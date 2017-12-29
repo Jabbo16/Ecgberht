@@ -1,12 +1,16 @@
 package ecgberht;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -73,7 +77,6 @@ public class GameState extends GameHandler {
 	public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
 	public Set<Unit> enemyBuildingMemory = new HashSet<Unit>();
 	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
-	//public List<Pair<Unit,Position> > Ms = new ArrayList<Pair<Unit,Position> >();
 	public Set<Unit> Ts = new HashSet<Unit>();
 	public Set<BaseLocation> BLs = new HashSet<BaseLocation>();
 	public Set<BaseLocation> ScoutSLs = new HashSet<BaseLocation>();
@@ -116,11 +119,22 @@ public class GameState extends GameHandler {
 
 	public void playSound(String soundFile) {
 		try{
-			File f = new File(soundFile);
-			AudioInputStream audioIn = AudioSystem.getAudioInputStream(f.toURI().toURL());
-			Clip clip = AudioSystem.getClip();
-			clip.open(audioIn);
-			clip.start();
+			String run = getClass().getResource("GameState.class").toString();
+			if(run.startsWith("jar:") || run.startsWith("rsrc:")) {
+				InputStream inp = getClass().getClassLoader().getResourceAsStream(soundFile);
+				AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(inp));
+				Clip clip = AudioSystem.getClip();
+				clip.open(audioInputStream);
+				clip.start();
+			}
+			else {
+				File f = new File(soundFile);
+				AudioInputStream audioIn = AudioSystem.getAudioInputStream(f.toURI().toURL());
+				Clip clip = AudioSystem.getClip();
+				clip.open(audioIn);
+				clip.start();
+			}
+			
 		}
 		catch(Exception e) {
 			System.err.println(e);
@@ -586,12 +600,22 @@ public class GameState extends GameHandler {
 	}
 
 	public String getSquadName() {
-		for(String nombre : teamNames) {
-			if(!squads.containsKey(nombre)) {
-				return nombre;
+		if(teamNames.size() == squads.size()) {
+			String gg = null;
+			while(gg == null || squads.containsKey(gg)) {
+				gg = "RandomSquad" + new Random().toString();
+			}
+			return gg;
+		}
+		String nombre = null;
+		while(nombre == null || squads.containsKey(nombre)) {
+			int index = new Random().nextInt(teamNames.size());
+			Iterator<String> iter = teamNames.iterator();
+			for (int i = 0; i < index; i++) {
+			    nombre = iter.next();
 			}
 		}
-		return null;
+		return nombre;
 	}
 
 	public void addToSquad(Unit unit) {

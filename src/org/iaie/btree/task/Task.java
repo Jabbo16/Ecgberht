@@ -77,18 +77,15 @@ public abstract class Task {
     }
     
     public final void running() {
-	State previousState = this.state;
-	this.state = State.RUNNING;
+    	this.state = State.RUNNING;
     }
     
     public final void success() {
-	State previousState = this.state;
-	this.state = State.SUCCESS;        
+    	this.state = State.SUCCESS;        
     }
     
     public final void failure() {
-	State previousState = this.state;
-	this.state = State.FAILURE;        
+    	this.state = State.FAILURE;        
     }
     
     public abstract State run();
