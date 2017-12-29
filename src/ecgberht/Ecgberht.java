@@ -210,7 +210,7 @@ public class Ecgberht extends DefaultBWListener {
 		addonBuildTree.run();
 		trainTree.run();
 		movementTree.run();
-		//bunkerTree.run();
+		bunkerTree.run();
 		scannerTree.run();
 		defenseTree.run();
 		attackTree.run();
@@ -341,7 +341,6 @@ public class Ecgberht extends DefaultBWListener {
 				}
 				else{
 					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
-						gs.Ms.add(new Pair<Unit,Position>(arg0,null));
 						gs.addToSquad(arg0);
 						if(gs.closestChoke != null)
 							arg0.attack(gs.closestChoke.toPosition());
@@ -502,8 +501,8 @@ public class Ecgberht extends DefaultBWListener {
 					if(arg0.getType() == UnitType.Terran_Bunker) {
 						for(Pair<Unit,List<Unit> > b : gs.DBs) {
 							if(b.first.equals(arg0)) {
-								for(Unit u:b.second) {
-									gs.Ms.add(new Pair<Unit,Position>(u,null));
+								for(Unit u : b.second) {
+									gs.addToSquad(u);
 								}
 								gs.DBs.remove(b);
 								break;
@@ -529,13 +528,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.testMap = gs.map.clone();
 				} else {
 					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
-						for(Pair<Unit,Position> u:gs.Ms) {
-							if(arg0.equals(u.first)) {
-								gs.Ms.remove(u);
-								gs.removeFromSquad(arg0);
-								break;
-							}
-						}
+						gs.removeFromSquad(arg0);
 					}
 				}
 			}

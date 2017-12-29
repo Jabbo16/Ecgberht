@@ -1,6 +1,5 @@
 package ecgberht.Defense;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.iaie.btree.state.State;
@@ -22,7 +21,7 @@ public class CheckPerimeter extends Conditional {
 	public State execute() {
 
 		try {
-			((GameState)this.handler).enemyInBase = new ArrayList<Unit>();
+			((GameState)this.handler).enemyInBase.clear();
 			for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(!u.getType().isBuilding()) {
 					for(Unit c : ((GameState)this.handler).CCs) {

@@ -19,7 +19,7 @@ public class ChooseBay extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).Ms.size() < 15) {
+			if(((GameState)this.handler).getArmySize() < 15) {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Engineering_Bay) < 1) {

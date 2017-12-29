@@ -1,14 +1,12 @@
 package ecgberht.CombatStim;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
-
-import bwapi.Pair;
-import bwapi.Position;
-import bwapi.TechType;
-import bwapi.Unit;
+import ecgberht.Squad;
 import bwapi.UnitType;
 
 public class Stim extends Action {
@@ -20,13 +18,11 @@ public class Stim extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).Ms.isEmpty() || ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) == 0) {
+			if(((GameState)this.handler).squads.isEmpty() || ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) == 0) {
 				return State.FAILURE;
 			}
-			for(Pair<Unit, Position> m : ((GameState)this.handler).Ms) {
-				if(m.first.canUseTech(TechType.Stim_Packs) && !m.first.isStimmed() && m.first.isAttacking()) {
-					m.first.useTech(TechType.Stim_Packs);
-				}
+			for(Entry<String,Squad> s : ((GameState)this.handler).squads.entrySet()) {
+				s.getValue().giveStimOrder();
 			}
 			return State.SUCCESS;
 		} catch(Exception e) {

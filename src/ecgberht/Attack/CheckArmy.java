@@ -14,10 +14,10 @@ public class CheckArmy extends Conditional {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).Ms.size() >= 40 && !((GameState)this.handler).defense) {
+			if(((GameState)this.handler).getArmySize() >= 40 && !((GameState)this.handler).defense) {
 				return State.SUCCESS;
 			} else if(((GameState)this.handler).defense) {
-				if((((GameState)this.handler).Ms.size() > 50 && ((GameState)this.handler).Ms.size() / ((GameState)this.handler).enemyInBase.size() > 10)) {
+				if((((GameState)this.handler).getArmySize() > 50 && ((GameState)this.handler).getArmySize() / ((GameState)this.handler).enemyInBase.size() > 10)) {
 					return State.SUCCESS;
 				}
 			}

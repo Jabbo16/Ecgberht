@@ -8,7 +8,6 @@ import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
 
 import bwapi.Pair;
-import bwapi.Position;
 import bwapi.Unit;
 
 public class EnterBunker extends Action {
@@ -20,12 +19,12 @@ public class EnterBunker extends Action {
 	@Override
 	public State execute() {
 		try {
-			Pair<Unit, Position> m = ((GameState)this.handler).chosenMarine;
+			Pair<String, Unit> m = ((GameState)this.handler).chosenMarine;
 			for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
 				if(b.first.equals(((GameState)this.handler).chosenBunker)) {
-					if(b.first.load(m.first)) {
-						b.second.add(m.first);
-						((GameState)this.handler).Ms.remove(m);
+					if(b.first.load(m.second)) {
+						b.second.add(m.second);
+						((GameState)this.handler).squads.get(m.first).members.remove(m.second);
 						return State.SUCCESS;
 					}
 				}

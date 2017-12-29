@@ -73,7 +73,7 @@ public class GameState extends GameHandler {
 	public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
 	public Set<Unit> enemyBuildingMemory = new HashSet<Unit>();
 	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
-	public List<Pair<Unit,Position> > Ms = new ArrayList<Pair<Unit,Position> >();
+	//public List<Pair<Unit,Position> > Ms = new ArrayList<Pair<Unit,Position> >();
 	public Set<Unit> Ts = new HashSet<Unit>();
 	public Set<BaseLocation> BLs = new HashSet<BaseLocation>();
 	public Set<BaseLocation> ScoutSLs = new HashSet<BaseLocation>();
@@ -96,10 +96,10 @@ public class GameState extends GameHandler {
 	public TechType chosenResearch;
 	public Unit chosenBuildingAddon;
 	public UnitType chosenAddon;
-	public List<Unit> buildingLot = new ArrayList<Unit>();
+	public Set<Unit> buildingLot = new HashSet<Unit>();
 	public Unit chosenBuildingLot;
-	public Pair<Unit, Position> chosenMarine;
-	public List<Unit> enemyInBase = new ArrayList<Unit>();
+	public Pair<String, Unit> chosenMarine;
+	public Set<Unit> enemyInBase = new HashSet<Unit>();
 	public boolean initCount = false;
 	public boolean activeCount = false;
 	public int startCount;
@@ -292,9 +292,8 @@ public class GameState extends GameHandler {
 			game.drawTextMap(u.first.getPosition(), "Spartan");
 		}
 		for(Entry<String, Squad> s : squads.entrySet()) {
-			System.out.println(s);
 			Position centro = getSquadCenter(s.getValue());
-			game.drawCircleMap(centro, 90, Color.Green);
+			game.drawCircleMap(centro, 80, Color.Green);
 			game.drawTextMap(centro,s.getKey());
 		}
 	}
@@ -376,7 +375,7 @@ public class GameState extends GameHandler {
 
 	public void moveUnitFromChokeWhenExpand(){
 		try {
-			if(!Ms.isEmpty()) {
+			if(!squads.isEmpty()) {
 				List<Unit> radius = game.getUnitsInRadius(closestChoke.toPosition(), 500);
 				if(!radius.isEmpty()) {
 					List<Chokepoint> cs = BWTA.getRegion(chosenBaseLocation).getChokepoints();
@@ -645,6 +644,19 @@ public class GameState extends GameHandler {
 				break;
 			}
 		}
+	}
+
+	public int getArmySize() {
+		int count = 0;
+		if(squads.isEmpty()) {
+			return count;
+		}
+		else {
+			for(Entry<String,Squad> s : squads.entrySet()) {
+				count += s.getValue().members.size();
+			}
+		}
+		return count;
 	}
 	
 }

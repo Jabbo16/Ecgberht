@@ -7,7 +7,6 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
 
-import bwapi.Color;
 import bwapi.Game;
 import bwapi.Pair;
 import bwapi.Player;

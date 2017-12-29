@@ -22,7 +22,7 @@ public class SendDefenders extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).Ms.isEmpty() || ((((GameState)this.handler).Ms.size() > 50 && ((GameState)this.handler).Ms.size() / ((GameState)this.handler).enemyInBase.size() > 10))) {
+			if(((GameState)this.handler).squads.isEmpty() || ((((GameState)this.handler).getArmySize() > 50 && ((GameState)this.handler).getArmySize() / ((GameState)this.handler).enemyInBase.size() > 10))) {
 				while(((GameState)this.handler).workerDefenders.size() < 2 && !((GameState)this.handler).workerIdle.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;

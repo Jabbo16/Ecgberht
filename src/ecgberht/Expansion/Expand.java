@@ -28,8 +28,8 @@ public class Expand extends Action {
 				((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
 				((GameState)this.handler).chosenBuilderBL.stop();
 				((GameState)this.handler).chosenBuilderBL = null;
-				((GameState)this.handler).deltaCash.first += UnitType.Terran_Command_Center.mineralPrice();
-				((GameState)this.handler).deltaCash.second += UnitType.Terran_Command_Center.gasPrice();
+				((GameState)this.handler).deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
+				((GameState)this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 				return State.FAILURE;
 			}
 			((GameState)this.handler).movingToExpand = false;

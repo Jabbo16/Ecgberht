@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import bwapi.Position;
+import bwapi.TechType;
 import bwapi.Unit;
 
 public class Squad {
@@ -33,6 +34,14 @@ public class Squad {
 		}
 		attack = pos;
 		estado = Status.ATTACK;
+	}
+	
+	public void giveStimOrder() {
+		for(Unit u : members) {
+			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking()) {
+				u.useTech(TechType.Stim_Packs);
+			}
+		}
 	}
 	
 }

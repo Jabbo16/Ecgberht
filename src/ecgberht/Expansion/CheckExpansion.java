@@ -39,7 +39,7 @@ public class CheckExpansion extends Conditional {
 			for(Pair<Unit, Integer> wt : ((GameState)this.handler).mineralsAssigned) {
 				workers += wt.second;
 			}
-			if(((GameState)this.handler).mineralsAssigned.size() * 2 <= workers && ((GameState)this.handler).Ms.size() >= 20) {
+			if(((GameState)this.handler).mineralsAssigned.size() * 2 <= workers && ((GameState)this.handler).getArmySize() >= 20) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;
