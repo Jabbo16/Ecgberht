@@ -7,3 +7,4 @@
 *.docx
 *.txt
 bin/
+src/ecgberht/uncrustify.cfg
