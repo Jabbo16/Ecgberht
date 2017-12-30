@@ -6,11 +6,10 @@ import java.util.Set;
 import bwapi.Position;
 import bwapi.TechType;
 import bwapi.Unit;
-
 public class Squad {
 
 	public enum Status {
-		ATTACK, KITE, RETREAT, MOVE, IDLE
+		ATTACK, KITE, RETREAT, MOVE, IDLE, DEFENSE
 	}
 	public String name;
 	public Set<Unit> members;

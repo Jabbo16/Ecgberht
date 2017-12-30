@@ -38,6 +38,7 @@ public class SendScout extends Action {
 				}
 			}
 			((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);
+			((GameState)this.handler).choosenScout.stop();
 			((GameState)this.handler).choosenScout = null;
 			return State.FAILURE;
 		} catch(Exception e) {

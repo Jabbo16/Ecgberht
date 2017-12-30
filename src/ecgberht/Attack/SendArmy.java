@@ -24,9 +24,9 @@ public class SendArmy extends Action {
 			}
 			for (Entry<String, Squad> u : ((GameState) this.handler).squads.entrySet()) {
 				if (((GameState) this.handler).attackPosition != null) {
-					if (u.getValue().estado == Status.IDLE
-					    || !((GameState) this.handler).attackPosition.equals(u.getValue().attack)) {
+					if (u.getValue().estado == Status.IDLE || !((GameState) this.handler).attackPosition.equals(u.getValue().attack)) {
 						u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
+						u.getValue().estado = Status.ATTACK;
 					}
 				} else {
 					u.getValue().estado = Status.IDLE;

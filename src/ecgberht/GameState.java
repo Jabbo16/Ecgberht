@@ -6,20 +6,20 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
-import org.iaie.btree.util.GameHandler;
 import ecgberht.BuildingMap;
+import org.iaie.btree.util.GameHandler;
 
 import bwapi.Color;
 import bwapi.Game;
@@ -33,80 +33,80 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import bwapi.UpgradeType;
 import bwapi.Utils;
-import bwta.BWTA;
 import bwta.BaseLocation;
+import bwta.BWTA;
 import bwta.Chokepoint;
 import bwta.Region;
 
 public class GameState extends GameHandler {
 
-	public int mining = 0;
-	public Set<String> teamNames = new HashSet<String>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
-	public Map<String,Squad> squads = new HashMap<String,Squad>();
-	public int trainedWorkers;
+	public BaseLocation enemyBase = null;
+	public boolean activeCount = false;
+	public boolean defense = false;
+	public boolean expanding = false;
+	public boolean initCount = false;
+	public boolean movingToExpand = false;
+	public BuildingMap map;
+	public BuildingMap testMap;
+	public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
+	public InfluenceMap inMap;
+	public InfluenceMap inMapUnits;
 	public int builtBuildings;
 	public int builtCC;
 	public int builtRefinery;
-	public int trainedCombatUnits;
-	public boolean defense = false;
-	public BaseLocation enemyBase = null;
-	public Unit chosenWorker = null;
-	public Unit chosenBunker = null;
-	public Unit choosenScout = null;
-	public Unit chosenBuilding = null;
-	public UnitType chosenUnit = null;
-	public UnitType chosenToBuild = null;
-	public TilePosition chosenPosition = null;
-	public String chosenSquad = null;
-	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
 	public int deltaSupply;
-	public Unit MainCC = null;
-	public Set<Unit> CCs = new HashSet<Unit>();
-	public Set<Unit> CSs = new HashSet<Unit>();
-	public Set<Unit> MBs = new HashSet<Unit>();
-	public Set<Unit> UBs = new HashSet<Unit>();
-	public Set<Unit> SBs = new HashSet<Unit>();
-	public List<Pair<Unit,List<Unit>>> DBs = new ArrayList<Pair<Unit,List<Unit>>>();
-	public List<Pair<Unit,Position> > workerDefenders = new ArrayList<Pair<Unit,Position> >();
-	public List<Unit> workerIdle = new ArrayList<Unit>();
-	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit> >();
-	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >();
-	public List<Pair<Unit,Pair<UnitType,TilePosition>>> workerBuild = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
-	public List<Pair<Unit,Integer> > mineralsAssigned = new ArrayList<Pair<Unit,Integer> >();
+	public int mining;
+	public int startCount;
+	public int trainedCombatUnits;
+	public int trainedWorkers;
 	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
-	public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
-	public Set<Unit> enemyBuildingMemory = new HashSet<Unit>();
-	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
-	public Set<Unit> Ts = new HashSet<Unit>();
+	public List<Pair<Unit,Integer> > mineralsAssigned = new ArrayList<Pair<Unit,Integer> >();
+	public List<Pair<Unit,List<Unit>>> DBs = new ArrayList<Pair<Unit,List<Unit>>>();
+	public List<Pair<Unit,Pair<UnitType,TilePosition>>> workerBuild = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
+	public List<Pair<Unit,Position> > workerDefenders = new ArrayList<Pair<Unit,Position> >();
+	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >();
+	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit> >();
+	public List<Unit> workerIdle = new ArrayList<Unit>();
+	public Map<String,Squad> squads = new HashMap<String,Squad>();
+	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
+	public Pair<String, Unit> chosenMarine = null;
+	public Position attackPosition = null;
 	public Set<BaseLocation> BLs = new HashSet<BaseLocation>();
 	public Set<BaseLocation> ScoutSLs = new HashSet<BaseLocation>();
-	public Unit chosenUnitUpgrader = null;
-	public UpgradeType chosenUpgrade = null;
-	public Unit chosenRepairer = null;
-	public Unit chosenBuildingRepair = null;
-	public Unit chosenBuilderBL = null;
-	public BuildingMap map;
-	public BuildingMap testMap;
-	public InfluenceMap inMap;
-	public InfluenceMap inMapUnits;
-	public Position attackPosition;
-	public TilePosition chosenBaseLocation;
-	public TilePosition initAttackPosition;
-	public TilePosition initDefensePosition;
-	public boolean expanding = false;
-	public TilePosition closestChoke;
-	public boolean movingToExpand = false;
-	public TechType chosenResearch;
-	public Unit chosenBuildingAddon;
-	public UnitType chosenAddon;
+	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
+	public Set<String> teamNames = new HashSet<String>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
 	public Set<Unit> buildingLot = new HashSet<Unit>();
-	public Unit chosenBuildingLot;
-	public Pair<String, Unit> chosenMarine;
+	public Set<Unit> CCs = new HashSet<Unit>();
+	public Set<Unit> CSs = new HashSet<Unit>();
+	public Set<Unit> enemyBuildingMemory = new HashSet<Unit>();
 	public Set<Unit> enemyInBase = new HashSet<Unit>();
-	public boolean initCount = false;
-	public boolean activeCount = false;
-	public int startCount;
-	public TilePosition checkScan;
+	public Set<Unit> MBs = new HashSet<Unit>();
+	public Set<Unit> SBs = new HashSet<Unit>();
+	public Set<Unit> Ts = new HashSet<Unit>();
+	public Set<Unit> UBs = new HashSet<Unit>();
+	public String chosenSquad = null;
+	public TechType chosenResearch = null;
+	public TilePosition checkScan = null;
+	public TilePosition chosenBaseLocation = null;
+	public TilePosition chosenPosition = null;
+	public TilePosition closestChoke = null;
+	public TilePosition initAttackPosition = null;
+	public TilePosition initDefensePosition = null;
+	public Unit choosenScout = null;
+	public Unit chosenBuilderBL = null;
+	public Unit chosenBuilding = null;
+	public Unit chosenBuildingAddon = null;
+	public Unit chosenBuildingLot = null;
+	public Unit chosenBuildingRepair = null;
+	public Unit chosenBunker = null;
+	public Unit chosenRepairer = null;
+	public Unit chosenUnitUpgrader = null;
+	public Unit chosenWorker = null;
+	public Unit MainCC = null;
+	public UnitType chosenAddon = null;
+	public UnitType chosenToBuild = null;
+	public UnitType chosenUnit = null;
+	public UpgradeType chosenUpgrade = null;
 
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -238,7 +238,11 @@ public class GameState extends GameHandler {
 	}
 
 	public void printer() {
-		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(game.getAPM()), Utils.White));
+		int apm = game.getAPM();
+		if(apm > 9000) {
+			game.sendText("My APM is over 9000!");
+		}
+		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
 		if(closestChoke != null) {
 			game.drawTextMap(closestChoke.toPosition(), "Choke");
 		}
@@ -330,19 +334,12 @@ public class GameState extends GameHandler {
 
 	public void updateEnemyCombatUnits() {
 		for (Unit u : game.enemy().getUnits()) {
-			//Si no es un edificio ni un trabajador
 			if (!u.getType().isBuilding() && !u.getType().isWorker()) {
-				//Si no estaba en la lista le metemos
 				if (!enemyCombatUnitMemory.contains(u)) enemyCombatUnitMemory.add(u);
 			}
 		}
-
-		//Iteramos sobre las unidades de combate enemigas
 		for (Unit p : enemyCombatUnitMemory) {
-			// Sacamos su posicion
 			TilePosition tileCorrespondingToP = new TilePosition(p.getPosition().getX()/32, p.getPosition().getY()/32);
-
-			// Si la posicion es visible comprobamos si la unidad sigue alli
 			if (game.isVisible(tileCorrespondingToP)) {
 				boolean enemyCombatUnitVisible = false;
 				for (Unit u : game.enemy().getUnits()) {
@@ -351,12 +348,10 @@ public class GameState extends GameHandler {
 						break;
 					}
 				}
-				// La eliminamos si deja de ser visible
 				if (enemyCombatUnitVisible == false) {
 					enemyCombatUnitMemory.remove(p);
 					break;
 				}
-
 			}
 		}
 	}
@@ -419,6 +414,10 @@ public class GameState extends GameHandler {
 	}
 
 	public void fix() {
+		if(choosenScout != null && choosenScout.isIdle()) {
+			workerIdle.add(choosenScout);
+			choosenScout = null;
+		}
 		if(chosenBuilderBL!= null && (chosenBuilderBL.isIdle() || chosenBuilderBL.isGatheringGas() || chosenBuilderBL.isGatheringMinerals())) {
 			workerIdle.add(chosenBuilderBL);
 			chosenBuilderBL = null;
@@ -627,7 +626,7 @@ public class GameState extends GameHandler {
 		else {
 			String chosen = null;
 			for(Entry<String, Squad> s : squads.entrySet()) {
-				if(s.getValue().members.size() < 12) {
+				if(s.getValue().members.size() < 12 && (chosen == null || unit.getDistance(getSquadCenter(s.getValue())) < unit.getDistance(getSquadCenter(squads.get(chosen))))) {
 					chosen = s.getKey();
 				}
 			}
