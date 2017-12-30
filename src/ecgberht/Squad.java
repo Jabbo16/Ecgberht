@@ -3,9 +3,11 @@ package ecgberht;
 import java.util.HashSet;
 import java.util.Set;
 
+import bwapi.Order;
 import bwapi.Position;
 import bwapi.TechType;
 import bwapi.Unit;
+import bwapi.UnitType;
 public class Squad {
 
 	public enum Status {
@@ -29,6 +31,12 @@ public class Squad {
 
 	public void giveAttackOrder(Position pos) {
 		for(Unit u : members) {
+			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
+				continue;
+			}
+			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+				continue;
+			}
 			u.attack(pos);
 		}
 		attack = pos;
@@ -41,6 +49,16 @@ public class Squad {
 				u.useTech(TechType.Stim_Packs);
 			}
 		}
+	}
+	
+	public Set<Unit> getTanks() {
+		Set<Unit> aux = new HashSet<Unit>();
+		for(Unit u : members) {
+			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+				aux.add(u);
+			}
+		}
+		return aux;
 	}
 	
 }

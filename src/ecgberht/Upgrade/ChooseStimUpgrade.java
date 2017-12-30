@@ -22,7 +22,7 @@ public class ChooseStimUpgrade extends Action {
 				return State.FAILURE;
 			}
 			for(Unit u : ((GameState)this.handler).UBs) {
-				if(((GameState)this.handler).getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) == 1 && u.canResearch(TechType.Stim_Packs) && !u.isResearching() && !u.isUpgrading()) {
+				if(((GameState)this.handler).getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) == 1 && !((GameState)this.handler).getPlayer().hasResearched(TechType.Stim_Packs) && u.canResearch(TechType.Stim_Packs) && !u.isResearching() && !u.isUpgrading()) {
 					((GameState)this.handler).chosenUnitUpgrader = u;
 					((GameState)this.handler).chosenResearch = TechType.Stim_Packs;
 					return State.SUCCESS;

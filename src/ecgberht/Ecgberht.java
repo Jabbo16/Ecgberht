@@ -82,9 +82,10 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseSCV cSCV = new ChooseSCV("Choose SCV", gs);
 		ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
 		ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
+		ChooseTank cTan = new ChooseTank("Choose Tank", gs);
 		CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
 		TrainUnit tr = new TrainUnit("Train SCV", gs);
-		Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV,cMed,cMar);
+		Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV,cTan,cMed,cMar);
 		Sequence train = new Sequence("Train",chooseUnit,cr,tr);
 		trainTree = new BehavioralTree("Training Tree");
 		trainTree.addChild(train);
@@ -92,6 +93,7 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
 		ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
 		ChooseBarracks cBar = new ChooseBarracks("Choose Barracks", gs);
+		ChooseFactory cFar = new ChooseFactory("Choose Factory", gs);
 		ChooseRefinery cRef = new ChooseRefinery("Choose Refinery", gs);
 		ChooseBay cBay = new ChooseBay("Choose Bay", gs);
 		ChooseTurret cTur = new ChooseTurret("Choose Turret", gs);
@@ -100,7 +102,7 @@ public class Ecgberht extends DefaultBWListener {
 		ChoosePosition cp = new ChoosePosition("Choose Position", gs);
 		ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
 		Build b = new Build("Build building", gs);
-		Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup,cBun,cTur,cRef,cAca,cBay,cBar);
+		Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup,cBun,cTur,cRef,cAca,cBay,cBar,cFar);
 		Sequence build = new Sequence("Build",chooseBuildingBuild,crb,cp,cw,b);
 		buildTree = new BehavioralTree("Building Tree");
 		buildTree.addChild(build);
@@ -136,8 +138,9 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseWeaponInfUp cWIU = new ChooseWeaponInfUp("Choose Weapon inf upgrade", gs);
 		ChooseMarineRange cMR = new ChooseMarineRange("Choose Marine Range upgrade", gs);
 		ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
+		ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
 		ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
-		Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade", cAIU, cWIU, cMR, cSU);
+		Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade", cAIU, cWIU, cMR, cSU , cSM);
 		Sequence Upgrader = new Sequence("Upgrader",ChooseUP,cRU,rU);
 		upgradeTree = new BehavioralTree("Technology");
 		upgradeTree.addChild(Upgrader);
@@ -169,7 +172,8 @@ public class Ecgberht extends DefaultBWListener {
 		BuildAddon bA = new BuildAddon("Build Addon",gs);
 		CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon",gs);
 		ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station",gs);
-		Selector<GameHandler> ChooseAddon = new Selector<GameHandler>("Choose Addon",cCS);
+		ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop",gs);
+		Selector<GameHandler> ChooseAddon = new Selector<GameHandler>("Choose Addon",cMS,cCS);
 		Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
 		addonBuildTree = new BehavioralTree("Addon Build Tree");
 		addonBuildTree.addChild(Addon);
@@ -213,6 +217,7 @@ public class Ecgberht extends DefaultBWListener {
 		bunkerTree.run();
 		scannerTree.run();
 		defenseTree.run();
+		gs.siegeTanks();
 		attackTree.run();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
@@ -319,8 +324,14 @@ public class Ecgberht extends DefaultBWListener {
 					if(arg0.getType() == UnitType.Terran_Barracks) {
 						gs.MBs.add(arg0);
 					}
+					if(arg0.getType() == UnitType.Terran_Factory) {
+						gs.Fs.add(arg0);
+					}
 					if(arg0.getType() == UnitType.Terran_Supply_Depot) {
 						gs.SBs.add(arg0);
+					}
+					if(arg0.getType() == UnitType.Terran_Machine_Shop) {
+						gs.UBs.add(arg0);
 					}
 					if(arg0.getType() == UnitType.Terran_Missile_Turret) {
 						gs.Ts.add(arg0);
@@ -340,7 +351,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.trainedWorkers++;
 				}
 				else{
-					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
+					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic || arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
 						gs.addToSquad(arg0);
 						if(gs.closestChoke != null)
 							arg0.attack(gs.closestChoke.toPosition());
@@ -486,6 +497,9 @@ public class Ecgberht extends DefaultBWListener {
 					if(gs.CSs.contains(arg0)) {
 						gs.CCs.remove(arg0);
 					}
+					if(gs.Fs.contains(arg0)) {
+						gs.Fs.remove(arg0);
+					}
 					if(gs.MBs.contains(arg0)) {
 						gs.MBs.remove(arg0);
 					}
@@ -527,7 +541,7 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					gs.testMap = gs.map.clone();
 				} else {
-					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
+					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic || arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
 						gs.removeFromSquad(arg0);
 					}
 				}

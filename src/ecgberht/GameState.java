@@ -19,6 +19,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import ecgberht.BuildingMap;
+
+import org.iaie.btree.state.State;
 import org.iaie.btree.util.GameHandler;
 
 import bwapi.Color;
@@ -33,6 +35,7 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import bwapi.UpgradeType;
 import bwapi.Utils;
+import bwapi.WeaponType;
 import bwta.BaseLocation;
 import bwta.BWTA;
 import bwta.Chokepoint;
@@ -81,6 +84,7 @@ public class GameState extends GameHandler {
 	public Set<Unit> enemyBuildingMemory = new HashSet<Unit>();
 	public Set<Unit> enemyInBase = new HashSet<Unit>();
 	public Set<Unit> MBs = new HashSet<Unit>();
+	public Set<Unit> Fs = new HashSet<Unit>();
 	public Set<Unit> SBs = new HashSet<Unit>();
 	public Set<Unit> Ts = new HashSet<Unit>();
 	public Set<Unit> UBs = new HashSet<Unit>();
@@ -680,6 +684,32 @@ public class GameState extends GameHandler {
 			}
 		}
 		return count;
+	}
+	public void siegeTanks() {
+		if(!squads.isEmpty()) {
+			Set<Unit> tanks = new HashSet<Unit>();
+			for (Entry<String,Squad> s : squads.entrySet()) {
+				tanks.addAll(s.getValue().getTanks());
+			}
+			if(!tanks.isEmpty()) {
+				for(Unit t : tanks) {
+					List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
+					boolean found = false;
+					for(Unit e : unitsInRange) {
+						if(e.getPlayer().getID() == game.enemy().getID() && !e.isFlying()) {
+							found = true;
+							break;
+						}
+					}
+					if(found && t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+						t.siege();
+					}
+					if(!found && t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+						t.unsiege();
+					}
+				}
+			}
+		}
 	}
 	
 }
