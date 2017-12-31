@@ -216,8 +216,8 @@ public class Ecgberht extends DefaultBWListener {
 		movementTree.run();
 		bunkerTree.run();
 		scannerTree.run();
-		defenseTree.run();
 		gs.siegeTanks();
+		defenseTree.run();
 		attackTree.run();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();

@@ -15,10 +15,11 @@ public class BuildAddon extends Action {
 	public State execute() {
 		try {
 			if(((GameState)this.handler).chosenBuildingAddon.canBuildAddon(((GameState)this.handler).chosenAddon)) {
-				((GameState)this.handler).chosenBuildingAddon.buildAddon(((GameState)this.handler).chosenAddon);
-				((GameState)this.handler).chosenBuildingAddon = null;
-				((GameState)this.handler).chosenAddon = null;
-				return State.SUCCESS;
+				if(((GameState)this.handler).chosenBuildingAddon.buildAddon(((GameState)this.handler).chosenAddon)) {
+					((GameState)this.handler).chosenBuildingAddon = null;
+					((GameState)this.handler).chosenAddon = null;
+					return State.SUCCESS;
+				}
 			}
 			((GameState)this.handler).chosenBuildingAddon = null;
 			((GameState)this.handler).chosenAddon = null;

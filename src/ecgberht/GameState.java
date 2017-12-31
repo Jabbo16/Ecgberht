@@ -696,7 +696,7 @@ public class GameState extends GameHandler {
 					List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
 					boolean found = false;
 					for(Unit e : unitsInRange) {
-						if(e.getPlayer().getID() == game.enemy().getID() && !e.isFlying()) {
+						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isFlyer()) {
 							found = true;
 							break;
 						}

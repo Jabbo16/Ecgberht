@@ -23,7 +23,7 @@ public class CollectGas extends Action {
 				int index = 0;
 				int count = 0;
 				for (Pair<Pair<Unit,Integer>,Boolean> g : ((GameState)this.handler).refineriesAssigned) {
-					if ((closestGeyser == null || chosen.getDistance(g.first.first) < chosen.getDistance(closestGeyser)) && g.first.second < 2 && ((GameState)this.handler).mining > 2 && g.second) {
+					if ((closestGeyser == null || chosen.getDistance(g.first.first) < chosen.getDistance(closestGeyser)) && g.first.second < 3 && ((GameState)this.handler).mining > 3 && g.second) {
 						closestGeyser = g.first.first;
 						index = count;
 					}
