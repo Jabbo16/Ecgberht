@@ -353,10 +353,11 @@ public class Ecgberht extends DefaultBWListener {
 				else{
 					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic || arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
 						gs.addToSquad(arg0);
-						if(gs.closestChoke != null)
+						if(gs.closestChoke != null) {
 							arg0.attack(gs.closestChoke.toPosition());
-					}else{
-						arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+						}else{
+							arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+						}
 					}
 					gs.trainedCombatUnits++;
 				}

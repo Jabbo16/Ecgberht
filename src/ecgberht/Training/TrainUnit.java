@@ -17,7 +17,7 @@ public class TrainUnit extends Action {
 	public State execute() {
 		try {
 			Unit chosen = ((GameState)this.handler).chosenBuilding;
-			if(((GameState)this.handler).getSupply() >= 2) {
+			if(((GameState)this.handler).getSupply() > 2 || ((GameState)this.handler).checkSupply()) {
 				chosen.train(((GameState)this.handler).chosenUnit);
 				return State.SUCCESS;
 			}

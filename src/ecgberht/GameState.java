@@ -696,7 +696,7 @@ public class GameState extends GameHandler {
 					List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
 					boolean found = false;
 					for(Unit e : unitsInRange) {
-						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isFlyer()) {
+						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
 							found = true;
 							break;
 						}
@@ -710,6 +710,30 @@ public class GameState extends GameHandler {
 				}
 			}
 		}
+	}
+
+	public boolean checkSupply() {
+		
+		for(Pair<Unit,Pair<UnitType,TilePosition> > w : workerBuild) {
+			if(w.second.first == UnitType.Terran_Supply_Depot) {
+				return true;
+			}
+		}
+		for(Pair<Unit,Unit> w : workerTask) {
+			if(w.second.getType() == UnitType.Terran_Supply_Depot) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public int getCombatUnitsBuildings() {
+		int count = 0;
+		count = MBs.size() + Fs.size();
+		if(count == 0) {
+			return 1;
+		}
+		return count;
 	}
 	
 }

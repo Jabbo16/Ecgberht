@@ -19,7 +19,7 @@ public class ChooseSupply extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).getSupply() <= 4 * ((GameState)this.handler).MBs.size()) {
+			if(((GameState)this.handler).getSupply() <= 4 * ((GameState)this.handler).getCombatUnitsBuildings()) {
 				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
 					if(w.second.first == UnitType.Terran_Supply_Depot) {
 						return State.FAILURE;
