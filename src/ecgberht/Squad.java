@@ -22,7 +22,7 @@ public class Squad {
 		this.name = name;
 		members = new HashSet<Unit>();
 		estado = Status.IDLE;
-		attack = null;
+		attack = Position.None;
 	}
 
 	public void addToSquad(Unit unit) {

@@ -71,6 +71,7 @@ public class GameState extends GameHandler {
 	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit> >();
 	public List<Unit> workerIdle = new ArrayList<Unit>();
 	public Map<String,Squad> squads = new HashMap<String,Squad>();
+	public Map<Integer, String> TTMs = new HashMap<Integer,String>();
 	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
 	public Pair<String, Unit> chosenMarine = null;
 	public Position attackPosition = null;
@@ -405,7 +406,7 @@ public class GameState extends GameHandler {
 					}
 					if(closestChoke != null) {
 						for(Unit t : radius) {
-							if(t.getPlayer().getID() == self.getID() && (t.getType() == UnitType.Terran_Marine || t.getType() == UnitType.Terran_Medic)) {
+							if(t.getPlayer().getID() == self.getID() && !t.getType().isWorker()) {
 								t.attack(closestChoke.getCenter().makeValid());
 							}
 						}
@@ -599,7 +600,6 @@ public class GameState extends GameHandler {
 				}
 			}
 		}
-
 	}
 
 	public String getSquadName() {
@@ -621,11 +621,13 @@ public class GameState extends GameHandler {
 		return nombre;
 	}
 
-	public void addToSquad(Unit unit) {
+	public String addToSquad(Unit unit) {
+		String nombre = "";
 		if(squads.size() == 0) {
 			Squad aux = new Squad(getSquadName());
 			aux.addToSquad(unit);
 			squads.put(aux.name, aux);
+			nombre = aux.name;
 		}
 		else {
 			String chosen = null;
@@ -636,13 +638,16 @@ public class GameState extends GameHandler {
 			}
 			if(chosen != null) {
 				squads.get(chosen).addToSquad(unit);
+				nombre = chosen;
 			}
 			else {
 				Squad nuevo = new Squad(getSquadName());
 				nuevo.addToSquad(unit);
 				squads.put(nuevo.name, nuevo);
+				nombre = nuevo.name;
 			}
 		}
+		return nombre;
 	}
 
 	public Position getSquadCenter(Squad s) {
@@ -685,6 +690,7 @@ public class GameState extends GameHandler {
 		}
 		return count;
 	}
+	
 	public void siegeTanks() {
 		if(!squads.isEmpty()) {
 			Set<Unit> tanks = new HashSet<Unit>();
@@ -713,7 +719,6 @@ public class GameState extends GameHandler {
 	}
 
 	public boolean checkSupply() {
-		
 		for(Pair<Unit,Pair<UnitType,TilePosition> > w : workerBuild) {
 			if(w.second.first == UnitType.Terran_Supply_Depot) {
 				return true;
@@ -735,5 +740,4 @@ public class GameState extends GameHandler {
 		}
 		return count;
 	}
-	
 }

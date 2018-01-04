@@ -351,7 +351,24 @@ public class Ecgberht extends DefaultBWListener {
 					gs.trainedWorkers++;
 				}
 				else{
-					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic || arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+					if(arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+						if(!gs.TTMs.containsKey(arg0.getID())) {
+							String nombre = gs.addToSquad(arg0);
+							gs.TTMs.put(arg0.getID(),nombre);
+							if(gs.closestChoke != null) {
+								arg0.attack(gs.closestChoke.toPosition());
+							}else{
+								arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+							}
+						}
+						else {
+							Position beforeSiege = gs.squads.get(gs.TTMs.get(arg0.getID())).attack;
+							if(beforeSiege != null && beforeSiege != Position.None) {
+								arg0.attack(beforeSiege);
+							}
+						}
+					}
+					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
 						gs.addToSquad(arg0);
 						if(gs.closestChoke != null) {
 							arg0.attack(gs.closestChoke.toPosition());
@@ -542,7 +559,13 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					gs.testMap = gs.map.clone();
 				} else {
-					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic || arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+					if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+						if(gs.TTMs.containsKey(arg0.getID())) {
+							gs.TTMs.remove(arg0.getID());
+							gs.removeFromSquad(arg0);
+						}
+					}
+					else if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
 						gs.removeFromSquad(arg0);
 					}
 				}
