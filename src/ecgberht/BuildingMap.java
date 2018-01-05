@@ -229,7 +229,6 @@ public class BuildingMap {
 
 	//Metodo que actualiza una porcion del mapa
 	public void actualizaMapa(TilePosition posicion,UnitType edificio,boolean Destroyed){
-
 		TilePosition tamaño_ed = edificio.tileSize();
 		int tamY = tamaño_ed.getY();
 		int tamX = tamaño_ed.getX();
@@ -330,7 +329,7 @@ public class BuildingMap {
 									continue;
 								}
 							}
-							if(game.getUnitsOnTile(new TilePosition(jj,ii)).isEmpty() && game.isExplored(new TilePosition(jj,ii))) {
+							if(game.getUnitsOnTile(new TilePosition(jj,ii)).isEmpty()) {
 								coord[0] = ii; coord[1] = jj; control = true; break;
 							}
 						}
