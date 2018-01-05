@@ -1,4 +1,4 @@
-package ecgberht.Building;
+package ecgberht.MoveToBuild;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -10,9 +10,9 @@ import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
 
-public class Build extends Action {
+public class Move extends Action {
 
-	public Build(String name, GameHandler gh) {
+	public Move(String name, GameHandler gh) {
 		super(name, gh);
 	}
 
@@ -20,10 +20,17 @@ public class Build extends Action {
 	public State execute() {
 		try {
 			Unit chosen = ((GameState)this.handler).chosenWorker;
-			if(!chosen.canBuild()) {
+			if(!chosen.canMove()) {
 				return State.FAILURE;
 			}
-			if(chosen.build(((GameState)this.handler).chosenToBuild, ((GameState)this.handler).chosenPosition)) {
+			boolean success = false;
+			if(((GameState)this.handler).chosenToBuild == UnitType.Terran_Refinery) {
+				success = chosen.build(((GameState)this.handler).chosenToBuild,((GameState)this.handler).chosenPosition);
+			}
+			else {
+				success = chosen.move(((GameState)this.handler).chosenPosition.toPosition());
+			}
+			if(success) {
 				if(((GameState)this.handler).workerIdle.contains(chosen)) {
 					((GameState)this.handler).workerIdle.remove(chosen);
 				} else {
@@ -40,7 +47,7 @@ public class Build extends Action {
 						}
 					}
 				}
-				((GameState)this.handler).workerBuild.add(new Pair<Unit,Pair<UnitType,TilePosition> >(chosen,new Pair <UnitType,TilePosition>(((GameState)this.handler).chosenToBuild,((GameState)this.handler).chosenPosition)));
+				((GameState)this.handler).workerBuild.add(new Pair<Unit,Pair<UnitType,TilePosition>>(chosen,new Pair <UnitType,TilePosition>(((GameState)this.handler).chosenToBuild,((GameState)this.handler).chosenPosition)));
 				((GameState)this.handler).deltaCash.first += ((GameState)this.handler).chosenToBuild.mineralPrice();
 				((GameState)this.handler).deltaCash.second += ((GameState)this.handler).chosenToBuild.gasPrice();
 				((GameState)this.handler).chosenWorker = null;

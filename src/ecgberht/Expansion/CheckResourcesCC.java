@@ -6,6 +6,8 @@ import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
 
 import bwapi.Pair;
+import bwapi.TilePosition;
+import bwapi.Unit;
 import bwapi.UnitType;
 
 public class CheckResourcesCC extends Conditional {
@@ -18,6 +20,14 @@ public class CheckResourcesCC extends Conditional {
 	public State execute() {
 		try {
 			Pair<Integer,Integer> cash = ((GameState)this.handler).getCash();
+			Unit chosen = ((GameState)this.handler).chosenBuilderBL;
+			TilePosition end = ((GameState)this.handler).chosenBaseLocation;
+			if(chosen != null && end != null) {
+				TilePosition start = chosen.getTilePosition();
+				if(cash.first + ((GameState)this.handler).getFramesToPosition(chosen, start, end) >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
+					return State.SUCCESS;
+				}
+			}
 			if(cash.first >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
 				return State.SUCCESS;
 			}

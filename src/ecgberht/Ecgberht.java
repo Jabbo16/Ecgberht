@@ -10,12 +10,14 @@ import org.iaie.btree.util.GameHandler;
 
 import ecgberht.AddonBuild.*;
 import ecgberht.Attack.*;
-import ecgberht.Building.*;
+import ecgberht.Build.Build;
+import ecgberht.Build.CheckWorkerBuild;
 import ecgberht.BuildingLot.*;
 import ecgberht.Bunker.*;
 import ecgberht.CombatStim.*;
 import ecgberht.Defense.*;
 import ecgberht.Expansion.*;
+import ecgberht.MoveToBuild.*;
 import ecgberht.Movement.*;
 import ecgberht.Recollection.*;
 import ecgberht.Repair.*;
@@ -34,6 +36,7 @@ public class Ecgberht extends DefaultBWListener {
 	private GameState gs;
 	private BehavioralTree collectTree;
 	private BehavioralTree trainTree;
+	private BehavioralTree moveBuildTree;
 	private BehavioralTree buildTree;
 	private BehavioralTree movementTree;
 	private BehavioralTree attackTree;
@@ -61,7 +64,7 @@ public class Ecgberht extends DefaultBWListener {
 		game = mirror.getGame();
 		self = game.self();
 		game.enableFlag(1);
-		game.setLocalSpeed(5);
+		game.setLocalSpeed(30);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
 		BWTA.analyze();
@@ -101,12 +104,18 @@ public class Ecgberht extends DefaultBWListener {
 		CheckResourcesBuilding crb = new CheckResourcesBuilding("Check Cash", gs);
 		ChoosePosition cp = new ChoosePosition("Choose Position", gs);
 		ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
-		Build b = new Build("Build building", gs);
+		Move m = new Move("Move to chosen building position", gs);
 		Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup,cBun,cTur,cRef,cAca,cBay,cBar,cFar);
-		Sequence build = new Sequence("Build",chooseBuildingBuild,crb,cp,cw,b);
-		buildTree = new BehavioralTree("Building Tree");
-		buildTree.addChild(build);
+		Sequence move = new Sequence("Move",chooseBuildingBuild,cp,cw,crb,m);
+		moveBuildTree = new BehavioralTree("Building Tree");
+		moveBuildTree.addChild(move);
 
+		CheckWorkerBuild cWB = new CheckWorkerBuild("Check WorkerBuild", gs);
+		Build b = new Build("Build", gs);
+		Sequence build = new Sequence("Build",cWB,b);
+		buildTree = new BehavioralTree("Build Tree");
+		buildTree.addChild(build);
+		
 		CheckScout cSc = new CheckScout("Check Scout", gs);
 		ChooseScout chSc = new ChooseScout("Choose Scouter",gs);
 		SendScout sSc = new SendScout("Send Scout",gs);
@@ -210,6 +219,7 @@ public class Ecgberht extends DefaultBWListener {
 		collectTree.run();
 		expandTree.run();
 		upgradeTree.run();
+		moveBuildTree.run();
 		buildTree.run();
 		addonBuildTree.run();
 		trainTree.run();

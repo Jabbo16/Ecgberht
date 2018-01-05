@@ -1,4 +1,4 @@
-package ecgberht.Building;
+package ecgberht.MoveToBuild;
 
 import java.util.List;
 

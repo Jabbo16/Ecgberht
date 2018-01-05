@@ -20,7 +20,6 @@ import javax.sound.sampled.Clip;
 
 import ecgberht.BuildingMap;
 
-import org.iaie.btree.state.State;
 import org.iaie.btree.util.GameHandler;
 
 import bwapi.Color;
@@ -35,7 +34,6 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import bwapi.UpgradeType;
 import bwapi.Utils;
-import bwapi.WeaponType;
 import bwta.BaseLocation;
 import bwta.BWTA;
 import bwta.Chokepoint;
@@ -247,6 +245,7 @@ public class GameState extends GameHandler {
 		if(apm > 9000) {
 			game.sendText("My APM is over 9000!");
 		}
+		game.drawTextScreen(10, 60, Utils.formatText("MRPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
 		if(closestChoke != null) {
 			game.drawTextMap(closestChoke.toPosition(), "Choke");
@@ -739,5 +738,35 @@ public class GameState extends GameHandler {
 			return 1;
 		}
 		return count;
+	}
+	
+	public double getMineralRate() {
+		double rate = 0.0;
+		if(game.getFrameCount() > 0) {
+			rate = ((double)self.gatheredMinerals()-50)/(double)game.getFrameCount();
+		}
+		return rate;
+	}
+	
+	//TODO Real maths
+	public int getFramesToPosition(Unit u, TilePosition start, TilePosition end) {
+		double rate = getMineralRate();
+		//Pair<Double,Double> speed = new Pair<Double,Double>(u.getVelocityX(),u.getVelocityY());
+		double distance = BWTA.getGroundDistance(start, end);
+		//double top = u.getType().topSpeed();
+		//double aceleration = u.getType().acceleration();
+		double frames = distance/2.8;
+		int mineralsWhenReach = (int) (rate*frames);
+//		System.out.println("--------------");
+//		System.out.println("RatioMRR: " + rate);
+//		System.out.println("Speed(x,y) " + speed);
+//		System.out.println("Distancia: " + distance);
+//		System.out.println("TopSpeed: " + top);
+//		System.out.println("Aceleration: " + aceleration);
+//		System.out.println("framesToReach: " + frames);
+//		System.out.println("Actual frame: " + game.getFrameCount());
+//		System.out.println("Minerales when reaching: " + mineralsWhenReach);
+//		System.out.println("--------------");
+		return mineralsWhenReach;
 	}
 }

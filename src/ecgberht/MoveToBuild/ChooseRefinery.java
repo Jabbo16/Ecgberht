@@ -1,4 +1,4 @@
-package ecgberht.Building;
+package ecgberht.MoveToBuild;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -19,7 +19,7 @@ public class ChooseRefinery extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).getPlayer().supplyUsed() < 30) {
+			if(((GameState)this.handler).getPlayer().supplyUsed() < 30 || ((GameState)this.handler).getCash().second >= 300) {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).refineriesAssigned.size() == 1) {
