@@ -45,6 +45,7 @@ public class GameState extends GameHandler {
 	public boolean activeCount = false;
 	public boolean defense = false;
 	public boolean expanding = false;
+	public boolean first_apm = false;
 	public boolean initCount = false;
 	public boolean movingToExpand = false;
 	public BuildingMap map;
@@ -241,9 +242,10 @@ public class GameState extends GameHandler {
 	}
 
 	public void printer() {
-		int apm = game.getAPM();
-		if(apm > 9000) {
+		int apm = game.getAPM(false);
+		if(apm > 9000 && !first_apm ) {
 			game.sendText("My APM is over 9000!");
+			first_apm = true;
 		}
 		game.drawTextScreen(10, 60, Utils.formatText("MRPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
@@ -258,6 +260,7 @@ public class GameState extends GameHandler {
 			print(chosenBaseLocation,UnitType.Terran_Command_Center,Color.Cyan);
 		}
 		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
+			game.drawTextMap(u.first.getPosition(), "ChosenBuilder");
 			print(u.second.second,u.second.first,Color.Teal);
 		}
 		for(Pair<Unit,Unit> r : repairerTask) {
@@ -279,9 +282,9 @@ public class GameState extends GameHandler {
 		else {
 			game.drawTextScreen(10, 35, Utils.formatText("Base enemiga encontrada: ",Utils.White) + Utils.formatText("False", Utils.Red));
 		}
-		if (chosenWorker != null) {
-			game.drawTextMap(chosenWorker.getPosition(), "ChosenWorker");
-		}
+//		if (chosenWorker != null) {
+//			game.drawTextMap(chosenWorker.getPosition(), "ChosenWorker");
+//		}
 		if (chosenRepairer != null) {
 			game.drawTextMap(chosenRepairer.getPosition(), "ChosenRepairer");
 		}
@@ -656,10 +659,10 @@ public class GameState extends GameHandler {
 			if(s.members.size() == 1) {
 				return u.getPosition();
 			}
-			point = new Position(point.getX()+u.getPosition().getX(),point.getY()+u.getPosition().getY());
+			point = new Position(point.getX() + u.getPosition().getX(), point.getY() + u.getPosition().getY());
 
 		}
-		return new Position(point.getX()/aux.size(),point.getY()/aux.size());
+		return new Position(point.getX()/aux.size(), point.getY()/aux.size());
 
 	}
 
@@ -749,7 +752,7 @@ public class GameState extends GameHandler {
 	}
 	
 	//TODO Real maths
-	public int getFramesToPosition(Unit u, TilePosition start, TilePosition end) {
+	public int getMineralsWhenReaching(Unit u, TilePosition start, TilePosition end) {
 		double rate = getMineralRate();
 		//Pair<Double,Double> speed = new Pair<Double,Double>(u.getVelocityX(),u.getVelocityY());
 		double distance = BWTA.getGroundDistance(start, end);

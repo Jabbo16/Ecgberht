@@ -4,7 +4,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
-
+import bwapi.Order;
 import bwapi.Pair;
 import bwapi.TilePosition;
 import bwapi.Unit;
@@ -20,7 +20,7 @@ public class Build extends Action {
 	public State execute() {
 		try {
 			for(Pair<Unit, Pair<UnitType, TilePosition>> u : ((GameState)this.handler).workerBuild) {
-				if(u.first.getPosition().getApproxDistance(u.second.second.toPosition()) < 5) {
+				if(u.first.getOrder() != Order.PlaceBuilding && u.first.getPosition().getApproxDistance(u.second.second.toPosition()) < 5) {
 					Unit chosen = u.first;
 					if(!chosen.canBuild()) {
 						return State.FAILURE;

@@ -22,7 +22,7 @@ public class CheckResourcesBuilding extends Conditional {
 			Unit chosen = ((GameState)this.handler).chosenWorker;
 			TilePosition start = chosen.getTilePosition();
 			TilePosition end = ((GameState)this.handler).chosenPosition;
-			if(cash.first + ((GameState)this.handler).getFramesToPosition(chosen, start, end) >= (((GameState)this.handler).chosenToBuild.mineralPrice() + ((GameState)this.handler).deltaCash.first) && cash.second >= (((GameState)this.handler).chosenToBuild.gasPrice()) + ((GameState)this.handler).deltaCash.second) {
+			if(cash.first + ((GameState)this.handler).getMineralsWhenReaching(chosen, start, end) >= (((GameState)this.handler).chosenToBuild.mineralPrice() + ((GameState)this.handler).deltaCash.first) && cash.second >= (((GameState)this.handler).chosenToBuild.gasPrice()) + ((GameState)this.handler).deltaCash.second) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

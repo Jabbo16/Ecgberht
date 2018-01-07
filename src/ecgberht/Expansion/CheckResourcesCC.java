@@ -24,7 +24,7 @@ public class CheckResourcesCC extends Conditional {
 			TilePosition end = ((GameState)this.handler).chosenBaseLocation;
 			if(chosen != null && end != null) {
 				TilePosition start = chosen.getTilePosition();
-				if(cash.first + ((GameState)this.handler).getFramesToPosition(chosen, start, end) >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
+				if(cash.first + ((GameState)this.handler).getMineralsWhenReaching(chosen, start, end) >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
 					return State.SUCCESS;
 				}
 			}
