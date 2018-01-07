@@ -751,6 +751,13 @@ public class GameState extends GameHandler {
 		return rate;
 	}
 	
+	public Position getCenterFromBuilding(Position leftTop, UnitType type) {
+		Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
+		Position center = new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
+		return center;
+		
+	}
+	
 	//TODO Real maths
 	public int getMineralsWhenReaching(Unit u, TilePosition start, TilePosition end) {
 		double rate = getMineralRate();
@@ -758,7 +765,7 @@ public class GameState extends GameHandler {
 		double distance = BWTA.getGroundDistance(start, end);
 		//double top = u.getType().topSpeed();
 		//double aceleration = u.getType().acceleration();
-		double frames = distance/2.8;
+		double frames = distance/2.55;
 		int mineralsWhenReach = (int) (rate*frames);
 //		System.out.println("--------------");
 //		System.out.println("RatioMRR: " + rate);

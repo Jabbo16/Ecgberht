@@ -6,6 +6,7 @@ import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
 
 import bwapi.Pair;
+import bwapi.Position;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
@@ -28,7 +29,8 @@ public class Move extends Action {
 				success = chosen.build(((GameState)this.handler).chosenToBuild,((GameState)this.handler).chosenPosition);
 			}
 			else {
-				success = chosen.move(((GameState)this.handler).chosenPosition.toPosition());
+				Position realEnd = ((GameState)this.handler).getCenterFromBuilding(((GameState)this.handler).chosenPosition.toPosition(), ((GameState)this.handler).chosenToBuild);
+				success = chosen.move(realEnd);
 			}
 			if(success) {
 				if(((GameState)this.handler).workerIdle.contains(chosen)) {
