@@ -22,7 +22,14 @@ public class SendDefenders extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).squads.isEmpty() || ((((GameState)this.handler).getArmySize() > 50 && ((GameState)this.handler).getArmySize() / ((GameState)this.handler).enemyInBase.size() > 10))) {
+			boolean air_only = true;
+			for(Unit u : ((GameState)this.handler).enemyInBase) {
+				if(u.isFlying() || u.isCloaked()) {
+					continue;
+				}
+				air_only = false;
+			}
+			if(!air_only && ((GameState)this.handler).squads.isEmpty()) {
 				while(((GameState)this.handler).workerDefenders.size() < 2 && !((GameState)this.handler).workerIdle.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;
@@ -72,6 +79,7 @@ public class SendDefenders extends Action {
 						}
 					}
 				}
+				
 				for(Pair<Unit,Position> u: ((GameState)this.handler).workerDefenders) {
 					if(((GameState)this.handler).attackPosition != null) {
 						if(u.first.isIdle() || !((GameState)this.handler).attackPosition.equals(u.second)) {

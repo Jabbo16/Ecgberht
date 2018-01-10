@@ -27,6 +27,7 @@ import ecgberht.Upgrade.*;
 
 import bwapi.*;
 import bwta.BWTA;
+import cameraModule.CameraModule;
 
 public class Ecgberht extends DefaultBWListener {
 
@@ -50,7 +51,8 @@ public class Ecgberht extends DefaultBWListener {
 	private BehavioralTree bunkerTree;
 	private BehavioralTree scannerTree;
 	private boolean first = false;
-
+	private CameraModule observer;
+	
 	public void run() {
 		mirror.getModule().setEventListener(this);
 		mirror.startGame();
@@ -69,6 +71,8 @@ public class Ecgberht extends DefaultBWListener {
 		BWTA.readMap();
 		BWTA.analyze();
 		System.out.println("Map data ready");
+		observer = new CameraModule(self.getStartLocation().toPosition(), game);
+		//observer.toggle();
 		gs = new GameState(mirror);
 		gs.initStartLocations();
 		gs.initBaseLocations();
@@ -210,7 +214,8 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onFrame() {
-
+		observer.onFrame();
+		gs.mineralLocking();
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyCombatUnits();
 		gs.checkEnemyAttackingWT();
@@ -298,6 +303,7 @@ public class Ecgberht extends DefaultBWListener {
 
 	@Override
 	public void onUnitComplete(Unit arg0) {
+		observer.moveCameraUnitCreated(arg0);
 		if(!arg0.getType().isNeutral() && arg0.getPlayer().getID() == self.getID()) {
 			if(arg0.getType().isBuilding()) {
 				gs.builtBuildings++;

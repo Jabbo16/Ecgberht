@@ -6,10 +6,12 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
-
+import ecgberht.Squad;
+import ecgberht.Squad.Status;
 import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
+import bwapi.UnitType;
 
 public class CheckPerimeter extends Conditional {
 
@@ -23,7 +25,7 @@ public class CheckPerimeter extends Conditional {
 		try {
 			((GameState)this.handler).enemyInBase.clear();
 			for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(!u.getType().isBuilding()) {
+				if(!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) {
 					for(Unit c : ((GameState)this.handler).CCs) {
 						if (((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
 							((GameState)this.handler).enemyInBase.add(u);
@@ -52,6 +54,13 @@ public class CheckPerimeter extends Conditional {
 			}
 			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
 				u.first.stop();
+			}
+			for(Squad u : ((GameState)this.handler).squads.values()) {
+				if(u.estado == Status.DEFENSE) {
+					u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
+					u.attack = ((GameState)this.handler).closestChoke.toPosition();
+					u.estado = Status.IDLE;
+				}
 			}
 			((GameState)this.handler).defense = false;
 			return State.FAILURE;

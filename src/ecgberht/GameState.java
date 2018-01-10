@@ -25,6 +25,7 @@ import org.iaie.btree.util.GameHandler;
 import bwapi.Color;
 import bwapi.Game;
 import bwapi.Mirror;
+import bwapi.Order;
 import bwapi.Pair;
 import bwapi.Player;
 import bwapi.Position;
@@ -778,5 +779,16 @@ public class GameState extends GameHandler {
 //		System.out.println("Minerales when reaching: " + mineralsWhenReach);
 //		System.out.println("--------------");
 		return mineralsWhenReach;
+	}
+
+	public void mineralLocking() {
+		for(Pair<Unit, Unit> u : workerTask) {
+			if(u.second.getType().isMineralField()) {
+				if(!u.first.getTarget().equals(u.second) && u.first.getOrder() != Order.MiningMinerals && !u.first.isCarryingMinerals()){
+					u.first.gather(u.second);
+				}
+			}
+		}
+		
 	}
 }
