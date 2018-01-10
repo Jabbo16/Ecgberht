@@ -215,7 +215,9 @@ public class Ecgberht extends DefaultBWListener {
 
 	public void onFrame() {
 		observer.onFrame();
-		gs.mineralLocking();
+		if(game.getFrameCount() % 5 == 0) {
+			gs.mineralLocking();
+		}
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyCombatUnits();
 		gs.checkEnemyAttackingWT();

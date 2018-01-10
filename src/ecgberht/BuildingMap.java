@@ -2,6 +2,7 @@ package ecgberht;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import bwapi.Game;
 import bwapi.Player;
@@ -329,7 +330,11 @@ public class BuildingMap {
 									continue;
 								}
 							}
-							if(game.getUnitsOnTile(new TilePosition(jj,ii)).isEmpty()) {
+							List<Unit> aux = game.getUnitsOnTile(new TilePosition(jj,ii));
+							if(aux.isEmpty()) {
+								coord[0] = ii; coord[1] = jj; control = true; break;
+							}
+							else if(aux.size() == 1 && aux.get(0).getType().isWorker() && aux.get(0).getPlayer().getID() == game.self().getID()) {
 								coord[0] = ii; coord[1] = jj; control = true; break;
 							}
 						}

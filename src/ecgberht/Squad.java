@@ -40,7 +40,6 @@ public class Squad {
 			u.attack(pos);
 		}
 		attack = pos;
-		estado = Status.ATTACK;
 	}
 	
 	public void giveStimOrder() {

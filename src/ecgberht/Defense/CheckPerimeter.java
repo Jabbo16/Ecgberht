@@ -12,6 +12,7 @@ import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
 import bwapi.UnitType;
+import bwta.BWTA;
 
 public class CheckPerimeter extends Conditional {
 
@@ -53,13 +54,18 @@ public class CheckPerimeter extends Conditional {
 				return State.SUCCESS;
 			}
 			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
-				u.first.stop();
+				Position closestCC = ((GameState)this.handler).getNearestCC(u.first.getPosition());
+				if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+					u.first.move(closestCC);
+				}
 			}
 			for(Squad u : ((GameState)this.handler).squads.values()) {
 				if(u.estado == Status.DEFENSE) {
-					u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
-					u.attack = ((GameState)this.handler).closestChoke.toPosition();
-					u.estado = Status.IDLE;
+					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
+					if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+						u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
+						u.estado = Status.IDLE;
+					}
 				}
 			}
 			((GameState)this.handler).defense = false;

@@ -789,6 +789,21 @@ public class GameState extends GameHandler {
 				}
 			}
 		}
-		
+	}
+	
+	public Position getNearestCC(Position position) {
+		Unit chosen = null;
+		double distance = Double.MAX_VALUE;
+		for (Unit u : CCs) {
+			double distance_aux = BWTA.getGroundDistance(u.getTilePosition(), position.toTilePosition());
+			if(chosen == null ||  distance_aux <  distance) {
+				chosen = u;
+				distance = distance_aux;
+			}
+		}
+		if(chosen != null) {
+			return chosen.getPosition();
+		}
+		return null;
 	}
 }
