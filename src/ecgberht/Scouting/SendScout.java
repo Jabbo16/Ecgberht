@@ -1,4 +1,4 @@
-package ecgberht.Movement;
+package ecgberht.Scouting;
 
 import java.util.ArrayList;
 import java.util.List;

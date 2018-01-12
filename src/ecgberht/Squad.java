@@ -17,7 +17,7 @@ public class Squad {
 	public Set<Unit> members;
 	public Status estado;
 	public Position attack;
-
+	public int lastFrameOrder = 0;
 	public Squad(String name) {
 		this.name = name;
 		members = new HashSet<Unit>();
@@ -29,7 +29,7 @@ public class Squad {
 		this.members.add(unit);
 	}
 
-	public void giveAttackOrder(Position pos) {
+	public void giveAttackOrder(Position pos, int frame) {
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
 				continue;
@@ -37,9 +37,13 @@ public class Squad {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 				continue;
 			}
-			u.attack(pos);
+			if(!u.getOrderTargetPosition().equals(pos)) {
+				u.attack(pos);
+			}
 		}
 		attack = pos;
+		lastFrameOrder = frame;
+		
 	}
 	
 	public void giveStimOrder() {
@@ -54,6 +58,16 @@ public class Squad {
 		Set<Unit> aux = new HashSet<Unit>();
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+				aux.add(u);
+			}
+		}
+		return aux;
+	}
+
+	public Set<Unit> getMarines() {
+		Set<Unit> aux = new HashSet<Unit>();
+		for(Unit u : this.members) {
+			if(u.getType() == UnitType.Terran_Marine) {
 				aux.add(u);
 			}
 		}

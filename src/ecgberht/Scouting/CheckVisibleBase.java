@@ -1,4 +1,4 @@
-package ecgberht.Movement;
+package ecgberht.Scouting;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;

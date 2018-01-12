@@ -2,7 +2,10 @@ package ecgberht;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +25,8 @@ import ecgberht.BuildingMap;
 
 import org.iaie.btree.util.GameHandler;
 
+import com.google.gson.Gson;
+
 import bwapi.Color;
 import bwapi.Game;
 import bwapi.Mirror;
@@ -29,6 +34,7 @@ import bwapi.Order;
 import bwapi.Pair;
 import bwapi.Player;
 import bwapi.Position;
+import bwapi.Race;
 import bwapi.TechType;
 import bwapi.TilePosition;
 import bwapi.Unit;
@@ -112,16 +118,26 @@ public class GameState extends GameHandler {
 	public UnitType chosenToBuild = null;
 	public UnitType chosenUnit = null;
 	public UpgradeType chosenUpgrade = null;
-
+	public Unit choosenBotherer = null;
+	public Race enemyRace = Race.Unknown;
+	public Unit chosenSCVToBother = null;
+	public Gson enemyInfoJSON = new Gson();
+	public EnemyInfo EI = new EnemyInfo(game.enemy().getName());
+	
 	public GameState(Mirror bwapi) {
 		super(bwapi);
 		map = new BuildingMap(game,self);
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
-
 	}
-
+	
+	public void initEnemyRace() {
+		if(game.enemy().getRace() != Race.Unknown) {
+			enemyRace = game.enemy().getRace();
+		}
+	}
+	
 	public void playSound(String soundFile) {
 		try{
 			String run = getClass().getResource("GameState.class").toString();
@@ -248,7 +264,7 @@ public class GameState extends GameHandler {
 			game.sendText("My APM is over 9000!");
 			first_apm = true;
 		}
-		game.drawTextScreen(10, 60, Utils.formatText("MRPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
+		game.drawTextScreen(10, 65, Utils.formatText("MRPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
 		if(closestChoke != null) {
 			game.drawTextMap(closestChoke.toPosition(), "Choke");
@@ -321,6 +337,9 @@ public class GameState extends GameHandler {
 			Position centro = getSquadCenter(s.getValue());
 			game.drawCircleMap(centro, 80, Color.Green);
 			game.drawTextMap(centro,s.getKey());
+		}
+		if(enemyRace == Race.Zerg && EI.naughty) {
+			game.drawTextScreen(10, 80, Utils.formatText("Naughty Zerg: ",Utils.White) + Utils.formatText("yes", Utils.Green));
 		}
 	}
 
@@ -501,6 +520,11 @@ public class GameState extends GameHandler {
 			}
 		}
 		workerDefenders.removeAll(aux5);
+		for(Squad u : squads.values()) {
+			if(u.members.isEmpty()) {
+				squads.values().remove(u);
+			}
+		}
 	}
 
 	public void checkMainEnemyBase() {
@@ -654,16 +678,15 @@ public class GameState extends GameHandler {
 	}
 
 	public Position getSquadCenter(Squad s) {
-		Set<Unit> aux = s.members;
 		Position point = new Position(0,0);
-		for(Unit u : aux) {
+		for(Unit u : s.members) {
 			if(s.members.size() == 1) {
 				return u.getPosition();
 			}
 			point = new Position(point.getX() + u.getPosition().getX(), point.getY() + u.getPosition().getY());
 
 		}
-		return new Position(point.getX()/aux.size(), point.getY()/aux.size());
+		return new Position(point.getX()/s.members.size(), point.getY()/s.members.size());
 
 	}
 
@@ -796,7 +819,7 @@ public class GameState extends GameHandler {
 		double distance = Double.MAX_VALUE;
 		for (Unit u : CCs) {
 			double distance_aux = BWTA.getGroundDistance(u.getTilePosition(), position.toTilePosition());
-			if(chosen == null ||  distance_aux <  distance) {
+			if( distance_aux > 0.0 && (chosen == null ||  distance_aux <  distance)) {
 				chosen = u;
 				distance = distance_aux;
 			}
@@ -805,5 +828,43 @@ public class GameState extends GameHandler {
 			return chosen.getPosition();
 		}
 		return null;
+	}
+	
+	public void readOpponentInfo(){
+		String name = game.enemy().getName();
+		String path = "bwapi-data/read/" + name + ".json";
+		try {
+			if(Files.exists(Paths.get(path))) { 
+				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
+			}
+		} catch(Exception e) {
+			System.err.println(e);
+		}
+		
+	}
+	public void MarineMicro() {
+		if(enemyCombatUnitMemory.isEmpty()) {
+			return;
+		}
+		for(Squad s : squads.values()) {
+			if(s.lastFrameOrder != game.getFrameCount()) {
+				for(Unit m : s.getMarines()) {
+					for(Unit u : enemyCombatUnitMemory) {
+						if(u.getType() == UnitType.Zerg_Zergling || u.getType() == UnitType.Protoss_Zealot) {
+							if(m.getGroundWeaponCooldown() != 0) {
+								if(m.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(u)) {
+									m.move(closestChoke.toPosition());
+								}
+							} else{
+								if(m.getOrder() == Order.Move) {
+									m.attack(s.attack);	
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 }

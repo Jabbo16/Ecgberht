@@ -55,16 +55,20 @@ public class CheckPerimeter extends Conditional {
 			}
 			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
 				Position closestCC = ((GameState)this.handler).getNearestCC(u.first.getPosition());
-				if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-					u.first.move(closestCC);
+				if(closestCC != null) {
+					if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+						u.first.move(closestCC);
+					}
 				}
 			}
 			for(Squad u : ((GameState)this.handler).squads.values()) {
 				if(u.estado == Status.DEFENSE) {
 					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
-					if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-						u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
-						u.estado = Status.IDLE;
+					if(closestCC != null) {
+						if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+							u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition(), ((GameState)this.handler).getGame().getFrameCount());
+							u.estado = Status.IDLE;
+						}
 					}
 				}
 			}

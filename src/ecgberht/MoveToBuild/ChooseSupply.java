@@ -6,6 +6,7 @@ import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
 
 import bwapi.Pair;
+import bwapi.Race;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
@@ -19,6 +20,25 @@ public class ChooseSupply extends Action {
 	@Override
 	public State execute() {
 		try {
+			if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).enemyRace == Race.Zerg) {
+				boolean found_rax = false;
+				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
+					if(w.second.first == UnitType.Terran_Barracks) {
+						found_rax = true;
+					}
+				}
+				if(!found_rax) {
+					for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
+						if(w.second.getType() == UnitType.Terran_Barracks) {
+							found_rax = true;
+						}
+					}
+				}
+				if(!found_rax) {
+					return State.FAILURE;
+				}
+				
+			}
 			if(((GameState)this.handler).getSupply() <= 4 * ((GameState)this.handler).getCombatUnitsBuildings()) {
 				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
 					if(w.second.first == UnitType.Terran_Supply_Depot) {

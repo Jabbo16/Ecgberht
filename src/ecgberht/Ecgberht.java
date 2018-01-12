@@ -1,5 +1,7 @@
 package ecgberht;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,8 +10,13 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 
+import com.google.gson.Gson;
+
 import ecgberht.AddonBuild.*;
 import ecgberht.Attack.*;
+import ecgberht.Bother.BotherSCV;
+import ecgberht.Bother.CheckBotherer;
+import ecgberht.Bother.CheckBuilderToBother;
 import ecgberht.Build.Build;
 import ecgberht.Build.CheckWorkerBuild;
 import ecgberht.BuildingLot.*;
@@ -18,10 +25,10 @@ import ecgberht.CombatStim.*;
 import ecgberht.Defense.*;
 import ecgberht.Expansion.*;
 import ecgberht.MoveToBuild.*;
-import ecgberht.Movement.*;
 import ecgberht.Recollection.*;
 import ecgberht.Repair.*;
 import ecgberht.Scanner.*;
+import ecgberht.Scouting.*;
 import ecgberht.Training.*;
 import ecgberht.Upgrade.*;
 
@@ -39,7 +46,7 @@ public class Ecgberht extends DefaultBWListener {
 	private BehavioralTree trainTree;
 	private BehavioralTree moveBuildTree;
 	private BehavioralTree buildTree;
-	private BehavioralTree movementTree;
+	private BehavioralTree scoutingTree;
 	private BehavioralTree attackTree;
 	private BehavioralTree defenseTree;
 	private BehavioralTree upgradeTree;
@@ -50,6 +57,7 @@ public class Ecgberht extends DefaultBWListener {
 	private BehavioralTree buildingLotTree;
 	private BehavioralTree bunkerTree;
 	private BehavioralTree scannerTree;
+	private BehavioralTree botherTree;
 	private boolean first = false;
 	private CameraModule observer;
 	
@@ -77,7 +85,8 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initStartLocations();
 		gs.initBaseLocations();
 		gs.initClosestChoke();
-
+		gs.initEnemyRace();
+		gs.readOpponentInfo();
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
 		FreeWorker fw = new FreeWorker("No Union", gs);
@@ -129,8 +138,8 @@ public class Ecgberht extends DefaultBWListener {
 		Selector<GameHandler> EnemyFound = new Selector<GameHandler>("Enemy found in base location",cEBV,sSc);
 		Sequence scoutTrue = new Sequence("Scout True",cVB,EnemyFound);
 		Selector<GameHandler> Scouting = new Selector<GameHandler>("Select Scouting Plan",scoutFalse,scoutTrue);
-		movementTree = new BehavioralTree("Movement Tree");
-		movementTree.addChild(Scouting);
+		scoutingTree = new BehavioralTree("Movement Tree");
+		scoutingTree.addChild(Scouting);
 
 		CheckArmy cA = new CheckArmy("Check Army",gs);
 		ChooseAttackPosition cAP = new ChooseAttackPosition("Choose Attack Position",gs);
@@ -211,13 +220,17 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence Scanning = new Sequence("Scanning", cScan, s);
 		scannerTree = new BehavioralTree("Scanner Tree");
 		scannerTree.addChild(Scanning);
+		
+		CheckBotherer cB = new CheckBotherer("Check Botherer", gs);
+		CheckBuilderToBother cBTB = new CheckBuilderToBother("Check SCV to Bother", gs);
+		BotherSCV bSCV = new BotherSCV("Bother SCV", gs);
+		Sequence bother = new Sequence("Bother", cB, cBTB, bSCV);
+		botherTree = new BehavioralTree("Bother Tree");
+		botherTree.addChild(bother);
 	}
 
 	public void onFrame() {
 		observer.onFrame();
-		if(game.getFrameCount() % 5 == 0) {
-			gs.mineralLocking();
-		}
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyCombatUnits();
 		gs.checkEnemyAttackingWT();
@@ -230,24 +243,40 @@ public class Ecgberht extends DefaultBWListener {
 		buildTree.run();
 		addonBuildTree.run();
 		trainTree.run();
-		movementTree.run();
+		scoutingTree.run();
+		botherTree.run();
 		bunkerTree.run();
 		scannerTree.run();
 		gs.siegeTanks();
 		defenseTree.run();
 		attackTree.run();
+		//gs.MarineMicro();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
 		gs.fix();
+		if(game.getFrameCount() % 5 == 0) {
+			gs.mineralLocking();
+		}
 		gs.printer();
 	}
 
 	@Override
 	public void onEnd(boolean arg0) {
+		String name = game.enemy().getName();
+		String path = "bwapi-data/read/" + name + ".json";
 		if(arg0) {
+			gs.EI.wins++;
 			game.sendText("git gud "+ game.enemy().getName());
 		} else {
+			gs.EI.losses++;
 			game.sendText("gg wp! "+ game.enemy().getName());
+		}
+		Gson aux = new Gson();
+		String print = aux.toJson(gs.EI);
+		try(PrintWriter out = new PrintWriter(path)){
+		    out.println(print);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -432,6 +461,9 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					if(gs.choosenScout != null && arg0.equals(gs.choosenScout)) {
 						gs.choosenScout = null;
+					}
+					if(gs.choosenBotherer != null && arg0.equals(gs.choosenBotherer)) {
+						gs.choosenBotherer = null;
 					}
 					if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
 						gs.chosenWorker = null;
@@ -661,12 +693,18 @@ public class Ecgberht extends DefaultBWListener {
 
 	@Override
 	public void onUnitShow(Unit arg0) {
-		if(arg0.getType().isBuilding() && game.enemy().getID() == arg0.getPlayer().getID()) {
-			if(!gs.enemyBuildingMemory.contains(arg0)) {
-				gs.enemyBuildingMemory.add(arg0);
-				gs.inMap.updateMap(arg0,false);
-				gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), false);
+		if(game.enemy().getID() == arg0.getPlayer().getID()) {
+			if(gs.enemyRace == Race.Unknown) {
+				gs.enemyRace = arg0.getType().getRace();
 			}
+			if(arg0.getType().isBuilding()) {
+				if(!gs.enemyBuildingMemory.contains(arg0)) {
+					gs.enemyBuildingMemory.add(arg0);
+					gs.inMap.updateMap(arg0,false);
+					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), false);
+				}
+			}
+			
 		}
 	}
 }
