@@ -43,8 +43,11 @@ public class SendDefenders extends Action {
 						((GameState)this.handler).workerIdle.remove(closestWorker);
 					}
 				}
-
-				while(((GameState)this.handler).workerDefenders.size() < 2 && !((GameState)this.handler).workerTask.isEmpty()) {
+				int defenders = 2;
+				if(((GameState)this.handler).enemyInBase.size() == 1 && ((GameState)this.handler).enemyInBase.iterator().next().getType().isWorker()) {
+					defenders = 1;
+				}
+				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerTask.isEmpty()) {
 					for(Pair<Unit, Unit> u:((GameState)this.handler).workerTask) {
 						if(u.second.getType().isNeutral()) {
 							break;

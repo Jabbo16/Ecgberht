@@ -10,6 +10,7 @@ import ecgberht.GameState;
 import bwapi.Game;
 import bwapi.Pair;
 import bwapi.Player;
+import bwapi.Race;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
@@ -60,19 +61,26 @@ public class ChoosePosition extends Action {
 						}
 					}
 					else {
-						if(((GameState)this.handler).Ts.isEmpty()) {
-							if(((GameState)this.handler).closestChoke != null) {
-								origin = ((GameState)this.handler).closestChoke;
-							}
-//							else {
-//								origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
-//							}
-
+						if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).enemyRace == Race.Zerg) {
+							origin = ((GameState)this.handler).getBunkerPositionAntiPool();
+							((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
+							return State.SUCCESS;
 						}
 						else {
-							for(Unit b : ((GameState)this.handler).Ts) {
-								origin = b.getTilePosition();
-								break;
+							if(((GameState)this.handler).Ts.isEmpty()) {
+								if(((GameState)this.handler).closestChoke != null) {
+									origin = ((GameState)this.handler).closestChoke;
+								}
+//								else {
+//									origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
+//								}
+	
+							}
+							else {
+								for(Unit b : ((GameState)this.handler).Ts) {
+									origin = b.getTilePosition();
+									break;
+								}
 							}
 						}
 

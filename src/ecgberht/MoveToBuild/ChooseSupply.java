@@ -21,6 +21,24 @@ public class ChooseSupply extends Action {
 	public State execute() {
 		try {
 			if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).enemyRace == Race.Zerg) {
+				if(!((GameState)this.handler).SBs.isEmpty() && !((GameState)this.handler).DBs.isEmpty()) {
+					boolean found_bunker = false;
+					for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
+						if(w.second.first == UnitType.Terran_Bunker) {
+							found_bunker = true;
+						}
+					}
+					if(!found_bunker) {
+						for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
+							if(w.second.getType() == UnitType.Terran_Bunker) {
+								found_bunker = true;
+							}
+						}
+					}
+					if(!found_bunker) {
+						return State.FAILURE;
+					}
+				}
 				boolean found_rax = false;
 				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
 					if(w.second.first == UnitType.Terran_Barracks) {

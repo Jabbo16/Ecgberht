@@ -244,7 +244,7 @@ public class Ecgberht extends DefaultBWListener {
 		addonBuildTree.run();
 		trainTree.run();
 		scoutingTree.run();
-		botherTree.run();
+		//botherTree.run();
 		bunkerTree.run();
 		scannerTree.run();
 		gs.siegeTanks();
@@ -417,10 +417,12 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
 						gs.addToSquad(arg0);
-						if(gs.closestChoke != null) {
-							arg0.attack(gs.closestChoke.toPosition());
-						}else{
-							arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+						if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
+							if(gs.closestChoke != null) {
+								arg0.attack(gs.closestChoke.toPosition());
+							}else{
+								arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+							}
 						}
 					}
 					gs.trainedCombatUnits++;

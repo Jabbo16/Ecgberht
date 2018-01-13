@@ -867,4 +867,24 @@ public class GameState extends GameHandler {
 			}
 		}
 	}
+
+	public TilePosition getBunkerPositionAntiPool() {
+		TilePosition rax = MBs.iterator().next().getTilePosition();
+		UnitType bunker = UnitType.Terran_Bunker;
+		TilePosition up = new TilePosition(rax.getX() - bunker.tileHeight(), rax.getY());
+		TilePosition down = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileHeight(), rax.getY());
+		TilePosition left = new TilePosition(rax.getX(), rax.getY() - bunker.tileWidth());
+		TilePosition right = new TilePosition(rax.getX(), rax.getY() + UnitType.Terran_Barracks.tileWidth());
+		TilePosition chosen = up;
+		if(closestChoke.getDistance(down) < closestChoke.getDistance(chosen)) {
+			chosen = down;
+		}
+		if(closestChoke.getDistance(left) < closestChoke.getDistance(chosen)) {
+			chosen = left;
+		}
+		if(closestChoke.getDistance(right) < closestChoke.getDistance(chosen)) {
+			chosen = down;
+		}
+		return chosen;
+	}
 }
