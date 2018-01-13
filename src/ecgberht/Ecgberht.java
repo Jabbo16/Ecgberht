@@ -17,6 +17,7 @@ import ecgberht.Attack.*;
 import ecgberht.Bother.BotherSCV;
 import ecgberht.Bother.CheckBotherer;
 import ecgberht.Bother.CheckBuilderToBother;
+import ecgberht.Bother.CheckWorkerToBother;
 import ecgberht.Build.Build;
 import ecgberht.Build.CheckWorkerBuild;
 import ecgberht.BuildingLot.*;
@@ -223,8 +224,10 @@ public class Ecgberht extends DefaultBWListener {
 		
 		CheckBotherer cB = new CheckBotherer("Check Botherer", gs);
 		CheckBuilderToBother cBTB = new CheckBuilderToBother("Check SCV to Bother", gs);
+		CheckWorkerToBother cWTB = new CheckWorkerToBother("Check Worker to Bother", gs);
 		BotherSCV bSCV = new BotherSCV("Bother SCV", gs);
-		Sequence bother = new Sequence("Bother", cB, cBTB, bSCV);
+		Selector<GameHandler> bOw = new Selector<GameHandler>("Choose Builder or Worker",cBTB,cWTB);
+		Sequence bother = new Sequence("Bother", cB, bOw, bSCV);
 		botherTree = new BehavioralTree("Bother Tree");
 		botherTree.addChild(bother);
 	}
@@ -233,7 +236,7 @@ public class Ecgberht extends DefaultBWListener {
 		observer.onFrame();
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyCombatUnits();
-		gs.checkEnemyAttackingWT();
+		//gs.checkEnemyAttackingWT();
 		buildingLotTree.run();
 		repairTree.run();
 		collectTree.run();
@@ -250,10 +253,24 @@ public class Ecgberht extends DefaultBWListener {
 		gs.siegeTanks();
 		defenseTree.run();
 		attackTree.run();
-		//gs.MarineMicro();
+		gs.MarineMicro();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
 		gs.fix();
+		if(game.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
+			boolean found_pool = false;
+			int drones = game.enemy().allUnitCount(UnitType.Zerg_Drone);
+			for(Unit u  : gs.enemyBuildingMemory) {
+				if(u.getType() == UnitType.Zerg_Spawning_Pool) {
+					found_pool = true;
+					break;
+				}
+			}
+			if(found_pool && drones <= 5) {
+				gs.EI.naughty = true;
+				game.sendText("Bad zerg!, bad!");
+			}
+		}
 		if(game.getFrameCount() % 5 == 0) {
 			gs.mineralLocking();
 		}
