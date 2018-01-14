@@ -26,7 +26,7 @@ public class CheckPerimeter extends Conditional {
 		try {
 			((GameState)this.handler).enemyInBase.clear();
 			for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) {
+				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Protoss_Interceptor) {
 					for(Unit c : ((GameState)this.handler).CCs) {
 						if (((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
 							((GameState)this.handler).enemyInBase.add(u);
