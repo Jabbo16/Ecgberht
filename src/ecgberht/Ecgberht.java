@@ -247,13 +247,13 @@ public class Ecgberht extends DefaultBWListener {
 		addonBuildTree.run();
 		trainTree.run();
 		scoutingTree.run();
-		//botherTree.run();
+		botherTree.run();
 		bunkerTree.run();
 		scannerTree.run();
 		gs.siegeTanks();
 		defenseTree.run();
 		attackTree.run();
-		gs.MarineMicro();
+		//gs.MarineMicro();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
 		gs.fix();
@@ -271,7 +271,7 @@ public class Ecgberht extends DefaultBWListener {
 				game.sendText("Bad zerg!, bad!");
 			}
 		}
-		if(game.getFrameCount() % 5 == 0) {
+		if(game.getFrameCount() > 0 && game.getFrameCount() % 5 == 0) {
 			gs.mineralLocking();
 		}
 		gs.printer();

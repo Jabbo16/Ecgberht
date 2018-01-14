@@ -479,22 +479,22 @@ public class GameState extends GameHandler {
 		}
 		workerTask.removeAll(aux);
 		workerIdle.removeAll(aux2);
-		List<Pair<Unit,Pair<UnitType,TilePosition>>> aux3 = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
-		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
-			if(choosenScout != null && u.first.equals(choosenScout)) {
-				choosenScout = null;
-			}
-			if(chosenRepairer != null && u.first.equals(chosenRepairer)) {
-				chosenRepairer = null;
-			}
-			if(u.first.isIdle() || u.first.isGatheringGas() || u.first.isGatheringMinerals()) {
-				aux3.add(u);
-				deltaCash.first -= u.second.first.mineralPrice();
-				deltaCash.second -= u.second.first.gasPrice();
-				workerIdle.add(u.first);
-			}
-		}
-		workerBuild.removeAll(aux3);
+//		List<Pair<Unit,Pair<UnitType,TilePosition>>> aux3 = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
+//		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
+//			if(choosenScout != null && u.first.equals(choosenScout)) {
+//				choosenScout = null;
+//			}
+//			if(chosenRepairer != null && u.first.equals(chosenRepairer)) {
+//				chosenRepairer = null;
+//			}
+//			if(u.first.isIdle() || u.first.isGatheringGas() || u.first.isGatheringMinerals()) {
+//				aux3.add(u);
+//				deltaCash.first -= u.second.first.mineralPrice();
+//				deltaCash.second -= u.second.first.gasPrice();
+//				workerIdle.add(u.first);
+//			}
+//		}
+//		workerBuild.removeAll(aux3);
 		List<Pair<Unit,Unit> > aux4 = new ArrayList<Pair<Unit,Unit> >();
 		for(Pair<Unit,Unit> r : repairerTask) {
 			if(r.first.equals(choosenScout)) {
@@ -849,18 +849,28 @@ public class GameState extends GameHandler {
 		for(Squad s : squads.values()) {
 			if(s.lastFrameOrder != game.getFrameCount()) {
 				for(Unit m : s.getMarines()) {
-					for(Unit u : enemyCombatUnitMemory) {
-						if(u.getType() == UnitType.Zerg_Zergling || u.getType() == UnitType.Protoss_Zealot) {
-							if(m.getGroundWeaponCooldown() != 0) {
-								if(m.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(u)) {
-									m.move(closestChoke.toPosition());
+					if(game.getFrameCount() % m.getID() != 0 || m.getLastCommandFrame() == game.getFrameCount()) {
+						continue;
+					}
+					if(enemyCombatUnitMemory.isEmpty()) {
+						if(m.getOrder() == Order.Move) {
+							m.attack(s.attack);	
+						}
+					}
+					else {
+						for(Unit u : enemyCombatUnitMemory) {
+							if(u.getType() == UnitType.Zerg_Zergling || u.getType() == UnitType.Protoss_Zealot) {
+								if(m.getGroundWeaponCooldown() != 0) {
+									if(m.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(u)) {
+										m.move(closestChoke.toPosition());
+									}
+								} else{
+									if(m.getOrder() == Order.Move) {
+										m.attack(s.attack);	
+									}
 								}
-							} else{
-								if(m.getOrder() == Order.Move) {
-									m.attack(s.attack);	
-								}
+								break;
 							}
-							break;
 						}
 					}
 				}

@@ -14,8 +14,10 @@ public class CheckBotherer extends Conditional {
 	@Override
 	public State execute() {
 		try {
-
-			if(((GameState)this.handler).choosenBotherer != null && !((GameState)this.handler).choosenBotherer.isAttacking()) {
+			if(((GameState)this.handler).choosenBotherer == null) {
+				return State.FAILURE;
+			}
+			else if(!((GameState)this.handler).choosenBotherer.isAttacking()) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

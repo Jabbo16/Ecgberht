@@ -19,7 +19,7 @@ public class ChooseSCV extends Action {
 		try {
 			if((((GameState)this.handler).workerIdle.size() + ((GameState)this.handler).workerTask.size() + ((GameState)this.handler).workerBuild.size())  + ((GameState)this.handler).workerDefenders.size() < ((GameState)this.handler).mineralsAssigned.size() * 2 + 3 && !((GameState)this.handler).CCs.isEmpty()) {
 				for(Unit b:((GameState)this.handler).CCs) {
-					if(!b.isTraining()) {
+					if(!b.isTraining() && !b.isConstructing()) {
 						((GameState)this.handler).chosenUnit = UnitType.Terran_SCV;
 						((GameState)this.handler).chosenBuilding = b;
 						return State.SUCCESS;

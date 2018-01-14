@@ -6,6 +6,7 @@ import java.util.List;
 
 import bwapi.Game;
 import bwapi.Player;
+import bwapi.Position;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
@@ -309,6 +310,33 @@ public class BuildingMap {
 		}
 	}
 
+	public boolean checkUnitsChosenBuildingGrid(TilePosition BL,UnitType type) {
+		try {
+			Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
+			Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
+			List<Unit> blockers = game.getUnitsInRectangle(topLeft, bottomRight);
+			if(blockers.isEmpty()) {
+				return false;
+			}
+			else {
+				if(blockers.size() > 1) {
+					return true;
+				}
+				else {
+					Unit blocker = blockers.get(0);
+					if(blocker.getPlayer().getID() == self.getID() && blocker.getType().isWorker() && blocker.getBuildType() == type) {
+						return false;
+					}
+				}
+			}
+			return true;
+		} catch(Exception e) {
+			System.err.println(e);
+		}
+		return true;
+		
+	}
+	
 	//Metodo que busca una posicion apta para construir segun el mapa
 	public TilePosition buscaPosicion(UnitType edificio, TilePosition starting){
 		TilePosition tamaño_ed = edificio.tileSize();
@@ -330,11 +358,7 @@ public class BuildingMap {
 									continue;
 								}
 							}
-							List<Unit> aux = game.getUnitsOnTile(new TilePosition(jj,ii));
-							if(aux.isEmpty()) {
-								coord[0] = ii; coord[1] = jj; control = true; break;
-							}
-							else if(aux.size() == 1 && aux.get(0).getType().isWorker() && aux.get(0).getPlayer().getID() == game.self().getID()) {
+							if(!checkUnitsChosenBuildingGrid( new TilePosition(jj, ii), edificio)) {
 								coord[0] = ii; coord[1] = jj; control = true; break;
 							}
 						}
