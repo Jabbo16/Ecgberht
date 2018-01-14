@@ -37,7 +37,7 @@ public class Squad {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 				continue;
 			}
-			if(!u.getOrderTargetPosition().equals(pos)) {
+			if(u.getLastCommandFrame() != frame) {
 				u.attack(pos);
 			}
 		}
