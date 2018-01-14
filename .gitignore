@@ -8,3 +8,4 @@
 *.txt
 bin/
 src/ecgberht/uncrustify.cfg
+bwapi-data/
