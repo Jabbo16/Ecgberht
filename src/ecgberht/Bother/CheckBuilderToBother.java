@@ -19,8 +19,8 @@ public class CheckBuilderToBother extends Conditional {
 		try {
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(((GameState)this.handler).enemyBase != null) {
-					if(BWTA.getRegion(u.getPosition()).getCenter().equals(((GameState)this.handler).enemyBase.getPosition())){
-						if(u.getType().isWorker()) {
+					if(u.getType().isWorker()) {
+						if(BWTA.getRegion(u.getPosition()).getCenter().equals(((GameState)this.handler).enemyBase.getPosition())){
 							((GameState)this.handler).chosenSCVToBother = u;
 							return State.SUCCESS;
 						}

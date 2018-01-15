@@ -53,7 +53,7 @@ public class BuildingMap {
 			for(int ii=0; ii<ancho; ii++) {
 				TilePosition x = new TilePosition(ii, jj);
 				if(game.isBuildable(x)) {
-					mapa[jj][ii] = "4";
+					mapa[jj][ii] = "6";
 				} else {
 					mapa[jj][ii] = "0";
 				}
@@ -108,10 +108,10 @@ public class BuildingMap {
 					mapa[i][j] = "E";
 				}
 			}
-			mapa[starting.getY()+1][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
-			mapa[starting.getY()+2][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
-			mapa[starting.getY()+1][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
-			mapa[starting.getY()+2][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
+			mapa[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
+			mapa[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
+			mapa[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
+			mapa[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
 		}
 		mapa = rellenaMapa(mapa);
 	}
@@ -134,47 +134,47 @@ public class BuildingMap {
 				}
 			}
 		}
-		//Se ponen a "B" las casillas adyacentes a 0,M,V por izquierda y arriba y sean 4
+		//Se ponen a "B" las casillas adyacentes a 0,M,V por izquierda y arriba y sean 6
 		for(int jj=alto-1; jj>=0; jj--) {
 			for(int ii=ancho-1; ii>=0; ii--) {
 				if(mapa[jj][ii] == "E" || mapa[jj][ii] == "M" || mapa[jj][ii] == "V") {
 					if(jj-1>=0) {
-						if(mapa[jj-1][ii] == "4") {
+						if(mapa[jj-1][ii] == "6") {
 							mapa[jj-1][ii] = "B";
 						}
 					}
 					if(ii-1>=0) {
-						if(mapa[jj][ii-1] == "4") {
+						if(mapa[jj][ii-1] == "6") {
 							mapa[jj][ii-1] = "B";
 						}
 					}
 					if(jj-1>=0 && ii-1>=0) {
-						if(mapa[jj-1][ii-1] == "4") {
+						if(mapa[jj-1][ii-1] == "6") {
 							mapa[jj-1][ii-1] = "B";
 						}
 					}
 					if(jj+1<alto) {
-						if(mapa[jj+1][ii] == "4") {
+						if(mapa[jj+1][ii] == "6") {
 							mapa[jj+1][ii] = "B";
 						}
 					}
 					if(ii+1<ancho) {
-						if(mapa[jj][ii+1] == "4") {
+						if(mapa[jj][ii+1] == "6") {
 							mapa[jj][ii+1] = "B";
 						}
 					}
 					if(jj+1<alto && ii+1<ancho) {
-						if(mapa[jj+1][ii+1] == "4") {
+						if(mapa[jj+1][ii+1] == "6") {
 							mapa[jj+1][ii+1] = "B";
 						}
 					}
 					if(jj-1>=0 && ii+1<ancho) {
-						if(mapa[jj-1][ii+1] == "4") {
+						if(mapa[jj-1][ii+1] == "6") {
 							mapa[jj-1][ii+1] = "B";
 						}
 					}
 					if(jj+1<alto && ii-1>=0) {
-						if(mapa[jj+1][ii-1] == "4") {
+						if(mapa[jj+1][ii-1] == "6") {
 							mapa[jj+1][ii-1] = "B";
 						}
 					}
@@ -184,13 +184,13 @@ public class BuildingMap {
 		for(int jj=alto-1; jj>0; jj--) {
 			for(int ii=ancho-1; ii>0; ii--) {
 				if(mapa[jj][ii] == "B" || mapa[jj][ii] == "0" || mapa[jj][ii] == "M" || mapa[jj][ii] == "V" || mapa[jj][ii] == "E") {
-					if(mapa[jj-1][ii] == "4") {
+					if(mapa[jj-1][ii] == "6") {
 						mapa[jj-1][ii] = "1";
 					}
-					if(mapa[jj][ii-1] == "4") {
+					if(mapa[jj][ii-1] == "6") {
 						mapa[jj][ii-1] = "1";
 					}
-					if(mapa[jj-1][ii-1] == "4") {
+					if(mapa[jj-1][ii-1] == "6") {
 						mapa[jj-1][ii-1] = "1";
 					}
 				}
@@ -199,13 +199,13 @@ public class BuildingMap {
 		for(int jj=alto-1; jj>0; jj--) {
 			for(int ii=ancho-1; ii>0; ii--) {
 				if(mapa[jj][ii] == "1") {
-					if(mapa[jj-1][ii] == "4") {
+					if(mapa[jj-1][ii] == "6") {
 						mapa[jj-1][ii] = "2";
 					}
-					if(mapa[jj][ii-1] == "4") {
+					if(mapa[jj][ii-1] == "6") {
 						mapa[jj][ii-1] = "2";
 					}
-					if(mapa[jj-1][ii-1] == "4") {
+					if(mapa[jj-1][ii-1] == "6") {
 						mapa[jj-1][ii-1] = "2";
 					}
 				}
@@ -214,14 +214,44 @@ public class BuildingMap {
 		for(int jj=alto-1; jj>0; jj--) {
 			for(int ii=ancho-1; ii>0; ii--) {
 				if(mapa[jj][ii] == "2") {
-					if(mapa[jj-1][ii] == "4") {
+					if(mapa[jj-1][ii] == "6") {
 						mapa[jj-1][ii] = "3";
 					}
-					if(mapa[jj][ii-1] == "4") {
+					if(mapa[jj][ii-1] == "6") {
 						mapa[jj][ii-1] = "3";
 					}
-					if(mapa[jj-1][ii-1] == "4") {
+					if(mapa[jj-1][ii-1] == "6") {
 						mapa[jj-1][ii-1] = "3";
+					}
+				}
+			}
+		}
+		for(int jj=alto-1; jj>0; jj--) {
+			for(int ii=ancho-1; ii>0; ii--) {
+				if(mapa[jj][ii] == "3") {
+					if(mapa[jj-1][ii] == "6") {
+						mapa[jj-1][ii] = "4";
+					}
+					if(mapa[jj][ii-1] == "6") {
+						mapa[jj][ii-1] = "4";
+					}
+					if(mapa[jj-1][ii-1] == "6") {
+						mapa[jj-1][ii-1] = "4";
+					}
+				}
+			}
+		}
+		for(int jj=alto-1; jj>0; jj--) {
+			for(int ii=ancho-1; ii>0; ii--) {
+				if(mapa[jj][ii] == "4") {
+					if(mapa[jj-1][ii] == "6") {
+						mapa[jj-1][ii] = "5";
+					}
+					if(mapa[jj][ii-1] == "6") {
+						mapa[jj][ii-1] = "5";
+					}
+					if(mapa[jj-1][ii-1] == "6") {
+						mapa[jj-1][ii-1] = "5";
 					}
 				}
 			}
@@ -243,11 +273,11 @@ public class BuildingMap {
 				if(Destroyed) {
 					if(i == posicion.getY()-1 || i == posicion.getY()+tamY || j == posicion.getX()-1 || j == posicion.getX()+tamX) {
 						if(mapa[i][j] != "0") {
-							mapa[i][j] = "4";
+							mapa[i][j] = "6";
 						}
 					} else {
 						if(mapa[i][j] != "V") {
-							mapa[i][j] = "4";
+							mapa[i][j] = "6";
 						}
 					}
 				} else {
@@ -263,22 +293,48 @@ public class BuildingMap {
 				}
 			}
 		}
+		if(edificio.canBuildAddon()) {
+			for(int i = posicion.getY()+tamY; i > posicion.getY()+tamY-4; i--) {
+				for(int j = posicion.getX()+tamX-1; j < posicion.getX()+tamX+3; j++) {
+					if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+						continue;
+					}
+					if(Destroyed) {
+						if(i == posicion.getY()+tamY-3 || i == posicion.getY()+tamY || j == posicion.getX()+tamX+2 || j == posicion.getX()+tamX-1) {
+							if(mapa[i][j] != "0") {
+								mapa[i][j] = "6";
+							}
+						} else {
+							if(mapa[i][j] != "V") {
+								mapa[i][j] = "6";
+							}
+						}
+					} else {
+						if(i != posicion.getY()+tamY-3 && i != posicion.getY()+tamY && j != posicion.getX()+tamX+2 && j != posicion.getX()+tamX-1) {
+							if(mapa[i][j] != "M" && mapa[i][j] != "V" && mapa[i][j] != "0" && mapa[i][j] != "E" && mapa[i][j] != "B") {
+								mapa[i][j] = "E";
+							}
+						}
+					}
+				}
+			}
+		}
 		//Se hallan las esquinas de la submatriz que contiene al edificio y sus alrededores
 		int init_i = 0;
-		if(posicion.getY()- alto > 0) {
-			init_i = posicion.getY()- alto;
+		if(posicion.getY() - alto > 0) {
+			init_i = posicion.getY() - alto;
 		}
 		int fin_i = alto;
-		if(posicion.getY()+tamY+ alto < alto) {
+		if(posicion.getY() + tamY + alto < alto) {
 			fin_i = posicion.getY() + tamY + alto;
 		}
 		int init_j = 0;
-		if(posicion.getX()- ancho > 0) {
-			init_j = posicion.getX()- ancho;
+		if(posicion.getX() - ancho > 0) {
+			init_j = posicion.getX() - ancho;
 		}
 		int fin_j = ancho;
-		if(posicion.getX()+tamX + ancho < ancho) {
-			fin_j = posicion.getX()+tamX + ancho;
+		if(posicion.getX() + tamX + ancho < ancho) {
+			fin_j = posicion.getX() + tamX + ancho;
 		}
 		//Se genera la submatriz como copia de la porcion del mapa delimitado por las esquinas y reseteando los 1,2,3 por 4
 		String[][] submapa = new String[fin_i-init_i][fin_j-init_j];
@@ -290,7 +346,7 @@ public class BuildingMap {
 				if(mapa[ii][jj]=="M" || mapa[ii][jj]=="V" || mapa[ii][jj]=="0" || mapa[ii][jj]=="E" || mapa[ii][jj]=="B") {
 					submapa[i][j] = mapa[ii][jj];
 				} else {
-					submapa[i][j] = "4";
+					submapa[i][j] = "6";
 				}
 				j++;
 			}
@@ -341,6 +397,9 @@ public class BuildingMap {
 	public TilePosition buscaPosicion(UnitType edificio, TilePosition starting){
 		TilePosition tamaño_ed = edificio.tileSize();
 		int tamaño = Math.max(tamaño_ed.getY(), tamaño_ed.getX());
+		if(edificio.canBuildAddon()) {
+			tamaño = Math.max(tamaño_ed.getY(), tamaño_ed.getX() + 2);
+		}
 		int x = starting.getY();
 		int y = starting.getX();
 		int i = 2;

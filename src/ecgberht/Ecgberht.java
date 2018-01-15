@@ -333,8 +333,10 @@ public class Ecgberht extends DefaultBWListener {
 			if(arg0.getType().isBuilding()) {
 				gs.inMap.updateMap(arg0,false);
 				if(arg0.getPlayer().getID() == self.getID()) {
-					gs.map.actualizaMapa(arg0.getTilePosition(),arg0.getType(),false);
-					gs.testMap = gs.map.clone();
+					if(arg0.getType() != UnitType.Terran_Command_Center) {
+						gs.map.actualizaMapa(arg0.getTilePosition(),arg0.getType(),false);
+						gs.testMap = gs.map.clone();
+					}
 					for(Pair<Unit,Pair<UnitType,TilePosition> > u: gs.workerBuild) {
 						if(u.first.equals(arg0.getBuildUnit()) && u.second.first.equals(arg0.getType())) {
 							gs.workerBuild.remove(u);
@@ -390,6 +392,7 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					if(arg0.getType() == UnitType.Terran_Factory) {
 						gs.Fs.add(arg0);
+						gs.map.writeMapa("FactoryMap.txt");
 					}
 					if(arg0.getType() == UnitType.Terran_Supply_Depot) {
 						gs.SBs.add(arg0);
