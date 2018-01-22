@@ -88,7 +88,7 @@ public class GameState extends GameHandler {
 	public Set<Unit> buildingLot = new HashSet<Unit>();
 	public Set<Unit> CCs = new HashSet<Unit>();
 	public Set<Unit> CSs = new HashSet<Unit>();
-	public Set<Unit> enemyBuildingMemory = new HashSet<Unit>();
+	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new HashMap<Unit,EnemyBuilding>();
 	public Set<Unit> enemyInBase = new HashSet<Unit>();
 	public Set<Unit> MBs = new HashSet<Unit>();
 	public Set<Unit> Fs = new HashSet<Unit>();
@@ -500,14 +500,14 @@ public class GameState extends GameHandler {
 			if(r.first.equals(choosenScout)) {
 				choosenScout = null;
 			}
-			if(chosenRepairer != null) {
-				if(!r.first.isRepairing() || r.first.isIdle()) {
+			if(!r.first.isRepairing() || r.first.isIdle()) {
+				if(chosenRepairer != null) {
 					if(r.first.equals(chosenRepairer)) {
 						chosenRepairer = null;
 					}
-					workerIdle.add(r.first);
-					aux4.add(r);
 				}
+				workerIdle.add(r.first);
+				aux4.add(r);
 			}
 		}
 		repairerTask.removeAll(aux4);
@@ -528,6 +528,14 @@ public class GameState extends GameHandler {
 	}
 
 	public void checkMainEnemyBase() {
+//		if(!enemyBuildingMemory.isEmpty()) {
+//			System.out.println("-----------");
+//			for(EnemyBuilding u : enemyBuildingMemory.values()) {
+//				System.out.println(u.type);
+//				print(u.pos, Color.Red);
+//			}
+//			System.out.println("-----------");
+//		}
 		if(enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
 			enemyBase = null;
 			choosenScout = null;
@@ -659,7 +667,7 @@ public class GameState extends GameHandler {
 		else {
 			String chosen = null;
 			for(Entry<String, Squad> s : squads.entrySet()) {
-				if(s.getValue().members.size() < 12 && (chosen == null || unit.getDistance(getSquadCenter(s.getValue())) < unit.getDistance(getSquadCenter(squads.get(chosen))))) {
+				if(s.getValue().members.size() < 12 && getSquadCenter(s.getValue()).getDistance(unit.getPosition()) <  800 && (chosen == null || unit.getDistance(getSquadCenter(s.getValue())) < unit.getDistance(getSquadCenter(squads.get(chosen))))) {
 					chosen = s.getKey();
 				}
 			}
@@ -881,20 +889,94 @@ public class GameState extends GameHandler {
 	public TilePosition getBunkerPositionAntiPool() {
 		TilePosition rax = MBs.iterator().next().getTilePosition();
 		UnitType bunker = UnitType.Terran_Bunker;
-		TilePosition up = new TilePosition(rax.getX() - bunker.tileHeight(), rax.getY());
-		TilePosition down = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileHeight(), rax.getY());
-		TilePosition left = new TilePosition(rax.getX(), rax.getY() - bunker.tileWidth());
-		TilePosition right = new TilePosition(rax.getX(), rax.getY() + UnitType.Terran_Barracks.tileWidth());
-		TilePosition chosen = up;
-		if(closestChoke.getDistance(down) < closestChoke.getDistance(chosen)) {
-			chosen = down;
-		}
-		if(closestChoke.getDistance(left) < closestChoke.getDistance(chosen)) {
-			chosen = left;
-		}
-		if(closestChoke.getDistance(right) < closestChoke.getDistance(chosen)) {
-			chosen = down;
+		int dist = 0;
+		TilePosition chosen = null;
+		while(chosen != null) {
+			TilePosition up = new TilePosition(rax.getX() - bunker.tileHeight() - dist, rax.getY());
+			TilePosition down = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileHeight() + dist, rax.getY());
+			TilePosition left = new TilePosition(rax.getX(), rax.getY() - bunker.tileWidth() - dist);
+			TilePosition right = new TilePosition(rax.getX(), rax.getY() + UnitType.Terran_Barracks.tileWidth() + dist);
+			chosen = up;
+			if(closestChoke.getDistance(down) < closestChoke.getDistance(chosen) && game.canBuildHere(down, bunker)) {
+				chosen = down;
+			}
+			if(closestChoke.getDistance(left) < closestChoke.getDistance(chosen) && game.canBuildHere(left, bunker)) {
+				chosen = left;
+			}
+			if(closestChoke.getDistance(right) < closestChoke.getDistance(chosen) && game.canBuildHere(right, bunker)) {
+				chosen = down;
+			}
+			if(chosen.equals(up) && !game.canBuildHere(right, bunker)) {
+				chosen = null;
+			}
 		}
 		return chosen;
+	}
+	
+	public void updateEnemyBuildingsMemory() {
+		List<Unit> aux = new ArrayList<Unit>();
+		for(EnemyBuilding u : enemyBuildingMemory.values()) {
+			if(game.isVisible(u.pos)) {
+				if(!game.getUnitsOnTile(u.pos).contains(u.unit)){
+					aux.add(u.unit);
+				}
+				else if(u.unit.isVisible()) {
+					u.pos = u.unit.getTilePosition();
+				}
+				u.type = u.unit.getType();
+			}
+			
+		}
+	}
+	public void mergeSquads() {
+		try {
+			if(squads.isEmpty()) {
+				return;
+			}
+			if(squads.size() < 2) {
+				return;
+			}
+			for(Squad u1 : squads.values()) {
+				int u1_size = u1.members.size();
+				if(u1_size < 12) {
+					for(Squad u2 : squads.values()) {
+						if(u2.name.equals(u1.name) || u2.members.size() > 11){
+							continue;
+						}
+						if(getSquadCenter(u1).getApproxDistance(getSquadCenter(u2)) < 200) {
+							if(u1_size + u2.members.size() > 12) {
+								continue;
+//								Set<Unit> aux = new HashSet<Unit>();
+//								while(u1_size < 12 && u2.members.size() != 0) {
+//									for(Unit u : u2.members) {
+//										u1.members.add(u);
+//										aux.add(u);
+//										u1_size++;
+//									}
+//								}
+//								u2.members.removeAll(aux);
+							}
+							else {
+								u1.members.addAll(u2.members);
+								u2.members.clear();
+								
+							}
+							break;
+						}
+					}
+					break;
+				}
+			}
+			Set<Squad> aux = new HashSet<Squad>();
+			for(Squad u : squads.values()) {
+				if(u.members.isEmpty()) {
+					aux.add(u);
+				}
+			}
+			squads.values().removeAll(aux);
+		} catch(Exception e) {
+			System.err.println(e);
+		}
+		
 	}
 }

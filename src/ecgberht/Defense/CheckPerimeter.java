@@ -66,7 +66,7 @@ public class CheckPerimeter extends Conditional {
 					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
 					if(closestCC != null) {
 						if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-							u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition(), ((GameState)this.handler).getGame().getFrameCount());
+							u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
 							u.estado = Status.IDLE;
 						}
 					}

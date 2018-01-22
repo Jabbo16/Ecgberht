@@ -40,9 +40,9 @@ import cameraModule.CameraModule;
 public class Ecgberht extends DefaultBWListener {
 
 	private Mirror mirror = new Mirror();
-	private Game game;
+	private static Game game;
 	private Player self;
-	private GameState gs;
+	private static GameState gs;
 	private BehavioralTree collectTree;
 	private BehavioralTree trainTree;
 	private BehavioralTree moveBuildTree;
@@ -71,11 +71,18 @@ public class Ecgberht extends DefaultBWListener {
 		new Ecgberht().run();
 	}
 
+	public static Game getGame() {
+		return game;
+	}
+	public static GameState getGs() {
+		return gs;
+	}
+	
 	public void onStart() {
 		game = mirror.getGame();
 		self = game.self();
 		game.enableFlag(1);
-		game.setLocalSpeed(10);
+		game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
 		BWTA.analyze();
@@ -236,6 +243,7 @@ public class Ecgberht extends DefaultBWListener {
 		observer.onFrame();
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyCombatUnits();
+		gs.updateEnemyBuildingsMemory();
 		//gs.checkEnemyAttackingWT();
 		buildingLotTree.run();
 		repairTree.run();
@@ -257,11 +265,12 @@ public class Ecgberht extends DefaultBWListener {
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
 		gs.fix();
+		gs.mergeSquads();
 		if(game.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
 			boolean found_pool = false;
 			int drones = game.enemy().allUnitCount(UnitType.Zerg_Drone);
-			for(Unit u  : gs.enemyBuildingMemory) {
-				if(u.getType() == UnitType.Zerg_Spawning_Pool) {
+			for(EnemyBuilding u  : gs.enemyBuildingMemory.values()) {
+				if(u.type == UnitType.Zerg_Spawning_Pool) {
 					found_pool = true;
 					break;
 				}
@@ -274,7 +283,7 @@ public class Ecgberht extends DefaultBWListener {
 		if(game.getFrameCount() > 0 && game.getFrameCount() % 5 == 0) {
 			gs.mineralLocking();
 		}
-		gs.printer();
+		//gs.printer();
 	}
 
 	@Override
@@ -667,9 +676,9 @@ public class Ecgberht extends DefaultBWListener {
 	public void onUnitMorph(Unit arg0) {
 		if(arg0.getPlayer().getID() == game.enemy().getID()) {
 			if(arg0.getType().isBuilding() && !arg0.getType().isRefinery()) {
-				if(!gs.enemyBuildingMemory.contains(arg0)) {
+				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
 					gs.inMap.updateMap(arg0,false);
-					gs.enemyBuildingMemory.add(arg0);
+					gs.enemyBuildingMemory.put(arg0,new EnemyBuilding(arg0));
 				}
 			}
 		}
@@ -720,8 +729,8 @@ public class Ecgberht extends DefaultBWListener {
 				gs.enemyRace = arg0.getType().getRace();
 			}
 			if(arg0.getType().isBuilding()) {
-				if(!gs.enemyBuildingMemory.contains(arg0)) {
-					gs.enemyBuildingMemory.add(arg0);
+				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
+					gs.enemyBuildingMemory.put(arg0,new EnemyBuilding(arg0));
 					gs.inMap.updateMap(arg0,false);
 					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), false);
 				}

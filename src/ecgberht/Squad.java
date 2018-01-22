@@ -2,7 +2,8 @@ package ecgberht;
 
 import java.util.HashSet;
 import java.util.Set;
-
+import static ecgberht.Ecgberht.getGame;
+import static ecgberht.Ecgberht.getGs;
 import bwapi.Order;
 import bwapi.Position;
 import bwapi.TechType;
@@ -29,21 +30,39 @@ public class Squad {
 		this.members.add(unit);
 	}
 
-	public void giveAttackOrder(Position pos, int frame) {
+	public void giveAttackOrder(Position pos) {
 		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
-				continue;
-			}
-			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
-				continue;
-			}
-			if(u.getLastCommandFrame() != frame) {
-				u.attack(pos);
+			if(getGame().getFrameCount() - u.getLastCommandFrame() > 32 ) {
+				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
+					continue;
+				}
+				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+					continue;
+				}
+				if(u.isIdle()) {
+					u.attack(pos);
+					continue;
+				}
+				if (estado == Status.IDLE || !pos.equals(attack)) {
+					if (u.getGroundWeaponCooldown() > 0) {
+						for(Unit e : getGs().enemyCombatUnitMemory) {
+							if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
+								if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
+									u.move(getGame().self().getStartLocation().toPosition());
+								}
+							}
+						}
+					}
+					else if(!u.isStartingAttack() && !u.isAttackFrame() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
+						u.attack(pos);
+					}
+				} else if(!u.getOrderTargetPosition().equals(attack)) {
+					u.attack(pos);
+				}
 			}
 		}
 		attack = pos;
-		lastFrameOrder = frame;
-		
+		lastFrameOrder = getGame().getFrameCount();
 	}
 	
 	public void giveStimOrder() {

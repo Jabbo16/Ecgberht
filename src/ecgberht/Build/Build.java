@@ -23,15 +23,14 @@ public class Build extends Action {
 				if(u.first.getOrder() != Order.PlaceBuilding && u.first.canBuild(u.second.first)) {
 					Unit chosen = u.first;
 					if(!chosen.canBuild()) {
-						return State.FAILURE;
+						continue;
 					}
 					if(chosen.build(u.second.first,u.second.second)) {
-						return State.SUCCESS;
+						continue;
 					}
-					return State.FAILURE;
 				}
 			}
-			return State.FAILURE;
+			return State.SUCCESS;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());
 			System.err.println(e);

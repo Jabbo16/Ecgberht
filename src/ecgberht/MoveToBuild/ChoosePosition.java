@@ -64,6 +64,9 @@ public class ChoosePosition extends Action {
 						if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).enemyRace == Race.Zerg) {
 							origin = ((GameState)this.handler).getBunkerPositionAntiPool();
 							((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
+							((GameState)this.handler).chosenPosition = origin;
+							
+							
 							return State.SUCCESS;
 						}
 						else {
