@@ -283,7 +283,7 @@ public class Ecgberht extends DefaultBWListener {
 		if(game.getFrameCount() > 0 && game.getFrameCount() % 5 == 0) {
 			gs.mineralLocking();
 		}
-		//gs.printer();
+		gs.printer();
 	}
 
 	@Override

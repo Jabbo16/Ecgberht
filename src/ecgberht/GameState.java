@@ -341,6 +341,9 @@ public class GameState extends GameHandler {
 		if(enemyRace == Race.Zerg && EI.naughty) {
 			game.drawTextScreen(10, 80, Utils.formatText("Naughty Zerg: ",Utils.White) + Utils.formatText("yes", Utils.Green));
 		}
+		for(Pair<Unit,Integer> m : mineralsAssigned) {
+			print(m.first,Color.Cyan);
+		}
 	}
 
 	public void print(Unit u,Color color) {
@@ -909,6 +912,7 @@ public class GameState extends GameHandler {
 			if(chosen.equals(up) && !game.canBuildHere(right, bunker)) {
 				chosen = null;
 			}
+			dist++;
 		}
 		return chosen;
 	}
@@ -927,6 +931,10 @@ public class GameState extends GameHandler {
 			}
 			
 		}
+		for(Unit u : aux) {
+			enemyBuildingMemory.remove(u);
+		}
+		
 	}
 	public void mergeSquads() {
 		try {
