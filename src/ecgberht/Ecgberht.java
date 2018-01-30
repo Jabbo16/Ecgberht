@@ -289,21 +289,14 @@ public class Ecgberht extends DefaultBWListener {
 	@Override
 	public void onEnd(boolean arg0) {
 		String name = game.enemy().getName();
-		String path = "bwapi-data/read/" + name + ".json";
 		if(arg0) {
 			gs.EI.wins++;
-			game.sendText("git gud "+ game.enemy().getName());
+			game.sendText("git gud "+ name);
 		} else {
 			gs.EI.losses++;
-			game.sendText("gg wp! "+ game.enemy().getName());
+			game.sendText("gg wp! "+ name);
 		}
-		Gson aux = new Gson();
-		String print = aux.toJson(gs.EI);
-		try(PrintWriter out = new PrintWriter(path)){
-		    out.println(print);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		gs.writeOpponentInfo(name);
 	}
 
 	@Override

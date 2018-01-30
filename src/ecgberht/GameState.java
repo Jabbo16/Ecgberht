@@ -2,8 +2,10 @@ package ecgberht;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -55,6 +57,7 @@ public class GameState extends GameHandler {
 	public boolean first_apm = false;
 	public boolean initCount = false;
 	public boolean movingToExpand = false;
+	public boolean enemyIsRandom = true;
 	public BuildingMap map;
 	public BuildingMap testMap;
 	public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
@@ -135,6 +138,7 @@ public class GameState extends GameHandler {
 	public void initEnemyRace() {
 		if(game.enemy().getRace() != Race.Unknown) {
 			enemyRace = game.enemy().getRace();
+			enemyIsRandom = false;
 		}
 	}
 	
@@ -851,8 +855,22 @@ public class GameState extends GameHandler {
 		} catch(Exception e) {
 			System.err.println(e);
 		}
-		
 	}
+	
+	public void writeOpponentInfo(String name) {
+		String path = "bwapi-data/read/" + name + ".json";
+		Gson aux = new Gson();
+		if(enemyIsRandom && EI.naughty) {
+			EI.naughty = false;
+		}
+		String print = aux.toJson(EI);
+		try(PrintWriter out = new PrintWriter(path)){
+		    out.println(print);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void MarineMicro() {
 		if(enemyCombatUnitMemory.isEmpty()) {
 			return;
