@@ -1,7 +1,5 @@
 package ecgberht;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,16 +8,10 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 
-import com.google.gson.Gson;
-
 import ecgberht.AddonBuild.*;
 import ecgberht.Attack.*;
-import ecgberht.Bother.BotherSCV;
-import ecgberht.Bother.CheckBotherer;
-import ecgberht.Bother.CheckBuilderToBother;
-import ecgberht.Bother.CheckWorkerToBother;
-import ecgberht.Build.Build;
-import ecgberht.Build.CheckWorkerBuild;
+import ecgberht.Bother.*;
+import ecgberht.Build.*;
 import ecgberht.BuildingLot.*;
 import ecgberht.Bunker.*;
 import ecgberht.CombatStim.*;

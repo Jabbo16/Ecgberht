@@ -8,6 +8,7 @@ import bwapi.UnitType;
 import bwapi.UpgradeType;
 
 public class Strategy {
+	public String name = "";
  	public boolean isFine = false;
 	public int armyForBay = 0;
 	public int armyForTurret = 0;
@@ -29,6 +30,7 @@ public class Strategy {
 	}
 	
 	public Strategy(AStrategy build) {
+		this.name = build.name;
 		this.isFine = true;
 		this.armyForBay = build.armyForBay;
 		this.armyForTurret = build.armyForTurret;

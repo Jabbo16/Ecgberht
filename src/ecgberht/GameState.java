@@ -278,8 +278,10 @@ public class GameState extends GameHandler {
 			game.sendText("My APM is over 9000!");
 			first_apm = true;
 		}
-		game.drawTextScreen(10, 65, Utils.formatText("MRPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
+		game.drawTextScreen(10, 65, Utils.formatText("MGPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
+		game.drawTextScreen(10, 80, Utils.formatText("Strategy: ",Utils.White) + Utils.formatText(strat.name, Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
+		
 		if(closestChoke != null) {
 			game.drawTextMap(closestChoke.toPosition(), "Choke");
 		}

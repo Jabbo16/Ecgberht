@@ -13,6 +13,7 @@ public class BioMechBuild extends AStrategy{
 	
 	@Override
 	public void initStrategy() {
+		name = "BioMech";
 		armyForBay = 15;
 		armyForTurret = 10;
 		numBays = 1;

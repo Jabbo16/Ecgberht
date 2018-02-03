@@ -13,6 +13,7 @@ public class BioBuild extends AStrategy{
 	
 	@Override
 	public void initStrategy() {
+		name = "FullBio";
 		armyForBay = 15;
 		armyForTurret = 10;
 		numBays = 2;

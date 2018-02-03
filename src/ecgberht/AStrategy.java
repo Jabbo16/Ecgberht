@@ -8,6 +8,7 @@ import bwapi.UnitType;
 import bwapi.UpgradeType;
 
 public abstract class AStrategy {
+	public String name = "";
     public int armyForBay = 0;
 	public int armyForTurret = 0;
 	public int numBays = 0;
