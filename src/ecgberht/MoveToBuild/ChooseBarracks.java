@@ -26,31 +26,33 @@ public class ChooseBarracks extends Action {
 					}
 				}
 			}
-			int count = 0;
-			boolean found = false;
-			for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
-				if(w.second.getType() == UnitType.Terran_Barracks) {
-					count++;
+			if(((GameState)this.handler).strat.buildUnits.contains(UnitType.Terran_Factory)) {
+				int count = 0;
+				boolean found = false;
+				for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
+					if(w.second.getType() == UnitType.Terran_Barracks) {
+						count++;
+					}
+					if(w.second.getType() == UnitType.Terran_Factory) {
+						found = true;
+					}
 				}
-				if(w.second.getType() == UnitType.Terran_Factory) {
+				for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
+					if(w.second.getType() == UnitType.Terran_Barracks) {
+						count++;
+					}
+					if(w.second.getType() == UnitType.Terran_Factory) {
+						found = true;
+					}
+				}
+				if(!((GameState)this.handler).Fs.isEmpty()) {
 					found = true;
 				}
-			}
-			for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
-				if(w.second.getType() == UnitType.Terran_Barracks) {
-					count++;
-				}
-				if(w.second.getType() == UnitType.Terran_Factory) {
-					found = true;
+				if(count + ((GameState)this.handler).MBs.size() > ((GameState)this.handler).strat.numRaxForFac && !found ) {
+					return State.FAILURE;
 				}
 			}
-			if(!((GameState)this.handler).Fs.isEmpty()) {
-				found = true;
-			}
-			if(count + ((GameState)this.handler).MBs.size() > 2 && !found ) {
-				return State.FAILURE;
-			}
-			if(((GameState)this.handler).MBs.size() < 3 * ((GameState)this.handler).CCs.size()) {
+			if(((GameState)this.handler).MBs.size() < ((GameState)this.handler).strat.raxPerCC * ((GameState)this.handler).CCs.size()) {
 				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
 					if(w.second.first == UnitType.Terran_Barracks) {
 						return State.FAILURE;

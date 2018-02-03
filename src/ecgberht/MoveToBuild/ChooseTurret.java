@@ -19,7 +19,7 @@ public class ChooseTurret extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).getArmySize() < 10) {
+			if(((GameState)this.handler).getArmySize() < ((GameState)this.handler).strat.armyForTurret) {
 				return State.FAILURE;
 			}
 			boolean tech = false;

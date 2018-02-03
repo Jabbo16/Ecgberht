@@ -109,7 +109,17 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseTank cTan = new ChooseTank("Choose Tank", gs);
 		CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
 		TrainUnit tr = new TrainUnit("Train SCV", gs);
-		Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV,cTan,cMed,cMar);
+		//Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV,cTan,cMed,cMar);
+		Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV);
+		if(gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+			chooseUnit.addChild(cTan);
+		}
+		if(gs.strat.trainUnits.contains(UnitType.Terran_Medic)) {
+			chooseUnit.addChild(cMed);
+		}
+		if(gs.strat.trainUnits.contains(UnitType.Terran_Marine)) {
+			chooseUnit.addChild(cMar);
+		}
 		Sequence train = new Sequence("Train",chooseUnit,cr,tr);
 		trainTree = new BehavioralTree("Training Tree");
 		trainTree.addChild(train);
@@ -126,7 +136,24 @@ public class Ecgberht extends DefaultBWListener {
 		ChoosePosition cp = new ChoosePosition("Choose Position", gs);
 		ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
 		Move m = new Move("Move to chosen building position", gs);
-		Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup,cBun,cTur,cRef,cAca,cBay,cBar,cFar);
+		//Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup,cBun,cTur,cRef,cAca,cBay,cBar,cFar);
+		Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup);
+		if(gs.strat.bunker) {
+			chooseBuildingBuild.addChild(cBun);
+		}
+		chooseBuildingBuild.addChild(cTur);
+		chooseBuildingBuild.addChild(cRef);
+		if(gs.strat.buildUnits.contains(UnitType.Terran_Academy)) {
+			chooseBuildingBuild.addChild(cAca);
+		}
+		if(gs.strat.buildUnits.contains(UnitType.Terran_Engineering_Bay)) {
+			chooseBuildingBuild.addChild(cBay);
+		}
+		chooseBuildingBuild.addChild(cBar);
+		if(gs.strat.buildUnits.contains(UnitType.Terran_Factory)) {
+			chooseBuildingBuild.addChild(cFar);
+		}
+		
 		Sequence move = new Sequence("Move",chooseBuildingBuild,cp,cw,crb,m);
 		moveBuildTree = new BehavioralTree("Building Tree");
 		moveBuildTree.addChild(move);
@@ -170,7 +197,23 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
 		ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
 		ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
-		Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade", cAIU, cWIU, cMR, cSU , cSM);
+		//Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade", cAIU, cWIU, cSU, cMR, cSM);
+		Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade");
+		if(gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) {
+			ChooseUP.addChild(cWIU);
+		}
+		if(gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) {
+			ChooseUP.addChild(cAIU);
+		}
+		if(gs.strat.techToResearch.contains(TechType.Stim_Packs)) {
+			ChooseUP.addChild(cSU);
+		}
+		if(gs.strat.upgradesToResearch.contains(UpgradeType.U_238_Shells)) {
+			ChooseUP.addChild(cMR);
+		}
+		if(gs.strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
+			ChooseUP.addChild(cSM);
+		}
 		Sequence Upgrader = new Sequence("Upgrader",ChooseUP,cRU,rU);
 		upgradeTree = new BehavioralTree("Technology");
 		upgradeTree.addChild(Upgrader);

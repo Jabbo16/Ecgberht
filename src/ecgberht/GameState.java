@@ -24,6 +24,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import ecgberht.BuildingMap;
+import ecgberht.Strategies.BioBuild;
+import ecgberht.Strategies.BioMechBuild;
 
 import org.iaie.btree.util.GameHandler;
 
@@ -98,6 +100,7 @@ public class GameState extends GameHandler {
 	public Set<Unit> SBs = new HashSet<Unit>();
 	public Set<Unit> Ts = new HashSet<Unit>();
 	public Set<Unit> UBs = new HashSet<Unit>();
+	public Strategy strat = new Strategy();
 	public String chosenSquad = null;
 	public TechType chosenResearch = null;
 	public TilePosition checkScan = null;
@@ -133,8 +136,15 @@ public class GameState extends GameHandler {
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
+		strat = newStrat();
+		
 	}
 	
+	private Strategy newStrat() {
+		BioBuild b = new BioBuild();
+		return new Strategy(b);
+	}
+
 	public void initEnemyRace() {
 		if(game.enemy().getRace() != Race.Unknown) {
 			enemyRace = game.enemy().getRace();

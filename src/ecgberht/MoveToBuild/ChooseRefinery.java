@@ -19,7 +19,7 @@ public class ChooseRefinery extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).getPlayer().supplyUsed() < 30 || ((GameState)this.handler).getCash().second >= 300) {
+			if(((GameState)this.handler).getPlayer().supplyUsed() < ((GameState)this.handler).strat.supplyForFirstRefinery || ((GameState)this.handler).getCash().second >= 300) {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).refineriesAssigned.size() == 1) {
