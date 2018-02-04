@@ -24,8 +24,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import ecgberht.BuildingMap;
-import ecgberht.Strategies.BioBuild;
-import ecgberht.Strategies.BioMechBuild;
+import ecgberht.Strategies.*;
 
 import org.iaie.btree.util.GameHandler;
 
@@ -73,6 +72,7 @@ public class GameState extends GameHandler {
 	public int startCount;
 	public int trainedCombatUnits;
 	public int trainedWorkers;
+	public int mapSize = 2;
 	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 	public List<Pair<Unit,Integer> > mineralsAssigned = new ArrayList<Pair<Unit,Integer> >();
 	public List<Pair<Unit,List<Unit>>> DBs = new ArrayList<Pair<Unit,List<Unit>>>();
@@ -136,12 +136,16 @@ public class GameState extends GameHandler {
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
-		strat = newStrat();
-		
+		strat = initStrat();
+		mapSize = BWTA.getStartLocations().size();
 	}
 	
-	private Strategy newStrat() {
+	private Strategy initStrat() {
 		BioBuild b = new BioBuild();
+		String map = game.mapFileName();
+		if(map.contains("Heartbreak Ridge")) {
+			return new Strategy(b);
+		}
 		return new Strategy(b);
 	}
 

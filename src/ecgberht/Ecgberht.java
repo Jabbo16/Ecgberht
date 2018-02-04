@@ -324,6 +324,7 @@ public class Ecgberht extends DefaultBWListener {
 	@Override
 	public void onEnd(boolean arg0) {
 		String name = game.enemy().getName();
+		gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
 		if(arg0) {
 			gs.EI.wins++;
 			game.sendText("git gud "+ name);
