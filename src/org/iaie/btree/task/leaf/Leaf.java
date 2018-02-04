@@ -33,9 +33,9 @@
 
 package org.iaie.btree.task.leaf;
 
-import org.iaie.btree.util.GameHandler;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.Task;
+import org.iaie.btree.util.GameHandler;
 
 /**
  *

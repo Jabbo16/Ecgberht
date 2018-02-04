@@ -3,12 +3,12 @@ package ecgberht.Expansion;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
 
 import bwapi.Pair;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
+import ecgberht.GameState;
 
 public class CheckResourcesCC extends Conditional {
 

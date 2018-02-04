@@ -5,7 +5,6 @@ import java.util.List;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
 
 import bwapi.Game;
 import bwapi.Pair;
@@ -15,6 +14,7 @@ import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BWTA;
+import ecgberht.GameState;
 
 public class ChoosePosition extends Action {
 

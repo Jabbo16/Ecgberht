@@ -6,11 +6,12 @@ import java.util.Map.Entry;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
-import ecgberht.Squad;
+
 import bwapi.Pair;
 import bwapi.Unit;
 import bwapi.UnitType;
+import ecgberht.GameState;
+import ecgberht.Squad;
 
 public class ChooseMarineToEnter extends Action {
 

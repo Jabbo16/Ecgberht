@@ -3,10 +3,10 @@ package ecgberht.Recollection;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
 
 import bwapi.Pair;
 import bwapi.Unit;
+import ecgberht.GameState;
 
 public class CollectMineral extends Action {
 

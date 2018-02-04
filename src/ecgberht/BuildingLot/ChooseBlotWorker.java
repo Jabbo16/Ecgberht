@@ -3,11 +3,11 @@ package ecgberht.BuildingLot;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
 
 import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
+import ecgberht.GameState;
 
 public class ChooseBlotWorker extends Action {
 

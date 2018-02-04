@@ -23,9 +23,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
-import ecgberht.BuildingMap;
-import ecgberht.Strategies.*;
-
 import org.iaie.btree.util.GameHandler;
 
 import com.google.gson.Gson;
@@ -44,10 +41,11 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import bwapi.UpgradeType;
 import bwapi.Utils;
-import bwta.BaseLocation;
 import bwta.BWTA;
+import bwta.BaseLocation;
 import bwta.Chokepoint;
 import bwta.Region;
+import ecgberht.Strategies.BioBuild;
 
 public class GameState extends GameHandler {
 

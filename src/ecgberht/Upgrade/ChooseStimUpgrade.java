@@ -3,11 +3,11 @@ package ecgberht.Upgrade;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
 
 import bwapi.TechType;
 import bwapi.Unit;
 import bwapi.UpgradeType;
+import ecgberht.GameState;
 
 public class ChooseStimUpgrade extends Action {
 

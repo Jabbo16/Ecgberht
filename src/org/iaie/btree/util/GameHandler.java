@@ -33,8 +33,10 @@
 
 package org.iaie.btree.util;
 
-import bwapi.*;
 //import jnibwapi.JNIBWAPI;
+import bwapi.Game;
+import bwapi.Mirror;
+import bwapi.Player;
 
 /**
  *

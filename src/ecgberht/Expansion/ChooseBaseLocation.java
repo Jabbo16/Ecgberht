@@ -3,13 +3,13 @@ package ecgberht.Expansion;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
 
 import bwapi.Position;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import ecgberht.GameState;
 
 public class ChooseBaseLocation extends Action {
 

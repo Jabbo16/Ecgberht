@@ -5,14 +5,15 @@ import java.util.List;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
-import ecgberht.Squad;
-import ecgberht.Squad.Status;
+
 import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BWTA;
+import ecgberht.GameState;
+import ecgberht.Squad;
+import ecgberht.Squad.Status;
 
 public class CheckPerimeter extends Conditional {
 

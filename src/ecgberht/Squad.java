@@ -1,9 +1,11 @@
 package ecgberht;
 
-import java.util.HashSet;
-import java.util.Set;
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import bwapi.Order;
 import bwapi.Position;
 import bwapi.TechType;
