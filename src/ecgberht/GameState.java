@@ -46,6 +46,7 @@ import bwta.BaseLocation;
 import bwta.Chokepoint;
 import bwta.Region;
 import ecgberht.Strategies.BioBuild;
+import ecgberht.Strategies.BioMechBuild;
 
 public class GameState extends GameHandler {
 
@@ -144,7 +145,16 @@ public class GameState extends GameHandler {
 		if(map.contains("Heartbreak Ridge")) {
 			return new Strategy(b);
 		}
-		return new Strategy(b);
+		else {
+			double random = Math.random();
+			if(random >= 0.5 ) {
+				return new Strategy(b);
+			}
+			else {
+				BioMechBuild bM = new BioMechBuild();
+				return new Strategy(bM);
+			}
+		}
 	}
 
 	public void initEnemyRace() {
@@ -174,7 +184,7 @@ public class GameState extends GameHandler {
 			
 		}
 		catch(Exception e) {
-			System.err.println(e);
+			//System.err.println(e);
 		}
 	}
 
@@ -867,12 +877,13 @@ public class GameState extends GameHandler {
 				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
 			}
 		} catch(Exception e) {
-			System.err.println(e);
+			//System.err.println(e);
 		}
 	}
 	
 	public void writeOpponentInfo(String name) {
 		String path = "bwapi-data/read/" + name + ".json";
+		game.sendText("Writing result to: " + path);
 		Gson aux = new Gson();
 		if(enemyIsRandom && EI.naughty) {
 			EI.naughty = false;
@@ -881,7 +892,7 @@ public class GameState extends GameHandler {
 		try(PrintWriter out = new PrintWriter(path)){
 		    out.println(print);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			//System.err.println(e);
 		}
 	}
 	

@@ -153,6 +153,7 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
+		
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
 		FreeWorker fw = new FreeWorker("No Union", gs);
@@ -398,13 +399,13 @@ public class Ecgberht extends DefaultBWListener {
 			gs.EI.losses++;
 			game.sendText("gg wp! "+ name);
 		}
-		Weka weka = new Weka();
-		try {
-			weka.createAndWriteInstance(game.enemy().getName(),gs.strat.name, gs.mapSize, arg0);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println(e);
-		}
+//		Weka weka = new Weka();
+//		try {
+//			weka.createAndWriteInstance(game.enemy().getName(),gs.strat.name, gs.mapSize, arg0);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			System.err.println(e);
+//		}
 		gs.writeOpponentInfo(name);
 	}
 
