@@ -41,26 +41,30 @@ public class Squad {
 				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
-				if(u.isIdle()) {
+				if(!u.isStartingAttack() && !u.isAttacking() || u.isIdle()) {
 					u.attack(pos);
 					continue;
 				}
-				if (estado == Status.IDLE || !pos.equals(attack)) {
-					if (u.getGroundWeaponCooldown() > 0) {
-						for(Unit e : getGs().enemyCombatUnitMemory) {
-							if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
-								if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
-									u.move(getGame().self().getStartLocation().toPosition());
-								}
-							}
-						}
-					}
-					else if(!u.isStartingAttack() && !u.isAttackFrame() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
-						u.attack(pos);
-					}
-				} else if(!u.getOrderTargetPosition().equals(attack)) {
-					u.attack(pos);
-				}
+//				if(u.isIdle()) {
+//					u.attack(pos);
+//					continue;
+//				}
+//				if (estado == Status.IDLE || !pos.equals(attack)) {
+//					if (u.getGroundWeaponCooldown() > 0) {
+//						for(Unit e : getGs().enemyCombatUnitMemory) {
+//							if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
+//								if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
+//									u.move(getGame().self().getStartLocation().toPosition());
+//								}
+//							}
+//						}
+//					}
+//					else if(!u.isStartingAttack() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
+//						u.attack(pos);
+//					}
+//				} else if(!u.getOrderTargetPosition().equals(attack)) {
+//					u.attack(pos);
+//				}
 			}
 		}
 		attack = pos;
@@ -74,7 +78,33 @@ public class Squad {
 			}
 		}
 	}
-	
+	public void microUpdateOrder() {
+		for(Unit u : members) {
+			if(u.isIdle() && attack != null && getGame().getFrameCount() != u.getLastCommandFrame()) {
+				u.attack(attack);
+				continue;
+			}
+			if(getGame().getFrameCount() - u.getLastCommandFrame() > 32) {
+				if(u.isIdle() && attack != null) {
+					u.attack(attack);
+					continue;
+				}
+				if (u.getGroundWeaponCooldown() > 0) {
+					for(Unit e : getGs().enemyCombatUnitMemory) {
+						if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
+							if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
+								u.move(getGame().self().getStartLocation().toPosition());
+							}
+						}
+					}
+				}
+				else if(attack != null && !u.isStartingAttack() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
+					u.attack(attack);
+				}
+			}
+		}
+		
+	}
 	public Set<Unit> getTanks() {
 		Set<Unit> aux = new HashSet<Unit>();
 		for(Unit u : members) {

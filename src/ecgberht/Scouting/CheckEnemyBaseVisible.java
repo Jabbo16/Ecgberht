@@ -29,7 +29,7 @@ public class CheckEnemyBaseVisible extends Action {
 							((GameState)this.handler).ScoutSLs = new HashSet<BaseLocation>();
 							//((GameState)this.handler).choosenScout.stop();
 							//((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);
-							((GameState)this.handler).chosenBotherer = ((GameState)this.handler).chosenScout;
+							((GameState)this.handler).chosenHarasser = ((GameState)this.handler).chosenScout;
 							((GameState)this.handler).chosenScout = null;
 							((GameState)this.handler).getGame().sendText(Utils.formatText("!",Utils.Yellow));
 							((GameState)this.handler).playSound("gear.wav");

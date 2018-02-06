@@ -123,9 +123,9 @@ public class GameState extends GameHandler {
 	public UnitType chosenToBuild = null;
 	public UnitType chosenUnit = null;
 	public UpgradeType chosenUpgrade = null;
-	public Unit chosenBotherer = null;
+	public Unit chosenHarasser = null;
 	public Race enemyRace = Race.Unknown;
-	public Unit chosenSCVToBother = null;
+	public Unit chosenUnitToHarass = null;
 	public Gson enemyInfoJSON = new Gson();
 	public EnemyInfo EI = new EnemyInfo(game.enemy().getName());
 	
@@ -302,9 +302,9 @@ public class GameState extends GameHandler {
 			game.drawTextMap(chosenBuilderBL.getPosition(), "BuilderBL");
 			print(chosenBuilderBL,Color.Blue);
 		}
-		if(chosenBotherer != null) {
-			game.drawTextMap(chosenBotherer.getPosition(), "Botherer");
-			print(chosenBotherer,Color.Blue);
+		if(chosenHarasser != null) {
+			game.drawTextMap(chosenHarasser.getPosition(), "Harasser");
+			print(chosenHarasser,Color.Blue);
 		}
 		if (chosenBaseLocation != null) {
 			print(chosenBaseLocation,UnitType.Terran_Command_Center,Color.Cyan);
@@ -313,9 +313,9 @@ public class GameState extends GameHandler {
 			game.drawTextMap(u.first.getPosition(), "ChosenBuilder");
 			print(u.second.second,u.second.first,Color.Teal);
 		}
-		if(chosenSCVToBother != null) {
-			print(chosenSCVToBother,Color.Red);
-			game.drawTextMap(chosenSCVToBother.getPosition(), "WorkerToBother");
+		if(chosenUnitToHarass != null) {
+			print(chosenUnitToHarass,Color.Red);
+			game.drawTextMap(chosenUnitToHarass.getPosition(), "WorkerToBother");
 		}
 		for(Pair<Unit,Unit> r : repairerTask) {
 			print(r.first,Color.Yellow);
@@ -563,6 +563,19 @@ public class GameState extends GameHandler {
 		for(Squad u : squads.values()) {
 			if(u.members.isEmpty()) {
 				squads.values().remove(u);
+			}
+		}
+		//TODO FIX
+		for(Unit u : self.getUnits()) {
+			if(u.getType().isBuilding() && u.getBuildUnit() == null && !u.isCompleted() && !buildingLot.contains(u)) {
+				boolean found = false;
+				for(Pair<Unit, Unit> e : workerTask) {
+					if(e.second.equals(u) && !e.first.getOrderTarget().equals(u)){
+						buildingLot.add(u);
+						workerTask.remove(e);
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -1042,6 +1055,10 @@ public class GameState extends GameHandler {
 		} catch(Exception e) {
 			System.err.println(e);
 		}
-		
+	}
+	public void updateSquadOrderAndMicro() {
+		for (Squad u : squads.values()) {
+			u.microUpdateOrder();
+		}
 	}
 }

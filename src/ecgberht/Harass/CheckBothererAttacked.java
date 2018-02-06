@@ -1,4 +1,4 @@
-package ecgberht.Bother;
+package ecgberht.Harass;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -12,7 +12,6 @@ public class CheckBothererAttacked extends Conditional {
 	public CheckBothererAttacked(String name, GameHandler gh) {
 		super(name, gh);
 	}
-
 	@Override
 	public State execute() {
 		try {
@@ -21,7 +20,7 @@ public class CheckBothererAttacked extends Conditional {
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(!u.getType().isBuilding() && u.getType().canAttack()) {
 					Unit target = (u.getTarget() == null ? u.getOrderTarget() : u.getTarget());
-				    if(target != null && target.equals(((GameState)this.handler).chosenBotherer)) {
+				    if(target != null && target.equals(((GameState)this.handler).chosenHarasser)) {
 				        count++;
 				        attacker = u;
 				        continue;
@@ -29,18 +28,18 @@ public class CheckBothererAttacked extends Conditional {
 				}
 			}
 			if(count > 1) {
-				((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBotherer);
-				((GameState)this.handler).chosenBotherer.stop();
-				((GameState)this.handler).chosenBotherer = null;
-				((GameState)this.handler).chosenSCVToBother = null;
+				((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenHarasser);
+				((GameState)this.handler).chosenHarasser.stop();
+				((GameState)this.handler).chosenHarasser = null;
+				((GameState)this.handler).chosenUnitToHarass = null;
 				return State.FAILURE;
 			}
 			else {
-				if(count == 1 && !attacker.equals(((GameState)this.handler).chosenSCVToBother)) {
-					((GameState)this.handler).chosenBotherer.attack(attacker);
-					((GameState)this.handler).chosenSCVToBother = attacker;
+				if(count == 1 && !attacker.equals(((GameState)this.handler).chosenUnitToHarass)) {
+					((GameState)this.handler).chosenHarasser.attack(attacker);
+					((GameState)this.handler).chosenUnitToHarass = attacker;
 				}
-				if(((GameState)this.handler).chosenSCVToBother != null) {
+				if(((GameState)this.handler).chosenUnitToHarass != null) {
 					return State.FAILURE;
 				}
 				return State.SUCCESS;
@@ -51,4 +50,5 @@ public class CheckBothererAttacked extends Conditional {
 			return State.ERROR;
 		}
 	}
+	
 }

@@ -34,11 +34,6 @@ import ecgberht.AddonBuild.ChooseMachineShop;
 import ecgberht.Attack.CheckArmy;
 import ecgberht.Attack.ChooseAttackPosition;
 import ecgberht.Attack.SendArmy;
-import ecgberht.Bother.BotherSCV;
-import ecgberht.Bother.CheckBotherer;
-import ecgberht.Bother.CheckBothererAttacked;
-import ecgberht.Bother.CheckWorkerToBother;
-import ecgberht.Bother.CheckBuilderToBother;
 import ecgberht.Build.Build;
 import ecgberht.Build.CheckWorkerBuild;
 import ecgberht.BuildingLot.CheckBuildingsLot;
@@ -60,6 +55,11 @@ import ecgberht.Expansion.ChooseBaseLocation;
 import ecgberht.Expansion.ChooseBuilderBL;
 import ecgberht.Expansion.Expand;
 import ecgberht.Expansion.SendBuilderBL;
+import ecgberht.Harass.HarassWorker;
+import ecgberht.Harass.CheckHarasser;
+import ecgberht.Harass.CheckBothererAttacked;
+import ecgberht.Harass.CheckBuilderToHarass;
+import ecgberht.Harass.CheckWorkerToHarass;
 import ecgberht.MoveToBuild.CheckResourcesBuilding;
 import ecgberht.MoveToBuild.ChooseAcademy;
 import ecgberht.MoveToBuild.ChooseBarracks;
@@ -154,7 +154,7 @@ public class Ecgberht extends DefaultBWListener {
 		
 		game = mirror.getGame();
 		self = game.self();
-		//game.enableFlag(1);
+		game.enableFlag(1);
 		//game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
@@ -345,11 +345,11 @@ public class Ecgberht extends DefaultBWListener {
 		scannerTree = new BehavioralTree("Scanner Tree");
 		scannerTree.addChild(Scanning);
 		
-		CheckBotherer cB = new CheckBotherer("Check Botherer", gs);
-		CheckWorkerToBother cBTB = new CheckWorkerToBother("Check SCV to Bother", gs);
-		CheckBuilderToBother cWTB = new CheckBuilderToBother("Check Worker to Bother", gs);
+		CheckHarasser cB = new CheckHarasser("Check Botherer", gs);
+		CheckWorkerToHarass cBTB = new CheckWorkerToHarass("Check SCV to Bother", gs);
+		CheckBuilderToHarass cWTB = new CheckBuilderToHarass("Check Worker to Bother", gs);
 		CheckBothererAttacked cBA = new CheckBothererAttacked("Check Botherer Attacked",gs);
-		BotherSCV bSCV = new BotherSCV("Bother SCV", gs);
+		HarassWorker bSCV = new HarassWorker("Bother SCV", gs);
 		Selector<GameHandler> bOw = new Selector<GameHandler>("Choose Builder or Worker",cBTB,cWTB);
 		Sequence bother = new Sequence("Bother", cB, cBA, bOw, bSCV);
 		botherTree = new BehavioralTree("Bother Tree");
@@ -379,6 +379,7 @@ public class Ecgberht extends DefaultBWListener {
 		defenseTree.run();
 		attackTree.run();
 		//gs.MarineMicro();
+		gs.updateSquadOrderAndMicro();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
 		gs.fix();
@@ -594,8 +595,8 @@ public class Ecgberht extends DefaultBWListener {
 					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
 				} else {
 					gs.initDefensePosition = arg0.getTilePosition();
-					if(arg0.getType().isWorker() && arg0.equals(gs.chosenSCVToBother)) {
-						gs.chosenSCVToBother = null;
+					if(arg0.getType().isWorker() && arg0.equals(gs.chosenUnitToHarass)) {
+						gs.chosenUnitToHarass = null;
 					}
 				}
 			}
@@ -613,8 +614,8 @@ public class Ecgberht extends DefaultBWListener {
 					if(gs.chosenScout != null && arg0.equals(gs.chosenScout)) {
 						gs.chosenScout = null;
 					}
-					if(gs.chosenBotherer != null && arg0.equals(gs.chosenBotherer)) {
-						gs.chosenBotherer = null;
+					if(gs.chosenHarasser != null && arg0.equals(gs.chosenHarasser)) {
+						gs.chosenHarasser = null;
 					}
 					if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
 						gs.chosenWorker = null;

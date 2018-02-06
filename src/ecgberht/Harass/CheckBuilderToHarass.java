@@ -1,4 +1,4 @@
-package ecgberht.Bother;
+package ecgberht.Harass;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -9,9 +9,9 @@ import bwapi.Unit;
 import bwta.BWTA;
 import ecgberht.GameState;
 
-public class CheckBuilderToBother extends Conditional {
+public class CheckBuilderToHarass extends Conditional {
 
-	public CheckBuilderToBother(String name, GameHandler gh) {
+	public CheckBuilderToHarass(String name, GameHandler gh) {
 		super(name, gh);
 	}
 
@@ -27,13 +27,13 @@ public class CheckBuilderToBother extends Conditional {
 					if(u.getType().isWorker() && u.isConstructing()) {
 						if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
 							if(u.getBuildType().canProduce()) {
-								((GameState)this.handler).chosenSCVToBother = u;
+								((GameState)this.handler).chosenUnitToHarass = u;
 								return State.SUCCESS;
 							}
 							aux = u;
 						}
 						if(aux != null) {
-							((GameState)this.handler).chosenSCVToBother = aux;
+							((GameState)this.handler).chosenUnitToHarass = aux;
 							return State.SUCCESS;
 						}
 					}
