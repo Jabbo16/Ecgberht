@@ -952,10 +952,10 @@ public class GameState extends GameHandler {
 		int dist = 0;
 		TilePosition chosen = null;
 		while(chosen == null) {
-			TilePosition up = new TilePosition(rax.getX() - bunker.tileHeight() - dist, rax.getY());
-			TilePosition down = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileHeight() + dist, rax.getY());
-			TilePosition left = new TilePosition(rax.getX(), rax.getY() - bunker.tileWidth() - dist);
-			TilePosition right = new TilePosition(rax.getX(), rax.getY() + UnitType.Terran_Barracks.tileWidth() + dist);
+			TilePosition up = new TilePosition(rax.getX() , rax.getY() - bunker.tileHeight() - dist);
+			TilePosition down = new TilePosition(rax.getX() , rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
+			TilePosition left = new TilePosition(rax.getX() - bunker.tileWidth() - dist, rax.getY());
+			TilePosition right = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist, rax.getY());
 			chosen = up;
 			if(closestChoke.getDistance(down) < closestChoke.getDistance(chosen) && game.canBuildHere(down, bunker)) {
 				chosen = down;
