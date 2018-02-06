@@ -17,7 +17,7 @@ public class CheckVisibleBase extends Conditional {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).choosenScout == null) {
+			if(((GameState)this.handler).chosenScout == null) {
 				return State.FAILURE;
 			}
 			if(!((GameState)this.handler).ScoutSLs.isEmpty()) {

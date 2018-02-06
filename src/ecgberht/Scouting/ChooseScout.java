@@ -18,20 +18,20 @@ public class ChooseScout extends Action {
 	public State execute() {
 		try {
 			for (Unit u : ((GameState)this.handler).workerIdle) {
-				((GameState)this.handler).choosenScout = u;
+				((GameState)this.handler).chosenScout = u;
 				((GameState)this.handler).workerIdle.remove(u);
 				break;
 			}
-			if(((GameState)this.handler).choosenScout == null) {
+			if(((GameState)this.handler).chosenScout == null) {
 				for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
 					if(u.second.getType().isNeutral()) {
-						((GameState)this.handler).choosenScout = u.first;
+						((GameState)this.handler).chosenScout = u.first;
 						((GameState)this.handler).workerTask.remove(u);
 					}
 					break;
 				}
 			}
-			if(((GameState)this.handler).choosenScout != null) {
+			if(((GameState)this.handler).chosenScout != null) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

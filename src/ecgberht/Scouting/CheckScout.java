@@ -16,7 +16,7 @@ public class CheckScout extends Conditional {
 	public State execute() {
 		try {
 
-			if(((GameState)this.handler).choosenScout == null && ((GameState)this.handler).getPlayer().supplyUsed() >= 12  && ((GameState)this.handler).enemyBase == null) {
+			if(((GameState)this.handler).chosenScout == null && ((GameState)this.handler).getPlayer().supplyUsed() >= 12  && ((GameState)this.handler).enemyBase == null) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

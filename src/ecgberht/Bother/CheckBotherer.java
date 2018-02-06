@@ -15,13 +15,12 @@ public class CheckBotherer extends Conditional {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).choosenBotherer == null) {
+			if(((GameState)this.handler).chosenBotherer == null) {
 				return State.FAILURE;
 			}
-			else if(!((GameState)this.handler).choosenBotherer.isAttacking()) {
+			else{
 				return State.SUCCESS;
 			}
-			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());
 			System.err.println(e);

@@ -18,7 +18,7 @@ public class BotherSCV extends Conditional {
 			if(((GameState)this.handler).chosenSCVToBother == null) {
 				return State.FAILURE;
 			}
-			if(((GameState)this.handler).choosenBotherer.attack(((GameState)this.handler).chosenSCVToBother)) {
+			if(((GameState)this.handler).chosenBotherer.attack(((GameState)this.handler).chosenSCVToBother)) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

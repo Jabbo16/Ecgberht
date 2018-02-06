@@ -108,7 +108,7 @@ public class GameState extends GameHandler {
 	public TilePosition closestChoke = null;
 	public TilePosition initAttackPosition = null;
 	public TilePosition initDefensePosition = null;
-	public Unit choosenScout = null;
+	public Unit chosenScout = null;
 	public Unit chosenBuilderBL = null;
 	public Unit chosenBuilding = null;
 	public Unit chosenBuildingAddon = null;
@@ -123,7 +123,7 @@ public class GameState extends GameHandler {
 	public UnitType chosenToBuild = null;
 	public UnitType chosenUnit = null;
 	public UpgradeType chosenUpgrade = null;
-	public Unit choosenBotherer = null;
+	public Unit chosenBotherer = null;
 	public Race enemyRace = Race.Unknown;
 	public Unit chosenSCVToBother = null;
 	public Gson enemyInfoJSON = new Gson();
@@ -175,6 +175,7 @@ public class GameState extends GameHandler {
 				clip.start();
 			}
 			else {
+				soundFile = "src\\" + soundFile; 
 				File f = new File(soundFile);
 				AudioInputStream audioIn = AudioSystem.getAudioInputStream(f.toURI().toURL());
 				Clip clip = AudioSystem.getClip();
@@ -301,6 +302,10 @@ public class GameState extends GameHandler {
 			game.drawTextMap(chosenBuilderBL.getPosition(), "BuilderBL");
 			print(chosenBuilderBL,Color.Blue);
 		}
+		if(chosenBotherer != null) {
+			game.drawTextMap(chosenBotherer.getPosition(), "Botherer");
+			print(chosenBotherer,Color.Blue);
+		}
 		if (chosenBaseLocation != null) {
 			print(chosenBaseLocation,UnitType.Terran_Command_Center,Color.Cyan);
 		}
@@ -308,14 +313,18 @@ public class GameState extends GameHandler {
 			game.drawTextMap(u.first.getPosition(), "ChosenBuilder");
 			print(u.second.second,u.second.first,Color.Teal);
 		}
+		if(chosenSCVToBother != null) {
+			print(chosenSCVToBother,Color.Red);
+			game.drawTextMap(chosenSCVToBother.getPosition(), "WorkerToBother");
+		}
 		for(Pair<Unit,Unit> r : repairerTask) {
 			print(r.first,Color.Yellow);
 			game.drawTextMap(r.first.getPosition(), "Repairer");
 		}
 		game.drawTextScreen(10, 5, Utils.formatText(self.getName(), Utils.Green) + Utils.formatText(" vs ", Utils.Yellow) + Utils.formatText(game.enemy().getName(), Utils.Red));
-		if (choosenScout != null) {
-			game.drawTextMap(choosenScout.getPosition(), "Scouter");
-			print(choosenScout,Color.Purple);
+		if (chosenScout != null) {
+			game.drawTextMap(chosenScout.getPosition(), "Scouter");
+			print(chosenScout,Color.Purple);
 			game.drawTextScreen(10, 20, Utils.formatText("Scouting: ",Utils.White) + Utils.formatText("True", Utils.Green));
 		}
 		else {
@@ -367,7 +376,7 @@ public class GameState extends GameHandler {
 			game.drawTextMap(centro,s.getKey());
 		}
 		if(enemyRace == Race.Zerg && EI.naughty) {
-			game.drawTextScreen(10, 80, Utils.formatText("Naughty Zerg: ",Utils.White) + Utils.formatText("yes", Utils.Green));
+			game.drawTextScreen(10, 95, Utils.formatText("Naughty Zerg: ",Utils.White) + Utils.formatText("yes", Utils.Green));
 		}
 		for(Pair<Unit,Integer> m : mineralsAssigned) {
 			print(m.first,Color.Cyan);
@@ -472,9 +481,9 @@ public class GameState extends GameHandler {
 	}
 
 	public void fix() {
-		if(choosenScout != null && choosenScout.isIdle()) {
-			workerIdle.add(choosenScout);
-			choosenScout = null;
+		if(chosenScout != null && chosenScout.isIdle()) {
+			workerIdle.add(chosenScout);
+			chosenScout = null;
 		}
 		if(chosenBuilderBL!= null && (chosenBuilderBL.isIdle() || chosenBuilderBL.isGatheringGas() || chosenBuilderBL.isGatheringMinerals())) {
 			workerIdle.add(chosenBuilderBL);
@@ -489,8 +498,8 @@ public class GameState extends GameHandler {
 		List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
 		List<Unit> aux2 = new ArrayList<Unit>();
 		for(Pair<Unit,Unit> w : workerTask) {
-			if(choosenScout != null && w.first.equals(choosenScout)) {
-				choosenScout = null;
+			if(chosenScout != null && w.first.equals(chosenScout)) {
+				chosenScout = null;
 			}
 			if(chosenRepairer != null && w.first.equals(chosenRepairer)) {
 				chosenRepairer = null;
@@ -528,8 +537,8 @@ public class GameState extends GameHandler {
 //		workerBuild.removeAll(aux3);
 		List<Pair<Unit,Unit> > aux4 = new ArrayList<Pair<Unit,Unit> >();
 		for(Pair<Unit,Unit> r : repairerTask) {
-			if(r.first.equals(choosenScout)) {
-				choosenScout = null;
+			if(r.first.equals(chosenScout)) {
+				chosenScout = null;
 			}
 			if(!r.first.isRepairing() || r.first.isIdle()) {
 				if(chosenRepairer != null) {
@@ -569,7 +578,7 @@ public class GameState extends GameHandler {
 //		}
 		if(enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
 			enemyBase = null;
-			choosenScout = null;
+			chosenScout = null;
 			ScoutSLs.addAll(BLs);
 			List<BaseLocation> aux = new ArrayList<BaseLocation>();
 			for(BaseLocation b : ScoutSLs) {
@@ -882,13 +891,18 @@ public class GameState extends GameHandler {
 	}
 	
 	public void writeOpponentInfo(String name) {
-		String path = "bwapi-data/read/" + name + ".json";
+		String dir = "bwapi-data/write/";
+		String path = dir + name + ".json";
 		game.sendText("Writing result to: " + path);
 		Gson aux = new Gson();
 		if(enemyIsRandom && EI.naughty) {
 			EI.naughty = false;
 		}
 		String print = aux.toJson(EI);
+		File directory = new File(dir);
+	    if (! directory.exists()){
+	        directory.mkdir();
+	    }
 		try(PrintWriter out = new PrintWriter(path)){
 		    out.println(print);
 		} catch (FileNotFoundException e) {
@@ -937,7 +951,7 @@ public class GameState extends GameHandler {
 		UnitType bunker = UnitType.Terran_Bunker;
 		int dist = 0;
 		TilePosition chosen = null;
-		while(chosen != null) {
+		while(chosen == null) {
 			TilePosition up = new TilePosition(rax.getX() - bunker.tileHeight() - dist, rax.getY());
 			TilePosition down = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileHeight() + dist, rax.getY());
 			TilePosition left = new TilePosition(rax.getX(), rax.getY() - bunker.tileWidth() - dist);

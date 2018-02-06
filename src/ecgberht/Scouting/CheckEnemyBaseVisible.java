@@ -24,13 +24,13 @@ public class CheckEnemyBaseVisible extends Action {
 			if(!((GameState)this.handler).getGame().enemy().getUnits().isEmpty()) {
 				for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 					if(u.getType().isBuilding()) {
-						if (((GameState)this.handler).getGame().getUnitsInRadius(((GameState)this.handler).choosenScout.getPosition(), 500).contains(u)) {
+						if (((GameState)this.handler).getGame().getUnitsInRadius(((GameState)this.handler).chosenScout.getPosition(), 500).contains(u)) {
 							((GameState)this.handler).enemyBase = BWTA.getNearestBaseLocation(u.getTilePosition());
 							((GameState)this.handler).ScoutSLs = new HashSet<BaseLocation>();
 							//((GameState)this.handler).choosenScout.stop();
 							//((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);
-							((GameState)this.handler).choosenBotherer = ((GameState)this.handler).choosenScout;
-							((GameState)this.handler).choosenScout = null;
+							((GameState)this.handler).chosenBotherer = ((GameState)this.handler).chosenScout;
+							((GameState)this.handler).chosenScout = null;
 							((GameState)this.handler).getGame().sendText(Utils.formatText("!",Utils.Yellow));
 							((GameState)this.handler).playSound("gear.wav");
 							return State.SUCCESS;

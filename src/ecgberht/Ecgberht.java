@@ -1,6 +1,10 @@
 package ecgberht;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+//import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +36,9 @@ import ecgberht.Attack.ChooseAttackPosition;
 import ecgberht.Attack.SendArmy;
 import ecgberht.Bother.BotherSCV;
 import ecgberht.Bother.CheckBotherer;
-import ecgberht.Bother.CheckBuilderToBother;
+import ecgberht.Bother.CheckBothererAttacked;
 import ecgberht.Bother.CheckWorkerToBother;
+import ecgberht.Bother.CheckBuilderToBother;
 import ecgberht.Build.Build;
 import ecgberht.Build.CheckWorkerBuild;
 import ecgberht.BuildingLot.CheckBuildingsLot;
@@ -93,7 +98,7 @@ import ecgberht.Upgrade.ChooseSiegeMode;
 import ecgberht.Upgrade.ChooseStimUpgrade;
 import ecgberht.Upgrade.ChooseWeaponInfUp;
 import ecgberht.Upgrade.ResearchUpgrade;
-import ecgberht.Weka.Weka;
+//import ecgberht.Weka.Weka;
 
 public class Ecgberht extends DefaultBWListener {
 
@@ -137,10 +142,20 @@ public class Ecgberht extends DefaultBWListener {
 	}
 	
 	public void onStart() {
+		//Disables System.err
+		OutputStream output = null;
+		try {
+			output = new FileOutputStream("NUL:");
+		} catch (FileNotFoundException e) {
+			//e.printStackTrace();
+		}
+		PrintStream nullOut = new PrintStream(output);
+		System.setErr(nullOut);
+		
 		game = mirror.getGame();
 		self = game.self();
-		game.enableFlag(1);
-		game.setLocalSpeed(0);
+		//game.enableFlag(1);
+		//game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
 		BWTA.analyze();
@@ -153,7 +168,6 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
-		
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
 		FreeWorker fw = new FreeWorker("No Union", gs);
@@ -332,11 +346,12 @@ public class Ecgberht extends DefaultBWListener {
 		scannerTree.addChild(Scanning);
 		
 		CheckBotherer cB = new CheckBotherer("Check Botherer", gs);
-		CheckBuilderToBother cBTB = new CheckBuilderToBother("Check SCV to Bother", gs);
-		CheckWorkerToBother cWTB = new CheckWorkerToBother("Check Worker to Bother", gs);
+		CheckWorkerToBother cBTB = new CheckWorkerToBother("Check SCV to Bother", gs);
+		CheckBuilderToBother cWTB = new CheckBuilderToBother("Check Worker to Bother", gs);
+		CheckBothererAttacked cBA = new CheckBothererAttacked("Check Botherer Attacked",gs);
 		BotherSCV bSCV = new BotherSCV("Bother SCV", gs);
 		Selector<GameHandler> bOw = new Selector<GameHandler>("Choose Builder or Worker",cBTB,cWTB);
-		Sequence bother = new Sequence("Bother", cB, bOw, bSCV);
+		Sequence bother = new Sequence("Bother", cB, cBA, bOw, bSCV);
 		botherTree = new BehavioralTree("Bother Tree");
 		botherTree.addChild(bother);
 	}
@@ -394,10 +409,10 @@ public class Ecgberht extends DefaultBWListener {
 		gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
 		if(arg0) {
 			gs.EI.wins++;
-			game.sendText("git gud "+ name);
+			game.sendText("gg wp "+ name);
 		} else {
 			gs.EI.losses++;
-			game.sendText("gg wp! "+ name);
+			game.sendText("gg wp! "+ name + ", next game I will win!");
 		}
 //		Weka weka = new Weka();
 //		try {
@@ -504,7 +519,6 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					if(arg0.getType() == UnitType.Terran_Factory) {
 						gs.Fs.add(arg0);
-						gs.map.writeMapa("FactoryMap.txt");
 					}
 					if(arg0.getType() == UnitType.Terran_Supply_Depot) {
 						gs.SBs.add(arg0);
@@ -580,6 +594,9 @@ public class Ecgberht extends DefaultBWListener {
 					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
 				} else {
 					gs.initDefensePosition = arg0.getTilePosition();
+					if(arg0.getType().isWorker() && arg0.equals(gs.chosenSCVToBother)) {
+						gs.chosenSCVToBother = null;
+					}
 				}
 			}
 			if(arg0.getPlayer().getID() == self.getID()) {
@@ -593,11 +610,11 @@ public class Ecgberht extends DefaultBWListener {
 					if(gs.workerIdle.contains(arg0)) {
 						gs.workerIdle.remove(arg0);
 					}
-					if(gs.choosenScout != null && arg0.equals(gs.choosenScout)) {
-						gs.choosenScout = null;
+					if(gs.chosenScout != null && arg0.equals(gs.chosenScout)) {
+						gs.chosenScout = null;
 					}
-					if(gs.choosenBotherer != null && arg0.equals(gs.choosenBotherer)) {
-						gs.choosenBotherer = null;
+					if(gs.chosenBotherer != null && arg0.equals(gs.chosenBotherer)) {
+						gs.chosenBotherer = null;
 					}
 					if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
 						gs.chosenWorker = null;

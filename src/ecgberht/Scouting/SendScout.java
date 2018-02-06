@@ -25,8 +25,8 @@ public class SendScout extends Action {
 				if(!((GameState)this.handler).ScoutSLs.isEmpty()) {
 					List<BaseLocation> aux = new ArrayList<BaseLocation>();
 					for(BaseLocation b : ((GameState)this.handler).ScoutSLs) {
-						if(BWTA.isConnected(b.getTilePosition(), ((GameState)this.handler).choosenScout.getTilePosition())) {
-							if(((GameState)this.handler).choosenScout.move(b.getPosition().makeValid())) {
+						if(BWTA.isConnected(b.getTilePosition(), ((GameState)this.handler).chosenScout.getTilePosition())) {
+							if(((GameState)this.handler).chosenScout.move(b.getPosition().makeValid())) {
 								return State.SUCCESS;
 							}
 						}
@@ -37,9 +37,9 @@ public class SendScout extends Action {
 					((GameState)this.handler).ScoutSLs.removeAll(aux);
 				}
 			}
-			((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);
-			((GameState)this.handler).choosenScout.stop();
-			((GameState)this.handler).choosenScout = null;
+			((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenScout);
+			((GameState)this.handler).chosenScout.stop();
+			((GameState)this.handler).chosenScout = null;
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());
