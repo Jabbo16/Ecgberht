@@ -565,19 +565,6 @@ public class GameState extends GameHandler {
 				squads.values().remove(u);
 			}
 		}
-		//TODO FIX
-		for(Unit u : self.getUnits()) {
-			if(u.getType().isBuilding() && u.getBuildUnit() == null && !u.isCompleted() && !buildingLot.contains(u)) {
-				boolean found = false;
-				for(Pair<Unit, Unit> e : workerTask) {
-					if(e.second.equals(u) && !e.first.getOrderTarget().equals(u)){
-						buildingLot.add(u);
-						workerTask.remove(e);
-						break;
-					}
-				}
-			}
-		}
 	}
 
 	public void checkMainEnemyBase() {
