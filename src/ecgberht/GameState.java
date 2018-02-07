@@ -27,26 +27,10 @@ import org.iaie.btree.util.GameHandler;
 
 import com.google.gson.Gson;
 
-import bwapi.Color;
-import bwapi.Game;
-import bwapi.Mirror;
-import bwapi.Order;
-import bwapi.Pair;
-import bwapi.Player;
-import bwapi.Position;
-import bwapi.Race;
-import bwapi.TechType;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
-import bwapi.UpgradeType;
-import bwapi.Utils;
-import bwta.BWTA;
-import bwta.BaseLocation;
-import bwta.Chokepoint;
+import bwapi.*;
+import bwta.*;
 import bwta.Region;
-import ecgberht.Strategies.BioBuild;
-import ecgberht.Strategies.BioMechBuild;
+import ecgberht.Strategies.*;
 
 public class GameState extends GameHandler {
 

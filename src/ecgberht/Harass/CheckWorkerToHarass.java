@@ -19,7 +19,7 @@ public class CheckWorkerToHarass extends Conditional {
 		try {
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(((GameState)this.handler).enemyBase != null) {
-					if(u.getType().isWorker()) {
+					if(u.getType().isWorker() && !u.isGatheringGas()) {
 						if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
 							((GameState)this.handler).chosenUnitToHarass = u;
 							return State.SUCCESS;

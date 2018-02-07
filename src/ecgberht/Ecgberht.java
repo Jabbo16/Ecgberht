@@ -13,91 +13,25 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.DefaultBWListener;
-import bwapi.Game;
-import bwapi.Mirror;
-import bwapi.Pair;
-import bwapi.Player;
-import bwapi.Position;
-import bwapi.Race;
-import bwapi.TechType;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
-import bwapi.UpgradeType;
+import bwapi.*;
 import bwta.BWTA;
 import cameraModule.CameraModule;
-import ecgberht.AddonBuild.BuildAddon;
-import ecgberht.AddonBuild.CheckResourcesAddon;
-import ecgberht.AddonBuild.ChooseComsatStation;
-import ecgberht.AddonBuild.ChooseMachineShop;
-import ecgberht.Attack.CheckArmy;
-import ecgberht.Attack.ChooseAttackPosition;
-import ecgberht.Attack.SendArmy;
-import ecgberht.Build.Build;
-import ecgberht.Build.CheckWorkerBuild;
-import ecgberht.BuildingLot.CheckBuildingsLot;
-import ecgberht.BuildingLot.ChooseBlotWorker;
-import ecgberht.BuildingLot.ChooseBuildingLot;
-import ecgberht.BuildingLot.FinishBuilding;
-import ecgberht.Bunker.ChooseBunkerToLoad;
-import ecgberht.Bunker.ChooseMarineToEnter;
-import ecgberht.Bunker.EnterBunker;
-import ecgberht.CombatStim.CheckStimResearched;
-import ecgberht.CombatStim.Stim;
-import ecgberht.Defense.CheckPerimeter;
-import ecgberht.Defense.ChooseDefensePosition;
-import ecgberht.Defense.SendDefenders;
-import ecgberht.Expansion.CheckExpansion;
-import ecgberht.Expansion.CheckResourcesCC;
-import ecgberht.Expansion.CheckVisibleBL;
-import ecgberht.Expansion.ChooseBaseLocation;
-import ecgberht.Expansion.ChooseBuilderBL;
-import ecgberht.Expansion.Expand;
-import ecgberht.Expansion.SendBuilderBL;
-import ecgberht.Harass.HarassWorker;
-import ecgberht.Harass.CheckHarasser;
-import ecgberht.Harass.CheckBothererAttacked;
-import ecgberht.Harass.CheckBuilderToHarass;
-import ecgberht.Harass.CheckWorkerToHarass;
-import ecgberht.MoveToBuild.CheckResourcesBuilding;
-import ecgberht.MoveToBuild.ChooseAcademy;
-import ecgberht.MoveToBuild.ChooseBarracks;
-import ecgberht.MoveToBuild.ChooseBay;
-import ecgberht.MoveToBuild.ChooseBunker;
-import ecgberht.MoveToBuild.ChooseFactory;
-import ecgberht.MoveToBuild.ChoosePosition;
-import ecgberht.MoveToBuild.ChooseRefinery;
-import ecgberht.MoveToBuild.ChooseSupply;
-import ecgberht.MoveToBuild.ChooseTurret;
-import ecgberht.MoveToBuild.ChooseWorker;
-import ecgberht.MoveToBuild.Move;
-import ecgberht.Recollection.CollectGas;
-import ecgberht.Recollection.CollectMineral;
-import ecgberht.Recollection.FreeWorker;
-import ecgberht.Repair.CheckBuildingFlames;
-import ecgberht.Repair.ChooseRepairer;
-import ecgberht.Repair.Repair;
-import ecgberht.Scanner.CheckScan;
-import ecgberht.Scanner.Scan;
-import ecgberht.Scouting.CheckEnemyBaseVisible;
-import ecgberht.Scouting.CheckScout;
-import ecgberht.Scouting.CheckVisibleBase;
-import ecgberht.Scouting.ChooseScout;
-import ecgberht.Scouting.SendScout;
-import ecgberht.Training.CheckResourcesUnit;
-import ecgberht.Training.ChooseMarine;
-import ecgberht.Training.ChooseMedic;
-import ecgberht.Training.ChooseSCV;
-import ecgberht.Training.ChooseTank;
-import ecgberht.Training.TrainUnit;
-import ecgberht.Upgrade.CheckResourcesUpgrade;
-import ecgberht.Upgrade.ChooseArmorInfUp;
-import ecgberht.Upgrade.ChooseMarineRange;
-import ecgberht.Upgrade.ChooseSiegeMode;
-import ecgberht.Upgrade.ChooseStimUpgrade;
-import ecgberht.Upgrade.ChooseWeaponInfUp;
-import ecgberht.Upgrade.ResearchUpgrade;
+import ecgberht.AddonBuild.*;
+import ecgberht.Attack.*;
+import ecgberht.Build.*;
+import ecgberht.BuildingLot.*;
+import ecgberht.Bunker.*;
+import ecgberht.CombatStim.*;
+import ecgberht.Defense.*;
+import ecgberht.Expansion.*;
+import ecgberht.Harass.*;
+import ecgberht.MoveToBuild.*;
+import ecgberht.Recollection.*;
+import ecgberht.Repair.*;
+import ecgberht.Scanner.*;
+import ecgberht.Scouting.*;
+import ecgberht.Training.*;
+import ecgberht.Upgrade.*;
 //import ecgberht.Weka.Weka;
 
 public class Ecgberht extends DefaultBWListener {
@@ -154,7 +88,7 @@ public class Ecgberht extends DefaultBWListener {
 		
 		game = mirror.getGame();
 		self = game.self();
-		game.enableFlag(1);
+		//game.enableFlag(1);
 		//game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
@@ -345,15 +279,16 @@ public class Ecgberht extends DefaultBWListener {
 		scannerTree = new BehavioralTree("Scanner Tree");
 		scannerTree.addChild(Scanning);
 		
-		CheckHarasser cB = new CheckHarasser("Check Botherer", gs);
-		CheckWorkerToHarass cBTB = new CheckWorkerToHarass("Check SCV to Bother", gs);
-		CheckBuilderToHarass cWTB = new CheckBuilderToHarass("Check Worker to Bother", gs);
-		CheckBothererAttacked cBA = new CheckBothererAttacked("Check Botherer Attacked",gs);
-		HarassWorker bSCV = new HarassWorker("Bother SCV", gs);
-		Selector<GameHandler> bOw = new Selector<GameHandler>("Choose Builder or Worker",cBTB,cWTB);
-		Sequence bother = new Sequence("Bother", cB, cBA, bOw, bSCV);
-		botherTree = new BehavioralTree("Bother Tree");
-		botherTree.addChild(bother);
+		CheckHarasser cH = new CheckHarasser("Check Harasser", gs);
+		CheckWorkerToHarass cWTH = new CheckWorkerToHarass("Check Worker to Harass", gs);
+		CheckBuilderToHarass cWTB = new CheckBuilderToHarass("Check Worker to Harass", gs);
+		CheckHarasserAttacked cHA = new CheckHarasserAttacked("Check Harasser Attacked",gs);
+		CheckBuildingToHarass cBTH = new CheckBuildingToHarass("Check Building to Harass", gs);
+		HarassWorker hW = new HarassWorker("Bother SCV", gs);
+		Selector<GameHandler> bOw = new Selector<GameHandler>("Choose Builder or Worker or Building",cWTH,cWTB, cBTH);
+		Sequence harass = new Sequence("Harass", cH, cHA, bOw, hW);
+		botherTree = new BehavioralTree("Harass Tree");
+		botherTree.addChild(harass);
 	}
 
 	public void onFrame() {
@@ -595,7 +530,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
 				} else {
 					gs.initDefensePosition = arg0.getTilePosition();
-					if(arg0.getType().isWorker() && arg0.equals(gs.chosenUnitToHarass)) {
+					if(arg0.equals(gs.chosenUnitToHarass)) {
 						gs.chosenUnitToHarass = null;
 					}
 				}
@@ -659,7 +594,7 @@ public class Ecgberht extends DefaultBWListener {
 									}
 								}
 							}
-							if(w.second.getType().isBuilding() && !w.second.isCompleted()()) {
+							if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
 								gs.buildingLot.add(w.second);
 							}
 							break;

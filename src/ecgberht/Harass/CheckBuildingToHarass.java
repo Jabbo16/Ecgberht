@@ -27,6 +27,12 @@ public class CheckBuildingToHarass extends Conditional {
 					}
 				}
 			}
+			if(((GameState)this.handler).chosenHarasser.isIdle()) {
+				((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenHarasser);
+				((GameState)this.handler).chosenHarasser.stop();
+				((GameState)this.handler).chosenHarasser = null;
+				((GameState)this.handler).chosenUnitToHarass = null;
+			}
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());

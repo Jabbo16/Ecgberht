@@ -7,9 +7,9 @@ import org.iaie.btree.util.GameHandler;
 import bwapi.Unit;
 import ecgberht.GameState;
 
-public class CheckBothererAttacked extends Conditional {
+public class CheckHarasserAttacked extends Conditional {
 
-	public CheckBothererAttacked(String name, GameHandler gh) {
+	public CheckHarasserAttacked(String name, GameHandler gh) {
 		super(name, gh);
 	}
 	@Override
