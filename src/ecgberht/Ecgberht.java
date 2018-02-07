@@ -659,7 +659,7 @@ public class Ecgberht extends DefaultBWListener {
 									}
 								}
 							}
-							if(w.second.getType().isBuilding() && w.second.isBeingConstructed()) {
+							if(w.second.getType().isBuilding() && !w.second.isCompleted()()) {
 								gs.buildingLot.add(w.second);
 							}
 							break;
