@@ -552,6 +552,7 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					if(gs.chosenHarasser != null && arg0.equals(gs.chosenHarasser)) {
 						gs.chosenHarasser = null;
+						gs.chosenUnitToHarass = null;
 					}
 					if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
 						gs.chosenWorker = null;
