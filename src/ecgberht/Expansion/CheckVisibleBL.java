@@ -6,6 +6,7 @@ import org.iaie.btree.util.GameHandler;
 
 import bwapi.Unit;
 import bwapi.UnitType;
+import bwta.BWTA;
 import ecgberht.GameState;
 
 public class CheckVisibleBL extends Action {
@@ -19,7 +20,10 @@ public class CheckVisibleBL extends Action {
 	public State execute() {
 		try {
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(u.getDistance(((GameState)this.handler).chosenBaseLocation.toPosition()) < 300) {
+				if(BWTA.getRegion(u.getPosition()) == null){
+					continue;
+				}
+				if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.toPosition()).getCenter())) {
 					((GameState)this.handler).chosenBaseLocation = null;
 					((GameState)this.handler).movingToExpand = false;
 					((GameState)this.handler).chosenBuilderBL.stop();

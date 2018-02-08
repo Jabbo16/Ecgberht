@@ -76,7 +76,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 	
 	public void onStart() {
-		//Disables System.err
+		//Disables System.err and System.Out
 		OutputStream output = null;
 		try {
 			output = new FileOutputStream("NUL:");
@@ -85,6 +85,7 @@ public class Ecgberht extends DefaultBWListener {
 		}
 		PrintStream nullOut = new PrintStream(output);
 		System.setErr(nullOut);
+		System.setOut(nullOut);
 		
 		game = mirror.getGame();
 		self = game.self();
@@ -280,10 +281,10 @@ public class Ecgberht extends DefaultBWListener {
 		scannerTree.addChild(Scanning);
 		
 		CheckHarasser cH = new CheckHarasser("Check Harasser", gs);
-		CheckWorkerToHarass cWTH = new CheckWorkerToHarass("Check Worker to Harass", gs);
-		CheckBuilderToHarass cWTB = new CheckBuilderToHarass("Check Worker to Harass", gs);
+		ChooseWorkerToHarass cWTH = new ChooseWorkerToHarass("Check Worker to Harass", gs);
+		ChooseBuilderToHarass cWTB = new ChooseBuilderToHarass("Check Worker to Harass", gs);
 		CheckHarasserAttacked cHA = new CheckHarasserAttacked("Check Harasser Attacked",gs);
-		CheckBuildingToHarass cBTH = new CheckBuildingToHarass("Check Building to Harass", gs);
+		ChooseBuildingToHarass cBTH = new ChooseBuildingToHarass("Check Building to Harass", gs);
 		HarassWorker hW = new HarassWorker("Bother SCV", gs);
 		Selector<GameHandler> bOw = new Selector<GameHandler>("Choose Builder or Worker or Building",cWTH,cWTB, cBTH);
 		Sequence harass = new Sequence("Harass", cH, cHA, bOw, hW);

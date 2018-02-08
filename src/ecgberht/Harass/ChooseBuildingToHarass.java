@@ -1,22 +1,25 @@
 package ecgberht.Harass;
 
 import org.iaie.btree.state.State;
-import org.iaie.btree.task.leaf.Conditional;
+import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
 import bwta.BWTA;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 
-public class CheckBuildingToHarass extends Conditional {
+public class ChooseBuildingToHarass extends Action {
 
-	public CheckBuildingToHarass(String name, GameHandler gh) {
+	public ChooseBuildingToHarass(String name, GameHandler gh) {
 		super(name, gh);
 	}
 
 	@Override
 	public State execute() {
 		try {
+			if(((GameState)this.handler).chosenUnitToHarass != null) {
+				return State.FAILURE;
+			}
 			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
 				if(((GameState)this.handler).enemyBase != null) {
 					if(u.type.isBuilding()) {

@@ -39,9 +39,6 @@ public class CheckHarasserAttacked extends Conditional {
 					((GameState)this.handler).chosenHarasser.attack(attacker);
 					((GameState)this.handler).chosenUnitToHarass = attacker;
 				}
-				if(((GameState)this.handler).chosenUnitToHarass != null) {
-					return State.FAILURE;
-				}
 				return State.SUCCESS;
 			}
 		} catch(Exception e) {

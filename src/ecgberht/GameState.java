@@ -552,14 +552,6 @@ public class GameState extends GameHandler {
 	}
 
 	public void checkMainEnemyBase() {
-//		if(!enemyBuildingMemory.isEmpty()) {
-//			System.out.println("-----------");
-//			for(EnemyBuilding u : enemyBuildingMemory.values()) {
-//				System.out.println(u.type);
-//				print(u.pos, Color.Red);
-//			}
-//			System.out.println("-----------");
-//		}
 		if(enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
 			enemyBase = null;
 			chosenScout = null;
@@ -870,7 +862,7 @@ public class GameState extends GameHandler {
 				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
 			}
 		} catch(Exception e) {
-			//System.err.println(e);
+			System.err.println(e);
 		}
 	}
 	
@@ -890,7 +882,7 @@ public class GameState extends GameHandler {
 		try(PrintWriter out = new PrintWriter(path)){
 		    out.println(print);
 		} catch (FileNotFoundException e) {
-			//System.err.println(e);
+			System.err.println(e);
 		}
 	}
 	
@@ -995,15 +987,6 @@ public class GameState extends GameHandler {
 						if(getSquadCenter(u1).getApproxDistance(getSquadCenter(u2)) < 200) {
 							if(u1_size + u2.members.size() > 12) {
 								continue;
-//								Set<Unit> aux = new HashSet<Unit>();
-//								while(u1_size < 12 && u2.members.size() != 0) {
-//									for(Unit u : u2.members) {
-//										u1.members.add(u);
-//										aux.add(u);
-//										u1_size++;
-//									}
-//								}
-//								u2.members.removeAll(aux);
 							}
 							else {
 								u1.members.addAll(u2.members);
@@ -1027,6 +1010,7 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 		}
 	}
+	
 	public void updateSquadOrderAndMicro() {
 		for (Squad u : squads.values()) {
 			u.microUpdateOrder();

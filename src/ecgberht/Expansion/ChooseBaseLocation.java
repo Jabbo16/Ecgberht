@@ -43,7 +43,11 @@ public class ChooseBaseLocation extends Action {
 					boolean found = false;
 					if(!((GameState)this.handler).getGame().enemy().getUnits().isEmpty()) {
 						for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-							if(u.getDistance(b) < 200) {
+							//if(u.getDistance(b) < 200) {
+							if(BWTA.getRegion(u.getPosition()) == null) {
+								continue;
+							}
+							if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(b.getPosition()).getCenter())) {
 								found = true;
 								break;
 							}

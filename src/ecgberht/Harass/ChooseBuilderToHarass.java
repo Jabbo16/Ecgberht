@@ -1,7 +1,7 @@
 package ecgberht.Harass;
 
 import org.iaie.btree.state.State;
-import org.iaie.btree.task.leaf.Conditional;
+import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
 import bwapi.Race;
@@ -9,9 +9,9 @@ import bwapi.Unit;
 import bwta.BWTA;
 import ecgberht.GameState;
 
-public class CheckBuilderToHarass extends Conditional {
+public class ChooseBuilderToHarass extends Action {
 
-	public CheckBuilderToHarass(String name, GameHandler gh) {
+	public ChooseBuilderToHarass(String name, GameHandler gh) {
 		super(name, gh);
 	}
 
@@ -19,6 +19,9 @@ public class CheckBuilderToHarass extends Conditional {
 	public State execute() {
 		try {
 			if(((GameState)this.handler).enemyRace != Race.Terran) {
+				return State.FAILURE;
+			}
+			if(((GameState)this.handler).chosenUnitToHarass != null && ((GameState)this.handler).chosenUnitToHarass.getType().isWorker() ) {
 				return State.FAILURE;
 			}
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {

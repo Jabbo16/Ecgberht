@@ -33,42 +33,44 @@ public class Squad {
 	}
 
 	public void giveAttackOrder(Position pos) {
-		for(Unit u : members) {
-			if(getGame().getFrameCount() - u.getLastCommandFrame() > 32 ) {
-				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
-					continue;
-				}
-				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
-					continue;
-				}
-				if(!u.isStartingAttack() && !u.isAttacking() || u.isIdle()) {
-					u.attack(pos);
-					continue;
-				}
-//				if(u.isIdle()) {
-//					u.attack(pos);
-//					continue;
-//				}
-//				if (estado == Status.IDLE || !pos.equals(attack)) {
-//					if (u.getGroundWeaponCooldown() > 0) {
-//						for(Unit e : getGs().enemyCombatUnitMemory) {
-//							if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
-//								if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
-//									u.move(getGame().self().getStartLocation().toPosition());
+		if(getGame().getFrameCount() - lastFrameOrder > 0 && !pos.equals(attack)) {
+			for(Unit u : members) {
+				if(getGame().getFrameCount() - u.getLastCommandFrame() > 24 ) {
+					if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
+						continue;
+					}
+					if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+						continue;
+					}
+					if(!u.isStartingAttack() && !u.isAttacking() || u.isIdle()) {
+						u.attack(pos);
+						continue;
+					}
+//					if(u.isIdle()) {
+//						u.attack(pos);
+//						continue;
+//					}
+//					if (estado == Status.IDLE || !pos.equals(attack)) {
+//						if (u.getGroundWeaponCooldown() > 0) {
+//							for(Unit e : getGs().enemyCombatUnitMemory) {
+//								if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
+//									if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
+//										u.move(getGame().self().getStartLocation().toPosition());
+//									}
 //								}
 //							}
 //						}
-//					}
-//					else if(!u.isStartingAttack() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
+//						else if(!u.isStartingAttack() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
+//							u.attack(pos);
+//						}
+//					} else if(!u.getOrderTargetPosition().equals(attack)) {
 //						u.attack(pos);
 //					}
-//				} else if(!u.getOrderTargetPosition().equals(attack)) {
-//					u.attack(pos);
-//				}
+				}
 			}
+			attack = pos;
+			lastFrameOrder = getGame().getFrameCount();
 		}
-		attack = pos;
-		lastFrameOrder = getGame().getFrameCount();
 	}
 	
 	public void giveStimOrder() {
@@ -80,19 +82,23 @@ public class Squad {
 	}
 	public void microUpdateOrder() {
 		for(Unit u : members) {
-			if(u.isIdle() && attack != null && getGame().getFrameCount() != u.getLastCommandFrame()) {
+			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+				continue;
+			}
+			if(u.isIdle() && attack != Position.None && getGame().getFrameCount() != u.getLastCommandFrame()) {
 				u.attack(attack);
 				continue;
 			}
-			if(getGame().getFrameCount() - u.getLastCommandFrame() > 32) {
+			if(getGame().getFrameCount() - u.getLastCommandFrame() > 24) {
 				if(u.isIdle() && attack != null) {
 					u.attack(attack);
 					continue;
 				}
 				if (u.getGroundWeaponCooldown() > 0) {
 					for(Unit e : getGs().enemyCombatUnitMemory) {
-						if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
-							if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
+//						if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
+						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32 && !e.getType().isWorker() && e.getType() != UnitType.Terran_Medic) {
+							if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
 								u.move(getGame().self().getStartLocation().toPosition());
 							}
 						}

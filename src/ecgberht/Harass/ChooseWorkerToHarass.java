@@ -1,22 +1,25 @@
 package ecgberht.Harass;
 
 import org.iaie.btree.state.State;
-import org.iaie.btree.task.leaf.Conditional;
+import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
 import bwapi.Unit;
 import bwta.BWTA;
 import ecgberht.GameState;
 
-public class CheckWorkerToHarass extends Conditional {
+public class ChooseWorkerToHarass extends Action {
 
-	public CheckWorkerToHarass(String name, GameHandler gh) {
+	public ChooseWorkerToHarass(String name, GameHandler gh) {
 		super(name, gh);
 	}
 
 	@Override
 	public State execute() {
 		try {
+			if(((GameState)this.handler).chosenUnitToHarass != null && ((GameState)this.handler).chosenUnitToHarass.getType().isWorker() ) {
+				return State.FAILURE;
+			}
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(((GameState)this.handler).enemyBase != null) {
 					if(u.getType().isWorker() && !u.isGatheringGas()) {
