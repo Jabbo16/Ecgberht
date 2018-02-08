@@ -932,18 +932,17 @@ public class GameState extends GameHandler {
 			TilePosition down = new TilePosition(rax.getX() , rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
 			TilePosition left = new TilePosition(rax.getX() - bunker.tileWidth() - dist, rax.getY());
 			TilePosition right = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist, rax.getY());
-			chosen = up;
-			if(closestChoke.getDistance(down) < closestChoke.getDistance(chosen) && game.canBuildHere(down, bunker)) {
-				chosen = down;
+			if(game.canBuildHere(up, bunker)) {
+				chosen = up;
 			}
-			if(closestChoke.getDistance(left) < closestChoke.getDistance(chosen) && game.canBuildHere(left, bunker)) {
+			if((chosen == null && game.canBuildHere(right, bunker) ) || (closestChoke.getDistance(right) < closestChoke.getDistance(chosen) && game.canBuildHere(right, bunker))) {
+				chosen = right;
+			}
+			if((chosen == null && game.canBuildHere(left, bunker) ) || (closestChoke.getDistance(left) < closestChoke.getDistance(chosen) && game.canBuildHere(left, bunker))) {
 				chosen = left;
 			}
-			if(closestChoke.getDistance(right) < closestChoke.getDistance(chosen) && game.canBuildHere(right, bunker)) {
+			if((chosen == null && game.canBuildHere(down, bunker) ) || (closestChoke.getDistance(down) < closestChoke.getDistance(chosen) && game.canBuildHere(down, bunker))) {
 				chosen = down;
-			}
-			if(chosen.equals(up) && !game.canBuildHere(right, bunker)) {
-				chosen = null;
 			}
 			dist++;
 		}

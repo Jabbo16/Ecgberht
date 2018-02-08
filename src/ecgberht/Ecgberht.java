@@ -524,6 +524,9 @@ public class Ecgberht extends DefaultBWListener {
 		}
 		if(!arg0.getType().isNeutral()  && (!arg0.getType().isSpecialBuilding() || arg0.getType().isRefinery())) {
 			if(arg0.getPlayer().getID() == game.enemy().getID()) {
+				if(arg0.equals(gs.chosenUnitToHarass)) {
+					gs.chosenUnitToHarass = null;
+				}
 				if(arg0.getType().isBuilding()) {
 					gs.inMap.updateMap(arg0,true);
 					gs.enemyBuildingMemory.remove(arg0);
@@ -531,9 +534,6 @@ public class Ecgberht extends DefaultBWListener {
 					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
 				} else {
 					gs.initDefensePosition = arg0.getTilePosition();
-					if(arg0.equals(gs.chosenUnitToHarass)) {
-						gs.chosenUnitToHarass = null;
-					}
 				}
 			}
 			if(arg0.getPlayer().getID() == self.getID()) {
