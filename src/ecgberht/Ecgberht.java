@@ -295,7 +295,7 @@ public class Ecgberht extends DefaultBWListener {
 	public void onFrame() {
 		observer.onFrame();
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
-		gs.updateEnemyCombatUnits();
+		//gs.updateEnemyCombatUnits();
 		gs.updateEnemyBuildingsMemory();
 		//gs.checkEnemyAttackingWT();
 		buildingLotTree.run();

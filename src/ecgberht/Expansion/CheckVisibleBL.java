@@ -20,7 +20,7 @@ public class CheckVisibleBL extends Action {
 	public State execute() {
 		try {
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(BWTA.getRegion(u.getPosition()) == null){
+				if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack()){
 					continue;
 				}
 				if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.toPosition()).getCenter())) {

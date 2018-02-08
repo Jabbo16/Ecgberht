@@ -1,7 +1,7 @@
 package ecgberht;
 
 import static ecgberht.Ecgberht.getGame;
-import static ecgberht.Ecgberht.getGs;
+//import static ecgberht.Ecgberht.getGs;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -95,7 +95,8 @@ public class Squad {
 					continue;
 				}
 				if (u.getGroundWeaponCooldown() > 0) {
-					for(Unit e : getGs().enemyCombatUnitMemory) {
+//					for(Unit e : getGs().enemyCombatUnitMemory) {
+					for(Unit e : getGame().enemy().getUnits()) {
 //						if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
 						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32 && !e.getType().isWorker() && e.getType() != UnitType.Terran_Medic) {
 							if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {

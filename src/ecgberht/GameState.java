@@ -44,7 +44,7 @@ public class GameState extends GameHandler {
 	public boolean enemyIsRandom = true;
 	public BuildingMap map;
 	public BuildingMap testMap;
-	public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
+	//public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
 	public InfluenceMap inMap;
 	public InfluenceMap inMapUnits;
 	public int builtBuildings;
@@ -326,12 +326,12 @@ public class GameState extends GameHandler {
 		if (chosenRepairer != null) {
 			game.drawTextMap(chosenRepairer.getPosition(), "ChosenRepairer");
 		}
-		if(enemyCombatUnitMemory.size()>0) {
-			for(Unit u : enemyCombatUnitMemory) {
-				game.drawTextMap(u.getPosition(), u.getType().toString());
-				print(u,Color.Red);
-			}
-		}
+//		if(enemyCombatUnitMemory.size()>0) {
+//			for(Unit u : enemyCombatUnitMemory) {
+//				game.drawTextMap(u.getPosition(), u.getType().toString());
+//				print(u,Color.Red);
+//			}
+//		}
 		List <Region> regions = BWTA.getRegions();
 		for(Region reg: regions) {
 			List <Chokepoint> ch = reg.getChokepoints();
@@ -383,29 +383,29 @@ public class GameState extends GameHandler {
 		game.drawBoxMap(leftTop,rightBottom,color);
 	}
 
-	public void updateEnemyCombatUnits() {
-		for (Unit u : game.enemy().getUnits()) {
-			if (!u.getType().isBuilding() && !u.getType().isWorker()) {
-				if (!enemyCombatUnitMemory.contains(u)) enemyCombatUnitMemory.add(u);
-			}
-		}
-		for (Unit p : enemyCombatUnitMemory) {
-			TilePosition tileCorrespondingToP = new TilePosition(p.getPosition().getX()/32, p.getPosition().getY()/32);
-			if (game.isVisible(tileCorrespondingToP)) {
-				boolean enemyCombatUnitVisible = false;
-				for (Unit u : game.enemy().getUnits()) {
-					if (!u.getType().isBuilding() && !u.getType().isWorker() && u.getPosition().equals(p.getPosition())) {
-						enemyCombatUnitVisible = true;
-						break;
-					}
-				}
-				if (enemyCombatUnitVisible == false) {
-					enemyCombatUnitMemory.remove(p);
-					break;
-				}
-			}
-		}
-	}
+//	public void updateEnemyCombatUnits() {
+//		for (Unit u : game.enemy().getUnits()) {
+//			if (!u.getType().isBuilding() && !u.getType().isWorker()) {
+//				if (!enemyCombatUnitMemory.contains(u)) enemyCombatUnitMemory.add(u);
+//			}
+//		}
+//		for (Unit p : enemyCombatUnitMemory) {
+//			TilePosition tileCorrespondingToP = new TilePosition(p.getPosition().getX()/32, p.getPosition().getY()/32);
+//			if (game.isVisible(tileCorrespondingToP)) {
+//				boolean enemyCombatUnitVisible = false;
+//				for (Unit u : game.enemy().getUnits()) {
+//					if (!u.getType().isBuilding() && !u.getType().isWorker() && u.getPosition().equals(p.getPosition())) {
+//						enemyCombatUnitVisible = true;
+//						break;
+//					}
+//				}
+//				if (enemyCombatUnitVisible == false) {
+//					enemyCombatUnitMemory.remove(p);
+//					break;
+//				}
+//			}
+//		}
+//	}
 
 	public String convertSeconds(int seconds){
 		int h = seconds/ 3600;
@@ -886,67 +886,43 @@ public class GameState extends GameHandler {
 		}
 	}
 	
-	public void MarineMicro() {
-		if(enemyCombatUnitMemory.isEmpty()) {
-			return;
-		}
-		for(Squad s : squads.values()) {
-			if(s.lastFrameOrder != game.getFrameCount()) {
-				for(Unit m : s.getMarines()) {
-					if(game.getFrameCount() % m.getID() != 0 || m.getLastCommandFrame() == game.getFrameCount()) {
-						continue;
-					}
-					if(enemyCombatUnitMemory.isEmpty()) {
-						if(m.getOrder() == Order.Move) {
-							m.attack(s.attack);	
-						}
-					}
-					else {
-						for(Unit u : enemyCombatUnitMemory) {
-							if(u.getType() == UnitType.Zerg_Zergling || u.getType() == UnitType.Protoss_Zealot) {
-								if(m.getGroundWeaponCooldown() != 0) {
-									if(m.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(u)) {
-										m.move(closestChoke.toPosition());
-									}
-								} else{
-									if(m.getOrder() == Order.Move) {
-										m.attack(s.attack);	
-									}
-								}
-								break;
-							}
-						}
+	public TilePosition getBunkerPositionAntiPool() {
+		try {
+			TilePosition rax = MBs.iterator().next().getTilePosition();
+			UnitType bunker = UnitType.Terran_Bunker;
+			int dist = 0;
+			TilePosition chosen = null;
+			while(chosen == null) {
+				List<TilePosition> sides = new ArrayList<TilePosition>();
+				if(rax.getY() - bunker.tileHeight() - dist >= 0) {
+					TilePosition up = new TilePosition(rax.getX() , rax.getY() - bunker.tileHeight() - dist);
+					sides.add(up);
+				}
+				if(rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist < game.mapHeight()) {
+					TilePosition down = new TilePosition(rax.getX() , rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
+					sides.add(down);
+				}
+				if(rax.getX() - bunker.tileWidth() - dist >= 0) {
+					TilePosition left = new TilePosition(rax.getX() - bunker.tileWidth() - dist, rax.getY());
+					sides.add(left);
+				}
+				if(rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist < game.mapWidth()) {
+					TilePosition right = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist, rax.getY());
+					sides.add(right);
+				}
+				for(TilePosition tile : sides) {
+					if((chosen == null && game.canBuildHere(tile, bunker) ) || (closestChoke.getDistance(tile) < closestChoke.getDistance(chosen) && game.canBuildHere(tile, bunker))) {
+						chosen = tile;
 					}
 				}
+				dist++;
 			}
+			return chosen;
+		} catch (Exception e) {
+			System.err.println(e);
+			return null;
 		}
-	}
-
-	public TilePosition getBunkerPositionAntiPool() {
-		TilePosition rax = MBs.iterator().next().getTilePosition();
-		UnitType bunker = UnitType.Terran_Bunker;
-		int dist = 0;
-		TilePosition chosen = null;
-		while(chosen == null) {
-			TilePosition up = new TilePosition(rax.getX() , rax.getY() - bunker.tileHeight() - dist);
-			TilePosition down = new TilePosition(rax.getX() , rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
-			TilePosition left = new TilePosition(rax.getX() - bunker.tileWidth() - dist, rax.getY());
-			TilePosition right = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist, rax.getY());
-			if(game.canBuildHere(up, bunker)) {
-				chosen = up;
-			}
-			if((chosen == null && game.canBuildHere(right, bunker) ) || (closestChoke.getDistance(right) < closestChoke.getDistance(chosen) && game.canBuildHere(right, bunker))) {
-				chosen = right;
-			}
-			if((chosen == null && game.canBuildHere(left, bunker) ) || (closestChoke.getDistance(left) < closestChoke.getDistance(chosen) && game.canBuildHere(left, bunker))) {
-				chosen = left;
-			}
-			if((chosen == null && game.canBuildHere(down, bunker) ) || (closestChoke.getDistance(down) < closestChoke.getDistance(chosen) && game.canBuildHere(down, bunker))) {
-				chosen = down;
-			}
-			dist++;
-		}
-		return chosen;
+		
 	}
 	
 	public void updateEnemyBuildingsMemory() {
