@@ -24,7 +24,7 @@ public class ChooseScout extends Action {
 			}
 			if(((GameState)this.handler).chosenScout == null) {
 				for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
-					if(u.second.getType().isNeutral()) {
+					if(u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
 						((GameState)this.handler).chosenScout = u.first;
 						((GameState)this.handler).workerTask.remove(u);
 					}

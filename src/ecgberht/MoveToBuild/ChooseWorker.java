@@ -30,7 +30,7 @@ public class ChooseWorker extends Action {
 			}
 			if(!((GameState)this.handler).workerTask.isEmpty()) {
 				for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
-					if ((closestWorker == null || u.first.getDistance(chosen) < closestWorker.getDistance(chosen)) && u.second.getType().isNeutral()) {
+					if ((closestWorker == null || u.first.getDistance(chosen) < closestWorker.getDistance(chosen)) && u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
 						closestWorker = u.first;
 					}
 				}

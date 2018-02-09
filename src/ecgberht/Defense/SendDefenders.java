@@ -49,7 +49,7 @@ public class SendDefenders extends Action {
 				}
 				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerTask.isEmpty()) {
 					for(Pair<Unit, Unit> u:((GameState)this.handler).workerTask) {
-						if(u.second.getType().isNeutral()) {
+						if(u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
 							break;
 						}
 						if(((GameState)this.handler).workerTask.indexOf(u) == ((GameState)this.handler).workerTask.size() - 1 && !u.second.getType().isNeutral()) {

@@ -20,7 +20,8 @@ public class ChooseSupply extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
+			//if(((GameState)this.handler).countUnit2(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
+			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).enemyRace == Race.Zerg) {

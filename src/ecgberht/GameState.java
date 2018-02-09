@@ -115,6 +115,7 @@ public class GameState extends GameHandler {
 	public Unit chosenUnitToHarass = null;
 	public Gson enemyInfoJSON = new Gson();
 	public EnemyInfo EI = new EnemyInfo(game.enemy().getName());
+	public Map<Race,Double> dpsWorkerRace = new HashMap<Race,Double>();
 	
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -124,12 +125,15 @@ public class GameState extends GameHandler {
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		strat = initStrat();
 		mapSize = BWTA.getStartLocations().size();
+		dpsWorkerRace.put(Race.Terran, 7.936);
+		dpsWorkerRace.put(Race.Zerg, 5.411);
+		dpsWorkerRace.put(Race.Protoss, 5.411);
 	}
 	
 	private Strategy initStrat() {
-		//BioBuild b = new BioBuild();
+		BioBuild b = new BioBuild();
 		ProxyBBS bbs = new ProxyBBS();
-		return new Strategy(bbs);
+		return new Strategy(b);
 //		String map = game.mapFileName();
 //		if(map.contains("Heartbreak Ridge")) {
 //			return new Strategy(b);
@@ -1050,7 +1054,7 @@ public class GameState extends GameHandler {
 				if(count <= workerCountToSustain) {
 					break;
 				}
-				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField()) {
+				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField() && !scv.first.isCarryingMinerals()) {
 					scv.first.move(new TilePosition(getGame().mapHeight()/2, getGame().mapWidth()/2).toPosition());
 					addToSquad(scv.first);
 					for(Pair<Unit,Integer> m : mineralsAssigned) {
@@ -1067,6 +1071,18 @@ public class GameState extends GameHandler {
 			workerTask.removeAll(aux);
 		}
 		
+	}
+
+	public int countUnit2(UnitType type) {
+		int count = 0;
+		for(Pair<Unit, Unit> w: workerTask) {
+			if(w.second.getType() == type) {
+				count++;
+			}
+		}
+		
+		count += self.allUnitCount(type);
+		return count;
 	}
 
 }
