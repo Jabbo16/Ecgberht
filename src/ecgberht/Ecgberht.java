@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.iaie.btree.BehavioralTree;
@@ -84,8 +85,8 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-		System.setErr(nullOut);
-		System.setOut(nullOut);
+//		System.setErr(nullOut);
+//		System.setOut(nullOut);
 		
 		game = mirror.getGame();
 		self = game.self();
@@ -311,6 +312,9 @@ public class Ecgberht extends DefaultBWListener {
 		botherTree.run();
 		bunkerTree.run();
 		scannerTree.run();
+		if(gs.strat.name == "ProxyBBS") {
+			gs.checkWorkerMilitia();
+		}
 		gs.siegeTanks();
 		defenseTree.run();
 		attackTree.run();
@@ -500,11 +504,13 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
 						gs.addToSquad(arg0);
-						if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
-							if(gs.closestChoke != null) {
-								arg0.attack(gs.closestChoke.toPosition());
-							}else{
-								arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+						if(gs.strat.name != "ProxyBBS") {
+							if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
+								if(gs.closestChoke != null) {
+									arg0.attack(gs.closestChoke.toPosition());
+								}else{
+									arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+								}
 							}
 						}
 					}
@@ -538,6 +544,7 @@ public class Ecgberht extends DefaultBWListener {
 			}
 			if(arg0.getPlayer().getID() == self.getID()) {
 				if(arg0.getType().isWorker()) {
+					gs.removeFromSquad(arg0);
 					for(Pair<Unit,Unit> r : gs.repairerTask) {
 						if(r.first.equals(arg0)) {
 							gs.repairerTask.remove(r);

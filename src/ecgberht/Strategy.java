@@ -17,6 +17,7 @@ public class Strategy {
 	public int facPerCC = 0;
 	public int numRaxForFac = 0;
 	public boolean bunker = false;
+	public boolean proxy = false;
 	public int supplyForFirstRefinery = 0;
 	public int armyForAttack = 0;
 	public int armyForExpand = 20;
@@ -39,6 +40,7 @@ public class Strategy {
 		this.facPerCC =build.facPerCC;
 		this.numRaxForFac = build.numRaxForFac;
 		this.bunker = build.bunker;
+		this.proxy = build.proxy;
 		this.supplyForFirstRefinery =build.supplyForFirstRefinery;
 		this.armyForAttack = build.armyForAttack;
 		this.armyForExpand = build.armyForExpand;

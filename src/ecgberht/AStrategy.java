@@ -16,6 +16,7 @@ public abstract class AStrategy {
 	public int facPerCC = 0;
 	public int numRaxForFac = 0;
 	public boolean bunker = false;
+	public boolean proxy = false;
 	public int supplyForFirstRefinery = 0;
 	public int armyForAttack = 0;
 	public int armyForExpand = 20;

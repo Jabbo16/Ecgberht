@@ -22,6 +22,10 @@ public class ChooseAttackPosition extends Conditional {
 				((GameState)this.handler).attackPosition = new TilePosition(p.second,p.first).toPosition();
 				return State.SUCCESS;
 			}
+			else if(((GameState)this.handler).enemyBase != null){
+				((GameState)this.handler).attackPosition = ((GameState)this.handler).enemyBase.getPosition();
+				return State.SUCCESS;
+			}
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());

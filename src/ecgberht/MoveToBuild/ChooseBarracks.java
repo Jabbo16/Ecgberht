@@ -19,11 +19,18 @@ public class ChooseBarracks extends Action {
 	@Override
 	public State execute() {
 		try {
-			for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-				if(w.second.getType() == UnitType.Terran_Barracks) {
-					if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Academy) == 0 ) {
-						return State.FAILURE;
+			if(((GameState)this.handler).strat.name != "ProxyBBS") {
+				for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
+					if(w.second.getType() == UnitType.Terran_Barracks) {
+						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Academy) == 0 ) {
+							return State.FAILURE;
+						}
 					}
+				}
+			}
+			else {
+				if(((GameState)this.handler).getPlayer().supplyUsed() < 16) {
+					return State.FAILURE;
 				}
 			}
 			if(((GameState)this.handler).strat.buildUnits.contains(UnitType.Terran_Factory)) {
@@ -52,7 +59,7 @@ public class ChooseBarracks extends Action {
 					return State.FAILURE;
 				}
 			}
-			if(((GameState)this.handler).MBs.size() < ((GameState)this.handler).strat.raxPerCC * ((GameState)this.handler).CCs.size()) {
+			if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) < ((GameState)this.handler).strat.raxPerCC * ((GameState)this.handler).CCs.size()) {
 				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
 					if(w.second.first == UnitType.Terran_Barracks) {
 						return State.FAILURE;

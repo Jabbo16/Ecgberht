@@ -23,6 +23,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
+import org.iaie.btree.state.State;
 import org.iaie.btree.util.GameHandler;
 
 import com.google.gson.Gson;
@@ -42,6 +43,7 @@ public class GameState extends GameHandler {
 	public boolean initCount = false;
 	public boolean movingToExpand = false;
 	public boolean enemyIsRandom = true;
+	public boolean scout = true;
 	public BuildingMap map;
 	public BuildingMap testMap;
 	//public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
@@ -56,6 +58,7 @@ public class GameState extends GameHandler {
 	public int trainedCombatUnits;
 	public int trainedWorkers;
 	public int mapSize = 2;
+	public int workerCountToSustain = 0;
 	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 	public List<Pair<Unit,Integer> > mineralsAssigned = new ArrayList<Pair<Unit,Integer> >();
 	public List<Pair<Unit,List<Unit>>> DBs = new ArrayList<Pair<Unit,List<Unit>>>();
@@ -124,21 +127,23 @@ public class GameState extends GameHandler {
 	}
 	
 	private Strategy initStrat() {
-		BioBuild b = new BioBuild();
-		String map = game.mapFileName();
-		if(map.contains("Heartbreak Ridge")) {
-			return new Strategy(b);
-		}
-		else {
-			double random = Math.random();
-			if(random >= 0.5 ) {
-				return new Strategy(b);
-			}
-			else {
-				BioMechBuild bM = new BioMechBuild();
-				return new Strategy(bM);
-			}
-		}
+		//BioBuild b = new BioBuild();
+		ProxyBBS bbs = new ProxyBBS();
+		return new Strategy(bbs);
+//		String map = game.mapFileName();
+//		if(map.contains("Heartbreak Ridge")) {
+//			return new Strategy(b);
+//		}
+//		else {
+//			double random = Math.random();
+//			if(random >= 0.5 ) {
+//				return new Strategy(b);
+//			}
+//			else {
+//				BioMechBuild bM = new BioMechBuild();
+//				return new Strategy(bM);
+//			}
+//		}
 	}
 
 	public void initEnemyRace() {
@@ -215,7 +220,9 @@ public class GameState extends GameHandler {
 			refineriesAssigned.add(geyser);
 		}
 		refineriesAssigned.addAll(auxGas);
-
+		if(strat.name == "ProxyBBS") {
+			workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
+		}
 	}
 
 	public void removeResources(Unit unit) {
@@ -259,6 +266,9 @@ public class GameState extends GameHandler {
 			}
 		}
 		refineriesAssigned.removeAll(auxGas);
+		if(strat.name == "ProxyBBS") {
+			workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
+		}
 	}
 
 	public Pair<Integer,Integer> getCash(){
@@ -831,7 +841,7 @@ public class GameState extends GameHandler {
 	public void mineralLocking() {
 		for(Pair<Unit, Unit> u : workerTask) {
 			if(u.second.getType().isMineralField()) {
-				if(!u.first.getTarget().equals(u.second) && u.first.getOrder() != Order.MiningMinerals && !u.first.isCarryingMinerals()){
+				if(!u.first.getTarget().equals(u.second) && u.first.getOrder() == Order.MoveToMinerals && !u.first.isCarryingMinerals()){
 					u.first.gather(u.second);
 				}
 			}
@@ -991,4 +1001,72 @@ public class GameState extends GameHandler {
 			u.microUpdateOrder();
 		}
 	}
+
+	public int countUnit(UnitType type) {
+		int count = 0;
+		for(Pair<Unit,Pair<UnitType,TilePosition> > w: workerBuild) {
+			if(w.second.first == type) {
+				count++;
+			}
+		}
+		
+		count += self.allUnitCount(type);
+		return count;
+	}
+	/** Thanks to Yegers for the method
+	 * @author Yegers
+	 * Number of workers needed to sustain a number of units.
+	 * This method assumes that the required buildings are available.
+	 * Example usage: to sustain building 2 marines at the same time from 2 barracks.
+	 * @param units List of units that are to be sustained.
+	 * @return Number of workers required.
+	 */
+	public double mineralGatherRateNeeded(final List<UnitType> units) {
+		double mineralsRequired = 0.0;
+		double m2f = (4.53/100.0)/65.0;
+		double SaturationX2_Slope = -1.5;
+		double SaturationX1 = m2f * 65.0;
+		double SaturationX2_B = m2f * 77.5 ;
+		for (final UnitType unit : units) {
+			mineralsRequired += (((double) unit.mineralPrice()) / unit.buildTime()) / 1.0;
+		}
+		double workersRequired = mineralsRequired / SaturationX1;
+		if (workersRequired > mineralsAssigned.size()) {
+			return  Math.ceil((mineralsRequired - SaturationX2_B / 1.0) / SaturationX2_Slope);
+		}
+		return Math.ceil(workersRequired);
+	}
+
+	public void checkWorkerMilitia() {
+		if(countUnit(UnitType.Terran_Barracks) == 2) {
+			List<Pair<Unit, Unit>> aux = new ArrayList<Pair<Unit, Unit>>();
+			int count = 0;
+			for(Pair<Unit, Unit> scv : workerTask) {
+				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField()) {
+					count++;
+				}
+			}
+			for(Pair<Unit, Unit> scv : workerTask) {
+				if(count <= workerCountToSustain) {
+					break;
+				}
+				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField()) {
+					scv.first.move(new TilePosition(getGame().mapHeight()/2, getGame().mapWidth()/2).toPosition());
+					addToSquad(scv.first);
+					for(Pair<Unit,Integer> m : mineralsAssigned) {
+						if(m.first.equals(scv.second)) {
+							mining--;
+							mineralsAssigned.get(mineralsAssigned.indexOf(m)).second--;
+						}
+					}
+					aux.add(scv);
+					count--;
+					
+				}
+			}
+			workerTask.removeAll(aux);
+		}
+		
+	}
+
 }
