@@ -82,7 +82,6 @@ public class SendDefenders extends Action {
 						}
 					}
 				}
-				
 				for(Pair<Unit,Position> u: ((GameState)this.handler).workerDefenders) {
 					if(((GameState)this.handler).attackPosition != null) {
 						if(u.first.isIdle() || !((GameState)this.handler).attackPosition.equals(u.second)) {
@@ -92,15 +91,17 @@ public class SendDefenders extends Action {
 					}
 				}
 			} else {
-				for(Entry<String,Squad> u :((GameState)this.handler).squads.entrySet()) {
-					if(((GameState)this.handler).attackPosition != null) {
-						//if(u.getValue().estado == Status.IDLE || !((GameState)this.handler).attackPosition.equals(u.getValue().attack)) {
-							u.getValue().giveAttackOrder(((GameState)this.handler).attackPosition);
-							u.getValue().estado = Status.DEFENSE;
-						//}
-					}
-					else {
-						u.getValue().estado = Status.IDLE;
+				if(((GameState)this.handler).strat.name != "ProxyBBS") {
+					for(Entry<String,Squad> u :((GameState)this.handler).squads.entrySet()) {
+						if(((GameState)this.handler).attackPosition != null) {
+							//if(u.getValue().estado == Status.IDLE || !((GameState)this.handler).attackPosition.equals(u.getValue().attack)) {
+								u.getValue().giveAttackOrder(((GameState)this.handler).attackPosition);
+								u.getValue().estado = Status.DEFENSE;
+							//}
+						}
+						else {
+							u.getValue().estado = Status.IDLE;
+						}
 					}
 				}
 			}

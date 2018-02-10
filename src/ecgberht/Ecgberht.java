@@ -318,7 +318,6 @@ public class Ecgberht extends DefaultBWListener {
 		gs.siegeTanks();
 		defenseTree.run();
 		attackTree.run();
-		//gs.MarineMicro();
 		gs.updateSquadOrderAndMicro();
 		combatStimTree.run();
 		gs.checkMainEnemyBase();
