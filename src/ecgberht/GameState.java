@@ -138,6 +138,15 @@ public class GameState extends GameHandler {
 		if(enemyRace == Race.Zerg && EI.naughty) {
 			return new Strategy(b);
 		}
+		if(enemyRace == Race.Protoss) {
+			double random = Math.random();
+			if(random > 0.5 ) {
+				return new Strategy(b);
+			}
+			else {
+				return new Strategy(bM);
+			}
+		}
 		if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
 			double random = Math.random();
 			if(random > 0.75 ) {
