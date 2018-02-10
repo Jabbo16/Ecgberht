@@ -38,7 +38,8 @@ public class GameState extends GameHandler {
 	public boolean activeCount = false;
 	public boolean defense = false;
 	public boolean expanding = false;
-	public boolean first_apm = false;
+	public boolean firstAPM = false;
+	public boolean firstProxyBBS = false;
 	public boolean initCount = false;
 	public boolean movingToExpand = false;
 	public boolean enemyIsRandom = true;
@@ -139,10 +140,10 @@ public class GameState extends GameHandler {
 		}
 		if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
 			double random = Math.random();
-			if(random > 0.8 ) {
+			if(random > 0.75 ) {
 				return new Strategy(bbs);
 			}
-			else if(random > 0.4 && random <= 0.8) {
+			else if(random > 0.4 && random <= 0.75) {
 				return new Strategy(bM);
 			}
 			else {
@@ -151,7 +152,7 @@ public class GameState extends GameHandler {
 		}
 		if(map.contains("Heartbreak Ridge")) {
 			double random = Math.random();
-			if(random > 0.7 ) {
+			if(random > 0.75 ) {
 				return new Strategy(bbs);
 			}
 			else {
@@ -161,7 +162,7 @@ public class GameState extends GameHandler {
 		}
 		else {
 			double random = Math.random();
-			if(random >= 0.5 ) {
+			if(random > 0.5 ) {
 				return new Strategy(b);
 			}
 			else {
@@ -305,9 +306,9 @@ public class GameState extends GameHandler {
 
 	public void printer() {
 		int apm = game.getAPM(false);
-		if(apm > 9000 && !first_apm ) {
+		if(apm > 9000 && !firstAPM ) {
 			game.sendText("My APM is over 9000!");
-			first_apm = true;
+			firstAPM = true;
 		}
 		game.drawTextScreen(10, 65, Utils.formatText("MGPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
 		game.drawTextScreen(10, 80, Utils.formatText("Strategy: ",Utils.White) + Utils.formatText(strat.name, Utils.White));
