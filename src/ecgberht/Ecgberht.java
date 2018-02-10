@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.iaie.btree.BehavioralTree;
@@ -85,8 +84,8 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-//		System.setErr(nullOut);
-//		System.setOut(nullOut);
+		System.setErr(nullOut);
+		System.setOut(nullOut);
 		
 		game = mirror.getGame();
 		self = game.self();

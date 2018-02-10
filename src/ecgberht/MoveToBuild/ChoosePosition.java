@@ -48,7 +48,7 @@ public class ChoosePosition extends Action {
 				if(!((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Bunker) && !((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
 					if(((GameState)this.handler).strat.proxy && ((GameState)this.handler).chosenToBuild == UnitType.Terran_Barracks) {
 						
-						origin = new TilePosition(((GameState)this.handler).getGame().mapHeight()/2, ((GameState)this.handler).getGame().mapWidth()/2);
+						origin = new TilePosition(((GameState)this.handler).getGame().mapWidth()/2, ((GameState)this.handler).getGame().mapHeight()/2);
 					}
 					else {
 						//origin = BWTA.getRegion(jugador.getStartLocation()).getCenter().toTilePosition();

@@ -43,11 +43,11 @@ public class CheckHarasserAttacked extends Conditional {
 			}
 			else {
 				if(workers == 1){
-					int hpHarasser = ((GameState)this.handler).chosenHarasser.getHitPoints();
-					int hpTarget = attacker.getHitPoints() + attacker.getShields();
+					double hpHarasser = ((GameState)this.handler).chosenHarasser.getHitPoints();
+					double hpTarget = attacker.getHitPoints() + attacker.getShields();
 					double dpsTarget = ((GameState)this.handler).dpsWorkerRace.get(attacker.getType().getRace());
 					double dpsSelf = ((GameState)this.handler).dpsWorkerRace.get(Race.Terran);
-					if(hpTarget / dpsSelf > hpHarasser / dpsTarget){
+					if(hpTarget / dpsSelf < hpHarasser / dpsTarget){
 						((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenHarasser);
 						((GameState)this.handler).chosenHarasser.stop();
 						((GameState)this.handler).chosenHarasser = null;

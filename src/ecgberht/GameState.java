@@ -23,7 +23,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
-import org.iaie.btree.state.State;
 import org.iaie.btree.util.GameHandler;
 
 import com.google.gson.Gson;
@@ -133,21 +132,42 @@ public class GameState extends GameHandler {
 	private Strategy initStrat() {
 		BioBuild b = new BioBuild();
 		ProxyBBS bbs = new ProxyBBS();
-		return new Strategy(b);
-//		String map = game.mapFileName();
-//		if(map.contains("Heartbreak Ridge")) {
-//			return new Strategy(b);
-//		}
-//		else {
-//			double random = Math.random();
-//			if(random >= 0.5 ) {
-//				return new Strategy(b);
-//			}
-//			else {
-//				BioMechBuild bM = new BioMechBuild();
-//				return new Strategy(bM);
-//			}
-//		}
+		BioMechBuild bM = new BioMechBuild();
+		String map = game.mapFileName();
+		if(enemyRace == Race.Zerg && EI.naughty) {
+			return new Strategy(b);
+		}
+		if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
+			double random = Math.random();
+			if(random > 0.8 ) {
+				return new Strategy(bbs);
+			}
+			else if(random > 0.4 && random <= 0.8) {
+				return new Strategy(bM);
+			}
+			else {
+				return new Strategy(b);
+			}
+		}
+		if(map.contains("Heartbreak Ridge")) {
+			double random = Math.random();
+			if(random > 0.7 ) {
+				return new Strategy(bbs);
+			}
+			else {
+				return new Strategy(b);
+			}
+			
+		}
+		else {
+			double random = Math.random();
+			if(random >= 0.5 ) {
+				return new Strategy(b);
+			}
+			else {
+				return new Strategy(bM);
+			}
+		}
 	}
 
 	public void initEnemyRace() {
@@ -1055,7 +1075,7 @@ public class GameState extends GameHandler {
 					break;
 				}
 				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField() && !scv.first.isCarryingMinerals()) {
-					scv.first.move(new TilePosition(getGame().mapHeight()/2, getGame().mapWidth()/2).toPosition());
+					scv.first.move(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
 					addToSquad(scv.first);
 					for(Pair<Unit,Integer> m : mineralsAssigned) {
 						if(m.first.equals(scv.second)) {
@@ -1072,17 +1092,4 @@ public class GameState extends GameHandler {
 		}
 		
 	}
-
-	public int countUnit2(UnitType type) {
-		int count = 0;
-		for(Pair<Unit, Unit> w: workerTask) {
-			if(w.second.getType() == type) {
-				count++;
-			}
-		}
-		
-		count += self.allUnitCount(type);
-		return count;
-	}
-
 }

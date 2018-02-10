@@ -5,7 +5,6 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
 import bwapi.Pair;
-import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
 import ecgberht.GameState;
@@ -60,11 +59,6 @@ public class ChooseBarracks extends Action {
 				}
 			}
 			if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) < ((GameState)this.handler).strat.raxPerCC * ((GameState)this.handler).CCs.size()) {
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-					if(w.second.first == UnitType.Terran_Barracks) {
-						return State.FAILURE;
-					}
-				}
 				((GameState)this.handler).chosenToBuild = UnitType.Terran_Barracks;
 				return State.SUCCESS;
 			}

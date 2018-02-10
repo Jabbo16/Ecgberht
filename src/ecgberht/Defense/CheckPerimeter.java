@@ -50,7 +50,14 @@ public class CheckPerimeter extends Conditional {
 					}
 				}
 			}
-			if(!((GameState)this.handler).enemyInBase.isEmpty()) {
+			boolean overlordCheck = true;
+			for(Unit u : ((GameState)this.handler).enemyInBase) {
+				if(u.getType().canAttack() || u.getType() == UnitType.Protoss_Shuttle || u.getType() == UnitType.Terran_Dropship) {
+					overlordCheck = false;
+					break;
+				}
+			}
+			if(!((GameState)this.handler).enemyInBase.isEmpty() && !overlordCheck) {
 				((GameState)this.handler).defense = true;
 				return State.SUCCESS;
 			}

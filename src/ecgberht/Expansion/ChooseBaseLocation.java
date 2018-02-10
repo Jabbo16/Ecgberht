@@ -44,7 +44,7 @@ public class ChooseBaseLocation extends Action {
 					if(!((GameState)this.handler).getGame().enemy().getUnits().isEmpty()) {
 						for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 							//if(u.getDistance(b) < 200) {
-							if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack()) {
+							if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack() || u.getType().isWorker()) {
 								continue;
 							}
 							if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(b.getPosition()).getCenter())) {

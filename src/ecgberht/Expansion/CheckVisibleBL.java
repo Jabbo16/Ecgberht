@@ -20,7 +20,7 @@ public class CheckVisibleBL extends Action {
 	public State execute() {
 		try {
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack()){
+				if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack() || u.getType().isWorker()) {
 					continue;
 				}
 				if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.toPosition()).getCenter())) {
@@ -36,9 +36,9 @@ public class CheckVisibleBL extends Action {
 				}
 			}
 			if(((GameState)this.handler).getGame().isVisible(((GameState)this.handler).chosenBaseLocation)) {
-				if(((GameState)this.handler).chosenBuilderBL.getDistance(((GameState)this.handler).chosenBaseLocation.toPosition()) < 10) {
-					return State.SUCCESS;
-				}
+				//if(((GameState)this.handler).chosenBuilderBL.getDistance(((GameState)this.handler).chosenBaseLocation.toPosition()) < 10) {
+				return State.SUCCESS;
+				//}
 			}
 			return State.FAILURE;
 		} catch(Exception e) {
