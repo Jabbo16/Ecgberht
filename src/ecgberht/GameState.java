@@ -123,8 +123,8 @@ public class GameState extends GameHandler {
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
-		strat = initStrat();
 		mapSize = BWTA.getStartLocations().size();
+		strat = initStrat();
 		dpsWorkerRace.put(Race.Terran, 7.936);
 		dpsWorkerRace.put(Race.Zerg, 5.411);
 		dpsWorkerRace.put(Race.Protoss, 5.411);

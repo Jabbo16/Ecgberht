@@ -103,6 +103,7 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
+		
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
 		FreeWorker fw = new FreeWorker("No Union", gs);
