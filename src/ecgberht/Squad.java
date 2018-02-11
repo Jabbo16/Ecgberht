@@ -27,7 +27,7 @@ public class Squad {
 		estado = Status.IDLE;
 		attack = Position.None;
 	}
-
+	
 	public void addToSquad(Unit unit) {
 		this.members.add(unit);
 	}
@@ -46,26 +46,6 @@ public class Squad {
 						u.attack(pos);
 						continue;
 					}
-//					if(u.isIdle()) {
-//						u.attack(pos);
-//						continue;
-//					}
-//					if (estado == Status.IDLE || !pos.equals(attack)) {
-//						if (u.getGroundWeaponCooldown() > 0) {
-//							for(Unit e : getGs().enemyCombatUnitMemory) {
-//								if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
-//									if(u.getUnitsInRadius(UnitType.Terran_Marine.groundWeapon().maxRange()).contains(e)) {
-//										u.move(getGame().self().getStartLocation().toPosition());
-//									}
-//								}
-//							}
-//						}
-//						else if(!u.isStartingAttack() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
-//							u.attack(pos);
-//						}
-//					} else if(!u.getOrderTargetPosition().equals(attack)) {
-//						u.attack(pos);
-//					}
 				}
 			}
 			attack = pos;
@@ -94,10 +74,12 @@ public class Squad {
 					u.attack(attack);
 					continue;
 				}
+				//Experimental storm dodging?
+				if(u.isUnderStorm()) {
+					u.move(getGame().self().getStartLocation().toPosition());
+				}
 				if (u.getGroundWeaponCooldown() > 0) {
-//					for(Unit e : getGs().enemyCombatUnitMemory) {
 					for(Unit e : getGame().enemy().getUnits()) {
-//						if(e.getType() == UnitType.Zerg_Zergling || e.getType() == UnitType.Protoss_Zealot) {
 						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
 							if (e.isAttacking()) {
 								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
@@ -133,5 +115,22 @@ public class Squad {
 		}
 		return aux;
 	}
-	
+//	public void squadGrouped() {
+//		if(attack != Position.None) {
+//			if(members.size() == 1) {
+//				return;
+//			}
+//			List<Unit> circle = getGame().getUnitsInRadius(getGs().getSquadCenter(this), 130);
+//			Set<Unit> different = new HashSet<>();
+//			different.addAll(circle);
+//			different.addAll(members);
+//			circle.retainAll(members);
+//			different.removeAll(circle);
+//			if(circle.size() != members.size()) {
+//				for(Unit u : different) {
+//					u.attack(getGs().getSquadCenter(this));
+//				}
+//			}
+//		} 
+//	}
 }

@@ -100,7 +100,7 @@ public class ChoosePosition extends Action {
 					}
 
 				}
-				TilePosition posicion = ((GameState)this.handler).testMap.buscaPosicion(((GameState)this.handler).chosenToBuild, origin);
+				TilePosition posicion = ((GameState)this.handler).testMap.findPosition(((GameState)this.handler).chosenToBuild, origin);
 				((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
 				if(posicion != null) {
 					((GameState)this.handler).chosenPosition = posicion;

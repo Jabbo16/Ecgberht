@@ -103,6 +103,7 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
+		gs.strat = gs.initStrat();
 		
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
@@ -510,6 +511,11 @@ public class Ecgberht extends DefaultBWListener {
 								}else{
 									arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
 								}
+							}
+						}
+						else {
+							if(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).getDistance(gs.enemyBase.getTilePosition()) < arg0.getTilePosition().getDistance(gs.enemyBase.getTilePosition())) {
+								arg0.attack(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
 							}
 						}
 					}

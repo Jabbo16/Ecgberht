@@ -17,82 +17,82 @@ public class BuildingMap {
 
 	private Game game;
 	private Player self;
-	private int alto;
-	private int ancho;
-	private String mapa[][];
+	private int height;
+	private int width;
+	private String map[][];
 
 	public BuildingMap(Game game, Player self) {
 		this.game = game;
 		this.self = self;
-		this.alto = game.mapHeight();
-		this.ancho = game.mapWidth();
-		this.mapa = new String[this.alto][this.ancho];
+		this.height = game.mapHeight();
+		this.width = game.mapWidth();
+		this.map = new String[this.height][this.width];
 	}
 
-	public BuildingMap(Game game, Player self, int alto, int ancho, String[][] mapa) {
+	public BuildingMap(Game game, Player self, int height, int width, String[][] map) {
 		this.game = game;
 		this.self = self;
-		this.alto = alto;
-		this.ancho = ancho;
-		this.mapa = mapa.clone();
+		this.height = height;
+		this.width = width;
+		this.map = map.clone();
 	}
 
 	public String[][] getMap(){
-		return this.mapa;
+		return this.map;
 	}
 
 	public BuildingMap clone() {
-		BuildingMap mapa2 = new BuildingMap(game,self,alto,ancho,mapa);
-		return mapa2;
+		BuildingMap map2 = new BuildingMap(game,self,height,width,map);
+		return map2;
 	}
 
-	//Metodo para generar un mapa inicial
+	//Generates an initial building map
 	public void initMap() {
-		//Busca posiciones validas y no validas para construccion
-		for(int jj=0; jj<alto; jj++) {
-			for(int ii=0; ii<ancho; ii++) {
+		//Find valid and no valid positions for building
+		for(int jj=0; jj<height; jj++) {
+			for(int ii=0; ii<width; ii++) {
 				TilePosition x = new TilePosition(ii, jj);
 				if(game.isBuildable(x)) {
-					mapa[jj][ii] = "6";
+					map[jj][ii] = "6";
 				} else {
-					mapa[jj][ii] = "0";
+					map[jj][ii] = "0";
 				}
 			}
 		}
-		//Recorre unidades neutrales para buscar minerales y vespeno
-		for(Unit unidad : game.getStaticNeutralUnits()) {
-			TilePosition recurso = unidad.getTilePosition();
-			if(unidad.getType().isBuilding()) {
-				if(unidad.getType().isMineralField()) {
-					TilePosition tamaño_ed = unidad.getType().tileSize();
-					for(int i = recurso.getY(); i < recurso.getY() + tamaño_ed.getY(); i++) {
-						for(int j = recurso.getX(); j < recurso.getX() + tamaño_ed.getX(); j++) {
-							if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+		//Finds minerals and geysers
+		for(Unit resource : game.getStaticNeutralUnits()) {
+			TilePosition resourceTile = resource.getTilePosition();
+			if(resource.getType().isBuilding()) {
+				if(resource.getType().isMineralField()) {
+					TilePosition resourceSize = resource.getType().tileSize();
+					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+							if(i < 0 || i >= height || j < 0 || j >= width) {
 								continue;
 							}
-							if(mapa[i][j] != "V") {
-								mapa[i][j] = "M";
+							if(map[i][j] != "V") {
+								map[i][j] = "M";
 							}
 						}
 					}
-				} else if(unidad.getType() == UnitType.Resource_Vespene_Geyser) {
-					TilePosition tamaño_ed = unidad.getType().tileSize();
-					for(int i = recurso.getY(); i < recurso.getY() + tamaño_ed.getY(); i++) {
-						for(int j = recurso.getX(); j < recurso.getX() + tamaño_ed.getX(); j++) {
-							if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+				} else if(resource.getType() == UnitType.Resource_Vespene_Geyser) {
+					TilePosition resourceSize = resource.getType().tileSize();
+					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+							if(i < 0 || i >= height || j < 0 || j >= width) {
 								continue;
 							}
-							mapa[i][j] = "V";
+							map[i][j] = "V";
 						}
 					}
 				} else {
-					TilePosition tamaño_ed = unidad.getType().tileSize();
-					for(int i = recurso.getY(); i < recurso.getY() + tamaño_ed.getY(); i++) {
-						for(int j = recurso.getX(); j < recurso.getX() + tamaño_ed.getX(); j++) {
-							if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+					TilePosition resourceSize = resource.getType().tileSize();
+					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+							if(i < 0 || i >= height || j < 0 || j >= width) {
 								continue;
 							}
-							mapa[i][j] = "E";
+							map[i][j] = "E";
 						}
 					}
 				}
@@ -102,249 +102,249 @@ public class BuildingMap {
 			TilePosition starting = b.getTilePosition();
 			for(int i = starting.getY(); i < starting.getY() + UnitType.Terran_Command_Center.tileHeight(); i++) {
 				for(int j = starting.getX(); j < starting.getX() + UnitType.Terran_Command_Center.tileWidth(); j++) {
-					if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+					if(i < 0 || i >= height || j < 0 || j >= width) {
 						continue;
 					}
-					mapa[i][j] = "E";
+					map[i][j] = "E";
 				}
 			}
-			mapa[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
-			mapa[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
-			mapa[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
-			mapa[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
+			map[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
+			map[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth()] = "E";
+			map[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
+			map[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
 		}
-		mapa = rellenaMapa(mapa);
+		map = fillMap(map);
 	}
 
-	//Metodo que rellena un mapa con los distintos valores permitidos
-	public String[][] rellenaMapa(String[][] mapa){
-		int alto = mapa.length;
-		int ancho = mapa[0].length;
-		for(int jj=alto-1; jj>=0; jj--) {
-			if(mapa[jj][ancho-1] != "M" && mapa[jj][ancho-1] != "V" && mapa[jj][ancho-1] != "0" && mapa[jj][ancho-1] != "E" && mapa[jj][ancho-1] != "B") {
-				if(jj == this.alto-1 || ancho-1 == this.ancho-1) {
-					mapa[jj][ancho-1] = "1";
+	//Fills the map with the correct values for each tile
+	public String[][] fillMap(String[][] map){
+		int height = map.length;
+		int width = map[0].length;
+		for(int jj = height-1; jj>=0; jj--) {
+			if(map[jj][width-1] != "M" && map[jj][width-1] != "V" && map[jj][width-1] != "0" && map[jj][width-1] != "E" && map[jj][width-1] != "B") {
+				if(jj == this.height-1 || width-1 == this.width-1) {
+					map[jj][width-1] = "1";
 				}
 			}
 		}
-		for(int ii=ancho-1; ii>=0; ii--) {
-			if(mapa[alto-1][ii] != "M" && mapa[alto-1][ii]  != "V" && mapa[alto-1][ii]  != "0" && mapa[alto-1][ii]  != "E" && mapa[alto-1][ii]  != "B") {
-				if(alto-1 == this.alto-1 || ii == this.ancho-1) {
-					mapa[alto-1][ii] = "1";
+		for(int ii=width-1; ii>=0; ii--) {
+			if(map[height-1][ii] != "M" && map[height-1][ii]  != "V" && map[height-1][ii]  != "0" && map[height-1][ii]  != "E" && map[height-1][ii]  != "B") {
+				if(height-1 == this.height-1 || ii == this.width-1) {
+					map[height-1][ii] = "1";
 				}
 			}
 		}
 		//Se ponen a "B" las casillas adyacentes a 0,M,V por izquierda y arriba y sean 6
-		for(int jj=alto-1; jj>=0; jj--) {
-			for(int ii=ancho-1; ii>=0; ii--) {
-				if(mapa[jj][ii] == "E" || mapa[jj][ii] == "M" || mapa[jj][ii] == "V") {
+		for(int jj=height-1; jj>=0; jj--) {
+			for(int ii=width-1; ii>=0; ii--) {
+				if(map[jj][ii] == "E" || map[jj][ii] == "M" || map[jj][ii] == "V") {
 					if(jj-1>=0) {
-						if(mapa[jj-1][ii] == "6") {
-							mapa[jj-1][ii] = "B";
+						if(map[jj-1][ii] == "6") {
+							map[jj-1][ii] = "B";
 						}
 					}
 					if(ii-1>=0) {
-						if(mapa[jj][ii-1] == "6") {
-							mapa[jj][ii-1] = "B";
+						if(map[jj][ii-1] == "6") {
+							map[jj][ii-1] = "B";
 						}
 					}
 					if(jj-1>=0 && ii-1>=0) {
-						if(mapa[jj-1][ii-1] == "6") {
-							mapa[jj-1][ii-1] = "B";
+						if(map[jj-1][ii-1] == "6") {
+							map[jj-1][ii-1] = "B";
 						}
 					}
-					if(jj+1<alto) {
-						if(mapa[jj+1][ii] == "6") {
-							mapa[jj+1][ii] = "B";
+					if(jj+1<height) {
+						if(map[jj+1][ii] == "6") {
+							map[jj+1][ii] = "B";
 						}
 					}
-					if(ii+1<ancho) {
-						if(mapa[jj][ii+1] == "6") {
-							mapa[jj][ii+1] = "B";
+					if(ii+1<width) {
+						if(map[jj][ii+1] == "6") {
+							map[jj][ii+1] = "B";
 						}
 					}
-					if(jj+1<alto && ii+1<ancho) {
-						if(mapa[jj+1][ii+1] == "6") {
-							mapa[jj+1][ii+1] = "B";
+					if(jj+1<height && ii+1<width) {
+						if(map[jj+1][ii+1] == "6") {
+							map[jj+1][ii+1] = "B";
 						}
 					}
-					if(jj-1>=0 && ii+1<ancho) {
-						if(mapa[jj-1][ii+1] == "6") {
-							mapa[jj-1][ii+1] = "B";
+					if(jj-1>=0 && ii+1<width) {
+						if(map[jj-1][ii+1] == "6") {
+							map[jj-1][ii+1] = "B";
 						}
 					}
-					if(jj+1<alto && ii-1>=0) {
-						if(mapa[jj+1][ii-1] == "6") {
-							mapa[jj+1][ii-1] = "B";
+					if(jj+1<height && ii-1>=0) {
+						if(map[jj+1][ii-1] == "6") {
+							map[jj+1][ii-1] = "B";
 						}
 					}
 				}
 			}
 		}
-		for(int jj=alto-1; jj>0; jj--) {
-			for(int ii=ancho-1; ii>0; ii--) {
-				if(mapa[jj][ii] == "B" || mapa[jj][ii] == "0" || mapa[jj][ii] == "M" || mapa[jj][ii] == "V" || mapa[jj][ii] == "E") {
-					if(mapa[jj-1][ii] == "6") {
-						mapa[jj-1][ii] = "1";
+		for(int jj=height-1; jj>0; jj--) {
+			for(int ii=width-1; ii>0; ii--) {
+				if(map[jj][ii] == "B" || map[jj][ii] == "0" || map[jj][ii] == "M" || map[jj][ii] == "V" || map[jj][ii] == "E") {
+					if(map[jj-1][ii] == "6") {
+						map[jj-1][ii] = "1";
 					}
-					if(mapa[jj][ii-1] == "6") {
-						mapa[jj][ii-1] = "1";
+					if(map[jj][ii-1] == "6") {
+						map[jj][ii-1] = "1";
 					}
-					if(mapa[jj-1][ii-1] == "6") {
-						mapa[jj-1][ii-1] = "1";
-					}
-				}
-			}
-		}
-		for(int jj=alto-1; jj>0; jj--) {
-			for(int ii=ancho-1; ii>0; ii--) {
-				if(mapa[jj][ii] == "1") {
-					if(mapa[jj-1][ii] == "6") {
-						mapa[jj-1][ii] = "2";
-					}
-					if(mapa[jj][ii-1] == "6") {
-						mapa[jj][ii-1] = "2";
-					}
-					if(mapa[jj-1][ii-1] == "6") {
-						mapa[jj-1][ii-1] = "2";
+					if(map[jj-1][ii-1] == "6") {
+						map[jj-1][ii-1] = "1";
 					}
 				}
 			}
 		}
-		for(int jj=alto-1; jj>0; jj--) {
-			for(int ii=ancho-1; ii>0; ii--) {
-				if(mapa[jj][ii] == "2") {
-					if(mapa[jj-1][ii] == "6") {
-						mapa[jj-1][ii] = "3";
+		for(int jj=height-1; jj>0; jj--) {
+			for(int ii=width-1; ii>0; ii--) {
+				if(map[jj][ii] == "1") {
+					if(map[jj-1][ii] == "6") {
+						map[jj-1][ii] = "2";
 					}
-					if(mapa[jj][ii-1] == "6") {
-						mapa[jj][ii-1] = "3";
+					if(map[jj][ii-1] == "6") {
+						map[jj][ii-1] = "2";
 					}
-					if(mapa[jj-1][ii-1] == "6") {
-						mapa[jj-1][ii-1] = "3";
-					}
-				}
-			}
-		}
-		for(int jj=alto-1; jj>0; jj--) {
-			for(int ii=ancho-1; ii>0; ii--) {
-				if(mapa[jj][ii] == "3") {
-					if(mapa[jj-1][ii] == "6") {
-						mapa[jj-1][ii] = "4";
-					}
-					if(mapa[jj][ii-1] == "6") {
-						mapa[jj][ii-1] = "4";
-					}
-					if(mapa[jj-1][ii-1] == "6") {
-						mapa[jj-1][ii-1] = "4";
+					if(map[jj-1][ii-1] == "6") {
+						map[jj-1][ii-1] = "2";
 					}
 				}
 			}
 		}
-		for(int jj=alto-1; jj>0; jj--) {
-			for(int ii=ancho-1; ii>0; ii--) {
-				if(mapa[jj][ii] == "4") {
-					if(mapa[jj-1][ii] == "6") {
-						mapa[jj-1][ii] = "5";
+		for(int jj=height-1; jj>0; jj--) {
+			for(int ii=width-1; ii>0; ii--) {
+				if(map[jj][ii] == "2") {
+					if(map[jj-1][ii] == "6") {
+						map[jj-1][ii] = "3";
 					}
-					if(mapa[jj][ii-1] == "6") {
-						mapa[jj][ii-1] = "5";
+					if(map[jj][ii-1] == "6") {
+						map[jj][ii-1] = "3";
 					}
-					if(mapa[jj-1][ii-1] == "6") {
-						mapa[jj-1][ii-1] = "5";
+					if(map[jj-1][ii-1] == "6") {
+						map[jj-1][ii-1] = "3";
 					}
 				}
 			}
 		}
-		return mapa;
+		for(int jj=height-1; jj>0; jj--) {
+			for(int ii=width-1; ii>0; ii--) {
+				if(map[jj][ii] == "3") {
+					if(map[jj-1][ii] == "6") {
+						map[jj-1][ii] = "4";
+					}
+					if(map[jj][ii-1] == "6") {
+						map[jj][ii-1] = "4";
+					}
+					if(map[jj-1][ii-1] == "6") {
+						map[jj-1][ii-1] = "4";
+					}
+				}
+			}
+		}
+		for(int jj=height-1; jj>0; jj--) {
+			for(int ii=width-1; ii>0; ii--) {
+				if(map[jj][ii] == "4") {
+					if(map[jj-1][ii] == "6") {
+						map[jj-1][ii] = "5";
+					}
+					if(map[jj][ii-1] == "6") {
+						map[jj][ii-1] = "5";
+					}
+					if(map[jj-1][ii-1] == "6") {
+						map[jj-1][ii-1] = "5";
+					}
+				}
+			}
+		}
+		return map;
 	}
 
-	//Metodo que actualiza una porcion del mapa
-	public void actualizaMapa(TilePosition posicion,UnitType edificio,boolean Destroyed){
-		TilePosition tamaño_ed = edificio.tileSize();
-		int tamY = tamaño_ed.getY();
-		int tamX = tamaño_ed.getX();
-		//Actualiza el mapa con el proximo edificio a construir
-		for(int i = posicion.getY()-1; i < posicion.getY()+tamY+1; i++) {
-			for(int j = posicion.getX()-1; j < posicion.getX()+tamX+1; j++) {
-				if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+	//Updates a portion of the map around the building
+	public void actualizaMapa(TilePosition position,UnitType building,boolean destroyed){
+		TilePosition buildingSize = building.tileSize();
+		int tamY = buildingSize.getY();
+		int tamX = buildingSize.getX();
+		//Updates the map with the next building to be built
+		for(int i = position.getY()-1; i < position.getY()+tamY+1; i++) {
+			for(int j = position.getX()-1; j < position.getX()+tamX+1; j++) {
+				if(i < 0 || i >= height || j < 0 || j >= width) {
 					continue;
 				}
-				if(Destroyed) {
-					if(i == posicion.getY()-1 || i == posicion.getY()+tamY || j == posicion.getX()-1 || j == posicion.getX()+tamX) {
-						if(mapa[i][j] != "0") {
-							mapa[i][j] = "6";
+				if(destroyed) {
+					if(i == position.getY()-1 || i == position.getY()+tamY || j == position.getX()-1 || j == position.getX()+tamX) {
+						if(map[i][j] != "0") {
+							map[i][j] = "6";
 						}
 					} else {
-						if(mapa[i][j] != "V") {
-							mapa[i][j] = "6";
+						if(map[i][j] != "V") {
+							map[i][j] = "6";
 						}
 					}
 				} else {
-					if(i != posicion.getY()-1 && i != posicion.getY()+tamY && j != posicion.getX()-1 && j != posicion.getX()+tamX) {
-						if(mapa[i][j] != "M" && mapa[i][j] != "V" && mapa[i][j] != "0" && mapa[i][j] != "E" && mapa[i][j] != "B") {
-							if(edificio == UnitType.Terran_Bunker) {
-								mapa[i][j] = "0";
+					if(i != position.getY()-1 && i != position.getY()+tamY && j != position.getX()-1 && j != position.getX()+tamX) {
+						if(map[i][j] != "M" && map[i][j] != "V" && map[i][j] != "0" && map[i][j] != "E" && map[i][j] != "B") {
+							if(building == UnitType.Terran_Bunker) {
+								map[i][j] = "0";
 							} else {
-								mapa[i][j] = "E";
+								map[i][j] = "E";
 							}
 						}
 					}
 				}
 			}
 		}
-		if(edificio.canBuildAddon()) {
-			for(int i = posicion.getY()+tamY; i > posicion.getY()+tamY-4; i--) {
-				for(int j = posicion.getX()+tamX-1; j < posicion.getX()+tamX+3; j++) {
-					if(i < 0 || i >= alto || j < 0 || j >= ancho) {
+		if(building.canBuildAddon()) {
+			for(int i = position.getY()+tamY; i > position.getY()+tamY-4; i--) {
+				for(int j = position.getX()+tamX-1; j < position.getX()+tamX+3; j++) {
+					if(i < 0 || i >= height || j < 0 || j >= width) {
 						continue;
 					}
-					if(Destroyed) {
-						if(i == posicion.getY()+tamY-3 || i == posicion.getY()+tamY || j == posicion.getX()+tamX+2 || j == posicion.getX()+tamX-1) {
-							if(mapa[i][j] != "0") {
-								mapa[i][j] = "6";
+					if(destroyed) {
+						if(i == position.getY()+tamY-3 || i == position.getY()+tamY || j == position.getX()+tamX+2 || j == position.getX()+tamX-1) {
+							if(map[i][j] != "0") {
+								map[i][j] = "6";
 							}
 						} else {
-							if(mapa[i][j] != "V") {
-								mapa[i][j] = "6";
+							if(map[i][j] != "V") {
+								map[i][j] = "6";
 							}
 						}
 					} else {
-						if(i != posicion.getY()+tamY-3 && i != posicion.getY()+tamY && j != posicion.getX()+tamX+2 && j != posicion.getX()+tamX-1) {
-							if(mapa[i][j] != "M" && mapa[i][j] != "V" && mapa[i][j] != "0" && mapa[i][j] != "E" && mapa[i][j] != "B") {
-								mapa[i][j] = "E";
+						if(i != position.getY()+tamY-3 && i != position.getY()+tamY && j != position.getX()+tamX+2 && j != position.getX()+tamX-1) {
+							if(map[i][j] != "M" && map[i][j] != "V" && map[i][j] != "0" && map[i][j] != "E" && map[i][j] != "B") {
+								map[i][j] = "E";
 							}
 						}
 					}
 				}
 			}
 		}
-		//Se hallan las esquinas de la submatriz que contiene al edificio y sus alrededores
+		//Finds the corners around the building
 		int init_i = 0;
-		if(posicion.getY() - alto > 0) {
-			init_i = posicion.getY() - alto;
+		if(position.getY() - height > 0) {
+			init_i = position.getY() - height;
 		}
-		int fin_i = alto;
-		if(posicion.getY() + tamY + alto < alto) {
-			fin_i = posicion.getY() + tamY + alto;
+		int fin_i = height;
+		if(position.getY() + tamY + height < height) {
+			fin_i = position.getY() + tamY + height;
 		}
 		int init_j = 0;
-		if(posicion.getX() - ancho > 0) {
-			init_j = posicion.getX() - ancho;
+		if(position.getX() - width > 0) {
+			init_j = position.getX() - width;
 		}
-		int fin_j = ancho;
-		if(posicion.getX() + tamX + ancho < ancho) {
-			fin_j = posicion.getX() + tamX + ancho;
+		int fin_j = width;
+		if(position.getX() + tamX + width < width) {
+			fin_j = position.getX() + tamX + width;
 		}
-		//Se genera la submatriz como copia de la porcion del mapa delimitado por las esquinas y reseteando los 1,2,3 por 4
+		//Generates a submatrix as a portion of the map delimited by the corners and resets the 1,2,3 values for 4
 		String[][] submapa = new String[fin_i-init_i][fin_j-init_j];
 		int i = 0;
 		int j = 0;
 		for(int ii = init_i; ii < fin_i; ii++) {
 			j = 0;
 			for(int jj = init_j; jj < fin_j; jj++) {
-				if(mapa[ii][jj]=="M" || mapa[ii][jj]=="V" || mapa[ii][jj]=="0" || mapa[ii][jj]=="E" || mapa[ii][jj]=="B") {
-					submapa[i][j] = mapa[ii][jj];
+				if(map[ii][jj]=="M" || map[ii][jj]=="V" || map[ii][jj]=="0" || map[ii][jj]=="E" || map[ii][jj]=="B") {
+					submapa[i][j] = map[ii][jj];
 				} else {
 					submapa[i][j] = "6";
 				}
@@ -352,14 +352,14 @@ public class BuildingMap {
 			}
 			i++;
 		}
-		submapa = rellenaMapa(submapa);
-		//Se pasan los cambios de la submatriz al mapa
+		submapa = fillMap(submapa);
+		//Updates the map using the submatrix
 		i = 0;
 		j = 0;
 		for(int ii = init_i; ii < fin_i; ii++) {
 			j = 0;
 			for(int jj = init_j; jj < fin_j; jj++) {
-				mapa[ii][jj] = submapa[i][j];
+				map[ii][jj] = submapa[i][j];
 				j++;
 			}
 			i++;
@@ -393,31 +393,51 @@ public class BuildingMap {
 		
 	}
 	
-	//Metodo que busca una posicion apta para construir segun el mapa
-	public TilePosition buscaPosicion(UnitType edificio, TilePosition starting){
-		TilePosition tamaño_ed = edificio.tileSize();
-		int tamaño = Math.max(tamaño_ed.getY(), tamaño_ed.getX());
-		if(edificio.canBuildAddon()) {
-			tamaño = Math.max(tamaño_ed.getY(), tamaño_ed.getX() + 2);
+	//Finds a valid position in the map for a specific building type starting with a given tileposition
+	public TilePosition findPosition(UnitType buildingType, TilePosition starting){
+		TilePosition buildingSize = buildingType.tileSize();
+		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
+		if(buildingType.canBuildAddon()) {
+			tamaño = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
 		}
 		int x = starting.getY();
 		int y = starting.getX();
+		int[] coord = new int[2];
+//		boolean center = false;
+//		if((map[x][y] != "M" && map[x][y] != "V" && map[x][y] != "E" && map[x][y] != "B") && Integer.parseInt(map[x][y]) >= tamaño) {
+//			if(buildingType == UnitType.Terran_Bunker) {
+//				if(BWTA.getRegion(new TilePosition(y, x)).getCenter().equals(BWTA.getRegion(self.getStartLocation()).getCenter())) {
+//					center = true;
+//				}
+//			}
+//			if(!checkUnitsChosenBuildingGrid( new TilePosition(y, x), buildingType)) {
+//				center = true;
+//				coord[0] = x; coord[1] = y;
+//			}
+//			else {
+//				center =  false;
+//			}
+//		}
+//		if(center) {
+//			TilePosition position = new TilePosition(coord[1], coord[0]);
+//			return position;
+//		}
 		int i = 2;
 		int j = 2;
 		boolean control = false;
-		int[] coord = new int[2];
-		//Busca la primera posicion apta desde el centro de mando inicial
+		
+		//Finds the first valid tileposition starting around the given tileposition
 		while(!control) {
 			for(int ii = (x - i); ii <= (x + i); ii++) {
 				for(int jj = (y - j); jj <= (y + j); jj++) {
-					if((ii >= 0 && ii < alto) && (jj >= 0 && jj < ancho)) {
-						if((mapa[ii][jj] != "M" && mapa[ii][jj] != "V" && mapa[ii][jj] != "E" && mapa[ii][jj] != "B") && Integer.parseInt(mapa[ii][jj]) >= tamaño) {
-							if(edificio == UnitType.Terran_Bunker) {
+					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
+						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
+							if(buildingType == UnitType.Terran_Bunker) {
 								if(!BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(BWTA.getRegion(self.getStartLocation()).getCenter())) {
 									continue;
 								}
 							}
-							if(!checkUnitsChosenBuildingGrid( new TilePosition(jj, ii), edificio)) {
+							if(!checkUnitsChosenBuildingGrid( new TilePosition(jj, ii), buildingType)) {
 								coord[0] = ii; coord[1] = jj; control = true; break;
 							}
 						}
@@ -430,27 +450,27 @@ public class BuildingMap {
 			i++;
 			j++;
 		}
-		TilePosition posicion = new TilePosition(coord[1], coord[0]);
-		return posicion;
+		TilePosition position = new TilePosition(coord[1], coord[0]);
+		return position;
 	}
 
-	//Metodo que escribe el mapa en un fichero
-	public void writeMapa(String file_name){
+	//Writes the map to a file
+	public void writeMap(String fileName){
 		FileWriter sw = null;
 		try {
-			sw = new FileWriter(file_name);
+			sw = new FileWriter(fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		for(int ii=0; ii<alto; ii++) {
-			for(int jj=0; jj<ancho; jj++) {
+		for(int ii=0; ii<height; ii++) {
+			for(int jj=0; jj<width; jj++) {
 				try {
-					sw.write(mapa[ii][jj]);
+					sw.write(map[ii][jj]);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			if(ii!=alto-1) {
+			if(ii!=height-1) {
 				try {
 					sw.write("\n");
 				} catch (IOException e) {

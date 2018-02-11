@@ -26,7 +26,7 @@ public class SendArmy extends Action {
 			for (Entry<String, Squad> u : ((GameState) this.handler).squads.entrySet()) {
 				if(!((GameState)this.handler).firstProxyBBS && ((GameState)this.handler).strat.name == "ProxyBBS") {
 					((GameState)this.handler).firstProxyBBS = true;
-					((GameState)this.handler).getGame().sendText("Get Proxied botter!");
+					((GameState)this.handler).getGame().sendText("Be ready for a party in your house!");
 				}
 				if (((GameState)this.handler).attackPosition != null) {
 					//if (u.getValue().estado == Status.IDLE || !((GameState) this.handler).attackPosition.equals(u.getValue().attack)) {

@@ -18,6 +18,7 @@ public class CheckHarasserAttacked extends Conditional {
 			int count = 0;
 			Unit attacker = null;
 			int workers = 0;
+			//Thanks to @N00byEdge to the cleaner code
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(!u.getType().isBuilding() && u.getType().canAttack()) {
 					Unit target = (u.getTarget() == null ? u.getOrderTarget() : u.getTarget());

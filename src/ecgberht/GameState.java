@@ -124,13 +124,12 @@ public class GameState extends GameHandler {
 		testMap = map.clone();
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		mapSize = BWTA.getStartLocations().size();
-		strat = initStrat();
 		dpsWorkerRace.put(Race.Terran, 7.936);
 		dpsWorkerRace.put(Race.Zerg, 5.411);
 		dpsWorkerRace.put(Race.Protoss, 5.411);
 	}
 	
-	private Strategy initStrat() {
+	public Strategy initStrat() {
 		BioBuild b = new BioBuild();
 		ProxyBBS bbs = new ProxyBBS();
 		BioMechBuild bM = new BioMechBuild();
@@ -138,45 +137,90 @@ public class GameState extends GameHandler {
 		if(enemyRace == Race.Zerg && EI.naughty) {
 			return new Strategy(b);
 		}
-		if(enemyRace == Race.Protoss) {
-			double random = Math.random();
-			if(random > 0.5 ) {
-				return new Strategy(b);
+		if(EI.history.isEmpty()) {
+			if(enemyRace == Race.Protoss) {
+				double random = Math.random();
+				if(random > 0.5 ) {
+					return new Strategy(b);
+				}
+				else {
+					return new Strategy(bM);
+				}
+			}
+			if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
+				double random = Math.random();
+				if(random > 0.75 ) {
+					return new Strategy(bbs);
+				}
+				else if(random > 0.4 && random <= 0.75) {
+					return new Strategy(bM);
+				}
+				else {
+					return new Strategy(b);
+				}
+			}
+			if(map.contains("Heartbreak Ridge")) {
+				double random = Math.random();
+				if(random > 0.75 ) {
+					return new Strategy(bbs);
+				}
+				else {
+					return new Strategy(b);
+				}
+				
 			}
 			else {
-				return new Strategy(bM);
+				double random = Math.random();
+				if(random > 0.5 ) {
+					return new Strategy(b);
+				}
+				else {
+					return new Strategy(bM);
+				}
 			}
-		}
-		if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
-			double random = Math.random();
-			if(random > 0.75 ) {
-				return new Strategy(bbs);
+		} else {
+			Map<String,Pair<Integer,Integer>> strategies = new HashMap<>();
+			Map<String,AStrategy> nameStrat = new HashMap<>();
+			strategies.put(b.name, new Pair<Integer,Integer>(0,0));
+			nameStrat.put(b.name, b);
+			strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
+			nameStrat.put(bbs.name, bbs);
+			strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
+			nameStrat.put(bM.name, bM);
+			for(StrategyOpponentHistory r: EI.history) {
+				if(strategies.containsKey(r.strategyName)) {
+					strategies.get(r.strategyName).first += r.wins;
+					strategies.get(r.strategyName).second += r.losses;
+				}
 			}
-			else if(random > 0.4 && random <= 0.75) {
-				return new Strategy(bM);
-			}
-			else {
-				return new Strategy(b);
-			}
-		}
-		if(map.contains("Heartbreak Ridge")) {
-			double random = Math.random();
-			if(random > 0.75 ) {
-				return new Strategy(bbs);
-			}
-			else {
-				return new Strategy(b);
-			}
-			
-		}
-		else {
-			double random = Math.random();
-			if(random > 0.5 ) {
-				return new Strategy(b);
-			}
-			else {
-				return new Strategy(bM);
-			}
+			int totalGamesPlayed = EI.wins + EI.losses;
+			int DefaultStrategyWins = strategies.get(b.name).first;
+			int DefaultStrategyLosses = strategies.get(b.name).second;
+		    int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
+		    double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
+		    if (strategyGamesPlayed < 5 || (strategyGamesPlayed > 0 && winRate > 0.49))
+		    {
+		        game.sendText("Using default Strategy as Im confident enough to do so");
+		        return new Strategy(b);
+		    }
+		    double C = 0.5;
+		    String bestUCBStrategy = null;
+		    double bestUCBStrategyVal = Double.MIN_VALUE;
+		    for (String strat : strategies.keySet()) {
+		    	if(map.contains("Heartbreak Ridge") && strat == "BioMech") {
+		    		continue;
+		    	}
+		        int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
+		        double sWinRate = sGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
+		        double ucbVal = C * Math.sqrt(Math.log((double)totalGamesPlayed / sGamesPlayed));
+		        double val = sWinRate + ucbVal;
+		        if (val > bestUCBStrategyVal) {
+		            bestUCBStrategy = strat;
+		            bestUCBStrategyVal = val;
+		        }
+		    }
+		    game.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+		    return new Strategy(nameStrat.get(bestUCBStrategy));
 		}
 	}
 
@@ -1101,5 +1145,29 @@ public class GameState extends GameHandler {
 			workerTask.removeAll(aux);
 		}
 		
+	}
+
+	public boolean armyGroupedBBS() {
+		boolean allFine = true;
+		for(Squad s : squads.values()) {
+			if(s.attack != Position.None) {
+				if(s.members.size() == 1) {
+					continue;
+				}
+				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 130);
+				Set<Unit> different = new HashSet<>();
+				different.addAll(circle);
+				different.addAll(s.members);
+				circle.retainAll(s.members);
+				different.removeAll(circle);
+				if(circle.size() != s.members.size()) {
+					allFine = false;
+					for(Unit u : different) {
+						u.attack(getSquadCenter(s));
+					}
+				}
+			} 
+		}
+		return allFine;
 	}
 }
