@@ -134,4 +134,16 @@ public class Squad {
 //			}
 //		} 
 //	}
+
+	public void giveMoveOrder(Position retreat) {
+		for(Unit u : members) {
+			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+				continue;
+			}
+			if(attack != Position.None && getGame().getFrameCount() != u.getLastCommandFrame()) {
+				u.move(retreat);
+			}
+		}
+		
+	}
 }

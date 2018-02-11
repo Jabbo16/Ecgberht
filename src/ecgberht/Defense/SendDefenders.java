@@ -86,7 +86,13 @@ public class SendDefenders extends Action {
 					if(((GameState)this.handler).attackPosition != null) {
 						if(u.first.isIdle() || !((GameState)this.handler).attackPosition.equals(u.second)) {
 							((GameState)this.handler).workerDefenders.get(((GameState)this.handler).workerDefenders.indexOf(u)).second = ((GameState)this.handler).attackPosition;
-							u.first.attack(((GameState)this.handler).attackPosition);
+							if(((GameState)this.handler).enemyInBase.size() == 1) {
+								u.first.attack(((GameState)this.handler).enemyInBase.iterator().next());
+							}
+							else {
+								u.first.attack(((GameState)this.handler).attackPosition);
+							}
+							
 						}
 					}
 				}
