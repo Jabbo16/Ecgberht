@@ -20,6 +20,9 @@ public class ChooseSupply extends Action {
 	@Override
 	public State execute() {
 		try {
+			if(((GameState)this.handler).getPlayer().supplyTotal() >= 400) {
+				return State.FAILURE;
+			}
 			//if(((GameState)this.handler).countUnit2(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
 			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
 				return State.FAILURE;
