@@ -41,6 +41,7 @@ public class BuildingMap {
 		return this.map;
 	}
 
+	@Override
 	public BuildingMap clone() {
 		BuildingMap map2 = new BuildingMap(game,self,height,width,map);
 		return map2;

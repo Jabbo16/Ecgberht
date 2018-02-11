@@ -96,11 +96,11 @@ public class SendDefenders extends Action {
 						if(((GameState)this.handler).attackPosition != null) {
 							//if(u.getValue().estado == Status.IDLE || !((GameState)this.handler).attackPosition.equals(u.getValue().attack)) {
 								u.getValue().giveAttackOrder(((GameState)this.handler).attackPosition);
-								u.getValue().estado = Status.DEFENSE;
+								u.getValue().status = Status.DEFENSE;
 							//}
 						}
 						else {
-							u.getValue().estado = Status.IDLE;
+							u.getValue().status = Status.IDLE;
 						}
 					}
 				}

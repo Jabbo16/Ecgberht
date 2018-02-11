@@ -403,10 +403,10 @@ public class GameState extends GameHandler {
 			game.drawTextScreen(10, 20, Utils.formatText("Scouting: ",Utils.White) + Utils.formatText("False", Utils.Red));
 		}
 		if(enemyBase != null) {
-			game.drawTextScreen(10, 35, Utils.formatText("Base enemiga encontrada: ",Utils.White) + Utils.formatText("True", Utils.Green));
+			game.drawTextScreen(10, 35, Utils.formatText("Enemy Base Found: ",Utils.White) + Utils.formatText("True", Utils.Green));
 		}
 		else {
-			game.drawTextScreen(10, 35, Utils.formatText("Base enemiga encontrada: ",Utils.White) + Utils.formatText("False", Utils.Red));
+			game.drawTextScreen(10, 35, Utils.formatText("Enemy Base Found: ",Utils.White) + Utils.formatText("False", Utils.Red));
 		}
 //		if (chosenWorker != null) {
 //			game.drawTextMap(chosenWorker.getPosition(), "ChosenWorker");
@@ -840,7 +840,7 @@ public class GameState extends GameHandler {
 					List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
 					boolean found = false;
 					for(Unit e : unitsInRange) {
-						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
+						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isWorker() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
 							found = true;
 							break;
 						}
@@ -882,7 +882,7 @@ public class GameState extends GameHandler {
 	public double getMineralRate() {
 		double rate = 0.0;
 		if(game.getFrameCount() > 0) {
-			rate = ((double)self.gatheredMinerals()-50)/(double)game.getFrameCount();
+			rate = ((double)self.gatheredMinerals()-50)/game.getFrameCount();
 		}
 		return rate;
 	}

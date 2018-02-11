@@ -92,7 +92,7 @@ public class InfluenceMap {
 			for(int ii = init_i; ii <= fin_i; ii++) {
 				for(int jj = init_j; jj <= fin_j; jj++) {
 					if(!(jj == celda.first.x && ii == celda.first.y))
-						mapa[jj][ii] += Math.round(celda.second / Math.pow(1 + Math.sqrt(Math.pow((double)(ii-celda.first.y), 2) + Math.pow((double)(jj-celda.first.x), 2)), 2));
+						mapa[jj][ii] += Math.round(celda.second / Math.pow(1 + Math.sqrt(Math.pow(ii-celda.first.y, 2) + Math.pow(jj-celda.first.x, 2)), 2));
 				}
 			}
 		}
@@ -169,7 +169,7 @@ public class InfluenceMap {
 							continue;
 						}
 					}
-					count = mapa[x][y] / Math.pow(1 + Math.sqrt(Math.pow((double)(x-sY), 2) + Math.pow((double)(y-sX), 2)), 2);
+					count = mapa[x][y] / Math.pow(1 + Math.sqrt(Math.pow(x-sY, 2) + Math.pow(y-sX, 2)), 2);
 					p.first = x;
 					p.second = y;
 				}

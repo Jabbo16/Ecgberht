@@ -31,10 +31,10 @@ public class SendArmy extends Action {
 				if (((GameState)this.handler).attackPosition != null) {
 					//if (u.getValue().estado == Status.IDLE || !((GameState) this.handler).attackPosition.equals(u.getValue().attack)) {
 					u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
-					u.getValue().estado = Status.ATTACK;
+					u.getValue().status = Status.ATTACK;
 					//}
 				} else {
-					u.getValue().estado = Status.IDLE;
+					u.getValue().status = Status.IDLE;
 				}
 			}
 			return State.SUCCESS;

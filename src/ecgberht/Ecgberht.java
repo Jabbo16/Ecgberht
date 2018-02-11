@@ -344,7 +344,6 @@ public class Ecgberht extends DefaultBWListener {
 		gs.printer();
 	}
 
-	@Override
 	public void onEnd(boolean arg0) {
 		String name = game.enemy().getName();
 		gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
@@ -365,37 +364,30 @@ public class Ecgberht extends DefaultBWListener {
 		gs.writeOpponentInfo(name);
 	}
 
-	@Override
 	public void onNukeDetect(Position arg0) {
 
 	}
 
-	@Override
 	public void onPlayerDropped(Player arg0) {
 
 	}
 
-	@Override
 	public void onPlayerLeft(Player arg0) {
 
 	}
 
-	@Override
 	public void onReceiveText(Player arg0, String arg1) {
 
 	}
 
-	@Override
 	public void onSaveGame(String arg0) {
 
 	}
 
-	@Override
 	public void onSendText(String arg0) {
 
 	}
 
-	@Override
 	public void onUnitCreate(Unit arg0) {
 		if(!arg0.getType().isNeutral() && !arg0.getType().isSpecialBuilding()) {
 			if(arg0.getType().isBuilding()) {
@@ -419,7 +411,6 @@ public class Ecgberht extends DefaultBWListener {
 		}
 	}
 
-	@Override
 	public void onUnitComplete(Unit arg0) {
 		observer.moveCameraUnitCreated(arg0);
 		if(!arg0.getType().isNeutral() && arg0.getPlayer().getID() == self.getID()) {
@@ -525,7 +516,6 @@ public class Ecgberht extends DefaultBWListener {
 		}
 	}
 
-	@Override
 	public void onUnitDestroy(Unit arg0) {
 		if(!arg0.getType().isBuilding()) {
 			if(!first ) {
@@ -742,7 +732,6 @@ public class Ecgberht extends DefaultBWListener {
 		}
 	}
 
-	@Override
 	public void onUnitMorph(Unit arg0) {
 		if(arg0.getPlayer().getID() == game.enemy().getID()) {
 			if(arg0.getType().isBuilding() && !arg0.getType().isRefinery()) {
@@ -772,27 +761,22 @@ public class Ecgberht extends DefaultBWListener {
 		}
 	}
 
-	@Override
 	public void onUnitDiscover(Unit arg0) {
 
 	}
 
-	@Override
 	public void onUnitEvade(Unit arg0) {
 
 	}
 
-	@Override
 	public void onUnitHide(Unit arg0) {
 
 	}
 
-	@Override
 	public void onUnitRenegade(Unit arg0) {
 
 	}
 
-	@Override
 	public void onUnitShow(Unit arg0) {
 		if(game.enemy().getID() == arg0.getPlayer().getID()) {
 			if(gs.enemyRace == Race.Unknown) {

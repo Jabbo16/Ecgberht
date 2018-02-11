@@ -14,17 +14,17 @@ import bwapi.UnitType;
 public class Squad {
 
 	public enum Status {
-		ATTACK, KITE, RETREAT, MOVE, IDLE, DEFENSE
+		ATTACK, IDLE, DEFENSE
 	}
 	public String name;
 	public Set<Unit> members;
-	public Status estado;
+	public Status status;
 	public Position attack;
 	public int lastFrameOrder = 0;
 	public Squad(String name) {
 		this.name = name;
 		members = new HashSet<Unit>();
-		estado = Status.IDLE;
+		status = Status.IDLE;
 		attack = Position.None;
 	}
 	
@@ -60,17 +60,18 @@ public class Squad {
 			}
 		}
 	}
+	
 	public void microUpdateOrder() {
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 				continue;
 			}
-			if(u.isIdle() && attack != Position.None && getGame().getFrameCount() != u.getLastCommandFrame()) {
+			if(u.isIdle() && attack != Position.None && getGame().getFrameCount() != u.getLastCommandFrame() && attack.getApproxDistance(u.getPosition()) > 500) {
 				u.attack(attack);
 				continue;
 			}
 			if(getGame().getFrameCount() - u.getLastCommandFrame() > 24) {
-				if(u.isIdle() && attack != null) {
+				if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
 					u.attack(attack);
 					continue;
 				}
@@ -78,7 +79,7 @@ public class Squad {
 				if(u.isUnderStorm()) {
 					u.move(getGame().self().getStartLocation().toPosition());
 				}
-				if (u.getGroundWeaponCooldown() > 0) {
+				if(u.getGroundWeaponCooldown() > 0) {
 					for(Unit e : getGame().enemy().getUnits()) {
 						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
 							if (e.isAttacking()) {
@@ -89,13 +90,13 @@ public class Squad {
 						}
 					}
 				}
-				else if(attack != null && !u.isStartingAttack() && !u.isAttacking() && (u.isIdle() || u.isMoving())) {
+				else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
 					u.attack(attack);
 				}
 			}
 		}
-		
 	}
+	
 	public Set<Unit> getTanks() {
 		Set<Unit> aux = new HashSet<Unit>();
 		for(Unit u : members) {

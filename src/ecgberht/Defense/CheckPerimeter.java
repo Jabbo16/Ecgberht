@@ -70,13 +70,13 @@ public class CheckPerimeter extends Conditional {
 				}
 			}
 			for(Squad u : ((GameState)this.handler).squads.values()) {
-				if(u.estado == Status.DEFENSE) {
+				if(u.status == Status.DEFENSE) {
 					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
 					if(closestCC != null) {
 						if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
 							//u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
 							u.giveAttackOrder(BWTA.getNearestChokepoint(closestCC).getCenter());
-							u.estado = Status.IDLE;
+							u.status = Status.IDLE;
 						}
 					}
 				}
