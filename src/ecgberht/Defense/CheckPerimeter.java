@@ -26,30 +26,75 @@ public class CheckPerimeter extends Conditional {
 
 		try {
 			((GameState)this.handler).enemyInBase.clear();
-			for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Protoss_Interceptor) {
-					for(Unit c : ((GameState)this.handler).CCs) {
-						if (((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-							((GameState)this.handler).enemyInBase.add(u);
-						}
+			int enemyID = ((GameState)this.handler).getGame().enemy().getID();
+			for(Unit c : ((GameState)this.handler).CCs) {
+				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500);
+				for(Unit u : unitsRadius) {
+					if(u.getPlayer().getID() != enemyID) {
+						continue;
 					}
-					for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-						if (((GameState)this.handler).getGame().getUnitsInRadius(b.first.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-							((GameState)this.handler).enemyInBase.add(u);
-						}
-					}
-					for(Unit b : ((GameState)this.handler).SBs) {
-						if (((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-							((GameState)this.handler).enemyInBase.add(u);
-						}
-					}
-					for(Unit b : ((GameState)this.handler).MBs) {
-						if (((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-							((GameState)this.handler).enemyInBase.add(u);
-						}
+					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
+						((GameState)this.handler).enemyInBase.add(u);
 					}
 				}
 			}
+			for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
+				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(b.first.getPosition(), 200);
+				for(Unit u : unitsRadius) {
+					if(u.getPlayer().getID() != enemyID) {
+						continue;
+					}
+					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
+						((GameState)this.handler).enemyInBase.add(u);
+					}
+				}
+			}
+			for(Unit b : ((GameState)this.handler).SBs) {
+				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200);
+				for(Unit u : unitsRadius) {
+					if(u.getPlayer().getID() != enemyID) {
+						continue;
+					}
+					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
+						((GameState)this.handler).enemyInBase.add(u);
+					}
+				}
+			}
+			for(Unit b : ((GameState)this.handler).MBs) {
+				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200);
+				for(Unit u : unitsRadius) {
+					if(u.getPlayer().getID() != enemyID) {
+						continue;
+					}
+					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
+						((GameState)this.handler).enemyInBase.add(u);
+					}
+				}
+			}
+//			for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
+//				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Protoss_Interceptor) {
+//					for(Unit c : ((GameState)this.handler).CCs) {
+//						if (((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
+//							((GameState)this.handler).enemyInBase.add(u);
+//						}
+//					}
+//					for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
+//						if (((GameState)this.handler).getGame().getUnitsInRadius(b.first.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
+//							((GameState)this.handler).enemyInBase.add(u);
+//						}
+//					}
+//					for(Unit b : ((GameState)this.handler).SBs) {
+//						if (((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
+//							((GameState)this.handler).enemyInBase.add(u);
+//						}
+//					}
+//					for(Unit b : ((GameState)this.handler).MBs) {
+//						if (((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
+//							((GameState)this.handler).enemyInBase.add(u);
+//						}
+//					}
+//				}
+//			}
 			boolean overlordCheck = true;
 			for(Unit u : ((GameState)this.handler).enemyInBase) {
 				if(u.getType().canAttack() || u.getType() == UnitType.Protoss_Shuttle || u.getType() == UnitType.Terran_Dropship) {

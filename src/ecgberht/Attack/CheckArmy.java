@@ -17,7 +17,7 @@ public class CheckArmy extends Conditional {
 	public State execute() {
 		try {
 			if(((GameState)this.handler).strat.name == "ProxyBBS") {
-				if(((GameState)this.handler).getArmySize() >= ((GameState)this.handler).strat.armyForAttack && !((GameState)this.handler).defense && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) > 5 && ((GameState)this.handler).armyGroupedBBS()) {
+				if(((GameState)this.handler).getArmySize() >= ((GameState)this.handler).strat.armyForAttack && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) > 4 && ((GameState)this.handler).armyGroupedBBS()) {
 					return State.SUCCESS;
 				}
 			}
