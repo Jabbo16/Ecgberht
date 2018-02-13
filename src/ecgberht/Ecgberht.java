@@ -302,83 +302,83 @@ public class Ecgberht extends DefaultBWListener {
 		gs.updateEnemyBuildingsMemory();
 		//gs.checkEnemyAttackingWT();
 		
-		//doublestartTime = System.nanoTime();
+		//double startTime = System.nanoTime();
 		buildingLotTree.run();
 		//double stopTime = System.nanoTime();
-		//double elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 20, "bLotTree: " + //elapsedTime);
+		//double elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 20, "bLotTree: " + elapsedTime);
         
         //startTime = System.nanoTime();
 		repairTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 35, "repairTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 35, "repairTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		collectTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 50, "collectTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 50, "collectTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		expandTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 65, "expandTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 65, "expandTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		upgradeTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 80, "upgradeTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 80, "upgradeTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		moveBuildTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 95, "moveBuildTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 95, "moveBuildTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		buildTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 115, "buildTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 115, "buildTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		addonBuildTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 130, "addonBuildTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 130, "addonBuildTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		trainTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 145, "trainTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 145, "trainTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		scoutingTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 160, "scoutingTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 160, "scoutingTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		botherTree.run();
 		//stopTime = System.nanoTime();
-		////elapsedTime = (//stopTime - ////stopTime)/1000.0;
-        //game.drawTextScreen(520, 175, "botherTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - stopTime)/1000.0;
+        //game.drawTextScreen(520, 175, "botherTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		bunkerTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 190, "bunkerTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 190, "bunkerTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		scannerTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 205, "scannerTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 205, "scannerTree: " + elapsedTime);
         
 		if(gs.strat.name == "ProxyBBS") {
 			gs.checkWorkerMilitia();
@@ -388,40 +388,40 @@ public class Ecgberht extends DefaultBWListener {
 		//startTime = System.nanoTime();
 		defenseTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 220, "defenseTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 220, "defenseTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		attackTree.run();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 235, "attackTree: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 235, "attackTree: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		gs.updateSquadOrderAndMicro();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 250, "updateSAndMicro: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 250, "updateSAndMicro: " + elapsedTime);
         
 		combatStimTree.run();
 		
 		//startTime = System.nanoTime();
 		gs.checkMainEnemyBase();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 265, "checkMEBase: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 265, "checkMEBase: " + elapsedTime);
         
         //startTime = System.nanoTime();
 		gs.fix();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 280, "fix: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 280, "fix: " + elapsedTime);
         
 		//startTime = System.nanoTime();
 		gs.mergeSquads();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 295, "mergeSquads: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 295, "mergeSquads: " + elapsedTime);
         
 		if(game.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
 			boolean found_pool = false;
@@ -444,8 +444,8 @@ public class Ecgberht extends DefaultBWListener {
 		//startTime = System.nanoTime();
 		gs.printer();
 		//stopTime = System.nanoTime();
-		//elapsedTime = (//stopTime - //startTime)/1000.0;
-        //game.drawTextScreen(520, 310, "printer: " + //elapsedTime);
+		//elapsedTime = (stopTime - startTime)/1000.0;
+        //game.drawTextScreen(520, 310, "printer: " + elapsedTime);
 	}
 
 	public void onEnd(boolean arg0) {

@@ -1,14 +1,18 @@
 package ecgberht.Expansion;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Position;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import ecgberht.BaseLocationComparator;
 import ecgberht.GameState;
 
 public class ChooseBaseLocation extends Action {
@@ -24,45 +28,45 @@ public class ChooseBaseLocation extends Action {
 			if(((GameState)this.handler).chosenBaseLocation != null) {
 				return State.SUCCESS;
 			}
-			Position main = null;
+			TilePosition main = null;
 			if(((GameState)this.handler).MainCC != null) {
-				main = ((GameState)this.handler).MainCC.getPosition();
+				main = ((GameState)this.handler).MainCC.getTilePosition();
 			}
 			else {
-				main = ((GameState)this.handler).getPlayer().getStartLocation().toPosition();
+				main = ((GameState)this.handler).getPlayer().getStartLocation();
 			}
-			TilePosition closestBase = null;
+			List<BaseLocation> valid = new ArrayList<>();
+			
 			for(BaseLocation b : ((GameState)this.handler).BLs) {
-				boolean close = false;
 				for(Unit cc : ((GameState)this.handler).CCs) {
-					if(BWTA.getRegion(cc.getTilePosition()).getCenter().equals(BWTA.getRegion(b.getTilePosition()).getCenter())) {
-						close = true;
-					}
-				}
-				if(!close && BWTA.isConnected(b.getTilePosition(), main.toTilePosition())) {
-					boolean found = false;
-					if(!((GameState)this.handler).getGame().enemy().getUnits().isEmpty()) {
-						for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-							//if(u.getDistance(b) < 200) {
-							if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack() || u.getType().isWorker()) {
-								continue;
-							}
-							if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(b.getPosition()).getCenter())) {
-								found = true;
-								break;
-							}
-						}
-					}
-					if (!found && (closestBase == null || BWTA.getGroundDistance(b.getTilePosition(), main.toTilePosition()) < BWTA.getGroundDistance(closestBase, main.toTilePosition()))) {
-						closestBase = b.getTilePosition();
+					if(BWTA.isConnected(b.getTilePosition(), main) && !cc.getTilePosition().equals(b.getTilePosition())) {
+						valid.add(b);
+						break;
 					}
 				}
 			}
-			if(closestBase != null) {
-				((GameState)this.handler).chosenBaseLocation = closestBase;
-				return State.SUCCESS;
+			Collections.sort(valid, new BaseLocationComparator());
+			
+			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
+				List<BaseLocation> remove = new ArrayList<>();
+				if(valid.isEmpty()) {
+					break;
+				}
+				for(BaseLocation b : valid) {
+					if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack() || u.getType().isWorker()) {
+						continue;
+					}
+					if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(b.getPosition()).getCenter())) {
+						remove.add(b);
+					}
+				}
+				valid.removeAll(remove);
 			}
-			return State.FAILURE;
+			if(valid.isEmpty()) {
+				return State.FAILURE;
+			}
+			((GameState)this.handler).chosenBaseLocation = valid.get(0).getTilePosition();
+			return State.SUCCESS;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());
 			System.err.println(e);
