@@ -2,8 +2,8 @@
 
 ## Description
 
-Ecgberht is a Starcraft: Brood War based on BWMirror 2.6.
+Ecgberht is a Java Starcraft: Brood War bot based on BWMirror 2.6 and BWAPI 4.1.2.
 
-Behaviour based on decisions trees and influence matrix.
+Behaviour based on decision trees and uses influence matrix to know where is the better place to attack or defend.
 
-Opponent based strategy picker learning using Weka is planned.
+Capable of playing more than one strategy and picking the best using the UCB1 algorithm.

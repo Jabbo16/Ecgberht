@@ -1,7 +1,7 @@
 package ecgberht;
 
 import static ecgberht.Ecgberht.getGame;
-//import static ecgberht.Ecgberht.getGs;
+import static ecgberht.Ecgberht.getGs;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,15 +33,16 @@ public class Squad {
 	}
 
 	public void giveAttackOrder(Position pos) {
-		if(getGame().getFrameCount() - lastFrameOrder > 0 && !pos.equals(attack)) {
+		int frameCount = getGame().getFrameCount();
+		if(frameCount - lastFrameOrder > 0 && !pos.equals(attack)) {
 			for(Unit u : members) {
+				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
+					continue;
+				}
+				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+					continue;
+				}
 				if(getGame().getFrameCount() - u.getLastCommandFrame() > 24 ) {
-					if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
-						continue;
-					}
-					if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
-						continue;
-					}
 					if(!u.isStartingAttack() && !u.isAttacking() || u.isIdle()) {
 						u.attack(pos);
 						continue;
@@ -49,42 +50,46 @@ public class Squad {
 				}
 			}
 			attack = pos;
-			lastFrameOrder = getGame().getFrameCount();
+			lastFrameOrder = frameCount;
 		}
 	}
 	
 	public void giveStimOrder() {
 		for(Unit u : members) {
-			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking()) {
+			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
 				u.useTech(TechType.Stim_Packs);
 			}
 		}
 	}
 	
 	public void microUpdateOrder() {
+		Set<Unit> enemy = getGs().enemyCombatUnitMemory;
+		int frameCount = getGame().getFrameCount();
+		Position start = getGame().self().getStartLocation().toPosition();
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 				continue;
 			}
-			if(u.isIdle() && attack != Position.None && getGame().getFrameCount() != u.getLastCommandFrame() && attack.getApproxDistance(u.getPosition()) > 500) {
+			if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
 				u.attack(attack);
 				continue;
 			}
-			if(getGame().getFrameCount() - u.getLastCommandFrame() > 24) {
+			if(frameCount - u.getLastCommandFrame() > 24) {
 				if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
 					u.attack(attack);
 					continue;
 				}
 				//Experimental storm dodging?
 				if(u.isUnderStorm()) {
-					u.move(getGame().self().getStartLocation().toPosition());
+					u.move(start);
+					continue;
 				}
 				if(u.getGroundWeaponCooldown() > 0) {
-					for(Unit e : getGame().enemy().getUnits()) {
+					for(Unit e : enemy) {
 						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
 							if (e.isAttacking()) {
 								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
-									u.move(getGame().self().getStartLocation().toPosition());
+									u.move(start);
 								}
 							}
 						}
@@ -116,31 +121,17 @@ public class Squad {
 		}
 		return aux;
 	}
-//	public void squadGrouped() {
-//		if(attack != Position.None) {
-//			if(members.size() == 1) {
-//				return;
-//			}
-//			List<Unit> circle = getGame().getUnitsInRadius(getGs().getSquadCenter(this), 130);
-//			Set<Unit> different = new HashSet<>();
-//			different.addAll(circle);
-//			different.addAll(members);
-//			circle.retainAll(members);
-//			different.removeAll(circle);
-//			if(circle.size() != members.size()) {
-//				for(Unit u : different) {
-//					u.attack(getGs().getSquadCenter(this));
-//				}
-//			}
-//		} 
-//	}
 
 	public void giveMoveOrder(Position retreat) {
+		int frameCount = getGame().getFrameCount();
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 				continue;
 			}
-			if(attack != Position.None && getGame().getFrameCount() != u.getLastCommandFrame()) {
+			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+				continue;
+			}
+			if(attack != Position.None && frameCount != u.getLastCommandFrame()) {
 				u.move(retreat);
 			}
 		}

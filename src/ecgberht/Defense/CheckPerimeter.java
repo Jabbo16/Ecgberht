@@ -26,75 +26,38 @@ public class CheckPerimeter extends Conditional {
 
 		try {
 			((GameState)this.handler).enemyInBase.clear();
-			int enemyID = ((GameState)this.handler).getGame().enemy().getID();
-			for(Unit c : ((GameState)this.handler).CCs) {
-				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500);
-				for(Unit u : unitsRadius) {
-					if(u.getPlayer().getID() != enemyID) {
-						continue;
+			
+			if(((GameState)this.handler).enemyCombatUnitMemory.isEmpty()) {
+				return State.FAILURE;
+			}
+			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
+				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
+					for(Unit c : ((GameState)this.handler).CCs) {
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 500) {
+							((GameState)this.handler).enemyInBase.add(u);
+							continue;
+						}
 					}
-					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
-						((GameState)this.handler).enemyInBase.add(u);
+					for(Pair<Unit,List<Unit> > c : ((GameState)this.handler).DBs) {
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.first.getPosition()) < 200) {
+							((GameState)this.handler).enemyInBase.add(u);
+							continue;
+						}
+					}
+					for(Unit c : ((GameState)this.handler).SBs) {
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+							((GameState)this.handler).enemyInBase.add(u);
+							continue;
+						}
+					}
+					for(Unit c : ((GameState)this.handler).MBs) {
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+							((GameState)this.handler).enemyInBase.add(u);
+							continue;
+						}
 					}
 				}
 			}
-			for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(b.first.getPosition(), 200);
-				for(Unit u : unitsRadius) {
-					if(u.getPlayer().getID() != enemyID) {
-						continue;
-					}
-					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
-						((GameState)this.handler).enemyInBase.add(u);
-					}
-				}
-			}
-			for(Unit b : ((GameState)this.handler).SBs) {
-				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200);
-				for(Unit u : unitsRadius) {
-					if(u.getPlayer().getID() != enemyID) {
-						continue;
-					}
-					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
-						((GameState)this.handler).enemyInBase.add(u);
-					}
-				}
-			}
-			for(Unit b : ((GameState)this.handler).MBs) {
-				List<Unit> unitsRadius = ((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200);
-				for(Unit u : unitsRadius) {
-					if(u.getPlayer().getID() != enemyID) {
-						continue;
-					}
-					if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
-						((GameState)this.handler).enemyInBase.add(u);
-					}
-				}
-			}
-//			for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-//				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Protoss_Interceptor) {
-//					for(Unit c : ((GameState)this.handler).CCs) {
-//						if (((GameState)this.handler).getGame().getUnitsInRadius(c.getPosition(), 500).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-//							((GameState)this.handler).enemyInBase.add(u);
-//						}
-//					}
-//					for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-//						if (((GameState)this.handler).getGame().getUnitsInRadius(b.first.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-//							((GameState)this.handler).enemyInBase.add(u);
-//						}
-//					}
-//					for(Unit b : ((GameState)this.handler).SBs) {
-//						if (((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-//							((GameState)this.handler).enemyInBase.add(u);
-//						}
-//					}
-//					for(Unit b : ((GameState)this.handler).MBs) {
-//						if (((GameState)this.handler).getGame().getUnitsInRadius(b.getPosition(), 200).contains(u) && !((GameState)this.handler).enemyInBase.contains(u)) {
-//							((GameState)this.handler).enemyInBase.add(u);
-//						}
-//					}
-//				}
-//			}
 			boolean overlordCheck = true;
 			for(Unit u : ((GameState)this.handler).enemyInBase) {
 				if(u.getType().canAttack() || u.getType() == UnitType.Protoss_Shuttle || u.getType() == UnitType.Terran_Dropship) {
@@ -120,7 +83,7 @@ public class CheckPerimeter extends Conditional {
 					if(closestCC != null) {
 						if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
 							//u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
-							u.giveMoveOrder(BWTA.getNearestChokepoint(closestCC).getCenter());
+							u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
 							u.status = Status.IDLE;
 							u.attack = Position.None;
 						}

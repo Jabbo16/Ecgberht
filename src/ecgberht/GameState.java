@@ -46,7 +46,7 @@ public class GameState extends GameHandler {
 	public boolean scout = true;
 	public BuildingMap map;
 	public BuildingMap testMap;
-	//public HashSet<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
+	public Set<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
 	public InfluenceMap inMap;
 	public InfluenceMap inMapUnits;
 	public int builtBuildings;
@@ -59,6 +59,7 @@ public class GameState extends GameHandler {
 	public int trainedWorkers;
 	public int mapSize = 2;
 	public int workerCountToSustain = 0;
+	public List<Unit> enemyInBase = new ArrayList<Unit>();
 	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 	public List<Pair<Unit,Integer> > mineralsAssigned = new ArrayList<Pair<Unit,Integer> >();
 	public List<Pair<Unit,List<Unit>>> DBs = new ArrayList<Pair<Unit,List<Unit>>>();
@@ -80,7 +81,6 @@ public class GameState extends GameHandler {
 	public Set<Unit> CCs = new HashSet<Unit>();
 	public Set<Unit> CSs = new HashSet<Unit>();
 	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new HashMap<Unit,EnemyBuilding>();
-	public Set<Unit> enemyInBase = new HashSet<Unit>();
 	public Set<Unit> MBs = new HashSet<Unit>();
 	public Set<Unit> Fs = new HashSet<Unit>();
 	public Set<Unit> SBs = new HashSet<Unit>();
@@ -252,7 +252,7 @@ public class GameState extends GameHandler {
 			
 		}
 		catch(Exception e) {
-			//System.err.println(e);
+			System.err.println(e);
 		}
 	}
 
@@ -470,30 +470,6 @@ public class GameState extends GameHandler {
 		Position rightBottom = new Position(leftTop.getX() + TilePosition.SIZE_IN_PIXELS, leftTop.getY() + TilePosition.SIZE_IN_PIXELS);
 		game.drawBoxMap(leftTop,rightBottom,color);
 	}
-
-//	public void updateEnemyCombatUnits() {
-//		for (Unit u : game.enemy().getUnits()) {
-//			if (!u.getType().isBuilding() && !u.getType().isWorker()) {
-//				if (!enemyCombatUnitMemory.contains(u)) enemyCombatUnitMemory.add(u);
-//			}
-//		}
-//		for (Unit p : enemyCombatUnitMemory) {
-//			TilePosition tileCorrespondingToP = new TilePosition(p.getPosition().getX()/32, p.getPosition().getY()/32);
-//			if (game.isVisible(tileCorrespondingToP)) {
-//				boolean enemyCombatUnitVisible = false;
-//				for (Unit u : game.enemy().getUnits()) {
-//					if (!u.getType().isBuilding() && !u.getType().isWorker() && u.getPosition().equals(p.getPosition())) {
-//						enemyCombatUnitVisible = true;
-//						break;
-//					}
-//				}
-//				if (enemyCombatUnitVisible == false) {
-//					enemyCombatUnitMemory.remove(p);
-//					break;
-//				}
-//			}
-//		}
-//	}
 
 	public String convertSeconds(int seconds){
 		int h = seconds/ 3600;
@@ -771,7 +747,7 @@ public class GameState extends GameHandler {
 		else {
 			String chosen = null;
 			for(Entry<String, Squad> s : squads.entrySet()) {
-				if(s.getValue().members.size() < 12 && getSquadCenter(s.getValue()).getDistance(unit.getPosition()) <  800 && (chosen == null || unit.getDistance(getSquadCenter(s.getValue())) < unit.getDistance(getSquadCenter(squads.get(chosen))))) {
+				if(s.getValue().members.size() < 12 && broodWarDistance(getSquadCenter(s.getValue()), unit.getPosition()) <  800 && (chosen == null || broodWarDistance(unit.getPosition(),getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(), getSquadCenter(squads.get(chosen))))) {
 					chosen = s.getKey();
 				}
 			}
@@ -837,9 +813,12 @@ public class GameState extends GameHandler {
 			}
 			if(!tanks.isEmpty()) {
 				for(Unit t : tanks) {
-					List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
+					//List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
 					boolean found = false;
-					for(Unit e : unitsInRange) {
+					for(Unit e : enemyCombatUnitMemory) {
+						if(broodWarDistance(e.getPosition(), t.getPosition()) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
+							continue;
+						}
 						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isWorker() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
 							found = true;
 							break;
@@ -847,9 +826,11 @@ public class GameState extends GameHandler {
 					}
 					if(found && t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
 						t.siege();
+						continue;
 					}
 					if(!found && t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 						t.unsiege();
+						continue;
 					}
 				}
 			}
@@ -1032,6 +1013,7 @@ public class GameState extends GameHandler {
 		}
 		
 	}
+	
 	public void mergeSquads() {
 		try {
 			if(squads.isEmpty()) {
@@ -1047,7 +1029,7 @@ public class GameState extends GameHandler {
 						if(u2.name.equals(u1.name) || u2.members.size() > 11){
 							continue;
 						}
-						if(getSquadCenter(u1).getApproxDistance(getSquadCenter(u2)) < 200) {
+						if(broodWarDistance(getSquadCenter(u1), getSquadCenter(u2)) < 200) {
 							if(u1_size + u2.members.size() > 12) {
 								continue;
 							}
@@ -1169,5 +1151,18 @@ public class GameState extends GameHandler {
 			} 
 		}
 		return allFine;
+	}
+	
+	//Credits to @PurpleWaveJadien
+	public double broodWarDistance(Position a, Position b) {
+		double dx = Math.abs(a.getX() - b.getX());
+		double dy = Math.abs(a.getY() - b.getY());
+		double d   = Math.min(dx, dy);
+		double D   = Math.max(dx, dy);
+		if (d < D / 4) {
+			return D;
+		}
+		return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
+		 
 	}
 }
