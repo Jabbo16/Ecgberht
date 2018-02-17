@@ -1,7 +1,6 @@
 package ecgberht.Expansion;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.iaie.btree.state.State;
@@ -12,7 +11,6 @@ import bwapi.TilePosition;
 import bwapi.Unit;
 import bwta.BWTA;
 import bwta.BaseLocation;
-import ecgberht.BaseLocationComparator;
 import ecgberht.GameState;
 
 public class ChooseBaseLocation extends Action {
@@ -36,7 +34,6 @@ public class ChooseBaseLocation extends Action {
 				main = ((GameState)this.handler).getPlayer().getStartLocation();
 			}
 			List<BaseLocation> valid = new ArrayList<>();
-			
 			for(BaseLocation b : ((GameState)this.handler).BLs) {
 				for(Unit cc : ((GameState)this.handler).CCs) {
 					if(BWTA.isConnected(b.getTilePosition(), main) && !cc.getTilePosition().equals(b.getTilePosition())) {
@@ -45,8 +42,6 @@ public class ChooseBaseLocation extends Action {
 					}
 				}
 			}
-			Collections.sort(valid, new BaseLocationComparator());
-			
 			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
 				List<BaseLocation> remove = new ArrayList<>();
 				if(valid.isEmpty()) {

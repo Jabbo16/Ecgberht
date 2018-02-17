@@ -19,9 +19,10 @@ public class BioBuild extends AStrategy{
 		numBays = 2;
 		raxPerCC = 3;
 		facPerCC = 0;
+		numRaxForAca = 2;
 		numRaxForFac = 0;
 		bunker = true;
-		supplyForFirstRefinery = 30;
+		supplyForFirstRefinery = 42;
 		armyForAttack = 40;
 		armyForExpand = 20;
 		initTrainUnits();

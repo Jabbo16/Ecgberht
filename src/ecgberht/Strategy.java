@@ -15,6 +15,7 @@ public class Strategy {
 	public int numBays = 0;
 	public int raxPerCC = 0;
 	public int facPerCC = 0;
+	public int numRaxForAca = 1;
 	public int numRaxForFac = 0;
 	public boolean bunker = false;
 	public boolean proxy = false;
@@ -38,6 +39,7 @@ public class Strategy {
 		this.numBays = build.numBays;
 		this.raxPerCC =build.raxPerCC;
 		this.facPerCC =build.facPerCC;
+		this.numRaxForAca = build.numRaxForAca;
 		this.numRaxForFac = build.numRaxForFac;
 		this.bunker = build.bunker;
 		this.proxy = build.proxy;

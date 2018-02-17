@@ -19,7 +19,7 @@ public class ChooseAcademy extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).MBs.size() >= 1 && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Academy) == 0) {
+			if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) >= ((GameState)this.handler).strat.numRaxForAca && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Academy) == 0) {
 				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
 					if(w.second.first == UnitType.Terran_Academy) {
 						return State.FAILURE;

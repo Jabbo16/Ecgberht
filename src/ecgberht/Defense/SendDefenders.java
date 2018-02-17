@@ -1,5 +1,7 @@
 package ecgberht.Defense;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.iaie.btree.state.State;
@@ -29,6 +31,23 @@ public class SendDefenders extends Action {
 				}
 				air_only = false;
 			}
+			List<Unit> friends = new ArrayList<Unit>();
+			for (Squad s : ((GameState)this.handler).squads.values())
+			{
+				for(Unit u : s.members) {
+					friends.add(u);
+				}
+			}
+			if(!((GameState)this.handler).DBs.isEmpty()){
+				for(Pair<Unit, List<Unit>> u : ((GameState)this.handler).DBs) {
+					friends.add(u.first);
+					for(Unit m : u.second) {
+						friends.add(m);
+					}
+				}
+			}
+			
+//			boolean battleWin = ((GameState)this.handler).simulateBattle(friends, ((GameState)this.handler).enemyInBase);
 			if(!air_only && ((GameState)this.handler).squads.isEmpty()) {
 				while(((GameState)this.handler).workerDefenders.size() < 2 && !((GameState)this.handler).workerIdle.isEmpty()) {
 					Unit closestWorker = null;

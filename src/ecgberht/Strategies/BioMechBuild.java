@@ -19,9 +19,10 @@ public class BioMechBuild extends AStrategy{
 		numBays = 1;
 		raxPerCC = 3;
 		facPerCC = 1;
+		numRaxForAca = 2;
 		numRaxForFac = 2;
 		bunker = true;
-		supplyForFirstRefinery = 30;
+		supplyForFirstRefinery = 36;
 		armyForAttack = 35;
 		armyForExpand = 20;
 		initTrainUnits();

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,7 +32,9 @@ import bwapi.*;
 import bwta.*;
 import bwta.Region;
 import ecgberht.Strategies.*;
-
+import jfap.JFAP;
+import jfap.JFAPUnit;
+import ecgberht.BaseLocationComparator;
 public class GameState extends GameHandler {
 
 	public BaseLocation enemyBase = null;
@@ -73,7 +76,7 @@ public class GameState extends GameHandler {
 	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
 	public Pair<String, Unit> chosenMarine = null;
 	public Position attackPosition = null;
-	public Set<BaseLocation> BLs = new HashSet<BaseLocation>();
+	public List<BaseLocation> BLs = new ArrayList<BaseLocation>();
 	public Set<BaseLocation> ScoutSLs = new HashSet<BaseLocation>();
 	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
 	public Set<String> teamNames = new HashSet<String>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
@@ -115,7 +118,7 @@ public class GameState extends GameHandler {
 	public Unit chosenUnitToHarass = null;
 	public Gson enemyInfoJSON = new Gson();
 	public EnemyInfo EI = new EnemyInfo(game.enemy().getName());
-	public Map<Race,Double> dpsWorkerRace = new HashMap<Race,Double>();
+	public JFAP simulator;
 	
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -124,9 +127,7 @@ public class GameState extends GameHandler {
 		testMap = map.clone();
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		mapSize = BWTA.getStartLocations().size();
-		dpsWorkerRace.put(Race.Terran, 7.936);
-		dpsWorkerRace.put(Race.Zerg, 5.411);
-		dpsWorkerRace.put(Race.Protoss, 5.411);
+		simulator = new JFAP(bwapi.getGame());
 	}
 	
 	public Strategy initStrat() {
@@ -492,9 +493,8 @@ public class GameState extends GameHandler {
 	}
 
 	public void initBaseLocations() {
-		for (BaseLocation b : BWTA.getBaseLocations()) {
-			BLs.add(b);
-		}
+		BLs.addAll(BWTA.getBaseLocations());
+		Collections.sort(BLs, new BaseLocationComparator());
 	}
 
 	public void moveUnitFromChokeWhenExpand(){
@@ -1136,7 +1136,7 @@ public class GameState extends GameHandler {
 				if(s.members.size() == 1) {
 					continue;
 				}
-				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 130);
+				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 150);
 				Set<Unit> different = new HashSet<>();
 				different.addAll(circle);
 				different.addAll(s.members);
@@ -1164,5 +1164,56 @@ public class GameState extends GameHandler {
 		}
 		return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
 		 
+	}
+	
+	public boolean simulateBattle(List<Unit> friends, List<Unit> enemies) {
+		simulator.clear();
+		for(Unit u : friends) {
+			simulator.addUnitPlayer1(new JFAPUnit(u));
+		}
+		for(Unit u : enemies) {
+			simulator.addUnitPlayer2(new JFAPUnit(u));
+		}
+		Pair<Integer, Integer> presim_scores = simulator.playerScores();
+//		int presim_my_unit_count = simulator.getState().first.size();
+//		int presim_enemy_unit_count = simulator.getState().second.size();
+		simulator.simulate(480);
+//		int postsim_my_unit_count = simulator.getState().first.size();
+//		int postsim_enemy_unit_count = simulator.getState().second.size();
+		Pair<Integer, Integer> postsim_scores = simulator.playerScores();
+//		int my_losses = presim_my_unit_count - postsim_my_unit_count;
+//		int enemy_losses = presim_enemy_unit_count - postsim_enemy_unit_count;
+		int my_score_diff = presim_scores.first - postsim_scores.first;
+		int enemy_score_diff = presim_scores.second - postsim_scores.second;
+//		System.out.println("----- SIM RESULTS -----");
+//		System.out.println("My losses : " + my_losses);
+//		System.out.println("Enemy losses : " + enemy_losses);
+//		System.out.println("My score diff : " + my_score_diff);
+//		System.out.println("Enemy score diff : " + enemy_score_diff);
+//		System.out.println("-----------------------");
+		if(enemy_score_diff < my_score_diff) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean simulateHarass(Unit harasser, List<Unit> enemies) {
+		simulator.clear();
+		simulator.addUnitPlayer1(new JFAPUnit(harasser));
+		for(Unit u : enemies) {
+			simulator.addUnitPlayer2(new JFAPUnit(u));
+		}
+		Pair<Integer, Integer> presim_scores = simulator.playerScores();
+		int presim_my_unit_count = simulator.getState().first.size();
+		simulator.simulate();
+		int postsim_my_unit_count = simulator.getState().first.size();
+		Pair<Integer, Integer> postsim_scores = simulator.playerScores();
+		int my_losses = presim_my_unit_count - postsim_my_unit_count;
+		int my_score_diff = presim_scores.first - postsim_scores.first;
+		int enemy_score_diff = presim_scores.second - postsim_scores.second;
+		if(enemy_score_diff < my_score_diff || my_losses > 0) {
+			return false;
+		}
+		return true;
 	}
 }
