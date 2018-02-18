@@ -35,14 +35,8 @@ public class ChooseBaseLocation extends Action {
 			}
 			List<BaseLocation> valid = new ArrayList<>();
 			for(BaseLocation b : ((GameState)this.handler).BLs) {
-				for(Unit cc : ((GameState)this.handler).CCs) {
-					if(cc.getTilePosition().equals(b.getTilePosition())){
-						continue;
-					}
-					if(BWTA.isConnected(b.getTilePosition(), main)) {
-						valid.add(b);
-						break;
-					}
+				if(!((GameState)this.handler).CCs.containsKey(b) && BWTA.isConnected(b.getTilePosition(), main)) {
+					valid.add(b);
 				}
 			}
 			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {

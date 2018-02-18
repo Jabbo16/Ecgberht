@@ -81,7 +81,7 @@ public class GameState extends GameHandler {
 	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
 	public Set<String> teamNames = new HashSet<String>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
 	public Set<Unit> buildingLot = new HashSet<Unit>();
-	public Set<Unit> CCs = new HashSet<Unit>();
+	public Map<BaseLocation,Unit> CCs = new HashMap<>();
 	public Set<Unit> CSs = new HashSet<Unit>();
 	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new HashMap<Unit,EnemyBuilding>();
 	public Set<Unit> MBs = new HashSet<Unit>();
@@ -270,7 +270,7 @@ public class GameState extends GameHandler {
 		List<Unit> units = self.getUnits();
 		for(Unit u:units) {
 			if(u.getType() == UnitType.Terran_Command_Center) {
-				CCs.add(u);
+				CCs.put(BWTA.getStartLocation(self),u);
 			}
 		}
 	}
@@ -430,7 +430,7 @@ public class GameState extends GameHandler {
 				game.drawLineMap(lados.first, lados.second, Color.Green);
 			}
 		}
-		for(Unit u: CCs) {
+		for(Unit u: CCs.values()) {
 			print(u,Color.Yellow);
 			game.drawCircleMap(u.getPosition(), 500, Color.Orange);
 		}
@@ -620,37 +620,12 @@ public class GameState extends GameHandler {
 		if(enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
 			enemyBase = null;
 			chosenScout = null;
-			ScoutSLs.addAll(BLs);
-			List<BaseLocation> aux = new ArrayList<BaseLocation>();
-			for(BaseLocation b : ScoutSLs) {
-				for(Unit u : CCs) {
-					if(b.getTilePosition().equals(u.getTilePosition())) {
-						if(!aux.contains(b)) {
-							aux.add(b);
-						}
-						break;
-					}
-				}
-				if(!BWTA.isConnected(self.getStartLocation(), b.getTilePosition())) {
-					if(!aux.contains(b)) {
-						aux.add(b);
-					}
-				}
-				boolean found = false;
-				if(game.isVisible(b.getTilePosition())) {
-					for (Unit u : game.getUnitsInRadius(b.getPosition(), 500)) {
-						if(u.getPlayer().getID() == game.enemy().getID() && u.getType().isBuilding()) {
-							found = true;
-						}
-					}
-					if(!found) {
-						if(!aux.contains(b)) {
-							aux.add(b);
-						}
-					}
+			ScoutSLs.clear();
+			for(BaseLocation b : BLs) {
+				if(!CCs.containsKey(b) && BWTA.isConnected(self.getStartLocation(), b.getTilePosition())) {
+					ScoutSLs.add(b);
 				}
 			}
-			ScoutSLs.removeAll(aux);
 		}
 	}
 
@@ -901,8 +876,10 @@ public class GameState extends GameHandler {
 	public void mineralLocking() {
 		for(Pair<Unit, Unit> u : workerTask) {
 			if(u.second.getType().isMineralField()) {
-				if(!u.first.getTarget().equals(u.second) && u.first.getOrder() == Order.MoveToMinerals && !u.first.isCarryingMinerals()){
-					u.first.gather(u.second);
+				if(u.first.getTarget() != null) {
+					if(!u.first.getTarget().equals(u.second) && u.first.getOrder() == Order.MoveToMinerals && !u.first.isCarryingMinerals()){
+						u.first.gather(u.second);
+					}
 				}
 			}
 		}
@@ -911,7 +888,7 @@ public class GameState extends GameHandler {
 	public Position getNearestCC(Position position) {
 		Unit chosen = null;
 		double distance = Double.MAX_VALUE;
-		for (Unit u : CCs) {
+		for (Unit u : CCs.values()) {
 			double distance_aux = BWTA.getGroundDistance(u.getTilePosition(), position.toTilePosition());
 			if( distance_aux > 0.0 && (chosen == null ||  distance_aux <  distance)) {
 				chosen = u;

@@ -104,7 +104,7 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).CCs) {
+			for(Unit b : ((GameState)this.handler).CCs.values()) {
 				if(b.getType().maxHitPoints() != b.getHitPoints()) {
 					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
 						if(b.equals(r.second)) {

@@ -11,6 +11,7 @@ import bwapi.Position;
 import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BWTA;
+import bwta.Region;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
@@ -50,7 +51,7 @@ public class CheckPerimeter extends Conditional {
 			}
 			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
 				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
-					for(Unit c : ((GameState)this.handler).CCs) {
+					for(Unit c : ((GameState)this.handler).CCs.values()) {
 						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 500) {
 							((GameState)this.handler).enemyInBase.add(u);
 							continue;
@@ -99,16 +100,22 @@ public class CheckPerimeter extends Conditional {
 				if(u.status == Status.DEFENSE) {
 					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
 					if(closestCC != null) {
-						if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-							if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
-								u.giveMoveOrder(((GameState)this.handler).DBs.iterator().next().first.getPosition());
+						Region squad = BWTA.getRegion(((GameState)this.handler).getSquadCenter(u));
+						Region regCC = BWTA.getRegion(closestCC);
+						if(squad != null && regCC != null) {
+							if(!squad.getCenter().equals(regCC.getCenter())){
+								if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
+									u.giveMoveOrder(((GameState)this.handler).DBs.iterator().next().first.getPosition());
+								}
+								else {
+									u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+								}
+								u.status = Status.IDLE;
+								u.attack = Position.None;
 							}
-							else {
-								u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
-							}
-							u.status = Status.IDLE;
-							u.attack = Position.None;
 						}
+						u.status = Status.IDLE;
+						u.attack = Position.None;
 					}
 				}
 			}

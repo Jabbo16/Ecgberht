@@ -86,8 +86,7 @@ public class Ecgberht extends DefaultBWListener {
 		}
 		PrintStream nullOut = new PrintStream(output);
 		System.setErr(nullOut);
-		System.setOut(nullOut);
-		
+		System.setOut(nullOut);		
 		game = mirror.getGame();
 		self = game.self();
 		//game.enableFlag(1);
@@ -105,7 +104,7 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
 		gs.strat = gs.initStrat();
-		
+
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
 		FreeWorker fw = new FreeWorker("No Union", gs);
@@ -353,7 +352,7 @@ public class Ecgberht extends DefaultBWListener {
 		if(game.getFrameCount() > 0 && game.getFrameCount() % 5 == 0) {
 			gs.mineralLocking();
 		}
-		gs.printer();	
+		gs.printer();
 	}
 
 	public void onEnd(boolean arg0) {
@@ -439,7 +438,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.builtRefinery++;
 				} else {
 					if(arg0.getType() == UnitType.Terran_Command_Center) {
-						gs.CCs.add(arg0);
+						gs.CCs.put(BWTA.getNearestBaseLocation(arg0.getTilePosition()),arg0);
 						gs.addNewResources(arg0);
 						if(arg0.getAddon() != null && !gs.CSs.contains(arg0.getAddon())) {
 							gs.CSs.add(arg0.getAddon());
@@ -659,15 +658,15 @@ public class Ecgberht extends DefaultBWListener {
 							break;
 						}
 					}
-					if(gs.CCs.contains(arg0)) {
+					if(gs.CCs.values().contains(arg0)) {
 						gs.removeResources(arg0);
 						if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
 							gs.CSs.remove(arg0.getAddon());
 						}
-						gs.CCs.remove(arg0);
+						gs.CCs.remove(BWTA.getNearestBaseLocation(arg0.getTilePosition()));
 						if(arg0.equals(gs.MainCC)) {
 							if(gs.CCs.size() > 0) {
-								for(Unit u : gs.CCs) {
+								for(Unit u : gs.CCs.values()) {
 									gs.MainCC = u;
 									break;
 								}
@@ -678,7 +677,7 @@ public class Ecgberht extends DefaultBWListener {
 						}
 					}
 					if(gs.CSs.contains(arg0)) {
-						gs.CCs.remove(arg0);
+						gs.CCs.remove(BWTA.getNearestBaseLocation(arg0.getTilePosition()));
 					}
 					if(gs.Fs.contains(arg0)) {
 						gs.Fs.remove(arg0);

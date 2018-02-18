@@ -18,7 +18,7 @@ public class ChooseComsatStation extends Action {
 	public State execute() {
 		try {
 			if(!((GameState)this.handler).CCs.isEmpty()) {
-				for(Unit c : ((GameState)this.handler).CCs) {
+				for(Unit c : ((GameState)this.handler).CCs.values()) {
 					if (!c.isTraining() && c.getAddon() == null) {
 						for(Unit u : ((GameState)this.handler).UBs) {
 							if(u.getType() == UnitType.Terran_Academy) {

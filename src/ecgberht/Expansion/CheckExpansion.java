@@ -21,11 +21,19 @@ public class CheckExpansion extends Conditional {
 		try {
 			if(((GameState)this.handler).defense) {
 				if(((GameState)this.handler).expanding) {
+					
 					((GameState)this.handler).deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
 					((GameState)this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 					((GameState)this.handler).movingToExpand = false;
 					if(((GameState)this.handler).chosenBuilderBL != null) {
-						((GameState)this.handler).workerBuild.add(new Pair<Unit,Pair<UnitType,TilePosition>>(((GameState)this.handler).chosenBuilderBL,new Pair <UnitType,TilePosition>(UnitType.Terran_Command_Center,((GameState)this.handler).chosenBaseLocation.getTilePosition())));
+						for(Pair<Unit, Pair<UnitType, TilePosition>> u : ((GameState)this.handler).workerBuild) {
+							if(u.first.equals(((GameState)this.handler).chosenBuilderBL)) {
+								((GameState)this.handler).workerBuild.remove(u);
+								((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
+								((GameState)this.handler).chosenBuilderBL.stop();
+								break;
+							}
+						}
 						((GameState)this.handler).chosenBuilderBL = null;
 					}
 					((GameState)this.handler).expanding = false;
