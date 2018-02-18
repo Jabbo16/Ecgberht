@@ -20,11 +20,14 @@ public class BioBuild extends AStrategy{
 		raxPerCC = 3;
 		facPerCC = 0;
 		numRaxForAca = 2;
-		numRaxForFac = 0;
+		numRaxForFac = 4;
 		bunker = true;
-		supplyForFirstRefinery = 42;
+		supplyForFirstRefinery = 36;
 		armyForAttack = 40;
-		armyForExpand = 20;
+		armyForExpand = 18;
+		numCCForPort = 2;
+		numCCForScience = 2;
+		portPerCC = 0;
 		initTrainUnits();
 		initBuildUnits();
 		initBuildAddons();
@@ -43,6 +46,9 @@ public class BioBuild extends AStrategy{
 		buildUnits.add(UnitType.Terran_Academy);
 		buildUnits.add(UnitType.Terran_Engineering_Bay);
 		buildUnits.add(UnitType.Terran_Missile_Turret);
+		buildUnits.add(UnitType.Terran_Factory);
+		buildUnits.add(UnitType.Terran_Starport);
+		buildUnits.add(UnitType.Terran_Science_Facility);
 		if(bunker) {
 			buildUnits.add(UnitType.Terran_Bunker);
 		}

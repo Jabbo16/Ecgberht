@@ -20,10 +20,10 @@ public class Expand extends Action {
 	public State execute() {
 		try {
 			Unit chosen = ((GameState)this.handler).chosenBuilderBL;
-			if(!chosen.build(UnitType.Terran_Command_Center, ((GameState)this.handler).chosenBaseLocation)) {
+			if(!chosen.build(UnitType.Terran_Command_Center, ((GameState)this.handler).chosenBaseLocation.getTilePosition())) {
 				((GameState)this.handler).movingToExpand = false;
 				((GameState)this.handler).expanding = false;
-				((GameState)this.handler).checkUnitsBL(((GameState)this.handler).chosenBaseLocation,chosen);
+				((GameState)this.handler).checkUnitsBL(((GameState)this.handler).chosenBaseLocation.getTilePosition(),chosen);
 				((GameState)this.handler).chosenBaseLocation = null;
 				((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
 				((GameState)this.handler).chosenBuilderBL.stop();
@@ -33,7 +33,7 @@ public class Expand extends Action {
 				return State.FAILURE;
 			}
 			((GameState)this.handler).movingToExpand = false;
-			((GameState)this.handler).workerBuild.add(new Pair<Unit,Pair<UnitType,TilePosition> >(chosen,new Pair <UnitType,TilePosition>(UnitType.Terran_Command_Center,((GameState)this.handler).chosenBaseLocation)));
+			((GameState)this.handler).workerBuild.add(new Pair<Unit,Pair<UnitType,TilePosition>>(chosen,new Pair <UnitType,TilePosition>(UnitType.Terran_Command_Center,((GameState)this.handler).chosenBaseLocation.getTilePosition())));
 			((GameState)this.handler).expanding = false;
 			((GameState)this.handler).chosenBaseLocation = null;
 			((GameState)this.handler).chosenBuilderBL = null;

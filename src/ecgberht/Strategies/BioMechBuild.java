@@ -21,6 +21,9 @@ public class BioMechBuild extends AStrategy{
 		facPerCC = 1;
 		numRaxForAca = 2;
 		numRaxForFac = 2;
+		numCCForPort = 2;
+		numCCForScience = 2;
+		portPerCC = 0;
 		bunker = true;
 		supplyForFirstRefinery = 36;
 		armyForAttack = 35;
@@ -45,6 +48,8 @@ public class BioMechBuild extends AStrategy{
 		buildUnits.add(UnitType.Terran_Engineering_Bay);
 		buildUnits.add(UnitType.Terran_Missile_Turret);
 		buildUnits.add(UnitType.Terran_Factory);
+		buildUnits.add(UnitType.Terran_Starport);
+		buildUnits.add(UnitType.Terran_Science_Facility);
 		if(bunker) {
 			buildUnits.add(UnitType.Terran_Bunker);
 		}

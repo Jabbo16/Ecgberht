@@ -23,8 +23,8 @@ public class CheckVisibleBL extends Action {
 				if(BWTA.getRegion(u.getPosition()) == null || !u.getType().canAttack() || u.getType().isWorker()) {
 					continue;
 				}
-				if(BWTA.getRegion(u.getPosition()) != null && BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.toPosition()) != null) {
-					if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.toPosition()).getCenter())) {
+				if(BWTA.getRegion(u.getPosition()) != null && BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.getPosition()) != null) {
+					if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).chosenBaseLocation.getPosition()).getCenter())) {
 						((GameState)this.handler).chosenBaseLocation = null;
 						((GameState)this.handler).movingToExpand = false;
 						((GameState)this.handler).chosenBuilderBL.stop();
@@ -35,7 +35,7 @@ public class CheckVisibleBL extends Action {
 						((GameState)this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 						return State.FAILURE;
 					}
-				} else if(u.getDistance(((GameState)this.handler).chosenBaseLocation.toPosition()) < 300) {
+				} else if(((GameState)this.handler).broodWarDistance(u.getPosition(), ((GameState)this.handler).chosenBaseLocation.getPosition()) < 300) {
 					((GameState)this.handler).chosenBaseLocation = null;
 					((GameState)this.handler).movingToExpand = false;
 					((GameState)this.handler).chosenBuilderBL.stop();
@@ -47,7 +47,7 @@ public class CheckVisibleBL extends Action {
 					return State.FAILURE;
 				}
 			}
-			if(((GameState)this.handler).getGame().isVisible(((GameState)this.handler).chosenBaseLocation) || ((GameState)this.handler).chosenBuilderBL.getDistance(((GameState)this.handler).chosenBaseLocation.toPosition()) < 10) {
+			if(((GameState)this.handler).getGame().isVisible(((GameState)this.handler).chosenBaseLocation.getTilePosition())) {
 				//if(((GameState)this.handler).chosenBuilderBL.getDistance(((GameState)this.handler).chosenBaseLocation.toPosition()) < 10) {
 				return State.SUCCESS;
 				//}

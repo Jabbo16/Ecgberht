@@ -14,8 +14,11 @@ public abstract class AStrategy {
 	public int numBays = 0;
 	public int raxPerCC = 0;
 	public int facPerCC = 0;
+	public int portPerCC = 0;
+	public int numCCForPort = 0;
 	public int numRaxForAca = 1;
 	public int numRaxForFac = 0;
+	public int numCCForScience = 0;
 	public boolean bunker = false;
 	public boolean proxy = false;
 	public int supplyForFirstRefinery = 0;

@@ -22,7 +22,7 @@ public class ChooseBuilderBL extends Action {
 				return State.SUCCESS;
 			}
 			Unit closestWorker = null;
-			TilePosition chosen = ((GameState)this.handler).chosenBaseLocation;
+			TilePosition chosen = ((GameState)this.handler).chosenBaseLocation.getTilePosition();
 			if(!((GameState)this.handler).workerIdle.isEmpty()) {
 				for (Unit u : ((GameState)this.handler).workerIdle) {
 					if ((closestWorker == null || u.getDistance(chosen.toPosition()) < closestWorker.getDistance(chosen.toPosition()))) {

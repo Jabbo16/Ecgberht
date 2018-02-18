@@ -19,12 +19,11 @@ public class ChooseBarracks extends Action {
 	public State execute() {
 		try {
 			if(((GameState)this.handler).strat.name != "ProxyBBS") {
-				for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Barracks) {
-						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Academy) == 0 ) {
-							return State.FAILURE;
-						}
-					}
+				if(!((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState)this.handler).strat.numRaxForAca && ((GameState)this.handler).countUnit(UnitType.Terran_Academy) == 0) {
+					return State.FAILURE;
+				}
+				if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState)this.handler).strat.numRaxForAca && ((GameState)this.handler).countUnit(UnitType.Terran_Refinery) == 0) {
+					return State.FAILURE;
 				}
 			}
 			else {

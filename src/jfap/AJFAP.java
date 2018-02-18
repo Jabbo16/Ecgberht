@@ -2,9 +2,7 @@ package jfap;
 
 import java.util.List;
 
-import bwapi.DamageType;
 import bwapi.Pair;
-import bwapi.UnitType;
 
 public abstract class AJFAP {
 	
@@ -72,14 +70,4 @@ public abstract class AJFAP {
 	   * Clears the simulation. All units are removed for both players. Equivalent to reconstructing.
 	   */
 	  abstract void clear();
-	  
-	  abstract void dealDamage(final JFAPUnit fu, int damage, DamageType damageType);
-	  abstract int distButNotReally(final JFAPUnit u1, final JFAPUnit u2);
-	  abstract boolean isSuicideUnit(UnitType ut);
-	  abstract void unitsim(final JFAPUnit fu, List<JFAPUnit> enemyUnits);
-	  abstract void medicsim(final JFAPUnit fu, List<JFAPUnit> friendlyUnits);
-	  abstract boolean suicideSim(final JFAPUnit fu, List<JFAPUnit> enemyUnits);
-	  abstract void isimulate();
-	  abstract void unitDeath(final JFAPUnit fu, List<JFAPUnit> itsFriendlies);
-	  abstract void convertToUnitType(final JFAPUnit fu, UnitType ut);
 }

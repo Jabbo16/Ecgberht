@@ -1,5 +1,6 @@
 package ecgberht.Expansion;
 
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -18,10 +19,10 @@ public class SendBuilderBL extends Action {
 			if(((GameState)this.handler).movingToExpand) {
 				return State.SUCCESS;
 			}
-			if(((GameState)this.handler).chosenBuilderBL.move(((GameState)this.handler).chosenBaseLocation.toPosition())) {
-				((GameState)this.handler).movingToExpand = true;
-				((GameState)this.handler).moveUnitFromChokeWhenExpand();
-				return State.SUCCESS;
+			if(((GameState)this.handler).chosenBuilderBL.move(((GameState)this.handler).chosenBaseLocation.getPosition())) {
+					((GameState)this.handler).movingToExpand = true;
+					((GameState)this.handler).moveUnitFromChokeWhenExpand();
+					return State.SUCCESS;
 			}
 			((GameState)this.handler).movingToExpand = false;
 			return State.FAILURE;

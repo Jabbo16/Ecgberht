@@ -36,7 +36,10 @@ public class ChooseBaseLocation extends Action {
 			List<BaseLocation> valid = new ArrayList<>();
 			for(BaseLocation b : ((GameState)this.handler).BLs) {
 				for(Unit cc : ((GameState)this.handler).CCs) {
-					if(BWTA.isConnected(b.getTilePosition(), main) && !cc.getTilePosition().equals(b.getTilePosition())) {
+					if(cc.getTilePosition().equals(b.getTilePosition())){
+						continue;
+					}
+					if(BWTA.isConnected(b.getTilePosition(), main)) {
 						valid.add(b);
 						break;
 					}
@@ -60,7 +63,7 @@ public class ChooseBaseLocation extends Action {
 			if(valid.isEmpty()) {
 				return State.FAILURE;
 			}
-			((GameState)this.handler).chosenBaseLocation = valid.get(0).getTilePosition();
+			((GameState)this.handler).chosenBaseLocation = valid.get(0);
 			return State.SUCCESS;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());

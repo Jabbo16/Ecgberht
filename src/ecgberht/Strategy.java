@@ -15,8 +15,11 @@ public class Strategy {
 	public int numBays = 0;
 	public int raxPerCC = 0;
 	public int facPerCC = 0;
+	public int portPerCC = 0;
 	public int numRaxForAca = 1;
 	public int numRaxForFac = 0;
+	public int numCCForPort = 0;
+	public int numCCForScience = 0;
 	public boolean bunker = false;
 	public boolean proxy = false;
 	public int supplyForFirstRefinery = 0;
@@ -37,10 +40,13 @@ public class Strategy {
 		this.armyForBay = build.armyForBay;
 		this.armyForTurret = build.armyForTurret;
 		this.numBays = build.numBays;
-		this.raxPerCC =build.raxPerCC;
-		this.facPerCC =build.facPerCC;
+		this.raxPerCC = build.raxPerCC;
+		this.facPerCC = build.facPerCC;
+		this.portPerCC = build.portPerCC;
 		this.numRaxForAca = build.numRaxForAca;
 		this.numRaxForFac = build.numRaxForFac;
+		this.numCCForPort = build.numCCForPort;
+		this.numCCForScience = build.numCCForScience;
 		this.bunker = build.bunker;
 		this.proxy = build.proxy;
 		this.supplyForFirstRefinery =build.supplyForFirstRefinery;

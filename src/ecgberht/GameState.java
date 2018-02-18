@@ -87,13 +87,14 @@ public class GameState extends GameHandler {
 	public Set<Unit> MBs = new HashSet<Unit>();
 	public Set<Unit> Fs = new HashSet<Unit>();
 	public Set<Unit> SBs = new HashSet<Unit>();
+	public Set<Unit> Ps = new HashSet<Unit>();
 	public Set<Unit> Ts = new HashSet<Unit>();
 	public Set<Unit> UBs = new HashSet<Unit>();
 	public Strategy strat = new Strategy();
 	public String chosenSquad = null;
 	public TechType chosenResearch = null;
 	public TilePosition checkScan = null;
-	public TilePosition chosenBaseLocation = null;
+	public BaseLocation chosenBaseLocation = null;
 	public TilePosition chosenPosition = null;
 	public TilePosition closestChoke = null;
 	public TilePosition initAttackPosition = null;
@@ -380,7 +381,7 @@ public class GameState extends GameHandler {
 			print(chosenHarasser,Color.Blue);
 		}
 		if (chosenBaseLocation != null) {
-			print(chosenBaseLocation,UnitType.Terran_Command_Center,Color.Cyan);
+			print(chosenBaseLocation.getTilePosition(),UnitType.Terran_Command_Center,Color.Cyan);
 		}
 		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
 			game.drawTextMap(u.first.getPosition(), "ChosenBuilder");
@@ -502,13 +503,13 @@ public class GameState extends GameHandler {
 			if(!squads.isEmpty()) {
 				List<Unit> radius = game.getUnitsInRadius(closestChoke.toPosition(), 500);
 				if(!radius.isEmpty()) {
-					List<Chokepoint> cs = BWTA.getRegion(chosenBaseLocation).getChokepoints();
+					List<Chokepoint> cs = BWTA.getRegion(chosenBaseLocation.getTilePosition()).getChokepoints();
 					Chokepoint closestChoke = null;
 					for(Chokepoint c : cs) {
 						if(!c.getCenter().toTilePosition().equals(this.closestChoke)) {
-							double aux = BWTA.getGroundDistance(c.getCenter().toTilePosition().makeValid(),chosenBaseLocation);
+							double aux = BWTA.getGroundDistance(c.getCenter().toTilePosition().makeValid(),chosenBaseLocation.getTilePosition());
 							if(aux > 0.0) {
-								if(closestChoke == null ||  aux< BWTA.getGroundDistance(closestChoke.getCenter().toTilePosition().makeValid(),chosenBaseLocation)) {
+								if(closestChoke == null ||  aux< BWTA.getGroundDistance(closestChoke.getCenter().toTilePosition().makeValid(),chosenBaseLocation.getTilePosition())) {
 									closestChoke = c;
 								}
 							}
@@ -1136,7 +1137,7 @@ public class GameState extends GameHandler {
 				if(s.members.size() == 1) {
 					continue;
 				}
-				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 150);
+				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 160);
 				Set<Unit> different = new HashSet<>();
 				different.addAll(circle);
 				different.addAll(s.members);
@@ -1203,15 +1204,15 @@ public class GameState extends GameHandler {
 		for(Unit u : enemies) {
 			simulator.addUnitPlayer2(new JFAPUnit(u));
 		}
-		Pair<Integer, Integer> presim_scores = simulator.playerScores();
-		int presim_my_unit_count = simulator.getState().first.size();
-		simulator.simulate();
-		int postsim_my_unit_count = simulator.getState().first.size();
-		Pair<Integer, Integer> postsim_scores = simulator.playerScores();
-		int my_losses = presim_my_unit_count - postsim_my_unit_count;
-		int my_score_diff = presim_scores.first - postsim_scores.first;
-		int enemy_score_diff = presim_scores.second - postsim_scores.second;
-		if(enemy_score_diff < my_score_diff || my_losses > 0) {
+		Pair<Integer, Integer> preSimScores = simulator.playerScores();
+		int preSimFriendlyUnitCount = simulator.getState().first.size();
+		simulator.simulate(50);
+		Pair<Integer, Integer> postSimScores = simulator.playerScores();
+		int postSimFriendlyUnitCount = simulator.getState().first.size();
+		int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
+		int myScoreDiff = preSimScores.first - postSimScores.first;
+		int enemyScoreDiff = preSimScores.second - postSimScores.second;
+		if(enemyScoreDiff < myScoreDiff || myLosses > 0) {
 			return false;
 		}
 		return true;

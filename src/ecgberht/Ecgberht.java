@@ -139,6 +139,8 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
 		ChooseBarracks cBar = new ChooseBarracks("Choose Barracks", gs);
 		ChooseFactory cFar = new ChooseFactory("Choose Factory", gs);
+		ChoosePort cPor = new ChoosePort("Choose Star Port", gs);
+		ChooseScience cSci = new ChooseScience("Choose Science Facility", gs);
 		ChooseRefinery cRef = new ChooseRefinery("Choose Refinery", gs);
 		ChooseBay cBay = new ChooseBay("Choose Bay", gs);
 		ChooseTurret cTur = new ChooseTurret("Choose Turret", gs);
@@ -160,11 +162,16 @@ public class Ecgberht extends DefaultBWListener {
 		if(gs.strat.buildUnits.contains(UnitType.Terran_Engineering_Bay)) {
 			chooseBuildingBuild.addChild(cBay);
 		}
-		chooseBuildingBuild.addChild(cBar);
 		if(gs.strat.buildUnits.contains(UnitType.Terran_Factory)) {
 			chooseBuildingBuild.addChild(cFar);
 		}
-		
+		if(gs.strat.buildUnits.contains(UnitType.Terran_Starport)) {
+			chooseBuildingBuild.addChild(cPor);
+		}
+		if(gs.strat.buildUnits.contains(UnitType.Terran_Science_Facility)) {
+			chooseBuildingBuild.addChild(cSci);
+		}
+		chooseBuildingBuild.addChild(cBar);
 		Sequence move = new Sequence("Move",chooseBuildingBuild,cp,cw,crb,m);
 		moveBuildTree = new BehavioralTree("Building Tree");
 		moveBuildTree.addChild(move);
@@ -256,7 +263,13 @@ public class Ecgberht extends DefaultBWListener {
 		CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon",gs);
 		ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station",gs);
 		ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop",gs);
-		Selector<GameHandler> ChooseAddon = new Selector<GameHandler>("Choose Addon",cMS,cCS);
+		Selector<GameHandler> ChooseAddon = new Selector<GameHandler>("Choose Addon");
+		if(gs.strat.buildAddons.contains(UnitType.Terran_Machine_Shop)) {
+			ChooseAddon.addChild(cMS);
+		}
+		if(gs.strat.buildAddons.contains(UnitType.Terran_Comsat_Station)) {
+			ChooseAddon.addChild(cCS);
+		}
 		Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
 		addonBuildTree = new BehavioralTree("Addon Build Tree");
 		addonBuildTree.addChild(Addon);
@@ -451,6 +464,12 @@ public class Ecgberht extends DefaultBWListener {
 					if(arg0.getType() == UnitType.Terran_Factory) {
 						gs.Fs.add(arg0);
 					}
+					if(arg0.getType() == UnitType.Terran_Starport) {
+						gs.Ps.add(arg0);
+					}
+					if(arg0.getType() == UnitType.Terran_Science_Facility) {
+						gs.UBs.add(arg0);
+					}
 					if(arg0.getType() == UnitType.Terran_Supply_Depot) {
 						gs.SBs.add(arg0);
 					}
@@ -479,7 +498,10 @@ public class Ecgberht extends DefaultBWListener {
 						if(!gs.TTMs.containsKey(arg0.getID())) {
 							String nombre = gs.addToSquad(arg0);
 							gs.TTMs.put(arg0.getID(),nombre);
-							if(gs.closestChoke != null) {
+							if(!gs.DBs.isEmpty()) {
+								arg0.attack(gs.DBs.iterator().next().first.getPosition());
+							}
+							else if(gs.closestChoke != null) {
 								arg0.attack(gs.closestChoke.toPosition());
 							}else{
 								arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
@@ -496,7 +518,10 @@ public class Ecgberht extends DefaultBWListener {
 						gs.addToSquad(arg0);
 						if(gs.strat.name != "ProxyBBS") {
 							if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
-								if(gs.closestChoke != null) {
+								if(!gs.DBs.isEmpty()) {
+									arg0.attack(gs.DBs.iterator().next().first.getPosition());
+								}
+								else if(gs.closestChoke != null) {
 									arg0.attack(gs.closestChoke.toPosition());
 								}else{
 									arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
@@ -670,6 +695,9 @@ public class Ecgberht extends DefaultBWListener {
 					if(gs.Ts.contains(arg0)) {
 						gs.Ts.remove(arg0);
 					}
+					if(gs.Ps.contains(arg0)) {
+						gs.Ps.remove(arg0);
+					}	
 					if(arg0.getType() == UnitType.Terran_Bunker) {
 						for(Pair<Unit,List<Unit> > b : gs.DBs) {
 							if(b.first.equals(arg0)) {

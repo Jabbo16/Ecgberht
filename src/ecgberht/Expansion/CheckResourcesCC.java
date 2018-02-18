@@ -21,11 +21,13 @@ public class CheckResourcesCC extends Conditional {
 		try {
 			Pair<Integer,Integer> cash = ((GameState)this.handler).getCash();
 			Unit chosen = ((GameState)this.handler).chosenBuilderBL;
-			TilePosition end = ((GameState)this.handler).chosenBaseLocation;
-			if(chosen != null && end != null) {
-				TilePosition start = chosen.getTilePosition();
-				if(cash.first + ((GameState)this.handler).getMineralsWhenReaching(chosen, start, end) >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
-					return State.SUCCESS;
+			if(((GameState)this.handler).chosenBaseLocation != null) {
+				TilePosition end = ((GameState)this.handler).chosenBaseLocation.getTilePosition();
+				if(chosen != null && end != null) {
+					TilePosition start = chosen.getTilePosition();
+					if(cash.first + ((GameState)this.handler).getMineralsWhenReaching(chosen, start, end) >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
+						return State.SUCCESS;
+					}
 				}
 			}
 			if(cash.first >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {

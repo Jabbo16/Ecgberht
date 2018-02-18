@@ -17,6 +17,9 @@ public class CollectGas extends Action {
 	@Override
 	public State execute() {
 		try {
+			if(((GameState)this.handler).getPlayer().gas() >= 400) {
+				return State.FAILURE;
+			}
 			Unit chosen = ((GameState)this.handler).chosenWorker;
 			if(!((GameState)this.handler).refineriesAssigned.isEmpty()) {
 				Unit closestGeyser = null;

@@ -28,6 +28,24 @@ public class CheckPerimeter extends Conditional {
 			((GameState)this.handler).enemyInBase.clear();
 			
 			if(((GameState)this.handler).enemyCombatUnitMemory.isEmpty()) {
+				for(Squad u : ((GameState)this.handler).squads.values()) {
+					if(u.status == Status.DEFENSE) {
+						Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
+						if(closestCC != null) {
+							if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+								if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
+									u.giveMoveOrder(((GameState)this.handler).DBs.iterator().next().first.getPosition());
+								}
+								else {
+									u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+								}
+								u.status = Status.IDLE;
+								u.attack = Position.None;
+							}
+						}
+					}
+				}
+				((GameState)this.handler).defense = false;
 				return State.FAILURE;
 			}
 			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
@@ -82,8 +100,12 @@ public class CheckPerimeter extends Conditional {
 					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
 					if(closestCC != null) {
 						if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-							//u.giveAttackOrder(((GameState)this.handler).closestChoke.toPosition());
-							u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+							if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
+								u.giveMoveOrder(((GameState)this.handler).DBs.iterator().next().first.getPosition());
+							}
+							else {
+								u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+							}
 							u.status = Status.IDLE;
 							u.attack = Position.None;
 						}

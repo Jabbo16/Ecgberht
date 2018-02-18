@@ -4,9 +4,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Pair;
-import bwapi.TilePosition;
-import bwapi.Unit;
 import bwapi.UnitType;
 import ecgberht.GameState;
 
@@ -19,20 +16,16 @@ public class ChooseFactory extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).Fs.size() == 0) {
-				if(((GameState)this.handler).MBs.isEmpty()) {
-					return State.FAILURE;
-				}
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w : ((GameState)this.handler).workerBuild) {
-					if(w.second.first == UnitType.Terran_Factory) {
-						return State.FAILURE;
-					}
-				}
-				for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Factory) {
-						return State.FAILURE;
-					}
-				}
+			
+			if(((GameState)this.handler).MBs.isEmpty() || ((GameState)this.handler).strat.numRaxForFac > ((GameState)this.handler).countUnit(UnitType.Terran_Barracks) || 
+					(((GameState)this.handler).countUnit(UnitType.Terran_Factory) > 0 && ((GameState)this.handler).strat.facPerCC == 0)) {
+				return State.FAILURE;
+			}
+			if(((GameState)this.handler).countUnit(UnitType.Terran_Factory) == 0 && ((GameState)this.handler).strat.facPerCC == 0) {
+				((GameState)this.handler).chosenToBuild = UnitType.Terran_Factory;
+				return State.SUCCESS;
+			}
+			else if(((GameState)this.handler).countUnit(UnitType.Terran_Factory) < ((GameState)this.handler).strat.facPerCC * ((GameState)this.handler).CCs.size()) {
 				((GameState)this.handler).chosenToBuild = UnitType.Terran_Factory;
 				return State.SUCCESS;
 			}

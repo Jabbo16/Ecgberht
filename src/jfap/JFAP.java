@@ -6,7 +6,6 @@ import java.util.List;
 import bwapi.DamageType;
 import bwapi.Game;
 import bwapi.Pair;
-import bwapi.Position;
 import bwapi.Race;
 import bwapi.UnitSizeType;
 import bwapi.UnitType;
@@ -149,7 +148,6 @@ public class JFAP extends AJFAP{
 		player2.clear();
 	}
 
-	@Override
 	void dealDamage(JFAPUnit fu, int damage, DamageType damageType) {
 		damage <<= 8;
 		final int remainingShields = fu.shields - damage + (fu.shieldArmor << 8);
@@ -182,12 +180,10 @@ public class JFAP extends AJFAP{
 		fu.health -= Math.max(128, damage);
 	}
 
-	@Override
 	int distButNotReally(JFAPUnit u1, JFAPUnit u2) {
 		return (u1.x - u2.x) * (u1.x - u2.x) + (u1.y - u2.y) * (u1.y - u2.y);
 	}
 
-	@Override
 	boolean isSuicideUnit(UnitType ut) {
 		return (ut == UnitType.Zerg_Scourge ||
 				ut == UnitType.Terran_Vulture_Spider_Mine ||
@@ -195,7 +191,6 @@ public class JFAP extends AJFAP{
 				ut == UnitType.Protoss_Scarab);
 	}
 
-	@Override
 	void unitsim(JFAPUnit fu, List<JFAPUnit> enemyUnits) {
 		if (fu.attackCooldownRemaining > 0) {
 			didSomething = true;
@@ -257,7 +252,6 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	@Override
 	void medicsim(JFAPUnit fu, List<JFAPUnit> friendlyUnits) {
 		JFAPUnit closestHealable = null;
 		int closestDist = 0;
@@ -281,7 +275,6 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	@Override
 	boolean suicideSim(JFAPUnit fu, List<JFAPUnit> enemyUnits) {
 		JFAPUnit closestEnemy = null;
 		int closestDist = 0;
@@ -377,7 +370,6 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	@Override
 	void isimulate() {
 		for (JFAPUnit fu : player1) {
 			simUnit(fu, player1, player2);
@@ -396,7 +388,6 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	@Override
 	void unitDeath(JFAPUnit fu, List<JFAPUnit> itsFriendlies) {
 		if (fu.unitType == UnitType.Terran_Bunker) {
 			convertToUnitType(fu, UnitType.Terran_Marine);
@@ -406,16 +397,14 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	@Override
 	void convertToUnitType(JFAPUnit fu, UnitType ut) {
-		EnemyData ed = new EnemyData();
-		ed.lastPosition = new Position(fu.x, fu.y);
-		ed.lastPlayer = fu.player;
-		ed.lastType = ut;
-		JFAPUnit funew = new JFAPUnit(ed);
+		JFAPUnit funew = new JFAPUnit();
+		funew.x = fu.x;
+		funew.y = fu.y;
+		funew.player = fu.player;
+		funew.unitType = ut;
 		funew.attackCooldownRemaining = fu.attackCooldownRemaining;
 		funew.elevation = fu.elevation;
 		fu = funew;
-
 	}
 }
