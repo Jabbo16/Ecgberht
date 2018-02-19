@@ -81,7 +81,7 @@ public class GameState extends GameHandler {
 	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
 	public Set<String> teamNames = new HashSet<String>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
 	public Set<Unit> buildingLot = new HashSet<Unit>();
-	public Map<BaseLocation,Unit> CCs = new HashMap<>();
+	public Map<Position,Unit> CCs = new HashMap<>();
 	public Set<Unit> CSs = new HashSet<Unit>();
 	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new HashMap<Unit,EnemyBuilding>();
 	public Set<Unit> MBs = new HashSet<Unit>();
@@ -94,7 +94,7 @@ public class GameState extends GameHandler {
 	public String chosenSquad = null;
 	public TechType chosenResearch = null;
 	public TilePosition checkScan = null;
-	public BaseLocation chosenBaseLocation = null;
+	public TilePosition chosenBaseLocation = null;
 	public TilePosition chosenPosition = null;
 	public TilePosition closestChoke = null;
 	public TilePosition initAttackPosition = null;
@@ -270,7 +270,7 @@ public class GameState extends GameHandler {
 		List<Unit> units = self.getUnits();
 		for(Unit u:units) {
 			if(u.getType() == UnitType.Terran_Command_Center) {
-				CCs.put(BWTA.getStartLocation(self),u);
+				CCs.put(BWTA.getRegion(u.getPosition()).getCenter(),u);
 			}
 		}
 	}
@@ -381,7 +381,7 @@ public class GameState extends GameHandler {
 			print(chosenHarasser,Color.Blue);
 		}
 		if (chosenBaseLocation != null) {
-			print(chosenBaseLocation.getTilePosition(),UnitType.Terran_Command_Center,Color.Cyan);
+			print(chosenBaseLocation, UnitType.Terran_Command_Center,Color.Cyan);
 		}
 		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
 			game.drawTextMap(u.first.getPosition(), "ChosenBuilder");
@@ -503,13 +503,13 @@ public class GameState extends GameHandler {
 			if(!squads.isEmpty()) {
 				List<Unit> radius = game.getUnitsInRadius(closestChoke.toPosition(), 500);
 				if(!radius.isEmpty()) {
-					List<Chokepoint> cs = BWTA.getRegion(chosenBaseLocation.getTilePosition()).getChokepoints();
+					List<Chokepoint> cs = BWTA.getRegion(chosenBaseLocation).getChokepoints();
 					Chokepoint closestChoke = null;
 					for(Chokepoint c : cs) {
 						if(!c.getCenter().toTilePosition().equals(this.closestChoke)) {
-							double aux = BWTA.getGroundDistance(c.getCenter().toTilePosition().makeValid(),chosenBaseLocation.getTilePosition());
+							double aux = BWTA.getGroundDistance(c.getCenter().toTilePosition().makeValid(),chosenBaseLocation);
 							if(aux > 0.0) {
-								if(closestChoke == null ||  aux< BWTA.getGroundDistance(closestChoke.getCenter().toTilePosition().makeValid(),chosenBaseLocation.getTilePosition())) {
+								if(closestChoke == null ||  aux< BWTA.getGroundDistance(closestChoke.getCenter().toTilePosition().makeValid(),chosenBaseLocation)) {
 									closestChoke = c;
 								}
 							}
@@ -622,7 +622,7 @@ public class GameState extends GameHandler {
 			chosenScout = null;
 			ScoutSLs.clear();
 			for(BaseLocation b : BLs) {
-				if(!CCs.containsKey(b) && BWTA.isConnected(self.getStartLocation(), b.getTilePosition())) {
+				if(!CCs.containsKey(b.getRegion().getCenter()) && BWTA.isConnected(self.getStartLocation(), b.getTilePosition())) {
 					ScoutSLs.add(b);
 				}
 			}

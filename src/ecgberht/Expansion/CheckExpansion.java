@@ -3,14 +3,14 @@ package ecgberht.Expansion;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import ecgberht.GameState;
 
 import bwapi.Pair;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
-import ecgberht.GameState;
 
-public class CheckExpansion extends Conditional {
+public class CheckExpansion extends Conditional{
 
 	public CheckExpansion(String name, GameHandler gh) {
 		super(name, gh);
@@ -19,43 +19,19 @@ public class CheckExpansion extends Conditional {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).defense) {
-				if(((GameState)this.handler).expanding) {
-					
-					((GameState)this.handler).deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
-					((GameState)this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
-					((GameState)this.handler).movingToExpand = false;
-					if(((GameState)this.handler).chosenBuilderBL != null) {
-						for(Pair<Unit, Pair<UnitType, TilePosition>> u : ((GameState)this.handler).workerBuild) {
-							if(u.first.equals(((GameState)this.handler).chosenBuilderBL)) {
-								((GameState)this.handler).workerBuild.remove(u);
-								((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
-								((GameState)this.handler).chosenBuilderBL.stop();
-								break;
-							}
-						}
-						((GameState)this.handler).chosenBuilderBL = null;
-					}
-					((GameState)this.handler).expanding = false;
-					((GameState)this.handler).chosenBaseLocation = null;
-					
-				}
+			if(((GameState)this.handler).defense){
 				return State.FAILURE;
 			}
-			if(!((GameState)this.handler).expanding && ((GameState)this.handler).movingToExpand) {
-				((GameState)this.handler).expanding = false;
-				return State.FAILURE;
-			}
-			if(((GameState)this.handler).expanding) {
+			if(((GameState)this.handler).expanding){
 				return State.SUCCESS;
 			}
-			for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-				if(w.second.first == UnitType.Terran_Command_Center) {
+			for(Pair<Unit,Pair<UnitType,TilePosition>> w : ((GameState)this.handler).workerBuild) {
+				if(w.second.first == UnitType.Terran_Command_Center){
 					return State.FAILURE;
 				}
 			}
-			for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-				if(w.second.getType() == UnitType.Terran_Command_Center) {
+			for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
+				if(w.second.getType() == UnitType.Terran_Command_Center){
 					return State.FAILURE;
 				}
 			}
@@ -73,4 +49,5 @@ public class CheckExpansion extends Conditional {
 			return State.ERROR;
 		}
 	}
+
 }

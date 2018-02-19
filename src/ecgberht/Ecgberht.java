@@ -89,7 +89,7 @@ public class Ecgberht extends DefaultBWListener {
 		System.setOut(nullOut);		
 		game = mirror.getGame();
 		self = game.self();
-		//game.enableFlag(1);
+		game.enableFlag(1);
 		//game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
@@ -438,7 +438,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.builtRefinery++;
 				} else {
 					if(arg0.getType() == UnitType.Terran_Command_Center) {
-						gs.CCs.put(BWTA.getNearestBaseLocation(arg0.getTilePosition()),arg0);
+						gs.CCs.put(BWTA.getRegion(arg0.getPosition()).getCenter(),arg0);
 						gs.addNewResources(arg0);
 						if(arg0.getAddon() != null && !gs.CSs.contains(arg0.getAddon())) {
 							gs.CSs.add(arg0.getAddon());
@@ -663,7 +663,7 @@ public class Ecgberht extends DefaultBWListener {
 						if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
 							gs.CSs.remove(arg0.getAddon());
 						}
-						gs.CCs.remove(BWTA.getNearestBaseLocation(arg0.getTilePosition()));
+						gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
 						if(arg0.equals(gs.MainCC)) {
 							if(gs.CCs.size() > 0) {
 								for(Unit u : gs.CCs.values()) {
@@ -677,7 +677,7 @@ public class Ecgberht extends DefaultBWListener {
 						}
 					}
 					if(gs.CSs.contains(arg0)) {
-						gs.CCs.remove(BWTA.getNearestBaseLocation(arg0.getTilePosition()));
+						gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
 					}
 					if(gs.Fs.contains(arg0)) {
 						gs.Fs.remove(arg0);

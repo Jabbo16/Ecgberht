@@ -20,8 +20,8 @@ public class CheckScan extends Conditional {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).getGame().elapsedTime() - ((GameState)this.handler).startCount > 1) {
-				for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-					if((u.isCloaked() || u.isBurrowed()) && !u.isDetected()) {
+				for (Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
+					if((u.isCloaked() || u.isBurrowed()) && !u.isDetected() && u.getType().canAttack()) {
 						((GameState)this.handler).checkScan = u.getTilePosition();
 						return State.SUCCESS;
 					}
