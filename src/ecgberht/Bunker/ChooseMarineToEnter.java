@@ -1,6 +1,5 @@
 package ecgberht.Bunker;
 
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.iaie.btree.state.State;
@@ -25,13 +24,14 @@ public class ChooseMarineToEnter extends Action {
 			if(((GameState)this.handler).squads.isEmpty()) {
 				return State.FAILURE;
 			}
-			for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-				if(b.first.getTilePosition().equals(((GameState)this.handler).chosenBunker.getTilePosition())) {
+			for(Unit b : ((GameState)this.handler).DBs.keySet()) {
+				if(b.getTilePosition().equals(((GameState)this.handler).chosenBunker.getTilePosition())) {
 					Pair<String,Unit> closest = null;
 					for(Entry<String, Squad> s : ((GameState)this.handler).squads.entrySet()) {
 						for(Unit u : s.getValue().members) {
 							if(u.getType() == UnitType.Terran_Marine) {
-								if ((closest == null || b.first.getDistance(u) < b.first.getDistance(closest.second))) {
+								if ((closest == null || ((GameState)this.handler).broodWarDistance(b.getPosition(), u.getPosition()) < 
+										((GameState)this.handler).broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
 									closest = new Pair<String,Unit>(s.getKey(),u);
 								}
 							}

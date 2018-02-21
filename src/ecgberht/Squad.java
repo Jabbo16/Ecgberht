@@ -3,10 +3,13 @@ package ecgberht;
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import bwapi.Order;
+import bwapi.Pair;
 import bwapi.Position;
 import bwapi.TechType;
 import bwapi.Unit;
@@ -70,11 +73,11 @@ public class Squad {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 				continue;
 			}
-			if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
+			if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame()) {
 				u.attack(attack);
 				continue;
 			}
-			if(frameCount - u.getLastCommandFrame() > 24) {
+			if(frameCount - u.getLastCommandFrame() >= 18) {
 				if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
 					u.attack(attack);
 					continue;
@@ -84,17 +87,24 @@ public class Squad {
 					u.move(start);
 					continue;
 				}
+				Set<Unit> enemyToKite = new HashSet<>();
 				if(u.getGroundWeaponCooldown() > 0) {
 					for(Unit e : enemy) {
 						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
 							if (e.isAttacking()) {
 								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
-									u.move(start);
+									//u.move(start);
+									enemyToKite.add(e);
 								}
 							}
 						}
 					}
+					if(!enemyToKite.isEmpty()) {
+						Position run = kiteAway(u,enemyToKite);
+						u.move(run);
+					}
 				}
+				
 				else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
 					u.attack(attack);
 				}
@@ -135,6 +145,42 @@ public class Squad {
 				u.move(retreat);
 			}
 		}
-		
+	}
+	
+	// Credits to @Yegers for a better kite method
+	private Position kiteAway(final Unit unit, final Set<Unit> enemies) {
+	    if (enemies.isEmpty()) {
+	        return null;
+	    }
+	    final Position ownPosition = unit.getPosition();
+	    //TODO add walls
+	    final List<Pair<Double, Double>> vectors = new ArrayList<>();
+	    Pair<Double, Double> unitV = null;
+	    double distance = 0;
+	    double minDistance = Double.MAX_VALUE;
+	    for (final Unit enemy : enemies) {
+	        final Position enemyPosition = enemy.getPosition();
+
+	        unitV = new Pair<>((double)Math.abs(ownPosition.getX() - enemyPosition.getX()), (double)Math.abs(ownPosition.getY() - enemyPosition.getY()));
+	        distance = getGs().broodWarDistance(ownPosition, enemyPosition);
+	        if (distance < minDistance) {
+	            minDistance = distance;
+	        }
+	        unitV.first = (1/distance) * unitV.first;
+	        unitV.second = (1/distance) * unitV.second;
+	        vectors.add(unitV);
+	    }
+	    unitV.first = (1/distance) * unitV.first;
+	    unitV.second = (1/distance) * unitV.second;
+	    vectors.add(unitV);
+	    minDistance = 2 * minDistance * minDistance;
+	    for (Pair<Double, Double> vector : vectors){
+	        vector.first *= minDistance;
+	        vector.second *= minDistance;
+	    }
+	    Position sum = Util.sumPosition(vectors);
+	    Position mean = new Position(sum.getX() / vectors.size(), sum.getY() / vectors.size());
+	    return Util.sumPosition(ownPosition, mean);
+	    //return GenericMath.add(ownPosition, GenericMath.multiply(1. / vectors.size(), GenericMath.sumAll(Util.sumPosition()));
 	}
 }

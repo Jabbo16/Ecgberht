@@ -31,11 +31,8 @@ public class CheckVisibleBL extends Action{
 					return State.FAILURE;
 				}
 			}
-			if(((GameState)this.handler).getGame().isVisible(((GameState)this.handler).chosenBaseLocation)) {
-				if(((GameState)this.handler).broodWarDistance(((GameState)this.handler).chosenBuilderBL.getPosition(), 
-						((GameState)this.handler).chosenBaseLocation.toPosition()) < 10){
-					return State.SUCCESS;
-				}
+			if(((GameState)this.handler).getGame().isExplored(((GameState)this.handler).chosenBaseLocation)) {
+				return State.SUCCESS;
 			}
 			return State.FAILURE;
 		} catch(Exception e) {

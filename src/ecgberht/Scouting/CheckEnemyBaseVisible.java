@@ -10,6 +10,7 @@ import bwapi.Unit;
 import bwapi.Utils;
 import bwta.BWTA;
 import bwta.BaseLocation;
+//import ecgberht.BaseLocationComparator;
 import ecgberht.GameState;
 
 public class CheckEnemyBaseVisible extends Action {
@@ -33,6 +34,9 @@ public class CheckEnemyBaseVisible extends Action {
 							((GameState)this.handler).chosenScout = null;
 							((GameState)this.handler).getGame().sendText(Utils.formatText("!",Utils.Yellow));
 							((GameState)this.handler).playSound("gear.wav");
+							((GameState)this.handler).EnemyBLs.clear();
+							((GameState)this.handler).EnemyBLs.addAll(((GameState)this.handler).BLs);
+							//((GameState)this.handler).EnemyBLs.sort(new BaseLocationComparator(true));
 							return State.SUCCESS;
 						}
 					}

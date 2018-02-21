@@ -1,12 +1,11 @@
 package ecgberht.Training;
 
-import java.util.List;
+import java.util.Set;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Pair;
 import bwapi.Unit;
 import bwapi.UnitType;
 import ecgberht.GameState;
@@ -29,8 +28,8 @@ public class ChooseMedic extends Action {
 					if (u.getType() == UnitType.Terran_Academy) {
 						int marine_count = 0;
 						if(!((GameState)this.handler).DBs.isEmpty()) {
-							for(Pair<Unit,List<Unit> > p : ((GameState)this.handler).DBs) {
-								marine_count += p.second.size();
+							for(Set<Unit> p : ((GameState)this.handler).DBs.values()) {
+								marine_count += p.size();
 							}
 						}
 						if(!((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Medic) * 4 < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) - marine_count) {

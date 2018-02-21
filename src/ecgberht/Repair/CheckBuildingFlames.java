@@ -1,6 +1,5 @@
 package ecgberht.Repair;
 
-import java.util.List;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -20,15 +19,15 @@ public class CheckBuildingFlames extends Action {
 	public State execute() {
 		try {
 			boolean isBeingRepaired = false;
-			for(Pair<Unit, List<Unit> > w : ((GameState)this.handler).DBs) {
-				if(w.first.getType().maxHitPoints() != w.first.getHitPoints()) {
+			for(Unit w : ((GameState)this.handler).DBs.keySet()) {
+				if(w.getType().maxHitPoints() != w.getHitPoints()) {
 					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(w.first.equals(r.second)) {
+						if(w.equals(r.second)) {
 							isBeingRepaired = true;
 						}
 					}
 					if(!isBeingRepaired) {
-						((GameState)this.handler).chosenBuildingRepair = w.first;
+						((GameState)this.handler).chosenBuildingRepair = w;
 						return State.SUCCESS;
 					}
 				}

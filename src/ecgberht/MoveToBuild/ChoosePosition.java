@@ -1,7 +1,5 @@
 package ecgberht.MoveToBuild;
 
-import java.util.List;
-
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -41,7 +39,7 @@ public class ChoosePosition extends Action {
 			} else {
 				if(!((GameState)this.handler).workerBuild.isEmpty()) {
 					for(Pair<Unit,Pair<UnitType,TilePosition> > w : ((GameState)this.handler).workerBuild) {
-						((GameState)this.handler).testMap.actualizaMapa(w.second.second, w.second.first, false);
+						((GameState)this.handler).testMap.updateMap(w.second.second, w.second.first, false);
 					}
 				}
 
@@ -61,8 +59,8 @@ public class ChoosePosition extends Action {
 							origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
 						}
 						else {
-							for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-								origin = b.first.getTilePosition();
+							for(Unit b : ((GameState)this.handler).DBs.keySet()) {
+								origin = b.getTilePosition();
 								break;
 							}
 						}
@@ -82,7 +80,16 @@ public class ChoosePosition extends Action {
 						else {
 							if(((GameState)this.handler).Ts.isEmpty()) {
 								if(((GameState)this.handler).closestChoke != null) {
-									origin = ((GameState)this.handler).closestChoke;
+									origin = ((GameState)this.handler).testMap.findBunkerPosition(((GameState)this.handler).closestChoke);
+									if(origin != null) {
+										((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
+										((GameState)this.handler).chosenPosition = origin;
+										return State.SUCCESS;
+									}
+									else {
+										origin = ((GameState)this.handler).closestChoke.getCenter().toTilePosition();
+									}
+									
 								}
 //								else {
 //									origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();

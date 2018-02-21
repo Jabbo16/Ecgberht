@@ -1,6 +1,7 @@
 package ecgberht.Bunker;
 
-import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -20,10 +21,10 @@ public class EnterBunker extends Action {
 	public State execute() {
 		try {
 			Pair<String, Unit> m = ((GameState)this.handler).chosenMarine;
-			for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-				if(b.first.equals(((GameState)this.handler).chosenBunker)) {
-					if(b.first.load(m.second)) {
-						b.second.add(m.second);
+			for(Entry<Unit, Set<Unit>> b : ((GameState)this.handler).DBs.entrySet()) {
+				if(b.getKey().equals(((GameState)this.handler).chosenBunker)) {
+					if(b.getKey().load(m.second)) {
+						b.getValue().add(m.second);
 						((GameState)this.handler).squads.get(m.first).members.remove(m.second);
 						return State.SUCCESS;
 					}

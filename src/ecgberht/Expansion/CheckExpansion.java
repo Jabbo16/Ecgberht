@@ -19,7 +19,17 @@ public class CheckExpansion extends Conditional{
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).defense){
+			if(((GameState)this.handler).defense && ((GameState)this.handler).expanding){
+				((GameState)this.handler).chosenBaseLocation = null;
+				((GameState)this.handler).movingToExpand = false;
+				if(((GameState)this.handler).chosenBuilderBL != null) {
+					((GameState)this.handler).chosenBuilderBL.stop();
+					((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
+					((GameState)this.handler).chosenBuilderBL = null;
+				}
+				((GameState)this.handler).expanding = false;
+				((GameState)this.handler).deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
+				((GameState)this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).expanding){
@@ -36,8 +46,8 @@ public class CheckExpansion extends Conditional{
 				}
 			}
 			int workers = 0;
-			for(Pair<Unit, Integer> wt : ((GameState)this.handler).mineralsAssigned) {
-				workers += wt.second;
+			for(Integer wt : ((GameState)this.handler).mineralsAssigned.values()) {
+				workers += wt;
 			}
 			if(((GameState)this.handler).mineralsAssigned.size() * 2 <= workers && ((GameState)this.handler).getArmySize() >= ((GameState)this.handler).strat.armyForExpand) {
 				return State.SUCCESS;

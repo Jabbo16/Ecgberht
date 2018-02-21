@@ -65,6 +65,7 @@ public class ChooseBaseLocation extends Action {
 			valid.removeAll(remove);
 			
 			if(valid.isEmpty()) {
+				System.out.println("wut");
 				((GameState)this.handler).chosenBaseLocation = null;
 				((GameState)this.handler).movingToExpand = false;
 				((GameState)this.handler).chosenBuilderBL.stop();

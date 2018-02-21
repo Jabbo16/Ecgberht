@@ -1,5 +1,7 @@
 package ecgberht.Recollection;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -20,17 +22,13 @@ public class CollectMineral extends Action {
 			Unit chosen = ((GameState)this.handler).chosenWorker;
 			if(!((GameState)this.handler).mineralsAssigned.isEmpty()) {
 				Unit closestMineral = null;
-				int index = 0;
-				int count = 0;
-				for (Pair<Unit,Integer> m : ((GameState)this.handler).mineralsAssigned) {
-					if ((closestMineral == null || chosen.getDistance(m.first) < chosen.getDistance(closestMineral)) && m.second < 2) {
-						closestMineral = m.first;
-						index = count;
+				for (Entry<Unit, Integer> m : ((GameState)this.handler).mineralsAssigned.entrySet()) {
+					if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral)) && m.getValue() < 2) {
+						closestMineral = m.getKey();
 					}
-					count++;
 				}
 				if (closestMineral != null) {
-					((GameState)this.handler).mineralsAssigned.get(index).second++;
+					((GameState)this.handler).mineralsAssigned.put(closestMineral, ((GameState)this.handler).mineralsAssigned.get(closestMineral) +1);
 					((GameState)this.handler).workerIdle.remove(chosen);
 					((GameState)this.handler).workerTask.add(new Pair<Unit, Unit>(chosen, closestMineral));
 					chosen.gather(closestMineral, false);

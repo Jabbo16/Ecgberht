@@ -1,12 +1,12 @@
 package ecgberht.Bunker;
 
-import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Pair;
 import bwapi.Unit;
 import ecgberht.GameState;
 
@@ -19,9 +19,9 @@ public class ChooseBunkerToLoad extends Action {
 	@Override
 	public State execute() {
 		try {
-			for(Pair<Unit,List<Unit> > b : ((GameState)this.handler).DBs) {
-				if(b.second.size()<4) {
-					((GameState)this.handler).chosenBunker = b.first;
+			for(Entry<Unit, Set<Unit>> b : ((GameState)this.handler).DBs.entrySet()) {
+				if(b.getValue().size()<4) {
+					((GameState)this.handler).chosenBunker = b.getKey();
 					return State.SUCCESS;
 				}
 			}

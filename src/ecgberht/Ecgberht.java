@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.iaie.btree.BehavioralTree;
@@ -33,6 +34,7 @@ import ecgberht.Scouting.*;
 import ecgberht.Training.*;
 import ecgberht.Upgrade.*;
 //import ecgberht.Weka.Weka;
+//import jweb.JBWEB;
 
 public class Ecgberht extends DefaultBWListener {
 
@@ -58,7 +60,7 @@ public class Ecgberht extends DefaultBWListener {
 	private BehavioralTree botherTree;
 	private boolean first = false;
 	private CameraModule observer;
-	
+
 	public void run() {
 		mirror.getModule().setEventListener(this);
 		mirror.startGame();
@@ -71,11 +73,11 @@ public class Ecgberht extends DefaultBWListener {
 	public static Game getGame() {
 		return game;
 	}
-	
+
 	public static GameState getGs() {
 		return gs;
 	}
-	
+
 	public void onStart() {
 		//Disables System.err and System.Out
 		OutputStream output = null;
@@ -85,12 +87,13 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-		System.setErr(nullOut);
-		System.setOut(nullOut);		
+		//		System.setErr(nullOut);
+		//		System.setOut(nullOut);		
+
 		game = mirror.getGame();
 		self = game.self();
-		game.enableFlag(1);
-		//game.setLocalSpeed(0);
+		//		game.enableFlag(1);
+		//		game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.readMap();
 		BWTA.analyze();
@@ -100,10 +103,23 @@ public class Ecgberht extends DefaultBWListener {
 		gs = new GameState(mirror);
 		gs.initStartLocations();
 		gs.initBaseLocations();
+		gs.initBlockingMinerals();
+		gs.checkBasesWithBLockingMinerals();
 		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
 		gs.strat = gs.initStrat();
+
+		//		try {
+		//			System.out.println("Loading JBWEB...");
+		//			long time = System.nanoTime();
+		//			gs.jbweb.onStart();
+		//			long end = System.nanoTime();
+		//			System.out.println("Loaded");
+		//			System.out.println("Time to load JBWEB(s): " + (end - time)*1e-9);
+		//		} catch(Exception e) {
+		//			System.err.println(e);
+		//		}
 
 		CollectGas cg = new CollectGas("Collect Gas", gs);
 		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
@@ -180,7 +196,7 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence build = new Sequence("Build",cWB,b);
 		buildTree = new BehavioralTree("Build Tree");
 		buildTree.addChild(build);
-		
+
 		CheckScout cSc = new CheckScout("Check Scout", gs);
 		ChooseScout chSc = new ChooseScout("Choose Scouter",gs);
 		SendScout sSc = new SendScout("Send Scout",gs);
@@ -293,7 +309,7 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence Scanning = new Sequence("Scanning", cScan, s);
 		scannerTree = new BehavioralTree("Scanner Tree");
 		scannerTree.addChild(Scanning);
-		
+
 		CheckHarasser cH = new CheckHarasser("Check Harasser", gs);
 		ChooseWorkerToHarass cWTH = new ChooseWorkerToHarass("Check Worker to Harass", gs);
 		ChooseBuilderToHarass cWTB = new ChooseBuilderToHarass("Check Worker to Harass", gs);
@@ -307,6 +323,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onFrame() {
+		gs.print(gs.naturalRegion.getCenter().toTilePosition(), Color.Red);
 		observer.onFrame();
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyBuildingsMemory();
@@ -353,6 +370,12 @@ public class Ecgberht extends DefaultBWListener {
 			gs.mineralLocking();
 		}
 		gs.printer();
+		//		try {
+		//			gs.jbweb.draw();
+		//		} catch(Exception e) {
+		//			System.err.println();
+		//		}
+
 	}
 
 	public void onEnd(boolean arg0) {
@@ -365,13 +388,13 @@ public class Ecgberht extends DefaultBWListener {
 			gs.EI.losses++;
 			game.sendText("gg wp! "+ name + ", next game I will win!");
 		}
-//		Weka weka = new Weka();
-//		try {
-//			weka.createAndWriteInstance(game.enemy().getName(),gs.strat.name, gs.mapSize, arg0);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			System.err.println(e);
-//		}
+		//		Weka weka = new Weka();
+		//		try {
+		//			weka.createAndWriteInstance(game.enemy().getName(),gs.strat.name, gs.mapSize, arg0);
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			System.err.println(e);
+		//		}
 		gs.writeOpponentInfo(name);
 	}
 
@@ -405,7 +428,7 @@ public class Ecgberht extends DefaultBWListener {
 				gs.inMap.updateMap(arg0,false);
 				if(arg0.getPlayer().getID() == self.getID()) {
 					if(arg0.getType() != UnitType.Terran_Command_Center) {
-						gs.map.actualizaMapa(arg0.getTilePosition(),arg0.getType(),false);
+						gs.map.updateMap(arg0.getTilePosition(),arg0.getType(),false);
 						gs.testMap = gs.map.clone();
 					}
 					for(Pair<Unit,Pair<UnitType,TilePosition> > u: gs.workerBuild) {
@@ -452,7 +475,7 @@ public class Ecgberht extends DefaultBWListener {
 						gs.CSs.add(arg0);
 					}
 					if(arg0.getType() == UnitType.Terran_Bunker) {
-						gs.DBs.add(new Pair<Unit,List<Unit> >(arg0,new ArrayList<Unit>()));
+						gs.DBs.put(arg0, new HashSet<Unit>());
 					}
 					if(arg0.getType() == UnitType.Terran_Engineering_Bay || arg0.getType() == UnitType.Terran_Academy) {
 						gs.UBs.add(arg0);
@@ -498,10 +521,10 @@ public class Ecgberht extends DefaultBWListener {
 							String nombre = gs.addToSquad(arg0);
 							gs.TTMs.put(arg0.getID(),nombre);
 							if(!gs.DBs.isEmpty()) {
-								arg0.attack(gs.DBs.iterator().next().first.getPosition());
+								arg0.attack(gs.DBs.keySet().iterator().next().getPosition());
 							}
 							else if(gs.closestChoke != null) {
-								arg0.attack(gs.closestChoke.toPosition());
+								arg0.attack(gs.closestChoke.getCenter());
 							}else{
 								arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
 							}
@@ -518,10 +541,10 @@ public class Ecgberht extends DefaultBWListener {
 						if(gs.strat.name != "ProxyBBS") {
 							if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
 								if(!gs.DBs.isEmpty()) {
-									arg0.attack(gs.DBs.iterator().next().first.getPosition());
+									arg0.attack(gs.DBs.keySet().iterator().next().getPosition());
 								}
 								else if(gs.closestChoke != null) {
-									arg0.attack(gs.closestChoke.toPosition());
+									arg0.attack(gs.closestChoke.getCenter());
 								}else{
 									arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
 								}
@@ -555,7 +578,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.inMap.updateMap(arg0,true);
 					gs.enemyBuildingMemory.remove(arg0);
 					gs.initAttackPosition = arg0.getTilePosition();
-					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
+					gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
 				} else {
 					gs.initDefensePosition = arg0.getTilePosition();
 				}
@@ -614,146 +637,138 @@ public class Ecgberht extends DefaultBWListener {
 								}
 							}
 							if(w.second.getType().isMineralField()) {
-								for(Pair<Unit,Integer> r: gs.mineralsAssigned) {
-									if(r.first.equals(w.second)) {
-										gs.mineralsAssigned.get(gs.mineralsAssigned.indexOf(r)).second--;
-										break;
-									}
+								if(gs.mineralsAssigned.containsKey(w.second)) {
+									gs.mineralsAssigned.put(w.second, gs.mineralsAssigned.get(w.second) - 1);
 								}
 							}
-							if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
-								gs.buildingLot.add(w.second);
-							}
-							break;
 						}
-					}
-					for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
-						if(w.first.equals(arg0)) {
-							gs.workerBuild.remove(w);
-							gs.deltaCash.first -= w.second.first.mineralPrice();
-							gs.deltaCash.second -= w.second.first.gasPrice();
-							break;
+						if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
+							gs.buildingLot.add(w.second);
 						}
+						break;
 					}
-				} else if(arg0.getType().isBuilding()) {
-					gs.inMap.updateMap(arg0,true);
-					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
-					for(Pair<Unit,Unit> r : gs.repairerTask) {
-						if(r.second.equals(arg0)) {
-							gs.workerIdle.add(r.first);
-							gs.repairerTask.remove(r);
-							break;
-						}
+				}
+				for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
+					if(w.first.equals(arg0)) {
+						gs.workerBuild.remove(w);
+						gs.deltaCash.first -= w.second.first.mineralPrice();
+						gs.deltaCash.second -= w.second.first.gasPrice();
+						break;
 					}
-					for(Pair<Unit, Unit> w: gs.workerTask) {
-						if(w.second.equals(arg0)) {
-							gs.workerTask.remove(w);
-							gs.workerIdle.add(w.first);
-							break;
-						}
+				}
+			} else if(arg0.getType().isBuilding()) {
+				gs.inMap.updateMap(arg0,true);
+				gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
+				for(Pair<Unit,Unit> r : gs.repairerTask) {
+					if(r.second.equals(arg0)) {
+						gs.workerIdle.add(r.first);
+						gs.repairerTask.remove(r);
+						break;
 					}
-					for(Unit w: gs.buildingLot) {
-						if(w.equals(arg0)) {
-							gs.buildingLot.remove(w);
-							break;
-						}
+				}
+				for(Pair<Unit, Unit> w: gs.workerTask) {
+					if(w.second.equals(arg0)) {
+						gs.workerTask.remove(w);
+						gs.workerIdle.add(w.first);
+						break;
 					}
-					if(gs.CCs.values().contains(arg0)) {
-						gs.removeResources(arg0);
-						if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
-							gs.CSs.remove(arg0.getAddon());
-						}
-						gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
-						if(arg0.equals(gs.MainCC)) {
-							if(gs.CCs.size() > 0) {
-								for(Unit u : gs.CCs.values()) {
-									gs.MainCC = u;
-									break;
-								}
-							}
-							else {
-								gs.MainCC = null;
-							}
-						}
+				}
+				for(Unit w: gs.buildingLot) {
+					if(w.equals(arg0)) {
+						gs.buildingLot.remove(w);
+						break;
 					}
-					if(gs.CSs.contains(arg0)) {
-						gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
+				}
+				if(gs.CCs.values().contains(arg0)) {
+					gs.removeResources(arg0);
+					if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
+						gs.CSs.remove(arg0.getAddon());
 					}
-					if(gs.Fs.contains(arg0)) {
-						gs.Fs.remove(arg0);
-					}
-					if(gs.MBs.contains(arg0)) {
-						gs.MBs.remove(arg0);
-					}
-					if(gs.UBs.contains(arg0)) {
-						gs.UBs.remove(arg0);
-					}
-					if(gs.SBs.contains(arg0)) {
-						gs.SBs.remove(arg0);
-					}
-					if(gs.Ts.contains(arg0)) {
-						gs.Ts.remove(arg0);
-					}
-					if(gs.Ps.contains(arg0)) {
-						gs.Ps.remove(arg0);
-					}	
-					if(arg0.getType() == UnitType.Terran_Bunker) {
-						for(Pair<Unit,List<Unit> > b : gs.DBs) {
-							if(b.first.equals(arg0)) {
-								for(Unit u : b.second) {
-									gs.addToSquad(u);
-								}
-								gs.DBs.remove(b);
+					gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
+					if(arg0.equals(gs.MainCC)) {
+						if(gs.CCs.size() > 0) {
+							for(Unit u : gs.CCs.values()) {
+								gs.MainCC = u;
 								break;
 							}
 						}
+						else {
+							gs.MainCC = null;
+						}
 					}
-					if(arg0.getType().isRefinery()) {
-						for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
-							if(r.first.first.equals(arg0)) {
-								gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = false;
-								List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-								for(Pair<Unit,Unit> w: gs.workerTask) {
-									if(r.first.first.equals(w.second)) {
-										aux.add(w);
-										gs.workerIdle.add(w.first);
-									}
+				}
+				if(gs.CSs.contains(arg0)) {
+					gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
+				}
+				if(gs.Fs.contains(arg0)) {
+					gs.Fs.remove(arg0);
+				}
+				if(gs.MBs.contains(arg0)) {
+					gs.MBs.remove(arg0);
+				}
+				if(gs.UBs.contains(arg0)) {
+					gs.UBs.remove(arg0);
+				}
+				if(gs.SBs.contains(arg0)) {
+					gs.SBs.remove(arg0);
+				}
+				if(gs.Ts.contains(arg0)) {
+					gs.Ts.remove(arg0);
+				}
+				if(gs.Ps.contains(arg0)) {
+					gs.Ps.remove(arg0);
+				}	
+				if(arg0.getType() == UnitType.Terran_Bunker) {
+					if(gs.DBs.containsKey(arg0)) {
+						for(Unit u : gs.DBs.get(arg0)) {
+							gs.addToSquad(u);
+						}
+						gs.DBs.remove(arg0);
+					}
+				}
+				if(arg0.getType().isRefinery()) {
+					for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
+						if(r.first.first.equals(arg0)) {
+							gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = false;
+							List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
+							for(Pair<Unit,Unit> w: gs.workerTask) {
+								if(r.first.first.equals(w.second)) {
+									aux.add(w);
+									gs.workerIdle.add(w.first);
 								}
-								gs.workerTask.removeAll(aux);
-								break;
 							}
+							gs.workerTask.removeAll(aux);
+							break;
 						}
 					}
-					gs.testMap = gs.map.clone();
-				} else {
-					if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
-						if(gs.TTMs.containsKey(arg0.getID())) {
-							gs.TTMs.remove(arg0.getID());
-							gs.removeFromSquad(arg0);
-						}
-					}
-					else if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
+				}
+				gs.testMap = gs.map.clone();
+			} else {
+				if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+					if(gs.TTMs.containsKey(arg0.getID())) {
+						gs.TTMs.remove(arg0.getID());
 						gs.removeFromSquad(arg0);
 					}
 				}
-			}
-		} else if(arg0.getType().isMineralField()) {
-			for(Pair<Unit,Integer> r: gs.mineralsAssigned) {
-				if(r.first.equals(arg0)) {
-					gs.mineralsAssigned.remove(r);
-					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), true);
-					gs.testMap = gs.map.clone();
-					List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-					for(Pair<Unit,Unit> w: gs.workerTask) {
-						if(r.first.equals(w.second)) {
-							w.first.stop();
-							gs.workerIdle.add(w.first);
-							aux.add(w);
-						}
-					}
-					gs.workerTask.removeAll(aux);
-					break;
+				else if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
+					gs.removeFromSquad(arg0);
 				}
+			}
+
+		} else if(arg0.getType().isMineralField()) {
+			if(gs.mineralsAssigned.containsKey(arg0)) {
+				gs.mineralsAssigned.remove(arg0);
+				gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
+				gs.testMap = gs.map.clone();
+				List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
+				for(Pair<Unit,Unit> w: gs.workerTask) {
+					if(arg0.equals(w.second)) {
+						w.first.stop();
+						gs.workerIdle.add(w.first);
+						aux.add(w);
+					}
+				}
+				gs.workerTask.removeAll(aux);
 			}
 		}
 	}
@@ -770,7 +785,7 @@ public class Ecgberht extends DefaultBWListener {
 		if(arg0.getType().isRefinery() && arg0.getPlayer().getID() == self.getID()) {
 			for(Pair<Pair<Unit,Integer>,Boolean> r:gs.refineriesAssigned) {
 				if(r.first.first.getTilePosition().equals(arg0.getTilePosition())) {
-					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(),false);
+					gs.map.updateMap(arg0.getTilePosition(), arg0.getType(),false);
 					gs.testMap = gs.map.clone();
 					break;
 				}
@@ -792,7 +807,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onUnitEvade(Unit arg0) {
-		
+
 	}
 
 	public void onUnitHide(Unit arg0) {
@@ -817,10 +832,10 @@ public class Ecgberht extends DefaultBWListener {
 				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
 					gs.enemyBuildingMemory.put(arg0,new EnemyBuilding(arg0));
 					gs.inMap.updateMap(arg0,false);
-					gs.map.actualizaMapa(arg0.getTilePosition(), arg0.getType(), false);
+					gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), false);
 				}
 			}
-			
+
 		}
 	}
 }

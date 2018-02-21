@@ -6,7 +6,7 @@ import org.iaie.btree.util.GameHandler;
 import ecgberht.GameState;
 
 import bwapi.Pair;
-import bwapi.TilePosition;
+import bwapi.Position;
 import bwapi.Unit;
 
 public class ChooseBuilderBL extends Action{
@@ -23,19 +23,33 @@ public class ChooseBuilderBL extends Action{
 				return State.SUCCESS;
 			}
 			Unit closestWorker = null;
-			TilePosition chosen = ((GameState)this.handler).chosenBaseLocation;
+			Position chosen = ((GameState)this.handler).chosenBaseLocation.toPosition();
 			if(!((GameState)this.handler).workerIdle.isEmpty()) {
 				for (Unit u : ((GameState)this.handler).workerIdle) {
-					if ((closestWorker == null || u.getDistance(chosen.toPosition()) < closestWorker.getDistance(chosen.toPosition()))) {
+					double unitChosen = ((GameState)this.handler).broodWarDistance(u.getPosition(), chosen);
+					if(closestWorker == null) {
 						closestWorker = u;
+					} 
+					else{
+						double closestChosen = ((GameState)this.handler).broodWarDistance(closestWorker.getPosition(), chosen);
+						if(unitChosen < closestChosen){
+							closestWorker = u;	
+						}
 					}
 				}
 			}
 			if(!((GameState)this.handler).workerTask.isEmpty()) {
 				for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
-					if ((closestWorker == null || u.first.getDistance(chosen.toPosition()) < closestWorker.getDistance(chosen.toPosition())) && u.second.getType().isNeutral()) {
+					double unitChosen = ((GameState)this.handler).broodWarDistance(u.first.getPosition(), chosen);
+					if(closestWorker == null) {
 						closestWorker = u.first;
-					}
+					} 
+					else {
+						double closestChosen = ((GameState)this.handler).broodWarDistance(closestWorker.getPosition(), chosen);
+						if(unitChosen < closestChosen && u.second.getType().isMineralField()){
+							closestWorker = u.first;
+						}
+					}	
 				}
 			}
 
@@ -46,11 +60,9 @@ public class ChooseBuilderBL extends Action{
 					for(Pair<Unit,Unit> u:((GameState)this.handler).workerTask) {
 						if(u.first.equals(closestWorker)) {
 							((GameState)this.handler).workerTask.remove(u);
-							for(Pair<Unit,Integer> m:((GameState)this.handler).mineralsAssigned) {
-								if(m.first.equals(u.second)) {
-									((GameState)this.handler).mining--;
-									((GameState)this.handler).mineralsAssigned.get(((GameState)this.handler).mineralsAssigned.indexOf(m)).second--;
-								}
+							if(((GameState)this.handler).mineralsAssigned.containsKey(u.second)) {
+								((GameState)this.handler).mining--;
+								((GameState)this.handler).mineralsAssigned.put(u.second, ((GameState)this.handler).mineralsAssigned.get(u.second) - 1);
 							}
 							break;
 						}

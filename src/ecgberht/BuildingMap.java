@@ -4,7 +4,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import static ecgberht.Ecgberht.getGs;
 import bwapi.Game;
+import bwapi.Pair;
 import bwapi.Player;
 import bwapi.Position;
 import bwapi.TilePosition;
@@ -12,6 +14,7 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import bwta.Chokepoint;
 
 public class BuildingMap {
 
@@ -261,7 +264,7 @@ public class BuildingMap {
 	}
 
 	//Updates a portion of the map around the building
-	public void actualizaMapa(TilePosition position,UnitType building,boolean destroyed){
+	public void updateMap(TilePosition position,UnitType building,boolean destroyed){
 		TilePosition buildingSize = building.tileSize();
 		int tamY = buildingSize.getY();
 		int tamX = buildingSize.getX();
@@ -404,25 +407,6 @@ public class BuildingMap {
 		int x = starting.getY();
 		int y = starting.getX();
 		int[] coord = new int[2];
-//		boolean center = false;
-//		if((map[x][y] != "M" && map[x][y] != "V" && map[x][y] != "E" && map[x][y] != "B") && Integer.parseInt(map[x][y]) >= tamaño) {
-//			if(buildingType == UnitType.Terran_Bunker) {
-//				if(BWTA.getRegion(new TilePosition(y, x)).getCenter().equals(BWTA.getRegion(self.getStartLocation()).getCenter())) {
-//					center = true;
-//				}
-//			}
-//			if(!checkUnitsChosenBuildingGrid( new TilePosition(y, x), buildingType)) {
-//				center = true;
-//				coord[0] = x; coord[1] = y;
-//			}
-//			else {
-//				center =  false;
-//			}
-//		}
-//		if(center) {
-//			TilePosition position = new TilePosition(coord[1], coord[0]);
-//			return position;
-//		}
 		int i = 2;
 		int j = 2;
 		boolean control = false;
@@ -455,6 +439,46 @@ public class BuildingMap {
 		return position;
 	}
 
+	public TilePosition findBunkerPosition(Chokepoint choke){
+		TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
+		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
+		Position starting = choke.getCenter();
+		Pair<Position,Position> sides = choke.getSides();
+		Position closestSide = null;
+		if(getGs().broodWarDistance(self.getStartLocation().toPosition(), sides.first) < getGs().broodWarDistance(self.getStartLocation().toPosition(), sides.second)){
+			closestSide = sides.first;
+		} else {
+			closestSide = sides.second;
+		}
+		int x = starting.toTilePosition().getY();
+		int y = starting.toTilePosition().getX();
+		
+		int i = 15;
+		int j = 15;
+		//Finds the first valid tileposition starting around the given tileposition
+		TilePosition position = null;
+		double dist = Double.MAX_VALUE;
+		for(int ii = (x - i); ii <= (x + i); ii++) {
+			for(int jj = (y - j); jj <= (y + j); jj++) {
+				if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
+					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
+						if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
+							continue;
+						}
+						if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
+							TilePosition newPosition = new TilePosition(jj, ii);
+							double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), closestSide);
+							if(position == null || newDist < dist) {
+								position = newPosition;
+								dist = newDist;
+							}
+						}
+					}
+				}
+			}
+		}
+		return position;
+	}
 	//Writes the map to a file
 	public void writeMap(String fileName){
 		FileWriter sw = null;

@@ -1,6 +1,6 @@
 package ecgberht.Defense;
 
-import java.util.List;
+
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -35,7 +35,7 @@ public class CheckPerimeter extends Conditional {
 						if(closestCC != null) {
 							if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
 								if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
-									u.giveMoveOrder(((GameState)this.handler).DBs.iterator().next().first.getPosition());
+									u.giveMoveOrder(((GameState)this.handler).DBs.keySet().iterator().next().getPosition());
 								}
 								else {
 									u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
@@ -57,8 +57,8 @@ public class CheckPerimeter extends Conditional {
 							continue;
 						}
 					}
-					for(Pair<Unit,List<Unit> > c : ((GameState)this.handler).DBs) {
-						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.first.getPosition()) < 200) {
+					for(Unit c : ((GameState)this.handler).DBs.keySet()) {
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
 							((GameState)this.handler).enemyInBase.add(u);
 							continue;
 						}
@@ -105,7 +105,7 @@ public class CheckPerimeter extends Conditional {
 						if(squad != null && regCC != null) {
 							if(!squad.getCenter().equals(regCC.getCenter())){
 								if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
-									u.giveMoveOrder(((GameState)this.handler).DBs.iterator().next().first.getPosition());
+									u.giveMoveOrder(((GameState)this.handler).DBs.keySet().iterator().next().getPosition());
 								}
 								else {
 									u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());

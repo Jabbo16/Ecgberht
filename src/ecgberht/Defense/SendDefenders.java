@@ -38,14 +38,14 @@ public class SendDefenders extends Action {
 					friends.add(u);
 				}
 			}
-			if(!((GameState)this.handler).DBs.isEmpty()){
-				for(Pair<Unit, List<Unit>> u : ((GameState)this.handler).DBs) {
-					friends.add(u.first);
-					for(Unit m : u.second) {
-						friends.add(m);
-					}
-				}
-			}
+//			if(!((GameState)this.handler).DBs.isEmpty()){
+//				for(Pair<Unit, List<Unit>> u : ((GameState)this.handler).DBs) {
+//					friends.add(u.first);
+//					for(Unit m : u.second) {
+//						friends.add(m);
+//					}
+//				}
+//			}
 			
 //			boolean battleWin = ((GameState)this.handler).simulateBattle(friends, ((GameState)this.handler).enemyInBase);
 			if(!air_only && ((GameState)this.handler).squads.isEmpty()) {
@@ -89,12 +89,9 @@ public class SendDefenders extends Action {
 							if(u.first.equals(closestWorker)) {
 								((GameState)this.handler).workerTask.remove(u);
 								((GameState)this.handler).workerDefenders.add(new Pair<Unit, Position>(closestWorker,null));
-								for(Pair<Unit,Integer> m:((GameState)this.handler).mineralsAssigned) {
-									if(m.first.equals(u.second)) {
-										((GameState)this.handler).mining--;
-										((GameState)this.handler).mineralsAssigned.get(((GameState)this.handler).mineralsAssigned.indexOf(m)).second--;
-										break;
-									}
+								if(((GameState)this.handler).mineralsAssigned.containsKey(u.second)) {
+									((GameState)this.handler).mining--;
+									((GameState)this.handler).mineralsAssigned.put(u.second, ((GameState)this.handler).mineralsAssigned.get(u.second) - 1);
 								}
 								break;
 							}

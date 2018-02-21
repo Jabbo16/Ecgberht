@@ -39,11 +39,9 @@ public class Move extends Action {
 					for(Pair<Unit,Unit> u:((GameState)this.handler).workerTask) {
 						if(u.first.equals(chosen)) {
 							((GameState)this.handler).workerTask.remove(u);
-							for(Pair<Unit,Integer> m:((GameState)this.handler).mineralsAssigned) {
-								if(m.first.equals(u.second)) {
-									((GameState)this.handler).mining--;
-									((GameState)this.handler).mineralsAssigned.get(((GameState)this.handler).mineralsAssigned.indexOf(m)).second--;
-								}
+							if(((GameState)this.handler).mineralsAssigned.containsKey(u.second)) {
+								((GameState)this.handler).mining--;
+								((GameState)this.handler).mineralsAssigned.put(u.second, ((GameState)this.handler).mineralsAssigned.get(u.second) - 1);
 							}
 							break;
 						}
