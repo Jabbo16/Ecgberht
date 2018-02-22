@@ -379,6 +379,11 @@ public class GameState extends GameHandler {
 	}
 
 	public void printer() {
+		Integer counter = 0;
+		for(BaseLocation b : BLs) {
+			game.drawTextMap(b.getPosition(), counter.toString());
+			counter++;
+		}
 		int apm = game.getAPM(false);
 		if(apm > 9000 && !firstAPM ) {
 			game.sendText("My APM is over 9000!");
@@ -552,6 +557,15 @@ public class GameState extends GameHandler {
 	}
 
 	public void fix() {
+		List<String> squadsToClean = new ArrayList<>();
+		for(Squad s : squads.values()) {
+			if(s.members.isEmpty()) {
+				squadsToClean.add(s.name);
+			}
+		}
+		for(String name : squadsToClean) {
+			squads.remove(name);
+		}
 		if(chosenScout != null && chosenScout.isIdle()) {
 			workerIdle.add(chosenScout);
 			chosenScout = null;
@@ -665,7 +679,7 @@ public class GameState extends GameHandler {
 
 	public void initClosestChoke() {
 		List<BaseLocation> aux = BLs;
-		aux.removeAll(blockedBLs);
+//		aux.removeAll(blockedBLs);
 		Region naturalArea = aux.get(1).getRegion();
 		naturalRegion = naturalArea;
 		double distBest = Double.MAX_VALUE;
@@ -675,8 +689,14 @@ public class GameState extends GameHandler {
 			if (dist < distBest && dist > 0.0)
 				closestChoke = choke; distBest = dist;
 		}
-		initAttackPosition = closestChoke.getCenter().toTilePosition();
-		initDefensePosition = closestChoke.getCenter().toTilePosition();
+		if(closestChoke != null) {
+			initAttackPosition = closestChoke.getCenter().toTilePosition();
+			initDefensePosition = closestChoke.getCenter().toTilePosition();
+		}
+		else {
+			initAttackPosition = self.getStartLocation();
+			initDefensePosition = self.getStartLocation();
+		}
 	}
 
 	public void checkUnitsBL(TilePosition BL, Unit chosen) {
@@ -1054,6 +1074,7 @@ public class GameState extends GameHandler {
 		count += self.allUnitCount(type);
 		return count;
 	}
+	
 	/** Thanks to Yegers for the method
 	 * @author Yegers
 	 * Number of workers needed to sustain a number of units.
@@ -1182,15 +1203,10 @@ public class GameState extends GameHandler {
 		for(Unit u : enemies) {
 			simulator.addUnitPlayer2(new JFAPUnit(u));
 		}
-//		Pair<Integer, Integer> preSimScores = simulator.playerScores();
 		int preSimFriendlyUnitCount = simulator.getState().first.size();
-		simulator.simulate(40);
-//		Pair<Integer, Integer> postSimScores = simulator.playerScores();
+		simulator.simulate(50);
 		int postSimFriendlyUnitCount = simulator.getState().first.size();
 		int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
-//		int myScoreDiff = preSimScores.first - postSimScores.first;
-//		int enemyScoreDiff = preSimScores.second - postSimScores.second;
-//		if(enemyScoreDiff < myScoreDiff || myLosses > 0) {
 		if(myLosses > 0) {
 			return false;
 		}

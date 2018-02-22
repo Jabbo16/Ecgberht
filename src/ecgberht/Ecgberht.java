@@ -87,8 +87,8 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-		//		System.setErr(nullOut);
-		//		System.setOut(nullOut);		
+				System.setErr(nullOut);
+				System.setOut(nullOut);		
 
 		game = mirror.getGame();
 		self = game.self();
@@ -616,8 +616,8 @@ public class Ecgberht extends DefaultBWListener {
 						gs.expanding = false;
 						gs.chosenBaseLocation = null;
 						gs.movingToExpand = false;
-						gs.deltaCash.first -= arg0.getType().mineralPrice();
-						gs.deltaCash.second -= arg0.getType().gasPrice();
+						gs.deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
+						gs.deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 					}
 					for(Pair<Unit,Position> u:gs.workerDefenders) {
 						if(arg0.equals(u.first)) {

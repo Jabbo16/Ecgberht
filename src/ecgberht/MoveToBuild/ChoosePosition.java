@@ -45,7 +45,6 @@ public class ChoosePosition extends Action {
 
 				if(!((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Bunker) && !((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
 					if(((GameState)this.handler).strat.proxy && ((GameState)this.handler).chosenToBuild == UnitType.Terran_Barracks) {
-						
 						origin = new TilePosition(((GameState)this.handler).getGame().mapWidth()/2, ((GameState)this.handler).getGame().mapHeight()/2);
 					}
 					else {
@@ -67,14 +66,23 @@ public class ChoosePosition extends Action {
 					}
 					else {
 						if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).enemyRace == Race.Zerg) {
-							origin = ((GameState)this.handler).getBunkerPositionAntiPool();
+							TilePosition raxTile = ((GameState)this.handler).MBs.iterator().next().getTilePosition();
+							origin = ((GameState)this.handler).testMap.findBunkerPositionAntiPool(raxTile.toPosition(),((GameState)this.handler).closestChoke);
 							if(origin != null) {
 								((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
 								((GameState)this.handler).chosenPosition = origin;
 								return State.SUCCESS;
 							}
 							else {
-								origin = ((GameState)this.handler).MBs.iterator().next().getTilePosition();
+								origin = ((GameState)this.handler).getBunkerPositionAntiPool();
+								if(origin != null) {
+									((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
+									((GameState)this.handler).chosenPosition = origin;
+									return State.SUCCESS;
+								}
+								else {
+									origin = raxTile;
+								}
 							}
 						}
 						else {
