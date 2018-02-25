@@ -87,8 +87,8 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-				System.setErr(nullOut);
-				System.setOut(nullOut);		
+		System.setErr(nullOut);
+		System.setOut(nullOut);		
 
 		game = mirror.getGame();
 		self = game.self();
@@ -585,7 +585,9 @@ public class Ecgberht extends DefaultBWListener {
 			}
 			if(arg0.getPlayer().getID() == self.getID()) {
 				if(arg0.getType().isWorker()) {
-					gs.removeFromSquad(arg0);
+					if(gs.strat.name == "ProxyBBS") {
+						gs.removeFromSquad(arg0);
+					}
 					for(Pair<Unit,Unit> r : gs.repairerTask) {
 						if(r.first.equals(arg0)) {
 							gs.repairerTask.remove(r);

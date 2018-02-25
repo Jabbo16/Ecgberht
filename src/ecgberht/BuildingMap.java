@@ -486,13 +486,13 @@ public class BuildingMap {
 		int x = starting.toTilePosition().getY();
 		int y = starting.toTilePosition().getX();
 		
-		int i = 15;
-		int j = 15;
+		int i = 8;
+		int j = 8;
 		//Finds the first valid tileposition starting around the given tileposition
 		TilePosition position = null;
 		double dist = Double.MAX_VALUE;
-		for(int ii = (x - i); ii <= (x + i); ii++) {
-			for(int jj = (y - j); jj <= (y + j); jj++) {
+		for(int ii = (x - i); ii <= (x + i + 4); ii++) {
+			for(int jj = (y - j); jj <= (y + j + 3); jj++) {
 				if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
 					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
 						if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {

@@ -117,6 +117,8 @@ public class CheckPerimeter extends Conditional {
 						u.status = Status.IDLE;
 						u.attack = Position.None;
 					}
+					u.status = Status.IDLE;
+					u.attack = Position.None;
 				}
 			}
 			((GameState)this.handler).defense = false;

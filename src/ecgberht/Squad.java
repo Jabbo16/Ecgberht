@@ -69,9 +69,24 @@ public class Squad {
 		Set<Unit> enemy = getGs().enemyCombatUnitMemory;
 		int frameCount = getGame().getFrameCount();
 		Position start = getGame().self().getStartLocation().toPosition();
+		Set<Unit> marinesToHeal = new HashSet<>();
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 				continue;
+			}
+			Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
+			if(lastTarget != null) {
+				if(lastTarget.equals(attack)) {
+					continue;
+				}
+			}
+			if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
+				Unit chosen = getHealTarget(u, marinesToHeal);
+				if(chosen != null) {
+					u.useTech(TechType.Healing, chosen);
+					marinesToHeal.add(chosen);
+					continue;
+				}
 			}
 			if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame()) {
 				u.attack(attack);
@@ -112,6 +127,23 @@ public class Squad {
 		}
 	}
 	
+	private Unit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
+		Set<Unit> marines = getMarines();
+		Unit chosen = null;
+		double dist = Double.MAX_VALUE;
+		for(Unit m : marines) {
+			if(m.getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) {
+				continue;
+			}
+			double distA = getGs().broodWarDistance(m.getPosition(), u.getPosition());
+			if(chosen == null || distA < dist) {
+				chosen = m;
+				dist = distA;
+			}
+		}
+		return chosen;
+	}
+
 	public Set<Unit> getTanks() {
 		Set<Unit> aux = new HashSet<Unit>();
 		for(Unit u : members) {
@@ -131,6 +163,16 @@ public class Squad {
 		}
 		return aux;
 	}
+	
+	public Set<Unit> getMedics() {
+		Set<Unit> aux = new HashSet<Unit>();
+		for(Unit u : this.members) {
+			if(u.getType() == UnitType.Terran_Medic) {
+				aux.add(u);
+			}
+		}
+		return aux;
+	}
 
 	public void giveMoveOrder(Position retreat) {
 		int frameCount = getGame().getFrameCount();
@@ -140,6 +182,12 @@ public class Squad {
 			}
 			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 				continue;
+			}
+			Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
+			if(lastTarget != null) {
+				if(lastTarget.equals(retreat)) {
+					continue;
+				}
 			}
 			if(attack != Position.None && frameCount != u.getLastCommandFrame()) {
 				u.move(retreat);

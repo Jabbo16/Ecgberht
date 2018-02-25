@@ -37,6 +37,7 @@ import jfap.JFAPUnit;
 //import jppap.JPPAP;
 //import jweb.JBWEB;
 import ecgberht.BaseLocationComparator;
+import ecgberht.Squad.Status;
 public class GameState extends GameHandler {
 
 	public BaseLocation enemyBase = null;
@@ -311,7 +312,7 @@ public class GameState extends GameHandler {
 	}
 	
 	public void addNewResources(Unit unit) {
-		List<Unit> minerals = BWTA.getNearestBaseLocation(unit.getTilePosition()).getMinerals();
+		List<Unit> minerals = BWTA.getNearestBaseLocation(unit.getTilePosition()).getStaticMinerals();
 		List<Unit> gas = BWTA.getNearestBaseLocation(unit.getTilePosition()).getGeysers();
 		List<Pair<Pair<Unit,Integer>,Boolean> > auxGas = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 		for(Unit m : minerals) {
@@ -328,7 +329,7 @@ public class GameState extends GameHandler {
 	}
 
 	public void removeResources(Unit unit) {
-		List<Unit> minerals = BWTA.getNearestBaseLocation(unit.getTilePosition()).getMinerals();
+		List<Unit> minerals = BWTA.getNearestBaseLocation(unit.getTilePosition()).getStaticMinerals();
 		List<Unit> gas = BWTA.getNearestBaseLocation(unit.getTilePosition()).getGeysers();
 		List<Pair<Pair<Unit,Integer>,Boolean> > auxGas = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 		for(Unit m : minerals) {
@@ -415,7 +416,7 @@ public class GameState extends GameHandler {
 		}
 		if(chosenUnitToHarass != null) {
 			print(chosenUnitToHarass,Color.Red);
-			game.drawTextMap(chosenUnitToHarass.getPosition(), "WorkerToBother");
+			game.drawTextMap(chosenUnitToHarass.getPosition(), "UnitToHarass");
 		}
 		for(Pair<Unit,Unit> r : repairerTask) {
 			print(r.first,Color.Yellow);
@@ -526,28 +527,31 @@ public class GameState extends GameHandler {
 
 	public void moveUnitFromChokeWhenExpand(){
 		try {
-			if(!squads.isEmpty()) {
-				List<Unit> radius = game.getUnitsInRadius(closestChoke.getCenter(), 500);
-				if(!radius.isEmpty()) {
-					List<Chokepoint> cs = BWTA.getRegion(chosenBaseLocation).getChokepoints();
-					Chokepoint closestChoke = null;
-					for(Chokepoint c : cs) {
-						if(!c.getCenter().toTilePosition().equals(closestChoke.getCenter().toTilePosition())) {
-							double aux = BWTA.getGroundDistance(c.getCenter().toTilePosition().makeValid(),chosenBaseLocation);
-							if(aux > 0.0) {
-								if(closestChoke == null ||  aux< BWTA.getGroundDistance(closestChoke.getCenter().toTilePosition().makeValid(),chosenBaseLocation)) {
-									closestChoke = c;
+			if(!squads.isEmpty() && chosenBaseLocation != null) {
+				Region chosenRegion = BWTA.getRegion(chosenBaseLocation);
+				if(chosenRegion != null) {
+					if(chosenRegion.getCenter().equals(naturalRegion.getCenter())) {
+						TilePosition mapCenter = new TilePosition(game.mapWidth(), game.mapHeight());
+						List<Chokepoint> cs = chosenRegion.getChokepoints();
+						Chokepoint closestChoke = null;
+						for(Chokepoint c : cs) {
+							if(!c.getCenter().toTilePosition().equals(this.closestChoke.getCenter().toTilePosition())) {
+								double aux = broodWarDistance(c.getCenter(),chosenBaseLocation.toPosition());
+								if(aux > 0.0) {
+									if(closestChoke == null ||  aux < broodWarDistance(closestChoke.getCenter(),mapCenter.toPosition())) {
+										closestChoke = c;
+									}
 								}
 							}
 						}
-					}
-					if(closestChoke != null) {
-						for(Unit t : radius) {
-							if(t.getPlayer().getID() == self.getID() && !t.getType().isWorker()) {
-								t.attack(closestChoke.getCenter().makeValid());
+						if(closestChoke != null) {
+							for(Squad s : squads.values()) {
+								if(s.status == Status.IDLE) {
+									s.giveAttackOrder(closestChoke.getCenter());
+								}
 							}
 						}
-					}
+					}	
 				}
 			}
 		} catch(Exception e) {
@@ -559,8 +563,19 @@ public class GameState extends GameHandler {
 	public void fix() {
 		List<String> squadsToClean = new ArrayList<>();
 		for(Squad s : squads.values()) {
-			if(s.members.isEmpty()) {
+			List<Unit> aux = new ArrayList<>();
+			for(Unit u : s.members) {
+				if(!u.exists()) {
+					aux.add(u);
+				}
+			}
+			
+			if(s.members.isEmpty() || aux.size() == s.members.size()) {
 				squadsToClean.add(s.name);
+				continue;
+			}
+			else {
+				s.members.removeAll(aux);	
 			}
 		}
 		for(String name : squadsToClean) {
@@ -743,7 +758,7 @@ public class GameState extends GameHandler {
 		else {
 			String chosen = null;
 			for(Entry<String, Squad> s : squads.entrySet()) {
-				if(s.getValue().members.size() < 12 && broodWarDistance(getSquadCenter(s.getValue()), unit.getPosition()) <  800 && (chosen == null || broodWarDistance(unit.getPosition(),getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(), getSquadCenter(squads.get(chosen))))) {
+				if(s.getValue().members.size() < 12 && broodWarDistance(getSquadCenter(s.getValue()), unit.getPosition()) <  1000 && (chosen == null || broodWarDistance(unit.getPosition(),getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(), getSquadCenter(squads.get(chosen))))) {
 					chosen = s.getKey();
 				}
 			}
@@ -909,7 +924,7 @@ public class GameState extends GameHandler {
 		Unit chosen = null;
 		double distance = Double.MAX_VALUE;
 		for (Unit u : CCs.values()) {
-			double distance_aux = BWTA.getGroundDistance(u.getTilePosition(), position.toTilePosition());
+			double distance_aux = broodWarDistance(u.getPosition(), position);
 			if( distance_aux > 0.0 && (chosen == null ||  distance_aux <  distance)) {
 				chosen = u;
 				distance = distance_aux;
