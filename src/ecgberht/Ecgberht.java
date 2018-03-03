@@ -63,7 +63,7 @@ public class Ecgberht extends DefaultBWListener {
 
 	public void run() {
 		mirror.getModule().setEventListener(this);
-		mirror.startGame();
+		mirror.startGame(false);
 	}
 
 	public static void main(String[] args) {
@@ -79,6 +79,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onStart() {
+		
 		//Disables System.err and System.Out
 		OutputStream output = null;
 		try {
@@ -95,11 +96,12 @@ public class Ecgberht extends DefaultBWListener {
 		//		game.enableFlag(1);
 		//		game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
-		BWTA.readMap();
+//		BWTA.readMap();
 		BWTA.analyze();
 		System.out.println("Map data ready");
 		observer = new CameraModule(self.getStartLocation().toPosition(), game);
 		//observer.toggle();
+		
 		gs = new GameState(mirror);
 		gs.initStartLocations();
 		gs.initBaseLocations();
@@ -649,15 +651,16 @@ public class Ecgberht extends DefaultBWListener {
 						}
 						break;
 					}
-				}
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
-					if(w.first.equals(arg0)) {
-						gs.workerBuild.remove(w);
-						gs.deltaCash.first -= w.second.first.mineralPrice();
-						gs.deltaCash.second -= w.second.first.gasPrice();
-						break;
+					for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
+						if(w.first.equals(arg0)) {
+							gs.workerBuild.remove(w);
+							gs.deltaCash.first -= w.second.first.mineralPrice();
+							gs.deltaCash.second -= w.second.first.gasPrice();
+							break;
+						}
 					}
 				}
+				
 			} else if(arg0.getType().isBuilding()) {
 				gs.inMap.updateMap(arg0,true);
 				gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);

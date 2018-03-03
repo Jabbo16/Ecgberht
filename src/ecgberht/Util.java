@@ -23,10 +23,11 @@ public class Util {
 		return sum;
 	}
 
-	public static Position sumPosition(List<Pair<Double, Double>> vectors) {
-		Position sum = new Position(0,0);
+	public static Pair<Double,Double> sumPosition(List<Pair<Double, Double>> vectors) {
+		Pair<Double,Double> sum = new Pair<>(0.0,0.0);
 		for(Pair<Double, Double> p : vectors) {
-			sum = new Position((int) (sum.getX() + p.first), (int) (sum.getY() + p.second));
+			sum.first += p.first;
+			sum.second += p.second;
 		}
 		return sum;
 	}

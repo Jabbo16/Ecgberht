@@ -17,15 +17,18 @@ public class CheckScout extends Conditional {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).EI.defendHarass && BWTA.getStartLocations().size() == 2) {
-				for(BaseLocation b : BWTA.getStartLocations()) {
-					if(!((GameState)this.handler).getGame().isVisible(b.getTilePosition())) {
-						((GameState)this.handler).enemyBase = b;
-						((GameState)this.handler).scout = false;
-						break;
+			if(((GameState)this.handler).firstScout) {
+				if(((GameState)this.handler).EI.defendHarass && BWTA.getStartLocations().size() == 2) {
+					for(BaseLocation b : BWTA.getStartLocations()) {
+						if(!BWTA.getNearestBaseLocation(((GameState)this.handler).MainCC.getTilePosition()).getTilePosition().equals(b.getTilePosition())) {
+							((GameState)this.handler).enemyBase = b;
+							((GameState)this.handler).scout = false;
+							((GameState)this.handler).firstScout = false;
+							break;
+						}
 					}
+					return State.FAILURE;
 				}
-				return State.FAILURE;
 			}
 			if(((GameState)this.handler).chosenScout == null && ((GameState)this.handler).getPlayer().supplyUsed() >= 12  && ((GameState)this.handler).enemyBase == null) {
 				return State.SUCCESS;

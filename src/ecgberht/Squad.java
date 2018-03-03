@@ -45,7 +45,7 @@ public class Squad {
 				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
-				if(getGame().getFrameCount() - u.getLastCommandFrame() > 24 ) {
+				if(frameCount - u.getLastCommandFrame() > 24 ) {
 					if(!u.isStartingAttack() && !u.isAttacking() || u.isIdle()) {
 						u.attack(pos);
 						continue;
@@ -66,65 +66,79 @@ public class Squad {
 	}
 	
 	public void microUpdateOrder() {
-		Set<Unit> enemy = getGs().enemyCombatUnitMemory;
-		int frameCount = getGame().getFrameCount();
-		Position start = getGame().self().getStartLocation().toPosition();
-		Set<Unit> marinesToHeal = new HashSet<>();
-		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
-				continue;
-			}
-			Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
-			if(lastTarget != null) {
-				if(lastTarget.equals(attack)) {
+		try {
+			Set<Unit> enemy = getGs().enemyCombatUnitMemory;
+			int frameCount = getGame().getFrameCount();
+			Position start = getGame().self().getStartLocation().toPosition();
+			Set<Unit> marinesToHeal = new HashSet<>();
+			for(Unit u : members) {
+				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 					continue;
 				}
-			}
-			if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
-				Unit chosen = getHealTarget(u, marinesToHeal);
-				if(chosen != null) {
-					u.useTech(TechType.Healing, chosen);
-					marinesToHeal.add(chosen);
+				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
-			}
-			if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame()) {
-				u.attack(attack);
-				continue;
-			}
-			if(frameCount - u.getLastCommandFrame() >= 18) {
-				if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
+				Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
+				if(lastTarget != null) {
+					if(lastTarget.equals(attack)) {
+						continue;
+					}
+				}
+				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
+					Unit chosen = getHealTarget(u, marinesToHeal);
+					if(chosen != null) {
+						u.useTech(TechType.Healing, chosen);
+						marinesToHeal.add(chosen);
+						continue;
+					}
+				}
+				if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
 					u.attack(attack);
 					continue;
 				}
-				//Experimental storm dodging?
-				if(u.isUnderStorm()) {
-					u.move(start);
-					continue;
-				}
-				Set<Unit> enemyToKite = new HashSet<>();
-				if(u.getGroundWeaponCooldown() > 0) {
-					for(Unit e : enemy) {
-						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
-							if (e.isAttacking()) {
-								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
-									//u.move(start);
-									enemyToKite.add(e);
+				if(frameCount - u.getLastCommandFrame() >= 18) {
+					if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
+						u.attack(attack);
+						continue;
+					}
+					//Experimental storm dodging?
+					if(u.isUnderStorm()) {
+						u.move(start);
+						continue;
+					}
+					Set<Unit> enemyToKite = new HashSet<>();
+					if(u.getGroundWeaponCooldown() > 0) {
+						for(Unit e : enemy) {
+							if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
+								if (e.isAttacking()) {
+									if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
+										//u.move(start);
+										enemyToKite.add(e);
+									}
 								}
 							}
 						}
+						if(!enemyToKite.isEmpty()) {
+							Position run = kiteAway(u,enemyToKite);
+							if(run.isValid()) {
+								u.move(run);
+							} else {
+								u.move(getGs().getPlayer().getStartLocation().toPosition());
+							}
+//							Position run = getGs().getPlayer().getStartLocation().toPosition();
+							
+						}
 					}
-					if(!enemyToKite.isEmpty()) {
-						Position run = kiteAway(u,enemyToKite);
-						u.move(run);
+					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
+						u.attack(attack);
 					}
-				}
-				
-				else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
-					u.attack(attack);
 				}
 			}
+		} catch(Exception e) {
+			System.err.println("microUpdateOrder Error");
+			System.err.println(e);
 		}
+		
 	}
 	
 	private Unit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
@@ -203,14 +217,12 @@ public class Squad {
 	    final Position ownPosition = unit.getPosition();
 	    //TODO add walls
 	    final List<Pair<Double, Double>> vectors = new ArrayList<>();
-	    Pair<Double, Double> unitV = null;
-	    double distance = 0;
+
 	    double minDistance = Double.MAX_VALUE;
 	    for (final Unit enemy : enemies) {
 	        final Position enemyPosition = enemy.getPosition();
-
-	        unitV = new Pair<>((double)Math.abs(ownPosition.getX() - enemyPosition.getX()), (double)Math.abs(ownPosition.getY() - enemyPosition.getY()));
-	        distance = getGs().broodWarDistance(ownPosition, enemyPosition);
+	        final Pair<Double, Double> unitV = new Pair<>((double)(ownPosition.getX() - enemyPosition.getX()),(double) (ownPosition.getY() - enemyPosition.getY()));
+	        final double distance = ownPosition.getDistance(enemyPosition);
 	        if (distance < minDistance) {
 	            minDistance = distance;
 	        }
@@ -218,17 +230,12 @@ public class Squad {
 	        unitV.second = (1/distance) * unitV.second;
 	        vectors.add(unitV);
 	    }
-	    unitV.first = (1/distance) * unitV.first;
-	    unitV.second = (1/distance) * unitV.second;
-	    vectors.add(unitV);
 	    minDistance = 2 * minDistance * minDistance;
-	    for (Pair<Double, Double> vector : vectors){
+	    for (final Pair<Double, Double> vector : vectors){
 	        vector.first *= minDistance;
 	        vector.second *= minDistance;
 	    }
-	    Position sum = Util.sumPosition(vectors);
-	    Position mean = new Position(sum.getX() / vectors.size(), sum.getY() / vectors.size());
-	    return Util.sumPosition(ownPosition, mean);
-	    //return GenericMath.add(ownPosition, GenericMath.multiply(1. / vectors.size(), GenericMath.sumAll(Util.sumPosition()));
+	    Pair<Double,Double> sumAll = Util.sumPosition(vectors);
+	    return Util.sumPosition(ownPosition, new Position((int)(sumAll.first / vectors.size()),(int) (sumAll.second / vectors.size())));
 	}
 }

@@ -27,28 +27,7 @@ public class CheckPerimeter extends Conditional {
 
 		try {
 			((GameState)this.handler).enemyInBase.clear();
-			
-			if(((GameState)this.handler).enemyCombatUnitMemory.isEmpty()) {
-				for(Squad u : ((GameState)this.handler).squads.values()) {
-					if(u.status == Status.DEFENSE) {
-						Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
-						if(closestCC != null) {
-							if(!BWTA.getRegion(((GameState)this.handler).getSquadCenter(u)).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-								if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
-									u.giveMoveOrder(((GameState)this.handler).DBs.keySet().iterator().next().getPosition());
-								}
-								else {
-									u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
-								}
-								u.status = Status.IDLE;
-								u.attack = Position.None;
-							}
-						}
-					}
-				}
-				((GameState)this.handler).defense = false;
-				return State.FAILURE;
-			}
+			((GameState)this.handler).defense = false;
 			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
 				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
 					for(Unit c : ((GameState)this.handler).CCs.values()) {
@@ -85,6 +64,9 @@ public class CheckPerimeter extends Conditional {
 				}
 			}
 			if(!((GameState)this.handler).enemyInBase.isEmpty() && !overlordCheck) {
+				if((((GameState)this.handler).getArmySize() >= 50 && ((GameState)this.handler).getArmySize() / ((GameState)this.handler).enemyInBase.size() > 10)) {
+					return State.FAILURE;
+				}
 				((GameState)this.handler).defense = true;
 				return State.SUCCESS;
 			}

@@ -128,6 +128,7 @@ public class GameState extends GameHandler {
 	public JFAP simulator;
 //	public JBWEB jbweb;
 	public Region naturalRegion = null;
+	public boolean firstScout = true;
 	
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -141,98 +142,106 @@ public class GameState extends GameHandler {
 	}
 	
 	public Strategy initStrat() {
-		BioBuild b = new BioBuild();
-		ProxyBBS bbs = new ProxyBBS();
-		BioMechBuild bM = new BioMechBuild();
-		String map = game.mapFileName();
-		if(enemyRace == Race.Zerg && EI.naughty) {
+		try {
+			BioBuild b = new BioBuild();
+			ProxyBBS bbs = new ProxyBBS();
+			BioMechBuild bM = new BioMechBuild();
+			String map = game.mapFileName();
+			if(enemyRace == Race.Zerg && EI.naughty) {
+				return new Strategy(b);
+			}
+			if(EI.history.isEmpty()) {
+				if(enemyRace == Race.Protoss) {
+					double random = Math.random();
+					if(random > 0.5 ) {
+						return new Strategy(b);
+					}
+					else {
+						return new Strategy(bM);
+					}
+				}
+				if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
+					double random = Math.random();
+					if(random > 0.75 ) {
+						return new Strategy(bbs);
+					}
+					else if(random > 0.4 && random <= 0.75) {
+						return new Strategy(bM);
+					}
+					else {
+						return new Strategy(b);
+					}
+				}
+				if(map.contains("HeartbreakRidge")) {
+					double random = Math.random();
+					if(random > 0.75 ) {
+						return new Strategy(bbs);
+					}
+					else {
+						return new Strategy(b);
+					}
+					
+				}
+				else {
+					double random = Math.random();
+					if(random > 0.5 ) {
+						return new Strategy(b);
+					}
+					else {
+						return new Strategy(bM);
+					}
+				}
+			} else {
+				Map<String,Pair<Integer,Integer>> strategies = new HashMap<>();
+				Map<String,AStrategy> nameStrat = new HashMap<>();
+				strategies.put(b.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(b.name, b);
+				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(bbs.name, bbs);
+				strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(bM.name, bM);
+				for(StrategyOpponentHistory r: EI.history) {
+					if(strategies.containsKey(r.strategyName)) {
+						strategies.get(r.strategyName).first += r.wins;
+						strategies.get(r.strategyName).second += r.losses;
+					}
+				}
+				int totalGamesPlayed = EI.wins + EI.losses;
+				int DefaultStrategyWins = strategies.get(b.name).first;
+				int DefaultStrategyLosses = strategies.get(b.name).second;
+			    int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
+			    double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
+			    if (strategyGamesPlayed < 3 || (strategyGamesPlayed > 0 && winRate > 0.49))
+			    {
+			        game.sendText("Using default Strategy as Im confident enough to do so");
+			        return new Strategy(b);
+			    }
+			    double C = 0.5;
+			    String bestUCBStrategy = null;
+			    double bestUCBStrategyVal = Double.MIN_VALUE;
+			    for (String strat : strategies.keySet()) {
+			    	if(map.contains("HeartbreakRidge") && strat == "BioMech") {
+			    		continue;
+			    	}
+			        int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
+			        double sWinRate = sGamesPlayed > 0 ? (double)strategies.get(strat).first / (double)(strategyGamesPlayed) : 0;
+			        double ucbVal = C * Math.sqrt(Math.log((double)(totalGamesPlayed / sGamesPlayed)));
+			        double val = sWinRate + ucbVal;
+			        if (val > bestUCBStrategyVal) {
+			            bestUCBStrategy = strat;
+			            bestUCBStrategyVal = val;
+			        }
+			    }
+			    game.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+			    return new Strategy(nameStrat.get(bestUCBStrategy));
+			}
+		} catch(Exception e) {
+			System.err.println("Error initStrat, loading default Strat");
+			BioBuild b = new BioBuild();
 			return new Strategy(b);
+			
 		}
-		if(EI.history.isEmpty()) {
-			if(enemyRace == Race.Protoss) {
-				double random = Math.random();
-				if(random > 0.5 ) {
-					return new Strategy(b);
-				}
-				else {
-					return new Strategy(bM);
-				}
-			}
-			if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
-				double random = Math.random();
-				if(random > 0.75 ) {
-					return new Strategy(bbs);
-				}
-				else if(random > 0.4 && random <= 0.75) {
-					return new Strategy(bM);
-				}
-				else {
-					return new Strategy(b);
-				}
-			}
-			if(map.contains("Heartbreak Ridge")) {
-				double random = Math.random();
-				if(random > 0.75 ) {
-					return new Strategy(bbs);
-				}
-				else {
-					return new Strategy(b);
-				}
-				
-			}
-			else {
-				double random = Math.random();
-				if(random > 0.5 ) {
-					return new Strategy(b);
-				}
-				else {
-					return new Strategy(bM);
-				}
-			}
-		} else {
-			Map<String,Pair<Integer,Integer>> strategies = new HashMap<>();
-			Map<String,AStrategy> nameStrat = new HashMap<>();
-			strategies.put(b.name, new Pair<Integer,Integer>(0,0));
-			nameStrat.put(b.name, b);
-			strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
-			nameStrat.put(bbs.name, bbs);
-			strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
-			nameStrat.put(bM.name, bM);
-			for(StrategyOpponentHistory r: EI.history) {
-				if(strategies.containsKey(r.strategyName)) {
-					strategies.get(r.strategyName).first += r.wins;
-					strategies.get(r.strategyName).second += r.losses;
-				}
-			}
-			int totalGamesPlayed = EI.wins + EI.losses;
-			int DefaultStrategyWins = strategies.get(b.name).first;
-			int DefaultStrategyLosses = strategies.get(b.name).second;
-		    int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
-		    double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
-		    if (strategyGamesPlayed < 3 || (strategyGamesPlayed > 0 && winRate > 0.49))
-		    {
-		        game.sendText("Using default Strategy as Im confident enough to do so");
-		        return new Strategy(b);
-		    }
-		    double C = 0.5;
-		    String bestUCBStrategy = null;
-		    double bestUCBStrategyVal = Double.MIN_VALUE;
-		    for (String strat : strategies.keySet()) {
-		    	if(map.contains("Heartbreak Ridge") && strat == "BioMech") {
-		    		continue;
-		    	}
-		        int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
-		        double sWinRate = sGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
-		        double ucbVal = C * Math.sqrt(Math.log((double)totalGamesPlayed / sGamesPlayed));
-		        double val = sWinRate + ucbVal;
-		        if (val > bestUCBStrategyVal) {
-		            bestUCBStrategy = strat;
-		            bestUCBStrategyVal = val;
-		        }
-		    }
-		    game.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-		    return new Strategy(nameStrat.get(bestUCBStrategy));
-		}
+		
 	}
 
 	public void initEnemyRace() {
@@ -561,6 +570,9 @@ public class GameState extends GameHandler {
 	}
 
 	public void fix() {
+		if(defense && enemyInBase.isEmpty()) {
+			defense = false;
+		}
 		List<String> squadsToClean = new ArrayList<>();
 		for(Squad s : squads.values()) {
 			List<Unit> aux = new ArrayList<>();
