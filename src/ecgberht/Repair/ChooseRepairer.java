@@ -1,10 +1,10 @@
 package ecgberht.Repair;
 
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
 import ecgberht.GameState;
@@ -25,9 +25,9 @@ public class ChooseRepairer extends Action {
 					closestWorker = u;
 				}
 			}
-			for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
-				if ((closestWorker == null || u.first.getDistance(chosen) < closestWorker.getDistance(chosen)) && u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
-					closestWorker = u.first;
+			for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+				if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
+					closestWorker = u;
 				}
 			}
 			if(closestWorker != null) {

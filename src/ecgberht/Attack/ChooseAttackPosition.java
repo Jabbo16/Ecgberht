@@ -31,12 +31,14 @@ public class ChooseAttackPosition extends Action {
 					}
 					u.giveAttackOrder(new TilePosition(p.second,p.first).toPosition());
 					u.status = Status.ATTACK;
+					continue;
 				} 
 				else if(((GameState)this.handler).enemyBase != null){
 					((GameState)this.handler).attackPosition = ((GameState)this.handler).enemyBase.getPosition();
-					return State.SUCCESS;
+					continue;
 				} else {
 					u.status = Status.IDLE;
+					continue;
 				}
 				
 			}

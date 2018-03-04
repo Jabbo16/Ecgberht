@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.composite.Selector;
@@ -93,8 +94,8 @@ public class Ecgberht extends DefaultBWListener {
 
 		game = mirror.getGame();
 		self = game.self();
-		//		game.enableFlag(1);
-		//		game.setLocalSpeed(0);
+//		game.enableFlag(1);
+		//game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 //		BWTA.readMap();
 		BWTA.analyze();
@@ -435,10 +436,10 @@ public class Ecgberht extends DefaultBWListener {
 					}
 					for(Pair<Unit,Pair<UnitType,TilePosition> > u: gs.workerBuild) {
 						if(u.first.equals(arg0.getBuildUnit()) && u.second.first.equals(arg0.getType())) {
-							gs.workerBuild.remove(u);
 							gs.workerTask.add(new Pair<Unit,Unit>(u.first,arg0));
 							gs.deltaCash.first -= arg0.getType().mineralPrice();
 							gs.deltaCash.second -= arg0.getType().gasPrice();
+							gs.workerBuild.remove(u);
 							break;
 						}
 					}
@@ -575,7 +576,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onUnitDestroy(Unit arg0) {
-		if(!arg0.getType().isBuilding() && !arg0.getType().isRefinery() && arg0.getType() != UnitType.Resource_Vespene_Geyser) {
+		if(!arg0.getType().isBuilding() && !arg0.getType().isRefinery() && arg0.getType() != UnitType.Resource_Vespene_Geyser && arg0.getType() != UnitType.Spell_Scanner_Sweep) {
 			if(!first ) {
 				gs.playSound("first.mp3");
 				first = true;
@@ -595,7 +596,7 @@ public class Ecgberht extends DefaultBWListener {
 					gs.initDefensePosition = arg0.getTilePosition();
 				}
 			}
-			if(arg0.getPlayer().getID() == self.getID()) {
+			else if(arg0.getPlayer().getID() == self.getID()) {
 				if(arg0.getType().isWorker()) {
 					if(gs.strat.name == "ProxyBBS") {
 						gs.removeFromSquad(arg0);
@@ -639,9 +640,18 @@ public class Ecgberht extends DefaultBWListener {
 							break;
 						}
 					}
+					
+					if(gs.workerMining.containsKey(arg0)) {
+						Unit mineral = gs.workerMining.get(arg0);
+						gs.workerMining.remove(arg0);
+						if(gs.mineralsAssigned.containsKey(mineral)) {
+							gs.mining--;
+							gs.mineralsAssigned.put(mineral, gs.mineralsAssigned.get(mineral) - 1);
+						}
+						
+					}
 					for(Pair<Unit,Unit> w: gs.workerTask) {
 						if(w.first.equals(arg0)) {
-							gs.workerTask.remove(w);
 							if(w.second.getType().isRefinery()) {
 								for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
 									if(r.first.first.equals(w.second)) {
@@ -650,16 +660,14 @@ public class Ecgberht extends DefaultBWListener {
 									}
 								}
 							}
-							if(w.second.getType().isMineralField()) {
-								if(gs.mineralsAssigned.containsKey(w.second)) {
-									gs.mineralsAssigned.put(w.second, gs.mineralsAssigned.get(w.second) - 1);
+							else {
+								if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
+									gs.buildingLot.add(w.second);
 								}
 							}
+							gs.workerTask.remove(w);
+							break;
 						}
-						if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
-							gs.buildingLot.add(w.second);
-						}
-						break;
 					}
 					for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
 						if(w.first.equals(arg0)) {
@@ -669,121 +677,131 @@ public class Ecgberht extends DefaultBWListener {
 							break;
 						}
 					}
-				}
-				
-			} else if(arg0.getType().isBuilding()) {
-				gs.inMap.updateMap(arg0,true);
-				gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
-				for(Pair<Unit,Unit> r : gs.repairerTask) {
-					if(r.second.equals(arg0)) {
-						gs.workerIdle.add(r.first);
-						gs.repairerTask.remove(r);
-						break;
-					}
-				}
-				for(Pair<Unit, Unit> w: gs.workerTask) {
-					if(w.second.equals(arg0)) {
-						gs.workerTask.remove(w);
-						gs.workerIdle.add(w.first);
-						break;
-					}
-				}
-				for(Unit w: gs.buildingLot) {
-					if(w.equals(arg0)) {
-						gs.buildingLot.remove(w);
-						break;
-					}
-				}
-				if(gs.CCs.values().contains(arg0)) {
-					gs.removeResources(arg0);
-					if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
-						gs.CSs.remove(arg0.getAddon());
-					}
-					gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
-					if(arg0.equals(gs.MainCC)) {
-						if(gs.CCs.size() > 0) {
-							for(Unit u : gs.CCs.values()) {
-								gs.MainCC = u;
-								break;
-							}
-						}
-						else {
-							gs.MainCC = null;
-						}
-					}
-				}
-				if(gs.CSs.contains(arg0)) {
-					gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
-				}
-				if(gs.Fs.contains(arg0)) {
-					gs.Fs.remove(arg0);
-				}
-				if(gs.MBs.contains(arg0)) {
-					gs.MBs.remove(arg0);
-				}
-				if(gs.UBs.contains(arg0)) {
-					gs.UBs.remove(arg0);
-				}
-				if(gs.SBs.contains(arg0)) {
-					gs.SBs.remove(arg0);
-				}
-				if(gs.Ts.contains(arg0)) {
-					gs.Ts.remove(arg0);
-				}
-				if(gs.Ps.contains(arg0)) {
-					gs.Ps.remove(arg0);
 				}	
-				if(arg0.getType() == UnitType.Terran_Bunker) {
-					if(gs.DBs.containsKey(arg0)) {
-						for(Unit u : gs.DBs.get(arg0)) {
-							gs.addToSquad(u);
-						}
-						gs.DBs.remove(arg0);
+				 else if(arg0.getType().isBuilding()) {
+	
+					gs.inMap.updateMap(arg0,true);
+					if(arg0.getType() != UnitType.Terran_Command_Center) {
+						gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
 					}
-				}
-				if(arg0.getType().isRefinery()) {
-					for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
-						if(r.first.first.equals(arg0)) {
-							gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = false;
-							List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-							for(Pair<Unit,Unit> w: gs.workerTask) {
-								if(r.first.first.equals(w.second)) {
-									aux.add(w);
-									gs.workerIdle.add(w.first);
-								}
-							}
-							gs.workerTask.removeAll(aux);
+					for(Pair<Unit,Unit> r : gs.repairerTask) {
+						if(r.second.equals(arg0)) {
+							gs.workerIdle.add(r.first);
+							gs.repairerTask.remove(r);
 							break;
 						}
 					}
-				}
-				gs.testMap = gs.map.clone();
-			} else {
-				if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
-					if(gs.TTMs.containsKey(arg0)) {
-						gs.TTMs.remove(arg0);
+					for(Pair<Unit, Unit> w: gs.workerTask) {
+						if(w.second.equals(arg0)) {
+							gs.workerTask.remove(w);
+							gs.workerIdle.add(w.first);
+							break;
+						}
+					}
+					for(Unit w: gs.buildingLot) {
+						if(w.equals(arg0)) {
+							gs.buildingLot.remove(w);
+							break;
+						}
+					}
+					for(Unit u : gs.CCs.values()) {
+						if(u.equals(arg0)) {
+							gs.removeResources(arg0);
+							if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
+								gs.CSs.remove(arg0.getAddon());
+							}
+							gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
+							if(arg0.equals(gs.MainCC)) {
+								if(gs.CCs.size() > 0) {
+									for(Unit c : gs.CCs.values()) {
+										if(!c.equals(arg0)) {
+											gs.MainCC = u;
+											break;
+										}
+									}
+								}
+								else {
+									gs.MainCC = null;
+								}
+							}
+						}
+					}
+	
+					if(gs.CSs.contains(arg0)) {
+						gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
+					}
+					if(gs.Fs.contains(arg0)) {
+						gs.Fs.remove(arg0);
+					}
+					if(gs.MBs.contains(arg0)) {
+						gs.MBs.remove(arg0);
+					}
+					if(gs.UBs.contains(arg0)) {
+						gs.UBs.remove(arg0);
+					}
+					if(gs.SBs.contains(arg0)) {
+						gs.SBs.remove(arg0);
+					}
+					if(gs.Ts.contains(arg0)) {
+						gs.Ts.remove(arg0);
+					}
+					if(gs.Ps.contains(arg0)) {
+						gs.Ps.remove(arg0);
+					}	
+					if(arg0.getType() == UnitType.Terran_Bunker) {
+						if(gs.DBs.containsKey(arg0)) {
+							for(Unit u : gs.DBs.get(arg0)) {
+								gs.addToSquad(u);
+							}
+							gs.DBs.remove(arg0);
+						}
+					}
+					if(arg0.getType().isRefinery()) {
+						for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
+							if(r.first.first.equals(arg0)) {
+								gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = false;
+								List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
+								for(Pair<Unit,Unit> w: gs.workerTask) {
+									if(r.first.first.equals(w.second)) {
+										aux.add(w);
+										gs.workerIdle.add(w.first);
+									}
+								}
+								gs.workerTask.removeAll(aux);
+								break;
+							}
+						}
+					}
+					gs.testMap = gs.map.clone();
+				} else {
+					if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+						if(gs.TTMs.containsKey(arg0)) {
+							gs.TTMs.remove(arg0);
+							gs.removeFromSquad(arg0);
+						}
+					}
+					else if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
 						gs.removeFromSquad(arg0);
 					}
 				}
-				else if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
-					gs.removeFromSquad(arg0);
-				}
-			}
-
-		} else if(arg0.getType().isMineralField()) {
-			if(gs.mineralsAssigned.containsKey(arg0)) {
-				gs.mineralsAssigned.remove(arg0);
-				gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
-				gs.testMap = gs.map.clone();
-				List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-				for(Pair<Unit,Unit> w: gs.workerTask) {
-					if(arg0.equals(w.second)) {
-						w.first.stop();
-						gs.workerIdle.add(w.first);
-						aux.add(w);
+	
+			} else if(arg0.getType().isMineralField()) {
+				if(gs.mineralsAssigned.containsKey(arg0)) {
+					gs.mineralsAssigned.remove(arg0);
+					gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
+					gs.testMap = gs.map.clone();
+					List<Unit> aux = new ArrayList<>();
+					for(Entry<Unit, Unit> w: gs.workerMining.entrySet()) {
+						if(arg0.equals(w.getValue())) {
+							w.getKey().stop();
+							gs.workerIdle.add(w.getKey());
+							aux.add(w.getKey());
+						}
+					}
+					for(Unit u : aux) {
+						gs.workerMining.remove(u);
 					}
 				}
-				gs.workerTask.removeAll(aux);
 			}
 		}
 	}

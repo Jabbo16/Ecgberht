@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -70,6 +71,7 @@ public class GameState extends GameHandler {
 	public List<Pair<Unit,Position> > workerDefenders = new ArrayList<Pair<Unit,Position> >();
 	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >();
 	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit>>();
+	public Map<Unit,Unit> workerMining = new HashMap<>();
 	public Set<Unit> workerIdle = new HashSet<>();
 	public Map<String,Squad> squads = new HashMap<String,Squad>();
 	public Map<Unit, String> TTMs = new HashMap<>();
@@ -281,14 +283,12 @@ public class GameState extends GameHandler {
 		try{
 			String run = getClass().getResource("GameState.class").toString();
 			if(run.startsWith("jar:") || run.startsWith("rsrc:")) {
-				FileInputStream fis = new FileInputStream(soundFile);
+				InputStream fis = getClass().getClassLoader().getResourceAsStream(soundFile);
 				javazoom.jl.player.Player playMP3 = new javazoom.jl.player.Player(fis);
 				new Thread(() -> {
 		        	 try {
 						playMP3.play();
-						this.finalize();
 					} catch (Throwable e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}).start();
@@ -300,9 +300,7 @@ public class GameState extends GameHandler {
 				new Thread(() -> {
 		        	 try {
 						playMP3.play();
-						this.finalize();
 					} catch (Throwable e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}).start();
@@ -415,7 +413,6 @@ public class GameState extends GameHandler {
 		game.drawTextScreen(10, 65, Utils.formatText("MGPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
 		game.drawTextScreen(10, 80, Utils.formatText("Strategy: ",Utils.White) + Utils.formatText(strat.name, Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
-		
 		if(closestChoke != null) {
 			game.drawTextMap(closestChoke.getCenter(), "Choke");
 		}
@@ -502,6 +499,7 @@ public class GameState extends GameHandler {
 		}
 		for(Unit m : mineralsAssigned.keySet()) {
 			print(m, Color.Cyan);
+			game.drawTextMap(m.getPosition(), mineralsAssigned.get(m).toString());
 		}
 	}
 
@@ -619,30 +617,7 @@ public class GameState extends GameHandler {
 		if(chosenBuilderBL!= null && workerIdle.contains(chosenBuilderBL)) {
 			workerIdle.remove(chosenBuilderBL);
 		}
-		List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-		List<Unit> aux2 = new ArrayList<Unit>();
-		for(Pair<Unit,Unit> w : workerTask) {
-			if(chosenScout != null && w.first.equals(chosenScout)) {
-				chosenScout = null;
-			}
-			if(chosenRepairer != null && w.first.equals(chosenRepairer)) {
-				chosenRepairer = null;
-			}
-			if(workerIdle.contains(w.first) && w.second.getType().isNeutral()) {
-				if(w.first.isGatheringMinerals()) {
-					aux2.add(w.first);
-				}
-				else if(w.first.isIdle()) {
-					aux.add(w);
-				}
-			}
-			if(w.first.isIdle() && w.second.getType().isNeutral()) {
-				workerIdle.add(w.first);
-				aux.add(w);
-			}
-		}
-		workerTask.removeAll(aux);
-		workerIdle.removeAll(aux2);
+		
 		List<Pair<Unit,Pair<UnitType,TilePosition>>> aux3 = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
 		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
 			if((u.first.isIdle() || u.first.isGatheringGas() || u.first.isGatheringMinerals()) && 
@@ -654,6 +629,7 @@ public class GameState extends GameHandler {
 			}
 		}
 		workerBuild.removeAll(aux3);
+		
 		List<Pair<Unit,Unit> > aux4 = new ArrayList<Pair<Unit,Unit> >();
 		for(Pair<Unit,Unit> r : repairerTask) {
 			if(r.first.equals(chosenScout)) {
@@ -673,16 +649,21 @@ public class GameState extends GameHandler {
 
 		List<Pair<Unit,Position> > aux5 = new ArrayList<Pair<Unit,Position> >();
 		for(Pair<Unit,Position> r : workerDefenders) {
-			if(r.first.isIdle()) {
+			if(r.first.isIdle() || r.first.isGatheringMinerals()) {
 				workerIdle.add(r.first);
 				aux5.add(r);
 			}
 		}
 		workerDefenders.removeAll(aux5);
+
+		List<String> aux6 = new ArrayList<>();
 		for(Squad u : squads.values()) {
 			if(u.members.isEmpty()) {
-				squads.values().remove(u);
+				aux6.add(u.name);
 			}
+		}
+		for(String s : aux6) {
+			squads.remove(s);
 		}
 	}
 
@@ -933,12 +914,10 @@ public class GameState extends GameHandler {
 	}
 
 	public void mineralLocking() {
-		for(Pair<Unit, Unit> u : workerTask) {
-			if(u.second.getType().isMineralField()) {
-				if(u.first.getTarget() != null) {
-					if(!u.first.getTarget().equals(u.second) && u.first.getOrder() == Order.MoveToMinerals && !u.first.isCarryingMinerals()){
-						u.first.gather(u.second);
-					}
+		for(Entry<Unit, Unit> u : workerMining.entrySet()) {
+			if(u.getKey().getTarget() != null) {
+				if(!u.getKey().getTarget().equals(u.getValue()) && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals()){
+					u.getKey().gather(u.getValue());
 				}
 			}
 		}
@@ -1140,57 +1119,54 @@ public class GameState extends GameHandler {
 
 	public void checkWorkerMilitia() {
 		if(countUnit(UnitType.Terran_Barracks) == 2) {
-			List<Pair<Unit, Unit>> aux = new ArrayList<Pair<Unit, Unit>>();
-			int count = 0;
-			for(Pair<Unit, Unit> scv : workerTask) {
-				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField()) {
-					count++;
-				}
-			}
-			for(Pair<Unit, Unit> scv : workerTask) {
+			List<Unit> aux = new ArrayList<>();
+			int count = workerMining.size();
+			for(Entry<Unit, Unit> scv : workerMining.entrySet()) {
 				if(count <= workerCountToSustain) {
 					break;
 				}
-				if(scv.first.getType().isWorker() && scv.second.getType().isMineralField() && !scv.first.isCarryingMinerals()) {
-					scv.first.move(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
-					addToSquad(scv.first);
-						if(mineralsAssigned.containsKey(scv.second)) {
+				if(!scv.getKey().isCarryingMinerals()) {
+					scv.getKey().move(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
+					addToSquad(scv.getKey());
+						if(mineralsAssigned.containsKey(scv.getValue())) {
 							mining--;
-							mineralsAssigned.put(scv.second, mineralsAssigned.get(scv.second) - 1);
+							mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
 						}
-					aux.add(scv);
+					aux.add(scv.getKey());
 					count--;
 					
 				}
 			}
-			workerTask.removeAll(aux);
+			for(Unit u : aux) {
+				workerMining.remove(u);
+			}
 		}
 		
 	}
 
-	public boolean armyGroupedBBS() {
-		boolean allFine = true;
-		for(Squad s : squads.values()) {
-			if(s.attack != Position.None) {
-				if(s.members.size() == 1) {
-					continue;
-				}
-				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 160);
-				Set<Unit> different = new HashSet<>();
-				different.addAll(circle);
-				different.addAll(s.members);
-				circle.retainAll(s.members);
-				different.removeAll(circle);
-				if(circle.size() != s.members.size()) {
-					allFine = false;
-					for(Unit u : different) {
-						u.attack(getSquadCenter(s));
-					}
-				}
-			} 
-		}
-		return allFine;
-	}
+//	public boolean armyGroupedBBS() {
+//		boolean allFine = true;
+//		for(Squad s : squads.values()) {
+//			if(s.attack != Position.None) {
+//				if(s.members.size() == 1) {
+//					continue;
+//				}
+//				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 160);
+//				Set<Unit> different = new HashSet<>();
+//				different.addAll(circle);
+//				different.addAll(s.members);
+//				circle.retainAll(s.members);
+//				different.removeAll(circle);
+//				if(circle.size() != s.members.size()) {
+//					allFine = false;
+//					for(Unit u : different) {
+//						u.attack(getSquadCenter(s));
+//					}
+//				}
+//			} 
+//		}
+//		return allFine;
+//	}
 	
 	//Credits to @PurpleWaveJadien
 	public double broodWarDistance(Position a, Position b) {
@@ -1205,7 +1181,7 @@ public class GameState extends GameHandler {
 		 
 	}
 	
-	public boolean simulateBattle(List<Unit> friends, List<Unit> enemies) {
+	public boolean simulateBattle(Set<Unit> friends, Set<Unit> enemies, int frames) {
 		simulator.clear();
 		for(Unit u : friends) {
 			simulator.addUnitPlayer1(new JFAPUnit(u));
@@ -1216,7 +1192,7 @@ public class GameState extends GameHandler {
 		Pair<Integer, Integer> presim_scores = simulator.playerScores();
 //		int presim_my_unit_count = simulator.getState().first.size();
 //		int presim_enemy_unit_count = simulator.getState().second.size();
-		simulator.simulate(480);
+		simulator.simulate(frames);
 //		int postsim_my_unit_count = simulator.getState().first.size();
 //		int postsim_enemy_unit_count = simulator.getState().second.size();
 		Pair<Integer, Integer> postsim_scores = simulator.playerScores();
@@ -1230,7 +1206,7 @@ public class GameState extends GameHandler {
 //		System.out.println("My score diff : " + my_score_diff);
 //		System.out.println("Enemy score diff : " + enemy_score_diff);
 //		System.out.println("-----------------------");
-		if(enemy_score_diff < my_score_diff) {
+		if(enemy_score_diff * 2 < my_score_diff) {
 			return false;
 		}
 		return true;

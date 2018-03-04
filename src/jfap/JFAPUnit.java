@@ -3,6 +3,7 @@ package jfap;
 import bwapi.DamageType;
 import bwapi.Game;
 import bwapi.Player;
+import bwapi.Race;
 import bwapi.Unit;
 import bwapi.UnitSizeType;
 import bwapi.UnitType;
@@ -39,6 +40,7 @@ public class JFAPUnit {
 	boolean didHealThisFrame = false;
 	int score = 0;
 	int attackCooldownRemaining = 0;
+	Race race = Race.Unknown;
 	
 	public JFAPUnit() {
 		
@@ -47,38 +49,41 @@ public class JFAPUnit {
 	public JFAPUnit(Unit u) {
 		x = u.getX();
 		y = u.getY();
+		UnitType auxType = u.getType();
+		Player auxPlayer = u.getPlayer();
 		health = u.getHitPoints();
-		maxHealth = u.getType().maxHitPoints();
-		armor = u.getPlayer().armor(u.getType());
+		maxHealth = auxType.maxHitPoints();
+		armor = auxPlayer.armor(auxType);
 		shields = u.getShields();
-		shieldArmor = u.getPlayer().getUpgradeLevel(UpgradeType.Protoss_Plasma_Shields);
-		maxShields = u.getType().maxShields();
-		speed = u.getPlayer().topSpeed(u.getType());
-		flying = u.getType().isFlyer();
-		groundDamage = u.getPlayer().damage(u.getType().groundWeapon());
-		groundCooldown = u.getType().groundWeapon().damageFactor() > 0 && u.getType().maxGroundHits() > 0 ? u.getPlayer().weaponDamageCooldown(u.getType()) /
-						(u.getType().groundWeapon().damageFactor() * u.getType().maxGroundHits()) : 0;
-		groundMaxRange = u.getPlayer().weaponMaxRange(u.getType().groundWeapon());
-		groundMinRange = u.getType().groundWeapon().minRange();
-		groundDamageType = u.getType().groundWeapon().damageType();
-		airDamage = u.getPlayer().damage(u.getType().airWeapon());
-		airCooldown = u.getType().airWeapon().damageFactor() > 0 && u.getType().maxAirHits() > 0 ? u.getType().airWeapon().damageCooldown() /
-				u.getType().airWeapon().damageFactor() * u.getType().maxAirHits() : 0;
-		airMaxRange = u.getPlayer().weaponMaxRange(u.getType().airWeapon());
-		airMinRange = u.getType().airWeapon().minRange();
-		airDamageType = u.getType().airWeapon().damageType();
-		unitType = u.getType();
-		player = u.getPlayer();
-		isOrganic = u.getType().isOrganic();
-		score = u.getType().destroyScore();
+		shieldArmor = auxPlayer.getUpgradeLevel(UpgradeType.Protoss_Plasma_Shields);
+		maxShields = auxType.maxShields();
+		speed = auxPlayer.topSpeed(auxType);
+		flying = auxType.isFlyer();
+		groundDamage = auxPlayer.damage(auxType.groundWeapon());
+		groundCooldown = auxType.groundWeapon().damageFactor() > 0 && auxType.maxGroundHits() > 0 ? auxPlayer.weaponDamageCooldown(auxType) /
+						(auxType.groundWeapon().damageFactor() * auxType.maxGroundHits()) : 0;
+		groundMaxRange = auxPlayer.weaponMaxRange(auxType.groundWeapon());
+		groundMinRange = auxType.groundWeapon().minRange();
+		groundDamageType = auxType.groundWeapon().damageType();
+		airDamage = auxPlayer.damage(auxType.airWeapon());
+		airCooldown = auxType.airWeapon().damageFactor() > 0 && auxType.maxAirHits() > 0 ? auxType.airWeapon().damageCooldown() /
+				auxType.airWeapon().damageFactor() * auxType.maxAirHits() : 0;
+		airMaxRange = auxPlayer.weaponMaxRange(auxType.airWeapon());
+		airMinRange = auxType.airWeapon().minRange();
+		airDamageType = auxType.airWeapon().damageType();
+		unitType = auxType;
+		player = auxPlayer;
+		isOrganic = auxType.isOrganic();
+		score = auxType.destroyScore();
+		race = auxType.getRace();
 		doThings(u, JFAP.game);
 	}
 
 	private void doThings(Unit u, Game game) {
 		int nextId = 0;
 		id = nextId++;
-		if(u.getType() == UnitType.Protoss_Carrier) {
-			groundDamage = u.getPlayer().damage(UnitType.Protoss_Interceptor.groundWeapon());
+		if(unitType == UnitType.Protoss_Carrier) {
+			groundDamage = player.damage(UnitType.Protoss_Interceptor.groundWeapon());
 			if (u != null && u.isVisible()) {
 				final int interceptorCount = u.getInterceptorCount();
 				if (interceptorCount > 0) {
@@ -88,7 +93,7 @@ public class JFAPUnit {
 					groundCooldown = 5;
 				}
 			} else {
-				if (u.getPlayer() != null) {
+				if (player != null) {
 					groundCooldown = (int)(Math.round(37.0f / (u.getPlayer().getUpgradeLevel(UpgradeType.Carrier_Capacity) == 1 ? 8 : 4)));
 				} else {
 					groundCooldown = (int)(Math.round(37.0f / 8));
@@ -101,15 +106,15 @@ public class JFAPUnit {
 			airCooldown = groundCooldown;
 			airMaxRange = groundMaxRange;
 		}
-		else if(u.getType() == UnitType.Terran_Bunker) {
-			groundDamage = u.getPlayer().damage(WeaponType.Gauss_Rifle);
+		else if(unitType == UnitType.Terran_Bunker) {
+			groundDamage = player.damage(WeaponType.Gauss_Rifle);
 			groundCooldown = UnitType.Terran_Marine.groundWeapon().damageCooldown() / 4;
-			groundMaxRange = u.getPlayer().weaponMaxRange(UnitType.Terran_Marine.groundWeapon()) + 32;
+			groundMaxRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon()) + 32;
 			airDamage = groundDamage;
 			airCooldown = groundCooldown;
 			airMaxRange = groundMaxRange;
 		}
-		else if(u.getType() == UnitType.Protoss_Reaver) {
+		else if(unitType == UnitType.Protoss_Reaver) {
 			groundDamage = u.getPlayer().damage(WeaponType.Scarab);
 		}
 		if (u != null && u.isStimmed()) {

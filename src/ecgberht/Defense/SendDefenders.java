@@ -66,35 +66,23 @@ public class SendDefenders extends Action {
 				if(((GameState)this.handler).enemyInBase.size() == 1 && ((GameState)this.handler).enemyInBase.iterator().next().getType().isWorker()) {
 					defenders = 1;
 				}
-				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerTask.isEmpty()) {
-					for(Pair<Unit, Unit> u:((GameState)this.handler).workerTask) {
-						if(u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
-							break;
-						}
-						if(((GameState)this.handler).workerTask.indexOf(u) == ((GameState)this.handler).workerTask.size() - 1 && !u.second.getType().isNeutral()) {
-							return State.FAILURE;
-						}
-					}
+				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerMining.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;
-					for (Pair<Unit, Unit> u : ((GameState)this.handler).workerTask) {
-						if ((closestWorker == null || u.first.getDistance(chosen) < closestWorker.getDistance(chosen))) {
-							if(u.second.getType().isNeutral()) {
-								closestWorker = u.first;
-							}
+					for (Entry<Unit, Unit> u : ((GameState)this.handler).workerMining.entrySet()) {
+						if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen))) {
+							closestWorker = u.getKey();
 						}
 					}
 					if(closestWorker != null) {
-						for(Pair<Unit,Unit> u:((GameState)this.handler).workerTask) {
-							if(u.first.equals(closestWorker)) {
-								((GameState)this.handler).workerTask.remove(u);
-								((GameState)this.handler).workerDefenders.add(new Pair<Unit, Position>(closestWorker,null));
-								if(((GameState)this.handler).mineralsAssigned.containsKey(u.second)) {
-									((GameState)this.handler).mining--;
-									((GameState)this.handler).mineralsAssigned.put(u.second, ((GameState)this.handler).mineralsAssigned.get(u.second) - 1);
-								}
-								break;
+						if(((GameState)this.handler).workerMining.containsKey(closestWorker)) {
+							Unit mineral = ((GameState)this.handler).workerMining.get(closestWorker);
+							((GameState)this.handler).workerDefenders.add(new Pair<Unit, Position>(closestWorker,null));
+							if(((GameState)this.handler).mineralsAssigned.containsKey(mineral)) {
+								((GameState)this.handler).mining--;
+								((GameState)this.handler).mineralsAssigned.put(mineral, ((GameState)this.handler).mineralsAssigned.get(mineral) - 1);
 							}
+							((GameState)this.handler).workerMining.remove(closestWorker);
 						}
 					}
 				}

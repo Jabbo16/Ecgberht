@@ -352,7 +352,7 @@ public class JFAP extends AJFAP{
 			fu.didHealThisFrame = false;
 		}
 
-		if (fu.unitType.getRace() == Race.Zerg) {
+		if (fu.race == Race.Zerg) {
 			if (fu.health < fu.maxHealth) {
 				fu.health += 4;
 			}
@@ -360,7 +360,7 @@ public class JFAP extends AJFAP{
 				fu.health = fu.maxHealth;
 			}
 		}
-		else if (fu.unitType.getRace() == Race.Protoss) {
+		else if (fu.race == Race.Protoss) {
 			if (fu.shields < fu.maxShields) {
 				fu.shields += 7;
 			}

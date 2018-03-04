@@ -4,7 +4,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Pair;
 import bwapi.Unit;
 import ecgberht.GameState;
 
@@ -23,10 +22,10 @@ public class ChooseScout extends Action {
 				break;
 			}
 			if(((GameState)this.handler).chosenScout == null) {
-				for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
-					if(u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
-						((GameState)this.handler).chosenScout = u.first;
-						((GameState)this.handler).workerTask.remove(u);
+				for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+					if(!u.isCarryingMinerals()) {
+						((GameState)this.handler).chosenScout = u;
+						((GameState)this.handler).workerMining.remove(u);
 					}
 					break;
 				}

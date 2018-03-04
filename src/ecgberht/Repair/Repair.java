@@ -21,14 +21,12 @@ public class Repair extends Action {
 				if(((GameState)this.handler).workerIdle.contains(((GameState)this.handler).chosenRepairer)) {
 					((GameState)this.handler).workerIdle.remove(((GameState)this.handler).chosenRepairer);
 				} else {
-					for(Pair<Unit,Unit> u:((GameState)this.handler).workerTask) {
-						if(u.first.equals(((GameState)this.handler).chosenRepairer)) {
-							((GameState)this.handler).workerTask.remove(u);
-							if(((GameState)this.handler).mineralsAssigned.containsKey(u.second)) {
-								((GameState)this.handler).mining--;
-								((GameState)this.handler).mineralsAssigned.put(u.second, ((GameState)this.handler).mineralsAssigned.get(u.second) - 1);
-							}
-							break;
+					if(((GameState)this.handler).workerMining.containsKey(((GameState)this.handler).chosenRepairer)) {
+						Unit mineral = ((GameState)this.handler).workerMining.get(((GameState)this.handler).chosenRepairer);
+						((GameState)this.handler).workerMining.remove(((GameState)this.handler).chosenRepairer);
+						if(((GameState)this.handler).mineralsAssigned.containsKey(mineral)) {
+							((GameState)this.handler).mining--;
+							((GameState)this.handler).mineralsAssigned.put(mineral, ((GameState)this.handler).mineralsAssigned.get(mineral) - 1);
 						}
 					}
 				}
