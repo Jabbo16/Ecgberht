@@ -378,15 +378,17 @@ public class BuildingMap {
 			if(blockers.isEmpty()) {
 				return false;
 			}
+			if(blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) {
+				return true;
+			}
+			
+			if(blockers.size() > 1) {
+				return true;
+			}
 			else {
-				if(blockers.size() > 1) {
-					return true;
-				}
-				else {
-					Unit blocker = blockers.get(0);
-					if(blocker.getPlayer().getID() == self.getID() && blocker.getType().isWorker() && blocker.getBuildType() == type) {
-						return false;
-					}
+				Unit blocker = blockers.get(0);
+				if(blocker.getPlayer().getID() == self.getID() && blocker.getType().isWorker() && blocker.getBuildType() == type) {
+					return false;
 				}
 			}
 			return true;

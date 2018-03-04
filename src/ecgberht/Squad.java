@@ -61,6 +61,11 @@ public class Squad {
 		for(Unit u : members) {
 			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
 				u.useTech(TechType.Stim_Packs);
+				if(getGs().getGame().elapsedTime() > getGs().lastFrameStim + 15) {
+					getGs().playSound("stim.mp3");
+					getGs().lastFrameStim = getGs().getGame().elapsedTime();
+				}
+				
 			}
 		}
 	}
@@ -191,7 +196,7 @@ public class Squad {
 	public void giveMoveOrder(Position retreat) {
 		int frameCount = getGame().getFrameCount();
 		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
 				continue;
 			}
 			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {

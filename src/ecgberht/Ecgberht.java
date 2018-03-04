@@ -448,100 +448,81 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onUnitComplete(Unit arg0) {
-		observer.moveCameraUnitCreated(arg0);
-		if(!arg0.getType().isNeutral() && arg0.getPlayer().getID() == self.getID()) {
-			if(arg0.getType().isBuilding()) {
-				gs.builtBuildings++;
-				if(arg0.getType().isRefinery()) {
-					for(Pair<Pair<Unit,Integer>,Boolean> r:gs.refineriesAssigned) {
-						if(r.first.first.getTilePosition().equals(arg0.getTilePosition())) {
-							gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = true;
-							gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).first.second++;
-							break;
+		try {
+			observer.moveCameraUnitCreated(arg0);
+			if(!arg0.getType().isNeutral() && arg0.getPlayer().getID() == self.getID()) {
+				if(arg0.getType().isBuilding()) {
+					gs.builtBuildings++;
+					if(arg0.getType().isRefinery()) {
+						for(Pair<Pair<Unit,Integer>,Boolean> r:gs.refineriesAssigned) {
+							if(r.first.first.getTilePosition().equals(arg0.getTilePosition())) {
+								gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = true;
+								gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).first.second++;
+								break;
+							}
+						}
+						gs.builtRefinery++;
+					} else {
+						if(arg0.getType() == UnitType.Terran_Command_Center) {
+							gs.CCs.put(BWTA.getRegion(arg0.getPosition()).getCenter(),arg0);
+							gs.addNewResources(arg0);
+							if(arg0.getAddon() != null && !gs.CSs.contains(arg0.getAddon())) {
+								gs.CSs.add(arg0.getAddon());
+							}
+							if(game.getFrameCount() == 0) {
+								gs.MainCC = arg0;
+							}
+							gs.builtCC++;
+						}
+						if(arg0.getType() == UnitType.Terran_Comsat_Station) {
+							gs.CSs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Bunker) {
+							gs.DBs.put(arg0, new HashSet<Unit>());
+						}
+						if(arg0.getType() == UnitType.Terran_Engineering_Bay || arg0.getType() == UnitType.Terran_Academy) {
+							gs.UBs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Barracks) {
+							gs.MBs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Factory) {
+							gs.Fs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Starport) {
+							gs.Ps.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Science_Facility) {
+							gs.UBs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Supply_Depot) {
+							gs.SBs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Machine_Shop) {
+							gs.UBs.add(arg0);
+						}
+						if(arg0.getType() == UnitType.Terran_Missile_Turret) {
+							gs.Ts.add(arg0);
+						}
+						for(Pair<Unit, Unit> u : gs.workerTask) {
+							if(u.second.equals(arg0)) {
+								gs.workerTask.remove(u);
+								gs.workerIdle.add(u.first);
+								break;
+							}
 						}
 					}
-					gs.builtRefinery++;
-				} else {
-					if(arg0.getType() == UnitType.Terran_Command_Center) {
-						gs.CCs.put(BWTA.getRegion(arg0.getPosition()).getCenter(),arg0);
-						gs.addNewResources(arg0);
-						if(arg0.getAddon() != null && !gs.CSs.contains(arg0.getAddon())) {
-							gs.CSs.add(arg0.getAddon());
-						}
-						if(game.getFrameCount() == 0) {
-							gs.MainCC = arg0;
-						}
-						gs.builtCC++;
-					}
-					if(arg0.getType() == UnitType.Terran_Comsat_Station) {
-						gs.CSs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Bunker) {
-						gs.DBs.put(arg0, new HashSet<Unit>());
-					}
-					if(arg0.getType() == UnitType.Terran_Engineering_Bay || arg0.getType() == UnitType.Terran_Academy) {
-						gs.UBs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Barracks) {
-						gs.MBs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Factory) {
-						gs.Fs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Starport) {
-						gs.Ps.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Science_Facility) {
-						gs.UBs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Supply_Depot) {
-						gs.SBs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Machine_Shop) {
-						gs.UBs.add(arg0);
-					}
-					if(arg0.getType() == UnitType.Terran_Missile_Turret) {
-						gs.Ts.add(arg0);
-					}
-					for(Pair<Unit, Unit> u : gs.workerTask) {
-						if(u.second.equals(arg0)) {
-							gs.workerTask.remove(u);
-							gs.workerIdle.add(u.first);
-							break;
-						}
-					}
-				}
-			}
-			else{
-				if(arg0.getType().isWorker()) {
-					gs.workerIdle.add(arg0);
-					gs.trainedWorkers++;
 				}
 				else{
-					if(arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
-						if(!gs.TTMs.containsKey(arg0.getID())) {
-							String nombre = gs.addToSquad(arg0);
-							gs.TTMs.put(arg0.getID(),nombre);
-							if(!gs.DBs.isEmpty()) {
-								arg0.attack(gs.DBs.keySet().iterator().next().getPosition());
-							}
-							else if(gs.closestChoke != null) {
-								arg0.attack(gs.closestChoke.getCenter());
-							}else{
-								arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
-							}
-						}
-						else {
-							Position beforeSiege = gs.squads.get(gs.TTMs.get(arg0.getID())).attack;
-							if(beforeSiege != null && beforeSiege != Position.None) {
-								arg0.attack(beforeSiege);
-							}
-						}
+					if(arg0.getType().isWorker()) {
+						gs.workerIdle.add(arg0);
+						gs.trainedWorkers++;
 					}
-					if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
-						gs.addToSquad(arg0);
-						if(gs.strat.name != "ProxyBBS") {
-							if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
+					else{
+						if(arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+							if(!gs.TTMs.containsKey(arg0)) {
+								String nombre = gs.addToSquad(arg0);
+								gs.TTMs.put(arg0,nombre);
 								if(!gs.DBs.isEmpty()) {
 									arg0.attack(gs.DBs.keySet().iterator().next().getPosition());
 								}
@@ -551,23 +532,52 @@ public class Ecgberht extends DefaultBWListener {
 									arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
 								}
 							}
-						}
-						else {
-							if(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).getDistance(gs.enemyBase.getTilePosition()) < arg0.getTilePosition().getDistance(gs.enemyBase.getTilePosition())) {
-								arg0.attack(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
+							else {
+								Squad tankS = gs.squads.get(gs.TTMs.get(arg0));
+								Position beforeSiege = null;
+								if(tankS != null) {
+									 beforeSiege = tankS.attack;
+								}
+								if(beforeSiege != null && beforeSiege != Position.None) {
+									arg0.attack(beforeSiege);
+								}
 							}
 						}
+						if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
+							gs.addToSquad(arg0);
+							if(gs.strat.name != "ProxyBBS") {
+								if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
+									if(!gs.DBs.isEmpty()) {
+										arg0.attack(gs.DBs.keySet().iterator().next().getPosition());
+									}
+									else if(gs.closestChoke != null) {
+										arg0.attack(gs.closestChoke.getCenter());
+									}else{
+										arg0.attack(BWTA.getNearestChokepoint(self.getStartLocation()).getCenter());
+									}
+								}
+							}
+							else {
+								if(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).getDistance(gs.enemyBase.getTilePosition()) < arg0.getTilePosition().getDistance(gs.enemyBase.getTilePosition())) {
+									arg0.attack(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
+								}
+							}
+						}
+						gs.trainedCombatUnits++;
 					}
-					gs.trainedCombatUnits++;
 				}
 			}
+		} catch(Exception e) {
+			System.err.println("onUnitComplete exception");
+			System.err.println(e);
 		}
+		
 	}
 
 	public void onUnitDestroy(Unit arg0) {
-		if(!arg0.getType().isBuilding()) {
+		if(!arg0.getType().isBuilding() && !arg0.getType().isRefinery() && arg0.getType() != UnitType.Resource_Vespene_Geyser) {
 			if(!first ) {
-				gs.playSound("first.wav");
+				gs.playSound("first.mp3");
 				first = true;
 			}
 		}
@@ -750,8 +760,8 @@ public class Ecgberht extends DefaultBWListener {
 				gs.testMap = gs.map.clone();
 			} else {
 				if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
-					if(gs.TTMs.containsKey(arg0.getID())) {
-						gs.TTMs.remove(arg0.getID());
+					if(gs.TTMs.containsKey(arg0)) {
+						gs.TTMs.remove(arg0);
 						gs.removeFromSquad(arg0);
 					}
 				}

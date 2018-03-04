@@ -1,10 +1,9 @@
 package ecgberht;
 
-import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,10 +19,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-
 import org.iaie.btree.util.GameHandler;
 
 import com.google.gson.Gson;
@@ -38,6 +33,7 @@ import jfap.JFAPUnit;
 //import jweb.JBWEB;
 import ecgberht.BaseLocationComparator;
 import ecgberht.Squad.Status;
+
 public class GameState extends GameHandler {
 
 	public BaseLocation enemyBase = null;
@@ -61,6 +57,7 @@ public class GameState extends GameHandler {
 	public int deltaSupply;
 	public int mining;
 	public int startCount;
+	public int lastFrameStim = Integer.MIN_VALUE;
 	public int trainedCombatUnits;
 	public int trainedWorkers;
 	public int mapSize = 2;
@@ -75,7 +72,7 @@ public class GameState extends GameHandler {
 	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit>>();
 	public Set<Unit> workerIdle = new HashSet<>();
 	public Map<String,Squad> squads = new HashMap<String,Squad>();
-	public Map<Integer, String> TTMs = new HashMap<Integer,String>();
+	public Map<Unit, String> TTMs = new HashMap<>();
 	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
 	public Pair<String, Unit> chosenMarine = null;
 	public Position attackPosition = null;
@@ -128,7 +125,6 @@ public class GameState extends GameHandler {
 	public JFAP simulator;
 //	public JBWEB jbweb;
 	public Region naturalRegion = null;
-	public boolean firstScout = true;
 	
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -138,6 +134,10 @@ public class GameState extends GameHandler {
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		mapSize = BWTA.getStartLocations().size();
 		simulator = new JFAP(bwapi.getGame());
+		if(game.enemy().getName() == "Zercgberht" || game.enemy().getName() == "Protecgberht") {
+			game.sendText("Hey there!, brother");
+			game.sendText("As the oldest of the three I'm not gonna lose");
+		}
 //		jbweb = new JBWEB(game);
 	}
 	
@@ -281,19 +281,31 @@ public class GameState extends GameHandler {
 		try{
 			String run = getClass().getResource("GameState.class").toString();
 			if(run.startsWith("jar:") || run.startsWith("rsrc:")) {
-				InputStream inp = getClass().getClassLoader().getResourceAsStream(soundFile);
-				AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(inp));
-				Clip clip = AudioSystem.getClip();
-				clip.open(audioInputStream);
-				clip.start();
+				FileInputStream fis = new FileInputStream(soundFile);
+				javazoom.jl.player.Player playMP3 = new javazoom.jl.player.Player(fis);
+				new Thread(() -> {
+		        	 try {
+						playMP3.play();
+						this.finalize();
+					} catch (Throwable e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}).start();
 			}
 			else {
 				soundFile = "src\\" + soundFile; 
-				File f = new File(soundFile);
-				AudioInputStream audioIn = AudioSystem.getAudioInputStream(f.toURI().toURL());
-				Clip clip = AudioSystem.getClip();
-				clip.open(audioIn);
-				clip.start();
+				FileInputStream fis = new FileInputStream(soundFile);
+				javazoom.jl.player.Player playMP3 = new javazoom.jl.player.Player(fis);
+				new Thread(() -> {
+		        	 try {
+						playMP3.play();
+						this.finalize();
+					} catch (Throwable e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}).start();
 			}
 			
 		}
@@ -302,7 +314,7 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 		}
 	}
-
+	
 	public Game getGame(){
 		return game;
 	}
@@ -847,11 +859,11 @@ public class GameState extends GameHandler {
 							break;
 						}
 					}
-					if(found && t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+					if(found && t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && t.getOrder() != Order.Sieging) {
 						t.siege();
 						continue;
 					}
-					if(!found && t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+					if(!found && t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && t.getOrder() != Order.Unsieging) {
 						t.unsiege();
 						continue;
 					}
