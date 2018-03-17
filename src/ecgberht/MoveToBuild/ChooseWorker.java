@@ -19,9 +19,13 @@ public class ChooseWorker extends Action {
 	public State execute() {
 		try {
 			Unit closestWorker = null;
+			int frame = ((GameState)this.handler).frameCount;
 			Position chosen = ((GameState)this.handler).chosenPosition.toPosition();
 			if(!((GameState)this.handler).workerIdle.isEmpty()) {
 				for (Unit u : ((GameState)this.handler).workerIdle) {
+					if(u.getLastCommandFrame() == frame) {
+						continue;
+					}
 					if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
 						closestWorker = u;
 					}
@@ -29,6 +33,9 @@ public class ChooseWorker extends Action {
 			}
 			if(!((GameState)this.handler).workerMining.isEmpty()) {
 				for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+					if(u.getLastCommandFrame() == frame) {
+						continue;
+					}
 					if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
 						closestWorker = u;
 					}

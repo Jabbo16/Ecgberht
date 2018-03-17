@@ -37,7 +37,7 @@ public class CheckHarasserAttacked extends Conditional {
 			if(workers > 1){
 				((GameState)this.handler).EI.defendHarass = true;
 			}
-			boolean winHarass = ((GameState)this.handler).simulateHarass(((GameState)this.handler).chosenHarasser, attackers);
+			boolean winHarass = ((GameState)this.handler).simulateHarass(((GameState)this.handler).chosenHarasser, attackers, 50);
 			if(winHarass) {
 				if(workers == 1 && !attacker.equals(((GameState)this.handler).chosenUnitToHarass)){
 					((GameState)this.handler).chosenHarasser.attack(attacker);

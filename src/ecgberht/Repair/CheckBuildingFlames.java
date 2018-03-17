@@ -130,6 +130,20 @@ public class CheckBuildingFlames extends Action {
 					}
 				}
 			}
+			isBeingRepaired = false;
+			for(Unit b : ((GameState)this.handler).Ps) {
+				if(b.getType().maxHitPoints() != b.getHitPoints()) {
+					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
+						if(b.equals(r.second)) {
+							isBeingRepaired = true;
+						}
+					}
+					if(!isBeingRepaired) {
+						((GameState)this.handler).chosenBuildingRepair = b;
+						return State.SUCCESS;
+					}
+				}
+			}
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());

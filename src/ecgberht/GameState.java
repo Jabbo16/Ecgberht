@@ -34,6 +34,7 @@ import jfap.JFAPUnit;
 //import jweb.JBWEB;
 import ecgberht.BaseLocationComparator;
 import ecgberht.Squad.Status;
+import ecgberht.Agents.Vulture;
 
 public class GameState extends GameHandler {
 
@@ -60,10 +61,11 @@ public class GameState extends GameHandler {
 	public int startCount;
 	public int lastFrameStim = Integer.MIN_VALUE;
 	public int trainedCombatUnits;
+	public int vulturesTrained = 0;
 	public int trainedWorkers;
 	public int mapSize = 2;
 	public int workerCountToSustain = 0;
-	public List<Unit> enemyInBase = new ArrayList<Unit>();
+	public Set<Unit> enemyInBase = new HashSet<Unit>();
 	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 	public Map<Unit,Integer> mineralsAssigned = new HashMap<>();
 	public Map<Unit, Set<Unit>> DBs = new HashMap<>();
@@ -127,6 +129,9 @@ public class GameState extends GameHandler {
 	public JFAP simulator;
 //	public JBWEB jbweb;
 	public Region naturalRegion = null;
+	public int frameCount;
+	public boolean siegeResearched = false;
+	public Set<Vulture> agents = new HashSet<>();
 	
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -148,6 +153,7 @@ public class GameState extends GameHandler {
 			BioBuild b = new BioBuild();
 			ProxyBBS bbs = new ProxyBBS();
 			BioMechBuild bM = new BioMechBuild();
+//			FullMech fM = new FullMech();
 			String map = game.mapFileName();
 			if(enemyRace == Race.Zerg && EI.naughty) {
 				return new Strategy(b);
@@ -164,14 +170,11 @@ public class GameState extends GameHandler {
 				}
 				if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
 					double random = Math.random();
-					if(random > 0.75 ) {
-						return new Strategy(bbs);
-					}
-					else if(random > 0.4 && random <= 0.75) {
-						return new Strategy(bM);
-					}
-					else {
+					if(random > 0.5 ) {
 						return new Strategy(b);
+					}
+					else{
+						return new Strategy(bM);
 					}
 				}
 				if(map.contains("HeartbreakRidge")) {
@@ -409,7 +412,9 @@ public class GameState extends GameHandler {
 			game.sendText("My APM is over 9000!");
 			firstAPM = true;
 		}
-		
+		for(Vulture vulture : agents) {
+			game.drawTextMap(vulture.unit.getPosition(), vulture.statusToString());
+		}
 		game.drawTextScreen(10, 65, Utils.formatText("MGPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
 		game.drawTextScreen(10, 80, Utils.formatText("Strategy: ",Utils.White) + Utils.formatText(strat.name, Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
@@ -878,8 +883,8 @@ public class GameState extends GameHandler {
 	
 	public double getMineralRate() {
 		double rate = 0.0;
-		if(game.getFrameCount() > 0) {
-			rate = ((double)self.gatheredMinerals()-50)/game.getFrameCount();
+		if(frameCount > 0) {
+			rate = ((double)self.gatheredMinerals()-50)/frameCount;
 		}
 		return rate;
 	}
@@ -907,7 +912,7 @@ public class GameState extends GameHandler {
 //		System.out.println("TopSpeed: " + top);
 //		System.out.println("Aceleration: " + aceleration);
 //		System.out.println("framesToReach: " + frames);
-//		System.out.println("Actual frame: " + game.getFrameCount());
+//		System.out.println("Actual frame: " + frameCount);
 //		System.out.println("Minerales when reaching: " + mineralsWhenReach);
 //		System.out.println("--------------");
 		return mineralsWhenReach;
@@ -1144,29 +1149,29 @@ public class GameState extends GameHandler {
 		
 	}
 
-//	public boolean armyGroupedBBS() {
-//		boolean allFine = true;
-//		for(Squad s : squads.values()) {
-//			if(s.attack != Position.None) {
-//				if(s.members.size() == 1) {
-//					continue;
-//				}
-//				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 160);
-//				Set<Unit> different = new HashSet<>();
-//				different.addAll(circle);
-//				different.addAll(s.members);
-//				circle.retainAll(s.members);
-//				different.removeAll(circle);
-//				if(circle.size() != s.members.size()) {
-//					allFine = false;
-//					for(Unit u : different) {
-//						u.attack(getSquadCenter(s));
-//					}
-//				}
-//			} 
-//		}
-//		return allFine;
-//	}
+	public boolean armyGroupedBBS() {
+		boolean allFine = true;
+		for(Squad s : squads.values()) {
+			if(s.attack != Position.None) {
+				if(s.members.size() == 1) {
+					continue;
+				}
+				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 160);
+				Set<Unit> different = new HashSet<>();
+				different.addAll(circle);
+				different.addAll(s.members);
+				circle.retainAll(s.members);
+				different.removeAll(circle);
+				if(circle.size() != s.members.size()) {
+					allFine = false;
+					for(Unit u : different) {
+						u.attack(getSquadCenter(s));
+					}
+				}
+			} 
+		}
+		return allFine;
+	}
 	
 	//Credits to @PurpleWaveJadien
 	public double broodWarDistance(Position a, Position b) {
@@ -1181,8 +1186,9 @@ public class GameState extends GameHandler {
 		 
 	}
 	
-	public boolean simulateBattle(Set<Unit> friends, Set<Unit> enemies, int frames) {
+	public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
 		simulator.clear();
+		Pair<Boolean,Boolean> result = new Pair<>(true,false);
 		for(Unit u : friends) {
 			simulator.addUnitPlayer1(new JFAPUnit(u));
 		}
@@ -1206,20 +1212,49 @@ public class GameState extends GameHandler {
 //		System.out.println("My score diff : " + my_score_diff);
 //		System.out.println("Enemy score diff : " + enemy_score_diff);
 //		System.out.println("-----------------------");
-		if(enemy_score_diff * 2 < my_score_diff) {
-			return false;
+		if(enemy_score_diff * 1.5 < my_score_diff) {
+			result.first = false;
 		}
-		return true;
+		if(bunker){
+			boolean bunkerDead = true;
+			for (JFAPUnit unit : simulator.getState().first){
+				if (unit.unitType == UnitType.Terran_Bunker){
+					bunkerDead = false;
+					break;
+				}
+			}
+			if(bunkerDead) {
+				result.second = true;
+			}
+		}
+		
+		return result;
 	}
 	
-	public boolean simulateHarass(Unit harasser, List<Unit> enemies) {
+	public boolean simulateHarass(Unit harasser, List<Unit> enemies, int frames) {
 		simulator.clear();
 		simulator.addUnitPlayer1(new JFAPUnit(harasser));
 		for(Unit u : enemies) {
 			simulator.addUnitPlayer2(new JFAPUnit(u));
 		}
 		int preSimFriendlyUnitCount = simulator.getState().first.size();
-		simulator.simulate(50);
+		simulator.simulate(frames);
+		int postSimFriendlyUnitCount = simulator.getState().first.size();
+		int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
+		if(myLosses > 0) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean simulateHarass(Unit harasser, Set<Unit> enemies, int frames) {
+		simulator.clear();
+		simulator.addUnitPlayer1(new JFAPUnit(harasser));
+		for(Unit u : enemies) {
+			simulator.addUnitPlayer2(new JFAPUnit(u));
+		}
+		int preSimFriendlyUnitCount = simulator.getState().first.size();
+		simulator.simulate(frames);
 		int postSimFriendlyUnitCount = simulator.getState().first.size();
 		int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
 		if(myLosses > 0) {
@@ -1263,4 +1298,93 @@ public class GameState extends GameHandler {
 		}
 		return dist += broodWarDistance(start.toPosition(), end.toPosition());
 	}
+	
+	public Unit getUnitToAttack(Unit myUnit, Set<Unit> closeSim) {
+		Unit chosen = null;
+		Set<Unit> workers = new HashSet<>();
+		Set<Unit> combatUnits = new HashSet<>();
+		Unit worker = null;
+		for(Unit u : closeSim) {
+			if(u.getType().isWorker()) {
+				workers.add(u);
+			}
+			if(!u.getType().isWorker() && u.getType().canAttack()) {
+				combatUnits.add(u);
+			}
+		}
+		if(combatUnits.isEmpty() && workers.isEmpty()) {
+			return null;
+		}
+		if(!workers.isEmpty()) {
+			double distB = Double.MAX_VALUE;
+			for(Unit u : workers) {
+				double distA = broodWarDistance(myUnit.getPosition(), u.getPosition());
+				if(worker == null || distA < distB) {
+					worker = u;
+					distB = distA;
+				}
+			}
+			
+		}
+		if(!combatUnits.isEmpty()) {
+			double distB = Double.MAX_VALUE;
+			for(Unit u : combatUnits) {
+				double distA = broodWarDistance(myUnit.getPosition(), u.getPosition());
+				if(chosen == null || distA < distB) {
+					chosen = u;
+					distB = distA;
+				}
+			}
+		}
+		if(chosen != null) {
+			return chosen;
+		}
+		if(worker != null){
+			return worker;
+		}
+		return null;
+	}
+	
+	// Credits to @Yegers for a better kite method
+		public Position kiteAway(final Unit unit, final Set<Unit> enemies) {
+		    if (enemies.isEmpty()) {
+		        return null;
+		    }
+		    final Position ownPosition = unit.getPosition();
+		    //TODO add walls
+		    final List<Pair<Double, Double>> vectors = new ArrayList<>();
+
+		    double minDistance = Double.MAX_VALUE;
+		    for (final Unit enemy : enemies) {
+		        final Position enemyPosition = enemy.getPosition();
+		        final Pair<Double, Double> unitV = new Pair<>((double)(ownPosition.getX() - enemyPosition.getX()),(double) (ownPosition.getY() - enemyPosition.getY()));
+		        final double distance = ownPosition.getDistance(enemyPosition);
+		        if (distance < minDistance) {
+		            minDistance = distance;
+		        }
+		        unitV.first = (1/distance) * unitV.first;
+		        unitV.second = (1/distance) * unitV.second;
+		        vectors.add(unitV);
+		    }
+		    minDistance = 2 * minDistance * minDistance;
+		    for (final Pair<Double, Double> vector : vectors){
+		        vector.first *= minDistance;
+		        vector.second *= minDistance;
+		    }
+		    Pair<Double,Double> sumAll = Util.sumPosition(vectors);
+		    return Util.sumPosition(ownPosition, new Position((int)(sumAll.first / vectors.size()),(int) (sumAll.second / vectors.size())));
+		}
+
+		public void runAgents() {
+			List<Vulture> rem = new ArrayList<>();
+			for(Vulture vulture : agents) {
+				boolean remove = vulture.runAgent();
+				if(remove) {
+					rem.add(vulture);
+				}
+			}
+			for(Vulture vult : rem) {
+				agents.remove(vult);
+			}
+		}
 }

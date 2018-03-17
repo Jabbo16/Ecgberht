@@ -19,6 +19,7 @@ import bwapi.*;
 import bwta.BWTA;
 import cameraModule.CameraModule;
 import ecgberht.AddonBuild.*;
+import ecgberht.Agents.Vulture;
 import ecgberht.Attack.*;
 import ecgberht.Build.*;
 import ecgberht.BuildingLot.*;
@@ -111,6 +112,11 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
+		if(gs.enemyRace == Race.Zerg) {
+			if(gs.EI.naughty) {
+				gs.playSound("rushed.mp3");
+			}
+		}
 		gs.strat = gs.initStrat();
 
 		//		try {
@@ -136,12 +142,17 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
 		ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
 		ChooseTank cTan = new ChooseTank("Choose Tank", gs);
+		ChooseVulture cVul = new ChooseVulture("Choose vulture", gs);
 		CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
 		TrainUnit tr = new TrainUnit("Train SCV", gs);
 		//Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV,cTan,cMed,cMar);
 		Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV);
+		
 		if(gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
 			chooseUnit.addChild(cTan);
+		}
+		if(gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) {
+			chooseUnit.addChild(cVul);
 		}
 		if(gs.strat.trainUnits.contains(UnitType.Terran_Medic)) {
 			chooseUnit.addChild(cMed);
@@ -326,10 +337,12 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onFrame() {
+		gs.frameCount = game.getFrameCount();
 		gs.print(gs.naturalRegion.getCenter().toTilePosition(), Color.Red);
 		observer.onFrame();
 		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		gs.updateEnemyBuildingsMemory();
+		gs.runAgents();
 		//gs.checkEnemyAttackingWT();
 		buildingLotTree.run();
 		repairTree.run();
@@ -367,9 +380,10 @@ public class Ecgberht extends DefaultBWListener {
 			if(found_pool && drones <= 5) {
 				gs.EI.naughty = true;
 				game.sendText("Bad zerg!, bad!");
+				gs.playSound("rushed.mp3");
 			}
 		}
-		if(game.getFrameCount() > 0 && game.getFrameCount() % 5 == 0) {
+		if(gs.frameCount > 0 && gs.frameCount % 5 == 0) {
 			gs.mineralLocking();
 		}
 		gs.printer();
@@ -445,16 +459,20 @@ public class Ecgberht extends DefaultBWListener {
 					}
 				}
 			}
+			else if(arg0.getType() == UnitType.Terran_Vulture && arg0.getPlayer().getID() == self.getID()) {
+				gs.vulturesTrained++;
+			}
 		}
 	}
 
 	public void onUnitComplete(Unit arg0) {
 		try {
 			observer.moveCameraUnitCreated(arg0);
-			if(!arg0.getType().isNeutral() && arg0.getPlayer().getID() == self.getID()) {
-				if(arg0.getType().isBuilding()) {
+			UnitType type = arg0.getType();
+			if(!type.isNeutral() && arg0.getPlayer().getID() == self.getID()) {
+				if(type.isBuilding()) {
 					gs.builtBuildings++;
-					if(arg0.getType().isRefinery()) {
+					if(type.isRefinery()) {
 						for(Pair<Pair<Unit,Integer>,Boolean> r:gs.refineriesAssigned) {
 							if(r.first.first.getTilePosition().equals(arg0.getTilePosition())) {
 								gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = true;
@@ -464,45 +482,45 @@ public class Ecgberht extends DefaultBWListener {
 						}
 						gs.builtRefinery++;
 					} else {
-						if(arg0.getType() == UnitType.Terran_Command_Center) {
+						if(type == UnitType.Terran_Command_Center) {
 							gs.CCs.put(BWTA.getRegion(arg0.getPosition()).getCenter(),arg0);
 							gs.addNewResources(arg0);
 							if(arg0.getAddon() != null && !gs.CSs.contains(arg0.getAddon())) {
 								gs.CSs.add(arg0.getAddon());
 							}
-							if(game.getFrameCount() == 0) {
+							if(gs.frameCount == 0) {
 								gs.MainCC = arg0;
 							}
 							gs.builtCC++;
 						}
-						if(arg0.getType() == UnitType.Terran_Comsat_Station) {
+						if(type == UnitType.Terran_Comsat_Station) {
 							gs.CSs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Bunker) {
+						if(type == UnitType.Terran_Bunker) {
 							gs.DBs.put(arg0, new HashSet<Unit>());
 						}
-						if(arg0.getType() == UnitType.Terran_Engineering_Bay || arg0.getType() == UnitType.Terran_Academy) {
+						if(type == UnitType.Terran_Engineering_Bay || type == UnitType.Terran_Academy) {
 							gs.UBs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Barracks) {
+						if(type == UnitType.Terran_Barracks) {
 							gs.MBs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Factory) {
+						if(type == UnitType.Terran_Factory) {
 							gs.Fs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Starport) {
+						if(type == UnitType.Terran_Starport) {
 							gs.Ps.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Science_Facility) {
+						if(type == UnitType.Terran_Science_Facility) {
 							gs.UBs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Supply_Depot) {
+						if(type == UnitType.Terran_Supply_Depot) {
 							gs.SBs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Machine_Shop) {
+						if(type == UnitType.Terran_Machine_Shop) {
 							gs.UBs.add(arg0);
 						}
-						if(arg0.getType() == UnitType.Terran_Missile_Turret) {
+						if(type == UnitType.Terran_Missile_Turret) {
 							gs.Ts.add(arg0);
 						}
 						for(Pair<Unit, Unit> u : gs.workerTask) {
@@ -515,12 +533,12 @@ public class Ecgberht extends DefaultBWListener {
 					}
 				}
 				else{
-					if(arg0.getType().isWorker()) {
+					if(type.isWorker()) {
 						gs.workerIdle.add(arg0);
 						gs.trainedWorkers++;
 					}
 					else{
-						if(arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+						if(type == UnitType.Terran_Siege_Tank_Tank_Mode) {
 							if(!gs.TTMs.containsKey(arg0)) {
 								String nombre = gs.addToSquad(arg0);
 								gs.TTMs.put(arg0,nombre);
@@ -544,7 +562,10 @@ public class Ecgberht extends DefaultBWListener {
 								}
 							}
 						}
-						if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
+						else if(type == UnitType.Terran_Vulture) {
+							gs.agents.add(new Vulture(arg0));
+						}
+						else if(type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
 							gs.addToSquad(arg0);
 							if(gs.strat.name != "ProxyBBS") {
 								if(!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
@@ -576,219 +597,11 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onUnitDestroy(Unit arg0) {
-		if(!arg0.getType().isBuilding() && !arg0.getType().isRefinery() && arg0.getType() != UnitType.Resource_Vespene_Geyser && arg0.getType() != UnitType.Spell_Scanner_Sweep) {
-			if(!first ) {
-				gs.playSound("first.mp3");
-				first = true;
-			}
-		}
-		if(!arg0.getType().isNeutral()  && (!arg0.getType().isSpecialBuilding() || arg0.getType().isRefinery())) {
-			if(arg0.getPlayer().getID() == game.enemy().getID()) {
-				if(arg0.equals(gs.chosenUnitToHarass)) {
-					gs.chosenUnitToHarass = null;
-				}
-				if(arg0.getType().isBuilding()) {
-					gs.inMap.updateMap(arg0,true);
-					gs.enemyBuildingMemory.remove(arg0);
-					gs.initAttackPosition = arg0.getTilePosition();
-					gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
-				} else {
-					gs.initDefensePosition = arg0.getTilePosition();
-				}
-			}
-			else if(arg0.getPlayer().getID() == self.getID()) {
-				if(arg0.getType().isWorker()) {
-					if(gs.strat.name == "ProxyBBS") {
-						gs.removeFromSquad(arg0);
-					}
-					for(Pair<Unit,Unit> r : gs.repairerTask) {
-						if(r.first.equals(arg0)) {
-							gs.repairerTask.remove(r);
-							break;
-						}
-					}
-					if(gs.workerIdle.contains(arg0)) {
-						gs.workerIdle.remove(arg0);
-					}
-					if(gs.chosenScout != null && arg0.equals(gs.chosenScout)) {
-						gs.chosenScout = null;
-					}
-					if(gs.chosenHarasser != null && arg0.equals(gs.chosenHarasser)) {
-						gs.chosenHarasser = null;
-						gs.chosenUnitToHarass = null;
-					}
-					if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
-						gs.chosenWorker = null;
-					}
-					for(Pair<Unit,Unit> r : gs.repairerTask) {
-						if(arg0.equals(r.first)) {
-							gs.repairerTask.remove(r);
-							break;
-						}
-					}
-					if(gs.chosenBuilderBL != null && arg0.equals(gs.chosenBuilderBL)) {
-						gs.chosenBuilderBL = null;
-						gs.expanding = false;
-						gs.chosenBaseLocation = null;
-						gs.movingToExpand = false;
-						gs.deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
-						gs.deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
-					}
-					for(Pair<Unit,Position> u:gs.workerDefenders) {
-						if(arg0.equals(u.first)) {
-							gs.workerDefenders.remove(u);
-							break;
-						}
-					}
-					
-					if(gs.workerMining.containsKey(arg0)) {
-						Unit mineral = gs.workerMining.get(arg0);
-						gs.workerMining.remove(arg0);
-						if(gs.mineralsAssigned.containsKey(mineral)) {
-							gs.mining--;
-							gs.mineralsAssigned.put(mineral, gs.mineralsAssigned.get(mineral) - 1);
-						}
-						
-					}
-					for(Pair<Unit,Unit> w: gs.workerTask) {
-						if(w.first.equals(arg0)) {
-							if(w.second.getType().isRefinery()) {
-								for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
-									if(r.first.first.equals(w.second)) {
-										gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).first.second--;
-										break;
-									}
-								}
-							}
-							else {
-								if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
-									gs.buildingLot.add(w.second);
-								}
-							}
-							gs.workerTask.remove(w);
-							break;
-						}
-					}
-					for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
-						if(w.first.equals(arg0)) {
-							gs.workerBuild.remove(w);
-							gs.deltaCash.first -= w.second.first.mineralPrice();
-							gs.deltaCash.second -= w.second.first.gasPrice();
-							break;
-						}
-					}
-				}	
-				 else if(arg0.getType().isBuilding()) {
-	
-					gs.inMap.updateMap(arg0,true);
-					if(arg0.getType() != UnitType.Terran_Command_Center) {
-						gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
-					}
-					for(Pair<Unit,Unit> r : gs.repairerTask) {
-						if(r.second.equals(arg0)) {
-							gs.workerIdle.add(r.first);
-							gs.repairerTask.remove(r);
-							break;
-						}
-					}
-					for(Pair<Unit, Unit> w: gs.workerTask) {
-						if(w.second.equals(arg0)) {
-							gs.workerTask.remove(w);
-							gs.workerIdle.add(w.first);
-							break;
-						}
-					}
-					for(Unit w: gs.buildingLot) {
-						if(w.equals(arg0)) {
-							gs.buildingLot.remove(w);
-							break;
-						}
-					}
-					for(Unit u : gs.CCs.values()) {
-						if(u.equals(arg0)) {
-							gs.removeResources(arg0);
-							if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
-								gs.CSs.remove(arg0.getAddon());
-							}
-							gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
-							if(arg0.equals(gs.MainCC)) {
-								if(gs.CCs.size() > 0) {
-									for(Unit c : gs.CCs.values()) {
-										if(!c.equals(arg0)) {
-											gs.MainCC = u;
-											break;
-										}
-									}
-								}
-								else {
-									gs.MainCC = null;
-								}
-							}
-						}
-					}
-	
-					if(gs.CSs.contains(arg0)) {
-						gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
-					}
-					if(gs.Fs.contains(arg0)) {
-						gs.Fs.remove(arg0);
-					}
-					if(gs.MBs.contains(arg0)) {
-						gs.MBs.remove(arg0);
-					}
-					if(gs.UBs.contains(arg0)) {
-						gs.UBs.remove(arg0);
-					}
-					if(gs.SBs.contains(arg0)) {
-						gs.SBs.remove(arg0);
-					}
-					if(gs.Ts.contains(arg0)) {
-						gs.Ts.remove(arg0);
-					}
-					if(gs.Ps.contains(arg0)) {
-						gs.Ps.remove(arg0);
-					}	
-					if(arg0.getType() == UnitType.Terran_Bunker) {
-						if(gs.DBs.containsKey(arg0)) {
-							for(Unit u : gs.DBs.get(arg0)) {
-								gs.addToSquad(u);
-							}
-							gs.DBs.remove(arg0);
-						}
-					}
-					if(arg0.getType().isRefinery()) {
-						for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
-							if(r.first.first.equals(arg0)) {
-								gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = false;
-								List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-								for(Pair<Unit,Unit> w: gs.workerTask) {
-									if(r.first.first.equals(w.second)) {
-										aux.add(w);
-										gs.workerIdle.add(w.first);
-									}
-								}
-								gs.workerTask.removeAll(aux);
-								break;
-							}
-						}
-					}
-					gs.testMap = gs.map.clone();
-				} else {
-					if(arg0.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || arg0.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
-						if(gs.TTMs.containsKey(arg0)) {
-							gs.TTMs.remove(arg0);
-							gs.removeFromSquad(arg0);
-						}
-					}
-					else if(arg0.getType() == UnitType.Terran_Marine || arg0.getType() == UnitType.Terran_Medic) {
-						gs.removeFromSquad(arg0);
-					}
-				}
-	
-			} else if(arg0.getType().isMineralField()) {
+		try {
+			UnitType type = arg0.getType();
+			if(type.isMineralField()) {
 				if(gs.mineralsAssigned.containsKey(arg0)) {
-					gs.mineralsAssigned.remove(arg0);
-					gs.map.updateMap(arg0.getTilePosition(), arg0.getType(), true);
+					gs.map.updateMap(arg0.getTilePosition(), type, true);
 					gs.testMap = gs.map.clone();
 					List<Unit> aux = new ArrayList<>();
 					for(Entry<Unit, Unit> w: gs.workerMining.entrySet()) {
@@ -801,9 +614,227 @@ public class Ecgberht extends DefaultBWListener {
 					for(Unit u : aux) {
 						gs.workerMining.remove(u);
 					}
+					gs.mineralsAssigned.remove(arg0);
 				}
 			}
+			if(!type.isBuilding() && !type.isRefinery() && type != UnitType.Resource_Vespene_Geyser && type != UnitType.Spell_Scanner_Sweep) {
+				if(!first ) {
+					gs.playSound("first.mp3");
+					first = true;
+				}
+			}
+			if(!type.isNeutral()  && (!type.isSpecialBuilding() || type.isRefinery())) {
+				if(arg0.getPlayer().getID() == game.enemy().getID()) {
+					if(arg0.equals(gs.chosenUnitToHarass)) {
+						gs.chosenUnitToHarass = null;
+					}
+					if(type.isBuilding()) {
+						gs.inMap.updateMap(arg0,true);
+						gs.enemyBuildingMemory.remove(arg0);
+						gs.initAttackPosition = arg0.getTilePosition();
+						gs.map.updateMap(arg0.getTilePosition(), type, true);
+					} else {
+						gs.initDefensePosition = arg0.getTilePosition();
+					}
+				}
+				else if(arg0.getPlayer().getID() == self.getID()) {
+					if(type.isWorker()) {
+						if(gs.strat.name == "ProxyBBS") {
+							gs.removeFromSquad(arg0);
+						}
+						for(Pair<Unit,Unit> r : gs.repairerTask) {
+							if(r.first.equals(arg0)) {
+								gs.repairerTask.remove(r);
+								break;
+							}
+						}
+						if(gs.workerIdle.contains(arg0)) {
+							gs.workerIdle.remove(arg0);
+						}
+						if(gs.chosenScout != null && arg0.equals(gs.chosenScout)) {
+							gs.chosenScout = null;
+						}
+						if(gs.chosenHarasser != null && arg0.equals(gs.chosenHarasser)) {
+							gs.chosenHarasser = null;
+							gs.chosenUnitToHarass = null;
+						}
+						if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
+							gs.chosenWorker = null;
+						}
+						for(Pair<Unit,Unit> r : gs.repairerTask) {
+							if(arg0.equals(r.first)) {
+								gs.repairerTask.remove(r);
+								break;
+							}
+						}
+						if(gs.chosenBuilderBL != null && arg0.equals(gs.chosenBuilderBL)) {
+							gs.chosenBuilderBL = null;
+							gs.expanding = false;
+							gs.chosenBaseLocation = null;
+							gs.movingToExpand = false;
+							gs.deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
+							gs.deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
+						}
+						for(Pair<Unit,Position> u:gs.workerDefenders) {
+							if(arg0.equals(u.first)) {
+								gs.workerDefenders.remove(u);
+								break;
+							}
+						}
+						
+						if(gs.workerMining.containsKey(arg0)) {
+							Unit mineral = gs.workerMining.get(arg0);
+							gs.workerMining.remove(arg0);
+							if(gs.mineralsAssigned.containsKey(mineral)) {
+								gs.mining--;
+								gs.mineralsAssigned.put(mineral, gs.mineralsAssigned.get(mineral) - 1);
+							}
+							
+						}
+						for(Pair<Unit,Unit> w: gs.workerTask) {
+							if(w.first.equals(arg0)) {
+								if(w.second.getType().isRefinery()) {
+									for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
+										if(r.first.first.equals(w.second)) {
+											gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).first.second--;
+											break;
+										}
+									}
+								}
+								else {
+									if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
+										gs.buildingLot.add(w.second);
+									}
+								}
+								gs.workerTask.remove(w);
+								break;
+							}
+						}
+						for(Pair<Unit,Pair<UnitType,TilePosition> > w: gs.workerBuild) {
+							if(w.first.equals(arg0)) {
+								gs.workerBuild.remove(w);
+								gs.deltaCash.first -= w.second.first.mineralPrice();
+								gs.deltaCash.second -= w.second.first.gasPrice();
+								break;
+							}
+						}
+					}	
+					 else if(type.isBuilding()) {
+		
+						gs.inMap.updateMap(arg0,true);
+						if(type != UnitType.Terran_Command_Center) {
+							gs.map.updateMap(arg0.getTilePosition(), type, true);
+						}
+						for(Pair<Unit,Unit> r : gs.repairerTask) {
+							if(r.second.equals(arg0)) {
+								gs.workerIdle.add(r.first);
+								gs.repairerTask.remove(r);
+								break;
+							}
+						}
+						for(Pair<Unit, Unit> w: gs.workerTask) {
+							if(w.second.equals(arg0)) {
+								gs.workerTask.remove(w);
+								gs.workerIdle.add(w.first);
+								break;
+							}
+						}
+						for(Unit w: gs.buildingLot) {
+							if(w.equals(arg0)) {
+								gs.buildingLot.remove(w);
+								break;
+							}
+						}
+						for(Unit u : gs.CCs.values()) {
+							if(u.equals(arg0)) {
+								gs.removeResources(arg0);
+								if(arg0.getAddon() != null && gs.CSs.contains(arg0.getAddon())) {
+									gs.CSs.remove(arg0.getAddon());
+								}
+								gs.CCs.remove(BWTA.getRegion(arg0.getPosition()).getCenter());
+								if(arg0.equals(gs.MainCC)) {
+									if(gs.CCs.size() > 0) {
+										for(Unit c : gs.CCs.values()) {
+											if(!c.equals(arg0)) {
+												gs.MainCC = u;
+												break;
+											}
+										}
+									}
+									else {
+										gs.MainCC = null;
+									}
+								}
+							}
+						}
+		
+						if(gs.CSs.contains(arg0)) {
+							gs.CSs.remove(arg0);
+						}
+						if(gs.Fs.contains(arg0)) {
+							gs.Fs.remove(arg0);
+						}
+						if(gs.MBs.contains(arg0)) {
+							gs.MBs.remove(arg0);
+						}
+						if(gs.UBs.contains(arg0)) {
+							gs.UBs.remove(arg0);
+						}
+						if(gs.SBs.contains(arg0)) {
+							gs.SBs.remove(arg0);
+						}
+						if(gs.Ts.contains(arg0)) {
+							gs.Ts.remove(arg0);
+						}
+						if(gs.Ps.contains(arg0)) {
+							gs.Ps.remove(arg0);
+						}	
+						if(type == UnitType.Terran_Bunker) {
+							if(gs.DBs.containsKey(arg0)) {
+								for(Unit u : gs.DBs.get(arg0)) {
+									gs.addToSquad(u);
+								}
+								gs.DBs.remove(arg0);
+							}
+						}
+						if(type.isRefinery()) {
+							for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
+								if(r.first.first.equals(arg0)) {
+									gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).second = false;
+									List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
+									for(Pair<Unit,Unit> w: gs.workerTask) {
+										if(r.first.first.equals(w.second)) {
+											aux.add(w);
+											gs.workerIdle.add(w.first);
+										}
+									}
+									gs.workerTask.removeAll(aux);
+									break;
+								}
+							}
+						}
+						gs.testMap = gs.map.clone();
+					} else {
+						if(type == UnitType.Terran_Siege_Tank_Siege_Mode || type == UnitType.Terran_Siege_Tank_Tank_Mode) {
+							if(gs.TTMs.containsKey(arg0)) {
+								gs.TTMs.remove(arg0);
+								gs.removeFromSquad(arg0);
+							}
+						}
+						else if(type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
+							gs.removeFromSquad(arg0);
+						}
+						else if(type == UnitType.Terran_Vulture) {
+							gs.agents.remove(new Vulture(arg0));
+						}
+					}
+				} 
+			}
+		} catch(Exception e) {
+			System.err.println("OnUnitDestroy Exception");
+			System.err.println(e);
 		}
+		
 	}
 
 	public void onUnitMorph(Unit arg0) {

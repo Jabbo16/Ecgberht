@@ -23,18 +23,18 @@ public class JFAPUnit {
 	double speed = 0;
 	boolean flying = false;
 	int elevation = -1;
-	UnitSizeType unitSize;
+	UnitSizeType unitSize = UnitSizeType.Unknown;
 	int groundDamage = 0;
 	int groundCooldown = 0;
 	int groundMaxRange = 0;
 	int groundMinRange = 0;
-	DamageType groundDamageType;
+	DamageType groundDamageType = DamageType.Unknown;
 	int airDamage = 0;
 	int airCooldown = 0;
 	int airMaxRange = 0;
 	int airMinRange = 0;
-	DamageType airDamageType;
-	UnitType unitType;
+	DamageType airDamageType = DamageType.Unknown;
+	public UnitType unitType = UnitType.Unknown;
 	Player player = null;
 	boolean isOrganic = false;
 	boolean didHealThisFrame = false;
@@ -52,6 +52,7 @@ public class JFAPUnit {
 		UnitType auxType = u.getType();
 		Player auxPlayer = u.getPlayer();
 		health = u.getHitPoints();
+		unitSize = auxType.size();
 		maxHealth = auxType.maxHitPoints();
 		armor = auxPlayer.armor(auxType);
 		shields = u.getShields();
@@ -94,7 +95,7 @@ public class JFAPUnit {
 				}
 			} else {
 				if (player != null) {
-					groundCooldown = (int)(Math.round(37.0f / (u.getPlayer().getUpgradeLevel(UpgradeType.Carrier_Capacity) == 1 ? 8 : 4)));
+					groundCooldown = (int)(Math.round(37.0f / (player.getUpgradeLevel(UpgradeType.Carrier_Capacity) == 1 ? 8 : 4)));
 				} else {
 					groundCooldown = (int)(Math.round(37.0f / 8));
 				}
@@ -115,7 +116,7 @@ public class JFAPUnit {
 			airMaxRange = groundMaxRange;
 		}
 		else if(unitType == UnitType.Protoss_Reaver) {
-			groundDamage = u.getPlayer().damage(WeaponType.Scarab);
+			groundDamage = player.damage(WeaponType.Scarab);
 		}
 		if (u != null && u.isStimmed()) {
 			groundCooldown /= 2;

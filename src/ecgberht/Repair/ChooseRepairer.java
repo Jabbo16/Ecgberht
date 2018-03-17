@@ -20,12 +20,19 @@ public class ChooseRepairer extends Action {
 		try {
 			Unit closestWorker = null;
 			Position chosen = ((GameState)this.handler).chosenBuildingRepair.getPosition();
+			int frame = ((GameState)this.handler).frameCount;
 			for (Unit u : ((GameState)this.handler).workerIdle) {
+				if(u.getLastCommandFrame() == frame) {
+					continue;
+				}
 				if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
 					closestWorker = u;
 				}
 			}
 			for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+				if(u.getLastCommandFrame() == frame) {
+					continue;
+				}
 				if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
 					closestWorker = u;
 				}

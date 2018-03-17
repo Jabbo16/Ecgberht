@@ -375,13 +375,14 @@ public class BuildingMap {
 			Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
 			Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
 			List<Unit> blockers = game.getUnitsInRectangle(topLeft, bottomRight);
-			if(blockers.isEmpty()) {
-				return false;
-			}
+			
 			if(blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) {
 				return true;
 			}
 			
+			if(blockers.isEmpty()) {
+				return false;
+			}
 			if(blockers.size() > 1) {
 				return true;
 			}
@@ -488,8 +489,8 @@ public class BuildingMap {
 		int x = starting.toTilePosition().getY();
 		int y = starting.toTilePosition().getX();
 		
-		int i = 8;
-		int j = 8;
+		int i = 4;
+		int j = 4;
 		//Finds the first valid tileposition starting around the given tileposition
 		TilePosition position = null;
 		double dist = Double.MAX_VALUE;

@@ -3,14 +3,10 @@ package ecgberht;
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
 
-
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import bwapi.Order;
-import bwapi.Pair;
 import bwapi.Position;
 import bwapi.TechType;
 import bwapi.Unit;
@@ -38,7 +34,7 @@ public class Squad {
 	}
 
 	public void giveAttackOrder(Position pos) {
-		int frameCount = getGame().getFrameCount();
+		int frameCount = getGs().frameCount;
 		if(frameCount - lastFrameOrder > 0 && !pos.equals(attack)) {
 			attack = pos;
 			lastFrameOrder = frameCount;
@@ -60,51 +56,14 @@ public class Squad {
 	
 	public void microUpdateOrder() {
 		try {
-			
-			int frameCount = getGame().getFrameCount();
-			if(this.members.isEmpty() || frameCount % getGs().getGame().getLatencyFrames() == 0) {
+			if(members.isEmpty()) {
 				return;
 			}
-			Position sCenter = getGs().getSquadCenter(this);
-			Position mainCC = getGs().MainCC.getPosition();
-			Set<Unit> closeSim = new HashSet<>();
-			Set<Unit> copy = new HashSet<>();
-			for(Unit u : getGs().enemyCombatUnitMemory) {
-				if(getGs().broodWarDistance(sCenter, u.getPosition()) <= 600) {
-					copy.add(u);
-					if(u.getType().isWorker() && !u.isAttacking()) {
-						continue;
-					}
-					closeSim.add(u);
-				}
-			}
-//			for(EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-//				if(u.type.canAttack() || u.type == UnitType.Terran_Bunker) {
-//					if(getGs().broodWarDistance(sCenter, u.pos.toPosition()) <= 600) {
-//						copy.add(u.unit);
-//						closeSim.add(u.unit);
-//					}
-//				}
-//				
-//			}
-			Set<Unit> aux = new HashSet<>();
-			if(getGs().squads.size() > 1) {
-				for(Squad s : getGs().squads.values()) {
-					if(s.name != this.name) {
-						if(getGs().broodWarDistance(sCenter, getGs().getSquadCenter(s)) <= 400) {
-							aux.addAll(s.members);
-						}
-					}
-				}
-			}
-			
-			aux.addAll(this.members);
-			boolean win = true;
-			if(!closeSim.isEmpty()) {
-				win = getGs().simulateBattle(aux, closeSim, 200);
-			}
+			Set<Unit> enemy = getGs().enemyCombatUnitMemory;
+			int frameCount = getGs().frameCount;
+			Position start = getGame().self().getStartLocation().toPosition();
 			Set<Unit> marinesToHeal = new HashSet<>();
-			
+			Position sCenter = getGs().getSquadCenter(this);
 			for(Unit u : members) {
 				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 					continue;
@@ -112,37 +71,16 @@ public class Squad {
 				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
-				if(frameCount == u.getLastCommandFrame()) {
-					continue;
+				Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
+				if(lastTarget != null) {
+					if(lastTarget.equals(attack)) {
+						continue;
+					}
 				}
-				Position lastTarget = u.getOrderTargetPosition();
-				Position lastCommandTarget = u.getLastCommand().getTargetPosition();
-				
-				if((u.getOrder() == Order.AttackMove || u.getOrder() == Order.Move ) && copy.isEmpty()) {
-					continue;
-				}
-				
-				if(getGs().broodWarDistance(sCenter, u.getPosition()) > 120 && getGame().isWalkable(sCenter.toWalkPosition()) && closeSim.isEmpty()) {
+				if(status == Status.IDLE && getGs().broodWarDistance(u.getPosition(), sCenter) >= 130 && u.getOrder() != Order.Move) {
 					u.move(sCenter);
-					continue;
 				}
-				
-				
-				if(u.isIdle() && attack != Position.None && getGs().broodWarDistance(sCenter, attack) > 150) {
-					if(lastTarget != null) {
-						if(attack.equals(lastTarget)) {
-							continue;
-						}
-					}
-					if(lastCommandTarget != null) {
-						if(attack.equals(lastCommandTarget)) {
-							continue;
-						}
-					}
-					u.attack(attack);
-					continue;
-				}
-				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal && u.getOrder() != Order.MedicHealToIdle) {
+				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
 					Unit chosen = getHealTarget(u, marinesToHeal);
 					if(chosen != null) {
 						u.useTech(TechType.Healing, chosen);
@@ -150,105 +88,52 @@ public class Squad {
 						continue;
 					}
 				}
-				
-				if(frameCount - u.getLastCommandFrame() >= 1) {
+				if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
+					u.attack(attack);
+					continue;
+				}
+				if(u.isAttacking() && attack == Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
+					u.move(sCenter);
+				}
+				int framesToOrder = 18;	
+				if(u.getType() == UnitType.Terran_Vulture) {
+					framesToOrder = 12;
+				}
+				if(frameCount - u.getLastCommandFrame() >= framesToOrder) {
 					if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
-						if(lastTarget != null) {
-							if(attack.equals(lastTarget)) {
-								continue;
-							}
-						}
-						if(lastCommandTarget != null) {
-							if(attack.equals(lastCommandTarget)) {
-								continue;
-							}
-						}
 						u.attack(attack);
 						continue;
 					}
 					//Experimental storm dodging?
 					if(u.isUnderStorm()) {
-						if(lastTarget != null) {
-							if(mainCC.equals(lastTarget)) {
-								continue;
-							}
-						}
-						if(lastCommandTarget != null) {
-							if(mainCC.equals(lastCommandTarget)) {
-								continue;
-							}
-						}
-						u.move(mainCC);
+						u.move(start);
 						continue;
 					}
-					if(win) {
-						Set<Unit> enemyToKite = new HashSet<>();
-						if(u.getGroundWeaponCooldown() > 0) {
-							for(Unit e : copy) {
-								if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
-									if (e.isAttacking()) {
-										if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
-											//u.move(start);
-											enemyToKite.add(e);
-										}
+					Set<Unit> enemyToKite = new HashSet<>();
+					if(u.getGroundWeaponCooldown() > 0) {
+						for(Unit e : enemy) {
+							if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
+								if (e.isAttacking()) {
+									if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
+										//u.move(start);
+										enemyToKite.add(e);
 									}
 								}
-							}
-							if(!enemyToKite.isEmpty()) {
-								Position run = kiteAway(u,enemyToKite);
-								if(run.isValid()) {
-									u.move(run);
-									continue;
-								} else {
-									if(lastTarget != null) {
-										if(mainCC.equals(lastTarget)) {
-											continue;
-										}
-									}
-									if(lastCommandTarget != null) {
-										if(mainCC.equals(lastCommandTarget)) {
-											continue;
-										}
-									}
-									u.move(mainCC);
-									continue;
-								}
-//								Position run = getGs().getPlayer().getStartLocation().toPosition();
-								
 							}
 						}
-						else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
-							if(lastTarget != null) {
-								if(attack.equals(lastTarget)) {
-									continue;
-								}
+						if(!enemyToKite.isEmpty()) {
+							Position run = getGs().kiteAway(u,enemyToKite);
+							if(run.isValid()) {
+								u.move(run);
+							} else {
+								u.move(getGs().getPlayer().getStartLocation().toPosition());
 							}
-							if(lastCommandTarget != null) {
-								if(attack.equals(lastCommandTarget)) {
-									continue;
-								}
-							}
-							u.attack(attack);
-							continue;
+//							Position run = getGs().getPlayer().getStartLocation().toPosition();
+							
 						}
-					}else {
-						if(getGs().broodWarDistance(sCenter, mainCC) > 50) {
-							if(u.getOrder() == Order.Move) {
-								if(lastTarget != null) {
-									if(mainCC.equals(lastTarget)) {
-										continue;
-									}
-								}
-								if(lastCommandTarget != null) {
-									if(mainCC.equals(lastCommandTarget)) {
-										continue;
-									}
-								}
-								u.move(mainCC);
-								continue;
-							}
-						}
-						
+					}
+					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
+						u.attack(attack);
 					}
 				}
 			}
@@ -307,7 +192,7 @@ public class Squad {
 	}
 
 	public void giveMoveOrder(Position retreat) {
-		int frameCount = getGame().getFrameCount();
+		int frameCount = getGs().frameCount;
 		for(Unit u : members) {
 			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
 				continue;
@@ -325,35 +210,5 @@ public class Squad {
 				u.move(retreat);
 			}
 		}
-	}
-	
-	// Credits to @Yegers for a better kite method
-	private Position kiteAway(final Unit unit, final Set<Unit> enemies) {
-	    if (enemies.isEmpty()) {
-	        return null;
-	    }
-	    final Position ownPosition = unit.getPosition();
-	    //TODO add walls
-	    final List<Pair<Double, Double>> vectors = new ArrayList<>();
-
-	    double minDistance = Double.MAX_VALUE;
-	    for (final Unit enemy : enemies) {
-	        final Position enemyPosition = enemy.getPosition();
-	        final Pair<Double, Double> unitV = new Pair<>((double)(ownPosition.getX() - enemyPosition.getX()),(double) (ownPosition.getY() - enemyPosition.getY()));
-	        final double distance = ownPosition.getDistance(enemyPosition);
-	        if (distance < minDistance) {
-	            minDistance = distance;
-	        }
-	        unitV.first = (1/distance) * unitV.first;
-	        unitV.second = (1/distance) * unitV.second;
-	        vectors.add(unitV);
-	    }
-	    minDistance = 2 * minDistance * minDistance;
-	    for (final Pair<Double, Double> vector : vectors){
-	        vector.first *= minDistance;
-	        vector.second *= minDistance;
-	    }
-	    Pair<Double,Double> sumAll = Util.sumPosition(vectors);
-	    return Util.sumPosition(ownPosition, new Position((int)(sumAll.first / vectors.size()),(int) (sumAll.second / vectors.size())));
 	}
 }

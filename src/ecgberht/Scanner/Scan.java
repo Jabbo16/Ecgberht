@@ -22,6 +22,7 @@ public class Scan extends Action {
 				if(u.getEnergy() >= 50 && u.getOrder() != Order.CastScannerSweep) {
 					if(u.useTech(TechType.Scanner_Sweep,((GameState)this.handler).checkScan.toPosition())) {
 						((GameState)this.handler).startCount = ((GameState)this.handler).getGame().elapsedTime();
+						((GameState)this.handler).playSound("uav.mp3");
 						return State.SUCCESS;
 					}
 				}

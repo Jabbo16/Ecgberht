@@ -2,6 +2,9 @@ package ecgberht.Defense;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -12,6 +15,7 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BWTA;
 import bwta.Region;
+import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
@@ -28,8 +32,15 @@ public class CheckPerimeter extends Conditional {
 		try {
 			((GameState)this.handler).enemyInBase.clear();
 			((GameState)this.handler).defense = false;
-			for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
-				if((!u.getType().isBuilding() || u.getType() == UnitType.Protoss_Pylon || u.getType().canAttack()) && u.getType() != UnitType.Zerg_Scourge) {
+			List<Unit> enemyInvaders = new ArrayList<>();
+			enemyInvaders.addAll(((GameState)this.handler).enemyCombatUnitMemory);
+			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
+				if(u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
+					enemyInvaders.add(u.unit);
+				}
+			}
+			for(Unit u : enemyInvaders) {
+				if((u.getType().canAttack() || u.getType() == UnitType.Protoss_Pylon) && u.getType() != UnitType.Zerg_Scourge && u.getType() != UnitType.Protoss_Corsair) {
 					for(Unit c : ((GameState)this.handler).CCs.values()) {
 						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 500) {
 							((GameState)this.handler).enemyInBase.add(u);
@@ -70,7 +81,11 @@ public class CheckPerimeter extends Conditional {
 				((GameState)this.handler).defense = true;
 				return State.SUCCESS;
 			}
+			int cFrame = ((GameState)this.handler).frameCount;
 			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
+				if(u.first.getLastCommandFrame() == cFrame) {
+					continue;
+				}
 				Position closestCC = ((GameState)this.handler).getNearestCC(u.first.getPosition());
 				if(closestCC != null) {
 					if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
@@ -94,13 +109,16 @@ public class CheckPerimeter extends Conditional {
 								}
 								u.status = Status.IDLE;
 								u.attack = Position.None;
+								continue;
 							}
 						}
 						u.status = Status.IDLE;
 						u.attack = Position.None;
+						continue;
 					}
 					u.status = Status.IDLE;
 					u.attack = Position.None;
+					continue;
 				}
 			}
 			((GameState)this.handler).defense = false;

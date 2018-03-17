@@ -2,43 +2,41 @@ package ecgberht.Strategies;
 
 import bwapi.TechType;
 import bwapi.UnitType;
-import bwapi.UpgradeType;
 import ecgberht.AStrategy;
 
-public class BioMechBuild extends AStrategy{
+public class FullMech extends AStrategy{
 
-	public BioMechBuild() {
+	public FullMech() {
 		initStrategy();
 	}
 	
 	@Override
 	public void initStrategy() {
-		name = "BioMech";
-		armyForBay = 15;
+		name = "FullMech";
+		armyForBay = 20;
 		armyForTurret = 10;
-		numBays = 1;
-		raxPerCC = 3;
-		facPerCC = 1;
-		numRaxForAca = 2;
-		numRaxForFac = 2;
+		numBays = 2;
+		raxPerCC = 1;
+		facPerCC = 3;
+		numRaxForAca = 1;
+		numRaxForFac = 1;
+		bunker = true;
+		supplyForFirstRefinery = 28;
+		armyForAttack = 25;
+		armyForExpand = 10;
 		numCCForPort = 2;
 		numCCForScience = 2;
-		portPerCC = 0;
-		bunker = true;
-		supplyForFirstRefinery = 36;
-		armyForAttack = 35;
-		armyForExpand = 20;
+		portPerCC = 1;
 		initTrainUnits();
 		initBuildUnits();
 		initBuildAddons();
 		initTechToResearch();
 		initUpgradesToResearch();
 	}
-
+	
 	@Override
 	public void initTrainUnits() {
 		trainUnits.add(UnitType.Terran_Marine);
-		trainUnits.add(UnitType.Terran_Medic);
 		trainUnits.add(UnitType.Terran_Vulture);
 		trainUnits.add(UnitType.Terran_Siege_Tank_Tank_Mode);
 	}
@@ -70,8 +68,6 @@ public class BioMechBuild extends AStrategy{
 
 	@Override
 	public void initUpgradesToResearch() {
-		upgradesToResearch.add(UpgradeType.Terran_Infantry_Weapons);
-		upgradesToResearch.add(UpgradeType.Terran_Infantry_Armor);
-		upgradesToResearch.add(UpgradeType.U_238_Shells);
+		
 	}
 }
