@@ -11,6 +11,7 @@ import org.iaie.btree.util.GameHandler;
 import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
+import bwapi.UnitCommand;
 import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Squad;
@@ -53,15 +54,36 @@ public class SendDefenders extends Action {
 				bunker = true;
 			}
 			int defenders = 6;
-			if(((GameState)this.handler).enemyInBase.size() == 1 && ((GameState)this.handler).enemyInBase.iterator().next().getType().isWorker() && ((GameState)this.handler).workerDefenders.isEmpty()) {
+			
+			int scvCount = ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_SCV);
+			for(Pair<Pair<Unit, Integer>, Boolean> u : ((GameState)this.handler).refineriesAssigned) {
+				scvCount -= u.first.second;
+			}
+			if(scvCount < 6) {
+				defenders = scvCount; 
+			}
+			if(scvCount == 0) {
+				defenders = 0; 
+			}
+			if(((GameState)this.handler).enemyInBase.size() == 1 && ((GameState)this.handler).enemyInBase.iterator().next().getType().isWorker()) {
 				defenders = 1;
 			}
-			Pair<Boolean,Boolean> battleWin = ((GameState)this.handler).simulateDefenseBattle(friends, ((GameState)this.handler).enemyInBase, 300, bunker);
+			
+			Pair<Boolean,Boolean> battleWin = new Pair<>(true,false);
+			if(defenders != 1) {
+				if(((GameState)this.handler).enemyInBase.size() + friends.size() < 30) {
+					battleWin = ((GameState)this.handler).simulateDefenseBattle(friends, ((GameState)this.handler).enemyInBase, 300, bunker);
+				}
+				if(((GameState)this.handler).enemyInBase.size() >= 2* friends.size()) {
+					battleWin.first = false;
+				}
+			}
+			
 			if(cannon_rush) {
 				battleWin.first = false;
 			}
 			int frame = ((GameState)this.handler).frameCount;
-			if(!air_only && ((!battleWin.first || battleWin.second) || defenders == 1)) {
+			if(!air_only && ((!battleWin.first || battleWin.second) || defenders == 1) && (scvCount > 6 || defenders == 1) && scvCount != 0) {
 				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerIdle.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;
@@ -122,9 +144,10 @@ public class SendDefenders extends Action {
 											continue;
 										}
 									}
-									Unit lastUnitCommand = u.first.getLastCommand().getTarget();
+									UnitCommand lastUnitCommand = u.first.getLastCommand();
 									if(lastUnitCommand != null) {
-										if(lastUnitCommand.equals(toAttack)) {
+										if(lastUnitCommand.getTarget()!= null)
+										if(lastUnitCommand.getTarget().equals(toAttack)) {
 											continue;
 										}
 									}

@@ -153,7 +153,6 @@ public class GameState extends GameHandler {
 			BioBuild b = new BioBuild();
 			ProxyBBS bbs = new ProxyBBS();
 			BioMechBuild bM = new BioMechBuild();
-//			FullMech fM = new FullMech();
 			String map = game.mapFileName();
 			if(enemyRace == Race.Zerg && EI.naughty) {
 				return new Strategy(b);
@@ -216,9 +215,9 @@ public class GameState extends GameHandler {
 				int DefaultStrategyLosses = strategies.get(b.name).second;
 			    int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
 			    double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
-			    if (strategyGamesPlayed < 3 || (strategyGamesPlayed > 0 && winRate > 0.49))
+			    if (strategyGamesPlayed < 3 || (strategyGamesPlayed > 0 && winRate > 0.69))
 			    {
-			        game.sendText("Using default Strategy as Im confident enough to do so");
+			        game.sendText("Using default Strategy");
 			        return new Strategy(b);
 			    }
 			    double C = 0.5;
@@ -229,7 +228,7 @@ public class GameState extends GameHandler {
 			    		continue;
 			    	}
 			        int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
-			        double sWinRate = sGamesPlayed > 0 ? (double)strategies.get(strat).first / (double)(strategyGamesPlayed) : 0;
+			        double sWinRate = sGamesPlayed > 0 ? (double)(strategies.get(strat).first / (double)(strategyGamesPlayed)) : 0;
 			        double ucbVal = C * Math.sqrt(Math.log((double)(totalGamesPlayed / sGamesPlayed)));
 			        double val = sWinRate + ucbVal;
 			        if (val > bestUCBStrategyVal) {

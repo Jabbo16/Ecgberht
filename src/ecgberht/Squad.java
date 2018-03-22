@@ -77,8 +77,30 @@ public class Squad {
 						continue;
 					}
 				}
-				if(status == Status.IDLE && getGs().broodWarDistance(u.getPosition(), sCenter) >= 130 && u.getOrder() != Order.Move) {
-					u.move(sCenter);
+				if(!getGs().DBs.isEmpty()) {
+					Unit bunker = getGs().DBs.keySet().iterator().next();
+					if(status == Status.IDLE && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 130) {
+						if(u.getOrder() != Order.Move) {
+							u.move(bunker.getPosition());
+						}
+						continue;
+					}
+				}
+				else if(getGs().closestChoke != null && !getGs().EI.naughty) {
+					if(status == Status.IDLE && getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 130) {
+						if(u.getOrder() != Order.Move) {
+							u.move(getGs().closestChoke.getCenter());
+						}
+						continue;
+					}
+				}
+				
+				if(status == Status.IDLE && getGs().broodWarDistance(u.getPosition(), sCenter) >= 100 && u.getOrder() != Order.Move) {
+					if(getGame().isWalkable(sCenter.toWalkPosition())) {
+						
+						u.move(sCenter);
+						continue;
+					}
 				}
 				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
 					Unit chosen = getHealTarget(u, marinesToHeal);
@@ -94,6 +116,7 @@ public class Squad {
 				}
 				if(u.isAttacking() && attack == Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
 					u.move(sCenter);
+					continue;
 				}
 				int framesToOrder = 18;	
 				if(u.getType() == UnitType.Terran_Vulture) {
@@ -125,8 +148,10 @@ public class Squad {
 							Position run = getGs().kiteAway(u,enemyToKite);
 							if(run.isValid()) {
 								u.move(run);
+								continue;
 							} else {
 								u.move(getGs().getPlayer().getStartLocation().toPosition());
+								continue;
 							}
 //							Position run = getGs().getPlayer().getStartLocation().toPosition();
 							
@@ -134,6 +159,7 @@ public class Squad {
 					}
 					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
 						u.attack(attack);
+						continue;
 					}
 				}
 			}

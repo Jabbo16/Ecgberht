@@ -34,6 +34,7 @@ public class Vulture {
 	int actualFrame = 0;
 	Set<Unit> closeEnemies = new HashSet<>();
 	Set<Unit> closeWorkers = new HashSet<>();
+	
 	public void placeMine(Position pos) {
 		unit.useTech(TechType.Spider_Mines, pos);
 	}
@@ -193,12 +194,44 @@ public class Vulture {
 			}
 			int cd = unit.getGroundWeaponCooldown();
 			if(status == Status.COMBAT || status == Status.ATTACK) {
+				if(attackUnit != null) {
+					if(attackUnit.getType().groundWeapon().maxRange() > type.groundWeapon().maxRange()) {
+						return;
+					}
+				}
 				if(cd > 0) {
 					status = Status.KITE;
 					return;
 				}
 			}
 			if(status == Status.KITE) {
+				if(attackUnit == null) {
+					Unit closest = getUnitToAttack(unit, closeEnemies);
+					if(closest != null) {
+						double dist = getGs().broodWarDistance(unit.getPosition(), closest.getPosition());
+						double speed = type.topSpeed();
+						double timeToEnter = 0.0;
+						if (speed > .00001){
+							timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
+						}
+						if (timeToEnter >= cd) {
+							status = Status.COMBAT;
+							return;
+						}
+					}	
+				}else {
+					double dist = getGs().broodWarDistance(unit.getPosition(), attackUnit.getPosition());
+					double speed = type.topSpeed();
+					double timeToEnter = 0.0;
+					if (speed > .00001){
+						timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
+					}
+					if (timeToEnter >= cd) {
+						status = Status.COMBAT;
+						return;
+					}
+				}
+				
 				if(cd == 0) {
 					status = Status.COMBAT;
 					return;
@@ -232,7 +265,6 @@ public class Vulture {
 		Position kite = getGs().kiteAway(unit, closeEnemies);
 		unit.move(kite);
 		attackPos = Position.None;
-		attackUnit = null;
 	}
 
 	private void attack() {
