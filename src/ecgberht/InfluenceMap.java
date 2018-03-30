@@ -64,7 +64,7 @@ public class InfluenceMap {
 		if(Destroyed) {
 			influence *= -1;
 		}
-		if(arg0.getPlayer().getID() != self.getID()) {
+		if(arg0.getPlayer().isEnemy(self)) {
 			influence *= -1;
 		}
 		updateCellInfluence(new Pair<Point,Integer>(new Point(tile.getY(),tile.getX()),influence),type.isBuilding());

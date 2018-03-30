@@ -82,14 +82,14 @@ public class CheckPerimeter extends Conditional {
 				return State.SUCCESS;
 			}
 			int cFrame = ((GameState)this.handler).frameCount;
-			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
-				if(u.first.getLastCommandFrame() == cFrame) {
+			for(Unit u : ((GameState)this.handler).workerDefenders) {
+				if(u.getLastCommandFrame() == cFrame) {
 					continue;
 				}
-				Position closestCC = ((GameState)this.handler).getNearestCC(u.first.getPosition());
+				Position closestCC = ((GameState)this.handler).getNearestCC(u.getPosition());
 				if(closestCC != null) {
-					if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-						u.first.move(closestCC);
+					if(!BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+						u.move(closestCC);
 					}
 				}
 			}

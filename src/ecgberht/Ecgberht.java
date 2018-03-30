@@ -675,11 +675,8 @@ public class Ecgberht extends DefaultBWListener {
 							gs.deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
 							gs.deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 						}
-						for(Pair<Unit,Position> u:gs.workerDefenders) {
-							if(arg0.equals(u.first)) {
-								gs.workerDefenders.remove(u);
-								break;
-							}
+						if(gs.workerDefenders.contains(arg0)) {
+							gs.workerDefenders.remove(arg0);
 						}
 						
 						if(gs.workerMining.containsKey(arg0)) {

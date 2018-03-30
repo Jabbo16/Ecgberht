@@ -300,7 +300,7 @@ public class Vulture {
 		Unit chosen = null;
 		double distB = Double.MAX_VALUE;
 		for(Unit u : enemies) {
-			if(u.getType().isFlyer()) {
+			if(u.getType().isFlyer() || u.isCloaked()) {
 				continue;
 			}
 			double distA = getGs().broodWarDistance(myUnit.getPosition(), u.getPosition());
