@@ -74,47 +74,47 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 			} else {
 				if(getGs().enemyBase != null) {
 					start = getGs().enemyBase.getTilePosition();
+				}else {
+					return -1;
 				}
-				else {
-					if(a.isIsland()) {
+				
+				if(a.isIsland()) {
+					return 1;
+				}
+				if(b.isIsland()) {
+					return -1;
+				}
+				double distA = getGs().getGroundDistance(a.getTilePosition(), start);
+				double distB = getGs().getGroundDistance(b.getTilePosition(), start);
+				
+				if(distA == 0.0 && distB > 0.0) {
+					return 1;
+				}
+				if(distB == 0.0 && distA > 0.0) {
+					return -1;
+				}
+				if(a.isMineralOnly() && !b.isMineralOnly()) {
+					return 1;
+				}
+				if(b.isMineralOnly() && !a.isMineralOnly()) {
+					return -1;
+				}
+				if(distA < distB && distA > 0.0) {
+					if(getGs().blockedBLs.contains(a)) {
 						return 1;
-					}
-					if(b.isIsland()) {
-						return -1;
-					}
-					double distA = getGs().getGroundDistance(a.getTilePosition(), start);
-					double distB = getGs().getGroundDistance(b.getTilePosition(), start);
-					
-					if(distA == 0.0 && distB > 0.0) {
-						return 1;
-					}
-					if(distB == 0.0 && distA > 0.0) {
-						return -1;
-					}
-					if(a.isMineralOnly() && !b.isMineralOnly()) {
-						return 1;
-					}
-					if(b.isMineralOnly() && !a.isMineralOnly()) {
-						return -1;
-					}
-					if(distA < distB && distA > 0.0) {
-						if(getGs().blockedBLs.contains(a)) {
-							return 1;
-						}
-						return 1;
-					}
-					else {
-						if(distA > distB && distB > 0.0) {
-							if(getGs().blockedBLs.contains(b)) {
-								return -1;
-							}
-							return 1;
-						}
 					}
 					return 1;
 				}
+				else {
+					if(distA > distB && distB > 0.0) {
+						if(getGs().blockedBLs.contains(b)) {
+							return -1;
+						}
+						return 1;
+					}
+				}
+				return 1;
 			}
-			return 1;
 		} catch(Exception e) {
 			System.err.println("Sorter");
 			System.err.println(e);

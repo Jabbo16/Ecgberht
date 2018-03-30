@@ -95,8 +95,8 @@ public class Ecgberht extends DefaultBWListener {
 
 		game = mirror.getGame();
 		self = game.self();
-//		game.enableFlag(1);
-//		game.setLocalSpeed(0);
+		game.enableFlag(1);
+		game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 //		BWTA.readMap();
 		BWTA.analyze();

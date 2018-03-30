@@ -5,7 +5,6 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
 import bwapi.Unit;
-import bwta.BWTA;
 import ecgberht.GameState;
 
 public class ChooseWorkerToHarass extends Action {
@@ -22,8 +21,8 @@ public class ChooseWorkerToHarass extends Action {
 			}
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
 				if(((GameState)this.handler).enemyBase != null) {
-					if(u.getType().isWorker() && !u.isGatheringGas()) {
-						if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
+					if(u.getType().isWorker() && !u.isGatheringGas() && u.exists()) {
+						if(((GameState)this.handler).broodWarDistance(((GameState)this.handler).enemyBase.getPosition(), ((GameState)this.handler).chosenHarasser.getPosition()) <= 700){
 							((GameState)this.handler).chosenUnitToHarass = u;
 							return State.SUCCESS;
 						}

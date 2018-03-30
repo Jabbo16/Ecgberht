@@ -9,7 +9,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
 import bwapi.UnitType;

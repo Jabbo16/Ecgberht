@@ -62,8 +62,8 @@ public class SendDefenders extends Action {
 			
 			Pair<Boolean,Boolean> battleWin = new Pair<>(true,false);
 			if(defenders != 1) {
-				if(((GameState)this.handler).enemyInBase.size() + friends.size() < 30) {
-					battleWin = ((GameState)this.handler).simulateDefenseBattle(friends, ((GameState)this.handler).enemyInBase, 300, bunker);
+				if(((GameState)this.handler).enemyInBase.size() + friends.size() < 25) {
+					battleWin = ((GameState)this.handler).simulateDefenseBattle(friends, ((GameState)this.handler).enemyInBase, 150, bunker);
 				}
 				if(((GameState)this.handler).enemyInBase.size() >= 2* friends.size()) {
 					battleWin.first = false;
@@ -129,14 +129,14 @@ public class SendDefenders extends Action {
 								
 								if(toAttack != null) {
 									Unit lastTarget = u.getOrderTarget();
-									if(lastTarget != null) {
+									if(lastTarget != null && lastTarget.exists()) {
 										if(lastTarget.equals(toAttack)) {
 											continue;
 										}
 									}
 									UnitCommand lastUnitCommand = u.getLastCommand();
 									if(lastUnitCommand != null) {
-										if(lastUnitCommand.getTarget()!= null)
+										if(lastUnitCommand.getTarget()!= null && lastUnitCommand.getTarget().exists())
 										if(lastUnitCommand.getTarget().equals(toAttack)) {
 											continue;
 										}

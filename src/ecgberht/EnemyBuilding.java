@@ -1,5 +1,7 @@
 package ecgberht;
 
+import java.util.Objects;
+
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
@@ -15,7 +17,19 @@ public class EnemyBuilding {
 		this.type = unit.getType();
 	}
 	
-	public boolean equals(EnemyBuilding eB2) {
-		return unit.equals(eB2.unit);
-	}
+	@Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+        if (!(o instanceof EnemyBuilding)) {
+            return false;
+        }
+        EnemyBuilding eB2 = (EnemyBuilding) o;
+        return unit.equals(eB2.unit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(unit);
+    }
 }

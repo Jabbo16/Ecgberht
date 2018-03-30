@@ -4,6 +4,7 @@ import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import bwapi.Order;
@@ -79,7 +80,7 @@ public class Squad {
 				}
 				if(!getGs().DBs.isEmpty()) {
 					Unit bunker = getGs().DBs.keySet().iterator().next();
-					if(status == Status.IDLE && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 130) {
+					if(status == Status.IDLE && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 130 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
 						if(u.getOrder() != Order.Move) {
 							u.move(bunker.getPosition());
 						}
@@ -87,7 +88,7 @@ public class Squad {
 					}
 				}
 				else if(getGs().closestChoke != null && !getGs().EI.naughty) {
-					if(status == Status.IDLE && getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 130) {
+					if(status == Status.IDLE && getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 130  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding) {
 						if(u.getOrder() != Order.Move) {
 							u.move(getGs().closestChoke.getCenter());
 						}
@@ -237,4 +238,20 @@ public class Squad {
 			}
 		}
 	}
+	
+	@Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+        if (!(o instanceof Squad)) {
+            return false;
+        }
+        Squad s = (Squad) o;
+        return name.equals(s.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }

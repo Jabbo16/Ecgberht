@@ -1,6 +1,6 @@
 package jfap;
 
-import java.util.List;
+import java.util.Set;
 
 import bwapi.Pair;
 
@@ -64,7 +64,7 @@ public abstract class AJFAP {
 	   * Gets the internal state of the simulator. You can use this to get any info about the unit participating in the simulation or edit the state.
 	   * @return Returns a pair of pointers, where each pointer points to a vector containing that player's units.
 	   */
-	  abstract Pair<List<JFAPUnit>, List<JFAPUnit>> getState();
+	  abstract Pair<Set<JFAPUnit>, Set<JFAPUnit>> getState();
 	  
 	  /**
 	   * Clears the simulation. All units are removed for both players. Equivalent to reconstructing.

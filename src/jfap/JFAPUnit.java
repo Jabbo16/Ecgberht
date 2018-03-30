@@ -1,5 +1,7 @@
 package jfap;
 
+import java.util.Objects;
+
 import bwapi.DamageType;
 import bwapi.Game;
 import bwapi.Player;
@@ -13,6 +15,7 @@ import bwapi.WeaponType;
 public class JFAPUnit {
 	
 	int id = 0;
+	Unit unit;
 	int x = 0, y = 0;
 	int health = 0;
 	int maxHealth = 0;
@@ -47,8 +50,10 @@ public class JFAPUnit {
 	}
 	
 	public JFAPUnit(Unit u) {
+		unit = u;
 		x = u.getX();
 		y = u.getY();
+		id++;
 		UnitType auxType = u.getType();
 		Player auxPlayer = u.getPlayer();
 		health = u.getHitPoints();
@@ -81,8 +86,6 @@ public class JFAPUnit {
 	}
 
 	private void doThings(Unit u, Game game) {
-		int nextId = 0;
-		id = nextId++;
 		if(unitType == UnitType.Protoss_Carrier) {
 			groundDamage = player.damage(UnitType.Protoss_Interceptor.groundWeapon());
 			if (u != null && u.isVisible()) {
@@ -133,5 +136,21 @@ public class JFAPUnit {
 		maxHealth <<= 8;
 		shields <<= 8;
 		maxShields <<= 8;
-	}	 
+	}
+	
+	@Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+        if (!(o instanceof JFAPUnit)) {
+            return false;
+        }
+        JFAPUnit jfap = (JFAPUnit) o;
+        return unit.equals(jfap.unit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(unit);
+    }
 }
