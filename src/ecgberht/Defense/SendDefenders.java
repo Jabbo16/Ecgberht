@@ -1,7 +1,6 @@
 package ecgberht.Defense;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -44,7 +43,7 @@ public class SendDefenders extends Action {
 			Set<Unit> friends = new HashSet<Unit>();
 			for (Squad s : ((GameState)this.handler).squads.values()){
 				for(Unit u : s.members) {
-					friends.add(u);
+					if(u.exists()) friends.add(u);
 				}
 			}
 			boolean bunker = false;
@@ -55,14 +54,14 @@ public class SendDefenders extends Action {
 				bunker = true;
 			}
 			int defenders = 6;
-			Iterator<Unit> it = ((GameState)this.handler).enemyInBase.iterator();
-			if(((GameState)this.handler).enemyInBase.size() == 1 && it.next().getType().isWorker()) {
+			
+			if(((GameState)this.handler).enemyInBase.size() == 1 && ((GameState)this.handler).enemyInBase.iterator().next().getType().isWorker()) {
 				defenders = 1;
 			}
 			
 			Pair<Boolean,Boolean> battleWin = new Pair<>(true,false);
 			if(defenders != 1) {
-				if(((GameState)this.handler).enemyInBase.size() + friends.size() < 25) {
+				if(((GameState)this.handler).enemyInBase.size() + friends.size() < 30) {
 					battleWin = ((GameState)this.handler).simulateDefenseBattle(friends, ((GameState)this.handler).enemyInBase, 150, bunker);
 				}
 				if(((GameState)this.handler).enemyInBase.size() >= 2* friends.size()) {
@@ -82,12 +81,12 @@ public class SendDefenders extends Action {
 						if(u.getLastCommandFrame() == frame) {
 							continue;
 						}
-						if ((closestWorker == null || ((GameState)this.handler).broodWarDistance(u.getPosition(), chosen) < ((GameState)this.handler).broodWarDistance(closestWorker.getPosition(), chosen))) {
+						if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
 							closestWorker = u;
 						}
 					}
 					if(closestWorker != null) {
-						((GameState)this.handler).workerDefenders.add(closestWorker);
+						((GameState)this.handler).workerDefenders.add(new Pair<Unit, Position>(closestWorker,null));
 						((GameState)this.handler).workerIdle.remove(closestWorker);
 					}
 				}
@@ -95,18 +94,18 @@ public class SendDefenders extends Action {
 				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerMining.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;
-					for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
-						if(u.getLastCommandFrame() == frame) {
+					for (Entry<Unit, Unit> u : ((GameState)this.handler).workerMining.entrySet()) {
+						if(u.getKey().getLastCommandFrame() == frame) {
 							continue;
 						}
-						if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
-							closestWorker = u;
+						if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen))) {
+							closestWorker = u.getKey();
 						}
 					}
 					if(closestWorker != null) {
 						if(((GameState)this.handler).workerMining.containsKey(closestWorker)) {
 							Unit mineral = ((GameState)this.handler).workerMining.get(closestWorker);
-							((GameState)this.handler).workerDefenders.add(closestWorker);
+							((GameState)this.handler).workerDefenders.add(new Pair<Unit, Position>(closestWorker,null));
 							if(((GameState)this.handler).mineralsAssigned.containsKey(mineral)) {
 								((GameState)this.handler).mining--;
 								((GameState)this.handler).mineralsAssigned.put(mineral, ((GameState)this.handler).mineralsAssigned.get(mineral) - 1);
@@ -115,36 +114,38 @@ public class SendDefenders extends Action {
 						}
 					}
 				}
-				for(Unit u: ((GameState)this.handler).workerDefenders) {
-					if(frame == u.getLastCommandFrame()){
+				for(Pair<Unit,Position> u: ((GameState)this.handler).workerDefenders) {
+					if(frame == u.first.getLastCommandFrame()){
 						continue;
 					}
 					if(((GameState)this.handler).attackPosition != null) {
-						if(u.isIdle()) {
+						if(u.first.isIdle() || !((GameState)this.handler).attackPosition.equals(u.second)) {
+							((GameState)this.handler).workerDefenders.get(((GameState)this.handler).workerDefenders.indexOf(u)).second = ((GameState)this.handler).attackPosition;
 							if(((GameState)this.handler).enemyInBase.size() == 1) {
-								u.attack(((GameState)this.handler).enemyInBase.iterator().next());
+								u.first.attack(((GameState)this.handler).enemyInBase.iterator().next());
 							}
 							else {
-								Unit toAttack = ((GameState)this.handler).getUnitToAttack(u, ((GameState)this.handler).enemyInBase);
+								Unit toAttack = ((GameState)this.handler).getUnitToAttack(u.first, ((GameState)this.handler).enemyInBase);
 								
-								if(toAttack != null) {
-									Unit lastTarget = u.getOrderTarget();
-									if(lastTarget != null && lastTarget.exists()) {
-										if(lastTarget.equals(toAttack)) {
+								if(toAttack != null && toAttack.exists()) {
+									Unit lastTarget = u.first.getOrderTarget();
+									if(lastTarget != null) {
+										if(lastTarget.exists() && lastTarget.equals(toAttack)) {
 											continue;
 										}
+									
 									}
-									UnitCommand lastUnitCommand = u.getLastCommand();
+									UnitCommand lastUnitCommand = u.first.getLastCommand();
 									if(lastUnitCommand != null) {
-										if(lastUnitCommand.getTarget()!= null && lastUnitCommand.getTarget().exists())
-										if(lastUnitCommand.getTarget().equals(toAttack)) {
+										if(lastUnitCommand.getTarget() != null)
+										if(lastUnitCommand.getTarget().exists() && lastUnitCommand.getTarget().equals(toAttack)) {
 											continue;
 										}
 									}
-									u.attack(toAttack);
+									u.first.attack(toAttack);
 								}
 								else {
-									u.attack(((GameState)this.handler).attackPosition);
+									u.first.attack(((GameState)this.handler).attackPosition);
 								}
 								continue;
 							}

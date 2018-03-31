@@ -20,12 +20,13 @@ public class CheckHarasserAttacked extends Conditional {
 	@Override
 	public State execute() {
 		try {
+			
 			Unit attacker = null;
 			int workers = 0;
 			Set<Unit> attackers = new HashSet<>();
 			//Thanks to @N00byEdge to the cleaner code
 			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(!u.getType().isBuilding() && u.getType().canAttack()) {
+				if(!u.getType().isBuilding() && u.getType().canAttack() && u.exists()) {
 					Unit target = (u.getTarget() == null ? u.getOrderTarget() : u.getTarget());
 				    if(target != null && target.equals(((GameState)this.handler).chosenHarasser)) {
 				        if(u.getType().isWorker()){
@@ -55,8 +56,8 @@ public class CheckHarasserAttacked extends Conditional {
 						return State.SUCCESS;
 					}
 				} else {
-					
 					if(((GameState)this.handler).chosenHarasser.getHitPoints() <= 15) {
+						((GameState)this.handler).getGame().sendText("Harasser: You will pay for this!, I will be back with friends");
 						((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenHarasser);
 						((GameState)this.handler).chosenHarasser.stop();
 						((GameState)this.handler).chosenHarasser = null;

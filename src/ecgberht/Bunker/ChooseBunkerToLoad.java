@@ -20,7 +20,7 @@ public class ChooseBunkerToLoad extends Action {
 	public State execute() {
 		try {
 			for(Entry<Unit, Set<Unit>> b : ((GameState)this.handler).DBs.entrySet()) {
-				if(b.getValue().size()<4) {
+				if(b.getValue().size() < 4) {
 					((GameState)this.handler).chosenBunker = b.getKey();
 					return State.SUCCESS;
 				}

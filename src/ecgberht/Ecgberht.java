@@ -95,8 +95,8 @@ public class Ecgberht extends DefaultBWListener {
 
 		game = mirror.getGame();
 		self = game.self();
-		game.enableFlag(1);
-		game.setLocalSpeed(0);
+//		game.enableFlag(1);
+//		game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 //		BWTA.readMap();
 		BWTA.analyze();
@@ -105,11 +105,6 @@ public class Ecgberht extends DefaultBWListener {
 		//observer.toggle();
 		
 		gs = new GameState(mirror);
-		gs.initStartLocations();
-		gs.initBaseLocations();
-		gs.initBlockingMinerals();
-		gs.checkBasesWithBLockingMinerals();
-		gs.initClosestChoke();
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
 		if(gs.enemyRace == Race.Zerg) {
@@ -118,6 +113,12 @@ public class Ecgberht extends DefaultBWListener {
 			}
 		}
 		gs.strat = gs.initStrat();
+		gs.initStartLocations();
+		gs.initBaseLocations();
+		gs.initBlockingMinerals();
+		gs.checkBasesWithBLockingMinerals();
+		gs.initClosestChoke();
+		
 
 		//		try {
 		//			System.out.println("Loading JBWEB...");
@@ -675,8 +676,11 @@ public class Ecgberht extends DefaultBWListener {
 							gs.deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
 							gs.deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 						}
-						if(gs.workerDefenders.contains(arg0)) {
-							gs.workerDefenders.remove(arg0);
+						for(Pair<Unit,Position> u:gs.workerDefenders) {
+							if(arg0.equals(u.first)) {
+								gs.workerDefenders.remove(u);
+								break;
+							}
 						}
 						
 						if(gs.workerMining.containsKey(arg0)) {

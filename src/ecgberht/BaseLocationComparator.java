@@ -49,11 +49,13 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				if(distB == 0.0 && distA > 0.0) {
 					return -1;
 				}
-				if(a.isMineralOnly() && !b.isMineralOnly()) {
-					return 1;
-				}
-				if(b.isMineralOnly() && !a.isMineralOnly()) {
-					return -1;
+				if(getGs().strat.name != "FullBio") {
+					if(a.isMineralOnly() && !b.isMineralOnly()) {
+						return 1;
+					}
+					if(b.isMineralOnly() && !a.isMineralOnly()) {
+						return -1;
+					}
 				}
 				if(distA < distB  && distA > 0.0) {
 					if(getGs().blockedBLs.contains(a)) {

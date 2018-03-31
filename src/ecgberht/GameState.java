@@ -70,7 +70,7 @@ public class GameState extends GameHandler {
 	public Map<Unit,Integer> mineralsAssigned = new HashMap<>();
 	public Map<Unit, Set<Unit>> DBs = new HashMap<>();
 	public List<Pair<Unit,Pair<UnitType,TilePosition>>> workerBuild = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
-	public Set<Unit> workerDefenders = new HashSet<>();
+	public List<Pair<Unit,Position> > workerDefenders = new ArrayList<Pair<Unit,Position> >();
 	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >();
 	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit>>();
 	public Map<Unit,Unit> workerMining = new HashMap<>();
@@ -489,9 +489,9 @@ public class GameState extends GameHandler {
 		for(Unit u: workerIdle) {
 			print(u,Color.Green);
 		}
-		for(Unit u: workerDefenders) {
-			print(u,Color.Purple);
-			game.drawTextMap(u.getPosition(), "Spartan");
+		for(Pair<Unit, Position> u: workerDefenders) {
+			print(u.first,Color.Purple);
+			game.drawTextMap(u.first.getPosition(), "Spartan");
 		}
 		for(Entry<String, Squad> s : squads.entrySet()) {
 			Position centro = getSquadCenter(s.getValue());
@@ -546,6 +546,7 @@ public class GameState extends GameHandler {
 	public void initBaseLocations() {
 		BLs.addAll(BWTA.getBaseLocations());
 		Collections.sort(BLs, new BaseLocationComparator(false));
+		
 	}
 
 	public void moveUnitFromChokeWhenExpand(){
@@ -604,6 +605,16 @@ public class GameState extends GameHandler {
 				s.members.removeAll(aux);	
 			}
 		}
+		List<Unit> bunkers =  new ArrayList<>();
+		for(Entry<Unit, Set<Unit>> u : DBs.entrySet()) {
+			if(u.getKey().exists()) continue;
+			for(Unit m : u.getValue()) {
+				if(m.exists()) addToSquad(m);
+			}
+			bunkers.add(u.getKey());
+		}
+		for(Unit c : bunkers) DBs.remove(c);
+		
 		for(String name : squadsToClean) {
 			squads.remove(name);
 		}
@@ -651,17 +662,15 @@ public class GameState extends GameHandler {
 		}
 		repairerTask.removeAll(aux4);
 
-		List<Unit > aux5 = new ArrayList<>();
-		for(Unit r : workerDefenders) {
-			if(r.isIdle() || r.isGatheringMinerals()) {
-				workerIdle.add(r);
+		List<Pair<Unit,Position> > aux5 = new ArrayList<Pair<Unit,Position> >();
+		for(Pair<Unit,Position> r : workerDefenders) {
+			if(r.first.isIdle() || r.first.isGatheringMinerals()) {
+				workerIdle.add(r.first);
 				aux5.add(r);
 			}
 		}
-		for(Unit scv : aux5) {
-			workerDefenders.remove(scv);
-		}
-		
+		workerDefenders.removeAll(aux5);
+
 		List<String> aux6 = new ArrayList<>();
 		for(Squad u : squads.values()) {
 			if(u.members.isEmpty()) {
@@ -1176,7 +1185,6 @@ public class GameState extends GameHandler {
 	
 	//Credits to @PurpleWaveJadien
 	public double broodWarDistance(Position a, Position b) {
-		if(a == null || b == null || !a.isValid() || !b.isValid()) return Double.MAX_VALUE;
 		double dx = Math.abs(a.getX() - b.getX());
 		double dy = Math.abs(a.getY() - b.getY());
 		double d   = Math.min(dx, dy);

@@ -9,6 +9,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 
+import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
 import bwapi.UnitType;
@@ -52,6 +53,13 @@ public class CheckPerimeter extends Conditional {
 							continue;
 						}
 					}
+					for(Pair<Unit, Unit> c : ((GameState)this.handler).workerTask) {
+						if(c.second.getType() != UnitType.Terran_Bunker) continue;
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.second.getPosition()) < 200) {
+							((GameState)this.handler).enemyInBase.add(u);
+							continue;
+						}
+					}
 					for(Unit c : ((GameState)this.handler).SBs) {
 						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
 							((GameState)this.handler).enemyInBase.add(u);
@@ -81,14 +89,14 @@ public class CheckPerimeter extends Conditional {
 				return State.SUCCESS;
 			}
 			int cFrame = ((GameState)this.handler).frameCount;
-			for(Unit u : ((GameState)this.handler).workerDefenders) {
-				if(u.getLastCommandFrame() == cFrame) {
+			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
+				if(u.first.getLastCommandFrame() == cFrame) {
 					continue;
 				}
-				Position closestCC = ((GameState)this.handler).getNearestCC(u.getPosition());
+				Position closestCC = ((GameState)this.handler).getNearestCC(u.first.getPosition());
 				if(closestCC != null) {
-					if(!BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-						u.move(closestCC);
+					if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
+						u.first.move(closestCC);
 					}
 				}
 			}

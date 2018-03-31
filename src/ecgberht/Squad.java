@@ -80,15 +80,15 @@ public class Squad {
 				}
 				if(!getGs().DBs.isEmpty()) {
 					Unit bunker = getGs().DBs.keySet().iterator().next();
-					if(status == Status.IDLE && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 130 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
+					if(bunker.exists() && status == Status.IDLE && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 130 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding && getGs().strat.name != "ProxyBBS") {
 						if(u.getOrder() != Order.Move) {
 							u.move(bunker.getPosition());
 						}
 						continue;
 					}
 				}
-				else if(getGs().closestChoke != null && !getGs().EI.naughty) {
-					if(status == Status.IDLE && getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 130  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding) {
+				else if(getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
+					if(status == Status.IDLE && getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 130  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding ) {
 						if(u.getOrder() != Order.Move) {
 							u.move(getGs().closestChoke.getCenter());
 						}
