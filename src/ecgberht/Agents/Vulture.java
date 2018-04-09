@@ -146,13 +146,15 @@ public class Vulture {
 						if(attackUnit.equals(toAttack)) {
 							return;
 						}
+						else {
+							unit.attack(toAttack);
+							attackUnit = toAttack;
+							attackPos = Position.None;
+						}
 					}
 				}
 			}
-			unit.attack(toAttack);
-			attackUnit = toAttack;
 		}
-		attackPos = Position.None;
 	}
 
 	private void getNewStatus() {

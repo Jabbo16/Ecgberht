@@ -4,6 +4,7 @@ import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,7 +47,7 @@ public class Squad {
 		for(Unit u : members) {
 			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
 				u.useTech(TechType.Stim_Packs);
-				if(getGs().getGame().elapsedTime() > getGs().lastFrameStim + 20) {
+				if(getGs().getGame().elapsedTime() > getGs().lastFrameStim + 65) {
 					getGs().playSound("stim.mp3");
 					getGs().lastFrameStim = getGs().getGame().elapsedTime();
 				}
@@ -72,37 +73,63 @@ public class Squad {
 				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
-				Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
-				if(lastTarget != null) {
-					if(lastTarget.equals(attack)) {
-						continue;
-					}
-				}
-				if(!getGs().DBs.isEmpty()) {
-					Unit bunker = getGs().DBs.keySet().iterator().next();
-					if(bunker.exists() && status == Status.IDLE && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 130 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding && getGs().strat.name != "ProxyBBS") {
-						if(u.getOrder() != Order.Move) {
-							u.move(bunker.getPosition());
+				if(status == Status.IDLE) {
+					if(!getGs().DBs.isEmpty()) {
+						Unit bunker = getGs().DBs.keySet().iterator().next();
+						if(bunker.exists() && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding && getGs().strat.name != "ProxyBBS") {
+							if(u.getOrder() != Order.Move) {
+								u.move(bunker.getPosition());
+							}
+							continue;
 						}
-						continue;
 					}
-				}
-				else if(getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
-					if(status == Status.IDLE && getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 130  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding ) {
-						if(u.getOrder() != Order.Move) {
-							u.move(getGs().closestChoke.getCenter());
+					else if(getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
+						if(getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 200  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding ) {
+							if(u.getOrder() != Order.Move) {
+								u.move(getGs().closestChoke.getCenter());
+							}
+							continue;
 						}
-						continue;
+					}
+					
+					if(getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
+						if(getGame().isWalkable(sCenter.toWalkPosition())) {
+							u.move(sCenter);
+							continue;
+						}
 					}
 				}
 				
-				if(status == Status.IDLE && getGs().broodWarDistance(u.getPosition(), sCenter) >= 100 && u.getOrder() != Order.Move) {
-					if(getGame().isWalkable(sCenter.toWalkPosition())) {
-						
-						u.move(sCenter);
+				// Experimental
+				if(status == Status.ATTACK && getGs().getGame().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
+					if(members.size() == 1) {
 						continue;
 					}
+					boolean gaveOrder = false;
+					List<Unit> circle = getGs().getGame().getUnitsInRadius(sCenter, 280);
+					Set<Unit> different = new HashSet<>();
+					different.addAll(circle);
+					different.addAll(members);
+					circle.retainAll(members);
+					different.removeAll(circle);
+					if(circle.size() != members.size()) {
+						for(Unit m : different) {
+							if(m.equals(u)) {
+								if(u.getOrderTargetPosition() != null) {
+									if(!u.getOrderTargetPosition().equals(sCenter)) {
+										u.attack(sCenter);
+										gaveOrder = true;
+										break;
+									}
+								}
+							}
+						}
+					}
+					if(gaveOrder) continue;
 				}
+				
+				
+				
 				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
 					Unit chosen = getHealTarget(u, marinesToHeal);
 					if(chosen != null) {
@@ -119,14 +146,26 @@ public class Squad {
 					u.move(sCenter);
 					continue;
 				}
+				
+				Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
+				if(lastTarget != null) {
+					if(lastTarget.equals(attack)) {
+						continue;
+					}
+				}
 				int framesToOrder = 18;	
 				if(u.getType() == UnitType.Terran_Vulture) {
 					framesToOrder = 12;
 				}
 				if(frameCount - u.getLastCommandFrame() >= framesToOrder) {
 					if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
-						u.attack(attack);
-						continue;
+						lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
+						if(lastTarget != null) {
+							if(!lastTarget.equals(attack)) {
+								u.attack(attack);
+								continue;
+							}
+						}
 					}
 					//Experimental storm dodging?
 					if(u.isUnderStorm()) {

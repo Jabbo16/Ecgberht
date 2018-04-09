@@ -662,6 +662,9 @@ public class Ecgberht extends DefaultBWListener {
 						if(gs.chosenWorker != null && arg0.equals(gs.chosenWorker)) {
 							gs.chosenWorker = null;
 						}
+						if(gs.chosenRepairer != null && arg0.equals(gs.chosenRepairer)) {
+							gs.chosenRepairer = null;
+						}
 						for(Pair<Unit,Unit> r : gs.repairerTask) {
 							if(arg0.equals(r.first)) {
 								gs.repairerTask.remove(r);

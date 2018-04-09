@@ -11,7 +11,6 @@ import org.iaie.btree.util.GameHandler;
 import bwapi.Pair;
 import bwapi.Position;
 import bwapi.Unit;
-import bwapi.UnitCommand;
 import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Squad;
@@ -37,13 +36,12 @@ public class SendDefenders extends Action {
 						cannon_rush = true;
 					}
 				}
-				
 				air_only = false;
 			}
 			Set<Unit> friends = new HashSet<Unit>();
 			for (Squad s : ((GameState)this.handler).squads.values()){
 				for(Unit u : s.members) {
-					if(u.exists()) friends.add(u);
+					friends.add(u);
 				}
 			}
 			boolean bunker = false;
@@ -73,8 +71,9 @@ public class SendDefenders extends Action {
 				battleWin.first = false;
 			}
 			int frame = ((GameState)this.handler).frameCount;
+			int notFound = 0;
 			if(!air_only && ((!battleWin.first || battleWin.second) || defenders == 1)) {
-				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerIdle.isEmpty()) {
+				while(((GameState)this.handler).workerDefenders.size() + notFound < defenders && !((GameState)this.handler).workerIdle.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;
 					for (Unit u : ((GameState)this.handler).workerIdle) {
@@ -88,10 +87,12 @@ public class SendDefenders extends Action {
 					if(closestWorker != null) {
 						((GameState)this.handler).workerDefenders.add(new Pair<Unit, Position>(closestWorker,null));
 						((GameState)this.handler).workerIdle.remove(closestWorker);
+					} else {
+						notFound++;
 					}
 				}
-				
-				while(((GameState)this.handler).workerDefenders.size() < defenders && !((GameState)this.handler).workerMining.isEmpty()) {
+				notFound = 0;
+				while(((GameState)this.handler).workerDefenders.size() + notFound < defenders && !((GameState)this.handler).workerMining.isEmpty()) {
 					Unit closestWorker = null;
 					Position chosen = ((GameState)this.handler).attackPosition;
 					for (Entry<Unit, Unit> u : ((GameState)this.handler).workerMining.entrySet()) {
@@ -112,6 +113,8 @@ public class SendDefenders extends Action {
 							}
 							((GameState)this.handler).workerMining.remove(closestWorker);
 						}
+					}else {
+						notFound++;
 					}
 				}
 				for(Pair<Unit,Position> u: ((GameState)this.handler).workerDefenders) {
@@ -127,20 +130,13 @@ public class SendDefenders extends Action {
 							else {
 								Unit toAttack = ((GameState)this.handler).getUnitToAttack(u.first, ((GameState)this.handler).enemyInBase);
 								
-								if(toAttack != null && toAttack.exists()) {
+								if(toAttack != null) {
 									Unit lastTarget = u.first.getOrderTarget();
 									if(lastTarget != null) {
-										if(lastTarget.exists() && lastTarget.equals(toAttack)) {
+										if(lastTarget.equals(toAttack)) {
 											continue;
 										}
 									
-									}
-									UnitCommand lastUnitCommand = u.first.getLastCommand();
-									if(lastUnitCommand != null) {
-										if(lastUnitCommand.getTarget() != null)
-										if(lastUnitCommand.getTarget().exists() && lastUnitCommand.getTarget().equals(toAttack)) {
-											continue;
-										}
 									}
 									u.first.attack(toAttack);
 								}

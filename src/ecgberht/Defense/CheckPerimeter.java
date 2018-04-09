@@ -35,7 +35,7 @@ public class CheckPerimeter extends Conditional {
 			List<Unit> enemyInvaders = new ArrayList<>();
 			enemyInvaders.addAll(((GameState)this.handler).enemyCombatUnitMemory);
 			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
-				if(u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
+				if(u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery() || u.type == UnitType.Protoss_Carrier || u.type.isSpellcaster()) {
 					enemyInvaders.add(u.unit);
 				}
 			}
@@ -54,7 +54,7 @@ public class CheckPerimeter extends Conditional {
 						}
 					}
 					for(Pair<Unit, Unit> c : ((GameState)this.handler).workerTask) {
-						if(c.second.getType() != UnitType.Terran_Bunker) continue;
+						if(c.second.getType() != UnitType.Terran_Bunker && c.second.getType() != UnitType.Terran_Command_Center) continue;
 						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.second.getPosition()) < 200) {
 							((GameState)this.handler).enemyInBase.add(u);
 							continue;

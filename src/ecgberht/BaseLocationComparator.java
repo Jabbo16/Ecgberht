@@ -49,7 +49,7 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				if(distB == 0.0 && distA > 0.0) {
 					return -1;
 				}
-				if(getGs().strat.name != "FullBio") {
+				if(getGs().strat.name != "FullBio" && getGs().strat.name != "FullBioFE") {
 					if(a.isMineralOnly() && !b.isMineralOnly()) {
 						return 1;
 					}

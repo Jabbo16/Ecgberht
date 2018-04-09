@@ -23,9 +23,6 @@ public class Build extends Action {
 			for(Pair<Unit, Pair<UnitType, TilePosition>> u : ((GameState)this.handler).workerBuild) {
 				if(u.first.getOrder() != Order.PlaceBuilding && u.first.canBuild(u.second.first)) {
 					Unit chosen = u.first;
-					if(!chosen.canBuild()) {
-						continue;
-					}
 					if(chosen.build(u.second.first,u.second.second)) {
 						continue;
 					}

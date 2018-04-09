@@ -153,6 +153,8 @@ public class GameState extends GameHandler {
 			BioBuild b = new BioBuild();
 			ProxyBBS bbs = new ProxyBBS();
 			BioMechBuild bM = new BioMechBuild();
+			BioBuildFE bFE = new BioBuildFE();
+			BioMechBuildFE bMFE = new BioMechBuildFE();
 			String map = game.mapFileName();
 			if(enemyRace == Race.Zerg && EI.naughty) {
 				return new Strategy(b);
@@ -204,6 +206,11 @@ public class GameState extends GameHandler {
 				nameStrat.put(bbs.name, bbs);
 				strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bM.name, bM);
+				strategies.put(bFE.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(bFE.name, bFE);
+				strategies.put(bMFE.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(bMFE.name, bFE);
+				
 				for(StrategyOpponentHistory r: EI.history) {
 					if(strategies.containsKey(r.strategyName)) {
 						strategies.get(r.strategyName).first += r.wins;
@@ -215,7 +222,7 @@ public class GameState extends GameHandler {
 				int DefaultStrategyLosses = strategies.get(b.name).second;
 			    int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
 			    double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
-			    if (strategyGamesPlayed < 3 || (strategyGamesPlayed > 0 && winRate > 0.69))
+			    if (strategyGamesPlayed < 2 || (strategyGamesPlayed > 0 && winRate > 0.74))
 			    {
 			        game.sendText("Using default Strategy");
 			        return new Strategy(b);
@@ -224,7 +231,7 @@ public class GameState extends GameHandler {
 			    String bestUCBStrategy = null;
 			    double bestUCBStrategyVal = Double.MIN_VALUE;
 			    for (String strat : strategies.keySet()) {
-			    	if(map.contains("HeartbreakRidge") && strat == "BioMech") {
+			    	if(map.contains("HeartbreakRidge") && (strat == "BioMechFE" || strat == "BioMech" || strat == "FullMech")) {
 			    		continue;
 			    	}
 			        int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
@@ -572,6 +579,7 @@ public class GameState extends GameHandler {
 							for(Squad s : squads.values()) {
 								if(s.status == Status.IDLE) {
 									s.giveAttackOrder(closestChoke.getCenter());
+									s.status = Status.ATTACK;
 								}
 							}
 						}
@@ -960,6 +968,17 @@ public class GameState extends GameHandler {
 		try {
 			if(Files.exists(Paths.get(path))) { 
 				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
+				return;
+			}
+			path = "bwapi-data/write/" + name + ".json";
+			if(Files.exists(Paths.get(path))) { 
+				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
+				return;
+			}
+			path = "bwapi-data/AI/" + name + ".json";
+			if(Files.exists(Paths.get(path))) { 
+				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
+				return;
 			}
 		} catch(Exception e) {
 			System.err.println("readOpponentInfo");
@@ -1166,7 +1185,7 @@ public class GameState extends GameHandler {
 				if(s.members.size() == 1) {
 					continue;
 				}
-				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 160);
+				List<Unit> circle = game.getUnitsInRadius(getSquadCenter(s), 190);
 				Set<Unit> different = new HashSet<>();
 				different.addAll(circle);
 				different.addAll(s.members);
@@ -1274,28 +1293,6 @@ public class GameState extends GameHandler {
 	}
 
 	public double getGroundDistance(TilePosition start, TilePosition end) {
-//		boolean[][] walkable = new boolean[game.mapWidth()*32][game.mapHeight()*32];
-//		for(int x = 0; x < walkable.length; x++) {
-//			for(int y = 0; y < walkable[0].length; y++) {
-//				if(game.isWalkable(new WalkPosition(x / 8, y /8 ))) {
-//					walkable[x][y] = true;
-//				}
-//				else {
-//					walkable[x][y] = false;
-//				}
-//			}
-//			
-//		}
-//		int distance = 0;
-//		try {
-//			distance = JPPAP.pathfind(start.toPosition(), end.toPosition(), walkable, game);
-//			System.out.println(distance);
-//		} catch(Exception e) {
-//			System.err.println(e);
-//		}
-//		
-//		return distance;
-		
 		double dist = 0.0;
 		if (!start.isValid() || !end.isValid()) return Integer.MAX_VALUE;
 		if (BWTA.getRegion(start) == null || BWTA.getRegion(end) == null) return Integer.MAX_VALUE;
