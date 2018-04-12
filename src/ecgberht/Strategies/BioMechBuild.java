@@ -26,8 +26,8 @@ public class BioMechBuild extends AStrategy{
 		portPerCC = 0;
 		bunker = true;
 		supplyForFirstRefinery = 36;
-		armyForAttack = 35;
-		armyForExpand = 20;
+		armyForAttack = 30;
+		armyForExpand = 18;
 		initTrainUnits();
 		initBuildUnits();
 		initBuildAddons();

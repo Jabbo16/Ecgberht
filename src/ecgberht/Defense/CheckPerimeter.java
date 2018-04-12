@@ -35,12 +35,12 @@ public class CheckPerimeter extends Conditional {
 			List<Unit> enemyInvaders = new ArrayList<>();
 			enemyInvaders.addAll(((GameState)this.handler).enemyCombatUnitMemory);
 			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
-				if(u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery() || u.type == UnitType.Protoss_Carrier || u.type.isSpellcaster()) {
+				if(u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
 					enemyInvaders.add(u.unit);
 				}
 			}
 			for(Unit u : enemyInvaders) {
-				if((u.getType().canAttack() || u.getType() == UnitType.Protoss_Pylon) && u.getType() != UnitType.Zerg_Scourge && u.getType() != UnitType.Protoss_Corsair) {
+				if(u.getType().isBuilding() || ((u.getType().canAttack() || u.getType().isSpellcaster()) && u.getType() != UnitType.Zerg_Scourge && u.getType() != UnitType.Protoss_Corsair)) {
 					for(Unit c : ((GameState)this.handler).CCs.values()) {
 						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 500) {
 							((GameState)this.handler).enemyInBase.add(u);
@@ -74,14 +74,8 @@ public class CheckPerimeter extends Conditional {
 					}
 				}
 			}
-			boolean overlordCheck = true;
-			for(Unit u : ((GameState)this.handler).enemyInBase) {
-				if(u.getType().canAttack() || u.getType() == UnitType.Protoss_Shuttle || u.getType() == UnitType.Terran_Dropship) {
-					overlordCheck = false;
-					break;
-				}
-			}
-			if(!((GameState)this.handler).enemyInBase.isEmpty() && !overlordCheck) {
+			
+			if(!((GameState)this.handler).enemyInBase.isEmpty()) {
 				if((((GameState)this.handler).getArmySize() >= 50 && ((GameState)this.handler).getArmySize() / ((GameState)this.handler).enemyInBase.size() > 10)) {
 					return State.FAILURE;
 				}

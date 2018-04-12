@@ -200,17 +200,16 @@ public class GameState extends GameHandler {
 			} else {
 				Map<String,Pair<Integer,Integer>> strategies = new HashMap<>();
 				Map<String,AStrategy> nameStrat = new HashMap<>();
-				strategies.put(b.name, new Pair<Integer,Integer>(0,0));
-				nameStrat.put(b.name, b);
 				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bbs.name, bbs);
-				strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
-				nameStrat.put(bM.name, bM);
 				strategies.put(bFE.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bFE.name, bFE);
 				strategies.put(bMFE.name, new Pair<Integer,Integer>(0,0));
-				nameStrat.put(bMFE.name, bFE);
-				
+				nameStrat.put(bMFE.name, bMFE);
+				strategies.put(b.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(b.name, b);
+				strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
+				nameStrat.put(bM.name, bM);
 				for(StrategyOpponentHistory r: EI.history) {
 					if(strategies.containsKey(r.strategyName)) {
 						strategies.get(r.strategyName).first += r.wins;
@@ -222,9 +221,13 @@ public class GameState extends GameHandler {
 				int DefaultStrategyLosses = strategies.get(b.name).second;
 			    int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
 			    double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double)(strategyGamesPlayed) : 0;
-			    if (strategyGamesPlayed < 2 || (strategyGamesPlayed > 0 && winRate > 0.74))
+			    if (strategyGamesPlayed < 2)
 			    {
-			        game.sendText("Using default Strategy");
+			    	game.sendText("I dont know you that well yet, lets pick the standard strategy");
+			        return new Strategy(b);
+			    }
+			    if(strategyGamesPlayed > 0 && winRate > 0.74) {
+			    	game.sendText("Using default Strategy with winrate " + winRate*100 + "%");
 			        return new Strategy(b);
 			    }
 			    double C = 0.5;
@@ -236,9 +239,9 @@ public class GameState extends GameHandler {
 			    	}
 			        int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
 			        double sWinRate = sGamesPlayed > 0 ? (double)(strategies.get(strat).first / (double)(strategyGamesPlayed)) : 0;
-			        double ucbVal = C * Math.sqrt(Math.log((double)(totalGamesPlayed / sGamesPlayed)));
+			        double ucbVal = sGamesPlayed == 0 ?  C : C * Math.sqrt(Math.log((double)(totalGamesPlayed / sGamesPlayed)));
 			        double val = sWinRate + ucbVal;
-			        if (val > bestUCBStrategyVal) {
+			        if (val >= bestUCBStrategyVal) {
 			            bestUCBStrategy = strat;
 			            bestUCBStrategyVal = val;
 			        }
@@ -248,6 +251,7 @@ public class GameState extends GameHandler {
 			}
 		} catch(Exception e) {
 			System.err.println("Error initStrat, loading default Strat");
+			System.err.println(e);
 			BioBuild b = new BioBuild();
 			return new Strategy(b);
 			
@@ -841,7 +845,7 @@ public class GameState extends GameHandler {
 				count += s.getValue().members.size();
 			}
 		}
-		return count;
+		return count + agents.size();
 	}
 	
 	public void siegeTanks() {
@@ -1241,7 +1245,7 @@ public class GameState extends GameHandler {
 //		System.out.println("My score diff : " + my_score_diff);
 //		System.out.println("Enemy score diff : " + enemy_score_diff);
 //		System.out.println("-----------------------");
-		if(enemy_score_diff * 1.5 < my_score_diff) {
+		if(enemy_score_diff * 2 < my_score_diff) {
 			result.first = false;
 		}
 		if(bunker){
