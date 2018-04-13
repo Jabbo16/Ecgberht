@@ -698,12 +698,18 @@ public class Ecgberht extends DefaultBWListener {
 						for(Pair<Unit,Unit> w: gs.workerTask) {
 							if(w.first.equals(arg0)) {
 								if(w.second.getType().isRefinery()) {
-									for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
-										if(r.first.first.equals(w.second)) {
-											gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).first.second--;
-											break;
+									if(w.second.isCompleted()) {
+										for(Pair<Pair<Unit,Integer>,Boolean> r: gs.refineriesAssigned) {
+											if(r.first.first.equals(w.second)) {
+												gs.refineriesAssigned.get(gs.refineriesAssigned.indexOf(r)).first.second--;
+												break;
+											}
 										}
 									}
+									else {
+										gs.buildingLot.add(w.second);
+									}
+									
 								}
 								else {
 									if(w.second.getType().isBuilding() && !w.second.isCompleted()) {

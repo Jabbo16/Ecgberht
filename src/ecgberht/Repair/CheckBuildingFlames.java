@@ -20,13 +20,18 @@ public class CheckBuildingFlames extends Action {
 		try {
 			boolean isBeingRepaired = false;
 			for(Unit w : ((GameState)this.handler).DBs.keySet()) {
+				int count = 0;
 				if(w.getType().maxHitPoints() != w.getHitPoints()) {
 					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
 						if(w.equals(r.second)) {
-							isBeingRepaired = true;
+							count++;
 						}
 					}
-					if(!isBeingRepaired) {
+					if(count < 2 && ((GameState)this.handler).defense) {
+						((GameState)this.handler).chosenBuildingRepair = w;
+						return State.SUCCESS;
+					}
+					else if(count == 0) {
 						((GameState)this.handler).chosenBuildingRepair = w;
 						return State.SUCCESS;
 					}
