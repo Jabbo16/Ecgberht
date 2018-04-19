@@ -2,7 +2,6 @@ package ecgberht;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-//import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -35,33 +34,31 @@ import ecgberht.Scanner.*;
 import ecgberht.Scouting.*;
 import ecgberht.Training.*;
 import ecgberht.Upgrade.*;
-//import ecgberht.Weka.Weka;
-//import jweb.JBWEB;
 
 public class Ecgberht extends DefaultBWListener {
 
-	private Mirror mirror = new Mirror();
-	private static Game game;
-	private Player self;
-	private static GameState gs;
-	private BehavioralTree collectTree;
-	private BehavioralTree trainTree;
-	private BehavioralTree moveBuildTree;
-	private BehavioralTree buildTree;
-	private BehavioralTree scoutingTree;
-	private BehavioralTree attackTree;
-	private BehavioralTree defenseTree;
-	private BehavioralTree upgradeTree;
-	private BehavioralTree repairTree;
-	private BehavioralTree expandTree;
-	private BehavioralTree combatStimTree;
 	private BehavioralTree addonBuildTree;
-	private BehavioralTree buildingLotTree;
-	private BehavioralTree bunkerTree;
-	private BehavioralTree scannerTree;
+	private BehavioralTree attackTree;
 	private BehavioralTree botherTree;
+	private BehavioralTree buildingLotTree;
+	private BehavioralTree buildTree;
+	private BehavioralTree bunkerTree;
+	private BehavioralTree collectTree;
+	private BehavioralTree combatStimTree;
+	private BehavioralTree defenseTree;
+	private BehavioralTree expandTree;
+	private BehavioralTree moveBuildTree;
+	private BehavioralTree repairTree;
+	private BehavioralTree scannerTree;
+	private BehavioralTree scoutingTree;
+	private BehavioralTree trainTree;
+	private BehavioralTree upgradeTree;
 	private boolean first = false;
 	private CameraModule observer;
+	private Mirror mirror = new Mirror();
+	private Player self;
+	private static Game game;
+	private static GameState gs;
 
 	public void run() {
 		mirror.getModule().setEventListener(this);
@@ -81,7 +78,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onStart() {
-		
+
 		//Disables System.err and System.Out
 		OutputStream output = null;
 		try {
@@ -90,20 +87,19 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-		System.setErr(nullOut);
-		System.setOut(nullOut);		
+//		System.setErr(nullOut);
+//		System.setOut(nullOut);
 
 		game = mirror.getGame();
 		self = game.self();
 //		game.enableFlag(1);
 //		game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
-//		BWTA.readMap();
 		BWTA.analyze();
 		System.out.println("Map data ready");
 		observer = new CameraModule(self.getStartLocation().toPosition(), game);
 		//observer.toggle();
-		
+
 		gs = new GameState(mirror);
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
@@ -118,27 +114,34 @@ public class Ecgberht extends DefaultBWListener {
 		gs.initBlockingMinerals();
 		gs.checkBasesWithBLockingMinerals();
 		gs.initClosestChoke();
-		
 
-		//		try {
-		//			System.out.println("Loading JBWEB...");
-		//			long time = System.nanoTime();
-		//			gs.jbweb.onStart();
-		//			long end = System.nanoTime();
-		//			System.out.println("Loaded");
-		//			System.out.println("Time to load JBWEB(s): " + (end - time)*1e-9);
-		//		} catch(Exception e) {
-		//			System.err.println(e);
-		//		}
+		// Trees Initializations
+		initCollectTree();
+		initTrainTree();
+		initMoveBuildTree();
+		initBuildTree();
+		initScoutingTree();
+		initAttackTree();
+		initDefenseTree();
+		initUpgradeTree();
+		initRepairTree();
+		initExpandTree();
+		initCombatStimTree();
+		initAddonBuildTree();
+		initBuildingLotTree();
+		initBunkerTree();
+		initScanTree();
+		initHarassTree();
+	}
 
-		CollectGas cg = new CollectGas("Collect Gas", gs);
-		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
-		FreeWorker fw = new FreeWorker("No Union", gs);
-		Selector<GameHandler> collectResources = new Selector<GameHandler>("Collect Melted Cash",cg,cm);
-		Sequence collect = new Sequence("Collect",fw,collectResources);
-		collectTree = new BehavioralTree("Recollection Tree");
-		collectTree.addChild(collect);
+	public void transition() {
+		initTrainTree();
+		initMoveBuildTree();
+		initUpgradeTree();
+		initAddonBuildTree();
+	}
 
+	private void initTrainTree() {
 		ChooseSCV cSCV = new ChooseSCV("Choose SCV", gs);
 		ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
 		ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
@@ -146,9 +149,8 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseVulture cVul = new ChooseVulture("Choose vulture", gs);
 		CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
 		TrainUnit tr = new TrainUnit("Train SCV", gs);
-		//Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV,cTan,cMed,cMar);
 		Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit",cSCV);
-		
+
 		if(gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
 			chooseUnit.addChild(cTan);
 		}
@@ -164,7 +166,9 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence train = new Sequence("Train",chooseUnit,cr,tr);
 		trainTree = new BehavioralTree("Training Tree");
 		trainTree.addChild(train);
+	}
 
+	private void initMoveBuildTree() {
 		ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
 		ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
 		ChooseBarracks cBar = new ChooseBarracks("Choose Barracks", gs);
@@ -179,7 +183,6 @@ public class Ecgberht extends DefaultBWListener {
 		ChoosePosition cp = new ChoosePosition("Choose Position", gs);
 		ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
 		Move m = new Move("Move to chosen building position", gs);
-		//Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup,cBun,cTur,cRef,cAca,cBay,cBar,cFar);
 		Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build",cSup);
 		if(gs.strat.bunker) {
 			chooseBuildingBuild.addChild(cBun);
@@ -205,13 +208,17 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence move = new Sequence("Move",chooseBuildingBuild,cp,cw,crb,m);
 		moveBuildTree = new BehavioralTree("Building Tree");
 		moveBuildTree.addChild(move);
+	}
 
+	private void initBuildTree() {
 		CheckWorkerBuild cWB = new CheckWorkerBuild("Check WorkerBuild", gs);
 		Build b = new Build("Build", gs);
 		Sequence build = new Sequence("Build",cWB,b);
 		buildTree = new BehavioralTree("Build Tree");
 		buildTree.addChild(build);
+	}
 
+	private void initScoutingTree() {
 		CheckScout cSc = new CheckScout("Check Scout", gs);
 		ChooseScout chSc = new ChooseScout("Choose Scouter",gs);
 		SendScout sSc = new SendScout("Send Scout",gs);
@@ -223,20 +230,26 @@ public class Ecgberht extends DefaultBWListener {
 		Selector<GameHandler> Scouting = new Selector<GameHandler>("Select Scouting Plan",scoutFalse,scoutTrue);
 		scoutingTree = new BehavioralTree("Movement Tree");
 		scoutingTree.addChild(Scouting);
+	}
 
+	private void initAttackTree() {
 		CheckArmy cA = new CheckArmy("Check Army",gs);
 		ChooseAttackPosition cAP = new ChooseAttackPosition("Choose Attack Position",gs);
 		Sequence Attack = new Sequence("Attack",cA,cAP);
 		attackTree = new BehavioralTree("Attack Tree");
 		attackTree.addChild(Attack);
+	}
 
+	private void initDefenseTree() {
 		CheckPerimeter cP = new CheckPerimeter("Check Perimeter",gs);
 		ChooseDefensePosition cDP = new ChooseDefensePosition("Choose Defence Position",gs);
 		SendDefenders sD = new SendDefenders("Send Defenders", gs);
 		Sequence Defense = new Sequence("Defence",cP,cDP,sD);
 		defenseTree = new BehavioralTree("Defence Tree");
 		defenseTree.addChild(Defense);
+	}
 
+	private void initUpgradeTree() {
 		CheckResourcesUpgrade cRU = new CheckResourcesUpgrade("Check Resources Upgrade", gs);
 		ChooseArmorInfUp cAIU = new ChooseArmorInfUp("Choose Armor inf upgrade", gs);
 		ChooseWeaponInfUp cWIU = new ChooseWeaponInfUp("Choose Weapon inf upgrade", gs);
@@ -244,7 +257,6 @@ public class Ecgberht extends DefaultBWListener {
 		ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
 		ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
 		ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
-		//Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade", cAIU, cWIU, cSU, cMR, cSM);
 		Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade");
 		if(gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) {
 			ChooseUP.addChild(cWIU);
@@ -264,14 +276,18 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence Upgrader = new Sequence("Upgrader",ChooseUP,cRU,rU);
 		upgradeTree = new BehavioralTree("Technology");
 		upgradeTree.addChild(Upgrader);
+	}
 
+	private void initRepairTree() {
 		CheckBuildingFlames cBF = new CheckBuildingFlames("Check building in flames",gs);
 		ChooseRepairer cR = new ChooseRepairer("Choose Repairer",gs);
 		Repair R = new Repair("Repair Building",gs);
 		Sequence Repair = new Sequence("Repair",cBF,cR,R);
 		repairTree = new BehavioralTree("RepairTree");
 		repairTree.addChild(Repair);
+	}
 
+	private void initExpandTree() {
 		CheckExpansion cE = new CheckExpansion("Check Expansion",gs);
 		CheckResourcesCC cRCC = new CheckResourcesCC("Check Resources CC",gs);
 		ChooseBaseLocation cBL = new ChooseBaseLocation("Choose Base Location",gs);
@@ -282,13 +298,17 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence Expander = new Sequence("Expander", cE, cRCC, cBL, cBBL, sBBL,cVBL, E);
 		expandTree = new BehavioralTree("Expand Tree");
 		expandTree.addChild(Expander);
+	}
 
+	private void initCombatStimTree() {
 		CheckStimResearched cSR = new CheckStimResearched("Check if Stim Packs researched",gs);
 		Stim S = new Stim("Use Stim",gs);
 		Sequence Stimmer = new Sequence("Stimmer", cSR, S);
 		combatStimTree = new BehavioralTree("CombatStim Tree");
 		combatStimTree.addChild(Stimmer);
+	}
 
+	private void initAddonBuildTree() {
 		BuildAddon bA = new BuildAddon("Build Addon",gs);
 		CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon",gs);
 		ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station",gs);
@@ -303,7 +323,9 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
 		addonBuildTree = new BehavioralTree("Addon Build Tree");
 		addonBuildTree.addChild(Addon);
+	}
 
+	private void initBuildingLotTree() {
 		CheckBuildingsLot chBL = new CheckBuildingsLot("Check Buildings Lot", gs);
 		ChooseBlotWorker cBW = new ChooseBlotWorker("Choose Building Lot worker", gs);
 		ChooseBuildingLot cBLot = new ChooseBuildingLot("Choose Building Lot building", gs);
@@ -311,20 +333,26 @@ public class Ecgberht extends DefaultBWListener {
 		Sequence BLot = new Sequence("Building Lot", chBL, cBLot, cBW, fB);
 		buildingLotTree = new BehavioralTree("Building Lot Tree");
 		buildingLotTree.addChild(BLot);
+	}
 
+	private void initBunkerTree() {
 		ChooseBunkerToLoad cBu = new ChooseBunkerToLoad("Choose Bunker to Load",gs);
 		EnterBunker eB = new EnterBunker("Enter bunker",gs);
 		ChooseMarineToEnter cMTE = new ChooseMarineToEnter("Choose Marine To Enter", gs);
 		Sequence Bunker = new Sequence("Bunker", cBu, cMTE, eB);
 		bunkerTree = new BehavioralTree("Bunker Tree");
 		bunkerTree.addChild(Bunker);
+	}
 
+	private void initScanTree() {
 		CheckScan cScan = new CheckScan("Check scan",gs);
 		Scan s = new Scan("Scan",gs);
 		Sequence Scanning = new Sequence("Scanning", cScan, s);
 		scannerTree = new BehavioralTree("Scanner Tree");
 		scannerTree.addChild(Scanning);
+	}
 
+	private void initHarassTree() {
 		CheckHarasser cH = new CheckHarasser("Check Harasser", gs);
 		ChooseWorkerToHarass cWTH = new ChooseWorkerToHarass("Check Worker to Harass", gs);
 		ChooseBuilderToHarass cWTB = new ChooseBuilderToHarass("Check Worker to Harass", gs);
@@ -337,7 +365,18 @@ public class Ecgberht extends DefaultBWListener {
 		botherTree.addChild(harass);
 	}
 
+	private void initCollectTree() {
+		CollectGas cg = new CollectGas("Collect Gas", gs);
+		CollectMineral cm = new CollectMineral("Collect Mineral", gs);
+		FreeWorker fw = new FreeWorker("No Union", gs);
+		Selector<GameHandler> collectResources = new Selector<GameHandler>("Collect Melted Cash",cg,cm);
+		Sequence collect = new Sequence("Collect",fw,collectResources);
+		collectTree = new BehavioralTree("Recollection Tree");
+		collectTree.addChild(collect);
+	}
+
 	public void onFrame() {
+		long frameStart = System.currentTimeMillis();
 		gs.frameCount = game.getFrameCount();
 		gs.print(gs.naturalRegion.getCenter().toTilePosition(), Color.Red);
 		observer.onFrame();
@@ -388,15 +427,14 @@ public class Ecgberht extends DefaultBWListener {
 			gs.mineralLocking();
 		}
 		gs.printer();
-		//		try {
-		//			gs.jbweb.draw();
-		//		} catch(Exception e) {
-		//			System.err.println();
-		//		}
-
+		long frameEnd = System.currentTimeMillis();
+		long frameTotal = frameEnd - frameStart;
+		gs.totalTime += frameTotal;
+		game.drawTextScreen(10, 65, Utils.formatText("frameTime(ms): ",Utils.White) + Utils.formatText(String.valueOf(frameTotal), Utils.White));
 	}
 
 	public void onEnd(boolean arg0) {
+		System.out.println("Avg. frameTime(ms): " + gs.totalTime/gs.frameCount);
 		String name = game.enemy().getName();
 		gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
 		if(arg0) {
@@ -406,13 +444,6 @@ public class Ecgberht extends DefaultBWListener {
 			gs.EI.losses++;
 			game.sendText("gg wp! "+ name + ", next game I will win!");
 		}
-		//		Weka weka = new Weka();
-		//		try {
-		//			weka.createAndWriteInstance(game.enemy().getName(),gs.strat.name, gs.mapSize, arg0);
-		//		} catch (IOException e) {
-		//			// TODO Auto-generated catch block
-		//			System.err.println(e);
-		//		}
 		gs.writeOpponentInfo(name);
 	}
 
@@ -594,7 +625,7 @@ public class Ecgberht extends DefaultBWListener {
 			System.err.println("onUnitComplete exception");
 			System.err.println(e);
 		}
-		
+
 	}
 
 	public void onUnitDestroy(Unit arg0) {
@@ -685,7 +716,7 @@ public class Ecgberht extends DefaultBWListener {
 								break;
 							}
 						}
-						
+
 						if(gs.workerMining.containsKey(arg0)) {
 							Unit mineral = gs.workerMining.get(arg0);
 							gs.workerMining.remove(arg0);
@@ -693,7 +724,7 @@ public class Ecgberht extends DefaultBWListener {
 								gs.mining--;
 								gs.mineralsAssigned.put(mineral, gs.mineralsAssigned.get(mineral) - 1);
 							}
-							
+
 						}
 						for(Pair<Unit,Unit> w: gs.workerTask) {
 							if(w.first.equals(arg0)) {
@@ -709,7 +740,7 @@ public class Ecgberht extends DefaultBWListener {
 									else {
 										gs.buildingLot.add(w.second);
 									}
-									
+
 								}
 								else {
 									if(w.second.getType().isBuilding() && !w.second.isCompleted()) {
@@ -728,9 +759,9 @@ public class Ecgberht extends DefaultBWListener {
 								break;
 							}
 						}
-					}	
+					}
 					 else if(type.isBuilding()) {
-		
+
 						gs.inMap.updateMap(arg0,true);
 						if(type != UnitType.Terran_Command_Center) {
 							gs.map.updateMap(arg0.getTilePosition(), type, true);
@@ -778,7 +809,7 @@ public class Ecgberht extends DefaultBWListener {
 								}
 							}
 						}
-		
+
 						if(gs.CSs.contains(arg0)) {
 							gs.CSs.remove(arg0);
 						}
@@ -799,7 +830,7 @@ public class Ecgberht extends DefaultBWListener {
 						}
 						if(gs.Ps.contains(arg0)) {
 							gs.Ps.remove(arg0);
-						}	
+						}
 						if(type == UnitType.Terran_Bunker) {
 							if(gs.DBs.containsKey(arg0)) {
 								for(Unit u : gs.DBs.get(arg0)) {
@@ -839,13 +870,13 @@ public class Ecgberht extends DefaultBWListener {
 							gs.agents.remove(new Vulture(arg0));
 						}
 					}
-				} 
+				}
 			}
 		} catch(Exception e) {
 			System.err.println("OnUnitDestroy Exception");
 			System.err.println(e);
 		}
-		
+
 	}
 
 	public void onUnitMorph(Unit arg0) {

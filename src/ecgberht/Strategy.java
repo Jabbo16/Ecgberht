@@ -8,54 +8,55 @@ import bwapi.UnitType;
 import bwapi.UpgradeType;
 
 public class Strategy {
-	public String name = "";
- 	public boolean isFine = false;
-	public int armyForBay = 0;
-	public int armyForTurret = 0;
-	public int numBays = 0;
-	public int raxPerCC = 0;
-	public int facPerCC = 0;
-	public int portPerCC = 0;
-	public int numRaxForAca = 1;
-	public int numRaxForFac = 0;
-	public int numCCForPort = 0;
-	public int numCCForScience = 0;
+
 	public boolean bunker = false;
 	public boolean proxy = false;
-	public int supplyForFirstRefinery = 0;
 	public int armyForAttack = 0;
+	public int armyForBay = 0;
 	public int armyForExpand = 20;
-	public Set<UnitType> trainUnits = new HashSet<>();
-	public Set<UnitType> buildUnits = new HashSet<>();
-	public Set<UnitType> buildAddons = new HashSet<>();
+	public int armyForTurret = 0;
+	public int facPerCC = 0;
+	public int numBays = 0;
+	public int numCCForPort = 0;
+	public int numCCForScience = 0;
+	public int numRaxForAca = 1;
+	public int numRaxForFac = 0;
+	public int portPerCC = 0;
+	public int raxPerCC = 0;
+	public int supplyForFirstRefinery = 0;
 	public Set<TechType> techToResearch = new HashSet<>();
+	public Set<UnitType> buildAddons = new HashSet<>();
+	public Set<UnitType> buildUnits = new HashSet<>();
+	public Set<UnitType> trainUnits = new HashSet<>();
 	public Set<UpgradeType> upgradesToResearch = new HashSet<>();
-	
+	public String name = "";
+ 	public boolean isFine = false;
+
 	public Strategy() {
 	}
-	
+
 	public Strategy(AStrategy build) {
-		this.name = build.name;
-		this.isFine = true;
+		this.armyForAttack = build.armyForAttack;
 		this.armyForBay = build.armyForBay;
+		this.armyForExpand = build.armyForExpand;
 		this.armyForTurret = build.armyForTurret;
-		this.numBays = build.numBays;
-		this.raxPerCC = build.raxPerCC;
+		this.buildAddons = build.buildAddons;
+		this.buildUnits = build.buildUnits;
+		this.bunker = build.bunker;
 		this.facPerCC = build.facPerCC;
-		this.portPerCC = build.portPerCC;
-		this.numRaxForAca = build.numRaxForAca;
-		this.numRaxForFac = build.numRaxForFac;
+		this.isFine = true;
+		this.name = build.name;
+		this.numBays = build.numBays;
 		this.numCCForPort = build.numCCForPort;
 		this.numCCForScience = build.numCCForScience;
-		this.bunker = build.bunker;
+		this.numRaxForAca = build.numRaxForAca;
+		this.numRaxForFac = build.numRaxForFac;
+		this.portPerCC = build.portPerCC;
 		this.proxy = build.proxy;
+		this.raxPerCC = build.raxPerCC;
 		this.supplyForFirstRefinery =build.supplyForFirstRefinery;
-		this.armyForAttack = build.armyForAttack;
-		this.armyForExpand = build.armyForExpand;
-		this.trainUnits = build.trainUnits;
-		this.buildUnits = build.buildUnits;
-		this.buildAddons = build.buildAddons;
 		this.techToResearch = build.techToResearch;
+		this.trainUnits = build.trainUnits;
 		this.upgradesToResearch = build.upgradesToResearch;
 	}
 }

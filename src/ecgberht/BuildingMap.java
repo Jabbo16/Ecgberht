@@ -19,9 +19,9 @@ import bwta.Chokepoint;
 public class BuildingMap {
 
 	private Game game;
-	private Player self;
 	private int height;
 	private int width;
+	private Player self;
 	private String map[][];
 
 	public BuildingMap(Game game, Player self) {
@@ -375,11 +375,11 @@ public class BuildingMap {
 			Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
 			Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
 			List<Unit> blockers = game.getUnitsInRectangle(topLeft, bottomRight);
-			
+
 			if(blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) {
 				return true;
 			}
-			
+
 			if(blockers.isEmpty()) {
 				return false;
 			}
@@ -397,9 +397,9 @@ public class BuildingMap {
 			System.err.println(e);
 		}
 		return true;
-		
+
 	}
-	
+
 	//Finds a valid position in the map for a specific building type starting with a given tileposition
 	public TilePosition findPosition(UnitType buildingType, TilePosition starting){
 		TilePosition buildingSize = buildingType.tileSize();
@@ -413,7 +413,7 @@ public class BuildingMap {
 		int i = 2;
 		int j = 2;
 		boolean control = false;
-		
+
 		//Finds the first valid tileposition starting around the given tileposition
 		while(!control) {
 			for(int ii = (x - i); ii <= (x + i); ii++) {
@@ -455,7 +455,7 @@ public class BuildingMap {
 		}
 		int x = starting.toTilePosition().getY();
 		int y = starting.toTilePosition().getX();
-		
+
 		int i = 15;
 		int j = 15;
 		//Finds the first valid tileposition starting around the given tileposition
@@ -482,13 +482,13 @@ public class BuildingMap {
 		}
 		return position;
 	}
-	
+
 	public TilePosition findBunkerPositionAntiPool(Position starting, Chokepoint choke){
 		TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
 		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
 		int x = starting.toTilePosition().getY();
 		int y = starting.toTilePosition().getX();
-		
+
 		int i = 4;
 		int j = 4;
 		//Finds the first valid tileposition starting around the given tileposition
@@ -515,7 +515,7 @@ public class BuildingMap {
 		}
 		return position;
 	}
-	
+
 	//Writes the map to a file
 	public void writeMap(String fileName){
 		FileWriter sw = null;
@@ -546,5 +546,5 @@ public class BuildingMap {
 			e1.printStackTrace();
 		}
 	}
-	
+
 }

@@ -20,7 +20,11 @@ public class CheckHarasserAttacked extends Conditional {
 	@Override
 	public State execute() {
 		try {
-			
+			if(((GameState)this.handler).chosenUnitToHarass != null) {
+				if(!((GameState)this.handler).chosenUnitToHarass.getPosition().isValid()) {
+					((GameState)this.handler).chosenUnitToHarass = null;
+				}
+			}
 			Unit attacker = null;
 			int workers = 0;
 			Set<Unit> attackers = new HashSet<>();
@@ -64,8 +68,11 @@ public class CheckHarasserAttacked extends Conditional {
 						((GameState)this.handler).chosenUnitToHarass = null;
 					} else {
 						Position kite = getGs().kiteAway(((GameState)this.handler).chosenHarasser, attackers);
-						((GameState)this.handler).chosenHarasser.move(kite);
-						((GameState)this.handler).chosenUnitToHarass = null;
+						if(kite.isValid()) {
+							((GameState)this.handler).chosenHarasser.move(kite);
+							((GameState)this.handler).chosenUnitToHarass = null;
+						}
+						
 					}
 					
 					return State.FAILURE;

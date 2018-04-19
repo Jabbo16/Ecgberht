@@ -14,28 +14,26 @@ import bwapi.UnitType;
 
 public class InfluenceMap {
 
-	public Game game;
-	public Player self;
-	public int alto;
-	public int ancho;
-	public double [][] mapa;
-	public final int neutro = 3;
-	public final int ofensivo = 4;
-	public final int defensivo = 5;
-
-	public final int biologica = 1;
-	public final int maquina = 3;
-	public final int volador = 6;
-
+	public double [][] map;
+	public final int bio = 1;
+	public final int defensive = 5;
+	public final int flying = 6;
+	public final int mech = 3;
+	public final int neutral = 3;
+	public final int ofensive = 4;
+	public final int propagation = 2;
 	public final int umbral = 3;
-	public final int propagacion = 2;
+	public Game game;
+	public int height;
+	public int width;
+	public Player self;
 
 	public InfluenceMap(Game game, Player self, int alto, int ancho) {
 		this.game = game;
 		this.self = self;
-		this.alto = alto;
-		this.ancho = ancho;
-		mapa = new double[alto][ancho];
+		this.height = alto;
+		this.width = ancho;
+		map = new double[alto][ancho];
 	}
 
 	public void updateMap(Unit arg0,boolean Destroyed) {
@@ -44,21 +42,21 @@ public class InfluenceMap {
 		TilePosition tile = arg0.getTilePosition().makeValid();
 		if(type.isBuilding()) {
 			if(type.canAttack() || type.equals(UnitType.Terran_Bunker)) {
-				influence = defensivo;
+				influence = defensive;
 			} else {
 				if(type.canProduce()) {
-					influence = ofensivo;
+					influence = ofensive;
 				} else {
-					influence = neutro;
+					influence = neutral;
 				}
 			}
 		} else {
 			if(type.isFlyer()) {
-				influence = volador;
+				influence = flying;
 			} else if(type.isMechanical()) {
-				influence = maquina;
+				influence = mech;
 			} else {
-				influence = biologica;
+				influence = bio;
 			}
 		}
 		if(Destroyed) {
@@ -71,28 +69,28 @@ public class InfluenceMap {
 	}
 
 	public void updateCellInfluence(Pair<Point,Integer> celda,boolean building) {
-		mapa[celda.first.x][celda.first.y] += celda.second;
+		map[celda.first.x][celda.first.y] += celda.second;
 		if(!building) {
 			int init_i = 0;
-			if(celda.first.y-propagacion > init_i) {
-				init_i = celda.first.y-propagacion;
+			if(celda.first.y-propagation > init_i) {
+				init_i = celda.first.y-propagation;
 			}
-			int fin_i = ancho-1;
-			if(celda.first.y+propagacion < fin_i) {
-				fin_i = celda.first.y+propagacion;
+			int fin_i = width-1;
+			if(celda.first.y+propagation < fin_i) {
+				fin_i = celda.first.y+propagation;
 			}
 			int init_j = 0;
-			if(celda.first.x-propagacion > init_j) {
-				init_j = celda.first.x-propagacion;
+			if(celda.first.x-propagation > init_j) {
+				init_j = celda.first.x-propagation;
 			}
-			int fin_j = alto-1;
-			if(celda.first.x+propagacion < fin_j) {
-				fin_j = celda.first.x+propagacion;
+			int fin_j = height-1;
+			if(celda.first.x+propagation < fin_j) {
+				fin_j = celda.first.x+propagation;
 			}
 			for(int ii = init_i; ii <= fin_i; ii++) {
 				for(int jj = init_j; jj <= fin_j; jj++) {
 					if(!(jj == celda.first.x && ii == celda.first.y))
-						mapa[jj][ii] += Math.round(celda.second / Math.pow(1 + Math.sqrt(Math.pow(ii-celda.first.y, 2) + Math.pow(jj-celda.first.x, 2)), 2));
+						map[jj][ii] += Math.round(celda.second / Math.pow(1 + Math.sqrt(Math.pow(ii-celda.first.y, 2) + Math.pow(jj-celda.first.x, 2)), 2));
 				}
 			}
 		}
@@ -105,38 +103,38 @@ public class InfluenceMap {
 	}
 
 	public double getInfluence(Point celda) {
-		return mapa[celda.x][celda.y];
+		return map[celda.x][celda.y];
 	}
 
 	public int getMyInfluenceLevel() {
-		int my_influence = 0;
-		for(int x = 0; x < alto; x++) {
-			for(int y = 0; y < ancho; y++) {
-				if(mapa[x][y] > 0) {
-					my_influence += mapa[x][y];
+		int myInfluence = 0;
+		for(int x = 0; x < height; x++) {
+			for(int y = 0; y < width; y++) {
+				if(map[x][y] > 0) {
+					myInfluence += map[x][y];
 				}
 			}
 		}
-		return my_influence;
+		return myInfluence;
 	}
 
 	public int getEnemyInfluenceLevel() {
-		int enemy_influence = 0;
-		for(int x = 0; x < alto; x++) {
-			for(int y = 0; y < ancho; y++) {
-				if(mapa[x][y] < 0) {
-					enemy_influence += mapa[x][y];
+		int enemyInfluence = 0;
+		for(int x = 0; x < height; x++) {
+			for(int y = 0; y < width; y++) {
+				if(map[x][y] < 0) {
+					enemyInfluence += map[x][y];
 				}
 			}
 		}
-		return enemy_influence;
+		return enemyInfluence;
 	}
 
 	public int getMyInfluenceArea() {
 		int count = 0;
-		for(int x = 0; x < alto; x++) {
-			for(int y = 0; y < ancho; y++) {
-				if(mapa[x][y] > 0) {
+		for(int x = 0; x < height; x++) {
+			for(int y = 0; y < width; y++) {
+				if(map[x][y] > 0) {
 					count++;
 				}
 			}
@@ -146,9 +144,9 @@ public class InfluenceMap {
 
 	public double getEnemyInfluenceArea() {
 		int count = 0;
-		for(int x = 0; x < alto; x++) {
-			for(int y = 0; y < ancho; y++) {
-				if(mapa[x][y] < 0) {
+		for(int x = 0; x < height; x++) {
+			for(int y = 0; y < width; y++) {
+				if(map[x][y] < 0) {
 					count++;
 				}
 			}
@@ -161,15 +159,15 @@ public class InfluenceMap {
 		int sX = start.getX();
 		int sY = start.getY();
 		Pair<Integer,Integer> p = new Pair<Integer,Integer>();
-		for(int x = 0; x < alto; x++) {
-			for(int y = 0; y < ancho; y++) {
-				if(mapa[x][y] < count) {
+		for(int x = 0; x < height; x++) {
+			for(int y = 0; y < width; y++) {
+				if(map[x][y] < count) {
 					if(attack) {
 						if(fixMapa(x,y)) {
 							continue;
 						}
 					}
-					count = mapa[x][y] / Math.pow(1 + Math.sqrt(Math.pow(x-sY, 2) + Math.pow(y-sX, 2)), 2);
+					count = map[x][y] / Math.pow(1 + Math.sqrt(Math.pow(x-sY, 2) + Math.pow(y-sX, 2)), 2);
 					p.first = x;
 					p.second = y;
 				}
@@ -186,29 +184,29 @@ public class InfluenceMap {
 					return false;
 				}
 			}
-			updateCellInfluence(new Pair<Point,Integer>(new Point(x,y),(int) mapa[x][y] * (-1)),true);
+			updateCellInfluence(new Pair<Point,Integer>(new Point(x,y),(int) map[x][y] * (-1)),true);
 			return true;
 		}
 		return false;
 	}
 
-	//Metodo que escribe el mapa en un fichero
-	public void writeMapa(String file_name){
+	// Writes Influence Map to a file
+	public void writeMapa(String fileName){
 		FileWriter sw = null;
 		try {
-			sw = new FileWriter(file_name);
+			sw = new FileWriter(fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		for(int ii=0; ii<alto; ii++) {
-			for(int jj=0; jj<ancho; jj++) {
+		for(int ii=0; ii<height; ii++) {
+			for(int jj=0; jj<width; jj++) {
 				try {
-					sw.write(Integer.toString((int)mapa[ii][jj]));
+					sw.write(Integer.toString((int)map[ii][jj]));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			if(ii!=alto-1) {
+			if(ii!=height-1) {
 				try {
 					sw.write("\n");
 				} catch (IOException e) {
@@ -222,5 +220,4 @@ public class InfluenceMap {
 			e1.printStackTrace();
 		}
 	}
-	
 }

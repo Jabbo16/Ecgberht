@@ -9,7 +9,8 @@ public class EnemyInfo {
 	public int losses = 0;
 	public boolean naughty = false;
 	public boolean defendHarass = false;
-	public List<StrategyOpponentHistory> history = new ArrayList<StrategyOpponentHistory>(); 
+	public List<StrategyOpponentHistory> history = new ArrayList<StrategyOpponentHistory>();
+
 	public EnemyInfo(String opponent) {
 		this.opponent = opponent;
 	}
@@ -22,7 +23,7 @@ public class EnemyInfo {
 			this.naughty = true;
 		}
 	}
-	
+
 	public void updateStrategyOpponentHistory(String strategyName, int mapSize, boolean win) {
 		for(StrategyOpponentHistory data : history) {
 			if(data.mapSize == mapSize && data.strategyName.equals(strategyName)) {

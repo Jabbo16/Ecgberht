@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.iaie.btree.util.GameHandler;
 
@@ -41,79 +43,90 @@ public class GameState extends GameHandler {
 	public BaseLocation enemyBase = null;
 	public boolean activeCount = false;
 	public boolean defense = false;
+	public boolean enemyIsRandom = true;
 	public boolean expanding = false;
 	public boolean firstAPM = false;
 	public boolean firstProxyBBS = false;
 	public boolean initCount = false;
 	public boolean movingToExpand = false;
-	public boolean enemyIsRandom = true;
 	public boolean scout = true;
+	public boolean siegeResearched = false;
 	public BuildingMap map;
 	public BuildingMap testMap;
-	public Set<Unit> enemyCombatUnitMemory = new HashSet<Unit>();
+	public Chokepoint closestChoke = null;
+	public EnemyInfo EI = new EnemyInfo(game.enemy().getName());
+	public Gson enemyInfoJSON = new Gson();
 	public InfluenceMap inMap;
 	public InfluenceMap inMapUnits;
 	public int builtBuildings;
 	public int builtCC;
 	public int builtRefinery;
 	public int deltaSupply;
+	public int frameCount;
+	public int lastFrameStim = Integer.MIN_VALUE;
+	public int mapSize = 2;
 	public int mining;
 	public int startCount;
-	public int lastFrameStim = Integer.MIN_VALUE;
 	public int trainedCombatUnits;
-	public int vulturesTrained = 0;
 	public int trainedWorkers;
-	public int mapSize = 2;
+	public int vulturesTrained = 0;
 	public int workerCountToSustain = 0;
-	public Set<Unit> enemyInBase = new HashSet<Unit>();
+	public JFAP simulator;
+	public List<BaseLocation> blockedBLs = new ArrayList<>();
+	public List<BaseLocation> BLs = new ArrayList<BaseLocation>();
+	public List<BaseLocation> EnemyBLs = new ArrayList<BaseLocation>();
 	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
-	public Map<Unit,Integer> mineralsAssigned = new HashMap<>();
-	public Map<Unit, Set<Unit>> DBs = new HashMap<>();
 	public List<Pair<Unit,Pair<UnitType,TilePosition>>> workerBuild = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
 	public List<Pair<Unit,Position> > workerDefenders = new ArrayList<Pair<Unit,Position> >();
 	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >();
 	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit>>();
-	public Map<Unit,Unit> workerMining = new HashMap<>();
-	public Set<Unit> workerIdle = new HashSet<>();
-	public Map<String,Squad> squads = new HashMap<String,Squad>();
-	public Map<Unit, String> TTMs = new HashMap<>();
+	public long totalTime = 0;
+	public Map<Position, Unit> blockingMinerals = new HashMap<>();
+	public Map<Position,Unit> CCs = new HashMap<>();
+	public Map<String,Squad> squads = new TreeMap<>();
+	public Map<Unit, Set<Unit>> DBs = new TreeMap<>(new UnitComparator());
+	public Map<Unit, String> TTMs = new TreeMap<>(new UnitComparator());
+	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new TreeMap<>(new UnitComparator());
+	public Map<Unit,Integer> mineralsAssigned = new TreeMap<>(new UnitComparator());
+	public Map<Unit,Unit> workerMining = new TreeMap<>(new UnitComparator());
 	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
 	public Pair<String, Unit> chosenMarine = null;
 	public Position attackPosition = null;
-	public List<BaseLocation> EnemyBLs = new ArrayList<BaseLocation>();
-	public List<BaseLocation> blockedBLs = new ArrayList<>();
-	public List<BaseLocation> BLs = new ArrayList<BaseLocation>();
-	public Set<BaseLocation> ScoutSLs = new HashSet<BaseLocation>();
-	public Set<BaseLocation> SLs = new HashSet<BaseLocation>();
-	public Set<String> teamNames = new HashSet<String>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
-	public Set<Unit> buildingLot = new HashSet<Unit>();
-	public Map<Position,Unit> CCs = new HashMap<>();
-	public Set<Unit> CSs = new HashSet<Unit>();
-	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new HashMap<Unit,EnemyBuilding>();
-	public Set<Unit> MBs = new HashSet<Unit>();
-	public Set<Unit> Fs = new HashSet<Unit>();
-	public Set<Unit> SBs = new HashSet<Unit>();
-	public Set<Unit> Ps = new HashSet<Unit>();
-	public Set<Unit> Ts = new HashSet<Unit>();
-	public Set<Unit> UBs = new HashSet<Unit>();
-	public Map<Position, Unit> blockingMinerals = new HashMap<>();
+	public Race enemyRace = Race.Unknown;
+	public Region naturalRegion = null;
+	public Set<BaseLocation> ScoutSLs = new HashSet<>();
+	public Set<BaseLocation> SLs = new HashSet<>();
+	public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
+	public Set<Unit> buildingLot = new TreeSet<>(new UnitComparator());
+	public Set<Unit> CSs = new TreeSet<>(new UnitComparator());
+	public Set<Unit> enemyCombatUnitMemory = new TreeSet<>(new UnitComparator());
+	public Set<Unit> enemyInBase = new TreeSet<>(new UnitComparator());
+	public Set<Unit> Fs = new TreeSet<>(new UnitComparator());
+	public Set<Unit> MBs = new TreeSet<>(new UnitComparator());
+	public Set<Unit> Ps = new TreeSet<>(new UnitComparator());
+	public Set<Unit> SBs = new TreeSet<>(new UnitComparator());
+	public Set<Unit> Ts = new TreeSet<>(new UnitComparator());
+	public Set<Unit> UBs = new TreeSet<>(new UnitComparator());
+	public Set<Unit> workerIdle = new TreeSet<>(new UnitComparator());
+	public Set<Vulture> agents = new HashSet<>();
 	public Strategy strat = new Strategy();
 	public String chosenSquad = null;
 	public TechType chosenResearch = null;
 	public TilePosition checkScan = null;
 	public TilePosition chosenBaseLocation = null;
 	public TilePosition chosenPosition = null;
-	public Chokepoint closestChoke = null;
 	public TilePosition initAttackPosition = null;
 	public TilePosition initDefensePosition = null;
-	public Unit chosenScout = null;
 	public Unit chosenBuilderBL = null;
 	public Unit chosenBuilding = null;
 	public Unit chosenBuildingAddon = null;
 	public Unit chosenBuildingLot = null;
 	public Unit chosenBuildingRepair = null;
 	public Unit chosenBunker = null;
+	public Unit chosenHarasser = null;
 	public Unit chosenRepairer = null;
+	public Unit chosenScout = null;
+	public Unit chosenUnitToHarass = null;
 	public Unit chosenUnitUpgrader = null;
 	public Unit chosenWorker = null;
 	public Unit MainCC = null;
@@ -121,18 +134,7 @@ public class GameState extends GameHandler {
 	public UnitType chosenToBuild = null;
 	public UnitType chosenUnit = null;
 	public UpgradeType chosenUpgrade = null;
-	public Unit chosenHarasser = null;
-	public Race enemyRace = Race.Unknown;
-	public Unit chosenUnitToHarass = null;
-	public Gson enemyInfoJSON = new Gson();
-	public EnemyInfo EI = new EnemyInfo(game.enemy().getName());
-	public JFAP simulator;
-//	public JBWEB jbweb;
-	public Region naturalRegion = null;
-	public int frameCount;
-	public boolean siegeResearched = false;
-	public Set<Vulture> agents = new HashSet<>();
-	
+
 	public GameState(Mirror bwapi) {
 		super(bwapi);
 		map = new BuildingMap(game,self);
@@ -145,9 +147,8 @@ public class GameState extends GameHandler {
 			game.sendText("Hey there!, brother");
 			game.sendText("As the oldest of the three I'm not gonna lose");
 		}
-//		jbweb = new JBWEB(game);
 	}
-	
+
 	public Strategy initStrat() {
 		try {
 			BioBuild b = new BioBuild();
@@ -186,7 +187,7 @@ public class GameState extends GameHandler {
 					else {
 						return new Strategy(b);
 					}
-					
+
 				}
 				else {
 					double random = Math.random();
@@ -200,22 +201,29 @@ public class GameState extends GameHandler {
 			} else {
 				Map<String,Pair<Integer,Integer>> strategies = new HashMap<>();
 				Map<String,AStrategy> nameStrat = new HashMap<>();
+
 				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bbs.name, bbs);
+
 				strategies.put(bFE.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bFE.name, bFE);
+
 				strategies.put(bMFE.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bMFE.name, bMFE);
+
 				strategies.put(b.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(b.name, b);
+
 				strategies.put(bM.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bM.name, bM);
+
 				for(StrategyOpponentHistory r: EI.history) {
 					if(strategies.containsKey(r.strategyName)) {
 						strategies.get(r.strategyName).first += r.wins;
 						strategies.get(r.strategyName).second += r.losses;
 					}
 				}
+
 				int totalGamesPlayed = EI.wins + EI.losses;
 				int DefaultStrategyWins = strategies.get(b.name).first;
 				int DefaultStrategyLosses = strategies.get(b.name).second;
@@ -254,9 +262,9 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 			BioBuild b = new BioBuild();
 			return new Strategy(b);
-			
+
 		}
-		
+
 	}
 
 	public void initEnemyRace() {
@@ -265,14 +273,14 @@ public class GameState extends GameHandler {
 			enemyIsRandom = false;
 		}
 	}
-	
+
 	public void initBlockingMinerals() {
 		for(Unit u : game.getStaticMinerals()) {
 			if(u.getResources() == 0)
 				blockingMinerals.put(u.getPosition(), u);
 		}
 	}
-	
+
 	public void checkBasesWithBLockingMinerals() {
 		if(blockingMinerals.isEmpty()) {
 			return;
@@ -291,7 +299,7 @@ public class GameState extends GameHandler {
 			}
 		}
 	}
-	
+
 	public void playSound(String soundFile) {
 		try{
 			String run = getClass().getResource("GameState.class").toString();
@@ -307,7 +315,7 @@ public class GameState extends GameHandler {
 				}).start();
 			}
 			else {
-				soundFile = "src\\" + soundFile; 
+				soundFile = "src\\" + soundFile;
 				FileInputStream fis = new FileInputStream(soundFile);
 				javazoom.jl.player.Player playMP3 = new javazoom.jl.player.Player(fis);
 				new Thread(() -> {
@@ -318,14 +326,14 @@ public class GameState extends GameHandler {
 					}
 				}).start();
 			}
-			
+
 		}
 		catch(Exception e) {
 			System.err.println("playSound");
 			System.err.println(e);
 		}
 	}
-	
+
 	public Game getGame(){
 		return game;
 	}
@@ -342,7 +350,7 @@ public class GameState extends GameHandler {
 			}
 		}
 	}
-	
+
 	public void addNewResources(Unit unit) {
 		List<Unit> minerals = BWTA.getNearestBaseLocation(unit.getTilePosition()).getStaticMinerals();
 		List<Unit> gas = BWTA.getNearestBaseLocation(unit.getTilePosition()).getGeysers();
@@ -376,7 +384,7 @@ public class GameState extends GameHandler {
 				workerTask.removeAll(aux);
 				mineralsAssigned.remove(m);
 			}
-			
+
 		}
 		for(Unit m : gas) {
 			Pair<Pair<Unit,Integer>,Boolean> geyser = new Pair<Pair<Unit,Integer>,Boolean>(new Pair<Unit,Integer>(m,0),false);
@@ -425,13 +433,13 @@ public class GameState extends GameHandler {
 		for(Vulture vulture : agents) {
 			game.drawTextMap(vulture.unit.getPosition(), vulture.statusToString());
 		}
-		game.drawTextScreen(10, 65, Utils.formatText("MGPF: ",Utils.White) + Utils.formatText(String.valueOf(getMineralRate()), Utils.White));
+
 		game.drawTextScreen(10, 80, Utils.formatText("Strategy: ",Utils.White) + Utils.formatText(strat.name, Utils.White));
 		game.drawTextScreen(10, 50, Utils.formatText("APM: ",Utils.White) + Utils.formatText(String.valueOf(apm), Utils.White));
 		if(closestChoke != null) {
 			game.drawTextMap(closestChoke.getCenter(), "Choke");
 		}
-		
+
 		if(chosenBuilderBL != null) {
 			game.drawTextMap(chosenBuilderBL.getPosition(), "BuilderBL");
 			print(chosenBuilderBL,Color.Blue);
@@ -557,7 +565,7 @@ public class GameState extends GameHandler {
 	public void initBaseLocations() {
 		BLs.addAll(BWTA.getBaseLocations());
 		Collections.sort(BLs, new BaseLocationComparator(false));
-		
+
 	}
 
 	public void moveUnitFromChokeWhenExpand(){
@@ -587,7 +595,7 @@ public class GameState extends GameHandler {
 								}
 							}
 						}
-					}	
+					}
 				}
 			}
 		} catch(Exception e) {
@@ -608,13 +616,13 @@ public class GameState extends GameHandler {
 					aux.add(u);
 				}
 			}
-			
+
 			if(s.members.isEmpty() || aux.size() == s.members.size()) {
 				squadsToClean.add(s.name);
 				continue;
 			}
 			else {
-				s.members.removeAll(aux);	
+				s.members.removeAll(aux);
 			}
 		}
 		List<Unit> bunkers =  new ArrayList<>();
@@ -626,7 +634,7 @@ public class GameState extends GameHandler {
 			bunkers.add(u.getKey());
 		}
 		for(Unit c : bunkers) DBs.remove(c);
-		
+
 		for(String name : squadsToClean) {
 			squads.remove(name);
 		}
@@ -644,10 +652,10 @@ public class GameState extends GameHandler {
 		if(chosenBuilderBL!= null && workerIdle.contains(chosenBuilderBL)) {
 			workerIdle.remove(chosenBuilderBL);
 		}
-		
+
 		List<Pair<Unit,Pair<UnitType,TilePosition>>> aux3 = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
 		for(Pair<Unit,Pair<UnitType,TilePosition> > u : workerBuild) {
-			if((u.first.isIdle() || u.first.isGatheringGas() || u.first.isGatheringMinerals()) && 
+			if((u.first.isIdle() || u.first.isGatheringGas() || u.first.isGatheringMinerals()) &&
 					broodWarDistance(u.first.getPosition(), u.second.second.toPosition()) > 100) {
 				aux3.add(u);
 				deltaCash.first -= u.second.first.mineralPrice();
@@ -656,7 +664,7 @@ public class GameState extends GameHandler {
 			}
 		}
 		workerBuild.removeAll(aux3);
-		
+
 		List<Pair<Unit,Unit> > aux4 = new ArrayList<Pair<Unit,Unit> >();
 		for(Pair<Unit,Unit> r : repairerTask) {
 			if(r.first.equals(chosenScout)) {
@@ -847,7 +855,7 @@ public class GameState extends GameHandler {
 		}
 		return count + agents.size();
 	}
-	
+
 	public void siegeTanks() {
 		if(!squads.isEmpty()) {
 			Set<Unit> tanks = new HashSet<Unit>();
@@ -902,7 +910,7 @@ public class GameState extends GameHandler {
 		}
 		return count;
 	}
-	
+
 	public double getMineralRate() {
 		double rate = 0.0;
 		if(frameCount > 0) {
@@ -910,14 +918,14 @@ public class GameState extends GameHandler {
 		}
 		return rate;
 	}
-	
+
 	public Position getCenterFromBuilding(Position leftTop, UnitType type) {
 		Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
 		Position center = new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
 		return center;
-		
+
 	}
-	
+
 	//TODO Real maths
 	public int getMineralsWhenReaching(Unit u, TilePosition start, TilePosition end) {
 		double rate = getMineralRate();
@@ -949,7 +957,7 @@ public class GameState extends GameHandler {
 			}
 		}
 	}
-	
+
 	public Position getNearestCC(Position position) {
 		Unit chosen = null;
 		double distance = Double.MAX_VALUE;
@@ -965,22 +973,22 @@ public class GameState extends GameHandler {
 		}
 		return null;
 	}
-	
+
 	public void readOpponentInfo(){
 		String name = game.enemy().getName();
 		String path = "bwapi-data/read/" + name + ".json";
 		try {
-			if(Files.exists(Paths.get(path))) { 
+			if(Files.exists(Paths.get(path))) {
 				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
 				return;
 			}
 			path = "bwapi-data/write/" + name + ".json";
-			if(Files.exists(Paths.get(path))) { 
+			if(Files.exists(Paths.get(path))) {
 				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
 				return;
 			}
 			path = "bwapi-data/AI/" + name + ".json";
-			if(Files.exists(Paths.get(path))) { 
+			if(Files.exists(Paths.get(path))) {
 				EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
 				return;
 			}
@@ -989,7 +997,7 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 		}
 	}
-	
+
 	public void writeOpponentInfo(String name) {
 		String dir = "bwapi-data/write/";
 		String path = dir + name + ".json";
@@ -1010,7 +1018,7 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 		}
 	}
-	
+
 	public TilePosition getBunkerPositionAntiPool() {
 		try {
 			TilePosition rax = MBs.iterator().next().getTilePosition();
@@ -1047,9 +1055,9 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 			return null;
 		}
-		
+
 	}
-	
+
 	public void updateEnemyBuildingsMemory() {
 		List<Unit> aux = new ArrayList<Unit>();
 		for(EnemyBuilding u : enemyBuildingMemory.values()) {
@@ -1062,14 +1070,14 @@ public class GameState extends GameHandler {
 				}
 				u.type = u.unit.getType();
 			}
-			
+
 		}
 		for(Unit u : aux) {
 			enemyBuildingMemory.remove(u);
 		}
-		
+
 	}
-	
+
 	public void mergeSquads() {
 		try {
 			if(squads.isEmpty()) {
@@ -1092,7 +1100,7 @@ public class GameState extends GameHandler {
 							else {
 								u1.members.addAll(u2.members);
 								u2.members.clear();
-								
+
 							}
 							break;
 						}
@@ -1112,7 +1120,7 @@ public class GameState extends GameHandler {
 			System.err.println(e);
 		}
 	}
-	
+
 	public void updateSquadOrderAndMicro() {
 		for (Squad u : squads.values()) {
 			u.microUpdateOrder();
@@ -1126,11 +1134,11 @@ public class GameState extends GameHandler {
 				count++;
 			}
 		}
-		
+
 		count += self.allUnitCount(type);
 		return count;
 	}
-	
+
 	/** Thanks to Yegers for the method
 	 * @author Yegers
 	 * Number of workers needed to sustain a number of units.
@@ -1172,14 +1180,14 @@ public class GameState extends GameHandler {
 						}
 					aux.add(scv.getKey());
 					count--;
-					
+
 				}
 			}
 			for(Unit u : aux) {
 				workerMining.remove(u);
 			}
 		}
-		
+
 	}
 
 	public boolean armyGroupedBBS() {
@@ -1201,11 +1209,11 @@ public class GameState extends GameHandler {
 						u.attack(getSquadCenter(s));
 					}
 				}
-			} 
+			}
 		}
 		return allFine;
 	}
-	
+
 	//Credits to @PurpleWaveJadien
 	public double broodWarDistance(Position a, Position b) {
 		double dx = Math.abs(a.getX() - b.getX());
@@ -1216,9 +1224,9 @@ public class GameState extends GameHandler {
 			return D;
 		}
 		return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
-		 
+
 	}
-	
+
 	public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
 		simulator.clear();
 		Pair<Boolean,Boolean> result = new Pair<>(true,false);
@@ -1260,10 +1268,10 @@ public class GameState extends GameHandler {
 				result.second = true;
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	public boolean simulateHarass(Unit harasser, List<Unit> enemies, int frames) {
 		simulator.clear();
 		simulator.addUnitPlayer1(new JFAPUnit(harasser));
@@ -1279,7 +1287,7 @@ public class GameState extends GameHandler {
 		}
 		return true;
 	}
-	
+
 	public boolean simulateHarass(Unit harasser, Set<Unit> enemies, int frames) {
 		simulator.clear();
 		simulator.addUnitPlayer1(new JFAPUnit(harasser));
@@ -1309,7 +1317,7 @@ public class GameState extends GameHandler {
 		}
 		return dist += broodWarDistance(start.toPosition(), end.toPosition());
 	}
-	
+
 	public Unit getUnitToAttack(Unit myUnit, Set<Unit> closeSim) {
 		Unit chosen = null;
 		Set<Unit> workers = new HashSet<>();
@@ -1335,7 +1343,7 @@ public class GameState extends GameHandler {
 					distB = distA;
 				}
 			}
-			
+
 		}
 		if(!combatUnits.isEmpty()) {
 			double distB = Double.MAX_VALUE;
@@ -1355,7 +1363,7 @@ public class GameState extends GameHandler {
 		}
 		return null;
 	}
-	
+
 	// Credits to @Yegers for a better kite method
 		public Position kiteAway(final Unit unit, final Set<Unit> enemies) {
 		    if (enemies.isEmpty()) {

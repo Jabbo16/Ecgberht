@@ -1,9 +1,7 @@
 package ecgberht.Defense;
 
-
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -19,6 +17,7 @@ import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
+import ecgberht.UnitComparator;
 
 public class CheckPerimeter extends Conditional {
 
@@ -32,7 +31,7 @@ public class CheckPerimeter extends Conditional {
 		try {
 			((GameState)this.handler).enemyInBase.clear();
 			((GameState)this.handler).defense = false;
-			List<Unit> enemyInvaders = new ArrayList<>();
+			Set<Unit> enemyInvaders = new TreeSet<>(new UnitComparator());
 			enemyInvaders.addAll(((GameState)this.handler).enemyCombatUnitMemory);
 			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
 				if(u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
@@ -74,7 +73,7 @@ public class CheckPerimeter extends Conditional {
 					}
 				}
 			}
-			
+
 			if(!((GameState)this.handler).enemyInBase.isEmpty()) {
 				if((((GameState)this.handler).getArmySize() >= 50 && ((GameState)this.handler).getArmySize() / ((GameState)this.handler).enemyInBase.size() > 10)) {
 					return State.FAILURE;

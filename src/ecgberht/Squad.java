@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 import bwapi.Order;
 import bwapi.Position;
@@ -19,18 +20,20 @@ public class Squad {
 	public enum Status {
 		ATTACK, IDLE, DEFENSE
 	}
-	public String name;
+
+	public int lastFrameOrder = 0;
+	public Position attack;
 	public Set<Unit> members;
 	public Status status;
-	public Position attack;
-	public int lastFrameOrder = 0;
+	public String name;
+
 	public Squad(String name) {
 		this.name = name;
-		members = new HashSet<Unit>();
+		members = new TreeSet<>(new UnitComparator());
 		status = Status.IDLE;
 		attack = Position.None;
 	}
-	
+
 	public void addToSquad(Unit unit) {
 		this.members.add(unit);
 	}
@@ -42,7 +45,7 @@ public class Squad {
 			lastFrameOrder = frameCount;
 		}
 	}
-	
+
 	public void giveStimOrder() {
 		for(Unit u : members) {
 			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
@@ -51,11 +54,11 @@ public class Squad {
 					getGs().playSound("stim.mp3");
 					getGs().lastFrameStim = getGs().getGame().elapsedTime();
 				}
-				
+
 			}
 		}
 	}
-	
+
 	public void microUpdateOrder() {
 		try {
 			if(members.isEmpty()) {
@@ -91,7 +94,7 @@ public class Squad {
 							continue;
 						}
 					}
-					
+
 					if(getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
 						if(getGame().isWalkable(sCenter.toWalkPosition())) {
 							u.move(sCenter);
@@ -99,7 +102,7 @@ public class Squad {
 						}
 					}
 				}
-				
+
 				// Experimental
 				if(status == Status.ATTACK && getGs().getGame().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
 					if(members.size() == 1) {
@@ -116,7 +119,7 @@ public class Squad {
 						for(Unit m : different) {
 							if(m.equals(u)) {
 								if(u.getOrderTargetPosition() != null) {
-									if(!u.getOrderTargetPosition().equals(sCenter)) {
+									if(!u.getOrderTargetPosition().equals(sCenter) && getGame().isWalkable(sCenter.toWalkPosition())) {
 										u.attack(sCenter);
 										gaveOrder = true;
 										break;
@@ -127,9 +130,7 @@ public class Squad {
 					}
 					if(gaveOrder) continue;
 				}
-				
-				
-				
+
 				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
 					Unit chosen = getHealTarget(u, marinesToHeal);
 					if(chosen != null) {
@@ -146,14 +147,14 @@ public class Squad {
 					u.move(sCenter);
 					continue;
 				}
-				
+
 				Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
 				if(lastTarget != null) {
 					if(lastTarget.equals(attack)) {
 						continue;
 					}
 				}
-				int framesToOrder = 18;	
+				int framesToOrder = 18;
 				if(u.getType() == UnitType.Terran_Vulture) {
 					framesToOrder = 12;
 				}
@@ -173,17 +174,28 @@ public class Squad {
 						continue;
 					}
 					Set<Unit> enemyToKite = new HashSet<>();
-					if(u.getGroundWeaponCooldown() > 0) {
-						for(Unit e : enemy) {
-							if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
-								if (e.isAttacking()) {
-									if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
-										//u.move(start);
+					Set<Unit> enemyToAttack = new HashSet<>();
+					for(Unit e : enemy) {
+						UnitType eType = e.getType();
+						if(eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
+						enemyToAttack.add(e);
+						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
+//							if (e.isAttacking()) {
+//								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
+									//u.move(start);
+									if(getGs().broodWarDistance(u.getPosition(), e.getPosition()) <= u.getType().groundWeapon().maxRange()) {
 										enemyToKite.add(e);
 									}
-								}
-							}
+//								}
+//							}
 						}
+					}
+					for(EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
+						if(b.type.canAttack()) {
+							enemyToAttack.add(b.unit);
+						}
+					}
+					if(u.getGroundWeaponCooldown() > 0) {
 						if(!enemyToKite.isEmpty()) {
 							Position run = getGs().kiteAway(u,enemyToKite);
 							if(run.isValid()) {
@@ -194,12 +206,26 @@ public class Squad {
 								continue;
 							}
 //							Position run = getGs().getPlayer().getStartLocation().toPosition();
-							
+
 						}
 					}
-					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
-						u.attack(attack);
-						continue;
+					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking()) {
+//					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
+						if(!enemyToAttack.isEmpty()) {
+							Unit target = Util.getTarget(u, enemyToAttack);
+							Unit lastTargetUnit = (u.getTarget() == null ? u.getOrderTarget() : u.getTarget());
+							if(lastTargetUnit != null) {
+								if(!lastTargetUnit.equals(target)) {
+									u.attack(target);
+									continue;
+								}
+							}
+						}
+						if(u.getOrder() == Order.Move){
+							u.attack(attack);
+							continue;
+						}
+
 					}
 				}
 			}
@@ -207,9 +233,9 @@ public class Squad {
 			System.err.println("microUpdateOrder Error");
 			System.err.println(e);
 		}
-		
+
 	}
-	
+
 	private Unit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
 		Set<Unit> marines = getMarines();
 		Unit chosen = null;
@@ -246,7 +272,7 @@ public class Squad {
 		}
 		return aux;
 	}
-	
+
 	public Set<Unit> getMedics() {
 		Set<Unit> aux = new HashSet<Unit>();
 		for(Unit u : this.members) {
@@ -277,7 +303,8 @@ public class Squad {
 			}
 		}
 	}
-	
+
+
 	@Override
     public boolean equals(Object o) {
 

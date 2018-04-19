@@ -30,7 +30,7 @@ public class ChooseMarineToEnter extends Action {
 					for(Entry<String, Squad> s : ((GameState)this.handler).squads.entrySet()) {
 						for(Unit u : s.getValue().members) {
 							if(u.getType() == UnitType.Terran_Marine) {
-								if ((closest == null || ((GameState)this.handler).broodWarDistance(b.getPosition(), u.getPosition()) < 
+								if ((closest == null || ((GameState)this.handler).broodWarDistance(b.getPosition(), u.getPosition()) <
 										((GameState)this.handler).broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
 									closest = new Pair<String,Unit>(s.getKey(),u);
 								}

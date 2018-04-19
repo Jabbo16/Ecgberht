@@ -12,8 +12,7 @@ import bwapi.UnitType;
 import bwapi.UpgradeType;
 import bwapi.WeaponType;
 
-public class JFAPUnit {
-	
+public class JFAPUnit implements Comparable<JFAPUnit>{
 	int id = 0;
 	Unit unit;
 	int x = 0, y = 0;
@@ -44,16 +43,12 @@ public class JFAPUnit {
 	int score = 0;
 	int attackCooldownRemaining = 0;
 	Race race = Race.Unknown;
-	
-	public JFAPUnit() {
-		
-	}
-	
+
 	public JFAPUnit(Unit u) {
 		unit = u;
 		x = u.getX();
 		y = u.getY();
-		id++;
+		id = u.getID();
 		UnitType auxType = u.getType();
 		Player auxPlayer = u.getPlayer();
 		health = u.getHitPoints();
@@ -83,6 +78,9 @@ public class JFAPUnit {
 		score = auxType.destroyScore();
 		race = auxType.getRace();
 		doThings(u, JFAP.game);
+	}
+
+	public JFAPUnit() {
 	}
 
 	private void doThings(Unit u, Game game) {
@@ -137,7 +135,7 @@ public class JFAPUnit {
 		shields <<= 8;
 		maxShields <<= 8;
 	}
-	
+
 	@Override
     public boolean equals(Object o) {
 
@@ -153,4 +151,10 @@ public class JFAPUnit {
     public int hashCode() {
         return Objects.hash(unit);
     }
+
+	@Override
+	public int compareTo(JFAPUnit arg0) {
+
+		return this.id - arg0.id;
+	}
 }

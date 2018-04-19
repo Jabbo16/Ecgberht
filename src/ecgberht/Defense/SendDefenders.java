@@ -1,8 +1,8 @@
 package ecgberht.Defense;
 
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -14,6 +14,7 @@ import bwapi.Unit;
 import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Squad;
+import ecgberht.UnitComparator;
 import ecgberht.Squad.Status;
 
 public class SendDefenders extends Action {
@@ -38,7 +39,7 @@ public class SendDefenders extends Action {
 				}
 				air_only = false;
 			}
-			Set<Unit> friends = new HashSet<Unit>();
+			Set<Unit> friends = new TreeSet<Unit>(new UnitComparator());
 			for (Squad s : ((GameState)this.handler).squads.values()){
 				for(Unit u : s.members) {
 					friends.add(u);
@@ -52,11 +53,11 @@ public class SendDefenders extends Action {
 				bunker = true;
 			}
 			int defenders = 6;
-			
+
 			if(((GameState)this.handler).enemyInBase.size() == 1 && ((GameState)this.handler).enemyInBase.iterator().next().getType().isWorker()) {
 				defenders = 1;
 			}
-			
+
 			Pair<Boolean,Boolean> battleWin = new Pair<>(true,false);
 			if(defenders != 1) {
 				if(((GameState)this.handler).enemyInBase.size() + friends.size() < 40) {
@@ -66,7 +67,7 @@ public class SendDefenders extends Action {
 					battleWin.first = false;
 				}
 			}
-			
+
 			if(cannon_rush) {
 				battleWin.first = false;
 			}
@@ -129,14 +130,14 @@ public class SendDefenders extends Action {
 							}
 							else {
 								Unit toAttack = ((GameState)this.handler).getUnitToAttack(u.first, ((GameState)this.handler).enemyInBase);
-								
+
 								if(toAttack != null) {
 									Unit lastTarget = u.first.getOrderTarget();
 									if(lastTarget != null) {
 										if(lastTarget.equals(toAttack)) {
 											continue;
 										}
-									
+
 									}
 									u.first.attack(toAttack);
 								}
@@ -145,7 +146,7 @@ public class SendDefenders extends Action {
 								}
 								continue;
 							}
-							
+
 						}
 					}
 				}

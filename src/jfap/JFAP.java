@@ -1,7 +1,7 @@
 package jfap;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import bwapi.DamageType;
 import bwapi.Game;
@@ -12,11 +12,11 @@ import bwapi.UnitType;
 
 public class JFAP extends AJFAP{
 	public static Game game;
-	private Set<JFAPUnit> player1 = new HashSet<>();
-	private Set<JFAPUnit> player2 = new HashSet<>();
+	private Set<JFAPUnit> player1 = new TreeSet<>();
+	private Set<JFAPUnit> player2 = new TreeSet<>();
 	private boolean didSomething = false;
 	private int nFrames = 96;
-	
+
 	public JFAP(Game game) {
 		JFAP.game = game;
 	}
@@ -54,7 +54,7 @@ public class JFAP extends AJFAP{
 		while (nFrames > 0) {
 			if (player1.isEmpty() || player2.isEmpty()) {
 				break;
-			}	    	
+			}
 			didSomething = false;
 			isimulate();
 
@@ -64,14 +64,14 @@ public class JFAP extends AJFAP{
 			nFrames--;
 		}
 	}
-	
+
 	@Override
 	public void simulate() {
 		int nFrames = this.nFrames;
 		while (nFrames > 0) {
 			if (player1.isEmpty() || player2.isEmpty()) {
 				break;
-			}	    	
+			}
 			didSomething = false;
 			isimulate();
 
@@ -81,7 +81,7 @@ public class JFAP extends AJFAP{
 			nFrames--;
 		}
 	}
-	
+
 	final int score(final JFAPUnit fu) {
 		if (fu.health > 0 && fu.maxHealth > 0) {
 			int bunker = 0;
@@ -89,7 +89,7 @@ public class JFAP extends AJFAP{
 				bunker = 1;
 			}
 			return ((fu.score * fu.health) / (fu.maxHealth * 2)) + bunker * UnitType.Terran_Marine.destroyScore() * 4;
-		}    
+		}
 		return 0;
 	}
 
@@ -111,7 +111,7 @@ public class JFAP extends AJFAP{
 		for (final JFAPUnit u : player1) {
 			if (!u.unitType.isBuilding()) {
 				res.first += score(u);
-			}    
+			}
 		}
 		for (final JFAPUnit u : player2) {
 			if (!u.unitType.isBuilding()) {
@@ -127,7 +127,7 @@ public class JFAP extends AJFAP{
 		for (final JFAPUnit u : player1) {
 			if (u.unitType.isBuilding()) {
 				res.first += score(u);
-			}    
+			}
 		}
 		for (final JFAPUnit u : player2) {
 			if (u.unitType.isBuilding()) {
@@ -169,7 +169,7 @@ public class JFAP extends AJFAP{
 			}
 			else if (fu.unitSize == UnitSizeType.Medium) {
 				damage = damage / 2;
-			} 
+			}
 		} else if (damageType == DamageType.Explosive) {
 			if (fu.unitSize == UnitSizeType.Small)
 				damage = damage / 2;
@@ -235,7 +235,7 @@ public class JFAP extends AJFAP{
 					if (closestEnemy.elevation > fu.elevation) {
 						fu.attackCooldownRemaining += fu.groundCooldown;
 					}
-				}	  
+				}
 			}
 			if (closestEnemy.health < 1) {
 				final JFAPUnit temp = closestEnemy;
@@ -287,7 +287,7 @@ public class JFAP extends AJFAP{
 						closestEnemy = enemy;
 					}
 				}
-			} else { 
+			} else {
 				if (fu.groundDamage > 0) {
 
 					int d = distButNotReally(fu, enemy);
@@ -327,7 +327,7 @@ public class JFAP extends AJFAP{
 		}
 		return false;
 	}
-	
+
 	final void simUnit(JFAPUnit unit, Set<JFAPUnit> player12, Set<JFAPUnit> player22) {
 		if(isSuicideUnit(unit.unitType)) {
 			final boolean unitDied = suicideSim(unit, player22);
@@ -339,7 +339,7 @@ public class JFAP extends AJFAP{
 				medicsim(unit, player12);
 			else {
 				unitsim(unit, player22);
-			} 
+			}
 		}
 	}
 
@@ -366,7 +366,7 @@ public class JFAP extends AJFAP{
 			}
 			if (fu.shields > fu.maxShields) {
 				fu.shields = fu.maxShields;
-			}	
+			}
 		}
 	}
 
@@ -388,23 +388,25 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	void unitDeath(JFAPUnit fu, Set<JFAPUnit> player22) {
+	void unitDeath(JFAPUnit fu, Set<JFAPUnit> player) {
 		if (fu.unitType == UnitType.Terran_Bunker) {
-			convertToUnitType(fu, UnitType.Terran_Marine);
+			JFAPUnit m = convertToUnitType(fu, UnitType.Terran_Marine);
+			m.unitType = UnitType.Terran_Marine;
 			for (int i = 0; i < 4; ++i) {
-				player22.add(fu);
+				player.add(m);
 			}
 		}
 	}
 
-	void convertToUnitType(JFAPUnit fu, UnitType ut) {
+	JFAPUnit convertToUnitType(JFAPUnit fu, UnitType ut) {
 		JFAPUnit funew = new JFAPUnit();
+		funew.id = fu.id;
 		funew.x = fu.x;
 		funew.y = fu.y;
 		funew.player = fu.player;
 		funew.unitType = ut;
 		funew.attackCooldownRemaining = fu.attackCooldownRemaining;
 		funew.elevation = fu.elevation;
-		fu = funew;
+		return funew;
 	}
 }

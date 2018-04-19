@@ -8,28 +8,28 @@ import bwapi.UnitType;
 import bwapi.UpgradeType;
 
 public abstract class AStrategy {
-	public String name = "";
-    public int armyForBay = 0;
-	public int armyForTurret = 0;
-	public int numBays = 0;
-	public int raxPerCC = 0;
-	public int facPerCC = 0;
-	public int portPerCC = 0;
-	public int numCCForPort = 0;
-	public int numRaxForAca = 1;
-	public int numRaxForFac = 0;
-	public int numCCForScience = 0;
 	public boolean bunker = false;
 	public boolean proxy = false;
-	public int supplyForFirstRefinery = 0;
 	public int armyForAttack = 0;
 	public int armyForExpand = 20;
-	public Set<UnitType> trainUnits = new HashSet<>();
-	public Set<UnitType> buildUnits = new HashSet<>();
-	public Set<UnitType> buildAddons = new HashSet<>();
+	public int armyForTurret = 0;
+	public int facPerCC = 0;
+	public int numBays = 0;
+	public int numCCForPort = 0;
+	public int numCCForScience = 0;
+	public int numRaxForAca = 1;
+	public int numRaxForFac = 0;
+	public int portPerCC = 0;
+	public int raxPerCC = 0;
+	public int supplyForFirstRefinery = 0;
 	public Set<TechType> techToResearch = new HashSet<>();
+	public Set<UnitType> buildAddons = new HashSet<>();
+	public Set<UnitType> buildUnits = new HashSet<>();
+	public Set<UnitType> trainUnits = new HashSet<>();
 	public Set<UpgradeType> upgradesToResearch = new HashSet<>();
-	
+	public String name = "";
+    public int armyForBay = 0;
+
 	public abstract void initStrategy();
 	public abstract void initTrainUnits();
 	public abstract void initBuildUnits();
