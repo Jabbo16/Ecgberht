@@ -199,8 +199,8 @@ public class GameState extends GameHandler {
 					}
 				}
 			} else {
-				Map<String,Pair<Integer,Integer>> strategies = new HashMap<>();
-				Map<String,AStrategy> nameStrat = new HashMap<>();
+				Map<String,Pair<Integer,Integer>> strategies = new TreeMap<>();
+				Map<String,AStrategy> nameStrat = new TreeMap<>();
 
 				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bbs.name, bbs);
