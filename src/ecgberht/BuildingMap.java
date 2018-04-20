@@ -2,7 +2,9 @@ package ecgberht;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 import bwapi.Game;
@@ -24,6 +26,9 @@ public class BuildingMap {
 	private Player self;
 	private String map[][];
 
+	private enum Side{
+		TOP, LEFT, RIGHT, BOTTOM
+	}
 	public BuildingMap(Game game, Player self) {
 		this.game = game;
 		this.self = self;
@@ -483,37 +488,80 @@ public class BuildingMap {
 		return position;
 	}
 
-	public TilePosition findBunkerPositionAntiPool(Position starting, Chokepoint choke){
-		TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
-		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
-		int x = starting.toTilePosition().getY();
-		int y = starting.toTilePosition().getX();
+	public TilePosition findBunkerPositionAntiPool(){ // TODO Finish it
+		TilePosition bunkerPlace = TilePosition.None;
+		Chokepoint choke = getGs().closestChoke;
+		Position chokePos = choke.getCenter();
+		Set<Position> posToDefend = new HashSet<>();
+		int marineRange = UnitType.Terran_Marine.groundWeapon().maxRange();
+		Side side = getSide(getGs().MainCC.getPosition(), choke.getCenter());
+		
+		Position top = null;
+		Position bottom = null;
+		double distTop = Double.MAX_VALUE;
+		double distBottom = Double.MIN_VALUE;
+		for(Unit m : getGs().mineralsAssigned.keySet()) {
+			Position mPos = m.getPosition();
+			if(top == null && bottom == null) {
+				top = mPos;
+				bottom = mPos;
+				continue;
+			}
+			double dist = getGs().broodWarDistance(mPos, chokePos);
+			if(dist < distTop) {
+				top = mPos;
+				distTop = dist;
+			}
+			if(dist > distBottom) {
+				bottom = mPos;
+				distBottom = dist;
+			}
+			
+		}
+		
+		// Old method just in case something goes wrong
+		if(bunkerPlace == TilePosition.None) {
+			TilePosition starting = getGs().MBs.iterator().next().getTilePosition();
+			TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
+			int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
+			int x = starting.getY();
+			int y = starting.getX();
 
-		int i = 4;
-		int j = 4;
-		//Finds the first valid tileposition starting around the given tileposition
-		TilePosition position = null;
-		double dist = Double.MAX_VALUE;
-		for(int ii = (x - i); ii <= (x + i + 4); ii++) {
-			for(int jj = (y - j); jj <= (y + j + 3); jj++) {
-				if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
-						if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
-							continue;
-						}
-						if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
-							TilePosition newPosition = new TilePosition(jj, ii);
-							double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter());
-							if(position == null || newDist < dist) {
-								position = newPosition;
-								dist = newDist;
+			int i = 4;
+			int j = 4;
+			
+			double dist = Double.MAX_VALUE;
+			for(int ii = (x - i); ii <= (x + i + 4); ii++) {
+				for(int jj = (y - j); jj <= (y + j + 3); jj++) {
+					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
+						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
+							if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
+								continue;
+							}
+							if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
+								TilePosition newPosition = new TilePosition(jj, ii);
+								double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter());
+								if(bunkerPlace == TilePosition.None || newDist < dist) {
+									bunkerPlace = newPosition;
+									dist = newDist;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-		return position;
+		
+		return bunkerPlace;
+	}
+
+	private Side getSide(Position start, Position end) {
+		double x = end.getX() - start.getX();
+		double y = end.getY() - start.getY();
+		if(Math.abs(x) > Math.abs(y)) {
+			return x > 0 ? Side .LEFT : Side.RIGHT;
+		}
+		return y > 0 ? Side.BOTTOM : Side.TOP;
 	}
 
 	//Writes the map to a file

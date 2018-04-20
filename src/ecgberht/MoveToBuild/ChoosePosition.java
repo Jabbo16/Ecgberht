@@ -66,8 +66,8 @@ public class ChoosePosition extends Action {
 					}
 					else {
 						if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).enemyRace == Race.Zerg) {
-							TilePosition raxTile = ((GameState)this.handler).MBs.iterator().next().getTilePosition();
-							origin = ((GameState)this.handler).testMap.findBunkerPositionAntiPool(raxTile.toPosition(),((GameState)this.handler).closestChoke);
+							
+							origin = ((GameState)this.handler).testMap.findBunkerPositionAntiPool();
 							if(origin != null) {
 								((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
 								((GameState)this.handler).chosenPosition = origin;

@@ -19,6 +19,9 @@ public class CheckHarasser extends Conditional {
 				return State.FAILURE;
 			}
 			else{
+				if(((GameState)this.handler).chosenHarasser.isIdle()) {
+					((GameState)this.handler).chosenUnitToHarass = null;
+				}
 				return State.SUCCESS;
 			}
 		} catch(Exception e) {
