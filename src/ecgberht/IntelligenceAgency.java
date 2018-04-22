@@ -42,6 +42,11 @@ public class IntelligenceAgency {
 
 	public static void onShow(Unit unit, UnitType type) {
 		String player = unit.getPlayer().getName();
+
+		// If base and player known skip
+		if(enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;
+
+		// Bases
 		if(type.isResourceDepot()) {
 			if(!enemyBases.containsKey(player)) {
 				TreeSet<Unit> aux = new TreeSet<>(new UnitComparator());
@@ -52,7 +57,12 @@ public class IntelligenceAgency {
 				enemyBases.get(player).add(unit);
 			}
 		}
-		if(!type.isBuilding() && !type.isWorker() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type.supplyProvided() == 0))) {
+
+		// If player and type known skip
+		if(enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;
+
+		// Normal units (no workers and no real combat or support units)
+		else if(!type.isBuilding() && !type.isWorker() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type.supplyProvided() == 0))) {
 			if(!enemyTypes.containsKey(player)) {
 				HashSet<UnitType> aux = new HashSet<>();
 				aux.add(type);
@@ -60,6 +70,115 @@ public class IntelligenceAgency {
 
 			} else {
 				enemyTypes.get(player).add(type);
+			}
+		}
+		// Eggs
+		else if(type == UnitType.Zerg_Lurker_Egg) {
+			if(!enemyTypes.containsKey(player)) {
+				HashSet<UnitType> aux = new HashSet<>();
+				aux.add(UnitType.Zerg_Lurker);
+				enemyTypes.put(player, aux);
+
+			} else {
+				enemyTypes.get(player).add(UnitType.Zerg_Lurker);
+			}
+		}
+		// Buildings
+		else if(type.isBuilding()) {
+			// Protoss tech
+			if(type == UnitType.Protoss_Arbiter_Tribunal) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Protoss_Arbiter);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Protoss_Arbiter);
+				}
+			}
+			else if(type == UnitType.Protoss_Templar_Archives) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Protoss_Dark_Templar);
+					aux.add(UnitType.Protoss_High_Templar);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Protoss_Dark_Templar);
+					enemyTypes.get(player).add(UnitType.Protoss_High_Templar);
+				}
+			}
+			else if(type == UnitType.Protoss_Fleet_Beacon) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Protoss_Carrier);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Protoss_Carrier);
+				}
+			}
+			else if(type == UnitType.Protoss_Robotics_Support_Bay) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Protoss_Reaver);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Protoss_Reaver);
+				}
+			}
+			// Zerg tech
+			else if(type == UnitType.Zerg_Spawning_Pool) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Zerg_Zergling);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Zerg_Zergling);
+				}
+			}
+			else if(type == UnitType.Zerg_Spire) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Zerg_Mutalisk);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Zerg_Mutalisk);
+				}
+			}
+			else if(type == UnitType.Zerg_Hydralisk_Den) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Zerg_Hydralisk);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Zerg_Hydralisk);
+				}
+			}
+			else if(type == UnitType.Zerg_Queens_Nest) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Zerg_Queen);
+					enemyTypes.put(player, aux);
+
+				} else {
+					enemyTypes.get(player).add(UnitType.Zerg_Queen);
+				}
+			}
+			else if(type == UnitType.Zerg_Defiler_Mound) {
+				if(!enemyTypes.containsKey(player)) {
+					HashSet<UnitType> aux = new HashSet<>();
+					aux.add(UnitType.Zerg_Defiler);
+					enemyTypes.put(player, aux);
+
+				}
+				else {
+					enemyTypes.get(player).add(UnitType.Zerg_Defiler);
+				}
 			}
 		}
 	}
@@ -70,5 +189,4 @@ public class IntelligenceAgency {
 			if(enemyBases.get(player).contains(unit)) enemyBases.get(player).remove(unit);
 		}
 	}
-
 }
