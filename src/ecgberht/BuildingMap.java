@@ -495,7 +495,7 @@ public class BuildingMap {
 		Set<Position> posToDefend = new HashSet<>();
 		int marineRange = UnitType.Terran_Marine.groundWeapon().maxRange();
 		Side side = getSide(getGs().MainCC.getPosition(), choke.getCenter());
-		
+
 		Position top = null;
 		Position bottom = null;
 		double distTop = Double.MAX_VALUE;
@@ -516,9 +516,10 @@ public class BuildingMap {
 				bottom = mPos;
 				distBottom = dist;
 			}
-			
+
 		}
-		
+		System.out.println(top.toTilePosition());
+		System.out.println(bottom.toTilePosition());
 		// Old method just in case something goes wrong
 		if(bunkerPlace == TilePosition.None) {
 			TilePosition starting = getGs().MBs.iterator().next().getTilePosition();
@@ -529,7 +530,7 @@ public class BuildingMap {
 
 			int i = 4;
 			int j = 4;
-			
+
 			double dist = Double.MAX_VALUE;
 			for(int ii = (x - i); ii <= (x + i + 4); ii++) {
 				for(int jj = (y - j); jj <= (y + j + 3); jj++) {
@@ -551,7 +552,7 @@ public class BuildingMap {
 				}
 			}
 		}
-		
+
 		return bunkerPlace;
 	}
 

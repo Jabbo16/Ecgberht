@@ -66,7 +66,7 @@ public class ChoosePosition extends Action {
 					}
 					else {
 						if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).enemyRace == Race.Zerg) {
-							
+
 							origin = ((GameState)this.handler).testMap.findBunkerPositionAntiPool();
 							if(origin != null) {
 								((GameState)this.handler).testMap = ((GameState)this.handler).map.clone();
@@ -81,7 +81,12 @@ public class ChoosePosition extends Action {
 									return State.SUCCESS;
 								}
 								else {
-									origin = raxTile;
+									if(((GameState)this.handler).MainCC != null) {
+										origin = ((GameState)this.handler).MainCC.getTilePosition();
+									}
+									else {
+										origin = ((GameState)this.handler).getPlayer().getStartLocation();
+									}
 								}
 							}
 						}
@@ -97,12 +102,12 @@ public class ChoosePosition extends Action {
 									else {
 										origin = ((GameState)this.handler).closestChoke.getCenter().toTilePosition();
 									}
-									
+
 								}
 //								else {
 //									origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
 //								}
-	
+
 							}
 							else {
 								for(Unit b : ((GameState)this.handler).Ts) {

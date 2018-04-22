@@ -134,6 +134,7 @@ public class GameState extends GameHandler {
 	public UnitType chosenToBuild = null;
 	public UnitType chosenUnit = null;
 	public UpgradeType chosenUpgrade = null;
+	public boolean iReallyWantToExpand = false;
 
 	public GameState(Mirror bwapi) {
 		super(bwapi);
@@ -143,10 +144,6 @@ public class GameState extends GameHandler {
 		inMap = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
 		mapSize = BWTA.getStartLocations().size();
 		simulator = new JFAP(bwapi.getGame());
-		if(game.enemy().getName() == "Zercgberht" || game.enemy().getName() == "Protecgberht") {
-			game.sendText("Hey there!, brother");
-			game.sendText("As the oldest of the three I'm not gonna lose");
-		}
 	}
 
 	public Strategy initStrat() {
@@ -170,6 +167,7 @@ public class GameState extends GameHandler {
 						return new Strategy(bM);
 					}
 				}
+
 				if(mapSize == 2 && !map.contains("Heartbreak Ridge")) {
 					double random = Math.random();
 					if(random > 0.5 ) {
@@ -858,31 +856,40 @@ public class GameState extends GameHandler {
 
 	public void siegeTanks() {
 		if(!squads.isEmpty()) {
-			Set<Unit> tanks = new HashSet<Unit>();
+			Set<Unit> tanks = new TreeSet<Unit>(new UnitComparator());
 			for (Entry<String,Squad> s : squads.entrySet()) {
 				tanks.addAll(s.getValue().getTanks());
 			}
 			if(!tanks.isEmpty()) {
 				for(Unit t : tanks) {
 					//List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
-					boolean found = false;
+					boolean far = false;
+					boolean close = false;
 					for(Unit e : enemyCombatUnitMemory) {
-						if(broodWarDistance(e.getPosition(), t.getPosition()) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
+						double distance = broodWarDistance(e.getPosition(), t.getPosition());
+						if(distance > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
 							continue;
 						}
-						if(e.getPlayer().getID() == game.enemy().getID() && !e.getType().isWorker() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
-							found = true;
+						if(distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) {
+							close = true;
+							break;
+						}
+						if(e.getPlayer().isEnemy(self) && !e.getType().isWorker() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
+							far = true;
 							break;
 						}
 					}
-					if(found && t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && t.getOrder() != Order.Sieging) {
-						t.siege();
+					if(close && !far) {
+						if(t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && t.getOrder() != Order.Unsieging) t.unsiege();
 						continue;
 					}
-					if(!found && t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && t.getOrder() != Order.Unsieging) {
-						t.unsiege();
+					if(far) {
+						if(t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && t.getOrder() != Order.Sieging) {
+							t.siege();
+						}
 						continue;
 					}
+					if(t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && t.getOrder() != Order.Unsieging) t.unsiege();
 				}
 			}
 		}
@@ -1404,6 +1411,23 @@ public class GameState extends GameHandler {
 			}
 			for(Vulture vult : rem) {
 				agents.remove(vult);
+			}
+		}
+
+		public void sendCustomMessage() {
+			String name = EI.opponent.toLowerCase();
+			if(name == "purplewave".toLowerCase()) {
+				game.sendText("Dude, stop with the DT opener :P");
+			}
+			if(name == "krasi0".toLowerCase()) {
+				game.sendText("Please be nice to me!");
+			}
+			if(name == "hannes bredberg".toLowerCase()) {
+				game.sendText("Dont you dare nuke me!");
+			}
+			if(name == "zercgberht" || name == "protecgberht") {
+				game.sendText("Hey there!, brother");
+				game.sendText("As the oldest of the three I'm not gonna lose");
 			}
 		}
 }

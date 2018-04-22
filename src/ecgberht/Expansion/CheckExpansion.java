@@ -52,6 +52,8 @@ public class CheckExpansion extends Conditional{
 			if(((GameState)this.handler).mineralsAssigned.size() * 2 <= workers && ((GameState)this.handler).getArmySize() >= ((GameState)this.handler).strat.armyForExpand) {
 				return State.SUCCESS;
 			}
+			if(((GameState)this.handler).iReallyWantToExpand) return State.SUCCESS;
+
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());

@@ -78,8 +78,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onStart() {
-
-		//Disables System.err and System.Out
+		// Disables System.err and System.Out
 		OutputStream output = null;
 		try {
 			output = new FileOutputStream("NUL:");
@@ -87,18 +86,18 @@ public class Ecgberht extends DefaultBWListener {
 			//e.printStackTrace();
 		}
 		PrintStream nullOut = new PrintStream(output);
-//		System.setErr(nullOut);
-//		System.setOut(nullOut);
+		System.setErr(nullOut);
+		System.setOut(nullOut);
 
 		game = mirror.getGame();
 		self = game.self();
-//		game.enableFlag(1);
-//		game.setLocalSpeed(0);
+		// game.enableFlag(1);
+		// game.setLocalSpeed(0);
 		System.out.println("Analyzing map...");
 		BWTA.analyze();
 		System.out.println("Map data ready");
 		observer = new CameraModule(self.getStartLocation().toPosition(), game);
-		//observer.toggle();
+		// observer.toggle();
 
 		gs = new GameState(mirror);
 		gs.initEnemyRace();
@@ -108,6 +107,7 @@ public class Ecgberht extends DefaultBWListener {
 				gs.playSound("rushed.mp3");
 			}
 		}
+		gs.EI.naughty = true;
 		gs.strat = gs.initStrat();
 		gs.initStartLocations();
 		gs.initBaseLocations();
@@ -376,61 +376,68 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onFrame() {
-		long frameStart = System.currentTimeMillis();
-		gs.frameCount = game.getFrameCount();
-		gs.print(gs.naturalRegion.getCenter().toTilePosition(), Color.Red);
-		observer.onFrame();
-		gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
-		gs.updateEnemyBuildingsMemory();
-		gs.runAgents();
-		//gs.checkEnemyAttackingWT();
-		buildingLotTree.run();
-		repairTree.run();
-		collectTree.run();
-		expandTree.run();
-		upgradeTree.run();
-		moveBuildTree.run();
-		buildTree.run();
-		addonBuildTree.run();
-		trainTree.run();
-		scoutingTree.run();
-		botherTree.run();
-		bunkerTree.run();
-		scannerTree.run();
-		if(gs.strat.name == "ProxyBBS") {
-			gs.checkWorkerMilitia();
-		}
-		gs.siegeTanks();
-		defenseTree.run();
-		attackTree.run();
-		gs.updateSquadOrderAndMicro();
-		combatStimTree.run();
-		gs.checkMainEnemyBase();
-		gs.fix();
-		gs.mergeSquads();
-		if(game.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
-			boolean found_pool = false;
-			int drones = game.enemy().allUnitCount(UnitType.Zerg_Drone);
-			for(EnemyBuilding u  : gs.enemyBuildingMemory.values()) {
-				if(u.type == UnitType.Zerg_Spawning_Pool) {
-					found_pool = true;
-					break;
+		try {
+			long frameStart = System.currentTimeMillis();
+			gs.frameCount = game.getFrameCount();
+			if(gs.frameCount == 1000) gs.sendCustomMessage();
+			gs.print(gs.naturalRegion.getCenter().toTilePosition(), Color.Red);
+			observer.onFrame();
+			gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
+			gs.updateEnemyBuildingsMemory();
+			gs.runAgents();
+			//gs.checkEnemyAttackingWT();
+			buildingLotTree.run();
+			repairTree.run();
+			collectTree.run();
+			expandTree.run();
+			upgradeTree.run();
+			moveBuildTree.run();
+			buildTree.run();
+			addonBuildTree.run();
+			trainTree.run();
+			scoutingTree.run();
+			botherTree.run();
+			bunkerTree.run();
+			scannerTree.run();
+			if(gs.strat.name == "ProxyBBS") {
+				gs.checkWorkerMilitia();
+			}
+			gs.siegeTanks();
+			defenseTree.run();
+			attackTree.run();
+			gs.updateSquadOrderAndMicro();
+			combatStimTree.run();
+			gs.checkMainEnemyBase();
+			gs.fix();
+			gs.mergeSquads();
+			if(game.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
+				boolean found_pool = false;
+				int drones = game.enemy().allUnitCount(UnitType.Zerg_Drone);
+				for(EnemyBuilding u  : gs.enemyBuildingMemory.values()) {
+					if(u.type == UnitType.Zerg_Spawning_Pool) {
+						found_pool = true;
+						break;
+					}
+				}
+				if(found_pool && drones <= 5) {
+					gs.EI.naughty = true;
+					game.sendText("Bad zerg!, bad!");
+					gs.playSound("rushed.mp3");
 				}
 			}
-			if(found_pool && drones <= 5) {
-				gs.EI.naughty = true;
-				game.sendText("Bad zerg!, bad!");
-				gs.playSound("rushed.mp3");
+			if(gs.frameCount > 0 && gs.frameCount % 5 == 0) {
+				gs.mineralLocking();
 			}
+			gs.printer();
+			long frameEnd = System.currentTimeMillis();
+			long frameTotal = frameEnd - frameStart;
+			gs.totalTime += frameTotal;
+			game.drawTextScreen(10, 65, Utils.formatText("frameTime(ms): ",Utils.White) + Utils.formatText(String.valueOf(frameTotal), Utils.White));
+		} catch(Exception e) {
+			System.err.println(e);
+			System.err.println("onFrame Exception");
 		}
-		if(gs.frameCount > 0 && gs.frameCount % 5 == 0) {
-			gs.mineralLocking();
-		}
-		gs.printer();
-		long frameEnd = System.currentTimeMillis();
-		long frameTotal = frameEnd - frameStart;
-		gs.totalTime += frameTotal;
-		game.drawTextScreen(10, 65, Utils.formatText("frameTime(ms): ",Utils.White) + Utils.formatText(String.valueOf(frameTotal), Utils.White));
+
 	}
 
 	public void onEnd(boolean arg0) {
@@ -656,7 +663,8 @@ public class Ecgberht extends DefaultBWListener {
 				}
 			}
 			if(!type.isNeutral()  && (!type.isSpecialBuilding() || type.isRefinery())) {
-				if(arg0.getPlayer().getID() == game.enemy().getID()) {
+				if(arg0.getPlayer().isEnemy(self)) {
+					IntelligenceAgency.onDestroy(arg0, type);
 					if(arg0.equals(gs.chosenUnitToHarass)) {
 						gs.chosenUnitToHarass = null;
 					}
@@ -880,7 +888,7 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onUnitMorph(Unit arg0) {
-		if(arg0.getPlayer().getID() == game.enemy().getID()) {
+		if(arg0.getPlayer().isEnemy(self)) {
 			if(arg0.getType().isBuilding() && !arg0.getType().isRefinery()) {
 				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
 					gs.inMap.updateMap(arg0,false);
@@ -927,14 +935,16 @@ public class Ecgberht extends DefaultBWListener {
 	}
 
 	public void onUnitShow(Unit arg0) {
-		if(game.enemy().getID() == arg0.getPlayer().getID()) {
-			if(gs.enemyRace == Race.Unknown) {
-				gs.enemyRace = arg0.getType().getRace();
+		UnitType type = arg0.getType();
+		if(arg0.getPlayer().isEnemy(self)) {
+			IntelligenceAgency.onShow(arg0, type);
+			if(gs.enemyRace == Race.Unknown && game.enemies().size() == 1) {
+				gs.enemyRace = type.getRace();
 			}
-			if(!arg0.getType().isBuilding() || arg0.getType().canAttack()) {
+			if(!type.isBuilding() || type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0) {
 				gs.enemyCombatUnitMemory.add(arg0);
 			}
-			if(arg0.getType().isBuilding()) {
+			if(type.isBuilding()) {
 				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
 					gs.enemyBuildingMemory.put(arg0,new EnemyBuilding(arg0));
 					gs.inMap.updateMap(arg0,false);
