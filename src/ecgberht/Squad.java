@@ -9,11 +9,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import bwapi.Order;
-import bwapi.Position;
-import bwapi.TechType;
-import bwapi.Unit;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Unit;
 
 public class Squad {
 
@@ -52,7 +52,7 @@ public class Squad {
 				u.useTech(TechType.Stim_Packs);
 				if(getGs().getGame().elapsedTime() > getGs().lastFrameStim + 65) {
 					getGs().playSound("stim.mp3");
-					getGs().lastFrameStim = getGs().getGame().elapsedTime();
+					getGs().lastFrameStim = getGs().getIH().getFrameCount();
 				}
 
 			}
@@ -66,7 +66,7 @@ public class Squad {
 			}
 			Set<Unit> enemy = getGs().enemyCombatUnitMemory;
 			int frameCount = getGs().frameCount;
-			Position start = getGame().self().getStartLocation().toPosition();
+			Position start = getGs().ih.self().getStartLocation().toPosition();
 			Set<Unit> marinesToHeal = new HashSet<>();
 			Position sCenter = getGs().getSquadCenter(this);
 			for(Unit u : members) {
@@ -104,7 +104,7 @@ public class Squad {
 				}
 
 				// Experimental
-				if(status == Status.ATTACK && getGs().getGame().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
+				if(status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
 					if(members.size() == 1) {
 						continue;
 					}
@@ -119,7 +119,7 @@ public class Squad {
 						for(Unit m : different) {
 							if(m.equals(u)) {
 								if(u.getOrderTargetPosition() != null) {
-									if(!u.getOrderTargetPosition().equals(sCenter) && getGame().isWalkable(sCenter.toWalkPosition())) {
+									if(!u.getOrderTargetPosition().equals(sCenter) && getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) {
 										u.attack(sCenter);
 										gaveOrder = true;
 										break;

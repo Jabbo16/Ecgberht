@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import bwapi.Unit;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Unit;
 
 public class IntelligenceAgency {
 	private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();

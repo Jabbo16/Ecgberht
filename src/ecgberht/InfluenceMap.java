@@ -5,12 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import bwapi.Game;
-import bwapi.Pair;
-import bwapi.Player;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.Player;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.util.Pair;
 
 public class InfluenceMap {
 
@@ -23,13 +23,13 @@ public class InfluenceMap {
 	public final int ofensive = 4;
 	public final int propagation = 2;
 	public final int umbral = 3;
-	public Game game;
+	public BW bw;
 	public int height;
 	public int width;
 	public Player self;
 
-	public InfluenceMap(Game game, Player self, int alto, int ancho) {
-		this.game = game;
+	public InfluenceMap(BW bw, Player self, int alto, int ancho) {
+		this.bw = bw;
 		this.self = self;
 		this.height = alto;
 		this.width = ancho;
@@ -39,7 +39,7 @@ public class InfluenceMap {
 	public void updateMap(Unit arg0,boolean Destroyed) {
 		int influence = 0;
 		UnitType type = arg0.getType();
-		TilePosition tile = arg0.getTilePosition().makeValid();
+		TilePosition tile = arg0.getTilePosition();
 		if(type.isBuilding()) {
 			if(type.canAttack() || type.equals(UnitType.Terran_Bunker)) {
 				influence = defensive;
@@ -158,7 +158,7 @@ public class InfluenceMap {
 		double count = 0;
 		int sX = start.getX();
 		int sY = start.getY();
-		Pair<Integer,Integer> p = new Pair<Integer,Integer>();
+		Pair<Integer,Integer> p = new Pair<>(0, 0);
 		for(int x = 0; x < height; x++) {
 			for(int y = 0; y < width; y++) {
 				if(map[x][y] < count) {
@@ -178,10 +178,12 @@ public class InfluenceMap {
 
 	public boolean fixMapa(int x, int y) {
 		TilePosition pos = new TilePosition(y, x);
-		if(game.isVisible(pos)) {
-			for(Unit u:game.getUnitsOnTile(pos)) {
-				if(u.getType().isBuilding()) {
-					return false;
+		if(bw.getBWMap().isVisible(pos)) {
+			for(Unit u : bw.getAllUnits()) {
+				if(u.getTilePosition().equals(pos)) {
+					if(u.getType().isBuilding()) {
+						return false;
+					}
 				}
 			}
 			updateCellInfluence(new Pair<Point,Integer>(new Point(x,y),(int) map[x][y] * (-1)),true);

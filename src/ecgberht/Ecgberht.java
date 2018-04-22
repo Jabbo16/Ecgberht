@@ -14,7 +14,11 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.*;
+import org.openbw.bwapi4j.*;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Unit;
+
+import bwem.BWEM;
 import bwta.BWTA;
 import cameraModule.CameraModule;
 import ecgberht.AddonBuild.*;
@@ -35,7 +39,7 @@ import ecgberht.Scouting.*;
 import ecgberht.Training.*;
 import ecgberht.Upgrade.*;
 
-public class Ecgberht extends DefaultBWListener {
+public class Ecgberht implements BWEventListener {
 
 	private BehavioralTree addonBuildTree;
 	private BehavioralTree attackTree;
@@ -54,29 +58,35 @@ public class Ecgberht extends DefaultBWListener {
 	private BehavioralTree trainTree;
 	private BehavioralTree upgradeTree;
 	private boolean first = false;
-	private CameraModule observer;
-	private Mirror mirror = new Mirror();
 	private Player self;
-	private static Game game;
+	private static BW bw;
+	private static InteractionHandler ih;
 	private static GameState gs;
+	private BWTA bwta;
+	private BWEM bwem;
 
-	public void run() {
-		mirror.getModule().setEventListener(this);
-		mirror.startGame(false);
+	private void run() {
+		this.bw = new BW(this);
+        this.bw.startGame();
 	}
 
 	public static void main(String[] args) {
 		new Ecgberht().run();
 	}
 
-	public static Game getGame() {
-		return game;
+	public static BW getGame() {
+		return bw;
+	}
+
+	public static InteractionHandler getIH() {
+		return ih;
 	}
 
 	public static GameState getGs() {
 		return gs;
 	}
 
+	@Override
 	public void onStart() {
 		// Disables System.err and System.Out
 		OutputStream output = null;
@@ -89,17 +99,18 @@ public class Ecgberht extends DefaultBWListener {
 		System.setErr(nullOut);
 		System.setOut(nullOut);
 
-		game = mirror.getGame();
-		self = game.self();
+		self = bw.getInteractionHandler().self();
 		// game.enableFlag(1);
 		// game.setLocalSpeed(0);
-		System.out.println("Analyzing map...");
-		BWTA.analyze();
+		System.out.println("Analyzing map...");;
+		bwta = new BWTA();
+		bwta.analyze();
 		System.out.println("Map data ready");
-		observer = new CameraModule(self.getStartLocation().toPosition(), game);
-		// observer.toggle();
+		//observer.toggle();
+		bwem = new BWEM(bw);
+		bwem.initialize();
 
-		gs = new GameState(mirror);
+		gs = new GameState(bw, bwta,bwem);
 		gs.initEnemyRace();
 		gs.readOpponentInfo();
 		if(gs.enemyRace == Race.Zerg) {
@@ -375,14 +386,15 @@ public class Ecgberht extends DefaultBWListener {
 		collectTree.addChild(collect);
 	}
 
+	@Override
 	public void onFrame() {
 		try {
 			long frameStart = System.currentTimeMillis();
-			gs.frameCount = game.getFrameCount();
+			gs.frameCount = bw.getFrameCount();
 			if(gs.frameCount == 1000) gs.sendCustomMessage();
 			gs.print(gs.naturalRegion.getCenter().toTilePosition(), Color.Red);
 			observer.onFrame();
-			gs.inMapUnits = new InfluenceMap(game,self,game.mapHeight(), game.mapWidth());
+			gs.inMapUnits = new InfluenceMap(bw,self,bw.mapHeight(), bw.mapWidth());
 			gs.updateEnemyBuildingsMemory();
 			gs.runAgents();
 			//gs.checkEnemyAttackingWT();
@@ -410,9 +422,9 @@ public class Ecgberht extends DefaultBWListener {
 			gs.checkMainEnemyBase();
 			gs.fix();
 			gs.mergeSquads();
-			if(game.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
+			if(bw.elapsedTime() < 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
 				boolean found_pool = false;
-				int drones = game.enemy().allUnitCount(UnitType.Zerg_Drone);
+				int drones = bw.enemy().allUnitCount(UnitType.Zerg_Drone);
 				for(EnemyBuilding u  : gs.enemyBuildingMemory.values()) {
 					if(u.type == UnitType.Zerg_Spawning_Pool) {
 						found_pool = true;
@@ -421,7 +433,7 @@ public class Ecgberht extends DefaultBWListener {
 				}
 				if(found_pool && drones <= 5) {
 					gs.EI.naughty = true;
-					game.sendText("Bad zerg!, bad!");
+					bw.sendText("Bad zerg!, bad!");
 					gs.playSound("rushed.mp3");
 				}
 			}
@@ -432,7 +444,7 @@ public class Ecgberht extends DefaultBWListener {
 			long frameEnd = System.currentTimeMillis();
 			long frameTotal = frameEnd - frameStart;
 			gs.totalTime += frameTotal;
-			game.drawTextScreen(10, 65, Utils.formatText("frameTime(ms): ",Utils.White) + Utils.formatText(String.valueOf(frameTotal), Utils.White));
+			bw.drawTextScreen(10, 65, Utils.formatText("frameTime(ms): ",Utils.White) + Utils.formatText(String.valueOf(frameTotal), Utils.White));
 		} catch(Exception e) {
 			System.err.println(e);
 			System.err.println("onFrame Exception");
@@ -440,44 +452,52 @@ public class Ecgberht extends DefaultBWListener {
 
 	}
 
+	@Override
 	public void onEnd(boolean arg0) {
 		System.out.println("Avg. frameTime(ms): " + gs.totalTime/gs.frameCount);
-		String name = game.enemy().getName();
+		String name = bw.enemy().getName();
 		gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
 		if(arg0) {
 			gs.EI.wins++;
-			game.sendText("gg wp "+ name);
+			bw.sendText("gg wp "+ name);
 		} else {
 			gs.EI.losses++;
-			game.sendText("gg wp! "+ name + ", next game I will win!");
+			bw.sendText("gg wp! "+ name + ", next game I will win!");
 		}
 		gs.writeOpponentInfo(name);
 	}
 
+	@Override
 	public void onNukeDetect(Position arg0) {
 
 	}
 
+	@Override
 	public void onPlayerDropped(Player arg0) {
 
 	}
 
+	@Override
 	public void onPlayerLeft(Player arg0) {
 
 	}
 
+	@Override
 	public void onReceiveText(Player arg0, String arg1) {
 
 	}
 
+	@Override
 	public void onSaveGame(String arg0) {
 
 	}
 
+	@Override
 	public void onSendText(String arg0) {
 
 	}
 
+	@Override
 	public void onUnitCreate(Unit arg0) {
 		if(!arg0.getType().isNeutral() && !arg0.getType().isSpecialBuilding()) {
 			if(arg0.getType().isBuilding()) {
@@ -504,6 +524,7 @@ public class Ecgberht extends DefaultBWListener {
 		}
 	}
 
+	@Override
 	public void onUnitComplete(Unit arg0) {
 		try {
 			observer.moveCameraUnitCreated(arg0);
@@ -619,8 +640,8 @@ public class Ecgberht extends DefaultBWListener {
 								}
 							}
 							else {
-								if(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).getDistance(gs.enemyBase.getTilePosition()) < arg0.getTilePosition().getDistance(gs.enemyBase.getTilePosition())) {
-									arg0.attack(new TilePosition(game.mapWidth()/2, game.mapHeight()/2).toPosition());
+								if(new TilePosition(bw.mapWidth()/2, bw.mapHeight()/2).getDistance(gs.enemyBase.getTilePosition()) < arg0.getTilePosition().getDistance(gs.enemyBase.getTilePosition())) {
+									arg0.attack(new TilePosition(bw.mapWidth()/2, bw.mapHeight()/2).toPosition());
 								}
 							}
 						}
@@ -635,6 +656,7 @@ public class Ecgberht extends DefaultBWListener {
 
 	}
 
+	@Override
 	public void onUnitDestroy(Unit arg0) {
 		try {
 			UnitType type = arg0.getType();
@@ -887,6 +909,7 @@ public class Ecgberht extends DefaultBWListener {
 
 	}
 
+	@Override
 	public void onUnitMorph(Unit arg0) {
 		if(arg0.getPlayer().isEnemy(self)) {
 			if(arg0.getType().isBuilding() && !arg0.getType().isRefinery()) {
@@ -916,29 +939,34 @@ public class Ecgberht extends DefaultBWListener {
 		}
 	}
 
+	@Override
 	public void onUnitDiscover(Unit arg0) {
 
 	}
 
+	@Override
 	public void onUnitEvade(Unit arg0) {
 
 	}
 
+	@Override
 	public void onUnitHide(Unit arg0) {
 		if(gs.enemyCombatUnitMemory.contains(arg0)) {
 			gs.enemyCombatUnitMemory.remove(arg0);
 		}
 	}
 
+	@Override
 	public void onUnitRenegade(Unit arg0) {
 
 	}
 
+	@Override
 	public void onUnitShow(Unit arg0) {
 		UnitType type = arg0.getType();
 		if(arg0.getPlayer().isEnemy(self)) {
 			IntelligenceAgency.onShow(arg0, type);
-			if(gs.enemyRace == Race.Unknown && game.enemies().size() == 1) {
+			if(gs.enemyRace == Race.Unknown && bw.enemies().size() == 1) {
 				gs.enemyRace = type.getRace();
 			}
 			if(!type.isBuilding() || type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0) {
