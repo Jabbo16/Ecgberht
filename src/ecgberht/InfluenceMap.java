@@ -9,6 +9,8 @@ import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -38,7 +40,7 @@ public class InfluenceMap {
 
 	public void updateMap(Unit arg0,boolean Destroyed) {
 		int influence = 0;
-		UnitType type = arg0.getType();
+		UnitType type = Util.getType((PlayerUnit)arg0);
 		TilePosition tile = arg0.getTilePosition();
 		if(type.isBuilding()) {
 			if(type.canAttack() || type.equals(UnitType.Terran_Bunker)) {
@@ -62,7 +64,7 @@ public class InfluenceMap {
 		if(Destroyed) {
 			influence *= -1;
 		}
-		if(arg0.getPlayer().isEnemy(self)) {
+		if(((PlayerUnit)arg0).getPlayer().isEnemy(self)) {
 			influence *= -1;
 		}
 		updateCellInfluence(new Pair<Point,Integer>(new Point(tile.getY(),tile.getX()),influence),type.isBuilding());
@@ -181,7 +183,7 @@ public class InfluenceMap {
 		if(bw.getBWMap().isVisible(pos)) {
 			for(Unit u : bw.getAllUnits()) {
 				if(u.getTilePosition().equals(pos)) {
-					if(u.getType().isBuilding()) {
+					if(u instanceof Building) {
 						return false;
 					}
 				}

@@ -3,9 +3,9 @@ package ecgberht;
 import java.util.HashSet;
 import java.util.Set;
 
-import bwapi.TechType;
-import bwapi.UnitType;
-import bwapi.UpgradeType;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 
 public abstract class AStrategy {
 	public boolean bunker = false;

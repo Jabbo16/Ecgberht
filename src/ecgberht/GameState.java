@@ -30,6 +30,7 @@ import org.openbw.bwapi4j.util.Pair;
 
 import com.google.gson.Gson;
 
+import bwem.BWEM;
 import bwta.*;
 import bwta.Region;
 import ecgberht.Strategies.*;
@@ -141,7 +142,7 @@ public class GameState extends GameHandler {
 
 	public GameState(BW bw, BWTA bwta, BWEM bwem) {
 		super(bw, bwta, bwem);
-		map = new BuildingMap(bw,ih.self(), bwem);
+		map = new BuildingMap(bw,ih.self(), bwem); // Check old source for bwta->bwem
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(bw,ih.self(),bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());

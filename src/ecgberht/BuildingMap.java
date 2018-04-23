@@ -6,40 +6,51 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.Player;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.MineralPatch;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.VespeneGeyser;
+import org.openbw.bwapi4j.unit.Worker;
+import org.openbw.bwapi4j.util.Pair;
+
+import bwem.unit.Neutral;
+import bwem.unit.NeutralData;
+
 import static ecgberht.Ecgberht.getGs;
-import bwapi.Game;
-import bwapi.Pair;
-import bwapi.Player;
-import bwapi.Position;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
 import bwta.BWTA;
 import bwta.BaseLocation;
 import bwta.Chokepoint;
 
 public class BuildingMap {
 
-	private Game game;
+	private BW game;
 	private int height;
 	private int width;
 	private Player self;
 	private String map[][];
+	private BWTA bwta;
 
 	private enum Side{
 		TOP, LEFT, RIGHT, BOTTOM
 	}
-	public BuildingMap(Game game, Player self) {
+	public BuildingMap(BW game, Player self, BWTA bwta) {
 		this.game = game;
 		this.self = self;
-		this.height = game.mapHeight();
-		this.width = game.mapWidth();
+		this.bwta = bwta;
+		this.height = game.getBWMap().mapHeight();
+		this.width = game.getBWMap().mapWidth();
 		this.map = new String[this.height][this.width];
 	}
 
-	public BuildingMap(Game game, Player self, int height, int width, String[][] map) {
+	public BuildingMap(BW game, Player self,  BWTA bwta, int height, int width, String[][] map) {
 		this.game = game;
 		this.self = self;
+		this.bwta = bwta;
 		this.height = height;
 		this.width = width;
 		this.map = map.clone();
@@ -51,7 +62,7 @@ public class BuildingMap {
 
 	@Override
 	public BuildingMap clone() {
-		BuildingMap map2 = new BuildingMap(game,self,height,width,map);
+		BuildingMap map2 = new BuildingMap(game, self, bwta, height, width, map);
 		return map2;
 	}
 
@@ -61,53 +72,90 @@ public class BuildingMap {
 		for(int jj=0; jj<height; jj++) {
 			for(int ii=0; ii<width; ii++) {
 				TilePosition x = new TilePosition(ii, jj);
-				if(game.isBuildable(x)) {
+				if(game.getBWMap().isBuildable(x, false)) {
 					map[jj][ii] = "6";
 				} else {
 					map[jj][ii] = "0";
 				}
 			}
 		}
-		//Finds minerals and geysers
-		for(Unit resource : game.getStaticNeutralUnits()) {
-			TilePosition resourceTile = resource.getTilePosition();
-			if(resource.getType().isBuilding()) {
-				if(resource.getType().isMineralField()) {
-					TilePosition resourceSize = resource.getType().tileSize();
-					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
-						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
-							if(i < 0 || i >= height || j < 0 || j >= width) {
-								continue;
-							}
-							if(map[i][j] != "V") {
-								map[i][j] = "M";
-							}
-						}
+
+		for(MineralPatch m : game.getMineralPatches()) { // TODO testing
+			TilePosition resourceTile = m .getTilePosition();
+			for(int i = m.getY(); i < resourceTile.getY() + m.height(); i++) {
+				for(int j = m.getX(); j < resourceTile.getX() + m.width(); j++) {
+					if(i < 0 || i >= height || j < 0 || j >= width) {
+						continue;
 					}
-				} else if(resource.getType() == UnitType.Resource_Vespene_Geyser) {
-					TilePosition resourceSize = resource.getType().tileSize();
-					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
-						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
-							if(i < 0 || i >= height || j < 0 || j >= width) {
-								continue;
-							}
-							map[i][j] = "V";
-						}
-					}
-				} else {
-					TilePosition resourceSize = resource.getType().tileSize();
-					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
-						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
-							if(i < 0 || i >= height || j < 0 || j >= width) {
-								continue;
-							}
-							map[i][j] = "E";
-						}
+					if(map[i][j] != "V") {
+						map[i][j] = "M";
 					}
 				}
 			}
 		}
-		for(BaseLocation b : BWTA.getBaseLocations()) {
+		for(VespeneGeyser v : game.getVespeneGeysers()) { // TODO testing
+			TilePosition resourceTile = v .getTilePosition();
+			for(int i = resourceTile.getY(); i < resourceTile.getY() + v.height(); i++) {
+				for(int j = resourceTile.getX(); j < resourceTile.getX() + v.width(); j++) {
+					if(i < 0 || i >= height || j < 0 || j >= width) {
+						continue;
+					}
+					map[i][j] = "V";
+				}
+			}
+		}
+		for(Unit v : game.getAllUnits()) { // TODO Neutral buildings
+			TilePosition resourceTile = v.getTilePosition();
+			for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+				for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+					if(i < 0 || i >= height || j < 0 || j >= width) {
+						continue;
+					}
+					map[i][j] = "E";
+				}
+			}
+		}
+
+//		//Finds minerals and geysers
+//		for(Unit resource : game.getStaticNeutralUnits()) {
+//
+//			if(resource.getType().isBuilding()) {
+//				if(resource.getType().isMineralField()) {
+//					TilePosition resourceSize = resource.getType().tileSize();
+//					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+//						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+//							if(i < 0 || i >= height || j < 0 || j >= width) {
+//								continue;
+//							}
+//							if(map[i][j] != "V") {
+//								map[i][j] = "M";
+//							}
+//						}
+//					}
+//				} else if(resource.getType() == UnitType.Resource_Vespene_Geyser) {
+//					TilePosition resourceSize = resource.getType().tileSize();
+//					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+//						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+//							if(i < 0 || i >= height || j < 0 || j >= width) {
+//								continue;
+//							}
+//							map[i][j] = "V";
+//						}
+//					}
+//				} else {
+//					TilePosition resourceSize = resource.getType().tileSize();
+//					for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+//						for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+//							if(i < 0 || i >= height || j < 0 || j >= width) {
+//								continue;
+//							}
+//							map[i][j] = "E";
+//						}
+//					}
+//				}
+//			}
+//		}
+		for(BaseLocation b : bwta.getBaseLocations()) {
 			TilePosition starting = b.getTilePosition();
 			for(int i = starting.getY(); i < starting.getY() + UnitType.Terran_Command_Center.tileHeight(); i++) {
 				for(int j = starting.getX(); j < starting.getX() + UnitType.Terran_Command_Center.tileWidth(); j++) {
@@ -379,7 +427,7 @@ public class BuildingMap {
 		try {
 			Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
 			Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
-			List<Unit> blockers = game.getUnitsInRectangle(topLeft, bottomRight);
+			List<Unit> blockers = game.getUnitsInRectangle(topLeft, bottomRight); // Do similar method
 
 			if(blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) {
 				return true;
@@ -393,7 +441,7 @@ public class BuildingMap {
 			}
 			else {
 				Unit blocker = blockers.get(0);
-				if(blocker.getPlayer().getID() == self.getID() && blocker.getType().isWorker() && blocker.getBuildType() == type) {
+				if(((PlayerUnit)blocker).getPlayer().getId() == self.getId() && blocker instanceof Worker && ((Worker)blocker).getBuildType() == type) {
 					return false;
 				}
 			}
@@ -426,7 +474,7 @@ public class BuildingMap {
 					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
 						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
 							if(buildingType == UnitType.Terran_Bunker) {
-								if(!BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(BWTA.getRegion(self.getStartLocation()).getCenter())) {
+								if(!bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(bwta.getRegion(self.getStartLocation()).getCenter())) {
 									continue;
 								}
 							}
@@ -470,7 +518,7 @@ public class BuildingMap {
 			for(int jj = (y - j); jj <= (y + j); jj++) {
 				if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
 					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
-						if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
+						if(bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
 							continue;
 						}
 						if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
@@ -489,7 +537,7 @@ public class BuildingMap {
 	}
 
 	public TilePosition findBunkerPositionAntiPool(){ // TODO Finish it
-		TilePosition bunkerPlace = TilePosition.None;
+		TilePosition bunkerPlace = null;
 		Chokepoint choke = getGs().closestChoke;
 		Position chokePos = choke.getCenter();
 		Set<Position> posToDefend = new HashSet<>();
@@ -518,10 +566,10 @@ public class BuildingMap {
 			}
 
 		}
-		System.out.println(top.toTilePosition());
-		System.out.println(bottom.toTilePosition());
+//		System.out.println(top.toTilePosition());
+//		System.out.println(bottom.toTilePosition());
 		// Old method just in case something goes wrong
-		if(bunkerPlace == TilePosition.None) {
+		if(bunkerPlace == null) {
 			TilePosition starting = getGs().MBs.iterator().next().getTilePosition();
 			TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
 			int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
@@ -536,13 +584,13 @@ public class BuildingMap {
 				for(int jj = (y - j); jj <= (y + j + 3); jj++) {
 					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
 						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
-							if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
+							if(bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
 								continue;
 							}
 							if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
 								TilePosition newPosition = new TilePosition(jj, ii);
 								double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter());
-								if(bunkerPlace == TilePosition.None || newDist < dist) {
+								if(bunkerPlace == null || newDist < dist) {
 									bunkerPlace = newPosition;
 									dist = newDist;
 								}

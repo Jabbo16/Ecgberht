@@ -2,13 +2,13 @@ package ecgberht;
 
 import java.util.Objects;
 
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Building;
 
 public class EnemyBuilding {
 	public TilePosition pos = null;
-	public Unit unit = null;
+	public Building unit = null;
 	public UnitType type = null;
 
 	public EnemyBuilding(Unit unit) {

@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 
 public class IntelligenceAgency {
@@ -41,7 +42,7 @@ public class IntelligenceAgency {
 	}
 
 	public static void onShow(Unit unit, UnitType type) {
-		String player = unit.getPlayer().getName();
+		String player = ((PlayerUnit)unit).getPlayer().getName();
 
 		// If base and player known skip
 		if(enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;

@@ -8,10 +8,26 @@ import java.util.Set;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.DamageType;
+import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitSizeType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.unit.Archon;
+import org.openbw.bwapi4j.unit.Burrowable;
+import org.openbw.bwapi4j.unit.Defiler;
+import org.openbw.bwapi4j.unit.Guardian;
+import org.openbw.bwapi4j.unit.Hydralisk;
+import org.openbw.bwapi4j.unit.Lurker;
+import org.openbw.bwapi4j.unit.MobileUnit;
+import org.openbw.bwapi4j.unit.Mutalisk;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Queen;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.unit.SiegeTank;
+import org.openbw.bwapi4j.unit.Ultralisk;
 import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Zergling;
 import org.openbw.bwapi4j.util.Pair;
 
 public class Util {
@@ -41,10 +57,76 @@ public class Util {
 		return sum;
 	}
 
+	public static UnitType getZergType(PlayerUnit unit) {
+		if(unit instanceof Zergling) {
+			return UnitType.Zerg_Zergling;
+		}
+		if(unit instanceof Hydralisk) {
+			return UnitType.Zerg_Hydralisk;
+		}
+		if(unit instanceof Mutalisk) {
+			return UnitType.Zerg_Mutalisk;
+		}
+		if(unit instanceof Lurker) {
+			return UnitType.Zerg_Lurker;
+		}
+		if(unit instanceof Queen) {
+			return UnitType.Zerg_Queen;
+		}
+		if(unit instanceof Ultralisk) {
+			return UnitType.Zerg_Ultralisk;
+		}
+		if(unit instanceof Guardian) {
+			return UnitType.Zerg_Guardian;
+		}
+		if(unit instanceof Defiler) {
+			return UnitType.Zerg_Defiler;
+		}
+		return unit.getInitialType();
+	}
+
+	public static UnitType getTerranType(PlayerUnit unit) {
+		if(unit instanceof SiegeTank) {
+			SiegeTank t = (SiegeTank)unit;
+			return t.isSieged() ? UnitType.Terran_Siege_Tank_Siege_Mode : UnitType.Terran_Siege_Tank_Tank_Mode;
+		}
+		return unit.getInitialType();
+	}
+
+	public static UnitType getProtossType(PlayerUnit unit) {
+		if(unit instanceof Archon) {
+			return UnitType.Protoss_Archon;
+		}
+		return unit.getInitialType();
+	}
+
+	public static UnitType getType(PlayerUnit unit) { // TODO TEST
+		Race race = unit.getPlayer().getRace();
+		UnitType type = UnitType.Unknown;
+		if(race == Race.Terran) {
+			type = getTerranType(unit);
+		}
+		if(type != UnitType.Unknown) return type;
+
+		if(race == Race.Zerg) {
+			type = getZergType(unit);
+		}
+
+		if(type != UnitType.Unknown) return type;
+
+		if(race == Race.Protoss) {
+			type = getProtossType(unit);
+			if(type.getRace() != race) {
+				return type.getRace() == Race.Zerg ? getZergType(unit) : getTerranType(unit);
+			}
+		}
+		return unit.getInitialType();
+	}
+
 	static WeaponType GetWeapon(Unit attacker, Unit target)
 	{
-		UnitType attackerType = attacker.getType();
-		UnitType targetType = target.getType();
+		UnitType attackerType = getType((PlayerUnit)attacker);
+		UnitType targetType = getType(((PlayerUnit)target));
 		if (attackerType == UnitType.Terran_Bunker)
 		{
 			return GetWeapon(UnitType.Terran_Marine, targetType);
@@ -85,7 +167,7 @@ public class Util {
 
 		// for each target possiblity
 		for (Unit targetUnit : targets) {
-			double priority = getScore(rangedUnit, targetUnit);
+			double priority = getScore((PlayerUnit)rangedUnit, (PlayerUnit)targetUnit);
 
 			// if it's a higher priority, set it
 			if (bestTarget == null || priority > highestPriority) {
@@ -97,7 +179,7 @@ public class Util {
 		return bestTarget;
 	}
 
-	static int getScore(final Unit attacker, final Unit target) {
+	static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
 		int priority = getAttackPriority(attacker, target);     // 0..12
 		int range    = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
 		// Let's say that 1 priority step is worth 160 pixels (5 tiles).
@@ -105,44 +187,48 @@ public class Util {
 		int score = 5 * 32 * priority - range;
 
 		WeaponType targetWeapon = Util.GetWeapon(attacker,target);
+		UnitType targetType = getType(target);
 		// Adjust for special features.
 		// This could adjust for relative speed and direction, so that we don't chase what we can't catch.
 		if (range <= targetWeapon.maxRange())
 		{
 			score += 5 * 32;
 		}
-		else if (!target.isMoving()) {
-			if (target.isSieged() || target.getOrder() == Order.Sieging || target.getOrder() == Order.Unsieging) {
-				score += 48;
+		else if (!((MobileUnit)target).isMoving()) {
+			if(target instanceof SiegeTank) {
+				if (((SiegeTank)target).isSieged() || target.getOrder() == Order.Sieging || target.getOrder() == Order.Unsieging) {
+					score += 48;
+				}
+				else {
+					score += 24;
+				}
 			}
-			else {
-				score += 24;
-			}
+
 		}
-		else if (target.isBraking()) {
+		else if (((MobileUnit)target).isBraking()) {
 			score += 16;
 		}
-		else if (target.getType().topSpeed() >= attacker.getType().topSpeed()) {
+		else if (targetType.topSpeed() >= getType(attacker).topSpeed()) {
 			score -= 5 * 32;
 		}
 
 		// Prefer targets that are already hurt.
-		if (target.getType().getRace() == Race.Protoss && target.getShields() <= 5) {
+		if (targetType.getRace() == Race.Protoss && target.getShields() <= 5) {
 			score += 32;
 		}
-		if (target.getHitPoints() < target.getType().maxHitPoints()) {
+		if (target.getHitPoints() < targetType.maxHitPoints()) {
 			score += 24;
 		}
 
 		DamageType damage = targetWeapon.damageType();
 		if (damage == DamageType.Explosive) {
-			if (target.getType().size() == UnitSizeType.Large) {
+			if (targetType.size() == UnitSizeType.Large) {
 				score += 32;
 			}
 		}
 		else if (damage == DamageType.Concussive)
 		{
-			if (target.getType().size() == UnitSizeType.Small) {
+			if (targetType.size() == UnitSizeType.Small) {
 				score += 32;
 			}
 		}
@@ -150,12 +236,15 @@ public class Util {
 	}
 
 	//get the attack priority of a target unit
-	static int getAttackPriority(Unit rangedUnit, Unit target) {
-		final UnitType targetType = target.getType();
+	static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
+		final UnitType targetType = getType(target);
 		// Exceptions if we're a ground unit.
-		if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !target.isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
-			return 12;
+		if(target instanceof Burrowable) {
+			if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !((Burrowable)target).isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
+				return 12;
+			}
 		}
+
 		if(targetType == UnitType.Zerg_Lurker) {
 			return 12;
 		}
@@ -178,18 +267,19 @@ public class Util {
 		}
 		// Next are workers.
 		if (targetType.isWorker())  {
-			if (rangedUnit.getType() == UnitType.Terran_Vulture) {
+			if (getType(rangedUnit) == UnitType.Terran_Vulture) {
 				return 11;
 			}
-			// Repairing or blocking a choke makes you critical.
-			if (target.isRepairing()) {
-				return 11;
+			if(target instanceof SCV) {
+				// Repairing or blocking a choke makes you critical.
+				if (((SCV)target).isRepairing()) {
+					return 11;
+				}
+				// SCVs constructing are also important.
+				if (((SCV)target).isConstructing()) {
+					return 10;
+				}
 			}
-			// SCVs constructing are also important.
-			if (target.isConstructing()) {
-				return 10;
-			}
-
 			return 9;
 		}
 		// Important combat units that we may not have targeted above (esp. if we're a flyer).

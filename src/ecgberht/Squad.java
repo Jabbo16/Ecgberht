@@ -13,6 +13,11 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Firebat;
+import org.openbw.bwapi4j.unit.Marine;
+import org.openbw.bwapi4j.unit.Medic;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.SiegeTank;
 import org.openbw.bwapi4j.unit.Unit;
 
 public class Squad {
@@ -48,9 +53,9 @@ public class Squad {
 
 	public void giveStimOrder() {
 		for(Unit u : members) {
-			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
+			if((u instanceof Marine || u instanceof Firebat) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
 				u.useTech(TechType.Stim_Packs);
-				if(getGs().getGame().elapsedTime() > getGs().lastFrameStim + 65) {
+				if(getGs().getIH().getFrameCount() > getGs().lastFrameStim + 24*10) {
 					getGs().playSound("stim.mp3");
 					getGs().lastFrameStim = getGs().getIH().getFrameCount();
 				}
@@ -70,10 +75,10 @@ public class Squad {
 			Set<Unit> marinesToHeal = new HashSet<>();
 			Position sCenter = getGs().getSquadCenter(this);
 			for(Unit u : members) {
-				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+				if(u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 					continue;
 				}
-				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+				if(u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
 				if(status == Status.IDLE) {
@@ -96,7 +101,7 @@ public class Squad {
 					}
 
 					if(getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
-						if(getGame().isWalkable(sCenter.toWalkPosition())) {
+						if(getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) {
 							u.move(sCenter);
 							continue;
 						}
@@ -109,7 +114,7 @@ public class Squad {
 						continue;
 					}
 					boolean gaveOrder = false;
-					List<Unit> circle = getGs().getGame().getUnitsInRadius(sCenter, 280);
+					List<Unit> circle = getGs().getGame().getUnitsInRadius(sCenter, 280); // TODO implement
 					Set<Unit> different = new HashSet<>();
 					different.addAll(circle);
 					different.addAll(members);
@@ -131,7 +136,7 @@ public class Squad {
 					if(gaveOrder) continue;
 				}
 
-				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
+				if(u.getInitialType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
 					Unit chosen = getHealTarget(u, marinesToHeal);
 					if(chosen != null) {
 						u.useTech(TechType.Healing, chosen);
@@ -155,7 +160,7 @@ public class Squad {
 					}
 				}
 				int framesToOrder = 18;
-				if(u.getType() == UnitType.Terran_Vulture) {
+				if(u.getInitialType() == UnitType.Terran_Vulture) {
 					framesToOrder = 12;
 				}
 				if(frameCount - u.getLastCommandFrame() >= framesToOrder) {
@@ -169,21 +174,21 @@ public class Squad {
 						}
 					}
 					//Experimental storm dodging?
-					if(u.isUnderStorm()) {
+					if(u.isUnderStorm()) { // Implement or check if there is something similar
 						u.move(start);
 						continue;
 					}
 					Set<Unit> enemyToKite = new HashSet<>();
 					Set<Unit> enemyToAttack = new HashSet<>();
 					for(Unit e : enemy) {
-						UnitType eType = e.getType();
+						UnitType eType = e.getInitialType();
 						if(eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
 						enemyToAttack.add(e);
-						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
+						if(!e.getInitialType().isFlyer() && e.getInitialType().groundWeapon().maxRange() <= 32  && e.getInitialType() != UnitType.Terran_Medic) {
 //							if (e.isAttacking()) {
 //								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
 									//u.move(start);
-									if(getGs().broodWarDistance(u.getPosition(), e.getPosition()) <= u.getType().groundWeapon().maxRange()) {
+									if(getGs().broodWarDistance(u.getPosition(), e.getPosition()) <= u.getInitialType().groundWeapon().maxRange()) {
 										enemyToKite.add(e);
 									}
 //								}
@@ -241,7 +246,7 @@ public class Squad {
 		Unit chosen = null;
 		double dist = Double.MAX_VALUE;
 		for(Unit m : marines) {
-			if(m.getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) {
+			if(((PlayerUnit)m).getHitPoints() == m.getInitialType().maxHitPoints() || marinesToHeal.contains(m)) {
 				continue;
 			}
 			double distA = getGs().broodWarDistance(m.getPosition(), u.getPosition());
@@ -256,7 +261,7 @@ public class Squad {
 	public Set<Unit> getTanks() {
 		Set<Unit> aux = new HashSet<Unit>();
 		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+			if(u instanceof SiegeTank) {
 				aux.add(u);
 			}
 		}
@@ -264,9 +269,9 @@ public class Squad {
 	}
 
 	public Set<Unit> getMarines() {
-		Set<Unit> aux = new HashSet<Unit>();
+		Set<Unit> aux = new TreeSet<>(new UnitComparator());
 		for(Unit u : this.members) {
-			if(u.getType() == UnitType.Terran_Marine) {
+			if(u instanceof Marine) {
 				aux.add(u);
 			}
 		}
@@ -274,9 +279,9 @@ public class Squad {
 	}
 
 	public Set<Unit> getMedics() {
-		Set<Unit> aux = new HashSet<Unit>();
+		Set<Unit> aux = new TreeSet<>(new UnitComparator());
 		for(Unit u : this.members) {
-			if(u.getType() == UnitType.Terran_Medic) {
+			if(u instanceof Medic) {
 				aux.add(u);
 			}
 		}
@@ -286,10 +291,10 @@ public class Squad {
 	public void giveMoveOrder(Position retreat) {
 		int frameCount = getGs().frameCount;
 		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
+			if(u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
 				continue;
 			}
-			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+			if(u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 				continue;
 			}
 			Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());

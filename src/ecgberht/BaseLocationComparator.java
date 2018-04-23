@@ -2,14 +2,15 @@ package ecgberht;
 
 import java.util.Comparator;
 
-import bwapi.TilePosition;
+import org.openbw.bwapi4j.TilePosition;
+
 import bwta.BWTA;
 import bwta.BaseLocation;
 import static ecgberht.Ecgberht.getGs;
 
 public class BaseLocationComparator implements Comparator<BaseLocation>{
 	private boolean enemy = false;
-	
+
 	public BaseLocationComparator(boolean enemy) {
 		this.enemy = enemy;
 	}
@@ -25,16 +26,16 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				if(start == null) {
 					start = getGs().getPlayer().getStartLocation();
 				}
-				BaseLocation closestBase = BWTA.getNearestBaseLocation(start);
+				BaseLocation closestBase = bwta.getNearestBaseLocation(start); // TODO similar method
 				if(closestBase != null) {
-					if(BWTA.getNearestBaseLocation(start).getTilePosition().equals(a.getTilePosition())) {
+					if(bwta.getNearestBaseLocation(start).getTilePosition().equals(a.getTilePosition())) {
 						return -1;
 					}
-					if(BWTA.getNearestBaseLocation(start).getTilePosition().equals(b.getTilePosition())) {
+					if(bwta.getNearestBaseLocation(start).getTilePosition().equals(b.getTilePosition())) {
 						return 1;
 					}
 				}
-				
+
 				if(a.isIsland()) {
 					return 1;
 				}
@@ -72,14 +73,14 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 					}
 				}
 				return 1;
-			
+
 			} else {
 				if(getGs().enemyBase != null) {
 					start = getGs().enemyBase.getTilePosition();
 				}else {
 					return -1;
 				}
-				
+
 				if(a.isIsland()) {
 					return 1;
 				}
@@ -88,7 +89,7 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				}
 				double distA = getGs().getGroundDistance(a.getTilePosition(), start);
 				double distB = getGs().getGroundDistance(b.getTilePosition(), start);
-				
+
 				if(distA == 0.0 && distB > 0.0) {
 					return 1;
 				}
