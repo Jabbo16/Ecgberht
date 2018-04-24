@@ -3,21 +3,21 @@ package jfap;
 import java.util.Set;
 import java.util.TreeSet;
 
-import bwapi.DamageType;
-import bwapi.Game;
-import bwapi.Pair;
-import bwapi.Race;
-import bwapi.UnitSizeType;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.type.DamageType;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.UnitSizeType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.util.Pair;
 
 public class JFAP extends AJFAP{
-	public static Game game;
+	public static BW game;
 	private Set<JFAPUnit> player1 = new TreeSet<>();
 	private Set<JFAPUnit> player2 = new TreeSet<>();
 	private boolean didSomething = false;
 	private int nFrames = 96;
 
-	public JFAP(Game game) {
+	public JFAP(BW game) {
 		JFAP.game = game;
 	}
 

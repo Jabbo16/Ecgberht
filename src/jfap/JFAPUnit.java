@@ -2,15 +2,19 @@ package jfap;
 
 import java.util.Objects;
 
-import bwapi.DamageType;
-import bwapi.Game;
-import bwapi.Player;
-import bwapi.Race;
-import bwapi.Unit;
-import bwapi.UnitSizeType;
-import bwapi.UnitType;
-import bwapi.UpgradeType;
-import bwapi.WeaponType;
+import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.Player;
+import org.openbw.bwapi4j.type.DamageType;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.UnitSizeType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.unit.Carrier;
+import org.openbw.bwapi4j.unit.Firebat;
+import org.openbw.bwapi4j.unit.Marine;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Unit;
 
 public class JFAPUnit implements Comparable<JFAPUnit>{
 	int id = 0;
@@ -45,31 +49,32 @@ public class JFAPUnit implements Comparable<JFAPUnit>{
 	Race race = Race.Unknown;
 
 	public JFAPUnit(Unit u) {
+		PlayerUnit pU = (PlayerUnit)u;
 		unit = u;
 		x = u.getX();
 		y = u.getY();
-		id = u.getID();
-		UnitType auxType = u.getType();
-		Player auxPlayer = u.getPlayer();
-		health = u.getHitPoints();
+		id = u.getId();
+		UnitType auxType = Util.getType(pU);
+		Player auxPlayer = pU.getPlayer();
+		health = pU.getHitPoints();
 		unitSize = auxType.size();
 		maxHealth = auxType.maxHitPoints();
-		armor = auxPlayer.armor(auxType);
-		shields = u.getShields();
+		armor = pU.getArmor();
+		shields = pU.getShields();
 		shieldArmor = auxPlayer.getUpgradeLevel(UpgradeType.Protoss_Plasma_Shields);
 		maxShields = auxType.maxShields();
-		speed = auxPlayer.topSpeed(auxType);
+		speed = auxType.topSpeed();
 		flying = auxType.isFlyer();
-		groundDamage = auxPlayer.damage(auxType.groundWeapon());
-		groundCooldown = auxType.groundWeapon().damageFactor() > 0 && auxType.maxGroundHits() > 0 ? auxPlayer.weaponDamageCooldown(auxType) /
+		groundDamage = auxType.groundWeapon().damageAmount();
+		groundCooldown = auxType.groundWeapon().damageFactor() > 0 && auxType.maxGroundHits() > 0 ? auxType.groundWeapon().damageCooldown() /
 						(auxType.groundWeapon().damageFactor() * auxType.maxGroundHits()) : 0;
-		groundMaxRange = auxPlayer.weaponMaxRange(auxType.groundWeapon());
+		groundMaxRange = auxType.groundWeapon().maxRange();
 		groundMinRange = auxType.groundWeapon().minRange();
 		groundDamageType = auxType.groundWeapon().damageType();
-		airDamage = auxPlayer.damage(auxType.airWeapon());
+		airDamage = auxType.airWeapon().damageAmount();
 		airCooldown = auxType.airWeapon().damageFactor() > 0 && auxType.maxAirHits() > 0 ? auxType.airWeapon().damageCooldown() /
 				auxType.airWeapon().damageFactor() * auxType.maxAirHits() : 0;
-		airMaxRange = auxPlayer.weaponMaxRange(auxType.airWeapon());
+		airMaxRange = auxType.airWeapon().maxRange();
 		airMinRange = auxType.airWeapon().minRange();
 		airDamageType = auxType.airWeapon().damageType();
 		unitType = auxType;
@@ -83,11 +88,12 @@ public class JFAPUnit implements Comparable<JFAPUnit>{
 	public JFAPUnit() {
 	}
 
-	private void doThings(Unit u, Game game) {
+	private void doThings(Unit u, BW game) {
 		if(unitType == UnitType.Protoss_Carrier) {
-			groundDamage = player.damage(UnitType.Protoss_Interceptor.groundWeapon());
+			Carrier carrier = (Carrier) u;
+			groundDamage = UnitType.Protoss_Interceptor.groundWeapon().damageAmount();
 			if (u != null && u.isVisible()) {
-				final int interceptorCount = u.getInterceptorCount();
+				final int interceptorCount = carrier.getInterceptorCount();
 				if (interceptorCount > 0) {
 					groundCooldown = (int)(Math.round(37.0f / interceptorCount));
 				} else {
@@ -109,22 +115,31 @@ public class JFAPUnit implements Comparable<JFAPUnit>{
 			airMaxRange = groundMaxRange;
 		}
 		else if(unitType == UnitType.Terran_Bunker) {
-			groundDamage = player.damage(WeaponType.Gauss_Rifle);
+			groundDamage = WeaponType.Gauss_Rifle.damageAmount();
 			groundCooldown = UnitType.Terran_Marine.groundWeapon().damageCooldown() / 4;
-			groundMaxRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon()) + 32;
+			groundMaxRange = UnitType.Terran_Marine.groundWeapon().maxRange() + 32;
 			airDamage = groundDamage;
 			airCooldown = groundCooldown;
 			airMaxRange = groundMaxRange;
 		}
 		else if(unitType == UnitType.Protoss_Reaver) {
-			groundDamage = player.damage(WeaponType.Scarab);
+			groundDamage = WeaponType.Scarab.damageAmount();
 		}
-		if (u != null && u.isStimmed()) {
-			groundCooldown /= 2;
-			airCooldown /= 2;
+		if (u != null) {
+			if(unitType == UnitType.Terran_Marine) {
+				if(((Marine)u).isStimmed()) {
+					groundCooldown /= 2;
+					airCooldown /= 2;
+				}
+			} else if(unitType == UnitType.Terran_Firebat) {
+				if(((Firebat)u).isStimmed()) {
+					groundCooldown /= 2;
+					airCooldown /= 2;
+				}
+			}
 		}
 		if (u != null && u.isVisible() && !u.isFlying()) {
-			elevation = game.getGroundHeight(u.getTilePosition());
+			elevation = game.getBWMap().getGroundHeight(u.getTilePosition());
 		}
 		groundMaxRange *= groundMaxRange;
 		groundMinRange *= groundMinRange;

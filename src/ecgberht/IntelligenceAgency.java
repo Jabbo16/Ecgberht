@@ -185,7 +185,7 @@ public class IntelligenceAgency {
 	}
 
 	public static void onDestroy(Unit unit, UnitType type) {
-		String player = unit.getPlayer().getName();
+		String player = ((PlayerUnit)unit).getPlayer().getName();
 		if(type.isResourceDepot() && enemyBases.containsKey(player)) {
 			if(enemyBases.get(player).contains(unit)) enemyBases.get(player).remove(unit);
 		}

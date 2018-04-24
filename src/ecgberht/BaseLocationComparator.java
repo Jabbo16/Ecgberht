@@ -26,7 +26,7 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				if(start == null) {
 					start = getGs().getPlayer().getStartLocation();
 				}
-				BaseLocation closestBase = bwta.getNearestBaseLocation(start); // TODO similar method
+				BaseLocation closestBase = bwta.getNearestBaseLocation(start); // TODO similar method / change to BWEM
 				if(closestBase != null) {
 					if(bwta.getNearestBaseLocation(start).getTilePosition().equals(a.getTilePosition())) {
 						return -1;

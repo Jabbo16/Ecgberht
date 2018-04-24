@@ -41,6 +41,7 @@ import jfap.JFAPUnit;
 import ecgberht.BaseLocationComparator;
 import ecgberht.Squad.Status;
 import ecgberht.Agents.Vulture;
+import ecgberht.Agents.VultureAgent;
 
 public class GameState extends GameHandler {
 
@@ -76,23 +77,23 @@ public class GameState extends GameHandler {
 	public int vulturesTrained = 0;
 	public int workerCountToSustain = 0;
 	public JFAP simulator;
-	public List<BaseLocation> blockedBLs = new ArrayList<>();
-	public List<BaseLocation> BLs = new ArrayList<BaseLocation>();
-	public List<BaseLocation> EnemyBLs = new ArrayList<BaseLocation>();
-	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
-	public List<Pair<Unit,Pair<UnitType,TilePosition>>> workerBuild = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>();
-	public List<Pair<Unit,Position> > workerDefenders = new ArrayList<Pair<Unit,Position> >();
-	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >();
-	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit>>();
+	public List<BaseLocation> blockedBLs = new ArrayList<>(); // TODO Change to BWEM
+	public List<BaseLocation> BLs = new ArrayList<BaseLocation>(); // TODO Change to BWEM
+	public List<BaseLocation> EnemyBLs = new ArrayList<BaseLocation>(); // TODO Change to BWEM
+	public List<Pair<Pair<Unit,Integer>,Boolean> > refineriesAssigned = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >(); // TODO Change to Map and Refinery
+	public List<Pair<Unit,Pair<UnitType,TilePosition>>> workerBuild = new ArrayList<Pair<Unit,Pair<UnitType,TilePosition>>>(); // TODO Change to Map and SCV
+	public List<Pair<Unit,Position>> workerDefenders = new ArrayList<Pair<Unit,Position> >(); //TODO Change to Map and to SCV
+	public List<Pair<Unit,Unit> > repairerTask = new ArrayList<Pair<Unit,Unit> >(); // TODO Change to SCV
+	public List<Pair<Unit,Unit> > workerTask = new ArrayList<Pair<Unit,Unit>>(); //TODO Change to SCV and Building
 	public long totalTime = 0;
-	public Map<Position, Unit> blockingMinerals = new HashMap<>();
-	public Map<Position,Unit> CCs = new HashMap<>();
+	public Map<Position, Unit> blockingMinerals = new HashMap<>(); // TODO Change to MineralPatch
+	public Map<Position,Unit> CCs = new HashMap<>(); // TODO Change to CommandCenter
 	public Map<String,Squad> squads = new TreeMap<>();
-	public Map<Unit, Set<Unit>> DBs = new TreeMap<>(new UnitComparator());
+	public Map<Unit, Set<Unit>> DBs = new TreeMap<>(new UnitComparator()); // TODO Change to Building
 	public Map<Unit, String> TTMs = new TreeMap<>(new UnitComparator());
 	public Map<Unit,EnemyBuilding> enemyBuildingMemory = new TreeMap<>(new UnitComparator());
-	public Map<Unit,Integer> mineralsAssigned = new TreeMap<>(new UnitComparator());
-	public Map<Unit,Unit> workerMining = new TreeMap<>(new UnitComparator());
+	public Map<Unit,Integer> mineralsAssigned = new TreeMap<>(new UnitComparator()); // TODO Change to MineralPatch
+	public Map<Unit,Unit> workerMining = new TreeMap<>(new UnitComparator()); // TODO Change to Worker and MineralPatch
 	public Pair<Integer,Integer> deltaCash = new Pair<Integer,Integer>(0,0);
 	public Pair<String, Unit> chosenMarine = null;
 	public Position attackPosition = null;
@@ -102,17 +103,17 @@ public class GameState extends GameHandler {
 	public Set<BaseLocation> SLs = new HashSet<>();
 	public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
 	public Set<Unit> buildingLot = new TreeSet<>(new UnitComparator());
-	public Set<Unit> CSs = new TreeSet<>(new UnitComparator());
+	public Set<Unit> CSs = new TreeSet<>(new UnitComparator()); // TODO Change to Building
 	public Set<Unit> enemyCombatUnitMemory = new TreeSet<>(new UnitComparator());
 	public Set<Unit> enemyInBase = new TreeSet<>(new UnitComparator());
-	public Set<Unit> Fs = new TreeSet<>(new UnitComparator());
-	public Set<Unit> MBs = new TreeSet<>(new UnitComparator());
-	public Set<Unit> Ps = new TreeSet<>(new UnitComparator());
-	public Set<Unit> SBs = new TreeSet<>(new UnitComparator());
-	public Set<Unit> Ts = new TreeSet<>(new UnitComparator());
-	public Set<Unit> UBs = new TreeSet<>(new UnitComparator());
-	public Set<Unit> workerIdle = new TreeSet<>(new UnitComparator());
-	public Set<Vulture> agents = new HashSet<>();
+	public Set<Unit> Fs = new TreeSet<>(new UnitComparator()); // TODO Change to Building
+	public Set<Unit> MBs = new TreeSet<>(new UnitComparator()); // TODO Change to Building
+	public Set<Unit> Ps = new TreeSet<>(new UnitComparator()); // TODO Change to Building
+	public Set<Unit> SBs = new TreeSet<>(new UnitComparator()); // TODO Change to Building
+	public Set<Unit> Ts = new TreeSet<>(new UnitComparator()); // TODO Change to Building
+	public Set<Unit> UBs = new TreeSet<>(new UnitComparator()); // TODO Change to Building
+	public Set<Unit> workerIdle = new TreeSet<>(new UnitComparator());  // TODO Change to Worker
+	public Set<VultureAgent> agents = new TreeSet<>();
 	public Strategy strat = new Strategy();
 	public String chosenSquad = null;
 	public TechType chosenResearch = null;
@@ -553,7 +554,7 @@ public class GameState extends GameHandler {
 		return sh + (h > 0 ? " " : "") + sm + (m > 0 ? " " : "") + ss;
 	}
 
-	public void initStartLocations() {
+	public void initStartLocations() { // TODO change to bwem
 		BaseLocation startBot = bwta.getStartLocation(getPlayer());
 		for (BaseLocation b : bwta.getBaseLocations()) {
 			if (b.isStartLocation() && !b.getTilePosition().equals(startBot.getTilePosition())) {
@@ -563,7 +564,7 @@ public class GameState extends GameHandler {
 		}
 	}
 
-	public void initBaseLocations() {
+	public void initBaseLocations() { // TODO change to bwem
 		BLs.addAll(bwta.getBaseLocations());
 		Collections.sort(BLs, new BaseLocationComparator(false));
 
@@ -716,22 +717,22 @@ public class GameState extends GameHandler {
 		}
 	}
 
-	public void checkEnemyAttackingWT() {
-		if(!workerTask.isEmpty()) {
-			List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-			for(Pair<Unit,Unit> p : workerTask) {
-				if(p.second.getInitialType().isBuilding() && !p.second.getType().isNeutral() && p.second.isBeingConstructed()) {
-					if((p.first.isUnderAttack()) && (p.second.getType() != UnitType.Terran_Bunker && p.second.getType() != UnitType.Terran_Missile_Turret)) {
-						p.first.haltConstruction();
-						workerIdle.add(p.first);
-						buildingLot.add(p.second);
-						aux.add(p);
-					}
-				}
-			}
-			workerTask.removeAll(aux);
-		}
-	}
+//	public void checkEnemyAttackingWT() {
+//		if(!workerTask.isEmpty()) {
+//			List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
+//			for(Pair<Unit,Unit> p : workerTask) {
+//				if(p.second.getInitialType().isBuilding() && !p.second.getType().isNeutral() && p.second.isBeingConstructed()) {
+//					if((p.first.isUnderAttack()) && (p.second.getType() != UnitType.Terran_Bunker && p.second.getType() != UnitType.Terran_Missile_Turret)) {
+//						p.first.haltConstruction();
+//						workerIdle.add(p.first);
+//						buildingLot.add(p.second);
+//						aux.add(p);
+//					}
+//				}
+//			}
+//			workerTask.removeAll(aux);
+//		}
+//	}
 
 	public void initClosestChoke() {
 		List<BaseLocation> aux = BLs;
@@ -761,7 +762,7 @@ public class GameState extends GameHandler {
 		List<Unit> blockers = bw.getUnitsInRectangle(topLeft, bottomRight);
 		if(!blockers.isEmpty()) {
 			for(Unit u : blockers) {
-				if(u.getPlayer().getID() == self.getId() && !u.equals(chosen) && !u.getType().isWorker()) {
+				if(((PlayerUnit)u).getPlayer().getId() == self.getId() && !u.equals(chosen) && !(u instanceof Worker)) {
 					u.move(bwta.getNearestChokepoint(BL).getCenter());
 				}
 			}
@@ -858,12 +859,12 @@ public class GameState extends GameHandler {
 
 	public void siegeTanks() {
 		if(!squads.isEmpty()) {
-			Set<Unit> tanks = new TreeSet<Unit>(new UnitComparator());
+			Set<SiegeTank> tanks = new TreeSet<>(new UnitComparator());
 			for (Entry<String,Squad> s : squads.entrySet()) {
 				tanks.addAll(s.getValue().getTanks());
 			}
 			if(!tanks.isEmpty()) {
-				for(Unit t : tanks) {
+				for(SiegeTank t : tanks) {
 					//List<Unit> unitsInRange = t.getUnitsInRadius(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange());
 					boolean far = false;
 					boolean close = false;
@@ -876,22 +877,23 @@ public class GameState extends GameHandler {
 							close = true;
 							break;
 						}
-						if(e.getPlayer().isEnemy(self) && !e.getType().isWorker() && !e.getType().isFlyer() && (e.getType().canAttack() || e.getType() == UnitType.Terran_Bunker)) {
+						UnitType eType = Util.getType((PlayerUnit)e);
+						if(((PlayerUnit)e).getPlayer().isEnemy(self) && !(e instanceof Worker) && !eType.isFlyer() && (eType.canAttack() || eType == UnitType.Terran_Bunker)) {
 							far = true;
 							break;
 						}
 					}
 					if(close && !far) {
-						if(t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && t.getOrder() != Order.Unsieging) t.unsiege();
+						if(t.isSieged() && t.getOrder() != Order.Unsieging) t.unsiege();
 						continue;
 					}
 					if(far) {
-						if(t.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && t.getOrder() != Order.Sieging) {
+						if(!t.isSieged() && t.getOrder() != Order.Sieging) {
 							t.siege();
 						}
 						continue;
 					}
-					if(t.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && t.getOrder() != Order.Unsieging) t.unsiege();
+					if(t.isSieged() && t.getOrder() != Order.Unsieging) t.unsiege();
 				}
 			}
 		}
@@ -1070,14 +1072,14 @@ public class GameState extends GameHandler {
 	public void updateEnemyBuildingsMemory() {
 		List<Unit> aux = new ArrayList<Unit>();
 		for(EnemyBuilding u : enemyBuildingMemory.values()) {
-			if(bw.isVisible(u.pos)) {
-				if(!bw.getUnitsOnTile(u.pos).contains(u.unit)){
+			if(bw.getBWMap().isVisible(u.pos)) {
+				if(!bw.getUnitsOnTile(u.pos).contains(u.unit)){ // TODO Implement
 					aux.add(u.unit);
 				}
 				else if(u.unit.isVisible()) {
 					u.pos = u.unit.getTilePosition();
 				}
-				u.type = u.unit.getType();
+				u.type = Util.getType(u.unit);
 			}
 
 		}
@@ -1144,7 +1146,7 @@ public class GameState extends GameHandler {
 			}
 		}
 
-		count += self.allUnitCount(type);
+		count += self.allUnitCount(type); // TODO implement
 		return count;
 	}
 
@@ -1335,7 +1337,7 @@ public class GameState extends GameHandler {
 			if(u.getInitialType().isWorker()) {
 				workers.add(u);
 			}
-			if(!u.getType().isWorker() && u.getType().canAttack()) {
+			if(!(u instanceof Worker) && (u instanceof Attacker)) {
 				combatUnits.add(u);
 			}
 		}
@@ -1403,14 +1405,14 @@ public class GameState extends GameHandler {
 		}
 
 		public void runAgents() {
-			List<Vulture> rem = new ArrayList<>();
-			for(Vulture vulture : agents) {
+			List<VultureAgent> rem = new ArrayList<>();
+			for(VultureAgent vulture : agents) {
 				boolean remove = vulture.runAgent();
 				if(remove) {
 					rem.add(vulture);
 				}
 			}
-			for(Vulture vult : rem) {
+			for(VultureAgent vult : rem) {
 				agents.remove(vult);
 			}
 		}

@@ -258,11 +258,11 @@ public class Squad {
 		return chosen;
 	}
 
-	public Set<Unit> getTanks() {
-		Set<Unit> aux = new HashSet<Unit>();
+	public Set<SiegeTank> getTanks() {
+		Set<SiegeTank> aux = new HashSet<>();
 		for(Unit u : members) {
 			if(u instanceof SiegeTank) {
-				aux.add(u);
+				aux.add((SiegeTank)u);
 			}
 		}
 		return aux;

@@ -2,28 +2,34 @@ package ecgberht.Agents;
 
 import static ecgberht.Ecgberht.getGs;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import bwapi.Pair;
-import bwapi.Position;
-import bwapi.TechType;
-import bwapi.Unit;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.GroundAttacker;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Vulture;
+import org.openbw.bwapi4j.unit.Worker;
+
 import ecgberht.EnemyBuilding;
 
-public class Vulture {
-	
-	public Vulture(Unit unit) {
-		this.unit = unit;
+public class VultureAgent implements Comparator<VultureAgent>{
+
+	public VultureAgent(Unit unit) {
+		this.unit = (Vulture)unit;
 	}
-	
+
 	enum Status{
 		ATTACK, KITE, COMBAT, IDLE, RETREAT
 	}
-	
-	public Unit unit = null;
+
+	public Vulture unit = null;
 	UnitType type = UnitType.Terran_Vulture;
 	boolean minesResearched = false;
 	int mines = 3;
@@ -34,11 +40,11 @@ public class Vulture {
 	int actualFrame = 0;
 	Set<Unit> closeEnemies = new HashSet<>();
 	Set<Unit> closeWorkers = new HashSet<>();
-	
+
 	public void placeMine(Position pos) {
-		unit.useTech(TechType.Spider_Mines, pos);
+		unit.spiderMine(pos);
 	}
-	
+
 	public String statusToString() {
 		if(status == Status.ATTACK) {
 			return "Attack";
@@ -57,7 +63,7 @@ public class Vulture {
 		}
 		return "None";
 	}
-	
+
 	public boolean runAgent() {
 		try {
 			boolean remove = false;
@@ -65,20 +71,20 @@ public class Vulture {
 				Position cc = getGs().MainCC.getPosition();
 				if(cc != null) {
 					unit.move(cc);
-					
+
 				} else {
 					unit.move(getGs().getPlayer().getStartLocation().toPosition());
 				}
 				getGs().addToSquad(unit);
 				return true;
 			}
-			actualFrame = getGs().getGame().getFrameCount();
+			actualFrame = getGs().getIH().getFrameCount();
 			closeEnemies.clear();
 			closeWorkers.clear();
 			if(frameLastOrder == actualFrame) {
 				return remove;
 			}
-			if (actualFrame % getGs().getGame().getLatencyFrames() == 0) {
+			if (actualFrame % getGs().getIH().getLatencyFrames() == 0) {
 				return remove;
 			}
 			Status old = status;
@@ -106,18 +112,18 @@ public class Vulture {
 			case COMBAT:
 				combat();
 				break;
-				
+
 			case KITE:
 				kite();
 				break;
-				
+
 			case RETREAT:
 				retreat();
 				break;
-				
+
 			default:
 				break;
-				
+
 			}
 			return remove;
 		} catch(Exception e) {
@@ -158,14 +164,14 @@ public class Vulture {
 	}
 
 	private void getNewStatus() {
-		
+
 		Position myPos = unit.getPosition();
 		if(getGs().enemyCombatUnitMemory.isEmpty()) {
 			status = Status.ATTACK;
 			return;
 		}
 		for(Unit u : getGs().enemyCombatUnitMemory) {
-			if(u.getType().isWorker() && !u.isAttacking()) {
+			if(u instanceof Worker && !u.isAttacking()) {
 				closeWorkers.add(u);
 			}
 			if(getGs().broodWarDistance(u.getPosition(), myPos) < 600) {
@@ -178,7 +184,7 @@ public class Vulture {
 					closeEnemies.add(u.unit);
 				}
 			}
-			
+
 		}
 		if(closeEnemies.isEmpty()) {
 			status = Status.ATTACK;
@@ -197,7 +203,8 @@ public class Vulture {
 			int cd = unit.getGroundWeaponCooldown();
 			if(status == Status.COMBAT || status == Status.ATTACK) {
 				if(attackUnit != null) {
-					if(attackUnit.getType().groundWeapon().maxRange() > type.groundWeapon().maxRange()) {
+					int weaponRange = attackUnit instanceof GroundAttacker ? ((GroundAttacker)attackUnit).getGroundWeaponMaxRange() : 0;
+					if(weaponRange > type.groundWeapon().maxRange()) {
 						return;
 					}
 				}
@@ -220,7 +227,7 @@ public class Vulture {
 							status = Status.COMBAT;
 							return;
 						}
-					}	
+					}
 				}else {
 					double dist = getGs().broodWarDistance(unit.getPosition(), attackUnit.getPosition());
 					double speed = type.topSpeed();
@@ -233,19 +240,20 @@ public class Vulture {
 						return;
 					}
 				}
-				
+
 				if(cd == 0) {
 					status = Status.COMBAT;
 					return;
 				}
 			}
 		}
-		
+
 	}
 
 	private boolean checkOnlyMelees() {
 		for(Unit e : closeEnemies) {
-			if(e.getType().groundWeapon().maxRange() > 32 || e.getType() == UnitType.Terran_Bunker) {
+			int weaponRange = e instanceof GroundAttacker ? ((GroundAttacker)e).getGroundWeaponMaxRange() : 0;
+			if(weaponRange > 32 || e instanceof Bunker) {
 				return false;
 			}
 		}
@@ -286,7 +294,7 @@ public class Vulture {
 		else if(attackPos.equals(newAttackPos)) {
 			return;
 		}
-		
+
 	}
 
 	private Position selectNewAttack() {
@@ -297,7 +305,7 @@ public class Vulture {
 			return getGs().EnemyBLs.get(1).getPosition();
 		}
 	}
-	
+
 	private Unit getUnitToAttack(Unit myUnit, Set<Unit> enemies) {
 		Unit chosen = null;
 		double distB = Double.MAX_VALUE;
@@ -311,14 +319,14 @@ public class Vulture {
 				distB = distA;
 			}
 		}
-		
+
 		if(chosen != null) {
 			return chosen;
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
     public boolean equals(Object o) {
 
@@ -326,7 +334,7 @@ public class Vulture {
         if (!(o instanceof Vulture)) {
             return false;
         }
-        Vulture vulture = (Vulture) o;
+        VultureAgent vulture = (VultureAgent) o;
         return unit.equals(vulture.unit);
     }
 
@@ -334,4 +342,9 @@ public class Vulture {
     public int hashCode() {
         return Objects.hash(unit);
     }
+
+	@Override
+	public int compare(VultureAgent v1, VultureAgent v2) {
+		return v1.unit.getId() - v2.unit.getId();
+	}
 }
