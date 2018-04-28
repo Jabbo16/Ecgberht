@@ -3,10 +3,11 @@ package ecgberht.Expansion;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Position;
-import bwapi.Unit;
+import ecgberht.GameState;
 
 public class ChooseBuilderBL extends Action{
 
@@ -17,7 +18,7 @@ public class ChooseBuilderBL extends Action{
 	@Override
 	public State execute() {
 		try {
-			
+
 			if(((GameState)this.handler).chosenBuilderBL != null) {
 				return State.SUCCESS;
 			}
@@ -28,11 +29,11 @@ public class ChooseBuilderBL extends Action{
 					double unitChosen = ((GameState)this.handler).broodWarDistance(u.getPosition(), chosen);
 					if(closestWorker == null) {
 						closestWorker = u;
-					} 
+					}
 					else{
 						double closestChosen = ((GameState)this.handler).broodWarDistance(closestWorker.getPosition(), chosen);
 						if(unitChosen < closestChosen){
-							closestWorker = u;	
+							closestWorker = u;
 						}
 					}
 				}
@@ -42,13 +43,13 @@ public class ChooseBuilderBL extends Action{
 					double unitChosen = ((GameState)this.handler).broodWarDistance(u.getPosition(), chosen);
 					if(closestWorker == null) {
 						closestWorker = u;
-					} 
+					}
 					else {
 						double closestChosen = ((GameState)this.handler).broodWarDistance(closestWorker.getPosition(), chosen);
 						if(unitChosen < closestChosen){
 							closestWorker = u;
 						}
-					}	
+					}
 				}
 			}
 
@@ -68,7 +69,7 @@ public class ChooseBuilderBL extends Action{
 				if(((GameState)this.handler).chosenWorker != null && ((GameState)this.handler).chosenWorker.equals(closestWorker)){
 					((GameState)this.handler).chosenWorker = null;
 				}
-				((GameState)this.handler).chosenBuilderBL = closestWorker;
+				((GameState)this.handler).chosenBuilderBL = (Worker) closestWorker;
 				return State.SUCCESS;
 			}
 			return State.FAILURE;
@@ -78,5 +79,5 @@ public class ChooseBuilderBL extends Action{
 			return State.ERROR;
 		}
 	}
-	
+
 }

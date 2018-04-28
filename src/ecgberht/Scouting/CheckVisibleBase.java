@@ -22,7 +22,7 @@ public class CheckVisibleBase extends Conditional {
 			}
 			if(!((GameState)this.handler).ScoutSLs.isEmpty()) {
 				for(BaseLocation b : ((GameState)this.handler).ScoutSLs) {
-					if((((GameState)this.handler).getGame().isVisible(b.getTilePosition()))) {
+					if((((GameState)this.handler).getGame().getBWMap().isVisible(b.getTilePosition()))) {
 						((GameState)this.handler).ScoutSLs.remove(b);
 						return State.SUCCESS;
 					}

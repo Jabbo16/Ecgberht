@@ -3,9 +3,9 @@ package ecgberht.AddonBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Factory;
 
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseMachineShop extends Action {
@@ -18,7 +18,7 @@ public class ChooseMachineShop extends Action {
 	public State execute() {
 		try {
 			if(!((GameState)this.handler).Fs.isEmpty()) {
-				for(Unit c : ((GameState)this.handler).Fs) {
+				for(Factory c : ((GameState)this.handler).Fs) {
 					if (!c.isTraining() && c.getAddon() == null) {
 						((GameState)this.handler).chosenBuildingAddon = c;
 						((GameState)this.handler).chosenAddon = UnitType.Terran_Machine_Shop;

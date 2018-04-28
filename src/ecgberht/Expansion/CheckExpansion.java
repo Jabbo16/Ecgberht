@@ -1,14 +1,18 @@
 package ecgberht.Expansion;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.CommandCenter;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
+import ecgberht.GameState;
 
 public class CheckExpansion extends Conditional{
 
@@ -23,7 +27,7 @@ public class CheckExpansion extends Conditional{
 				((GameState)this.handler).chosenBaseLocation = null;
 				((GameState)this.handler).movingToExpand = false;
 				if(((GameState)this.handler).chosenBuilderBL != null) {
-					((GameState)this.handler).chosenBuilderBL.stop();
+					((GameState)this.handler).chosenBuilderBL.stop(false);
 					((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
 					((GameState)this.handler).chosenBuilderBL = null;
 				}
@@ -35,13 +39,13 @@ public class CheckExpansion extends Conditional{
 			if(((GameState)this.handler).expanding){
 				return State.SUCCESS;
 			}
-			for(Pair<Unit,Pair<UnitType,TilePosition>> w : ((GameState)this.handler).workerBuild) {
-				if(w.second.first == UnitType.Terran_Command_Center){
+			for(Entry<SCV, Pair<UnitType, TilePosition>> w : ((GameState)this.handler).workerBuild.entrySet()) {
+				if(w.getValue().first == UnitType.Terran_Command_Center){
 					return State.FAILURE;
 				}
 			}
-			for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
-				if(w.second.getType() == UnitType.Terran_Command_Center){
+			for(Building w : ((GameState)this.handler).workerTask.values()) {
+				if(w instanceof CommandCenter){
 					return State.FAILURE;
 				}
 			}

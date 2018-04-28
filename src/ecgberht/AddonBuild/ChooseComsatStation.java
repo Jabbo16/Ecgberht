@@ -3,9 +3,11 @@ package ecgberht.AddonBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Academy;
+import org.openbw.bwapi4j.unit.CommandCenter;
+import org.openbw.bwapi4j.unit.ResearchingFacility;
 
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseComsatStation extends Action {
@@ -18,10 +20,10 @@ public class ChooseComsatStation extends Action {
 	public State execute() {
 		try {
 			if(!((GameState)this.handler).CCs.isEmpty()) {
-				for(Unit c : ((GameState)this.handler).CCs.values()) {
+				for(CommandCenter c : ((GameState)this.handler).CCs.values()) {
 					if (!c.isTraining() && c.getAddon() == null) {
-						for(Unit u : ((GameState)this.handler).UBs) {
-							if(u.getType() == UnitType.Terran_Academy) {
+						for(ResearchingFacility u : ((GameState)this.handler).UBs) {
+							if(u instanceof Academy) {
 								((GameState)this.handler).chosenBuildingAddon = c;
 								((GameState)this.handler).chosenAddon = UnitType.Terran_Comsat_Station;
 								return State.SUCCESS;

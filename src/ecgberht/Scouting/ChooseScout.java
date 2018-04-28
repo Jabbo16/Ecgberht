@@ -3,8 +3,8 @@ package ecgberht.Scouting;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class ChooseScout extends Action {
@@ -16,13 +16,13 @@ public class ChooseScout extends Action {
 	@Override
 	public State execute() {
 		try {
-			for (Unit u : ((GameState)this.handler).workerIdle) {
+			for (Worker u : ((GameState)this.handler).workerIdle) {
 				((GameState)this.handler).chosenScout = u;
 				((GameState)this.handler).workerIdle.remove(u);
 				break;
 			}
 			if(((GameState)this.handler).chosenScout == null) {
-				for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+				for (Worker u : ((GameState)this.handler).workerMining.keySet()) {
 					if(!u.isCarryingMinerals()) {
 						((GameState)this.handler).chosenScout = u;
 						((GameState)this.handler).workerMining.remove(u);

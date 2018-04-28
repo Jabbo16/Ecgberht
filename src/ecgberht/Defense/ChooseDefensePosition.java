@@ -3,10 +3,10 @@ package ecgberht.Defense;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.TilePosition;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class ChooseDefensePosition extends Conditional {

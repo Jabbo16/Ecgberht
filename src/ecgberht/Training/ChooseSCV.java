@@ -3,9 +3,10 @@ package ecgberht.Training;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Barracks;
+import org.openbw.bwapi4j.unit.CommandCenter;
 
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseSCV extends Action {
@@ -19,7 +20,7 @@ public class ChooseSCV extends Action {
 		try {
 			if(((GameState)this.handler).strat.name == "ProxyBBS") {
 				boolean notTraining = false;
-				for(Unit b:((GameState)this.handler).MBs) {
+				for(Barracks b:((GameState)this.handler).MBs) {
 					if(!b.isTraining()) {
 						notTraining = true;
 						break;
@@ -30,8 +31,8 @@ public class ChooseSCV extends Action {
 				}
 			}
 			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_SCV) < 50 && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_SCV) < ((GameState)this.handler).mineralsAssigned.size() * 2 + 3 && !((GameState)this.handler).CCs.isEmpty()) {
-				for(Unit b:((GameState)this.handler).CCs.values()) {
-					if(!b.isTraining() && !b.isConstructing()) {
+				for(CommandCenter b:((GameState)this.handler).CCs.values()) {
+					if(!b.isTraining() && !b.isBuildingAddon()) {
 						((GameState)this.handler).chosenUnit = UnitType.Terran_SCV;
 						((GameState)this.handler).chosenBuilding = b;
 						return State.SUCCESS;

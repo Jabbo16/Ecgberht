@@ -3,10 +3,13 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Barracks;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.Factory;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseBarracks extends Action {
@@ -34,19 +37,19 @@ public class ChooseBarracks extends Action {
 			if(((GameState)this.handler).strat.buildUnits.contains(UnitType.Terran_Factory)) {
 				int count = 0;
 				boolean found = false;
-				for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Barracks) {
+				for(Pair<UnitType, TilePosition> w : ((GameState)this.handler).workerBuild.values()) {
+					if(w.first == UnitType.Terran_Barracks) {
 						count++;
 					}
-					if(w.second.getType() == UnitType.Terran_Factory) {
+					if(w.first == UnitType.Terran_Factory) {
 						found = true;
 					}
 				}
-				for(Pair<Unit,Unit> w : ((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Barracks) {
+				for(Building w : ((GameState)this.handler).workerTask.values()) {
+					if(w instanceof Barracks) {
 						count++;
 					}
-					if(w.second.getType() == UnitType.Terran_Factory) {
+					if(w instanceof Factory) {
 						found = true;
 					}
 				}

@@ -1,8 +1,9 @@
 package ecgberht.Strategies;
 
-import bwapi.TechType;
-import bwapi.UnitType;
-import bwapi.UpgradeType;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
+
 import ecgberht.AStrategy;
 
 public class BioMechBuildFE extends AStrategy{
@@ -10,7 +11,7 @@ public class BioMechBuildFE extends AStrategy{
 	public BioMechBuildFE() {
 		initStrategy();
 	}
-	
+
 	@Override
 	public void initStrategy() {
 		name = "BioMechFE";

@@ -15,8 +15,8 @@ public class BuildAddon extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).chosenBuildingAddon.canBuildAddon(((GameState)this.handler).chosenAddon)) {
-				if(((GameState)this.handler).chosenBuildingAddon.buildAddon(((GameState)this.handler).chosenAddon)) {
+			if(((GameState)this.handler).chosenBuildingAddon.getAddon() == null) { // TODO Revisar
+				if(((GameState)this.handler).chosenBuildingAddon.build(((GameState)this.handler).chosenAddon)) {
 					((GameState)this.handler).chosenBuildingAddon = null;
 					((GameState)this.handler).chosenAddon = null;
 					return State.SUCCESS;

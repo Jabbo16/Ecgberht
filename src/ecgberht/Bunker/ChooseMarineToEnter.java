@@ -5,10 +5,11 @@ import java.util.Map.Entry;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.Marine;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Squad;
 
@@ -24,12 +25,12 @@ public class ChooseMarineToEnter extends Action {
 			if(((GameState)this.handler).squads.isEmpty()) {
 				return State.FAILURE;
 			}
-			for(Unit b : ((GameState)this.handler).DBs.keySet()) {
+			for(Bunker b : ((GameState)this.handler).DBs.keySet()) {
 				if(b.getTilePosition().equals(((GameState)this.handler).chosenBunker.getTilePosition())) {
 					Pair<String,Unit> closest = null;
 					for(Entry<String, Squad> s : ((GameState)this.handler).squads.entrySet()) {
 						for(Unit u : s.getValue().members) {
-							if(u.getType() == UnitType.Terran_Marine) {
+							if(u instanceof Marine) {
 								if ((closest == null || ((GameState)this.handler).broodWarDistance(b.getPosition(), u.getPosition()) <
 										((GameState)this.handler).broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
 									closest = new Pair<String,Unit>(s.getKey(),u);

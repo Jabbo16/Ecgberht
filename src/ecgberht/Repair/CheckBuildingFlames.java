@@ -4,10 +4,21 @@ package ecgberht.Repair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Barracks;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.CommandCenter;
+import org.openbw.bwapi4j.unit.ComsatStation;
+import org.openbw.bwapi4j.unit.Factory;
+import org.openbw.bwapi4j.unit.MissileTurret;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.ResearchingFacility;
+import org.openbw.bwapi4j.unit.Starport;
+import org.openbw.bwapi4j.unit.SupplyDepot;
 
-import bwapi.Pair;
-import bwapi.Unit;
 import ecgberht.GameState;
+import ecgberht.Util;
 
 public class CheckBuildingFlames extends Action {
 
@@ -19,11 +30,11 @@ public class CheckBuildingFlames extends Action {
 	public State execute() {
 		try {
 			boolean isBeingRepaired = false;
-			for(Unit w : ((GameState)this.handler).DBs.keySet()) {
+			for(Bunker w : ((GameState)this.handler).DBs.keySet()) {
 				int count = 0;
-				if(w.getType().maxHitPoints() != w.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(w.equals(r.second)) {
+				if(UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(w.equals(r)) {
 							count++;
 						}
 					}
@@ -38,10 +49,10 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).Ts) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(MissileTurret b : ((GameState)this.handler).Ts) {
+				if(UnitType.Terran_Missile_Turret.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}
@@ -52,10 +63,10 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).MBs) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(Barracks b : ((GameState)this.handler).MBs) {
+				if(UnitType.Terran_Barracks.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}
@@ -66,10 +77,10 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).Fs) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(Factory b : ((GameState)this.handler).Fs) {
+				if(UnitType.Terran_Factory.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}
@@ -80,10 +91,24 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).UBs) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(ResearchingFacility b : ((GameState)this.handler).UBs) {
+				if(Util.getType((PlayerUnit)b).maxHitPoints() != ((PlayerUnit)b).getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
+							isBeingRepaired = true;
+						}
+					}
+					if(!isBeingRepaired) {
+						((GameState)this.handler).chosenBuildingRepair = (Building) b;
+						return State.SUCCESS;
+					}
+				}
+			}
+			isBeingRepaired = false;
+			for(SupplyDepot b : ((GameState)this.handler).SBs) {
+				if(UnitType.Terran_Supply_Depot.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}
@@ -94,10 +119,10 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).SBs) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(CommandCenter b : ((GameState)this.handler).CCs.values()) {
+				if(UnitType.Terran_Command_Center.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}
@@ -108,10 +133,10 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).CCs.values()) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(ComsatStation b : ((GameState)this.handler).CSs) {
+				if(UnitType.Terran_Comsat_Station.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}
@@ -122,24 +147,10 @@ public class CheckBuildingFlames extends Action {
 				}
 			}
 			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).CSs) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
-							isBeingRepaired = true;
-						}
-					}
-					if(!isBeingRepaired) {
-						((GameState)this.handler).chosenBuildingRepair = b;
-						return State.SUCCESS;
-					}
-				}
-			}
-			isBeingRepaired = false;
-			for(Unit b : ((GameState)this.handler).Ps) {
-				if(b.getType().maxHitPoints() != b.getHitPoints()) {
-					for(Pair<Unit,Unit> r : ((GameState)this.handler).repairerTask) {
-						if(b.equals(r.second)) {
+			for(Starport b : ((GameState)this.handler).Ps) {
+				if(UnitType.Terran_Starport.maxHitPoints() != b.getHitPoints()) {
+					for(Building r : ((GameState)this.handler).repairerTask.values()) {
+						if(b.equals(r)) {
 							isBeingRepaired = true;
 						}
 					}

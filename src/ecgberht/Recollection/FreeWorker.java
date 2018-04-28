@@ -3,8 +3,8 @@ package ecgberht.Recollection;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class FreeWorker extends Action {
@@ -19,7 +19,7 @@ public class FreeWorker extends Action {
 		try {
 			if(!((GameState)this.handler).workerIdle.isEmpty()) {
 				int frame = ((GameState)this.handler).frameCount;
-				for(Unit w:((GameState)this.handler).workerIdle) {
+				for(Worker w:((GameState)this.handler).workerIdle) {
 					if(w.isIdle() && w.getLastCommandFrame() != frame) {
 						((GameState)this.handler).chosenWorker = w;
 						return State.SUCCESS;

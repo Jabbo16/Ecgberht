@@ -1,16 +1,22 @@
 package ecgberht.Defense;
 
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.CommandCenter;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Pair;
-import bwapi.Position;
-import bwapi.Unit;
-import bwapi.UnitType;
 import bwta.BWTA;
 import bwta.Region;
 import ecgberht.EnemyBuilding;
@@ -18,6 +24,7 @@ import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.UnitComparator;
+import ecgberht.Util;
 
 public class CheckPerimeter extends Conditional {
 
@@ -39,7 +46,8 @@ public class CheckPerimeter extends Conditional {
 				}
 			}
 			for(Unit u : enemyInvaders) {
-				if(u.getType().isBuilding() || ((u.getType().canAttack() || u.getType().isSpellcaster()) && u.getType() != UnitType.Zerg_Scourge && u.getType() != UnitType.Protoss_Corsair)) {
+				UnitType uType = Util.getType((PlayerUnit)u);
+				if(u instanceof Building || ((uType.canAttack() || uType.isSpellcaster()) && uType != UnitType.Zerg_Scourge && uType != UnitType.Protoss_Corsair)) {
 					for(Unit c : ((GameState)this.handler).CCs.values()) {
 						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 500) {
 							((GameState)this.handler).enemyInBase.add(u);
@@ -52,9 +60,9 @@ public class CheckPerimeter extends Conditional {
 							continue;
 						}
 					}
-					for(Pair<Unit, Unit> c : ((GameState)this.handler).workerTask) {
-						if(c.second.getType() != UnitType.Terran_Bunker && c.second.getType() != UnitType.Terran_Command_Center) continue;
-						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.second.getPosition()) < 200) {
+					for(Building c : ((GameState)this.handler).workerTask.values()) {
+						if(!(c instanceof Bunker) && !(c instanceof CommandCenter)) continue;
+						if(((GameState)this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
 							((GameState)this.handler).enemyInBase.add(u);
 							continue;
 						}
@@ -82,14 +90,14 @@ public class CheckPerimeter extends Conditional {
 				return State.SUCCESS;
 			}
 			int cFrame = ((GameState)this.handler).frameCount;
-			for(Pair<Unit, Position> u : ((GameState)this.handler).workerDefenders) {
-				if(u.first.getLastCommandFrame() == cFrame) {
+			for(Worker u : ((GameState)this.handler).workerDefenders.keySet()) {
+				if(u.getLastCommandFrame() == cFrame) {
 					continue;
 				}
-				Position closestCC = ((GameState)this.handler).getNearestCC(u.first.getPosition());
+				Position closestCC = ((GameState)this.handler).getNearestCC(u.getPosition());
 				if(closestCC != null) {
-					if(!BWTA.getRegion(u.first.getPosition()).getCenter().equals(BWTA.getRegion(closestCC).getCenter())){
-						u.first.move(closestCC);
+					if(!((GameState)this.handler).bwta.getRegion(u.getPosition()).getCenter().equals(((GameState)this.handler).bwta.getRegion(closestCC).getCenter())){
+						u.move(closestCC);
 					}
 				}
 			}
@@ -97,15 +105,15 @@ public class CheckPerimeter extends Conditional {
 				if(u.status == Status.DEFENSE) {
 					Position closestCC = ((GameState)this.handler).getNearestCC(((GameState)this.handler).getSquadCenter(u));
 					if(closestCC != null) {
-						Region squad = BWTA.getRegion(((GameState)this.handler).getSquadCenter(u));
-						Region regCC = BWTA.getRegion(closestCC);
+						Region squad = ((GameState)this.handler).bwta.getRegion(((GameState)this.handler).getSquadCenter(u));
+						Region regCC =  ((GameState)this.handler).bwta.getRegion(closestCC);
 						if(squad != null && regCC != null) {
 							if(!squad.getCenter().equals(regCC.getCenter())){
 								if(!((GameState)this.handler).DBs.isEmpty() && ((GameState)this.handler).CCs.size() == 1) {
 									u.giveMoveOrder(((GameState)this.handler).DBs.keySet().iterator().next().getPosition());
 								}
 								else {
-									u.giveMoveOrder(BWTA.getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+									u.giveMoveOrder(((GameState)this.handler).getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
 								}
 								u.status = Status.IDLE;
 								u.attack = Position.None;

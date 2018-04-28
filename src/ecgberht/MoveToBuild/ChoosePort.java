@@ -3,8 +3,8 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
 
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChoosePort extends Action {
@@ -16,8 +16,8 @@ public class ChoosePort extends Action {
 	@Override
 	public State execute() {
 		try {
-			
-			if(((GameState)this.handler).MBs.isEmpty() || ((GameState)this.handler).Fs.isEmpty() || ((GameState)this.handler).strat.numCCForPort > ((GameState)this.handler).CCs.size()|| 
+
+			if(((GameState)this.handler).MBs.isEmpty() || ((GameState)this.handler).Fs.isEmpty() || ((GameState)this.handler).strat.numCCForPort > ((GameState)this.handler).CCs.size()||
 					(((GameState)this.handler).countUnit(UnitType.Terran_Starport) > 0 && ((GameState)this.handler).strat.portPerCC == 0)) {
 				return State.FAILURE;
 			}

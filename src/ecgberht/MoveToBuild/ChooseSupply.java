@@ -3,12 +3,15 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Barracks;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.SupplyDepot;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.Race;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseSupply extends Action {
@@ -30,15 +33,16 @@ public class ChooseSupply extends Action {
 			if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).enemyRace == Race.Zerg) {
 				if(!((GameState)this.handler).SBs.isEmpty() && !((GameState)this.handler).DBs.isEmpty()) {
 					boolean found_bunker = false;
-					for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-						if(w.second.first == UnitType.Terran_Bunker) {
+					for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
+						if(w.first == UnitType.Terran_Bunker) {
 							found_bunker = true;
 						}
 					}
 					if(!found_bunker) {
-						for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-							if(w.second.getType() == UnitType.Terran_Bunker) {
+						for(Building w : ((GameState)this.handler).workerTask.values()) {
+							if(w instanceof Bunker) {
 								found_bunker = true;
+								break; // TODO test
 							}
 						}
 					}
@@ -47,31 +51,32 @@ public class ChooseSupply extends Action {
 					}
 				}
 				boolean found_rax = false;
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-					if(w.second.first == UnitType.Terran_Barracks) {
+				for(Pair<UnitType, TilePosition> w : ((GameState)this.handler).workerBuild.values()) {
+					if(w.first == UnitType.Terran_Barracks) {
 						found_rax = true;
 					}
 				}
 				if(!found_rax) {
-					for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-						if(w.second.getType() == UnitType.Terran_Barracks) {
+					for(Building w : ((GameState)this.handler).workerTask.values()) {
+						if(w instanceof Barracks) {
 							found_rax = true;
+							break; // TODO test
 						}
 					}
 				}
 				if(!found_rax) {
 					return State.FAILURE;
 				}
-				
+
 			}
 			if(((GameState)this.handler).getSupply() <= 4 * ((GameState)this.handler).getCombatUnitsBuildings()) {
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-					if(w.second.first == UnitType.Terran_Supply_Depot) {
+				for(Pair<UnitType, TilePosition> w : ((GameState)this.handler).workerBuild.values()) {
+					if(w.first == UnitType.Terran_Supply_Depot) {
 						return State.FAILURE;
 					}
 				}
-				for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Supply_Depot) {
+				for(Building w : ((GameState)this.handler).workerTask.values()) {
+					if(w instanceof SupplyDepot) {
 						return State.FAILURE;
 					}
 				}

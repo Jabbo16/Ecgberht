@@ -1,13 +1,18 @@
 package ecgberht.MoveToBuild;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Barracks;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.GasMiningFacility;
+import org.openbw.bwapi4j.unit.Refinery;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseRefinery extends Action {
@@ -24,14 +29,14 @@ public class ChooseRefinery extends Action {
 			}
 			if(((GameState)this.handler).refineriesAssigned.size() == 1) {
 				boolean found = false;
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-					if(w.second.first == UnitType.Terran_Barracks) {
+				for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
+					if(w.first == UnitType.Terran_Barracks) {
 						found = true;
 						break;
 					}
 				}
-				for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Barracks) {
+				for(Building w:((GameState)this.handler).workerTask.values()) {
+					if(w instanceof Barracks) {
 						found = true;
 						break;
 					}
@@ -41,25 +46,25 @@ public class ChooseRefinery extends Action {
 				}
 			}
 			int count = 0;
-			Unit geyser = null;
-			for(Pair<Pair<Unit,Integer>,Boolean> r: ((GameState)this.handler).refineriesAssigned) {
-				if(r.second) {
+			GasMiningFacility geyser = null;
+			for(Entry<GasMiningFacility, Pair<Integer, Boolean>> r: ((GameState)this.handler).refineriesAssigned.entrySet()) {
+				if(r.getValue().second) {
 					count++;
 				}
 				else{
-					geyser = r.first.first;
+					geyser = r.getKey();
 				}
 			}
 			if(count == ((GameState)this.handler).refineriesAssigned.size()) {
 				return State.FAILURE;
 			}
-			for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-				if(w.second.first == UnitType.Terran_Refinery) {
+			for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
+				if(w.first == UnitType.Terran_Refinery) {
 					return State.FAILURE;
 				}
 			}
-			for(Pair<Unit, Unit> w:((GameState)this.handler).workerTask) {
-				if(w.second.getType() == UnitType.Terran_Refinery && w.second.getPosition().equals(geyser.getPosition())) {
+			for(Building w:((GameState)this.handler).workerTask.values()) {
+				if(w instanceof Refinery && w.getPosition().equals(geyser.getPosition())) {
 					return State.FAILURE;
 				}
 			}

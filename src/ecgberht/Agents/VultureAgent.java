@@ -13,11 +13,13 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.GroundAttacker;
+import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Vulture;
 import org.openbw.bwapi4j.unit.Worker;
 
 import ecgberht.EnemyBuilding;
+import ecgberht.Util;
 
 public class VultureAgent implements Comparator<VultureAgent>{
 
@@ -171,7 +173,7 @@ public class VultureAgent implements Comparator<VultureAgent>{
 			return;
 		}
 		for(Unit u : getGs().enemyCombatUnitMemory) {
-			if(u instanceof Worker && !u.isAttacking()) {
+			if(u instanceof Worker && !((PlayerUnit)u).isAttacking()) {
 				closeWorkers.add(u);
 			}
 			if(getGs().broodWarDistance(u.getPosition(), myPos) < 600) {
@@ -310,7 +312,7 @@ public class VultureAgent implements Comparator<VultureAgent>{
 		Unit chosen = null;
 		double distB = Double.MAX_VALUE;
 		for(Unit u : enemies) {
-			if(u.getType().isFlyer() || u.isCloaked()) {
+			if(Util.getType((PlayerUnit)u).isFlyer() || ((PlayerUnit)u).isCloaked()) {
 				continue;
 			}
 			double distA = getGs().broodWarDistance(myUnit.getPosition(), u.getPosition());

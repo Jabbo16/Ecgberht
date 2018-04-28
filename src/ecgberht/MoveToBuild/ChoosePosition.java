@@ -1,16 +1,20 @@
 package ecgberht.MoveToBuild;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.Player;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.GasMiningFacility;
+import org.openbw.bwapi4j.unit.MissileTurret;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Game;
-import bwapi.Pair;
-import bwapi.Player;
-import bwapi.Race;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
 import bwta.BWTA;
 import ecgberht.GameState;
 
@@ -23,14 +27,14 @@ public class ChoosePosition extends Action {
 	@Override
 	public State execute() {
 		try {
-			Game juego = ((GameState)this.handler).getGame();
+			BW juego = ((GameState)this.handler).getGame();
 			Player jugador = ((GameState)this.handler).getPlayer();
 			TilePosition origin = null;
 			if(((GameState)this.handler).chosenToBuild.isRefinery()) {
 				if(!((GameState)this.handler).refineriesAssigned.isEmpty()) {
-					for (Pair<Pair<Unit,Integer>,Boolean> g : ((GameState)this.handler).refineriesAssigned) {
-						if (!g.second) {
-							((GameState)this.handler).chosenPosition = g.first.first.getTilePosition();
+					for (Entry<GasMiningFacility, Pair<Integer, Boolean>> g : ((GameState)this.handler).refineriesAssigned.entrySet()) {
+						if (!g.getValue().second) {
+							((GameState)this.handler).chosenPosition = g.getKey().getTilePosition();
 							return State.SUCCESS;
 						}
 					}
@@ -38,14 +42,14 @@ public class ChoosePosition extends Action {
 
 			} else {
 				if(!((GameState)this.handler).workerBuild.isEmpty()) {
-					for(Pair<Unit,Pair<UnitType,TilePosition> > w : ((GameState)this.handler).workerBuild) {
-						((GameState)this.handler).testMap.updateMap(w.second.second, w.second.first, false);
+					for(Pair<UnitType, TilePosition> w : ((GameState)this.handler).workerBuild.values()) {
+						((GameState)this.handler).testMap.updateMap(w.second, w.first, false);
 					}
 				}
 
 				if(!((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Bunker) && !((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
 					if(((GameState)this.handler).strat.proxy && ((GameState)this.handler).chosenToBuild == UnitType.Terran_Barracks) {
-						origin = new TilePosition(((GameState)this.handler).getGame().mapWidth()/2, ((GameState)this.handler).getGame().mapHeight()/2);
+						origin = new TilePosition(((GameState)this.handler).getGame().getBWMap().mapWidth()/2, ((GameState)this.handler).getGame().getBWMap().mapHeight()/2);
 					}
 					else {
 						//origin = BWTA.getRegion(jugador.getStartLocation()).getCenter().toTilePosition();
@@ -55,10 +59,10 @@ public class ChoosePosition extends Action {
 				else{
 					if(((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
 						if(((GameState)this.handler).DBs.isEmpty()) {
-							origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
+							origin = ((GameState)this.handler).bwta.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
 						}
 						else {
-							for(Unit b : ((GameState)this.handler).DBs.keySet()) {
+							for(Bunker b : ((GameState)this.handler).DBs.keySet()) {
 								origin = b.getTilePosition();
 								break;
 							}
@@ -104,13 +108,9 @@ public class ChoosePosition extends Action {
 									}
 
 								}
-//								else {
-//									origin = BWTA.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
-//								}
-
 							}
 							else {
-								for(Unit b : ((GameState)this.handler).Ts) {
+								for(MissileTurret b : ((GameState)this.handler).Ts) {
 									origin = b.getTilePosition();
 									break;
 								}
@@ -128,13 +128,6 @@ public class ChoosePosition extends Action {
 				}
 			}
 
-			TilePosition posicion = juego.getBuildLocation(((GameState)this.handler).chosenToBuild, BWTA.getRegion(jugador.getStartLocation()).getCenter().toTilePosition(), 500);
-			if(posicion != null) {
-				if(juego.canBuildHere(posicion, ((GameState)this.handler).chosenToBuild)) {
-					((GameState)this.handler).chosenPosition = posicion;
-					return State.SUCCESS;
-				}
-			}
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());

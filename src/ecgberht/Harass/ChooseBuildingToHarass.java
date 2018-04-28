@@ -4,7 +4,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwta.BWTA;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 
@@ -23,7 +22,7 @@ public class ChooseBuildingToHarass extends Action {
 			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
 				if(((GameState)this.handler).enemyBase != null) {
 					if(u.type.isBuilding()) {
-						if(BWTA.getRegion(u.pos).getCenter().equals(BWTA.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
+						if(((GameState)this.handler).bwta.getRegion(u.pos).getCenter().equals(((GameState)this.handler).bwta.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
 							((GameState)this.handler).chosenUnitToHarass = u.unit;
 							return State.SUCCESS;
 						}
@@ -32,7 +31,7 @@ public class ChooseBuildingToHarass extends Action {
 			}
 			if(((GameState)this.handler).chosenHarasser.isIdle()) {
 				((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenHarasser);
-				((GameState)this.handler).chosenHarasser.stop();
+				((GameState)this.handler).chosenHarasser.stop(false);
 				((GameState)this.handler).chosenHarasser = null;
 				((GameState)this.handler).chosenUnitToHarass = null;
 			}

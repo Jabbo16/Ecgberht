@@ -3,8 +3,8 @@ package ecgberht.CombatStim;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.TechType;
 
-import bwapi.TechType;
 import ecgberht.GameState;
 
 public class CheckStimResearched extends Conditional{

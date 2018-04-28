@@ -3,11 +3,12 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Academy;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseAcademy extends Action {
@@ -23,13 +24,13 @@ public class ChooseAcademy extends Action {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) >= ((GameState)this.handler).strat.numRaxForAca && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Academy) == 0) {
-				for(Pair<Unit,Pair<UnitType,TilePosition> > w:((GameState)this.handler).workerBuild) {
-					if(w.second.first == UnitType.Terran_Academy) {
+				for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
+					if(w.first == UnitType.Terran_Academy) {
 						return State.FAILURE;
 					}
 				}
-				for(Pair<Unit,Unit> w:((GameState)this.handler).workerTask) {
-					if(w.second.getType() == UnitType.Terran_Academy) {
+				for(Building w : ((GameState)this.handler).workerTask.values()) {
+					if(w instanceof Academy) {
 						return State.FAILURE;
 					}
 				}

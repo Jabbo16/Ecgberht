@@ -4,9 +4,9 @@ import java.util.Comparator;
 
 import org.openbw.bwapi4j.unit.Unit;
 
-public class UnitComparator implements Comparator<Unit>{
+public class UnitComparator implements Comparator<Object>{
 
-	public int compare(Unit e1, Unit e2) {
-		return e1.getId() - e2.getId();
+	public int compare(Object e1, Object e2) {
+		return ((Unit)e1).getId() - ((Unit)e2).getId();
 	}
 }

@@ -1,12 +1,14 @@
 package ecgberht.BuildingLot;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.MineralPatch;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Pair;
-import bwapi.Position;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class ChooseBlotWorker extends Action {
@@ -18,19 +20,19 @@ public class ChooseBlotWorker extends Action {
 	@Override
 	public State execute() {
 		try {
-			Unit closestWorker = null;
+			Worker closestWorker = null;
 			Position chosen = ((GameState)this.handler).chosenBuildingLot.getPosition();
 			if(!((GameState)this.handler).workerIdle.isEmpty()) {
-				for (Unit u : ((GameState)this.handler).workerIdle) {
+				for (Worker u : ((GameState)this.handler).workerIdle) {
 					if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
 						closestWorker = u;
 					}
 				}
 			}
-			if(!((GameState)this.handler).workerTask.isEmpty()) {
-				for (Pair<Unit,Unit> u : ((GameState)this.handler).workerTask) {
-					if ((closestWorker == null || u.first.getDistance(chosen) < closestWorker.getDistance(chosen)) && u.second.getType().isMineralField() && !u.first.isCarryingMinerals()) {
-						closestWorker = u.first;
+			if(!((GameState)this.handler).workerMining.isEmpty()) {
+				for (Entry<Worker, MineralPatch> u : ((GameState)this.handler).workerMining.entrySet()) {
+					if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen))  && !u.getKey().isCarryingMinerals()) {
+						closestWorker = u.getKey();
 					}
 				}
 			}

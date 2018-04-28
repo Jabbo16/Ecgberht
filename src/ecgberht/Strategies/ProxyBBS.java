@@ -1,6 +1,7 @@
 package ecgberht.Strategies;
 
-import bwapi.UnitType;
+import org.openbw.bwapi4j.type.UnitType;
+
 import ecgberht.AStrategy;
 
 public class ProxyBBS extends AStrategy{
@@ -8,7 +9,7 @@ public class ProxyBBS extends AStrategy{
 	public ProxyBBS() {
 		initStrategy();
 	}
-	
+
 	@Override
 	public void initStrategy() {
 		name = "ProxyBBS";
@@ -29,7 +30,7 @@ public class ProxyBBS extends AStrategy{
 		initTechToResearch();
 		initUpgradesToResearch();
 	}
-	
+
 	@Override
 	public void initTrainUnits() {
 		trainUnits.add(UnitType.Terran_Marine);
@@ -49,11 +50,11 @@ public class ProxyBBS extends AStrategy{
 
 	@Override
 	public void initTechToResearch() {
-		
+
 	}
 
 	@Override
 	public void initUpgradesToResearch() {
-		
+
 	}
 }

@@ -3,16 +3,16 @@ package ecgberht.Expansion;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import ecgberht.GameState;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Unit;
 
-import bwapi.Unit;
-import bwapi.UnitType;
+import ecgberht.GameState;
 
 public class CheckVisibleBL extends Action{
 
 	public CheckVisibleBL(String name, GameHandler gh) {
 		super(name, gh);
-		
+
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class CheckVisibleBL extends Action{
 				if(((GameState)this.handler).broodWarDistance(u.getPosition(), ((GameState)this.handler).chosenBaseLocation.toPosition()) < 300){
 					((GameState)this.handler).chosenBaseLocation = null;
 					((GameState)this.handler).movingToExpand = false;
-					((GameState)this.handler).chosenBuilderBL.stop();
+					((GameState)this.handler).chosenBuilderBL.stop(false);
 					((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenBuilderBL);
 					((GameState)this.handler).chosenBuilderBL = null;
 					((GameState)this.handler).expanding = false;
@@ -31,7 +31,7 @@ public class CheckVisibleBL extends Action{
 					return State.FAILURE;
 				}
 			}
-			if(((GameState)this.handler).getGame().isExplored(((GameState)this.handler).chosenBaseLocation)) {
+			if(((GameState)this.handler).getGame().getBWMap().isExplored(((GameState)this.handler).chosenBaseLocation)) {
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

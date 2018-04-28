@@ -3,10 +3,11 @@ package ecgberht.Harass;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Race;
-import bwapi.Unit;
-import bwta.BWTA;
 import ecgberht.GameState;
 
 public class ChooseBuilderToHarass extends Action {
@@ -21,15 +22,15 @@ public class ChooseBuilderToHarass extends Action {
 			if(((GameState)this.handler).enemyRace != Race.Terran) {
 				return State.FAILURE;
 			}
-			if(((GameState)this.handler).chosenUnitToHarass != null && ((GameState)this.handler).chosenUnitToHarass.getType().isWorker() ) {
+			if(((GameState)this.handler).chosenUnitToHarass != null && ((GameState)this.handler).chosenUnitToHarass instanceof Worker ) {
 				return State.FAILURE;
 			}
-			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
+			for(Unit u : ((GameState)this.handler).getGame().getUnits( ((GameState)this.handler).getIH().enemy())) {
 				Unit aux = null;
 				if(((GameState)this.handler).enemyBase != null) {
-					if(u.getType().isWorker() && u.isConstructing()) {
-						if(BWTA.getRegion(u.getPosition()).getCenter().equals(BWTA.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
-							if(u.getBuildType().canProduce()) {
+					if(u instanceof SCV && ((SCV)u).isConstructing()) {
+						if(((GameState)this.handler).bwta.getRegion(u.getPosition()).getCenter().equals(((GameState)this.handler).bwta.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
+							if(((SCV)u).getBuildType().canProduce()) {
 								((GameState)this.handler).chosenUnitToHarass = u;
 								return State.SUCCESS;
 							}

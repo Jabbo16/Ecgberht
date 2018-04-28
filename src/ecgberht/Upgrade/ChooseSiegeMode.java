@@ -3,9 +3,9 @@ package ecgberht.Upgrade;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.unit.ResearchingFacility;
 
-import bwapi.TechType;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class ChooseSiegeMode extends Action {
@@ -20,7 +20,7 @@ public class ChooseSiegeMode extends Action {
 			if(((GameState)this.handler).UBs.isEmpty()) {
 				return State.FAILURE;
 			}
-			for(Unit u : ((GameState)this.handler).UBs) {
+			for(ResearchingFacility u : ((GameState)this.handler).UBs) {
 				if(!((GameState)this.handler).getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
 					((GameState)this.handler).chosenUnitUpgrader = u;
 					((GameState)this.handler).chosenResearch = TechType.Tank_Siege_Mode;

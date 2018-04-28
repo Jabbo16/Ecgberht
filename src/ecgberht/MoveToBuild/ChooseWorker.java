@@ -3,9 +3,9 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Position;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class ChooseWorker extends Action {
@@ -18,11 +18,11 @@ public class ChooseWorker extends Action {
 	@Override
 	public State execute() {
 		try {
-			Unit closestWorker = null;
+			Worker closestWorker = null;
 			int frame = ((GameState)this.handler).frameCount;
 			Position chosen = ((GameState)this.handler).chosenPosition.toPosition();
 			if(!((GameState)this.handler).workerIdle.isEmpty()) {
-				for (Unit u : ((GameState)this.handler).workerIdle) {
+				for (Worker u : ((GameState)this.handler).workerIdle) {
 					if(u.getLastCommandFrame() == frame) {
 						continue;
 					}
@@ -32,7 +32,7 @@ public class ChooseWorker extends Action {
 				}
 			}
 			if(!((GameState)this.handler).workerMining.isEmpty()) {
-				for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+				for (Worker u : ((GameState)this.handler).workerMining.keySet()) {
 					if(u.getLastCommandFrame() == frame) {
 						continue;
 					}

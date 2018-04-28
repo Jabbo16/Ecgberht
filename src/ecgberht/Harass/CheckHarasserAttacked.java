@@ -4,14 +4,20 @@ import static ecgberht.Ecgberht.getGs;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.Attacker;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Position;
-import bwapi.Unit;
 import ecgberht.GameState;
+import ecgberht.UnitComparator;
 
 public class CheckHarasserAttacked extends Conditional {
 	public CheckHarasserAttacked(String name, GameHandler gh) {
@@ -27,13 +33,13 @@ public class CheckHarasserAttacked extends Conditional {
 			}
 			Unit attacker = null;
 			int workers = 0;
-			Set<Unit> attackers = new HashSet<>();
+			Set<Unit> attackers = new TreeSet<>(new UnitComparator());
 			//Thanks to @N00byEdge to the cleaner code
-			for(Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-				if(!u.getType().isBuilding() && u.getType().canAttack() && u.exists()) {
-					Unit target = (u.getTarget() == null ? u.getOrderTarget() : u.getTarget());
+			for(PlayerUnit u : ((GameState)this.handler).getGame().getUnits(((GameState)this.handler).getIH().enemy())) {
+				if(!(u instanceof Building) && u instanceof Attacker && u.exists()) {
+					Unit target = ((Attacker)u).getTargetUnit() == null ? u.getOrderTarget() : ((Attacker)u).getTargetUnit();
 				    if(target != null && target.equals(((GameState)this.handler).chosenHarasser)) {
-				        if(u.getType().isWorker()){
+				        if(u instanceof Worker){
 				        	workers++;
 				        	attacker = u;
 				        }
@@ -46,7 +52,7 @@ public class CheckHarasserAttacked extends Conditional {
 				((GameState)this.handler).EI.defendHarass = true;
 			}
 			if(attackers.isEmpty()) {
-				if(!((GameState)this.handler).getGame().isVisible(((GameState)this.handler).enemyBase.getTilePosition()) && ((GameState)this.handler).chosenUnitToHarass == null){
+				if(!((GameState)this.handler).getGame().getBWMap().isVisible(((GameState)this.handler).enemyBase.getTilePosition()) && ((GameState)this.handler).chosenUnitToHarass == null){
 					((GameState)this.handler).chosenHarasser.move(((GameState)this.handler).enemyBase.getPosition());
 				}
 				return State.SUCCESS;
@@ -61,9 +67,9 @@ public class CheckHarasserAttacked extends Conditional {
 					}
 				} else {
 					if(((GameState)this.handler).chosenHarasser.getHitPoints() <= 15) {
-						((GameState)this.handler).getGame().sendText("Harasser: You will pay for this!, I will be back with friends");
+						((GameState)this.handler).getIH().sendText("Harasser: You will pay for this!, I will be back with friends");
 						((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenHarasser);
-						((GameState)this.handler).chosenHarasser.stop();
+						((GameState)this.handler).chosenHarasser.stop(winHarass);
 						((GameState)this.handler).chosenHarasser = null;
 						((GameState)this.handler).chosenUnitToHarass = null;
 					} else {
@@ -72,13 +78,13 @@ public class CheckHarasserAttacked extends Conditional {
 							((GameState)this.handler).chosenHarasser.move(kite);
 							((GameState)this.handler).chosenUnitToHarass = null;
 						}
-						
+
 					}
-					
+
 					return State.FAILURE;
 				}
 			}
-			
+
 			return State.SUCCESS;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());
@@ -86,5 +92,5 @@ public class CheckHarasserAttacked extends Conditional {
 			return State.ERROR;
 		}
 	}
-	
+
 }

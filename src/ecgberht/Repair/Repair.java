@@ -3,9 +3,9 @@ package ecgberht.Repair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.Mechanical;
+import org.openbw.bwapi4j.unit.MineralPatch;
 
-import bwapi.Pair;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class Repair extends Action {
@@ -17,12 +17,12 @@ public class Repair extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).chosenRepairer.repair(((GameState)this.handler).chosenBuildingRepair)) {
+			if(((GameState)this.handler).chosenRepairer.repair((Mechanical) ((GameState)this.handler).chosenBuildingRepair)) {
 				if(((GameState)this.handler).workerIdle.contains(((GameState)this.handler).chosenRepairer)) {
 					((GameState)this.handler).workerIdle.remove(((GameState)this.handler).chosenRepairer);
 				} else {
 					if(((GameState)this.handler).workerMining.containsKey(((GameState)this.handler).chosenRepairer)) {
-						Unit mineral = ((GameState)this.handler).workerMining.get(((GameState)this.handler).chosenRepairer);
+						MineralPatch mineral = ((GameState)this.handler).workerMining.get(((GameState)this.handler).chosenRepairer);
 						((GameState)this.handler).workerMining.remove(((GameState)this.handler).chosenRepairer);
 						if(((GameState)this.handler).mineralsAssigned.containsKey(mineral)) {
 							((GameState)this.handler).mining--;
@@ -30,7 +30,7 @@ public class Repair extends Action {
 						}
 					}
 				}
-				((GameState)this.handler).repairerTask.add(new Pair<Unit,Unit>(((GameState)this.handler).chosenRepairer,((GameState)this.handler).chosenBuildingRepair));
+				((GameState)this.handler).repairerTask.put(((GameState)this.handler).chosenRepairer,((GameState)this.handler).chosenBuildingRepair);
 				return State.SUCCESS;
 			}
 			return State.FAILURE;

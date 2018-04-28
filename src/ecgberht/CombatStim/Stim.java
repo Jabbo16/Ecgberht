@@ -6,7 +6,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Squad;
 
@@ -19,7 +18,7 @@ public class Stim extends Action {
 	@Override
 	public State execute() {
 		try {
-			if(((GameState)this.handler).squads.isEmpty() || ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) == 0) {
+			if(((GameState)this.handler).squads.isEmpty()) {
 				return State.FAILURE;
 			}
 			for(Entry<String,Squad> s : ((GameState)this.handler).squads.entrySet()) {

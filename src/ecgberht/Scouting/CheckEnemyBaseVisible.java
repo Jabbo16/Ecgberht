@@ -1,13 +1,15 @@
 package ecgberht.Scouting;
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Unit;
 
-import bwapi.Unit;
-import bwapi.Utils;
 import bwta.BWTA;
 import bwta.BaseLocation;
 //import ecgberht.BaseLocationComparator;
@@ -18,21 +20,22 @@ public class CheckEnemyBaseVisible extends Action {
 	public CheckEnemyBaseVisible(String name, GameHandler gh) {
 		super(name, gh);
 	}
-	
+
 	@Override
 	public State execute() {
 		try {
-			if(!((GameState)this.handler).getGame().enemy().getUnits().isEmpty()) {
-				for (Unit u : ((GameState)this.handler).getGame().enemy().getUnits()) {
-					if(u.getType().isBuilding()) {
-						if (((GameState)this.handler).getGame().getUnitsInRadius(((GameState)this.handler).chosenScout.getPosition(), 500).contains(u)) {
-							((GameState)this.handler).enemyBase = BWTA.getNearestBaseLocation(u.getTilePosition());
+			List<PlayerUnit> enemies = ((GameState)this.handler).getGame().getUnits(((GameState)this.handler).getIH().enemy());
+			if(!enemies.isEmpty()) {
+				for (Unit u : enemies) {
+					if(u instanceof Building) {
+						if(((GameState)this.handler).broodWarDistance(((GameState)this.handler).chosenScout.getPosition(), u.getPosition()) <= 500) {
+							((GameState)this.handler).enemyBase = ((GameState)this.handler).bwta.getNearestBaseLocation(u.getTilePosition());
 							((GameState)this.handler).ScoutSLs = new HashSet<BaseLocation>();
 							//((GameState)this.handler).choosenScout.stop();
 							//((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);
 							((GameState)this.handler).chosenHarasser = ((GameState)this.handler).chosenScout;
 							((GameState)this.handler).chosenScout = null;
-							((GameState)this.handler).getGame().sendText(Utils.formatText("!",Utils.Yellow));
+							((GameState)this.handler).getIH().sendText("!");
 							((GameState)this.handler).playSound("gear.mp3");
 							((GameState)this.handler).EnemyBLs.clear();
 							((GameState)this.handler).EnemyBLs.addAll(((GameState)this.handler).BLs);

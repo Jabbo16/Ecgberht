@@ -3,11 +3,11 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.unit.Worker;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.Position;
-import bwapi.TilePosition;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class CheckResourcesBuilding extends Conditional {
@@ -20,7 +20,7 @@ public class CheckResourcesBuilding extends Conditional {
 	public State execute() {
 		try {
 			Pair<Integer,Integer> cash = ((GameState)this.handler).getCash();
-			Unit chosen = ((GameState)this.handler).chosenWorker;
+			Worker chosen = ((GameState)this.handler).chosenWorker;
 			TilePosition start = chosen.getTilePosition();
 			TilePosition end = ((GameState)this.handler).chosenPosition;
 			Position realEnd = ((GameState)this.handler).getCenterFromBuilding(end.toPosition(), ((GameState)this.handler).chosenToBuild);

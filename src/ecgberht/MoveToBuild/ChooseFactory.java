@@ -3,8 +3,8 @@ package ecgberht.MoveToBuild;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
 
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class ChooseFactory extends Action {
@@ -16,8 +16,8 @@ public class ChooseFactory extends Action {
 	@Override
 	public State execute() {
 		try {
-			
-			if(((GameState)this.handler).MBs.isEmpty() || ((GameState)this.handler).strat.numRaxForFac > ((GameState)this.handler).countUnit(UnitType.Terran_Barracks) || 
+
+			if(((GameState)this.handler).MBs.isEmpty() || ((GameState)this.handler).strat.numRaxForFac > ((GameState)this.handler).countUnit(UnitType.Terran_Barracks) ||
 					(((GameState)this.handler).countUnit(UnitType.Terran_Factory) > 0 && ((GameState)this.handler).strat.facPerCC == 0)) {
 				return State.FAILURE;
 			}

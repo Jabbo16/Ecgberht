@@ -5,6 +5,8 @@ import java.util.Objects;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Unit;
 
 public class EnemyBuilding {
 	public TilePosition pos = null;
@@ -12,9 +14,9 @@ public class EnemyBuilding {
 	public UnitType type = null;
 
 	public EnemyBuilding(Unit unit) {
-		this.unit = unit;
+		this.unit = (Building)unit;
 		this.pos = unit.getTilePosition();
-		this.type = unit.getType();
+		this.type = Util.getType((PlayerUnit)unit);
 	}
 
 	@Override

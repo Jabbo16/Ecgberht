@@ -1,14 +1,16 @@
 package ecgberht.Build;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Order;
-import bwapi.Pair;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 public class Build extends Action {
@@ -20,10 +22,10 @@ public class Build extends Action {
 	@Override
 	public State execute() {
 		try {
-			for(Pair<Unit, Pair<UnitType, TilePosition>> u : ((GameState)this.handler).workerBuild) {
-				if(u.first.getOrder() != Order.PlaceBuilding && u.first.canBuild(u.second.first)) {
-					Unit chosen = u.first;
-					if(chosen.build(u.second.first,u.second.second)) {
+			for(Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState)this.handler).workerBuild.entrySet()) {
+				if(u.getKey().getOrder() != Order.PlaceBuilding) {
+					SCV chosen = u.getKey();
+					if(chosen.build(u.getValue().second,u.getValue().first)) {
 						continue;
 					}
 				}

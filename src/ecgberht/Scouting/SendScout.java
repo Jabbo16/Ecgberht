@@ -7,7 +7,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwta.BWTA;
 import bwta.BaseLocation;
 import ecgberht.GameState;
 
@@ -25,8 +24,8 @@ public class SendScout extends Action {
 				if(!((GameState)this.handler).ScoutSLs.isEmpty()) {
 					List<BaseLocation> aux = new ArrayList<BaseLocation>();
 					for(BaseLocation b : ((GameState)this.handler).ScoutSLs) {
-						if(BWTA.isConnected(b.getTilePosition(), ((GameState)this.handler).chosenScout.getTilePosition())) {
-							if(((GameState)this.handler).chosenScout.move(b.getPosition().makeValid())) {
+						if(((GameState)this.handler).bwta.isConnected(b.getTilePosition(), ((GameState)this.handler).chosenScout.getTilePosition())) {
+							if(((GameState)this.handler).chosenScout.move(b.getPosition())) {
 								return State.SUCCESS;
 							}
 						}
@@ -38,7 +37,7 @@ public class SendScout extends Action {
 				}
 			}
 			((GameState)this.handler).workerIdle.add(((GameState)this.handler).chosenScout);
-			((GameState)this.handler).chosenScout.stop();
+			((GameState)this.handler).chosenScout.stop(false);
 			((GameState)this.handler).chosenScout = null;
 			return State.FAILURE;
 		} catch(Exception e) {

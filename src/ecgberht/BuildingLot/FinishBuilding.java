@@ -3,9 +3,9 @@ package ecgberht.BuildingLot;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-
-import bwapi.Pair;
-import bwapi.Unit;
+import org.openbw.bwapi4j.unit.MineralPatch;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.unit.Worker;
 import ecgberht.GameState;
 
 public class FinishBuilding extends Action {
@@ -17,13 +17,13 @@ public class FinishBuilding extends Action {
 	@Override
 	public State execute() {
 		try {
-			Unit chosen = ((GameState)this.handler).chosenWorker;
-			if(chosen.rightClick(((GameState)this.handler).chosenBuildingLot)) {
+			Worker chosen = ((GameState)this.handler).chosenWorker;
+			if(chosen.rightClick(((GameState)this.handler).chosenBuildingLot, false)) {
 				if(((GameState)this.handler).workerIdle.contains(chosen)) {
 					((GameState)this.handler).workerIdle.remove(chosen);
 				} else {
 					if(((GameState)this.handler).workerMining.containsKey(chosen)) {
-						Unit mineral = ((GameState)this.handler).workerMining.get(chosen);
+						MineralPatch mineral = ((GameState)this.handler).workerMining.get(chosen);
 						((GameState)this.handler).workerMining.remove(chosen);
 						if(((GameState)this.handler).mineralsAssigned.containsKey(mineral)) {
 							((GameState)this.handler).mining--;
@@ -31,7 +31,7 @@ public class FinishBuilding extends Action {
 						}
 					}
 				}
-				((GameState)this.handler).workerTask.add(new Pair<Unit,Unit>(chosen,((GameState)this.handler).chosenBuildingLot));
+				((GameState)this.handler).workerTask.put((SCV) chosen,((GameState)this.handler).chosenBuildingLot);
 				((GameState)this.handler).chosenWorker = null;
 				((GameState)this.handler).buildingLot.remove(((GameState)this.handler).chosenBuildingLot);
 				((GameState)this.handler).chosenBuildingLot = null;

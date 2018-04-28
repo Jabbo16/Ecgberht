@@ -1,7 +1,8 @@
 package ecgberht.Strategies;
 
-import bwapi.TechType;
-import bwapi.UnitType;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+
 import ecgberht.AStrategy;
 
 public class FullMech extends AStrategy{
@@ -9,7 +10,7 @@ public class FullMech extends AStrategy{
 	public FullMech() {
 		initStrategy();
 	}
-	
+
 	@Override
 	public void initStrategy() {
 		name = "FullMech";
@@ -33,7 +34,7 @@ public class FullMech extends AStrategy{
 		initTechToResearch();
 		initUpgradesToResearch();
 	}
-	
+
 	@Override
 	public void initTrainUnits() {
 		trainUnits.add(UnitType.Terran_Marine);
@@ -68,6 +69,6 @@ public class FullMech extends AStrategy{
 
 	@Override
 	public void initUpgradesToResearch() {
-		
+
 	}
 }

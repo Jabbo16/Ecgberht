@@ -1,11 +1,14 @@
 package ecgberht.Recollection;
 
+import java.util.Map.Entry;
+
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.GasMiningFacility;
+import org.openbw.bwapi4j.unit.Worker;
+import org.openbw.bwapi4j.util.Pair;
 
-import bwapi.Pair;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class CollectGas extends Action {
@@ -20,22 +23,20 @@ public class CollectGas extends Action {
 			if(((GameState)this.handler).getPlayer().gas() >= 400) {
 				return State.FAILURE;
 			}
-			Unit chosen = ((GameState)this.handler).chosenWorker;
+			Worker chosen = ((GameState)this.handler).chosenWorker;
 			if(!((GameState)this.handler).refineriesAssigned.isEmpty()) {
-				Unit closestGeyser = null;
-				int index = 0;
-				int count = 0;
-				for (Pair<Pair<Unit,Integer>,Boolean> g : ((GameState)this.handler).refineriesAssigned) {
-					if ((closestGeyser == null || chosen.getDistance(g.first.first) < chosen.getDistance(closestGeyser)) && g.first.second < 3 && ((GameState)this.handler).mining > 3 && g.second) {
-						closestGeyser = g.first.first;
-						index = count;
+				GasMiningFacility closestGeyser = null;
+				for (Entry<GasMiningFacility, Pair<Integer, Boolean>> g : ((GameState)this.handler).refineriesAssigned.entrySet()) {
+					if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue().first < 3 && ((GameState)this.handler).mining > 3 && g.getValue().second) {
+						closestGeyser = g.getKey();
 					}
-					count++;
 				}
 				if (closestGeyser != null) {
-					((GameState)this.handler).refineriesAssigned.get(index).first.second++;
+					Pair<Integer,Boolean> aux =  ((GameState)this.handler).refineriesAssigned.get(closestGeyser);
+					aux.first++;
+					((GameState)this.handler).refineriesAssigned.put(closestGeyser,aux);
 					((GameState)this.handler).workerIdle.remove(chosen);
-					((GameState)this.handler).workerTask.add(new Pair<Unit, Unit>(chosen, closestGeyser));
+					((GameState)this.handler).workerGas.put(chosen, closestGeyser);
 					chosen.gather(closestGeyser, false);
 					((GameState)this.handler).chosenWorker = null;
 					return State.SUCCESS;

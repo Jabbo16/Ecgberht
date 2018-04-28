@@ -16,7 +16,7 @@ import org.openbw.bwapi4j.unit.Zergling;
 
 public class Util {
 
-	public static UnitType getZergType(PlayerUnit unit) {
+	private static UnitType getZergType(PlayerUnit unit) {
 		if(unit instanceof Zergling) {
 			return UnitType.Zerg_Zergling;
 		}
@@ -44,7 +44,7 @@ public class Util {
 		return unit.getInitialType();
 	}
 
-	public static UnitType getTerranType(PlayerUnit unit) {
+	private static UnitType getTerranType(PlayerUnit unit) {
 		if(unit instanceof SiegeTank) {
 			SiegeTank t = (SiegeTank)unit;
 			return t.isSieged() ? UnitType.Terran_Siege_Tank_Siege_Mode : UnitType.Terran_Siege_Tank_Tank_Mode;
@@ -52,14 +52,14 @@ public class Util {
 		return unit.getInitialType();
 	}
 
-	public static UnitType getProtossType(PlayerUnit unit) {
+	private static UnitType getProtossType(PlayerUnit unit) {
 		if(unit instanceof Archon) {
 			return UnitType.Protoss_Archon;
 		}
 		return unit.getInitialType();
 	}
 
-	public static UnitType getType(PlayerUnit unit) { // TODO TEST
+	protected static UnitType getType(PlayerUnit unit) { // TODO TEST
 		Race race = unit.getPlayer().getRace();
 		UnitType type = UnitType.Unknown;
 		if(race == Race.Terran) {

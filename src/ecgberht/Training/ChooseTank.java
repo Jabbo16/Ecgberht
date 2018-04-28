@@ -3,10 +3,9 @@ package ecgberht.Training;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Factory;
 
-import bwapi.Pair;
-import bwapi.Unit;
-import bwapi.UnitType;
 import ecgberht.GameState;
 
 
@@ -25,9 +24,9 @@ public class ChooseTank extends Action {
 						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture) == 0){
 							return State.FAILURE;
 						}
-						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Siege_Mode) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Tank_Mode) * 5 < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Medic) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture)) {	
-							for(Unit b:((GameState)this.handler).Fs) {
-								if(!b.isTraining() && b.canTrain()) {
+						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Siege_Mode) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Tank_Mode) * 5 < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Medic) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture)) {
+							for(Factory b:((GameState)this.handler).Fs) {
+								if(!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
 									((GameState)this.handler).chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
 									((GameState)this.handler).chosenBuilding = b;
 									return State.SUCCESS;
@@ -35,13 +34,13 @@ public class ChooseTank extends Action {
 							}
 						}
 					} else {
-						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Siege_Mode) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Tank_Mode) < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine)*2 + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture)) {	
+						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Siege_Mode) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Tank_Mode) < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine)*2 + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture)) {
 							Pair<Integer,Integer> cash = ((GameState)this.handler).getCash();
 							if(cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) {
 								return State.FAILURE;
 							}
-							for(Unit b:((GameState)this.handler).Fs) {
-								if(!b.isTraining() && b.canTrain()) {
+							for(Factory b:((GameState)this.handler).Fs) {
+								if(!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
 									((GameState)this.handler).chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
 									((GameState)this.handler).chosenBuilding = b;
 									return State.SUCCESS;

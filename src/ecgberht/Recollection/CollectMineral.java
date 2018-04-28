@@ -5,8 +5,9 @@ import java.util.Map.Entry;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.MineralPatch;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class CollectMineral extends Action {
@@ -18,10 +19,10 @@ public class CollectMineral extends Action {
 	@Override
 	public State execute() {
 		try {
-			Unit chosen = ((GameState)this.handler).chosenWorker;
+			Worker chosen = ((GameState)this.handler).chosenWorker;
 			if(!((GameState)this.handler).mineralsAssigned.isEmpty()) {
-				Unit closestMineral = null;
-				for (Entry<Unit, Integer> m : ((GameState)this.handler).mineralsAssigned.entrySet()) {
+				MineralPatch closestMineral = null;
+				for (Entry<MineralPatch, Integer> m : ((GameState)this.handler).mineralsAssigned.entrySet()) {
 					if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral)) && m.getValue() < 2) {
 						closestMineral = m.getKey();
 					}

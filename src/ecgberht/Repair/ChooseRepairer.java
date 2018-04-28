@@ -4,9 +4,10 @@ package ecgberht.Repair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.unit.Worker;
 
-import bwapi.Position;
-import bwapi.Unit;
 import ecgberht.GameState;
 
 public class ChooseRepairer extends Action {
@@ -18,23 +19,23 @@ public class ChooseRepairer extends Action {
 	@Override
 	public State execute() {
 		try {
-			Unit closestWorker = null;
+			SCV closestWorker = null;
 			Position chosen = ((GameState)this.handler).chosenBuildingRepair.getPosition();
 			int frame = ((GameState)this.handler).frameCount;
-			for (Unit u : ((GameState)this.handler).workerIdle) {
+			for (Worker u : ((GameState)this.handler).workerIdle) {
 				if(u.getLastCommandFrame() == frame) {
 					continue;
 				}
 				if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
-					closestWorker = u;
+					closestWorker = (SCV) u;
 				}
 			}
-			for (Unit u : ((GameState)this.handler).workerMining.keySet()) {
+			for (Worker u : ((GameState)this.handler).workerMining.keySet()) {
 				if(u.getLastCommandFrame() == frame) {
 					continue;
 				}
 				if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
-					closestWorker = u;
+					closestWorker = (SCV) u;
 				}
 			}
 			if(closestWorker != null) {
