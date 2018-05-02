@@ -10,10 +10,10 @@ import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 
-import bwta.BWTA;
 import bwta.BaseLocation;
 //import ecgberht.BaseLocationComparator;
 import ecgberht.GameState;
+import ecgberht.Util;
 
 public class CheckEnemyBaseVisible extends Action {
 
@@ -29,7 +29,7 @@ public class CheckEnemyBaseVisible extends Action {
 				for (Unit u : enemies) {
 					if(u instanceof Building) {
 						if(((GameState)this.handler).broodWarDistance(((GameState)this.handler).chosenScout.getPosition(), u.getPosition()) <= 500) {
-							((GameState)this.handler).enemyBase = ((GameState)this.handler).bwta.getNearestBaseLocation(u.getTilePosition());
+							((GameState)this.handler).enemyBase = Util.getClosestBaseLocation(u.getPosition());
 							((GameState)this.handler).ScoutSLs = new HashSet<BaseLocation>();
 							//((GameState)this.handler).choosenScout.stop();
 							//((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);

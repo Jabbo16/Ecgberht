@@ -2,9 +2,11 @@ package ecgberht;
 
 import static ecgberht.Ecgberht.getGs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.DamageType;
@@ -30,7 +32,18 @@ import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Zergling;
 import org.openbw.bwapi4j.util.Pair;
 
+import bwta.BaseLocation;
+import bwta.Chokepoint;
+
 public class Util {
+
+	public static int countUnitTypeSelf(UnitType type) {
+		int count = 0;
+		for(Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
+			if(getType(((PlayerUnit)u)) == type) count++;
+		}
+		return count;
+	}
 
 	public static Position sumPosition(Position... positions) {
 		Position sum = new Position(0,0);
@@ -57,7 +70,66 @@ public class Util {
 		return sum;
 	}
 
-	public static UnitType getZergType(PlayerUnit unit) {
+	public static boolean isEnemy(Player player) {
+		return getGs().players.get(player) == -1;
+	}
+
+	public static Chokepoint getClosestChokepoint(Position pos) {
+		Chokepoint closestChoke = null;
+		double dist = Double.MAX_VALUE;
+		for(Chokepoint choke : getGs().bwta.getChokepoints()) {
+			double cDist = getGs().broodWarDistance(pos, choke.getCenter());
+			if(closestChoke == null || cDist < dist) {
+				closestChoke = choke;
+				dist = cDist;
+			}
+		}
+		return closestChoke;
+	}
+
+	public static Chokepoint getGroundDistanceClosestChoke(Position pos) {
+		Chokepoint closestChoke = null;
+		double dist = Double.MAX_VALUE;
+		for(Chokepoint choke : getGs().bwta.getChokepoints()) {
+			double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), choke.getCenter().toTilePosition());
+			if(cDist == 0.0) continue;
+			if(closestChoke == null || cDist < dist) {
+				closestChoke = choke;
+				dist = cDist;
+			}
+		}
+		return closestChoke;
+	}
+
+	public static BaseLocation getClosestBaseLocation(Position pos) {
+		BaseLocation closestBase = null;
+		double dist = Double.MAX_VALUE;
+		for(BaseLocation base : getGs().bwta.getBaseLocations()) {
+			double cDist = getGs().broodWarDistance(pos, base.getPosition());
+			if(cDist == 0.0) continue;
+			if(closestBase == null || cDist < dist) {
+				closestBase = base;
+				dist = cDist;
+			}
+		}
+		return closestBase;
+	}
+
+	public static BaseLocation getGroundDistanceClosestBase(Position pos) {
+		BaseLocation closestBase = null;
+		double dist = Double.MAX_VALUE;
+		for(BaseLocation base : getGs().bwta.getBaseLocations()) {
+			double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), base.getTilePosition());
+			if(cDist == 0.0) continue;
+			if(closestBase == null || cDist < dist) {
+				closestBase = base;
+				dist = cDist;
+			}
+		}
+		return closestBase;
+	}
+
+	private static UnitType getZergType(PlayerUnit unit) {
 		if(unit instanceof Zergling) {
 			return UnitType.Zerg_Zergling;
 		}
@@ -85,7 +157,7 @@ public class Util {
 		return unit.getInitialType();
 	}
 
-	public static UnitType getTerranType(PlayerUnit unit) {
+	private static UnitType getTerranType(PlayerUnit unit) {
 		if(unit instanceof SiegeTank) {
 			SiegeTank t = (SiegeTank)unit;
 			return t.isSieged() ? UnitType.Terran_Siege_Tank_Siege_Mode : UnitType.Terran_Siege_Tank_Tank_Mode;
@@ -93,7 +165,7 @@ public class Util {
 		return unit.getInitialType();
 	}
 
-	public static UnitType getProtossType(PlayerUnit unit) {
+	private static UnitType getProtossType(PlayerUnit unit) {
 		if(unit instanceof Archon) {
 			return UnitType.Protoss_Archon;
 		}
@@ -123,7 +195,7 @@ public class Util {
 		return unit.getInitialType();
 	}
 
-	static WeaponType GetWeapon(Unit attacker, Unit target)
+	public static WeaponType GetWeapon(Unit attacker, Unit target)
 	{
 		UnitType attackerType = getType((PlayerUnit)attacker);
 		UnitType targetType = getType(((PlayerUnit)target));
@@ -142,7 +214,7 @@ public class Util {
 		return target.isFlying() ? attackerType.airWeapon() : attackerType.groundWeapon();
 	}
 
-	static WeaponType GetWeapon(UnitType attacker, UnitType target)
+	private static WeaponType GetWeapon(UnitType attacker, UnitType target)
 	{
 		if (attacker == UnitType.Terran_Bunker)
 		{
@@ -161,7 +233,7 @@ public class Util {
 
 
 	// get a target for the ranged unit to attack
-	static final Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
+	public static final Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
 		double highestPriority = 0.f;
 		Unit bestTarget = null;
 
@@ -179,7 +251,7 @@ public class Util {
 		return bestTarget;
 	}
 
-	static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
+	private static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
 		int priority = getAttackPriority(attacker, target);     // 0..12
 		int range    = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
 		// Let's say that 1 priority step is worth 160 pixels (5 tiles).
@@ -236,7 +308,7 @@ public class Util {
 	}
 
 	//get the attack priority of a target unit
-	static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
+	private static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
 		final UnitType targetType = getType(target);
 		// Exceptions if we're a ground unit.
 		if(target instanceof Burrowable) {
@@ -309,5 +381,13 @@ public class Util {
 		}
 		// Finally everything else.
 		return 1;
+	}
+
+	public static List<Unit> getFriendlyUnitsInRadius(Position sCenter, int radius) {
+		List<Unit> units = new ArrayList<>();
+		for(Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
+			if(getGs().broodWarDistance(u.getPosition(), sCenter) <= radius) units.add(u);
+		}
+		return units;
 	}
 }

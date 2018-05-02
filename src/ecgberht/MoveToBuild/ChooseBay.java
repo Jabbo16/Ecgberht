@@ -10,6 +10,7 @@ import org.openbw.bwapi4j.unit.EngineeringBay;
 import org.openbw.bwapi4j.util.Pair;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 
 public class ChooseBay extends Action {
 
@@ -23,7 +24,7 @@ public class ChooseBay extends Action {
 			if(((GameState)this.handler).getArmySize() < ((GameState)this.handler).strat.armyForBay) {
 				return State.FAILURE;
 			}
-			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Engineering_Bay) < ((GameState)this.handler).strat.numBays) {
+			if(Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < ((GameState)this.handler).strat.numBays) {
 				for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
 					if(w.first == UnitType.Terran_Engineering_Bay) {
 						return State.FAILURE;

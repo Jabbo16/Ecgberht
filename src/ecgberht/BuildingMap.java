@@ -104,10 +104,10 @@ public class BuildingMap {
 				}
 			}
 		}
-		for(Unit v : game.getAllUnits()) { // TODO Neutral buildings
-			TilePosition resourceTile = v.getTilePosition();
-			for(int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
-				for(int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+		for(Unit n : game.getUnits(getGs().neutral)) { // TODO Neutral buildings
+			TilePosition resourceTile = n.getTilePosition();
+			for(int i = resourceTile.getY(); i < resourceTile.getY() + n.height(); i++) {
+				for(int j = resourceTile.getX(); j < resourceTile.getX() + n.width(); j++) {
 					if(i < 0 || i >= height || j < 0 || j >= width) {
 						continue;
 					}
@@ -319,16 +319,16 @@ public class BuildingMap {
 	//Updates a portion of the map around the building
 	public void updateMap(TilePosition position,UnitType building,boolean destroyed){
 		TilePosition buildingSize = building.tileSize();
-		int tamY = buildingSize.getY();
-		int tamX = buildingSize.getX();
+		int sizeY = buildingSize.getY();
+		int sizeX = buildingSize.getX();
 		//Updates the map with the next building to be built
-		for(int i = position.getY()-1; i < position.getY()+tamY+1; i++) {
-			for(int j = position.getX()-1; j < position.getX()+tamX+1; j++) {
+		for(int i = position.getY()-1; i < position.getY()+sizeY+1; i++) {
+			for(int j = position.getX()-1; j < position.getX()+sizeX+1; j++) {
 				if(i < 0 || i >= height || j < 0 || j >= width) {
 					continue;
 				}
 				if(destroyed) {
-					if(i == position.getY()-1 || i == position.getY()+tamY || j == position.getX()-1 || j == position.getX()+tamX) {
+					if(i == position.getY()-1 || i == position.getY()+sizeY || j == position.getX()-1 || j == position.getX()+sizeX) {
 						if(map[i][j] != "0") {
 							map[i][j] = "6";
 						}
@@ -338,7 +338,7 @@ public class BuildingMap {
 						}
 					}
 				} else {
-					if(i != position.getY()-1 && i != position.getY()+tamY && j != position.getX()-1 && j != position.getX()+tamX) {
+					if(i != position.getY()-1 && i != position.getY()+sizeY && j != position.getX()-1 && j != position.getX()+sizeX) {
 						if(map[i][j] != "M" && map[i][j] != "V" && map[i][j] != "0" && map[i][j] != "E" && map[i][j] != "B") {
 							if(building == UnitType.Terran_Bunker) {
 								map[i][j] = "0";
@@ -351,13 +351,13 @@ public class BuildingMap {
 			}
 		}
 		if(building.canBuildAddon()) {
-			for(int i = position.getY()+tamY; i > position.getY()+tamY-4; i--) {
-				for(int j = position.getX()+tamX-1; j < position.getX()+tamX+3; j++) {
+			for(int i = position.getY()+sizeY; i > position.getY()+sizeY-4; i--) {
+				for(int j = position.getX()+sizeX-1; j < position.getX()+sizeX+3; j++) {
 					if(i < 0 || i >= height || j < 0 || j >= width) {
 						continue;
 					}
 					if(destroyed) {
-						if(i == position.getY()+tamY-3 || i == position.getY()+tamY || j == position.getX()+tamX+2 || j == position.getX()+tamX-1) {
+						if(i == position.getY()+sizeY-3 || i == position.getY()+sizeY || j == position.getX()+sizeX+2 || j == position.getX()+sizeX-1) {
 							if(map[i][j] != "0") {
 								map[i][j] = "6";
 							}
@@ -367,7 +367,7 @@ public class BuildingMap {
 							}
 						}
 					} else {
-						if(i != position.getY()+tamY-3 && i != position.getY()+tamY && j != position.getX()+tamX+2 && j != position.getX()+tamX-1) {
+						if(i != position.getY()+sizeY-3 && i != position.getY()+sizeY && j != position.getX()+sizeX+2 && j != position.getX()+sizeX-1) {
 							if(map[i][j] != "M" && map[i][j] != "V" && map[i][j] != "0" && map[i][j] != "E" && map[i][j] != "B") {
 								map[i][j] = "E";
 							}
@@ -381,42 +381,42 @@ public class BuildingMap {
 		if(position.getY() - height > 0) {
 			init_i = position.getY() - height;
 		}
-		int fin_i = height;
-		if(position.getY() + tamY + height < height) {
-			fin_i = position.getY() + tamY + height;
+		int end_i = height;
+		if(position.getY() + sizeY + height < height) {
+			end_i = position.getY() + sizeY + height;
 		}
 		int init_j = 0;
 		if(position.getX() - width > 0) {
 			init_j = position.getX() - width;
 		}
-		int fin_j = width;
-		if(position.getX() + tamX + width < width) {
-			fin_j = position.getX() + tamX + width;
+		int end_j = width;
+		if(position.getX() + sizeX + width < width) {
+			end_j = position.getX() + sizeX + width;
 		}
 		//Generates a submatrix as a portion of the map delimited by the corners and resets the 1,2,3 values for 4
-		String[][] submapa = new String[fin_i-init_i][fin_j-init_j];
+		String[][] submap = new String[end_i-init_i][end_j-init_j];
 		int i = 0;
 		int j = 0;
-		for(int ii = init_i; ii < fin_i; ii++) {
+		for(int ii = init_i; ii < end_i; ii++) {
 			j = 0;
-			for(int jj = init_j; jj < fin_j; jj++) {
+			for(int jj = init_j; jj < end_j; jj++) {
 				if(map[ii][jj]=="M" || map[ii][jj]=="V" || map[ii][jj]=="0" || map[ii][jj]=="E" || map[ii][jj]=="B") {
-					submapa[i][j] = map[ii][jj];
+					submap[i][j] = map[ii][jj];
 				} else {
-					submapa[i][j] = "6";
+					submap[i][j] = "6";
 				}
 				j++;
 			}
 			i++;
 		}
-		submapa = fillMap(submapa);
+		submap = fillMap(submap);
 		//Updates the map using the submatrix
 		i = 0;
 		j = 0;
-		for(int ii = init_i; ii < fin_i; ii++) {
+		for(int ii = init_i; ii < end_i; ii++) {
 			j = 0;
-			for(int jj = init_j; jj < fin_j; jj++) {
-				map[ii][jj] = submapa[i][j];
+			for(int jj = init_j; jj < end_j; jj++) {
+				map[ii][jj] = submap[i][j];
 				j++;
 			}
 			i++;

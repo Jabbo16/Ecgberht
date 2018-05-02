@@ -6,13 +6,22 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static ecgberht.Ecgberht.getGs;
+
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Drone;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 
 public class IntelligenceAgency {
 	private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
 	private static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
+	private static TreeSet<Unit> drones = new TreeSet<>(new UnitComparator());
+
+	public static int getNumDrones() {
+		return drones.size();
+	}
 
 	public static int getNumEnemyBases(String player) {
 		if(enemyBases.containsKey(player))return enemyBases.get(player).size();
@@ -43,7 +52,11 @@ public class IntelligenceAgency {
 
 	public static void onShow(Unit unit, UnitType type) {
 		String player = ((PlayerUnit)unit).getPlayer().getName();
-
+		if(getGs().enemyRace == Race.Zerg) {
+			if(unit instanceof Drone) {
+				if(!drones.contains(unit)) drones.add(unit);
+			}
+		}
 		// If base and player known skip
 		if(enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;
 
@@ -188,6 +201,11 @@ public class IntelligenceAgency {
 		String player = ((PlayerUnit)unit).getPlayer().getName();
 		if(type.isResourceDepot() && enemyBases.containsKey(player)) {
 			if(enemyBases.get(player).contains(unit)) enemyBases.get(player).remove(unit);
+		}
+		if(getGs().enemyRace == Race.Zerg) {
+			if(unit instanceof Drone) {
+				if(drones.contains(unit)) drones.remove(unit);
+			}
 		}
 	}
 }

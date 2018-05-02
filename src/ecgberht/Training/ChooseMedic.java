@@ -12,6 +12,7 @@ import org.openbw.bwapi4j.unit.ResearchingFacility;
 import org.openbw.bwapi4j.unit.Unit;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 
 
 public class ChooseMedic extends Action {
@@ -35,7 +36,7 @@ public class ChooseMedic extends Action {
 								marine_count += p.size();
 							}
 						}
-						if(!((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Medic) * 4 < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) - marine_count) {
+						if(!((GameState)this.handler).MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
 							for(Barracks b:((GameState)this.handler).MBs) {
 								if(!b.isTraining()) {
 									((GameState)this.handler).chosenUnit = UnitType.Terran_Medic;

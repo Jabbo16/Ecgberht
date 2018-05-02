@@ -8,6 +8,7 @@ import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.CommandCenter;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 
 public class ChooseSCV extends Action {
 
@@ -30,7 +31,7 @@ public class ChooseSCV extends Action {
 					return State.FAILURE;
 				}
 			}
-			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_SCV) < 50 && ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_SCV) < ((GameState)this.handler).mineralsAssigned.size() * 2 + 3 && !((GameState)this.handler).CCs.isEmpty()) {
+			if(Util.countUnitTypeSelf(UnitType.Terran_SCV) < 50 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < ((GameState)this.handler).mineralsAssigned.size() * 2 + 3 && !((GameState)this.handler).CCs.isEmpty()) {
 				for(CommandCenter b:((GameState)this.handler).CCs.values()) {
 					if(!b.isTraining() && !b.isBuildingAddon()) {
 						((GameState)this.handler).chosenUnit = UnitType.Terran_SCV;

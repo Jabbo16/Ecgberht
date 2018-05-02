@@ -5,8 +5,10 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Factory;
+import org.openbw.bwapi4j.util.Pair;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 
 
 public class ChooseTank extends Action {
@@ -21,10 +23,11 @@ public class ChooseTank extends Action {
 			if(!((GameState)this.handler).Fs.isEmpty()) {
 				if(((GameState)this.handler).siegeResearched) {
 					if(((GameState)this.handler).strat.name != "FullMech") {
-						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture) == 0){
+						if(Util.countUnitTypeSelf(UnitType.Terran_Vulture) == 0){
 							return State.FAILURE;
 						}
-						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Siege_Mode) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Tank_Mode) * 5 < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Medic) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture)) {
+						if(Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) * 5 <
+								Util.countUnitTypeSelf(UnitType.Terran_Marine) + Util.countUnitTypeSelf(UnitType.Terran_Medic) + Util.countUnitTypeSelf(UnitType.Terran_Vulture)) {
 							for(Factory b:((GameState)this.handler).Fs) {
 								if(!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
 									((GameState)this.handler).chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
@@ -34,7 +37,8 @@ public class ChooseTank extends Action {
 							}
 						}
 					} else {
-						if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Siege_Mode) + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Siege_Tank_Tank_Mode) < ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Marine)*2 + ((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Vulture)) {
+						if(Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine)*2 +
+								Util.countUnitTypeSelf(UnitType.Terran_Vulture)) {
 							Pair<Integer,Integer> cash = ((GameState)this.handler).getCash();
 							if(cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) {
 								return State.FAILURE;

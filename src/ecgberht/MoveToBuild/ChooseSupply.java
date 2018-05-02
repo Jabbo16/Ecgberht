@@ -13,6 +13,7 @@ import org.openbw.bwapi4j.unit.SupplyDepot;
 import org.openbw.bwapi4j.util.Pair;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 
 public class ChooseSupply extends Action {
 
@@ -27,7 +28,7 @@ public class ChooseSupply extends Action {
 				return State.FAILURE;
 			}
 			//if(((GameState)this.handler).countUnit2(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
-			if(((GameState)this.handler).getPlayer().allUnitCount(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
+			if(Util.countUnitTypeSelf(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
 				return State.FAILURE;
 			}
 			if(((GameState)this.handler).EI.naughty && ((GameState)this.handler).MBs.isEmpty() && ((GameState)this.handler).enemyRace == Race.Zerg) {

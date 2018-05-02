@@ -17,6 +17,7 @@ import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Vulture;
 import org.openbw.bwapi4j.unit.Worker;
+import org.openbw.bwapi4j.util.Pair;
 
 import ecgberht.EnemyBuilding;
 import ecgberht.Util;

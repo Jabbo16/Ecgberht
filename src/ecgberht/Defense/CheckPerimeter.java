@@ -113,7 +113,7 @@ public class CheckPerimeter extends Conditional {
 									u.giveMoveOrder(((GameState)this.handler).DBs.keySet().iterator().next().getPosition());
 								}
 								else {
-									u.giveMoveOrder(((GameState)this.handler).getNearestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+									u.giveMoveOrder(Util.getClosestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
 								}
 								u.status = Status.IDLE;
 								u.attack = Position.None;

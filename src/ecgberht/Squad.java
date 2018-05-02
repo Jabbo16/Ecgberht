@@ -117,7 +117,7 @@ public class Squad {
 						continue;
 					}
 					boolean gaveOrder = false;
-					List<Unit> circle = getGs().getGame().getUnitsInRadius(sCenter, 280); // TODO implement
+					List<Unit> circle = Util.getFriendlyUnitsInRadius(sCenter, 280); // TODO test
 					Set<Unit> different = new HashSet<>();
 					different.addAll(circle);
 					different.addAll(members);
@@ -206,7 +206,7 @@ public class Squad {
 					if(((GroundAttacker)u).getGroundWeaponCooldown() > 0) {
 						if(!enemyToKite.isEmpty()) {
 							Position run = getGs().kiteAway(u,enemyToKite);
-							if(run.isValid()) {
+							if(getGs().getGame().getBWMap().isValidPosition(run)) {
 								((MobileUnit) u).move(run);
 								continue;
 							} else {

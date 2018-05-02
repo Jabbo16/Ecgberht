@@ -30,15 +30,15 @@ public class InfluenceMap {
 	public int width;
 	public Player self;
 
-	public InfluenceMap(BW bw, Player self, int alto, int ancho) {
+	public InfluenceMap(BW bw, Player self, int height, int width) {
 		this.bw = bw;
 		this.self = self;
-		this.height = alto;
-		this.width = ancho;
-		map = new double[alto][ancho];
+		this.height = height;
+		this.width = width;
+		map = new double[height][width];
 	}
 
-	public void updateMap(Unit arg0,boolean Destroyed) {
+	public void updateMap(Unit arg0,boolean destroyed) {
 		int influence = 0;
 		UnitType type = Util.getType((PlayerUnit)arg0);
 		TilePosition tile = arg0.getTilePosition();
@@ -61,45 +61,45 @@ public class InfluenceMap {
 				influence = bio;
 			}
 		}
-		if(Destroyed) {
+		if(destroyed) {
 			influence *= -1;
 		}
-		if(((PlayerUnit)arg0).getPlayer().isEnemy(self)) {
+		if(Util.isEnemy(((PlayerUnit)arg0).getPlayer())) {
 			influence *= -1;
 		}
 		updateCellInfluence(new Pair<Point,Integer>(new Point(tile.getY(),tile.getX()),influence),type.isBuilding());
 	}
 
-	public void updateCellInfluence(Pair<Point,Integer> celda,boolean building) {
-		map[celda.first.x][celda.first.y] += celda.second;
+	public void updateCellInfluence(Pair<Point,Integer> tile,boolean building) {
+		map[tile.first.x][tile.first.y] += tile.second;
 		if(!building) {
 			int init_i = 0;
-			if(celda.first.y-propagation > init_i) {
-				init_i = celda.first.y-propagation;
+			if(tile.first.y-propagation > init_i) {
+				init_i = tile.first.y-propagation;
 			}
 			int fin_i = width-1;
-			if(celda.first.y+propagation < fin_i) {
-				fin_i = celda.first.y+propagation;
+			if(tile.first.y+propagation < fin_i) {
+				fin_i = tile.first.y+propagation;
 			}
 			int init_j = 0;
-			if(celda.first.x-propagation > init_j) {
-				init_j = celda.first.x-propagation;
+			if(tile.first.x-propagation > init_j) {
+				init_j = tile.first.x-propagation;
 			}
 			int fin_j = height-1;
-			if(celda.first.x+propagation < fin_j) {
-				fin_j = celda.first.x+propagation;
+			if(tile.first.x+propagation < fin_j) {
+				fin_j = tile.first.x+propagation;
 			}
 			for(int ii = init_i; ii <= fin_i; ii++) {
 				for(int jj = init_j; jj <= fin_j; jj++) {
-					if(!(jj == celda.first.x && ii == celda.first.y))
-						map[jj][ii] += Math.round(celda.second / Math.pow(1 + Math.sqrt(Math.pow(ii-celda.first.y, 2) + Math.pow(jj-celda.first.x, 2)), 2));
+					if(!(jj == tile.first.x && ii == tile.first.y))
+						map[jj][ii] += Math.round(tile.second / Math.pow(1 + Math.sqrt(Math.pow(ii-tile.first.y, 2) + Math.pow(jj-tile.first.x, 2)), 2));
 				}
 			}
 		}
 	}
 
-	public void updateCellsInfluence(List<Pair<Point,Integer> > celdas) {
-		for(Pair<Point,Integer> p : celdas) {
+	public void updateCellsInfluence(List<Pair<Point,Integer>> tiles) {
+		for(Pair<Point,Integer> p : tiles) {
 			updateCellInfluence(p,true);
 		}
 	}

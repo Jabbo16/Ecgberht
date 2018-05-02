@@ -2,7 +2,6 @@ package ecgberht.Harass;
 
 import static ecgberht.Ecgberht.getGs;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -27,7 +26,7 @@ public class CheckHarasserAttacked extends Conditional {
 	public State execute() {
 		try {
 			if(((GameState)this.handler).chosenUnitToHarass != null) {
-				if(!((GameState)this.handler).chosenUnitToHarass.getPosition().isValid()) {
+				if(!((GameState)this.handler).bw.getBWMap().isValidPosition(((GameState)this.handler).chosenUnitToHarass.getPosition())) {
 					((GameState)this.handler).chosenUnitToHarass = null;
 				}
 			}
@@ -74,7 +73,7 @@ public class CheckHarasserAttacked extends Conditional {
 						((GameState)this.handler).chosenUnitToHarass = null;
 					} else {
 						Position kite = getGs().kiteAway(((GameState)this.handler).chosenHarasser, attackers);
-						if(kite.isValid()) {
+						if(((GameState)this.handler).bw.getBWMap().isValidPosition(kite)) {
 							((GameState)this.handler).chosenHarasser.move(kite);
 							((GameState)this.handler).chosenUnitToHarass = null;
 						}

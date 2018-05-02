@@ -4,6 +4,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 
@@ -62,7 +63,7 @@ public class ChooseBuilderBL extends Action{
 						((GameState)this.handler).workerMining.remove(closestWorker);
 						if(((GameState)this.handler).mineralsAssigned.containsKey(mineral)) {
 							((GameState)this.handler).mining--;
-							((GameState)this.handler).mineralsAssigned.put(mineral, ((GameState)this.handler).mineralsAssigned.get(mineral) - 1);
+							((GameState)this.handler).mineralsAssigned.put((MineralPatch) mineral, ((GameState)this.handler).mineralsAssigned.get(mineral) - 1);
 						}
 					}
 				}

@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
@@ -15,8 +14,8 @@ import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.MissileTurret;
 import org.openbw.bwapi4j.util.Pair;
 
-import bwta.BWTA;
 import ecgberht.GameState;
+import ecgberht.Util;
 
 public class ChoosePosition extends Action {
 
@@ -27,8 +26,7 @@ public class ChoosePosition extends Action {
 	@Override
 	public State execute() {
 		try {
-			BW juego = ((GameState)this.handler).getGame();
-			Player jugador = ((GameState)this.handler).getPlayer();
+			Player self = ((GameState)this.handler).getPlayer();
 			TilePosition origin = null;
 			if(((GameState)this.handler).chosenToBuild.isRefinery()) {
 				if(!((GameState)this.handler).refineriesAssigned.isEmpty()) {
@@ -53,13 +51,13 @@ public class ChoosePosition extends Action {
 					}
 					else {
 						//origin = BWTA.getRegion(jugador.getStartLocation()).getCenter().toTilePosition();
-						origin = jugador.getStartLocation();
+						origin = self.getStartLocation();
 					}
 				}
 				else{
 					if(((GameState)this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
 						if(((GameState)this.handler).DBs.isEmpty()) {
-							origin = ((GameState)this.handler).bwta.getNearestChokepoint(jugador.getStartLocation()).getCenter().toTilePosition();
+							origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
 						}
 						else {
 							for(Bunker b : ((GameState)this.handler).DBs.keySet()) {
