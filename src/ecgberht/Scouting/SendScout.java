@@ -7,7 +7,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 
-import bwta.BaseLocation;
+import bwem.Base;
 import ecgberht.GameState;
 
 public class SendScout extends Action {
@@ -22,10 +22,10 @@ public class SendScout extends Action {
 		try {
 			if(((GameState)this.handler).enemyBase == null) {
 				if(!((GameState)this.handler).ScoutSLs.isEmpty()) {
-					List<BaseLocation> aux = new ArrayList<BaseLocation>();
-					for(BaseLocation b : ((GameState)this.handler).ScoutSLs) {
-						if(((GameState)this.handler).bwta.isConnected(b.getTilePosition(), ((GameState)this.handler).chosenScout.getTilePosition())) {
-							if(((GameState)this.handler).chosenScout.move(b.getPosition())) {
+					List<Base> aux = new ArrayList<>();
+					for(Base b : ((GameState)this.handler).ScoutSLs) {
+						if(((GameState)this.handler).bwta.isConnected(b.getLocation(), ((GameState)this.handler).chosenScout.getTilePosition())) {
+							if(((GameState)this.handler).chosenScout.move(b.getLocation().toPosition())) {
 								return State.SUCCESS;
 							}
 						}

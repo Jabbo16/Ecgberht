@@ -32,10 +32,73 @@ import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Zergling;
 import org.openbw.bwapi4j.util.Pair;
 
+import bwem.Base;
+import bwem.ChokePoint;
 import bwta.BaseLocation;
 import bwta.Chokepoint;
 
 public class Util {
+
+	private static double areaOfTriangle(Position p1, Position p2, Position pos) {
+	    double side1 = Math.sqrt(Math.pow(Math.abs(p1.getY()-p2.getY()),2) + Math.pow(Math.abs(p1.getX()-p2.getX()),2));
+	    double side2 = Math.sqrt(Math.pow(Math.abs(p1.getY()-pos.getY()),2) + Math.pow(Math.abs(p1.getX()-pos.getX()),2));
+	    double side3 = Math.sqrt(Math.pow(Math.abs(p2.getY()-pos.getY()),2) + Math.pow(Math.abs(p2.getX()-pos.getX()),2));
+	    double semi_perimeter = (side1+side2+side3)/2;
+	    double area = Math.sqrt(semi_perimeter*(semi_perimeter-side1)*(semi_perimeter-side2)*(semi_perimeter-side3));
+	    return area;
+	}
+
+
+	private static double areaOfRect(Position p1, Position p2, Position p3) {
+	    double side1 = Math.sqrt(Math.pow(Math.abs(p1.getY()-p2.getY()),2) + Math.pow(Math.abs(p1.getX()-p2.getX()),2));
+	    double side2 = Math.sqrt(Math.pow(Math.abs(p2.getY()-p3.getY()),2) + Math.pow(Math.abs(p2.getX()-p3.getX()),2));
+	    double area = side1*side2;
+	    return area;
+	}
+
+	private static boolean check(Position p1, Position p2, Position p3, Position p4,  Position pos)
+	{
+
+	    double triangle1Area = areaOfTriangle(p1, p2, pos);
+	    double triangle2Area = areaOfTriangle(p2, p3, pos);
+	    double triangle3Area = areaOfTriangle(p3, p4, pos);
+	    double triangle4Area = areaOfTriangle(p4, p1, pos);
+	    double rectArea = areaOfRect(p1, p2, p3);
+	    double triangleAreaSum = (triangle1Area + triangle2Area + triangle3Area + triangle4Area);
+
+	    if(triangleAreaSum%(Math.pow(10, 14)) >= 0.999999999999999)
+	    {
+	        triangleAreaSum = Math.ceil(triangleAreaSum);
+	    }
+
+	    if(triangleAreaSum==rectArea)
+	        return true;
+	    else
+	        return false;
+	}
+
+	public static List<Unit> getUnitsInRectangle(Position topLeft, Position bottomRight){ //TODO test
+		List<Unit> units = new ArrayList<>();
+		for(Unit u : getGs().bw.getAllUnits()) {
+			if(!u.exists()) continue;
+			Position pos = u.getPosition();
+			Position p1 = topLeft;
+			Position p2 = new Position(bottomRight.getX(), topLeft.getY());
+			Position p3 = new Position(topLeft.getX(), bottomRight.getY());
+			Position p4 = bottomRight;
+			if(check(p1, p2, p3, p4, pos)) units.add(u);
+		}
+		return units;
+	}
+
+	public static List<Unit> getUnitsOnTile(TilePosition tile){ //TODO test
+		List<Unit> units = new ArrayList<>();
+		for(Unit u : getGs().bw.getAllUnits()) {
+			if(!u.exists()) continue;
+			if(u.getTilePosition().equals(tile)) units.add(u);
+		}
+		return units;
+	}
 
 	public static int countUnitTypeSelf(UnitType type) {
 		int count = 0;
@@ -74,11 +137,11 @@ public class Util {
 		return getGs().players.get(player) == -1;
 	}
 
-	public static Chokepoint getClosestChokepoint(Position pos) {
-		Chokepoint closestChoke = null;
+	public static ChokePoint getClosestChokepoint(Position pos) {
+		ChokePoint closestChoke = null;
 		double dist = Double.MAX_VALUE;
-		for(Chokepoint choke : getGs().bwta.getChokepoints()) {
-			double cDist = getGs().broodWarDistance(pos, choke.getCenter());
+		for(ChokePoint choke : getGs().bwem.getMap().getChokePoints()) {
+			double cDist = getGs().broodWarDistance(pos, choke.getCenter().toPosition());
 			if(closestChoke == null || cDist < dist) {
 				closestChoke = choke;
 				dist = cDist;
@@ -101,12 +164,11 @@ public class Util {
 		return closestChoke;
 	}
 
-	public static BaseLocation getClosestBaseLocation(Position pos) {
-		BaseLocation closestBase = null;
+	public static Base getClosestBaseLocation(Position pos) {
+		Base closestBase = null;
 		double dist = Double.MAX_VALUE;
-		for(BaseLocation base : getGs().bwta.getBaseLocations()) {
-			double cDist = getGs().broodWarDistance(pos, base.getPosition());
-			if(cDist == 0.0) continue;
+		for(Base base : getGs().bwem.getMap().getBases()) {
+			double cDist = getGs().broodWarDistance(pos, base.getLocation().toPosition());
 			if(closestBase == null || cDist < dist) {
 				closestBase = base;
 				dist = cDist;

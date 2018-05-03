@@ -13,7 +13,7 @@ import org.openbw.bwapi4j.unit.ComsatStation;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 
-import bwta.BaseLocation;
+import bwem.Base;
 import ecgberht.GameState;
 
 public class CheckScan extends Conditional {
@@ -37,13 +37,13 @@ public class CheckScan extends Conditional {
 					}
 				}
 			}
-			List<BaseLocation> valid = new ArrayList<>();
-			for(BaseLocation b : ((GameState)this.handler).EnemyBLs) {
-				if(((GameState)this.handler).getGame().getBWMap().isVisible(b.getTilePosition()) || b.isIsland()){
+			List<Base> valid = new ArrayList<>();
+			for(Base b : ((GameState)this.handler).EnemyBLs) {
+				if(((GameState)this.handler).getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()){
 					continue;
 				}
 				if(((GameState)this.handler).enemyBase != null) {
-					if(((GameState)this.handler).enemyBase.getTilePosition().equals(b.getTilePosition())) {
+					if(((GameState)this.handler).enemyBase.getLocation().equals(b.getLocation())) {
 						continue;
 					}
 				}
@@ -55,7 +55,7 @@ public class CheckScan extends Conditional {
 			for(ComsatStation u: ((GameState)this.handler).CSs) {
 				if(u.getEnergy() == 200) {
 					Random random = new Random();
-					((GameState)this.handler).checkScan = valid.get(random.nextInt(valid.size())).getTilePosition();
+					((GameState)this.handler).checkScan = valid.get(random.nextInt(valid.size())).getLocation();
 					return State.SUCCESS;
 				}
 			}

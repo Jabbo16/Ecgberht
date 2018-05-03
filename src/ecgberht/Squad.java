@@ -11,7 +11,6 @@ import java.util.TreeSet;
 
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Attacker;
 import org.openbw.bwapi4j.unit.Firebat;
@@ -39,7 +38,7 @@ public class Squad {
 		this.name = name;
 		members = new TreeSet<>(new UnitComparator());
 		status = Status.IDLE;
-		attack = Position.None;
+		attack = null;
 	}
 
 	public void addToSquad(Unit unit) {
@@ -95,9 +94,9 @@ public class Squad {
 						}
 					}
 					else if(getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
-						if(getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 200  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding ) {
+						if(getGs().broodWarDistance(getGs().closestChoke.getCenter().toPosition(), sCenter) >= 200  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding ) {
 							if(u.getOrder() != Order.Move) {
-								((MobileUnit) u).move(getGs().closestChoke.getCenter());
+								((MobileUnit) u).move(getGs().closestChoke.getCenter().toPosition());
 							}
 							continue;
 						}
@@ -147,11 +146,11 @@ public class Squad {
 						continue;
 					}
 				}
-				if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
+				if(u.isIdle() && attack != null && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
 					((MobileUnit) u).attack(attack);
 					continue;
 				}
-				if(u.isAttacking() && attack == Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
+				if(u.isAttacking() && attack == null && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
 					((MobileUnit) u).move(sCenter);
 					continue;
 				}
@@ -167,7 +166,7 @@ public class Squad {
 					framesToOrder = 12;
 				}
 				if(frameCount - u.getLastCommandFrame() >= framesToOrder) {
-					if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
+					if(u.isIdle() && attack != null && status != Status.IDLE) {
 						lastTarget = (((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() : ((MobileUnit) u).getTargetPosition());
 						if(lastTarget != null) {
 							if(!lastTarget.equals(attack)) {
@@ -217,7 +216,7 @@ public class Squad {
 
 						}
 					}
-					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking()) {
+					else if(attack != null && !u.isStartingAttack() && !u.isAttacking()) {
 //					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
 						if(!enemyToAttack.isEmpty()) {
 							Unit target = Util.getTarget(u, enemyToAttack);
@@ -306,7 +305,7 @@ public class Squad {
 					continue;
 				}
 			}
-			if(attack != Position.None && frameCount != u.getLastCommandFrame()) {
+			if(attack != null && frameCount != u.getLastCommandFrame()) {
 				((MobileUnit) u).move(retreat);
 			}
 		}

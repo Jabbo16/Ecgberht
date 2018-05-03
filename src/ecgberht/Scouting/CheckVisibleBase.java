@@ -4,7 +4,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 
-import bwta.BaseLocation;
+import bwem.Base;
 import ecgberht.GameState;
 
 public class CheckVisibleBase extends Conditional {
@@ -21,8 +21,8 @@ public class CheckVisibleBase extends Conditional {
 				return State.FAILURE;
 			}
 			if(!((GameState)this.handler).ScoutSLs.isEmpty()) {
-				for(BaseLocation b : ((GameState)this.handler).ScoutSLs) {
-					if((((GameState)this.handler).getGame().getBWMap().isVisible(b.getTilePosition()))) {
+				for(Base b : ((GameState)this.handler).ScoutSLs) {
+					if((((GameState)this.handler).getGame().getBWMap().isVisible(b.getLocation()))) {
 						((GameState)this.handler).ScoutSLs.remove(b);
 						return State.SUCCESS;
 					}

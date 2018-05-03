@@ -16,15 +16,13 @@ import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.VespeneGeyser;
 import org.openbw.bwapi4j.unit.Worker;
-import org.openbw.bwapi4j.util.Pair;
 
-import bwem.unit.Neutral;
-import bwem.unit.NeutralData;
+import bwem.BWEM;
+import bwem.Base;
+import bwem.ChokePoint;
 
 import static ecgberht.Ecgberht.getGs;
 import bwta.BWTA;
-import bwta.BaseLocation;
-import bwta.Chokepoint;
 
 public class BuildingMap {
 
@@ -34,23 +32,25 @@ public class BuildingMap {
 	private Player self;
 	private String map[][];
 	private BWTA bwta;
-
+	private BWEM bwem;
 	private enum Side{
 		TOP, LEFT, RIGHT, BOTTOM
 	}
-	public BuildingMap(BW game, Player self, BWTA bwta) {
+	public BuildingMap(BW game, Player self, BWTA bwta, BWEM bwem) {
 		this.game = game;
 		this.self = self;
 		this.bwta = bwta;
+		this.bwem = bwem;
 		this.height = game.getBWMap().mapHeight();
 		this.width = game.getBWMap().mapWidth();
 		this.map = new String[this.height][this.width];
 	}
 
-	public BuildingMap(BW game, Player self,  BWTA bwta, int height, int width, String[][] map) {
+	public BuildingMap(BW game, Player self,  BWTA bwta, BWEM bwem, int height, int width, String[][] map) {
 		this.game = game;
 		this.self = self;
 		this.bwta = bwta;
+		this.bwem = bwem;
 		this.height = height;
 		this.width = width;
 		this.map = map.clone();
@@ -62,7 +62,7 @@ public class BuildingMap {
 
 	@Override
 	public BuildingMap clone() {
-		BuildingMap map2 = new BuildingMap(game, self, bwta, height, width, map);
+		BuildingMap map2 = new BuildingMap(game, self, bwta, bwem, height, width, map);
 		return map2;
 	}
 
@@ -104,17 +104,17 @@ public class BuildingMap {
 				}
 			}
 		}
-		for(Unit n : game.getUnits(getGs().neutral)) { // TODO Neutral buildings
-			TilePosition resourceTile = n.getTilePosition();
-			for(int i = resourceTile.getY(); i < resourceTile.getY() + n.height(); i++) {
-				for(int j = resourceTile.getX(); j < resourceTile.getX() + n.width(); j++) {
-					if(i < 0 || i >= height || j < 0 || j >= width) {
-						continue;
-					}
-					map[i][j] = "E";
-				}
-			}
-		}
+//		for(Unit n : game.getUnits(getGs().neutral)) { // TODO Neutral buildings
+//			TilePosition resourceTile = n.getTilePosition();
+//			for(int i = resourceTile.getY(); i < resourceTile.getY() + n.height(); i++) {
+//				for(int j = resourceTile.getX(); j < resourceTile.getX() + n.width(); j++) {
+//					if(i < 0 || i >= height || j < 0 || j >= width) {
+//						continue;
+//					}
+//					map[i][j] = "E";
+//				}
+//			}
+//		}
 
 //		//Finds minerals and geysers
 //		for(Unit resource : game.getStaticNeutralUnits()) {
@@ -155,8 +155,8 @@ public class BuildingMap {
 //				}
 //			}
 //		}
-		for(BaseLocation b : bwta.getBaseLocations()) {
-			TilePosition starting = b.getTilePosition();
+		for(Base b : bwem.getMap().getBases()) {
+			TilePosition starting = b.getLocation();
 			for(int i = starting.getY(); i < starting.getY() + UnitType.Terran_Command_Center.tileHeight(); i++) {
 				for(int j = starting.getX(); j < starting.getX() + UnitType.Terran_Command_Center.tileWidth(); j++) {
 					if(i < 0 || i >= height || j < 0 || j >= width) {
@@ -427,7 +427,7 @@ public class BuildingMap {
 		try {
 			Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
 			Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
-			List<Unit> blockers = game.getUnitsInRectangle(topLeft, bottomRight); // Do similar method
+			List<Unit> blockers = Util.getUnitsInRectangle(topLeft, bottomRight); // Test
 
 			if(blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) {
 				return true;
@@ -495,17 +495,17 @@ public class BuildingMap {
 		return position;
 	}
 
-	public TilePosition findBunkerPosition(Chokepoint choke){
+	public TilePosition findBunkerPosition(ChokePoint closestChoke){
 		TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
 		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
-		Position starting = choke.getCenter();
-		Pair<Position,Position> sides = choke.getSides();
-		Position closestSide = null;
-		if(getGs().broodWarDistance(self.getStartLocation().toPosition(), sides.first) < getGs().broodWarDistance(self.getStartLocation().toPosition(), sides.second)){
-			closestSide = sides.first;
-		} else {
-			closestSide = sides.second;
-		}
+		Position starting = closestChoke.getCenter().toPosition();
+//		Pair<Position,Position> sides = closestChoke.getSides();
+		Position closestSide = starting;
+//		if(getGs().broodWarDistance(self.getStartLocation().toPosition(), sides.first) < getGs().broodWarDistance(self.getStartLocation().toPosition(), sides.second)){
+//			closestSide = sides.first;
+//		} else {
+//			closestSide = sides.second;
+//		}
 		int x = starting.toTilePosition().getY();
 		int y = starting.toTilePosition().getX();
 
@@ -518,7 +518,7 @@ public class BuildingMap {
 			for(int jj = (y - j); jj <= (y + j); jj++) {
 				if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
 					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
-						if(bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
+						if(bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(bwta.getRegion(getGs().naturalRegion.getTop().toTilePosition()).getCenter())) {
 							continue;
 						}
 						if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
@@ -538,11 +538,11 @@ public class BuildingMap {
 
 	public TilePosition findBunkerPositionAntiPool(){ // TODO Finish it
 		TilePosition bunkerPlace = null;
-		Chokepoint choke = getGs().closestChoke;
-		Position chokePos = choke.getCenter();
+		ChokePoint choke = getGs().closestChoke;
+		Position chokePos = choke.getCenter().toPosition();
 		Set<Position> posToDefend = new HashSet<>();
 		int marineRange = UnitType.Terran_Marine.groundWeapon().maxRange();
-		Side side = getSide(getGs().MainCC.getPosition(), choke.getCenter());
+		Side side = getSide(getGs().MainCC.getPosition(), choke.getCenter().toPosition());
 
 		Position top = null;
 		Position bottom = null;
@@ -584,12 +584,12 @@ public class BuildingMap {
 				for(int jj = (y - j); jj <= (y + j + 3); jj++) {
 					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
 						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
-							if(bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
+							if(bwta.getRegion(new TilePosition(jj, ii)).getCenter().equals(bwta.getRegion(getGs().naturalRegion.getTop().toPosition()).getCenter())) {
 								continue;
 							}
 							if(!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
 								TilePosition newPosition = new TilePosition(jj, ii);
-								double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter());
+								double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter().toPosition());
 								if(bunkerPlace == null || newDist < dist) {
 									bunkerPlace = newPosition;
 									dist = newDist;

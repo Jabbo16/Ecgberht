@@ -166,7 +166,7 @@ public class SendDefenders extends Action {
 						}
 						else {
 							u.getValue().status = Status.IDLE;
-							u.getValue().attack = Position.None;
+							u.getValue().attack = null;
 							continue;
 						}
 					}

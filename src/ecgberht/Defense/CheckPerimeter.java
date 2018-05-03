@@ -1,6 +1,5 @@
 package ecgberht.Defense;
 
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,11 +12,9 @@ import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.CommandCenter;
 import org.openbw.bwapi4j.unit.PlayerUnit;
-import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 
-import bwta.BWTA;
 import bwta.Region;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
@@ -113,19 +110,19 @@ public class CheckPerimeter extends Conditional {
 									u.giveMoveOrder(((GameState)this.handler).DBs.keySet().iterator().next().getPosition());
 								}
 								else {
-									u.giveMoveOrder(Util.getClosestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter());
+									u.giveMoveOrder(Util.getClosestChokepoint(((GameState)this.handler).getSquadCenter(u)).getCenter().toPosition());
 								}
 								u.status = Status.IDLE;
-								u.attack = Position.None;
+								u.attack = null;
 								continue;
 							}
 						}
 						u.status = Status.IDLE;
-						u.attack = Position.None;
+						u.attack = null;
 						continue;
 					}
 					u.status = Status.IDLE;
-					u.attack = Position.None;
+					u.attack = null;
 					continue;
 				}
 			}

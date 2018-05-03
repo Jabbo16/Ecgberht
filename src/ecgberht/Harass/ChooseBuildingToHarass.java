@@ -22,7 +22,7 @@ public class ChooseBuildingToHarass extends Action {
 			for(EnemyBuilding u : ((GameState)this.handler).enemyBuildingMemory.values()) {
 				if(((GameState)this.handler).enemyBase != null) {
 					if(u.type.isBuilding()) {
-						if(((GameState)this.handler).bwta.getRegion(u.pos).getCenter().equals(((GameState)this.handler).bwta.getRegion(((GameState)this.handler).enemyBase.getPosition()).getCenter())){
+						if(((GameState)this.handler).bwta.getRegion(u.pos).getCenter().equals(((GameState)this.handler).bwta.getRegion(((GameState)this.handler).enemyBase.getLocation()).getCenter())){
 							((GameState)this.handler).chosenUnitToHarass = u.unit;
 							return State.SUCCESS;
 						}

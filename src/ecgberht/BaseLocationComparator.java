@@ -4,10 +4,10 @@ import java.util.Comparator;
 
 import org.openbw.bwapi4j.Position;
 
-import bwta.BaseLocation;
+import bwem.Base;
 import static ecgberht.Ecgberht.getGs;
 
-public class BaseLocationComparator implements Comparator<BaseLocation>{
+public class BaseLocationComparator implements Comparator<bwem.Base>{
 	private boolean enemy = false;
 
 	public BaseLocationComparator(boolean enemy) {
@@ -15,7 +15,7 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 	}
 
 	@Override
-	public int compare(BaseLocation a, BaseLocation b) {
+	public int compare(bwem.Base a, bwem.Base b) {
 		try {
 			Position start = null;
 			if(!enemy) {
@@ -25,24 +25,24 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				if(start == null) {
 					start = getGs().getPlayer().getStartLocation().toPosition();
 				}
-				BaseLocation closestBase = Util.getClosestBaseLocation(start); // TODO similar method / change to BWEM
+				Base closestBase = Util.getClosestBaseLocation(start); // TODO similar method / change to BWEM
 				if(closestBase != null) {
-					if(Util.getClosestBaseLocation(start).getTilePosition().equals(a.getTilePosition())) {
+					if(Util.getClosestBaseLocation(start).getLocation().equals(a.getLocation())) {
 						return -1;
 					}
-					if(Util.getClosestBaseLocation(start).getTilePosition().equals(b.getTilePosition())) {
+					if(Util.getClosestBaseLocation(start).getLocation().equals(b.getLocation())) {
 						return 1;
 					}
 				}
 
-				if(a.isIsland()) {
+				if(a.getArea().getAccessibleNeighbors().isEmpty()) {
 					return 1;
 				}
-				if(b.isIsland()) {
+				if(b.getArea().getAccessibleNeighbors().isEmpty()) {
 					return -1;
 				}
-				double distA = getGs().bwta.getGroundDistance(a.getTilePosition(), start.toTilePosition());
-				double distB = getGs().bwta.getGroundDistance(b.getTilePosition(), start.toTilePosition());
+				double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
+				double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
 				if(distA == 0.0 && distB > 0.0) {
 					return 1;
 				}
@@ -50,10 +50,10 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 					return -1;
 				}
 				if(getGs().strat.name != "FullBio" && getGs().strat.name != "FullBioFE") {
-					if(a.isMineralOnly() && !b.isMineralOnly()) {
+					if((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
 						return 1;
 					}
-					if(b.isMineralOnly() && !a.isMineralOnly()) {
+					if((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
 						return -1;
 					}
 				}
@@ -75,19 +75,18 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 
 			} else {
 				if(getGs().enemyBase != null) {
-					start = getGs().enemyBase.getPosition();
+					start = getGs().enemyBase.getLocation().toPosition();
 				}else {
 					return -1;
 				}
-
-				if(a.isIsland()) {
+				if(a.getArea().getAccessibleNeighbors().isEmpty()) {
 					return 1;
 				}
-				if(b.isIsland()) {
+				if(b.getArea().getAccessibleNeighbors().isEmpty()) {
 					return -1;
 				}
-				double distA = getGs().bwta.getGroundDistance(a.getTilePosition(), start.toTilePosition());
-				double distB = getGs().bwta.getGroundDistance(b.getTilePosition(), start.toTilePosition());
+				double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
+				double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
 
 				if(distA == 0.0 && distB > 0.0) {
 					return 1;
@@ -95,10 +94,10 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				if(distB == 0.0 && distA > 0.0) {
 					return -1;
 				}
-				if(a.isMineralOnly() && !b.isMineralOnly()) {
+				if((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
 					return 1;
 				}
-				if(b.isMineralOnly() && !a.isMineralOnly()) {
+				if((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
 					return -1;
 				}
 				if(distA < distB && distA > 0.0) {

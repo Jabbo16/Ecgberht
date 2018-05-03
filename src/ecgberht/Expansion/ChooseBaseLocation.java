@@ -12,7 +12,7 @@ import org.openbw.bwapi4j.unit.Attacker;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 
-import bwta.BaseLocation;
+import bwem.Base;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 
@@ -36,19 +36,19 @@ public class ChooseBaseLocation extends Action {
 			else {
 				main = ((GameState)this.handler).getPlayer().getStartLocation();
 			}
-			List<BaseLocation> valid = new ArrayList<>();
-			for(BaseLocation b : ((GameState)this.handler).BLs) {
-				if(!((GameState)this.handler).CCs.containsKey(b.getRegion().getCenter()) && ((GameState)this.handler).bwta.isConnected(b.getTilePosition(), main)) {
+			List<Base> valid = new ArrayList<>();
+			for(Base b : ((GameState)this.handler).BLs) {
+				if(!((GameState)this.handler).CCs.containsKey(b.getArea().getTop().toPosition()) && ((GameState)this.handler).bwta.isConnected(b.getLocation(), main)) {
 					valid.add(b);
 				}
 			}
-			List<BaseLocation> remove = new ArrayList<>();
-			for(BaseLocation b : valid) {
+			List<Base> remove = new ArrayList<>();
+			for(Base b : valid) {
 				for(Unit u : ((GameState)this.handler).enemyCombatUnitMemory) {
 					if(((GameState)this.handler).bwta.getRegion(u.getPosition()) == null || !(u instanceof Attacker) || u instanceof Worker) {
 						continue;
 					}
-					if(((GameState)this.handler).bwta.getRegion(u.getPosition()).getCenter().equals(((GameState)this.handler).bwta.getRegion(b.getPosition()).getCenter())) {
+					if(((GameState)this.handler).bwta.getRegion(u.getPosition()).getCenter().equals(((GameState)this.handler).bwta.getRegion(b.getLocation()).getCenter())) {
 						remove.add(b);
 						break;
 					}
@@ -57,7 +57,7 @@ public class ChooseBaseLocation extends Action {
 					if(((GameState)this.handler).bwta.getRegion(u.pos) == null) {
 						continue;
 					}
-					if(((GameState)this.handler).bwta.getRegion(u.pos).getCenter().equals(((GameState)this.handler).bwta.getRegion(b.getPosition()).getCenter())) {
+					if(((GameState)this.handler).bwta.getRegion(u.pos).getCenter().equals(((GameState)this.handler).bwta.getRegion(b.getLocation()).getCenter())) {
 						remove.add(b);
 						break;
 					}
@@ -66,7 +66,6 @@ public class ChooseBaseLocation extends Action {
 			valid.removeAll(remove);
 
 			if(valid.isEmpty()) {
-				System.out.println("wut");
 				((GameState)this.handler).chosenBaseLocation = null;
 				((GameState)this.handler).movingToExpand = false;
 				((GameState)this.handler).chosenBuilderBL.stop(false);
@@ -77,7 +76,7 @@ public class ChooseBaseLocation extends Action {
 				((GameState)this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
 				return State.FAILURE;
 			}
-			((GameState)this.handler).chosenBaseLocation = valid.get(0).getTilePosition();
+			((GameState)this.handler).chosenBaseLocation = valid.get(0).getLocation();
 //			System.out.println("----------------------------");
 //			System.out.println(((GameState)this.handler).chosenBaseLocation);
 //			System.out.println("Expanding : " + ((GameState)this.handler).expanding);

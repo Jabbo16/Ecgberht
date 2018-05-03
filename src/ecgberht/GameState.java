@@ -31,8 +31,12 @@ import org.openbw.bwapi4j.util.Pair;
 import com.google.gson.Gson;
 
 import bwem.BWEM;
+import bwem.Base;
+import bwem.ChokePoint;
+import bwem.area.Area;
+import bwem.unit.Geyser;
+import bwem.unit.Mineral;
 import bwta.*;
-import bwta.Region;
 import ecgberht.Strategies.*;
 import jfap.JFAP;
 import jfap.JFAPUnit;
@@ -42,7 +46,7 @@ import ecgberht.Agents.VultureAgent;
 
 public class GameState extends GameHandler {
 
-	public BaseLocation enemyBase = null;
+	public Base enemyBase = null;
 	public boolean activeCount = false;
 	public boolean defense = false;
 	public boolean enemyIsRandom = true;
@@ -55,7 +59,7 @@ public class GameState extends GameHandler {
 	public boolean siegeResearched = false;
 	public BuildingMap map;
 	public BuildingMap testMap;
-	public Chokepoint closestChoke = null;
+	public ChokePoint closestChoke = null;
 	public EnemyInfo EI = new EnemyInfo(ih.enemy().getName());
 	public Gson enemyInfoJSON = new Gson();
 	public InfluenceMap inMap;
@@ -74,9 +78,9 @@ public class GameState extends GameHandler {
 	public int vulturesTrained = 0;
 	public int workerCountToSustain = 0;
 	public JFAP simulator;
-	public List<BaseLocation> blockedBLs = new ArrayList<>(); // TODO Change to BWEM
-	public List<BaseLocation> BLs = new ArrayList<BaseLocation>(); // TODO Change to BWEM
-	public List<BaseLocation> EnemyBLs = new ArrayList<BaseLocation>(); // TODO Change to BWEM
+	public List<Base> blockedBLs = new ArrayList<>();
+	public List<Base> BLs = new ArrayList<>();
+	public List<Base> EnemyBLs = new ArrayList<>();
 	public Map<GasMiningFacility, Pair<Integer,Boolean>> refineriesAssigned = new TreeMap<>(new UnitComparator());
 	public Map<SCV,Pair<UnitType,TilePosition>> workerBuild = new TreeMap<>(new UnitComparator());
 	public Map<Worker,Position> workerDefenders = new TreeMap<>(new UnitComparator());
@@ -98,9 +102,9 @@ public class GameState extends GameHandler {
 	public Player neutral;
 	public Position attackPosition = null;
 	public Race enemyRace = Race.Unknown;
-	public Region naturalRegion = null;
-	public Set<BaseLocation> ScoutSLs = new HashSet<>();
-	public Set<BaseLocation> SLs = new HashSet<>();
+	public Area naturalRegion = null;
+	public Set<Base> ScoutSLs = new HashSet<>();
+	public Set<Base> SLs = new HashSet<>();
 	public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-Ray","Yankee","Zulu"));
 	public Set<Building> buildingLot = new TreeSet<>(new UnitComparator());
 	public Set<ComsatStation> CSs = new TreeSet<>(new UnitComparator());
@@ -143,7 +147,8 @@ public class GameState extends GameHandler {
 
 	public GameState(BW bw, BWTA bwta, BWEM bwem) {
 		super(bw, bwta, bwem);
-		map = new BuildingMap(bw,ih.self(), bwta); // Check old source for bwta->bwem
+		initPlayers();
+		map = new BuildingMap(bw,ih.self(), bwta, bwem); // Check old source for bwta->bwem
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(bw,ih.self(),bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
@@ -169,7 +174,7 @@ public class GameState extends GameHandler {
 	public Strategy initStrat() {
 		try {
 			BioBuild b = new BioBuild();
-			ProxyBBS bbs = new ProxyBBS();
+			// ProxyBBS bbs = new ProxyBBS(); //TODO broken, fix
 			BioMechBuild bM = new BioMechBuild();
 			BioBuildFE bFE = new BioBuildFE();
 			BioMechBuildFE bMFE = new BioMechBuildFE();
@@ -200,7 +205,7 @@ public class GameState extends GameHandler {
 				if(map.contains("HeartbreakRidge")) {
 					double random = Math.random();
 					if(random > 0.75 ) {
-						return new Strategy(bbs);
+						return new Strategy(bFE);
 					}
 					else {
 						return new Strategy(b);
@@ -220,8 +225,8 @@ public class GameState extends GameHandler {
 				Map<String,Pair<Integer,Integer>> strategies = new TreeMap<>();
 				Map<String,AStrategy> nameStrat = new TreeMap<>();
 
-				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0));
-				nameStrat.put(bbs.name, bbs);
+//				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0)); // BROKEN
+//				nameStrat.put(bbs.name, bbs);
 
 				strategies.put(bFE.name, new Pair<Integer,Integer>(0,0));
 				nameStrat.put(bFE.name, bFE);
@@ -303,13 +308,13 @@ public class GameState extends GameHandler {
 		if(blockingMinerals.isEmpty()) {
 			return;
 		}
-		for(BaseLocation b : BLs) {
-			if(b.isStartLocation()) {
+		for(bwem.Base b : BLs) {
+			if(b.isStartingLocation()) {
 				continue;
 			}
-			for(Chokepoint c : b.getRegion().getChokepoints()) {
+			for(ChokePoint c : b.getArea().getChokePoints()) {
 				for(Position m : blockingMinerals.keySet()) {
-					if(broodWarDistance(m,c.getCenter()) < 40){
+					if(broodWarDistance(m,c.getCenter().toPosition()) < 40){
 						blockedBLs.add(b);
 						break;
 					}
@@ -374,14 +379,14 @@ public class GameState extends GameHandler {
 	}
 
 	public void addNewResources(Unit unit) {
-		List<MineralPatch> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
-		List<VespeneGeyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
-		for(Unit m : minerals) {
-			mineralsAssigned.put((MineralPatch) m, 0);
+		List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
+		List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
+		for(Mineral m : minerals) {
+			mineralsAssigned.put((MineralPatch) m.getUnit(), 0);
 		}
-		for(Unit m:gas) {
+		for(Geyser g : gas) {
 			Pair<Integer,Boolean> geyser = new Pair<>(0,false);
-			refineriesAssigned.put((GasMiningFacility) m,geyser);
+			refineriesAssigned.put((GasMiningFacility) g.getUnit(),geyser); // TODO Cant cast to GasMiningFacility from VespeneGeyser
 		}
 		if(strat.name == "ProxyBBS") {
 			workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
@@ -389,13 +394,13 @@ public class GameState extends GameHandler {
 	}
 
 	public void removeResources(Unit unit) {
-		List<MineralPatch> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
-		List<VespeneGeyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
-		for(Unit m : minerals) {
-			if(mineralsAssigned.containsKey(m)) {
+		List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
+		List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
+		for(Mineral m : minerals) {
+			if(mineralsAssigned.containsKey(m.getUnit())) {
 				List<Unit> aux = new ArrayList<>();
 				for(Entry<Worker, MineralPatch> w: workerMining.entrySet()) {
-					if(m.equals(w.getValue())) {
+					if(m.getUnit().equals(w.getValue())) {
 						aux.add(w.getKey());
 						workerIdle.add(w.getKey());
 					}
@@ -403,18 +408,18 @@ public class GameState extends GameHandler {
 				for(Unit u : aux) {
 					workerMining.remove(u);
 				}
-				mineralsAssigned.remove(m);
+				mineralsAssigned.remove(m.getUnit());
 			}
 
 		}
-		for(Unit m : gas) {
+		for(Geyser g : gas) {
 			Pair<Integer,Boolean> geyser = new Pair<Integer,Boolean>(0,false);
-			refineriesAssigned.put((GasMiningFacility) m,geyser);
+			refineriesAssigned.put((GasMiningFacility) g.getUnit(),geyser);
 		}
 		List<Unit> auxGas = new ArrayList<>();
 		for(Entry<GasMiningFacility, Pair<Integer, Boolean>> pm : refineriesAssigned.entrySet()) {
-			for(Unit m : gas) {
-				if(pm.getKey().equals(m)) {
+			for(Geyser g : gas) {
+				if(pm.getKey().equals(g.getUnit())) {
 					List<Unit> aux = new ArrayList<>();
 					for(Entry<Worker, GasMiningFacility> w: workerGas.entrySet()) {
 						if(pm.getKey().equals(w.getValue())) {
@@ -447,8 +452,8 @@ public class GameState extends GameHandler {
 
 	public void printer() {
 		Integer counter = 0;
-		for(BaseLocation b : BLs) {
-			bw.getMapDrawer().drawTextMap(b.getPosition(), counter.toString());
+		for(bwem.Base b : BLs) {
+			bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
 			counter++;
 		}
 
@@ -458,7 +463,7 @@ public class GameState extends GameHandler {
 
 		bw.getMapDrawer().drawTextScreen(10, 80, "Strategy: " + strat.name);
 		if(closestChoke != null) {
-			bw.getMapDrawer().drawTextMap(closestChoke.getCenter(), "Choke");
+			bw.getMapDrawer().drawTextMap(closestChoke.getCenter().toPosition(), "Choke");
 		}
 
 		if(chosenBuilderBL != null) {
@@ -573,36 +578,35 @@ public class GameState extends GameHandler {
 		return sh + (h > 0 ? " " : "") + sm + (m > 0 ? " " : "") + ss;
 	}
 
-	public void initStartLocations() { // TODO change to bwem
-		BaseLocation startBot = Util.getClosestBaseLocation(self.getStartLocation().toPosition());
-		for (BaseLocation b : bwta.getBaseLocations()) {
-			if (b.isStartLocation() && !b.getTilePosition().equals(startBot.getTilePosition())) {
+	public void initStartLocations() {
+		Base startBot = Util.getClosestBaseLocation(self.getStartLocation().toPosition());
+		for (bwem.Base b : bwem.getMap().getBases()) {
+			if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) { // TODO Test, scouter bugged
 				SLs.add(b);
 				ScoutSLs.add(b);
 			}
 		}
 	}
 
-	public void initBaseLocations() { // TODO change to bwem
-		BLs.addAll(bwta.getBaseLocations());
+	public void initBaseLocations() {
+		BLs.addAll(bwem.getMap().getBases());
 		Collections.sort(BLs, new BaseLocationComparator(false));
-
 	}
 
 	public void moveUnitFromChokeWhenExpand(){
 		try {
 			if(!squads.isEmpty() && chosenBaseLocation != null) {
-				Region chosenRegion = bwta.getRegion(chosenBaseLocation);
+				Area chosenRegion = bwem.getMap().getArea(chosenBaseLocation);
 				if(chosenRegion != null) {
-					if(chosenRegion.getCenter().equals(naturalRegion.getCenter())) {
+					if(chosenRegion.equals(naturalRegion)) {
 						TilePosition mapCenter = new TilePosition(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
-						List<Chokepoint> cs = chosenRegion.getChokepoints();
-						Chokepoint closestChoke = null;
-						for(Chokepoint c : cs) {
+						List<ChokePoint> cs = chosenRegion.getChokePoints();
+						ChokePoint closestChoke = null;
+						for(ChokePoint c : cs) {
 							if(!c.getCenter().toTilePosition().equals(this.closestChoke.getCenter().toTilePosition())) {
-								double aux = broodWarDistance(c.getCenter(),chosenBaseLocation.toPosition());
+								double aux = broodWarDistance(c.getCenter().toPosition(),chosenBaseLocation.toPosition());
 								if(aux > 0.0) {
-									if(closestChoke == null ||  aux < broodWarDistance(closestChoke.getCenter(),mapCenter.toPosition())) {
+									if(closestChoke == null ||  aux < broodWarDistance(closestChoke.getCenter().toPosition(),mapCenter.toPosition())) {
 										closestChoke = c;
 									}
 								}
@@ -611,7 +615,7 @@ public class GameState extends GameHandler {
 						if(closestChoke != null) {
 							for(Squad s : squads.values()) {
 								if(s.status == Status.IDLE) {
-									s.giveAttackOrder(closestChoke.getCenter());
+									s.giveAttackOrder(closestChoke.getCenter().toPosition());
 									s.status = Status.ATTACK;
 								}
 							}
@@ -728,8 +732,8 @@ public class GameState extends GameHandler {
 			enemyBase = null;
 			chosenScout = null;
 			ScoutSLs.clear();
-			for(BaseLocation b : BLs) {
-				if(!CCs.containsKey(b.getRegion().getCenter()) && bwta.isConnected(self.getStartLocation(), b.getTilePosition())) {
+			for(bwem.Base b : BLs) {
+				if(!CCs.containsKey(b.getArea().getTop().toPosition()) && bwta.isConnected(self.getStartLocation(), b.getLocation())) {
 					ScoutSLs.add(b);
 				}
 			}
@@ -754,11 +758,11 @@ public class GameState extends GameHandler {
 //	}
 
 	public void initClosestChoke() {
-		List<BaseLocation> aux = BLs;
-		Region naturalArea = aux.get(1).getRegion();
+		List<bwem.Base> aux = BLs;
+		Area naturalArea = aux.get(1).getArea();
 		naturalRegion = naturalArea;
 		double distBest = Double.MAX_VALUE;
-		for (Chokepoint choke : naturalArea.getChokepoints())
+		for (ChokePoint choke : naturalArea.getChokePoints())
 		{
 			double dist = bwta.getGroundDistance(choke.getCenter().toTilePosition(), getPlayer().getStartLocation());
 			if (dist < distBest && dist > 0.0)
@@ -778,11 +782,11 @@ public class GameState extends GameHandler {
 		UnitType type = UnitType.Terran_Command_Center;
 		Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
 		Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
-		List<Unit> blockers = bw.getUnitsInRectangle(topLeft, bottomRight);
+		List<Unit> blockers = Util.getUnitsInRectangle(topLeft, bottomRight);
 		if(!blockers.isEmpty()) {
 			for(Unit u : blockers) {
 				if(((PlayerUnit)u).getPlayer().getId() == self.getId() && !u.equals(chosen) && !(u instanceof Worker)) {
-					((MobileUnit) u).move(Util.getClosestChokepoint(BL.toPosition()).getCenter());
+					((MobileUnit) u).move(Util.getClosestChokepoint(BL.toPosition()).getCenter().toPosition());
 				}
 			}
 		}
@@ -1092,7 +1096,7 @@ public class GameState extends GameHandler {
 		List<Unit> aux = new ArrayList<Unit>();
 		for(EnemyBuilding u : enemyBuildingMemory.values()) {
 			if(bw.getBWMap().isVisible(u.pos)) {
-				if(!bw.getUnitsOnTile(u.pos).contains(u.unit)){ // TODO Implement
+				if(!Util.getUnitsOnTile(u.pos).contains(u.unit)){ // TODO test
 					aux.add(u.unit);
 				}
 				else if(u.unit.isVisible()) {
@@ -1164,7 +1168,7 @@ public class GameState extends GameHandler {
 				count++;
 			}
 		}
-		count += Util.countUnitTypeSelf(type); // TODO implement
+		count += Util.countUnitTypeSelf(type);
 		return count;
 	}
 
@@ -1222,7 +1226,7 @@ public class GameState extends GameHandler {
 	public boolean armyGroupedBBS() {
 		boolean allFine = true;
 		for(Squad s : squads.values()) {
-			if(s.attack != Position.None) {
+			if(s.attack != null) { // TODO test
 				if(s.members.size() == 1) {
 					continue;
 				}

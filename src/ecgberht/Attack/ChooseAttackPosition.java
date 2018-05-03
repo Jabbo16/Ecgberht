@@ -34,7 +34,7 @@ public class ChooseAttackPosition extends Action {
 					continue;
 				}
 				else if(((GameState)this.handler).enemyBase != null){
-					((GameState)this.handler).attackPosition = ((GameState)this.handler).enemyBase.getPosition();
+					((GameState)this.handler).attackPosition = ((GameState)this.handler).enemyBase.getLocation().toPosition();
 					continue;
 				} else {
 					u.status = Status.IDLE;

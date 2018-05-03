@@ -51,8 +51,8 @@ public class CheckHarasserAttacked extends Conditional {
 				((GameState)this.handler).EI.defendHarass = true;
 			}
 			if(attackers.isEmpty()) {
-				if(!((GameState)this.handler).getGame().getBWMap().isVisible(((GameState)this.handler).enemyBase.getTilePosition()) && ((GameState)this.handler).chosenUnitToHarass == null){
-					((GameState)this.handler).chosenHarasser.move(((GameState)this.handler).enemyBase.getPosition());
+				if(!((GameState)this.handler).getGame().getBWMap().isVisible(((GameState)this.handler).enemyBase.getLocation()) && ((GameState)this.handler).chosenUnitToHarass == null){
+					((GameState)this.handler).chosenHarasser.move(((GameState)this.handler).enemyBase.getLocation().toPosition());
 				}
 				return State.SUCCESS;
 			}

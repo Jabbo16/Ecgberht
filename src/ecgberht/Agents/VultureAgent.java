@@ -8,9 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.GroundAttacker;
 import org.openbw.bwapi4j.unit.PlayerUnit;
@@ -36,7 +34,7 @@ public class VultureAgent implements Comparator<VultureAgent>{
 	UnitType type = UnitType.Terran_Vulture;
 	boolean minesResearched = false;
 	int mines = 3;
-	Position attackPos = Position.None;
+	Position attackPos = null;
 	Unit attackUnit = null;
 	Status status = Status.IDLE;
 	int frameLastOrder = 0;
@@ -158,7 +156,7 @@ public class VultureAgent implements Comparator<VultureAgent>{
 						else {
 							unit.attack(toAttack);
 							attackUnit = toAttack;
-							attackPos = Position.None;
+							attackPos = null;
 						}
 					}
 				}
@@ -270,24 +268,24 @@ public class VultureAgent implements Comparator<VultureAgent>{
 		} else {
 			unit.move(getGs().getPlayer().getStartLocation().toPosition());
 		}
-		attackPos = Position.None;
+		attackPos = null;
 		attackUnit = null;
 	}
 
 	private void kite() {
 		Position kite = getGs().kiteAway(unit, closeEnemies);
 		unit.move(kite);
-		attackPos = Position.None;
+		attackPos = null;
 	}
 
 	private void attack() {
 		Position newAttackPos = null;
-		if(attackPos == Position.None) {
+		if(attackPos == null) {
 			newAttackPos = selectNewAttack();
 			attackPos = newAttackPos;
-			if(attackPos == null || !attackPos.isValid()) {
+			if(attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
 				attackUnit = null;
-				attackPos = Position.None;
+				attackPos = null;
 				return;
 			}
 			unit.attack(newAttackPos);
@@ -302,10 +300,10 @@ public class VultureAgent implements Comparator<VultureAgent>{
 
 	private Position selectNewAttack() {
 		if(getGs().enemyBase != null) {
-			return getGs().enemyBase.getPosition();
+			return getGs().enemyBase.getLocation().toPosition();
 		}
 		else {
-			return getGs().EnemyBLs.get(1).getPosition();
+			return getGs().EnemyBLs.get(1).getLocation().toPosition();
 		}
 	}
 
