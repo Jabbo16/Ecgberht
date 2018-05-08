@@ -372,14 +372,14 @@ public class GameState extends GameHandler {
 		List<Pair<Pair<Unit,Integer>,Boolean> > auxGas = new ArrayList<Pair<Pair<Unit,Integer>,Boolean> >();
 		for(Unit m : minerals) {
 			if(mineralsAssigned.containsKey(m)) {
-				List<Pair<Unit,Unit> > aux = new ArrayList<Pair<Unit,Unit> >();
-				for(Pair<Unit,Unit> w: workerTask) {
-					if(m.equals(w.second)) {
-						aux.add(w);
-						workerIdle.add(w.first);
+				List<Unit> aux = new ArrayList<>();
+				for(Entry<Unit, Unit> w: workerMining.entrySet()) {
+					if(m.equals(w.getValue())) {
+						aux.add(w.getKey());
+						workerIdle.add(w.getKey());
 					}
 				}
-				workerTask.removeAll(aux);
+				for(Unit u : aux) workerMining.remove(u);
 				mineralsAssigned.remove(m);
 			}
 
@@ -488,13 +488,17 @@ public class GameState extends GameHandler {
 //				print(u,Color.Red);
 //			}
 //		}
-		List <Region> regions = BWTA.getRegions();
-		for(Region reg: regions) {
-			List <Chokepoint> ch = reg.getChokepoints();
-			for(Chokepoint c : ch) {
-				Pair <Position,Position> lados = c.getSides();
-				game.drawLineMap(lados.first, lados.second, Color.Green);
-			}
+//		List <Region> regions = BWTA.getRegions();
+//		for(Region reg: regions) {
+//			List <Chokepoint> ch = reg.getChokepoints();
+//			for(Chokepoint c : ch) {
+//				Pair <Position,Position> sides = c.getSides();
+//				game.drawLineMap(sides.first, sides.second, Color.Green);
+//			}
+//		}
+		for(Chokepoint c : BWTA.getChokepoints()) {
+			Pair <Position,Position> sides = c.getSides();
+			game.drawLineMap(sides.first, sides.second, Color.Green);
 		}
 		for(Unit u: CCs.values()) {
 			print(u,Color.Yellow);
