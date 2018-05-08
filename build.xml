@@ -33,5 +33,6 @@
     <target name="clean-build" depends="clean,jar"/>
 
     <target name="main" depends="clean,run"/>
+	<target name="test" depends="clean,run"/>
 
 </project>
