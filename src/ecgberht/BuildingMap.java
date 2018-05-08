@@ -408,9 +408,9 @@ public class BuildingMap {
 	//Finds a valid position in the map for a specific building type starting with a given tileposition
 	public TilePosition findPosition(UnitType buildingType, TilePosition starting){
 		TilePosition buildingSize = buildingType.tileSize();
-		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
+		int size = Math.max(buildingSize.getY(), buildingSize.getX());
 		if(buildingType.canBuildAddon()) {
-			tamaño = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
+			size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
 		}
 		int x = starting.getY();
 		int y = starting.getX();
@@ -424,7 +424,7 @@ public class BuildingMap {
 			for(int ii = (x - i); ii <= (x + i); ii++) {
 				for(int jj = (y - j); jj <= (y + j); jj++) {
 					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
+						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
 							if(buildingType == UnitType.Terran_Bunker) {
 								if(!BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(BWTA.getRegion(self.getStartLocation()).getCenter())) {
 									continue;
@@ -449,7 +449,7 @@ public class BuildingMap {
 
 	public TilePosition findBunkerPosition(Chokepoint choke){
 		TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
-		int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
+		int size = Math.max(buildingSize.getY(), buildingSize.getX());
 		Position starting = choke.getCenter();
 		Pair<Position,Position> sides = choke.getSides();
 		Position closestSide = null;
@@ -469,7 +469,7 @@ public class BuildingMap {
 		for(int ii = (x - i); ii <= (x + i); ii++) {
 			for(int jj = (y - j); jj <= (y + j); jj++) {
 				if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
+					if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
 						if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
 							continue;
 						}
@@ -524,7 +524,7 @@ public class BuildingMap {
 		if(bunkerPlace == TilePosition.None) {
 			TilePosition starting = getGs().MBs.iterator().next().getTilePosition();
 			TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
-			int tamaño = Math.max(buildingSize.getY(), buildingSize.getX());
+			int size = Math.max(buildingSize.getY(), buildingSize.getX());
 			int x = starting.getY();
 			int y = starting.getX();
 
@@ -535,7 +535,7 @@ public class BuildingMap {
 			for(int ii = (x - i); ii <= (x + i + 4); ii++) {
 				for(int jj = (y - j); jj <= (y + j + 3); jj++) {
 					if((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tamaño) {
+						if((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
 							if(BWTA.getRegion(new TilePosition(jj, ii)).getCenter().equals(getGs().naturalRegion.getCenter())) {
 								continue;
 							}
