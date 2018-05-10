@@ -1,12 +1,11 @@
 sudo: true
 language: java
 jdk: openjdk8
-before_install:
+before_scripr:
     - sudo dpkg --add-architecture i386
-    - sudo apt-get update
+    - sudo update-java-alternatives --set java-1.8.0-openjdk-i386
+    - export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-i386"
 addons:
   apt:
     packages:
     - openjdk-8-jdk:i386
-after_install:
-    - sudo update-java-alternatives --set java-1.8.0-openjdk-i386
