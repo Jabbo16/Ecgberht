@@ -1,38 +1,32 @@
 <project name="Ecgberht" basedir="." default="main">
-
-    <property name="src.dir"     value="src"/>
-    <property name="build.dir"   value="build"/>
-    <property name="classes.dir" value="${build.dir}/classes"/>
-    <property name="jar.dir"     value="${build.dir}/jar"/>
-    <property name="main-class"  value="ecgberht.Ecgberht"/>
-
-
-
-    <target name="clean">
-        <delete dir="${build.dir}"/>
-    </target>
-
-    <target name="compile">
-        <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
-    </target>
-
-    <target name="jar" depends="compile">
-        <mkdir dir="${jar.dir}"/>
-        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
-            <manifest>
-                <attribute name="Main-Class" value="${main-class}"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target name="run" depends="jar">
-        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
-    </target>
-
-    <target name="clean-build" depends="clean,jar"/>
-
-    <target name="main" depends="clean,run"/>
+	<property name="main-class" value="ecgberht.Ecgberht"/>
+	<target name="clean">
+		<delete dir="./build"/>
+	</target>
+	<target name="compile">
+		<mkdir dir="./build/classes"/>
+		<unjar dest="./build/classes">
+			<fileset dir="./lib/" includes="*.jar"/>
+		</unjar>
+		<javac srcdir="./src/" destdir="./build/classes"></javac>
+	</target>
+	<target name="sounds">
+		<copy todir="./build/classes">
+			<fileset dir="./src" includes="*.mp3"/>
+		</copy>
+	</target>
+	<target name="jar" depends="compile, sounds">
+		<mkdir dir="./build/jar"/>
+		<jar destfile="./build/jar/Ecgberht.jar" basedir="./build/classes">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}"/>
+			</manifest>
+		</jar>
+	</target>
+	<target name="run" depends="jar">
+		<java jar="./build/jar/Ecgberht.jar" fork="true" timeout="3500"/>
+		<antcall target="clean"/>
+	</target>
+	<target name="main" depends="clean,run"/>
 	<target name="test" depends="clean,run"/>
-
 </project>

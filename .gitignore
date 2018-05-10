@@ -10,3 +10,4 @@ bin/
 .checkstyle
 src/ecgberht/uncrustify.cfg
 bwapi-data/
+/target/
