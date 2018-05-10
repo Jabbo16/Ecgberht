@@ -1,5 +1,7 @@
 # Ecgberht
 
+[![Build Status](https://travis-ci.org/Jabbo16/Ecgberht.svg?branch=master)](https://travis-ci.org/Jabbo16/Ecgberht) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 ## Description
 
 Ecgberht is a Java Starcraft: Brood War bot based on BWMirror 2.6 and BWAPI 4.1.2.
