@@ -8,3 +8,5 @@ addons:
   apt:
     packages:
     - openjdk-8-jdk:i386
+after_install:
+    - sudo update-java-alternatives --set java-1.8.0-openjdk-i386
