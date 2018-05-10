@@ -24,9 +24,7 @@
 		</jar>
 	</target>
 	<target name="run" depends="jar">
-		<java jar="./build/jar/Ecgberht.jar" fork="true" timeout="3500">
-			<jvmarg value="-d32"/>
-		</java>
+		<java jar="./build/jar/Ecgberht.jar" fork="true" timeout="3500"/>
 		<antcall target="clean"/>
 	</target>
 	<target name="main" depends="clean,run"/>
