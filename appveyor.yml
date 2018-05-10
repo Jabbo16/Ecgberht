@@ -14,7 +14,7 @@ install:
         )
         [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\ant-bin.zip", "C:\ant")
       }
-  - cmd: SET PATH=C:\ant\apache-ant-1.9.9\bin;%JAVA_HOME%\bin;%PATH%
+  - cmd: SET PATH=C:\ant\apache-ant-1.9.9\bin;C:\Progra~2\Java\jdk1.8.0\bin;%PATH%
   - cmd: echo %PATH%
   - cmd: java -version
 
