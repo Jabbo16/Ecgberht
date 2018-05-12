@@ -1,6 +1,6 @@
 # Ecgberht
 
-[![Build Status](https://travis-ci.org/Jabbo16/Ecgberht.svg?branch=master)](https://travis-ci.org/Jabbo16/Ecgberht) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build status](https://ci.appveyor.com/api/projects/status/ka5uam9blh1i8qtn?svg=true)](https://ci.appveyor.com/project/Jabbo16/ecgberht) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Description
 
