@@ -10,8 +10,11 @@ import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.SpecialBuilding;
 import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.VespeneGeyser;
 import org.openbw.bwapi4j.util.Pair;
 
 public class InfluenceMap {
@@ -39,35 +42,46 @@ public class InfluenceMap {
 	}
 
 	public void updateMap(Unit arg0,boolean destroyed) {
-		int influence = 0;
-		UnitType type = Util.getType((PlayerUnit)arg0);
-		TilePosition tile = arg0.getTilePosition();
-		if(type.isBuilding()) {
-			if(type.canAttack() || type.equals(UnitType.Terran_Bunker)) {
-				influence = defensive;
-			} else {
-				if(type.canProduce()) {
-					influence = ofensive;
+		try {
+			int influence = 0;
+			UnitType type = UnitType.Unknown;
+			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding) {
+				return;
+			}
+			else{
+				type = Util.getType((PlayerUnit)arg0);
+			}
+			TilePosition tile = arg0.getTilePosition();
+			if(type.isBuilding()) {
+				if(type.canAttack() || type.equals(UnitType.Terran_Bunker)) {
+					influence = defensive;
 				} else {
-					influence = neutral;
+					if(type.canProduce()) {
+						influence = ofensive;
+					} else {
+						influence = neutral;
+					}
+				}
+			} else {
+				if(type.isFlyer()) {
+					influence = flying;
+				} else if(type.isMechanical()) {
+					influence = mech;
+				} else {
+					influence = bio;
 				}
 			}
-		} else {
-			if(type.isFlyer()) {
-				influence = flying;
-			} else if(type.isMechanical()) {
-				influence = mech;
-			} else {
-				influence = bio;
+			if(destroyed) {
+				influence *= -1;
 			}
+			if(Util.isEnemy(((PlayerUnit)arg0).getPlayer())) {
+				influence *= -1;
+			}
+			updateCellInfluence(new Pair<Point,Integer>(new Point(tile.getY(),tile.getX()),influence),type.isBuilding());
+		} catch(Exception e){
+			System.err.println("updateInMap Exception");
+			e.printStackTrace();
 		}
-		if(destroyed) {
-			influence *= -1;
-		}
-		if(Util.isEnemy(((PlayerUnit)arg0).getPlayer())) {
-			influence *= -1;
-		}
-		updateCellInfluence(new Pair<Point,Integer>(new Point(tile.getY(),tile.getX()),influence),type.isBuilding());
 	}
 
 	public void updateCellInfluence(Pair<Point,Integer> tile,boolean building) {

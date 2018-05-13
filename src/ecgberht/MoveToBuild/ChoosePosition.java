@@ -30,11 +30,9 @@ public class ChoosePosition extends Action {
 			TilePosition origin = null;
 			if(((GameState)this.handler).chosenToBuild.isRefinery()) {
 				if(!((GameState)this.handler).refineriesAssigned.isEmpty()) {
-					for (Entry<GasMiningFacility, Pair<Integer, Boolean>> g : ((GameState)this.handler).refineriesAssigned.entrySet()) {
-						if (!g.getValue().second) {
-							((GameState)this.handler).chosenPosition = g.getKey().getTilePosition();
-							return State.SUCCESS;
-						}
+					for (Entry<GasMiningFacility, Integer> g : ((GameState)this.handler).refineriesAssigned.entrySet()) {
+						((GameState)this.handler).chosenPosition = g.getKey().getTilePosition();
+						return State.SUCCESS;
 					}
 				}
 

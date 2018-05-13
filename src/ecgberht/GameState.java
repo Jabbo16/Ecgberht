@@ -81,7 +81,8 @@ public class GameState extends GameHandler {
 	public List<Base> blockedBLs = new ArrayList<>();
 	public List<Base> BLs = new ArrayList<>();
 	public List<Base> EnemyBLs = new ArrayList<>();
-	public Map<GasMiningFacility, Pair<Integer,Boolean>> refineriesAssigned = new TreeMap<>(new UnitComparator());
+	public Map <VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>(new UnitComparator());
+	public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>(new UnitComparator());
 	public Map<SCV,Pair<UnitType,TilePosition>> workerBuild = new TreeMap<>(new UnitComparator());
 	public Map<Worker,Position> workerDefenders = new TreeMap<>(new UnitComparator());
 	public Map<SCV,Building> repairerTask = new TreeMap<>(new UnitComparator());
@@ -159,7 +160,9 @@ public class GameState extends GameHandler {
 	public void initPlayers() {
 		int ally = self.getForceID();
 		for(Player p : bw.getAllPlayers()) {
-			if(p.isObserver()) continue;
+			//System.out.println("playername: " + p.getName() + " is observer: " + p.isObserver());
+			//if(p.isObserver()) continue;
+
 			if(p.isNeutral()) {
 				players.put(p, 0);
 				neutral = p;
@@ -167,7 +170,9 @@ public class GameState extends GameHandler {
 			else if(p.getForceID() == ally) {
 				players.put(p, 1);
 			}
-			players.put(p, -1);
+			else{
+				players.put(p, -1);
+			}
 		}
 	}
 
@@ -385,8 +390,7 @@ public class GameState extends GameHandler {
 			mineralsAssigned.put((MineralPatch) m.getUnit(), 0);
 		}
 		for(Geyser g : gas) {
-			Pair<Integer,Boolean> geyser = new Pair<>(0,false);
-			refineriesAssigned.put((GasMiningFacility) g.getUnit(),geyser); // TODO Cant cast to GasMiningFacility from VespeneGeyser
+			vespeneGeysers.put((VespeneGeyser) g.getUnit(), false);
 		}
 		if(strat.name == "ProxyBBS") {
 			workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
@@ -413,11 +417,13 @@ public class GameState extends GameHandler {
 
 		}
 		for(Geyser g : gas) {
-			Pair<Integer,Boolean> geyser = new Pair<Integer,Boolean>(0,false);
-			refineriesAssigned.put((GasMiningFacility) g.getUnit(),geyser);
+			VespeneGeyser geyser = (VespeneGeyser) g.getUnit(); // TODO improve
+			if(vespeneGeysers.containsKey(geyser)) {
+				vespeneGeysers.remove(geyser);
+			}
 		}
 		List<Unit> auxGas = new ArrayList<>();
-		for(Entry<GasMiningFacility, Pair<Integer, Boolean>> pm : refineriesAssigned.entrySet()) {
+		for(Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) { // TODO test
 			for(Geyser g : gas) {
 				if(pm.getKey().equals(g.getUnit())) {
 					List<Unit> aux = new ArrayList<>();
@@ -456,6 +462,7 @@ public class GameState extends GameHandler {
 			bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
 			counter++;
 		}
+		bw.getMapDrawer().drawTextScreen(10, 50,"Next Building: "+ chosenToBuild);
 
 		for(VultureAgent vulture : agents) {
 			bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), vulture.statusToString());

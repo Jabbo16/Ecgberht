@@ -34,6 +34,7 @@ import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Refinery;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 import org.openbw.bwapi4j.unit.SCV;
+import org.openbw.bwapi4j.unit.SpecialBuilding;
 import org.openbw.bwapi4j.unit.Starport;
 import org.openbw.bwapi4j.unit.SupplyDepot;
 import org.openbw.bwapi4j.unit.Unit;
@@ -413,6 +414,14 @@ public class Ecgberht implements BWEventListener {
 	@Override
 	public void onFrame() {
 		try {
+
+//			if(true) {
+//				System.out.println("---WorkerBuild---");
+//				System.out.println(gs.workerBuild);
+//				System.out.println("---WorkerTask---");
+//				System.out.println(gs.workerTask);
+//			}
+
 			long frameStart = System.currentTimeMillis();
 			gs.frameCount = ih.getFrameCount();
 			if(gs.frameCount == 1000) gs.sendCustomMessage();
@@ -517,30 +526,36 @@ public class Ecgberht implements BWEventListener {
 
 	@Override
 	public void onUnitCreate(Unit arg0) {
-		PlayerUnit pU = (PlayerUnit)arg0;
-		UnitType type = Util.getType(pU);
-		if(!type.isNeutral() && !type.isSpecialBuilding()) {
-			if(arg0 instanceof Building) {
-				gs.inMap.updateMap(arg0,false);
-				if(pU.getPlayer().getId() == self.getId()) {
-					if(!(arg0 instanceof CommandCenter)) {
-						gs.map.updateMap(arg0.getTilePosition(), type, false);
-						gs.testMap = gs.map.clone();
-					}
-					for(Entry<SCV, Pair<UnitType, TilePosition>> u: gs.workerBuild.entrySet()) {
-						if(u.getKey().equals(((Building)arg0).getBuildUnit()) && u.getValue().first.equals(type)) {
-							gs.workerTask.put(u.getKey(),(Building) arg0);
-							gs.deltaCash.first -= type.mineralPrice();
-							gs.deltaCash.second -= type.gasPrice();
-							gs.workerBuild.remove(u.getKey());
-							break;
+		try {
+			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding) return;
+			PlayerUnit pU = (PlayerUnit)arg0;
+			UnitType type = Util.getType(pU);
+			if(!type.isNeutral() && !type.isSpecialBuilding()) {
+				if(arg0 instanceof Building) {
+					gs.inMap.updateMap(arg0,false);
+					if(pU.getPlayer().getId() == self.getId()) {
+						if(!(arg0 instanceof CommandCenter)) {
+							gs.map.updateMap(arg0.getTilePosition(), type, false);
+							gs.testMap = gs.map.clone();
+						}
+						for(Entry<SCV, Pair<UnitType, TilePosition>> u: gs.workerBuild.entrySet()) {
+							if(u.getKey().equals(((Building)arg0).getBuildUnit()) && u.getValue().first.equals(type)) { // TODO use Map
+								gs.workerTask.put(u.getKey(),(Building) arg0);
+								gs.deltaCash.first -= type.mineralPrice();
+								gs.deltaCash.second -= type.gasPrice();
+								gs.workerBuild.remove(u.getKey());
+								break;
+							}
 						}
 					}
 				}
+				else if(arg0 instanceof Vulture && pU.getPlayer().getId() == self.getId()) {
+					gs.vulturesTrained++;
+				}
 			}
-			else if(arg0 instanceof Vulture && pU.getPlayer().getId() == self.getId()) {
-				gs.vulturesTrained++;
-			}
+		} catch(Exception e) {
+			System.err.println("onUnitCreate exception");
+			e.printStackTrace();
 		}
 	}
 
@@ -557,15 +572,13 @@ public class Ecgberht implements BWEventListener {
 				if(type.isBuilding()) {
 					gs.builtBuildings++;
 					if(type.isRefinery()) {
-						for(Entry<GasMiningFacility, Pair<Integer, Boolean>> r : gs.refineriesAssigned.entrySet()) {
+						for(Entry<VespeneGeyser, Boolean> r : gs.vespeneGeysers.entrySet()) {
 							if(r.getKey().getTilePosition().equals(arg0.getTilePosition())) {
-								Pair<Integer, Boolean> aux = gs.refineriesAssigned.get(r.getKey());
-								aux.second = true;
-								aux.first++;
-								gs.refineriesAssigned.put(r.getKey(), aux);
+								gs.vespeneGeysers.put(r.getKey(), true);
 								break;
 							}
 						}
+						gs.refineriesAssigned.put((GasMiningFacility) arg0, 0);
 						gs.builtRefinery++;
 					} else {
 						if(type == UnitType.Terran_Command_Center) {
@@ -677,7 +690,7 @@ public class Ecgberht implements BWEventListener {
 			}
 		} catch(Exception e) {
 			System.err.println("onUnitComplete exception");
-			System.err.println(e);
+			e.printStackTrace();
 		}
 
 	}
@@ -777,9 +790,8 @@ public class Ecgberht implements BWEventListener {
 						}
 						if(gs.workerGas.containsKey(arg0)) {
 							GasMiningFacility aux = gs.workerGas.get(arg0);
-							Pair<Integer,Boolean> auxPair = gs.refineriesAssigned.get(arg0);
-							auxPair.first--;
-							gs.refineriesAssigned.put(aux, auxPair);
+							Integer auxInt = gs.refineriesAssigned.get(arg0);
+							gs.refineriesAssigned.put(aux, auxInt--);
 							gs.workerGas.remove(arg0);
 						}
 
@@ -875,20 +887,21 @@ public class Ecgberht implements BWEventListener {
 								gs.DBs.remove(arg0);
 							}
 						}
-						if(type.isRefinery()) { // TODO Use Map
-							for(Entry<GasMiningFacility, Pair<Integer, Boolean>> r: gs.refineriesAssigned.entrySet()) {
-								if(r.getKey().equals(arg0)) {
-									Pair<Integer, Boolean> auxPair = new Pair<>(0, false);
-									gs.refineriesAssigned.put(r.getKey(), auxPair);
-									List<Unit> aux = new ArrayList<>();
-									for(Entry<Worker, GasMiningFacility> w: gs.workerGas.entrySet()) {
-										if(r.getKey().equals(w.getValue())) {
-											aux.add(w.getKey());
-											gs.workerIdle.add((Worker) w.getKey());
-										}
+						if(type.isRefinery()) { // TODO test
+							if(gs.refineriesAssigned.containsKey(arg0)) {
+								List<Unit> aux = new ArrayList<>();
+								for(Entry<Worker, GasMiningFacility> w: gs.workerGas.entrySet()) {
+									if(arg0.equals(w.getValue())) {
+										gs.workerIdle.add((Worker) w.getKey());
+										aux.add(w.getKey());
 									}
-									for(Unit u : aux) gs.workerGas.remove(u);
-									break;
+								}
+								for(Unit u : aux) gs.workerGas.remove(u);
+								gs.refineriesAssigned.remove(arg0);
+								for(VespeneGeyser g : gs.vespeneGeysers.keySet()) {
+									if(g.getTilePosition().equals(arg0.getTilePosition())) {
+										gs.vespeneGeysers.put(g, false);
+									}
 								}
 							}
 						}
@@ -928,7 +941,7 @@ public class Ecgberht implements BWEventListener {
 			}
 		}
 		if(arg0 instanceof Refinery && ((PlayerUnit)arg0).getPlayer().getId() == self.getId()) {
-			for(Entry<GasMiningFacility, Pair<Integer, Boolean>> r:gs.refineriesAssigned.entrySet()) {
+			for(Entry<GasMiningFacility, Integer> r:gs.refineriesAssigned.entrySet()) {
 				if(r.getKey().getTilePosition().equals(arg0.getTilePosition())) {
 					gs.map.updateMap(arg0.getTilePosition(), type,false);
 					gs.testMap = gs.map.clone();
