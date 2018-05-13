@@ -134,7 +134,7 @@ public class Ecgberht implements BWEventListener {
 		//observer.toggle();
 		bwem = new BWEM(bw);
 		bwem.initialize();
-
+		bwem.getMap().assignStartingLocationsToSuitableBases();
 		gs = new GameState(bw, bwta,bwem);
 		gs.initEnemyRace();
 		gs.readOpponentInfo();

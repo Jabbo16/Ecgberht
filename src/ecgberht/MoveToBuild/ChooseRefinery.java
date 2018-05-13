@@ -9,7 +9,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.Refinery;
 import org.openbw.bwapi4j.unit.VespeneGeyser;
 import org.openbw.bwapi4j.util.Pair;
@@ -28,7 +27,7 @@ public class ChooseRefinery extends Action {
 			if(((GameState)this.handler).getPlayer().supplyUsed() < ((GameState)this.handler).strat.supplyForFirstRefinery || ((GameState)this.handler).getCash().second >= 300) {
 				return State.FAILURE;
 			}
-			if(((GameState)this.handler).vespeneGeysers.size() == 1) {
+			if(((GameState)this.handler).refineriesAssigned.size() == 1) {
 				boolean found = false;
 				for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
 					if(w.first == UnitType.Terran_Barracks) {
@@ -56,7 +55,7 @@ public class ChooseRefinery extends Action {
 					geyser = r.getKey();
 				}
 			}
-			if(count == ((GameState)this.handler).refineriesAssigned.size()) {
+			if(count == ((GameState)this.handler).vespeneGeysers.size()) {
 				return State.FAILURE;
 			}
 			for(Pair<UnitType, TilePosition> w:((GameState)this.handler).workerBuild.values()) {
@@ -65,7 +64,7 @@ public class ChooseRefinery extends Action {
 				}
 			}
 			for(Building w:((GameState)this.handler).workerTask.values()) {
-				if(w instanceof Refinery && w.getPosition().equals(geyser.getPosition())) {
+				if(w instanceof Refinery && w.getTilePosition().equals(geyser.getTilePosition())) {
 					return State.FAILURE;
 				}
 			}

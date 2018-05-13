@@ -7,7 +7,6 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.Worker;
-import org.openbw.bwapi4j.util.Pair;
 
 import ecgberht.GameState;
 

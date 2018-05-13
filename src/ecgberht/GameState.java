@@ -149,7 +149,7 @@ public class GameState extends GameHandler {
 	public GameState(BW bw, BWTA bwta, BWEM bwem) {
 		super(bw, bwta, bwem);
 		initPlayers();
-		map = new BuildingMap(bw,ih.self(), bwta, bwem); // Check old source for bwta->bwem
+		map = new BuildingMap(bw,ih.self(), bwem); // Check old source for bwta->bwem
 		map.initMap();
 		testMap = map.clone();
 		inMap = new InfluenceMap(bw,ih.self(),bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
@@ -588,7 +588,7 @@ public class GameState extends GameHandler {
 	public void initStartLocations() {
 		Base startBot = Util.getClosestBaseLocation(self.getStartLocation().toPosition());
 		for (bwem.Base b : bwem.getMap().getBases()) {
-			if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) { // TODO Test, scouter bugged
+			if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) {
 				SLs.add(b);
 				ScoutSLs.add(b);
 			}

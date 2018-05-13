@@ -10,8 +10,8 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Bunker;
-import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.MissileTurret;
+import org.openbw.bwapi4j.unit.VespeneGeyser;
 import org.openbw.bwapi4j.util.Pair;
 
 import ecgberht.GameState;
@@ -29,10 +29,13 @@ public class ChoosePosition extends Action {
 			Player self = ((GameState)this.handler).getPlayer();
 			TilePosition origin = null;
 			if(((GameState)this.handler).chosenToBuild.isRefinery()) {
-				if(!((GameState)this.handler).refineriesAssigned.isEmpty()) {
-					for (Entry<GasMiningFacility, Integer> g : ((GameState)this.handler).refineriesAssigned.entrySet()) {
-						((GameState)this.handler).chosenPosition = g.getKey().getTilePosition();
-						return State.SUCCESS;
+				if(!((GameState)this.handler).vespeneGeysers.isEmpty()) {
+					for (Entry<VespeneGeyser, Boolean> g : ((GameState)this.handler).vespeneGeysers.entrySet()) {
+						if(!g.getValue()) {
+							((GameState)this.handler).chosenPosition = g.getKey().getTilePosition();
+							return State.SUCCESS;
+						}
+
 					}
 				}
 

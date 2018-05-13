@@ -202,7 +202,7 @@ public class Squad {
 							enemyToAttack.add(b.unit);
 						}
 					}
-					if(((GroundAttacker)u).getGroundWeaponCooldown() > 0) {
+					if(u instanceof GroundAttacker && ((GroundAttacker)u).getGroundWeaponCooldown() > 0) {
 						if(!enemyToKite.isEmpty()) {
 							Position run = getGs().kiteAway(u,enemyToKite);
 							if(getGs().getGame().getBWMap().isValidPosition(run)) {
@@ -238,7 +238,7 @@ public class Squad {
 			}
 		} catch(Exception e) {
 			System.err.println("microUpdateOrder Error");
-			System.err.println(e);
+			e.printStackTrace();
 		}
 
 	}
