@@ -158,16 +158,13 @@ public class GameState extends GameHandler {
 	}
 
 	public void initPlayers() {
-		int ally = self.getForceID();
-		for(Player p : bw.getAllPlayers()) {
-			//System.out.println("playername: " + p.getName() + " is observer: " + p.isObserver());
+		for(Player p : bw.getAllPlayers()) { // TODO FIX when support is added
 			//if(p.isObserver()) continue;
-
 			if(p.isNeutral()) {
 				players.put(p, 0);
 				neutral = p;
 			}
-			else if(p.getForceID() == ally) {
+			else if(p.equals(self)) {
 				players.put(p, 1);
 			}
 			else{

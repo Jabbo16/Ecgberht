@@ -21,7 +21,7 @@ public class ChooseArmorInfUp extends Action {
 				return State.FAILURE;
 			}
 			for(ResearchingFacility u : ((GameState)this.handler).UBs) {
-				if(u.canUpgrade(UpgradeType.Terran_Infantry_Armor) && !u.isResearching() && !u.isUpgrading()) {
+				if(u.canUpgrade(UpgradeType.Terran_Infantry_Armor) && !u.isResearching() && !u.isUpgrading() && ((GameState)this.handler).getPlayer().getUpgradeLevel(UpgradeType.Terran_Infantry_Armor) < 3) {
 					((GameState)this.handler).chosenUnitUpgrader = u;
 					((GameState)this.handler).chosenUpgrade = UpgradeType.Terran_Infantry_Armor;
 					return State.SUCCESS;

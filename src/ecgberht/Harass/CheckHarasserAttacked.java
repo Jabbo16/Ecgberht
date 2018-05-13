@@ -33,7 +33,7 @@ public class CheckHarasserAttacked extends Conditional {
 			Unit attacker = null;
 			int workers = 0;
 			Set<Unit> attackers = new TreeSet<>(new UnitComparator());
-			//Thanks to @N00byEdge to the cleaner code
+			//Thanks to @N00byEdge for cleaner code
 			for(PlayerUnit u : ((GameState)this.handler).getGame().getUnits(((GameState)this.handler).getIH().enemy())) {
 				if(!(u instanceof Building) && u instanceof Attacker && u.exists()) {
 					Unit target = ((Attacker)u).getTargetUnit() == null ? u.getOrderTarget() : ((Attacker)u).getTargetUnit();
@@ -86,8 +86,8 @@ public class CheckHarasserAttacked extends Conditional {
 
 			return State.SUCCESS;
 		} catch(Exception e) {
-			System.err.println(this.getClass().getSimpleName());
-			System.err.println(e);
+			//System.err.println(this.getClass().getSimpleName());
+			//e.printStackTrace();
 			return State.ERROR;
 		}
 	}

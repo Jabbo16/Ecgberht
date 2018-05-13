@@ -57,10 +57,7 @@ public class Squad {
 		for(PlayerUnit u : members) {
 			if(u instanceof Marine || u instanceof Firebat) {
 				if(u instanceof Marine ? !((Marine)u).isStimmed() :  ((Firebat)u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
-					if(getGs().getIH().getFrameCount() > getGs().lastFrameStim + 24*10) {
-						getGs().playSound("stim.mp3");
-						getGs().lastFrameStim = getGs().getIH().getFrameCount();
-					}
+					if((u instanceof Marine) ? ((Marine)u).stimPack() : ((Firebat)u).stimPack());
 				}
 			}
 		}
@@ -218,8 +215,9 @@ public class Squad {
 					}
 					else if(attack != null && !u.isStartingAttack() && !u.isAttacking()) {
 //					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
-						if(!enemyToAttack.isEmpty()) {
+						if(!enemyToAttack.isEmpty() && u instanceof Attacker) {
 							Unit target = Util.getTarget(u, enemyToAttack);
+
 							Unit lastTargetUnit = (((Attacker)u).getTargetUnit() == null ? u.getOrderTarget() : ((Attacker)u).getTargetUnit());
 							if(lastTargetUnit != null) {
 								if(!lastTargetUnit.equals(target)) {

@@ -18,8 +18,8 @@ public class CheckResourcesUpgrade extends Conditional {
 		try {
 			Pair<Integer,Integer> cash = ((GameState)this.handler).getCash();
 			if(((GameState)this.handler).chosenUpgrade != null) {
-				if(cash.first >= (((GameState)this.handler).chosenUpgrade.mineralPrice(((GameState)this.handler).getPlayer().getUpgradeLevel(((GameState)this.handler).chosenUpgrade) + 1) +
-						((GameState)this.handler).deltaCash.first) && cash.second >= (((GameState)this.handler).chosenUpgrade.gasPrice(((GameState)this.handler).getPlayer().getUpgradeLevel(((GameState)this.handler).chosenUpgrade) + 1))
+				if(cash.first >= (((GameState)this.handler).chosenUpgrade.mineralPrice(((GameState)this.handler).getPlayer().getUpgradeLevel(((GameState)this.handler).chosenUpgrade)) +
+						((GameState)this.handler).deltaCash.first) && cash.second >= (((GameState)this.handler).chosenUpgrade.gasPrice(((GameState)this.handler).getPlayer().getUpgradeLevel(((GameState)this.handler).chosenUpgrade)))
 						+ ((GameState)this.handler).deltaCash.second) {
 					return State.SUCCESS;
 				}
@@ -32,7 +32,7 @@ public class CheckResourcesUpgrade extends Conditional {
 			return State.FAILURE;
 		} catch(Exception e) {
 			System.err.println(this.getClass().getSimpleName());
-			System.err.println(e);
+			e.printStackTrace();
 			return State.ERROR;
 		}
 	}

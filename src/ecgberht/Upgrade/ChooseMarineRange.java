@@ -22,7 +22,7 @@ public class ChooseMarineRange extends Action {
 				return State.FAILURE;
 			}
 			for(ResearchingFacility u : ((GameState)this.handler).UBs) {
-				if(((GameState)this.handler).getPlayer().hasResearched(TechType.Stim_Packs) && ((GameState)this.handler).getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) != 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
+				if(((GameState)this.handler).getPlayer().hasResearched(TechType.Stim_Packs) && ((GameState)this.handler).getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) < 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
 					((GameState)this.handler).chosenUnitUpgrader = u;
 					((GameState)this.handler).chosenUpgrade = UpgradeType.U_238_Shells;
 					return State.SUCCESS;

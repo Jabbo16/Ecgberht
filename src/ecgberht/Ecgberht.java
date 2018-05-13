@@ -25,6 +25,7 @@ import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.CommandCenter;
 import org.openbw.bwapi4j.unit.ComsatStation;
+import org.openbw.bwapi4j.unit.Critter;
 import org.openbw.bwapi4j.unit.Factory;
 import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.MineralPatch;
@@ -44,6 +45,7 @@ import org.openbw.bwapi4j.unit.Worker;
 import org.openbw.bwapi4j.util.Pair;
 
 import bwem.BWEM;
+import bwem.unit.StaticBuilding;
 import bwta.BWTA;
 import ecgberht.AddonBuild.*;
 import ecgberht.Agents.VultureAgent;
@@ -527,7 +529,7 @@ public class Ecgberht implements BWEventListener {
 	@Override
 	public void onUnitCreate(Unit arg0) {
 		try {
-			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding) return;
+			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding || arg0 instanceof Critter) return;
 			PlayerUnit pU = (PlayerUnit)arg0;
 			UnitType type = Util.getType(pU);
 			if(!type.isNeutral() && !type.isSpecialBuilding()) {
@@ -562,7 +564,7 @@ public class Ecgberht implements BWEventListener {
 	@Override
 	public void onUnitComplete(Unit arg0) {
 		try {
-			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser) {
+			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding || arg0 instanceof Critter) {
 				return;
 			}
 			PlayerUnit pU = (PlayerUnit)arg0;
@@ -698,7 +700,13 @@ public class Ecgberht implements BWEventListener {
 	@Override
 	public void onUnitDestroy(Unit arg0) { //TODO Fix NPEs
 		try {
-			UnitType type = Util.getType((PlayerUnit)arg0);
+			UnitType type = UnitType.Unknown;
+			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding || arg0 instanceof Critter) {
+				type = arg0.getInitialType();
+			} else {
+				type = Util.getType((PlayerUnit)arg0);
+			}
+
 			if(type.isMineralField()) {
 				if(gs.mineralsAssigned.containsKey(arg0)) {
 					gs.map.updateMap(arg0.getTilePosition(), type, true);
@@ -931,7 +939,12 @@ public class Ecgberht implements BWEventListener {
 
 	@Override
 	public void onUnitMorph(Unit arg0) {
-		UnitType type = Util.getType((PlayerUnit)arg0);
+		UnitType type = UnitType.Unknown;
+		if(arg0 instanceof VespeneGeyser) {
+			type = arg0.getInitialType();
+		} else {
+			type = Util.getType((PlayerUnit)arg0);
+		}
 		if(Util.isEnemy(((PlayerUnit)arg0).getPlayer())) {
 			if(arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
 				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
@@ -984,23 +997,31 @@ public class Ecgberht implements BWEventListener {
 
 	@Override
 	public void onUnitShow(Unit arg0) {
-		UnitType type = Util.getType((PlayerUnit)arg0);
-		if(Util.isEnemy(((PlayerUnit)arg0).getPlayer())) {
-			IntelligenceAgency.onShow(arg0, type);
-			if(gs.enemyRace == Race.Unknown && getGs().players.size() == 3) { // TODO Check
-				gs.enemyRace = type.getRace();
-			}
-			if(!type.isBuilding() || type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0) {
-				gs.enemyCombatUnitMemory.add(arg0);
-			}
-			if(type.isBuilding()) {
-				if(!gs.enemyBuildingMemory.containsKey(arg0)) {
-					gs.enemyBuildingMemory.put(arg0,new EnemyBuilding(arg0));
-					gs.inMap.updateMap(arg0,false);
-					gs.map.updateMap(arg0.getTilePosition(), type, false);
+		try {
+			if(arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding || arg0 instanceof Critter) return;
+			UnitType type = Util.getType((PlayerUnit)arg0);
+			if(Util.isEnemy(((PlayerUnit)arg0).getPlayer())) {
+				IntelligenceAgency.onShow(arg0, type);
+				if(gs.enemyRace == Race.Unknown && getGs().players.size() == 3) { // TODO Check
+					gs.enemyRace = type.getRace();
 				}
-			}
+				if(!type.isBuilding() || type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0) {
+					gs.enemyCombatUnitMemory.add(arg0);
+				}
+				if(type.isBuilding()) {
 
+					if(!gs.enemyBuildingMemory.containsKey(arg0)) {
+						gs.enemyBuildingMemory.put(arg0,new EnemyBuilding(arg0));
+						gs.inMap.updateMap(arg0,false);
+						gs.map.updateMap(arg0.getTilePosition(), type, false);
+					}
+				}
+
+			}
+		} catch(Exception e) {
+			System.err.println("OnUnitShow Exception");
+			e.printStackTrace();
 		}
+
 	}
 }
