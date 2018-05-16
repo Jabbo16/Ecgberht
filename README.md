@@ -1,4 +1,6 @@
-<img align="center" src="egbert.png" style="width: 157px; height: 198px"></img>
+<p align="center">
+<img src="egbert.png" width="157" height="198" />
+</p>
 
 # Ecgberht
 
