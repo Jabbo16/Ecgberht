@@ -1,0 +1,36 @@
+version: build {build} {branch}
+
+os: Visual Studio 2017
+
+platform: x86
+ 
+clone_depth: 50
+
+install:
+  - ps: |
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if (!(Test-Path -Path "C:\ant\apache-ant-1.9.9" )) {
+        (new-object System.Net.WebClient).DownloadFile(
+        'https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.9-bin.zip',
+          'C:\ant-bin.zip'
+        )
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\ant-bin.zip", "C:\ant")
+      }
+  - cmd: SET PATH=C:\ant\apache-ant-1.9.9\bin;C:\Progra~2\Java\jdk1.8.0\bin;%PATH%
+  - cmd: SET JAVA_HOME=C:\Progra~2\Java\jdk1.8.0
+  - cmd: echo %PATH%
+  - cmd: echo %JAVA_HOME%
+  - cmd: java -version
+
+build_script:
+  - ant
+
+cache:
+  - C:\ant
+
+notifications:
+  - provider: Email
+    to:
+      - jabbo16@gmail.com
+    on_build_success: false
+    on_build_status_changed: true

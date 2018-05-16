@@ -1,0 +1,28 @@
+apply plugin: 'java'
+sourceCompatibility = 1.8
+sourceSets {
+    main {
+         java {
+              srcDir 'src'
+              }
+         }
+}
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+}
+dependencies {
+    compile fileTree(dir: 'lib', include: ['*.jar'], exclude: ['*-javadoc.jar'])
+}
+
+task fatJar(type: Jar) {
+	from('src/') {
+      include  '*.mp3'
+   }
+    manifest {
+        attributes 'Main-Class': 'ecgberht.Ecgberht'
+    }
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
