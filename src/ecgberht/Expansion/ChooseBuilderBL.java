@@ -55,7 +55,7 @@ public class ChooseBuilderBL extends Action{
 			}
 
 			if(closestWorker != null) {
-				if(!((GameState)this.handler).workerTask.isEmpty() && ((GameState)this.handler).workerIdle.contains(closestWorker)) {
+				if(!((GameState)this.handler).workerIdle.isEmpty() && ((GameState)this.handler).workerIdle.contains(closestWorker)) {
 					((GameState)this.handler).workerIdle.remove(closestWorker);
 				} else if(!((GameState)this.handler).workerMining.isEmpty()){
 					if(((GameState)this.handler).workerMining.containsKey(closestWorker)) {

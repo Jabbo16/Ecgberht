@@ -2,8 +2,6 @@ package jfap;
 
 import java.util.Set;
 
-import org.openbw.bwapi4j.util.Pair;
-
 public abstract class AJFAP {
 
 	  /**

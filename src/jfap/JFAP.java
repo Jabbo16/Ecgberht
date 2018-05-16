@@ -8,7 +8,6 @@ import org.openbw.bwapi4j.type.DamageType;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitSizeType;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.util.Pair;
 
 public class JFAP extends AJFAP{
 	public static BW game;
@@ -82,7 +81,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	final int score(final JFAPUnit fu) {
+	private final int score(final JFAPUnit fu) {
 		if (fu.health > 0 && fu.maxHealth > 0) {
 			int bunker = 0;
 			if((fu.unitType == UnitType.Terran_Bunker)) {
@@ -148,7 +147,7 @@ public class JFAP extends AJFAP{
 		player2.clear();
 	}
 
-	void dealDamage(JFAPUnit fu, int damage, DamageType damageType) {
+	private void dealDamage(JFAPUnit fu, int damage, DamageType damageType) {
 		damage <<= 8;
 		final int remainingShields = fu.shields - damage + (fu.shieldArmor << 8);
 		if (remainingShields > 0) {
@@ -180,18 +179,18 @@ public class JFAP extends AJFAP{
 		fu.health -= Math.max(128, damage);
 	}
 
-	int distButNotReally(JFAPUnit u1, JFAPUnit u2) {
+	private int distButNotReally(JFAPUnit u1, JFAPUnit u2) {
 		return (u1.x - u2.x) * (u1.x - u2.x) + (u1.y - u2.y) * (u1.y - u2.y);
 	}
 
-	boolean isSuicideUnit(UnitType ut) {
+	private boolean isSuicideUnit(UnitType ut) {
 		return (ut == UnitType.Zerg_Scourge ||
 				ut == UnitType.Terran_Vulture_Spider_Mine ||
 				ut == UnitType.Zerg_Infested_Terran ||
 				ut == UnitType.Protoss_Scarab);
 	}
 
-	void unitsim(JFAPUnit fu, Set<JFAPUnit> enemyUnits) {
+	private void unitsim(JFAPUnit fu, Set<JFAPUnit> enemyUnits) {
 		if (fu.attackCooldownRemaining > 0) {
 			didSomething = true;
 			return;
@@ -252,7 +251,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	void medicsim(JFAPUnit fu, Set<JFAPUnit> player12) {
+	private void medicsim(JFAPUnit fu, Set<JFAPUnit> player12) {
 		JFAPUnit closestHealable = null;
 		int closestDist = 0;
 		for (JFAPUnit friendlyUnit : player12) {
@@ -275,7 +274,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	boolean suicideSim(JFAPUnit fu, Set<JFAPUnit> player22) {
+	private boolean suicideSim(JFAPUnit fu, Set<JFAPUnit> player22) {
 		JFAPUnit closestEnemy = null;
 		int closestDist = 0;
 		for (JFAPUnit enemy : player22) {
@@ -328,7 +327,7 @@ public class JFAP extends AJFAP{
 		return false;
 	}
 
-	final void simUnit(JFAPUnit unit, Set<JFAPUnit> player12, Set<JFAPUnit> player22) {
+	private final void simUnit(JFAPUnit unit, Set<JFAPUnit> player12, Set<JFAPUnit> player22) {
 		if(isSuicideUnit(unit.unitType)) {
 			final boolean unitDied = suicideSim(unit, player22);
 			if (unitDied) {
@@ -343,7 +342,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	final void updateUnit(JFAPUnit fu) {
+	private final void updateUnit(JFAPUnit fu) {
 		if (fu.attackCooldownRemaining > 0) {
 			--fu.attackCooldownRemaining;
 		}
@@ -370,7 +369,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	void isimulate() {
+	private void isimulate() {
 		for (JFAPUnit fu : player1) {
 			simUnit(fu, player1, player2);
 		}
@@ -388,7 +387,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	void unitDeath(JFAPUnit fu, Set<JFAPUnit> player) {
+	private void unitDeath(JFAPUnit fu, Set<JFAPUnit> player) {
 		if (fu.unitType == UnitType.Terran_Bunker) {
 			JFAPUnit m = convertToUnitType(fu, UnitType.Terran_Marine);
 			m.unitType = UnitType.Terran_Marine;
@@ -398,7 +397,7 @@ public class JFAP extends AJFAP{
 		}
 	}
 
-	JFAPUnit convertToUnitType(JFAPUnit fu, UnitType ut) {
+	private JFAPUnit convertToUnitType(JFAPUnit fu, UnitType ut) {
 		JFAPUnit funew = new JFAPUnit();
 		funew.id = fu.id;
 		funew.x = fu.x;

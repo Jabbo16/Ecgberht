@@ -169,7 +169,6 @@ public class JFAPUnit implements Comparable<JFAPUnit>{
 
 	@Override
 	public int compareTo(JFAPUnit arg0) {
-
 		return this.id - arg0.id;
 	}
 }

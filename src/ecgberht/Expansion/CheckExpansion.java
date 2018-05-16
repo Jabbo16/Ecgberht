@@ -39,8 +39,8 @@ public class CheckExpansion extends Conditional{
 			if(((GameState)this.handler).expanding){
 				return State.SUCCESS;
 			}
-			for(Entry<SCV, Pair<UnitType, TilePosition>> w : ((GameState)this.handler).workerBuild.entrySet()) {
-				if(w.getValue().first == UnitType.Terran_Command_Center){
+			for(Pair<UnitType, TilePosition> w : ((GameState)this.handler).workerBuild.values()) {
+				if(w.first == UnitType.Terran_Command_Center){
 					return State.FAILURE;
 				}
 			}

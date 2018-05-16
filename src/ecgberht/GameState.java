@@ -158,16 +158,16 @@ public class GameState extends GameHandler {
 	}
 
 	public void initPlayers() {
-		for(Player p : bw.getAllPlayers()) { // TODO FIX when support is added
+		for(Player p : bw.getAllPlayers()) {
 			//if(p.isObserver()) continue;
 			if(p.isNeutral()) {
 				players.put(p, 0);
 				neutral = p;
 			}
-			else if(p.equals(self)) {
+			else if(ih.allies().contains(p)) {
 				players.put(p, 1);
 			}
-			else{
+			else if(ih.enemies().contains(p)){
 				players.put(p, -1);
 			}
 		}
@@ -542,10 +542,16 @@ public class GameState extends GameHandler {
 			print(u,Color.PURPLE);
 			bw.getMapDrawer().drawTextMap(u.getPosition(), "Spartan");
 		}
+		for(Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
+			print((Unit) u.getKey(), Color.ORANGE);
+			bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
+		}
+
 		for(Entry<String, Squad> s : squads.entrySet()) {
-			Position centro = getSquadCenter(s.getValue());
-			bw.getMapDrawer().drawCircleMap(centro, 80, Color.GREEN);
-			bw.getMapDrawer().drawTextMap(centro,s.getKey());
+			if(s.getValue().members.isEmpty()) continue;
+			Position center = getSquadCenter(s.getValue());
+			bw.getMapDrawer().drawCircleMap(center, 80, Color.GREEN);
+			bw.getMapDrawer().drawTextMap(center,s.getKey());
 		}
 		if(enemyRace == Race.Zerg && EI.naughty) {
 			bw.getMapDrawer().drawTextScreen(10, 95,"Naughty Zerg: " + "yes");
@@ -989,7 +995,7 @@ public class GameState extends GameHandler {
 	public void mineralLocking() {
 		for(Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
 			if(u.getKey().getTargetUnit() != null) {
-				if(!u.getKey().getTargetUnit().equals(u.getValue()) && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals()){
+				if(!u.getKey().getTargetUnit().equals(u.getValue()) && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals() || u.getKey().isIdle()){
 					u.getKey().gather(u.getValue());
 				}
 			}
@@ -1273,13 +1279,13 @@ public class GameState extends GameHandler {
 		for(Unit u : enemies) {
 			simulator.addUnitPlayer2(new JFAPUnit(u));
 		}
-		Pair<Integer, Integer> presim_scores = simulator.playerScores();
+		jfap.Pair<Integer, Integer> presim_scores = simulator.playerScores();
 //		int presim_my_unit_count = simulator.getState().first.size();
 //		int presim_enemy_unit_count = simulator.getState().second.size();
 		simulator.simulate(frames);
 //		int postsim_my_unit_count = simulator.getState().first.size();
 //		int postsim_enemy_unit_count = simulator.getState().second.size();
-		Pair<Integer, Integer> postsim_scores = simulator.playerScores();
+		jfap.Pair<Integer, Integer> postsim_scores = simulator.playerScores();
 //		int my_losses = presim_my_unit_count - postsim_my_unit_count;
 //		int enemy_losses = presim_enemy_unit_count - postsim_enemy_unit_count;
 		int my_score_diff = presim_scores.first - postsim_scores.first;

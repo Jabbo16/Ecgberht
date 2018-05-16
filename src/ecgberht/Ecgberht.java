@@ -417,17 +417,17 @@ public class Ecgberht implements BWEventListener {
 	public void onFrame() {
 		try {
 
-//			if(true) {
-//				System.out.println("---WorkerBuild---");
-//				System.out.println(gs.workerBuild);
-//				System.out.println("---WorkerTask---");
-//				System.out.println(gs.workerTask);
+//			for(Unit u : bw.getUnits(self)){
+//				if(u instanceof ComsatStation && ((ComsatStation) u).isCompleted()) {
+//					System.out.println("Comsat with energy: " + ((ComsatStation)u).getEnergy());
+//				}
 //			}
 
 			long frameStart = System.currentTimeMillis();
 			gs.frameCount = ih.getFrameCount();
 			if(gs.frameCount == 1000) gs.sendCustomMessage();
 			gs.print(gs.naturalRegion.getTop().toTilePosition(), Color.RED);
+			gs.fix();
 			gs.inMapUnits = new InfluenceMap(bw,self,bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
 			gs.updateEnemyBuildingsMemory();
 			gs.runAgents();
@@ -454,7 +454,6 @@ public class Ecgberht implements BWEventListener {
 			gs.updateSquadOrderAndMicro();
 			combatStimTree.run();
 			gs.checkMainEnemyBase();
-			gs.fix();
 			gs.mergeSquads();
 			if(ih.getFrameCount() < 24*150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
 				boolean found_pool = false;
@@ -480,8 +479,8 @@ public class Ecgberht implements BWEventListener {
 			gs.totalTime += frameTotal;
 			bw.getMapDrawer().drawTextScreen(10, 65,"frameTime(ms): " + (String.valueOf(frameTotal)));
 		} catch(Exception e) {
-			System.err.println(e);
 			System.err.println("onFrame Exception");
+			e.printStackTrace();
 		}
 
 	}
@@ -580,11 +579,19 @@ public class Ecgberht implements BWEventListener {
 								break;
 							}
 						}
-						gs.refineriesAssigned.put((GasMiningFacility) arg0, 0);
+						for(Entry<SCV, Building> u : gs.workerTask.entrySet()) {
+							if(u.getValue().equals(arg0)) {
+								gs.workerTask.remove(u.getKey());
+								gs.workerGas.put(u.getKey(), (GasMiningFacility) arg0);
+								break;
+							}
+						}
+						gs.refineriesAssigned.put((GasMiningFacility) arg0, 1);
+
 						gs.builtRefinery++;
 					} else {
 						if(type == UnitType.Terran_Command_Center) {
-							gs.CCs.put(bwta.getRegion(arg0.getPosition()).getCenter(),(CommandCenter) arg0);
+							gs.CCs.put(bwem.getMap().getArea(arg0.getTilePosition()).getTopLeft().toPosition(),(CommandCenter) arg0);
 							gs.addNewResources(arg0);
 							if(((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
 								gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
@@ -796,7 +803,7 @@ public class Ecgberht implements BWEventListener {
 								gs.mineralsAssigned.put((MineralPatch) mineral, gs.mineralsAssigned.get(mineral) - 1);
 							}
 						}
-						if(gs.workerGas.containsKey(arg0)) {
+						if(gs.workerGas.containsKey(arg0)) { // TODO fix when destroyed
 							GasMiningFacility aux = gs.workerGas.get(arg0);
 							Integer auxInt = gs.refineriesAssigned.get(arg0);
 							gs.refineriesAssigned.put(aux, auxInt--);
@@ -846,7 +853,7 @@ public class Ecgberht implements BWEventListener {
 								if(u.getAddon() != null && gs.CSs.contains(u.getAddon())) {
 									gs.CSs.remove(u.getAddon());
 								}
-								gs.CCs.remove(bwta.getRegion(arg0.getPosition()).getCenter());
+								gs.CCs.remove(bwem.getMap().getArea(arg0.getTilePosition()).getTopLeft().toPosition());
 								if(arg0.equals(gs.MainCC)) {
 									if(gs.CCs.size() > 0) {
 										for(Unit c : gs.CCs.values()) {
@@ -932,7 +939,7 @@ public class Ecgberht implements BWEventListener {
 			}
 		} catch(Exception e) {
 			System.err.println("OnUnitDestroy Exception");
-			System.err.println(e);
+			e.printStackTrace();
 		}
 
 	}
