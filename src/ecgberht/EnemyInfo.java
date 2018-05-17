@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EnemyInfo {
-    String opponent = "";
+    public String opponent = "";
     public int wins = 0;
     public int losses = 0;
     public boolean naughty = false;

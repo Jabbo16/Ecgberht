@@ -20,6 +20,7 @@ import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
+import ecgberht.Config.ConfigManager;
 import ecgberht.Defense.CheckPerimeter;
 import ecgberht.Defense.ChooseDefensePosition;
 import ecgberht.Defense.SendDefenders;

@@ -11,6 +11,7 @@ import bwta.Chokepoint;
 import bwta.Region;
 import com.google.gson.Gson;
 import ecgberht.Agents.VultureAgent;
+import ecgberht.Config.ConfigManager;
 import ecgberht.Squad.Status;
 import ecgberht.Strategies.BioBuild;
 import ecgberht.Strategies.BioBuildFE;
@@ -134,6 +135,7 @@ public class GameState extends GameHandler {
 
     public GameState(BW bw, BWTA bwta, BWEM bwem) {
         super(bw, bwta, bwem);
+        ConfigManager.readConfig();
         initPlayers();
         map = new BuildingMap(bw, ih.self(), bwem); // Check old source for bwta->bwem
         map.initMap();
@@ -149,7 +151,7 @@ public class GameState extends GameHandler {
             if (p.isNeutral()) {
                 players.put(p, 0);
                 neutral = p;
-            } else if (ih.allies().contains(p)) {
+            } else if (ih.allies().contains(p) || p.equals(self)) {
                 players.put(p, 1);
             } else if (ih.enemies().contains(p)) {
                 players.put(p, -1);
@@ -305,6 +307,7 @@ public class GameState extends GameHandler {
 
     public void playSound(String soundFile) {
         try {
+            if(!ConfigManager.getConfig().sounds) return;
             String run = getClass().getResource("GameState.class").toString();
             if (run.startsWith("jar:") || run.startsWith("rsrc:")) {
                 InputStream fis = getClass().getClassLoader().getResourceAsStream(soundFile);
@@ -430,6 +433,7 @@ public class GameState extends GameHandler {
     }
 
     public void printer() {
+        if(!ConfigManager.getConfig().debug) return;
         Integer counter = 0;
         for (bwem.Base b : BLs) {
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
