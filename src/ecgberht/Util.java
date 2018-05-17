@@ -1,79 +1,62 @@
 package ecgberht;
 
-import static ecgberht.Ecgberht.getGs;
+import bwapi.*;
 
 import java.util.List;
 import java.util.Set;
 
-import bwapi.DamageType;
-import bwapi.Order;
-import bwapi.Pair;
-import bwapi.Position;
-import bwapi.Race;
-import bwapi.TilePosition;
-import bwapi.Unit;
-import bwapi.UnitSizeType;
-import bwapi.UnitType;
-import bwapi.WeaponType;
+import static ecgberht.Ecgberht.getGs;
 
 public class Util {
 
 	public static Position sumPosition(Position... positions) {
-		Position sum = new Position(0,0);
-		for(Position p : positions) {
+		Position sum = new Position(0, 0);
+		for (Position p : positions) {
 			sum = new Position(sum.getX() + p.getX(), sum.getY() + p.getY());
 		}
 		return sum;
 	}
 
 	public static TilePosition sumTilePosition(TilePosition... tilepositions) {
-		TilePosition sum = new TilePosition(0,0);
-		for(TilePosition p : tilepositions) {
+		TilePosition sum = new TilePosition(0, 0);
+		for (TilePosition p : tilepositions) {
 			sum = new TilePosition(sum.getX() + p.getX(), sum.getY() + p.getY());
 		}
 		return sum;
 	}
 
-	public static Pair<Double,Double> sumPosition(List<Pair<Double, Double>> vectors) {
-		Pair<Double,Double> sum = new Pair<>(0.0,0.0);
-		for(Pair<Double, Double> p : vectors) {
+	public static Pair<Double, Double> sumPosition(List<Pair<Double, Double>> vectors) {
+		Pair<Double, Double> sum = new Pair<>(0.0, 0.0);
+		for (Pair<Double, Double> p : vectors) {
 			sum.first += p.first;
 			sum.second += p.second;
 		}
 		return sum;
 	}
 
-	static WeaponType GetWeapon(Unit attacker, Unit target)
-	{
+	static WeaponType GetWeapon(Unit attacker, Unit target) {
 		UnitType attackerType = attacker.getType();
 		UnitType targetType = target.getType();
-		if (attackerType == UnitType.Terran_Bunker)
-		{
+		if (attackerType == UnitType.Terran_Bunker) {
 			return GetWeapon(UnitType.Terran_Marine, targetType);
 		}
-		if (attackerType == UnitType.Protoss_Carrier)
-		{
+		if (attackerType == UnitType.Protoss_Carrier) {
 			return GetWeapon(UnitType.Protoss_Interceptor, targetType);
 		}
-		if (attackerType == UnitType.Protoss_Reaver)
-		{
+		if (attackerType == UnitType.Protoss_Reaver) {
 			return GetWeapon(UnitType.Protoss_Scarab, targetType);
 		}
 		return target.isFlying() ? attackerType.airWeapon() : attackerType.groundWeapon();
 	}
 
-	static WeaponType GetWeapon(UnitType attacker, UnitType target)
-	{
-		if (attacker == UnitType.Terran_Bunker)
-		{
+	static WeaponType GetWeapon(UnitType attacker, UnitType target) {
+		if (attacker == UnitType.Terran_Bunker) {
 			return GetWeapon(UnitType.Terran_Marine, target);
 		}
-		if (attacker == UnitType.Protoss_Carrier)
-		{
+		if (attacker == UnitType.Protoss_Carrier) {
 			return GetWeapon(UnitType.Protoss_Interceptor, target);
 		}
-		if (attacker == UnitType.Protoss_Reaver)
-		{
+		if (attacker == UnitType.Protoss_Reaver) {
 			return GetWeapon(UnitType.Protoss_Scarab, target);
 		}
 		return target.isFlyer() ? attacker.airWeapon() : attacker.groundWeapon();
@@ -101,30 +84,25 @@ public class Util {
 
 	static int getScore(final Unit attacker, final Unit target) {
 		int priority = getAttackPriority(attacker, target);     // 0..12
-		int range    = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
+		int range = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
 		// Let's say that 1 priority step is worth 160 pixels (5 tiles).
 		// We care about unit-target range and target-order position distance.
 		int score = 5 * 32 * priority - range;
 
-		WeaponType targetWeapon = Util.GetWeapon(attacker,target);
+		WeaponType targetWeapon = Util.GetWeapon(attacker, target);
 		// Adjust for special features.
 		// This could adjust for relative speed and direction, so that we don't chase what we can't catch.
-		if (range <= targetWeapon.maxRange())
-		{
+		if (range <= targetWeapon.maxRange()) {
 			score += 5 * 32;
-		}
-		else if (!target.isMoving()) {
+		} else if (!target.isMoving()) {
 			if (target.isSieged() || target.getOrder() == Order.Sieging || target.getOrder() == Order.Unsieging) {
 				score += 48;
-			}
-			else {
+			} else {
 				score += 24;
 			}
-		}
-		else if (target.isBraking()) {
+		} else if (target.isBraking()) {
 			score += 16;
-		}
-		else if (target.getType().topSpeed() >= attacker.getType().topSpeed()) {
+		} else if (target.getType().topSpeed() >= attacker.getType().topSpeed()) {
 			score -= 5 * 32;
 		}
 
@@ -141,9 +119,7 @@ public class Util {
 			if (target.getType().size() == UnitSizeType.Large) {
 				score += 32;
 			}
-		}
-		else if (damage == DamageType.Concussive)
-		{
+		} else if (damage == DamageType.Concussive) {
 			if (target.getType().size() == UnitSizeType.Small) {
 				score += 32;
 			}
@@ -158,7 +134,7 @@ public class Util {
 		if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !target.isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
 			return 12;
 		}
-		if(targetType == UnitType.Zerg_Lurker) {
+		if (targetType == UnitType.Zerg_Lurker) {
 			return 12;
 		}
 
@@ -179,7 +155,7 @@ public class Util {
 			return 10;
 		}
 		// Next are workers.
-		if (targetType.isWorker())  {
+		if (targetType.isWorker()) {
 			if (rangedUnit.getType() == UnitType.Terran_Vulture) {
 				return 11;
 			}
@@ -199,8 +175,7 @@ public class Util {
 			return 8;
 		}
 		// Short circuit: Give bunkers a lower priority to reduce bunker obsession.
-		if (targetType == UnitType.Terran_Bunker || targetType == UnitType.Zerg_Sunken_Colony || targetType == UnitType.Protoss_Photon_Cannon)
-		{
+		if (targetType == UnitType.Terran_Bunker || targetType == UnitType.Zerg_Sunken_Colony || targetType == UnitType.Protoss_Photon_Cannon) {
 			return 6;
 		}
 		// Spellcasters are as important as key buildings.

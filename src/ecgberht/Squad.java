@@ -1,19 +1,11 @@
 package ecgberht;
 
+import bwapi.*;
+
+import java.util.*;
+
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-
-import bwapi.Order;
-import bwapi.Position;
-import bwapi.TechType;
-import bwapi.Unit;
-import bwapi.UnitType;
 
 public class Squad {
 
@@ -40,17 +32,17 @@ public class Squad {
 
 	public void giveAttackOrder(Position pos) {
 		int frameCount = getGs().frameCount;
-		if(frameCount - lastFrameOrder > 0 && !pos.equals(attack)) {
+		if (frameCount - lastFrameOrder > 0 && !pos.equals(attack)) {
 			attack = pos;
 			lastFrameOrder = frameCount;
 		}
 	}
 
 	public void giveStimOrder() {
-		for(Unit u : members) {
-			if(u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
+		for (Unit u : members) {
+			if (u.canUseTech(TechType.Stim_Packs) && !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
 				u.useTech(TechType.Stim_Packs);
-				if(getGs().getGame().elapsedTime() > getGs().lastFrameStim + 65) {
+				if (getGs().getGame().elapsedTime() > getGs().lastFrameStim + 65) {
 					getGs().playSound("stim.mp3");
 					getGs().lastFrameStim = getGs().getGame().elapsedTime();
 				}
@@ -61,7 +53,7 @@ public class Squad {
 
 	public void microUpdateOrder() {
 		try {
-			if(members.isEmpty()) {
+			if (members.isEmpty()) {
 				return;
 			}
 			Set<Unit> enemy = getGs().enemyCombatUnitMemory;
@@ -69,34 +61,33 @@ public class Squad {
 			Position start = getGame().self().getStartLocation().toPosition();
 			Set<Unit> marinesToHeal = new HashSet<>();
 			Position sCenter = getGs().getSquadCenter(this);
-			for(Unit u : members) {
-				if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
+			for (Unit u : members) {
+				if (u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
 					continue;
 				}
-				if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+				if (u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 					continue;
 				}
-				if(status == Status.IDLE) {
-					if(!getGs().DBs.isEmpty()) {
+				if (status == Status.IDLE) {
+					if (!getGs().DBs.isEmpty()) {
 						Unit bunker = getGs().DBs.keySet().iterator().next();
-						if(bunker.exists() && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding && getGs().strat.name != "ProxyBBS") {
-							if(u.getOrder() != Order.Move) {
+						if (bunker.exists() && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding && getGs().strat.name != "ProxyBBS") {
+							if (u.getOrder() != Order.Move) {
 								u.move(bunker.getPosition());
 							}
 							continue;
 						}
-					}
-					else if(getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
-						if(getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 200  && getGs().getArmySize() < getGs().strat.armyForAttack  && !getGs().expanding ) {
-							if(u.getOrder() != Order.Move) {
+					} else if (getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
+						if (getGs().broodWarDistance(getGs().closestChoke.getCenter(), sCenter) >= 200 && getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
+							if (u.getOrder() != Order.Move) {
 								u.move(getGs().closestChoke.getCenter());
 							}
 							continue;
 						}
 					}
 
-					if(getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
-						if(getGame().isWalkable(sCenter.toWalkPosition())) {
+					if (getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
+						if (getGame().isWalkable(sCenter.toWalkPosition())) {
 							u.move(sCenter);
 							continue;
 						}
@@ -104,8 +95,8 @@ public class Squad {
 				}
 
 				// Experimental
-				if(status == Status.ATTACK && getGs().getGame().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
-					if(members.size() == 1) {
+				if (status == Status.ATTACK && getGs().getGame().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
+					if (members.size() == 1) {
 						continue;
 					}
 					boolean gaveOrder = false;
@@ -115,11 +106,11 @@ public class Squad {
 					different.addAll(members);
 					circle.retainAll(members);
 					different.removeAll(circle);
-					if(circle.size() != members.size()) {
-						for(Unit m : different) {
-							if(m.equals(u)) {
-								if(u.getOrderTargetPosition() != null) {
-									if(!u.getOrderTargetPosition().equals(sCenter) && getGame().isWalkable(sCenter.toWalkPosition())) {
+					if (circle.size() != members.size()) {
+						for (Unit m : different) {
+							if (m.equals(u)) {
+								if (u.getOrderTargetPosition() != null) {
+									if (!u.getOrderTargetPosition().equals(sCenter) && getGame().isWalkable(sCenter.toWalkPosition())) {
 										u.attack(sCenter);
 										gaveOrder = true;
 										break;
@@ -128,77 +119,77 @@ public class Squad {
 							}
 						}
 					}
-					if(gaveOrder) continue;
+					if (gaveOrder) continue;
 				}
 
-				if(u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
+				if (u.getType() == UnitType.Terran_Medic && u.getOrder() != Order.MedicHeal) {
 					Unit chosen = getHealTarget(u, marinesToHeal);
-					if(chosen != null) {
+					if (chosen != null) {
 						u.useTech(TechType.Healing, chosen);
 						marinesToHeal.add(chosen);
 						continue;
 					}
 				}
-				if(u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
+				if (u.isIdle() && attack != Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(attack, u.getPosition()) > 500) {
 					u.attack(attack);
 					continue;
 				}
-				if(u.isAttacking() && attack == Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
+				if (u.isAttacking() && attack == Position.None && frameCount != u.getLastCommandFrame() && getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
 					u.move(sCenter);
 					continue;
 				}
 
 				Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
-				if(lastTarget != null) {
-					if(lastTarget.equals(attack)) {
+				if (lastTarget != null) {
+					if (lastTarget.equals(attack)) {
 						continue;
 					}
 				}
 				int framesToOrder = 18;
-				if(u.getType() == UnitType.Terran_Vulture) {
+				if (u.getType() == UnitType.Terran_Vulture) {
 					framesToOrder = 12;
 				}
-				if(frameCount - u.getLastCommandFrame() >= framesToOrder) {
-					if(u.isIdle() && attack != Position.None && status != Status.IDLE) {
+				if (frameCount - u.getLastCommandFrame() >= framesToOrder) {
+					if (u.isIdle() && attack != Position.None && status != Status.IDLE) {
 						lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
-						if(lastTarget != null) {
-							if(!lastTarget.equals(attack)) {
+						if (lastTarget != null) {
+							if (!lastTarget.equals(attack)) {
 								u.attack(attack);
 								continue;
 							}
 						}
 					}
 					//Experimental storm dodging?
-					if(u.isUnderStorm()) {
+					if (u.isUnderStorm()) {
 						u.move(start);
 						continue;
 					}
 					Set<Unit> enemyToKite = new HashSet<>();
 					Set<Unit> enemyToAttack = new HashSet<>();
-					for(Unit e : enemy) {
+					for (Unit e : enemy) {
 						UnitType eType = e.getType();
-						if(eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
+						if (eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
 						enemyToAttack.add(e);
-						if(!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32  && e.getType() != UnitType.Terran_Medic) {
+						if (!e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32 && e.getType() != UnitType.Terran_Medic) {
 //							if (e.isAttacking()) {
 //								if(u.getUnitsInRadius(u.getType().groundWeapon().maxRange()).contains(e)) {
-									//u.move(start);
-									if(getGs().broodWarDistance(u.getPosition(), e.getPosition()) <= u.getType().groundWeapon().maxRange()) {
-										enemyToKite.add(e);
-									}
+							//u.move(start);
+							if (getGs().broodWarDistance(u.getPosition(), e.getPosition()) <= u.getType().groundWeapon().maxRange()) {
+								enemyToKite.add(e);
+							}
 //								}
 //							}
 						}
 					}
-					for(EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
-						if(b.type.canAttack()) {
+					for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
+						if (b.type.canAttack()) {
 							enemyToAttack.add(b.unit);
 						}
 					}
-					if(u.getGroundWeaponCooldown() > 0) {
-						if(!enemyToKite.isEmpty()) {
-							Position run = getGs().kiteAway(u,enemyToKite);
-							if(run.isValid()) {
+					if (u.getGroundWeaponCooldown() > 0) {
+						if (!enemyToKite.isEmpty()) {
+							Position run = getGs().kiteAway(u, enemyToKite);
+							if (run.isValid()) {
 								u.move(run);
 								continue;
 							} else {
@@ -208,20 +199,19 @@ public class Squad {
 //							Position run = getGs().getPlayer().getStartLocation().toPosition();
 
 						}
-					}
-					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking()) {
+					} else if (attack != Position.None && !u.isStartingAttack() && !u.isAttacking()) {
 //					else if(attack != Position.None && !u.isStartingAttack() && !u.isAttacking() && u.getOrder() == Order.Move) {
-						if(!enemyToAttack.isEmpty()) {
+						if (!enemyToAttack.isEmpty()) {
 							Unit target = Util.getTarget(u, enemyToAttack);
 							Unit lastTargetUnit = (u.getTarget() == null ? u.getOrderTarget() : u.getTarget());
-							if(lastTargetUnit != null) {
-								if(!lastTargetUnit.equals(target)) {
+							if (lastTargetUnit != null) {
+								if (!lastTargetUnit.equals(target)) {
 									u.attack(target);
 									continue;
 								}
 							}
 						}
-						if(u.getOrder() == Order.Move){
+						if (u.getOrder() == Order.Move) {
 							u.attack(attack);
 							continue;
 						}
@@ -229,7 +219,7 @@ public class Squad {
 					}
 				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			System.err.println("microUpdateOrder Error");
 			System.err.println(e);
 		}
@@ -240,12 +230,12 @@ public class Squad {
 		Set<Unit> marines = getMarines();
 		Unit chosen = null;
 		double dist = Double.MAX_VALUE;
-		for(Unit m : marines) {
-			if(m.getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) {
+		for (Unit m : marines) {
+			if (m.getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) {
 				continue;
 			}
 			double distA = getGs().broodWarDistance(m.getPosition(), u.getPosition());
-			if(chosen == null || distA < dist) {
+			if (chosen == null || distA < dist) {
 				chosen = m;
 				dist = distA;
 			}
@@ -255,8 +245,8 @@ public class Squad {
 
 	public Set<Unit> getTanks() {
 		Set<Unit> aux = new HashSet<Unit>();
-		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
+		for (Unit u : members) {
+			if (u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode || u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode) {
 				aux.add(u);
 			}
 		}
@@ -265,8 +255,8 @@ public class Squad {
 
 	public Set<Unit> getMarines() {
 		Set<Unit> aux = new HashSet<Unit>();
-		for(Unit u : this.members) {
-			if(u.getType() == UnitType.Terran_Marine) {
+		for (Unit u : this.members) {
+			if (u.getType() == UnitType.Terran_Marine) {
 				aux.add(u);
 			}
 		}
@@ -275,8 +265,8 @@ public class Squad {
 
 	public Set<Unit> getMedics() {
 		Set<Unit> aux = new HashSet<Unit>();
-		for(Unit u : this.members) {
-			if(u.getType() == UnitType.Terran_Medic) {
+		for (Unit u : this.members) {
+			if (u.getType() == UnitType.Terran_Medic) {
 				aux.add(u);
 			}
 		}
@@ -285,20 +275,20 @@ public class Squad {
 
 	public void giveMoveOrder(Position retreat) {
 		int frameCount = getGs().frameCount;
-		for(Unit u : members) {
-			if(u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
+		for (Unit u : members) {
+			if (u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
 				continue;
 			}
-			if(u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
+			if (u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
 				continue;
 			}
 			Position lastTarget = (u.getTargetPosition() == null ? u.getOrderTargetPosition() : u.getTargetPosition());
-			if(lastTarget != null) {
-				if(lastTarget.equals(retreat)) {
+			if (lastTarget != null) {
+				if (lastTarget.equals(retreat)) {
 					continue;
 				}
 			}
-			if(attack != Position.None && frameCount != u.getLastCommandFrame()) {
+			if (attack != Position.None && frameCount != u.getLastCommandFrame()) {
 				u.move(retreat);
 			}
 		}

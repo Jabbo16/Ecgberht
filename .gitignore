@@ -13,3 +13,4 @@ bwapi-data/
 target/
 .gradle/
 build/
+out/
