@@ -12,3 +12,4 @@ src/ecgberht/uncrustify.cfg
 bwapi-data/
 .gradle/
 build/
+out/
