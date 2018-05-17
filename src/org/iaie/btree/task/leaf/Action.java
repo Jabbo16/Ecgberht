@@ -8,9 +8,8 @@ package org.iaie.btree.task.leaf;
 import org.iaie.btree.util.GameHandler;
 
 /**
- *
- * @author nluis momartin
  * @param <GameHandler>
+ * @author nluis momartin
  */
 public abstract class Action extends Leaf {
 

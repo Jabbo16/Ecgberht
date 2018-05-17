@@ -1,125 +1,123 @@
 package ecgberht;
 
-import java.util.Comparator;
-
+import bwem.Base;
 import org.openbw.bwapi4j.Position;
 
-import bwem.Base;
+import java.util.Comparator;
+
 import static ecgberht.Ecgberht.getGs;
 
-public class BaseLocationComparator implements Comparator<bwem.Base>{
-	private boolean enemy = false;
+public class BaseLocationComparator implements Comparator<bwem.Base> {
+    private boolean enemy = false;
 
-	public BaseLocationComparator(boolean enemy) {
-		this.enemy = enemy;
-	}
+    public BaseLocationComparator(boolean enemy) {
+        this.enemy = enemy;
+    }
 
-	@Override
-	public int compare(bwem.Base a, bwem.Base b) {
-		try {
-			Position start = null;
-			if(!enemy) {
-				if(getGs().MainCC != null) {
-					start = getGs().MainCC.getPosition();
-				}
-				if(start == null) {
-					start = getGs().getPlayer().getStartLocation().toPosition();
-				}
-				Base closestBase = Util.getClosestBaseLocation(start); // TODO similar method / change to BWEM
-				if(closestBase != null) {
-					if(Util.getClosestBaseLocation(start).getLocation().equals(a.getLocation())) {
-						return -1;
-					}
-					if(Util.getClosestBaseLocation(start).getLocation().equals(b.getLocation())) {
-						return 1;
-					}
-				}
+    @Override
+    public int compare(bwem.Base a, bwem.Base b) {
+        try {
+            Position start = null;
+            if (!enemy) {
+                if (getGs().MainCC != null) {
+                    start = getGs().MainCC.getPosition();
+                }
+                if (start == null) {
+                    start = getGs().getPlayer().getStartLocation().toPosition();
+                }
+                Base closestBase = Util.getClosestBaseLocation(start); // TODO similar method / change to BWEM
+                if (closestBase != null) {
+                    if (Util.getClosestBaseLocation(start).getLocation().equals(a.getLocation())) {
+                        return -1;
+                    }
+                    if (Util.getClosestBaseLocation(start).getLocation().equals(b.getLocation())) {
+                        return 1;
+                    }
+                }
 
-				if(a.getArea().getAccessibleNeighbors().isEmpty()) {
-					return 1;
-				}
-				if(b.getArea().getAccessibleNeighbors().isEmpty()) {
-					return -1;
-				}
-				double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
-				double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
-				if(distA == 0.0 && distB > 0.0) {
-					return 1;
-				}
-				if(distB == 0.0 && distA > 0.0) {
-					return -1;
-				}
-				if(getGs().strat.name != "FullBio" && getGs().strat.name != "FullBioFE") {
-					if((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
-						return 1;
-					}
-					if((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
-						return -1;
-					}
-				}
-				if(distA < distB  && distA > 0.0) {
-					if(getGs().blockedBLs.contains(a)) {
-						return 1;
-					}
-					return -1;
-				}
-				else {
-					if(distA > distB && distB > 0.0) {
-						if(getGs().blockedBLs.contains(b)) {
-							return -1;
-						}
-						return 1;
-					}
-				}
-				return 1;
+                if (a.getArea().getAccessibleNeighbors().isEmpty()) {
+                    return 1;
+                }
+                if (b.getArea().getAccessibleNeighbors().isEmpty()) {
+                    return -1;
+                }
+                double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
+                double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
+                if (distA == 0.0 && distB > 0.0) {
+                    return 1;
+                }
+                if (distB == 0.0 && distA > 0.0) {
+                    return -1;
+                }
+                if (getGs().strat.name != "FullBio" && getGs().strat.name != "FullBioFE") {
+                    if ((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
+                        return 1;
+                    }
+                    if ((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
+                        return -1;
+                    }
+                }
+                if (distA < distB && distA > 0.0) {
+                    if (getGs().blockedBLs.contains(a)) {
+                        return 1;
+                    }
+                    return -1;
+                } else {
+                    if (distA > distB && distB > 0.0) {
+                        if (getGs().blockedBLs.contains(b)) {
+                            return -1;
+                        }
+                        return 1;
+                    }
+                }
+                return 1;
 
-			} else {
-				if(getGs().enemyBase != null) {
-					start = getGs().enemyBase.getLocation().toPosition();
-				}else {
-					return -1;
-				}
-				if(a.getArea().getAccessibleNeighbors().isEmpty()) {
-					return 1;
-				}
-				if(b.getArea().getAccessibleNeighbors().isEmpty()) {
-					return -1;
-				}
-				double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
-				double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
+            } else {
+                if (getGs().enemyBase != null) {
+                    start = getGs().enemyBase.getLocation().toPosition();
+                } else {
+                    return -1;
+                }
+                if (a.getArea().getAccessibleNeighbors().isEmpty()) {
+                    return 1;
+                }
+                if (b.getArea().getAccessibleNeighbors().isEmpty()) {
+                    return -1;
+                }
+                double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
+                double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
 
-				if(distA == 0.0 && distB > 0.0) {
-					return 1;
-				}
-				if(distB == 0.0 && distA > 0.0) {
-					return -1;
-				}
-				if((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
-					return 1;
-				}
-				if((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
-					return -1;
-				}
-				if(distA < distB && distA > 0.0) {
-					if(getGs().blockedBLs.contains(a)) {
-						return 1;
-					}
-					return 1;
-				}
-				else {
-					if(distA > distB && distB > 0.0) {
-						if(getGs().blockedBLs.contains(b)) {
-							return -1;
-						}
-						return 1;
-					}
-				}
-				return 1;
-			}
-		} catch(Exception e) {
-			System.err.println("Sorter");
-			System.err.println(e);
-		}
-		return 0;
-	}
+                if (distA == 0.0 && distB > 0.0) {
+                    return 1;
+                }
+                if (distB == 0.0 && distA > 0.0) {
+                    return -1;
+                }
+                if ((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
+                    return 1;
+                }
+                if ((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
+                    return -1;
+                }
+                if (distA < distB && distA > 0.0) {
+                    if (getGs().blockedBLs.contains(a)) {
+                        return 1;
+                    }
+                    return 1;
+                } else {
+                    if (distA > distB && distB > 0.0) {
+                        if (getGs().blockedBLs.contains(b)) {
+                            return -1;
+                        }
+                        return 1;
+                    }
+                }
+                return 1;
+            }
+        } catch (Exception e) {
+            System.err.println("Sorter");
+            System.err.println(e);
+        }
+        return 0;
+    }
 }
