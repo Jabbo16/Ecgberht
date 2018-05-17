@@ -54,7 +54,7 @@ public class BuildingMap {
         return map2;
     }
 
-    //Generates an initial building map
+    // Generates an initial building map
     public void initMap() {
         //Find valid and no valid positions for building
         for (int jj = 0; jj < height; jj++) {
@@ -67,7 +67,7 @@ public class BuildingMap {
                 }
             }
         }
-        //Finds minerals and geysers
+        // Finds minerals and geysers
         for (MineralPatch resource : bw.getMineralPatches()) {
             TilePosition resourceTile = resource.getTilePosition();
 
@@ -95,8 +95,6 @@ public class BuildingMap {
                 }
             }
         }
-
-
         for (Area a : bwem.getMap().getAreas()) {
             for (Base b : a.getBases()) {
                 TilePosition starting = b.getLocation();
@@ -113,12 +111,10 @@ public class BuildingMap {
                 map[starting.getY() + 1][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
                 map[starting.getY() + 2][starting.getX() + UnitType.Terran_Command_Center.tileWidth() + 1] = "E";
             }
-
         }
         map = fillMap(map);
     }
-
-    //Fills the map with the correct values for each tile
+    // Fills the map with the correct values for each tile
     public String[][] fillMap(String[][] map) {
         int height = map.length;
         int width = map[0].length;
@@ -136,7 +132,7 @@ public class BuildingMap {
                 }
             }
         }
-        //Se ponen a "B" las casillas adyacentes a 0,M,V por izquierda y arriba y sean 6
+        // Sets to "B" adjacent tiles to 0,M,V by the left and top with value "6"
         for (int jj = height - 1; jj >= 0; jj--) {
             for (int ii = width - 1; ii >= 0; ii--) {
                 if (map[jj][ii] == "E" || map[jj][ii] == "M" || map[jj][ii] == "V") {
@@ -261,7 +257,7 @@ public class BuildingMap {
         return map;
     }
 
-    //Updates a portion of the map around the building
+    // Updates a portion of the map around the building
     public void updateMap(TilePosition position, UnitType building, boolean destroyed) {
         TilePosition buildingSize = building.tileSize();
         int tamY = buildingSize.getY();
@@ -321,7 +317,7 @@ public class BuildingMap {
                 }
             }
         }
-        //Finds the corners around the building
+        // Finds the corners around the building
         int init_i = 0;
         if (position.getY() - height > 0) {
             init_i = position.getY() - height;
@@ -338,30 +334,30 @@ public class BuildingMap {
         if (position.getX() + tamX + width < width) {
             fin_j = position.getX() + tamX + width;
         }
-        //Generates a submatrix as a portion of the map delimited by the corners and resets the 1,2,3 values for 4
-        String[][] submapa = new String[fin_i - init_i][fin_j - init_j];
+        // Generates a submatrix as a portion of the map delimited by the corners and resets the 1,2,3 values for 4
+        String[][] submap = new String[fin_i - init_i][fin_j - init_j];
         int i = 0;
         int j = 0;
         for (int ii = init_i; ii < fin_i; ii++) {
             j = 0;
             for (int jj = init_j; jj < fin_j; jj++) {
                 if (map[ii][jj] == "M" || map[ii][jj] == "V" || map[ii][jj] == "0" || map[ii][jj] == "E" || map[ii][jj] == "B") {
-                    submapa[i][j] = map[ii][jj];
+                    submap[i][j] = map[ii][jj];
                 } else {
-                    submapa[i][j] = "6";
+                    submap[i][j] = "6";
                 }
                 j++;
             }
             i++;
         }
-        submapa = fillMap(submapa);
-        //Updates the map using the submatrix
+        submap = fillMap(submap);
+        // Updates the map using the submatrix
         i = 0;
         j = 0;
         for (int ii = init_i; ii < fin_i; ii++) {
             j = 0;
             for (int jj = init_j; jj < fin_j; jj++) {
-                map[ii][jj] = submapa[i][j];
+                map[ii][jj] = submap[i][j];
                 j++;
             }
             i++;
@@ -369,12 +365,12 @@ public class BuildingMap {
     }
 
 
-    //Finds a valid position in the map for a specific building type starting with a given tileposition
+    // Finds a valid position in the map for a specific building type starting with a given tileposition
     public TilePosition findPosition(UnitType buildingType, TilePosition starting) {
         TilePosition buildingSize = buildingType.tileSize();
-        int tama�o = Math.max(buildingSize.getY(), buildingSize.getX());
+        int size = Math.max(buildingSize.getY(), buildingSize.getX());
         if (buildingType.canBuildAddon()) {
-            tama�o = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
+            size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
         }
         int x = starting.getY();
         int y = starting.getX();
@@ -383,13 +379,12 @@ public class BuildingMap {
         int j = 2;
         boolean control = false;
 
-        //Finds the first valid tileposition starting around the given tileposition
+        // Finds the first valid tileposition starting around the given tileposition
         while (!control) {
             for (int ii = (x - i); ii <= (x + i); ii++) {
                 for (int jj = (y - j); jj <= (y + j); jj++) {
                     if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-                        if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= tama�
-                        o){
+                        if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size){
                             if (buildingType == UnitType.Terran_Bunker) {
                                 if (!bwem.getMap().getArea(new TilePosition(jj, ii)).equals(bwem.getMap().getArea(self.getStartLocation()))) {
                                     continue;
@@ -423,7 +418,7 @@ public class BuildingMap {
         int y = starting.toTilePosition().getX();
         int i = 10;
         int j = 10;
-        //Finds the first valid tileposition starting around the given tileposition
+        // Finds the first valid tileposition starting around the given tileposition
         TilePosition position = null;
         double dist = Double.MAX_VALUE;
         for (int ii = (x - i); ii <= (x + i); ii++) {
@@ -511,7 +506,7 @@ public class BuildingMap {
         return bunkerPlace;
     }
 
-    //Writes the map to a file
+    // Writes the map to a file
     public void writeMap(String fileName) {
         FileWriter sw = null;
         try {
@@ -541,5 +536,4 @@ public class BuildingMap {
             e1.printStackTrace();
         }
     }
-
 }
