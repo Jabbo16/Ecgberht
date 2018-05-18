@@ -13,3 +13,4 @@ bwapi-data/
 .gradle/
 build/
 out/
+.markdownlint.json
