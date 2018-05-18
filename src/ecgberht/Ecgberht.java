@@ -105,16 +105,19 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onStart() {
-        // Disables System.err and System.Out
-        OutputStream output = null;
-        try {
-            output = new FileOutputStream("NUL:");
-        } catch (FileNotFoundException e) {
-            //e.printStackTrace();
+        ConfigManager.readConfig();
+        if(ConfigManager.getConfig().debugText){
+            // Disables System.err and System.Out
+            OutputStream output = null;
+            try {
+                output = new FileOutputStream("NUL:");
+            } catch (FileNotFoundException e) {
+                //e.printStackTrace();
+            }
+            PrintStream nullOut = new PrintStream(output);
+            System.setErr(nullOut);
+            System.setOut(nullOut);
         }
-        PrintStream nullOut = new PrintStream(output);
-//		System.setErr(nullOut);
-//		System.setOut(nullOut);
 
         self = bw.getInteractionHandler().self();
         ih = bw.getInteractionHandler();

@@ -135,7 +135,6 @@ public class GameState extends GameHandler {
 
     public GameState(BW bw, BWTA bwta, BWEM bwem) {
         super(bw, bwta, bwem);
-        ConfigManager.readConfig();
         initPlayers();
         map = new BuildingMap(bw, ih.self(), bwem); // Check old source for bwta->bwem
         map.initMap();
@@ -433,7 +432,7 @@ public class GameState extends GameHandler {
     }
 
     public void printer() {
-        if(!ConfigManager.getConfig().debug) return;
+        if(!ConfigManager.getConfig().debugScreen) return;
         Integer counter = 0;
         for (bwem.Base b : BLs) {
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
@@ -482,9 +481,9 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextScreen(10, 20, "Scouting: " + "False");
         }
         if (enemyBase != null) {
-            bw.getMapDrawer().drawTextScreen(10, 35, "Enemy Base Found: " + "True");
+            bw.getMapDrawer().drawTextScreen(10, 35, "Enemy Base Found: " + ColorUtil.formatText("True",ColorUtil.Green));
         } else {
-            bw.getMapDrawer().drawTextScreen(10, 35, "Enemy Base Found: " + "False");
+            bw.getMapDrawer().drawTextScreen(10, 35, "Enemy Base Found: " + ColorUtil.formatText("False",ColorUtil.Red));
         }
 //		if (chosenWorker != null) {
 //			game.drawTextMap(chosenWorker.getPosition(), "ChosenWorker");
