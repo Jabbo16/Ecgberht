@@ -1,1 +1,6 @@
-{"debugText":true,"debugScreen":true,"sounds":false}
+{
+    "debugConsole":true,
+    "debugScreen":true,
+    "debugText":true,
+    "sounds":false
+}

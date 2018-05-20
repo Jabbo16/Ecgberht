@@ -7,8 +7,6 @@ import bwem.area.Area;
 import bwem.unit.Geyser;
 import bwem.unit.Mineral;
 import bwta.BWTA;
-import bwta.Chokepoint;
-import bwta.Region;
 import com.google.gson.Gson;
 import ecgberht.Agents.VultureAgent;
 import ecgberht.Config.ConfigManager;
@@ -306,7 +304,7 @@ public class GameState extends GameHandler {
 
     public void playSound(String soundFile) {
         try {
-            if(!ConfigManager.getConfig().sounds) return;
+            if (!ConfigManager.getConfig().sounds) return;
             String run = getClass().getResource("GameState.class").toString();
             if (run.startsWith("jar:") || run.startsWith("rsrc:")) {
                 InputStream fis = getClass().getClassLoader().getResourceAsStream(soundFile);
@@ -431,24 +429,48 @@ public class GameState extends GameHandler {
         return (self.supplyTotal() - self.supplyUsed());
     }
 
-    public void printer() {
-        if(!ConfigManager.getConfig().debugScreen) return;
+    public void debugText() {
+        if (!ConfigManager.getConfig().debugText) return;
+        if(ih.allies().size() + ih.enemies().size() == 1){
+            bw.getMapDrawer().drawTextScreen(10, 5,
+                    ColorUtil.formatText(ih.self().getName(),ColorUtil.getColor(ih.self().getColor())) +
+                            ColorUtil.formatText(" vs ", ColorUtil.White )+
+                            ColorUtil.formatText(ih.enemy().getName(),ColorUtil.getColor(ih.enemy().getColor())));
+        }
+        if (chosenScout != null) {
+            bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ",ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
+        } else {
+            bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ",ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
+        }
+        if (enemyBase != null) {
+            bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ",ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
+        } else {
+            bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ",ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
+        }
+        if (defense) {
+            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White ) + ColorUtil.formatText("Yes", ColorUtil.Green));
+        } else {
+            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White ) + ColorUtil.formatText("No", ColorUtil.Red));
+        }
+        bw.getMapDrawer().drawTextScreen(10, 65, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(strat.name, ColorUtil.Yellow));
+        if (enemyRace == Race.Zerg && EI.naughty) {
+            bw.getMapDrawer().drawTextScreen(10, 80, "Naughty Zerg: " + ColorUtil.formatText("yes", ColorUtil.Green));
+        }
+    }
+
+    public void debugScreen() {
+        if (!ConfigManager.getConfig().debugScreen) return;
         Integer counter = 0;
         for (bwem.Base b : BLs) {
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
             counter++;
         }
-        bw.getMapDrawer().drawTextScreen(10, 50, "Next Building: " + chosenToBuild);
-
         for (VultureAgent vulture : agents) {
             bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), vulture.statusToString());
         }
-
-        bw.getMapDrawer().drawTextScreen(10, 80, "Strategy: " + strat.name);
         if (closestChoke != null) {
             bw.getMapDrawer().drawTextMap(closestChoke.getCenter().toPosition(), "Choke");
         }
-
         if (chosenBuilderBL != null) {
             bw.getMapDrawer().drawTextMap(chosenBuilderBL.getPosition(), "BuilderBL");
             print(chosenBuilderBL, Color.BLUE);
@@ -472,37 +494,17 @@ public class GameState extends GameHandler {
             print(r, Color.YELLOW);
             bw.getMapDrawer().drawTextMap(r.getPosition(), "Repairer");
         }
-        bw.getMapDrawer().drawTextScreen(10, 5, self.getName() + " vs " + ih.enemy().getName());
         if (chosenScout != null) {
             bw.getMapDrawer().drawTextMap(chosenScout.getPosition(), "Scouter");
             print(chosenScout, Color.PURPLE);
-            bw.getMapDrawer().drawTextScreen(10, 20, "Scouting: " + "True");
-        } else {
-            bw.getMapDrawer().drawTextScreen(10, 20, "Scouting: " + "False");
         }
-        if (enemyBase != null) {
-            bw.getMapDrawer().drawTextScreen(10, 35, "Enemy Base Found: " + ColorUtil.formatText("True",ColorUtil.Green));
-        } else {
-            bw.getMapDrawer().drawTextScreen(10, 35, "Enemy Base Found: " + ColorUtil.formatText("False",ColorUtil.Red));
-        }
-//		if (chosenWorker != null) {
-//			game.drawTextMap(chosenWorker.getPosition(), "ChosenWorker");
-//		}
         if (chosenRepairer != null) {
             bw.getMapDrawer().drawTextMap(chosenRepairer.getPosition(), "ChosenRepairer");
         }
-//		if(enemyCombatUnitMemory.size()>0) {
-//			for(Unit u : enemyCombatUnitMemory) {
-//				game.drawTextMap(u.getPosition(), u.getType().toString());
-//				print(u,Color.Red);
-//			}
-//		}
-        List<Region> regions = bwta.getRegions();
-        for (Region reg : regions) {
-            List<Chokepoint> ch = reg.getChokepoints();
-            for (Chokepoint c : ch) {
-                Pair<Position, Position> lados = c.getSides();
-                bw.getMapDrawer().drawLineMap(lados.first, lados.second, Color.GREEN);
+        for (ChokePoint c : bwem.getMap().getChokePoints()) {
+            List<WalkPosition> sides = c.getGeometry();
+            if (sides.size() == 3) {
+                bw.getMapDrawer().drawLineMap(sides.get(1).toPosition(), sides.get(2).toPosition(), Color.GREEN);
             }
         }
         for (Unit u : CCs.values()) {
@@ -520,18 +522,14 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextMap(u.getPosition(), "Spartan");
         }
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
-            print((Unit) u.getKey(), Color.ORANGE);
+            print(u.getKey(), Color.ORANGE);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
         }
-
         for (Entry<String, Squad> s : squads.entrySet()) {
             if (s.getValue().members.isEmpty()) continue;
             Position center = getSquadCenter(s.getValue());
             bw.getMapDrawer().drawCircleMap(center, 80, Color.GREEN);
             bw.getMapDrawer().drawTextMap(center, s.getKey());
-        }
-        if (enemyRace == Race.Zerg && EI.naughty) {
-            bw.getMapDrawer().drawTextScreen(10, 95, "Naughty Zerg: " + "yes");
         }
         for (Unit m : mineralsAssigned.keySet()) {
             print(m, Color.CYAN);

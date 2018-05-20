@@ -114,6 +114,7 @@ public class BuildingMap {
         }
         map = fillMap(map);
     }
+
     // Fills the map with the correct values for each tile
     public String[][] fillMap(String[][] map) {
         int height = map.length;
@@ -384,7 +385,7 @@ public class BuildingMap {
             for (int ii = (x - i); ii <= (x + i); ii++) {
                 for (int jj = (y - j); jj <= (y + j); jj++) {
                     if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-                        if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size){
+                        if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
                             if (buildingType == UnitType.Terran_Bunker) {
                                 if (!bwem.getMap().getArea(new TilePosition(jj, ii)).equals(bwem.getMap().getArea(self.getStartLocation()))) {
                                     continue;

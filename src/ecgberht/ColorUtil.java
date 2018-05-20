@@ -1,7 +1,6 @@
 package ecgberht;
 
-import java.lang.String;
-import java.lang.System;
+import org.openbw.bwapi4j.type.Color;
 
 public class ColorUtil {
     public static final byte Previous = 0x01;
@@ -36,7 +35,7 @@ public class ColorUtil {
     public static final byte Bluegrey = 0x1E;
     public static final byte Turquoise = 0x1F;
 
-    public static String formatText(String text, byte format){
+    public static String formatText(String text, byte format) {
         byte[] textData = text.getBytes();
         int textDataLength = text.length();
 
@@ -44,5 +43,35 @@ public class ColorUtil {
         newTextData[0] = format;
         System.arraycopy(textData, 0, newTextData, 1, textDataLength);
         return new String(newTextData);
+    }
+
+    public static byte getColor(Color color){
+        switch(color){
+            case RED:
+                return Red;
+            case BLUE:
+                return Blue;
+            case TEAL:
+                return Teal;
+            case PURPLE:
+                return Purple;
+            case ORANGE:
+                return Orange;
+            case BROWN:
+                return Brown;
+            case WHITE:
+                return White;
+            case YELLOW:
+                return Yellow;
+            case GREEN:
+                return Green;
+            case CYAN:
+                return Cyan;
+            case BLACK:
+                return Pinkish;
+            case GREY:
+                return Grey;
+        }
+        return Clear_formatting;
     }
 }

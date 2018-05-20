@@ -106,7 +106,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onStart() {
         ConfigManager.readConfig();
-        if(ConfigManager.getConfig().debugText){
+        if (!ConfigManager.getConfig().debugConsole) {
             // Disables System.err and System.Out
             OutputStream output = null;
             try {
@@ -411,14 +411,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onFrame() {
         try {
-
-//			for(Unit u : bw.getUnits(self)){
-//				if(u instanceof ComsatStation && ((ComsatStation) u).isCompleted()) {
-//					System.out.println("Comsat with energy: " + ((ComsatStation)u).getEnergy());
-//				}
-//			}
-
-            long frameStart = System.currentTimeMillis();
+            //long frameStart = System.currentTimeMillis();
             gs.frameCount = ih.getFrameCount();
             if (gs.frameCount == 1000) gs.sendCustomMessage();
             gs.print(gs.naturalRegion.getTop().toTilePosition(), Color.RED);
@@ -468,11 +461,12 @@ public class Ecgberht implements BWEventListener {
             if (gs.frameCount > 0 && gs.frameCount % 5 == 0) {
                 gs.mineralLocking();
             }
-            gs.printer();
-            long frameEnd = System.currentTimeMillis();
-            long frameTotal = frameEnd - frameStart;
-            gs.totalTime += frameTotal;
-            bw.getMapDrawer().drawTextScreen(10, 65, "frameTime(ms): " + (String.valueOf(frameTotal)));
+            gs.debugScreen();
+            gs.debugText();
+            //long frameEnd = System.currentTimeMillis();
+            //long frameTotal = frameEnd - frameStart;
+            //gs.totalTime += frameTotal;
+            //bw.getMapDrawer().drawTextScreen(10, 65, "frameTime(ms): " + (String.valueOf(frameTotal)));
         } catch (Exception e) {
             System.err.println("onFrame Exception");
             e.printStackTrace();
@@ -482,7 +476,6 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onEnd(boolean arg0) {
-        System.out.println("Avg. frameTime(ms): " + gs.totalTime / gs.frameCount);
         String name = ih.enemy().getName();
         gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
         if (arg0) {
