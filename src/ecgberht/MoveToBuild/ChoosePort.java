@@ -15,7 +15,6 @@ public class ChoosePort extends Action {
     @Override
     public State execute() {
         try {
-
             if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).strat.numCCForPort > ((GameState) this.handler).CCs.size() ||
                     (((GameState) this.handler).countUnit(UnitType.Terran_Starport) > 0 && ((GameState) this.handler).strat.portPerCC == 0)) {
                 return State.FAILURE;

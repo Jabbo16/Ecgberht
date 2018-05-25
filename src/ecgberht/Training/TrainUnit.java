@@ -39,14 +39,16 @@ public class TrainUnit extends Action {
                     return State.SUCCESS;
                 }
             }
+
             if (((GameState) this.handler).getSupply() > 4 || ((GameState) this.handler).checkSupply() || ((GameState) this.handler).getPlayer().supplyTotal() >= 400) {
-                if (((GameState) this.handler).EI.naughty) { // TODO test
+                /*if (((GameState) this.handler).EI.naughty) { // TODO test
                     if (((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Bunker) == 0) {
                         if (((GameState) this.handler).getPlayer().minerals() + ((GameState) this.handler).deltaCash.first < 100) {
                             return State.FAILURE;
                         }
                     }
-                }
+                }*/
+
                 chosen.train(((GameState) this.handler).chosenUnit);
                 return State.SUCCESS;
             }

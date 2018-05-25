@@ -3,7 +3,6 @@ package ecgberht.Defense;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
-import ecgberht.UnitComparator;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -37,7 +36,7 @@ public class SendDefenders extends Action {
                 }
                 air_only = false;
             }
-            Set<Unit> friends = new TreeSet<Unit>(new UnitComparator());
+            Set<Unit> friends = new TreeSet<>();
             for (Squad s : ((GameState) this.handler).squads.values()) {
                 for (Unit u : s.members) {
                     friends.add(u);

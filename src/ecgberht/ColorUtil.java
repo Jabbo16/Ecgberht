@@ -38,7 +38,6 @@ public class ColorUtil {
     public static String formatText(String text, byte format) {
         byte[] textData = text.getBytes();
         int textDataLength = text.length();
-
         byte[] newTextData = new byte[textDataLength + 1];
         newTextData[0] = format;
         System.arraycopy(textData, 0, newTextData, 1, textDataLength);
@@ -46,6 +45,7 @@ public class ColorUtil {
     }
 
     public static byte getColor(Color color){
+        if(color == null) return Clear_formatting;
         switch(color){
             case RED:
                 return Red;

@@ -1,7 +1,6 @@
 package ecgberht.Harass;
 
 import ecgberht.GameState;
-import ecgberht.UnitComparator;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -28,7 +27,7 @@ public class CheckHarasserAttacked extends Conditional {
             }
             Unit attacker = null;
             int workers = 0;
-            Set<Unit> attackers = new TreeSet<>(new UnitComparator());
+            Set<Unit> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
             for (PlayerUnit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getIH().enemy())) {
                 if (!(u instanceof Building) && u instanceof Attacker && u.exists()) {

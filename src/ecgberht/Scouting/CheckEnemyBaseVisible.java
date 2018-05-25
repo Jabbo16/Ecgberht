@@ -30,8 +30,6 @@ public class CheckEnemyBaseVisible extends Action {
                         if (((GameState) this.handler).broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.getPosition()) <= 500) {
                             ((GameState) this.handler).enemyBase = Util.getClosestBaseLocation(u.getPosition());
                             ((GameState) this.handler).ScoutSLs = new HashSet<>();
-                            //((GameState)this.handler).choosenScout.stop();
-                            //((GameState)this.handler).workerIdle.add(((GameState)this.handler).choosenScout);
                             ((GameState) this.handler).chosenHarasser = ((GameState) this.handler).chosenScout;
                             ((GameState) this.handler).chosenScout = null;
                             ((GameState) this.handler).getIH().sendText("!");

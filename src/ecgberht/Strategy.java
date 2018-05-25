@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class Strategy {
 
+    public int numFacForPort = 1;
     public boolean bunker = false;
     public boolean proxy = false;
     public int armyForAttack = 0;
@@ -49,6 +50,7 @@ public class Strategy {
         this.numBays = build.numBays;
         this.numCCForPort = build.numCCForPort;
         this.numCCForScience = build.numCCForScience;
+        this.numFacForPort = build.numFacForPort;
         this.numRaxForAca = build.numRaxForAca;
         this.numRaxForFac = build.numRaxForFac;
         this.portPerCC = build.portPerCC;

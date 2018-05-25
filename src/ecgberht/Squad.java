@@ -24,7 +24,7 @@ public class Squad {
 
     public Squad(String name) {
         this.name = name;
-        members = new TreeSet<>(new UnitComparator());
+        members = new TreeSet<>();
         status = Status.IDLE;
         attack = null;
     }
@@ -45,7 +45,7 @@ public class Squad {
         for (PlayerUnit u : members) {
             if (u instanceof Marine || u instanceof Firebat) {
                 if (u instanceof Marine ? !((Marine) u).isStimmed() : ((Firebat) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
-                    if ((u instanceof Marine) ? ((Marine) u).stimPack() : ((Firebat) u).stimPack()) ;
+                    if ((u instanceof Marine) ? ((Marine) u).stimPack() : ((Firebat) u).stimPack());
                 }
             }
         }
@@ -94,6 +94,12 @@ public class Squad {
                     }
                 }
 
+                if((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove && !u.getOrderTargetPosition().equals(attack)){ // TODO test change target position faster
+                    if(u instanceof MobileUnit){
+                        ((MobileUnit)u).attack(attack);
+                        continue;
+                    }
+                }
                 // Experimental
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition()) && frameCount % 35 == 0) {
                     if (members.size() == 1) {
@@ -255,7 +261,7 @@ public class Squad {
     }
 
     public Set<Unit> getMarines() {
-        Set<Unit> aux = new TreeSet<>(new UnitComparator());
+        Set<Unit> aux = new TreeSet<>();
         for (Unit u : this.members) {
             if (u instanceof Marine) {
                 aux.add(u);
@@ -265,7 +271,7 @@ public class Squad {
     }
 
     public Set<Unit> getMedics() {
-        Set<Unit> aux = new TreeSet<>(new UnitComparator());
+        Set<Unit> aux = new TreeSet<>();
         for (Unit u : this.members) {
             if (u instanceof Medic) {
                 aux.add(u);

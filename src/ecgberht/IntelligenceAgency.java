@@ -17,7 +17,7 @@ import static ecgberht.Ecgberht.getGs;
 public class IntelligenceAgency {
     private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
     private static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
-    private static TreeSet<Unit> drones = new TreeSet<>(new UnitComparator());
+    private static TreeSet<Unit> drones = new TreeSet<>();
 
     public static int getNumDrones() {
         return drones.size();
@@ -63,7 +63,7 @@ public class IntelligenceAgency {
         // Bases
         if (type.isResourceDepot()) {
             if (!enemyBases.containsKey(player)) {
-                TreeSet<Unit> aux = new TreeSet<>(new UnitComparator());
+                TreeSet<Unit> aux = new TreeSet<>();
                 aux.add(unit);
                 enemyBases.put(player, aux);
 

@@ -41,6 +41,7 @@ public class BioMechBuildFE extends AStrategy {
         trainUnits.add(UnitType.Terran_Medic);
         trainUnits.add(UnitType.Terran_Vulture);
         trainUnits.add(UnitType.Terran_Siege_Tank_Tank_Mode);
+        trainUnits.add(UnitType.Terran_Wraith);
     }
 
     @Override

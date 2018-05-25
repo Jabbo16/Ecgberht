@@ -25,7 +25,7 @@ public class CheckPerimeter extends Conditional {
         try {
             ((GameState) this.handler).enemyInBase.clear();
             ((GameState) this.handler).defense = false;
-            Set<Unit> enemyInvaders = new TreeSet<>(new UnitComparator());
+            Set<Unit> enemyInvaders = new TreeSet<>();
             enemyInvaders.addAll(((GameState) this.handler).enemyCombatUnitMemory);
             for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
                 if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
@@ -119,7 +119,7 @@ public class CheckPerimeter extends Conditional {
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

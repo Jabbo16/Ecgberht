@@ -24,7 +24,8 @@ public class FullMech extends AStrategy {
         supplyForFirstRefinery = 28;
         armyForAttack = 25;
         armyForExpand = 10;
-        numCCForPort = 2;
+        numCCForPort = 1;
+        numFacForPort = 2;
         numCCForScience = 2;
         portPerCC = 1;
         initTrainUnits();
@@ -39,6 +40,7 @@ public class FullMech extends AStrategy {
         trainUnits.add(UnitType.Terran_Marine);
         trainUnits.add(UnitType.Terran_Vulture);
         trainUnits.add(UnitType.Terran_Siege_Tank_Tank_Mode);
+        trainUnits.add(UnitType.Terran_Wraith);
     }
 
     @Override

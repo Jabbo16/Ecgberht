@@ -14,7 +14,7 @@ import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 
-public class VultureAgent implements Comparator<VultureAgent> {
+public class VultureAgent implements Comparable<VultureAgent> {
 
     public VultureAgent(Unit unit) {
         this.unit = (Vulture) unit;
@@ -79,9 +79,9 @@ public class VultureAgent implements Comparator<VultureAgent> {
             if (frameLastOrder == actualFrame) {
                 return remove;
             }
-            if (actualFrame % getGs().getIH().getLatencyFrames() == 0) {
-                return remove;
-            }
+            //if (actualFrame % getGs().getIH().getLatencyFrames() == 0) {
+                //return remove;
+            //}
             Status old = status;
             getNewStatus();
             if (old == status && status != Status.COMBAT && status != Status.ATTACK) {
@@ -334,7 +334,7 @@ public class VultureAgent implements Comparator<VultureAgent> {
     }
 
     @Override
-    public int compare(VultureAgent v1, VultureAgent v2) {
-        return v1.unit.getId() - v2.unit.getId();
+    public int compareTo(VultureAgent v1) {
+        return this.unit.getId() - v1.unit.getId();
     }
 }

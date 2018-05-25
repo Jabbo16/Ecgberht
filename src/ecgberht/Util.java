@@ -128,10 +128,10 @@ public class Util {
         return closestChoke;
     }
 
-    public static Chokepoint getGroundDistanceClosestChoke(Position pos) {
-        Chokepoint closestChoke = null;
+    public static ChokePoint getGroundDistanceClosestChoke(Position pos) {
+        ChokePoint closestChoke = null;
         double dist = Double.MAX_VALUE;
-        for (Chokepoint choke : getGs().bwta.getChokepoints()) {
+        for (ChokePoint choke : getGs().bwem.getMap().getChokePoints()) {
             double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), choke.getCenter().toTilePosition());
             if (cDist == 0.0) continue;
             if (closestChoke == null || cDist < dist) {
@@ -155,11 +155,11 @@ public class Util {
         return closestBase;
     }
 
-    public static BaseLocation getGroundDistanceClosestBase(Position pos) {
-        BaseLocation closestBase = null;
+    public static Base getGroundDistanceClosestBase(Position pos) {
+        Base closestBase = null;
         double dist = Double.MAX_VALUE;
-        for (BaseLocation base : getGs().bwta.getBaseLocations()) {
-            double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), base.getTilePosition());
+        for (Base base : getGs().bwem.getMap().getBases()) {
+            double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), base.getLocation());
             if (cDist == 0.0) continue;
             if (closestBase == null || cDist < dist) {
                 closestBase = base;
@@ -269,7 +269,7 @@ public class Util {
         double highestPriority = 0.f;
         Unit bestTarget = null;
 
-        // for each target possiblity
+        // for each target possibility
         for (Unit targetUnit : targets) {
             double priority = getScore((PlayerUnit) rangedUnit, (PlayerUnit) targetUnit);
 

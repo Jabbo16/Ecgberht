@@ -9,12 +9,10 @@ import bwem.unit.Mineral;
 import bwta.BWTA;
 import com.google.gson.Gson;
 import ecgberht.Agents.VultureAgent;
+import ecgberht.Agents.WraithAgent;
 import ecgberht.Config.ConfigManager;
 import ecgberht.Squad.Status;
-import ecgberht.Strategies.BioBuild;
-import ecgberht.Strategies.BioBuildFE;
-import ecgberht.Strategies.BioMechBuild;
-import ecgberht.Strategies.BioMechBuildFE;
+import ecgberht.Strategies.*;
 import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.iaie.btree.util.GameHandler;
@@ -32,15 +30,11 @@ import java.util.Map.Entry;
 public class GameState extends GameHandler {
 
     public Base enemyBase = null;
-    public boolean activeCount = false;
     public boolean defense = false;
     public boolean enemyIsRandom = true;
     public boolean expanding = false;
-    public boolean firstAPM = false;
     public boolean firstProxyBBS = false;
-    public boolean initCount = false;
     public boolean movingToExpand = false;
-    public boolean scout = true;
     public boolean siegeResearched = false;
     public BuildingMap map;
     public BuildingMap testMap;
@@ -52,9 +46,7 @@ public class GameState extends GameHandler {
     public int builtBuildings;
     public int builtCC;
     public int builtRefinery;
-    public int deltaSupply;
     public int frameCount;
-    public int lastFrameStim = Integer.MIN_VALUE;
     public int mapSize = 2;
     public int mining;
     public int startCount;
@@ -66,24 +58,24 @@ public class GameState extends GameHandler {
     public List<Base> blockedBLs = new ArrayList<>();
     public List<Base> BLs = new ArrayList<>();
     public List<Base> EnemyBLs = new ArrayList<>();
-    public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>(new UnitComparator());
-    public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>(new UnitComparator());
-    public Map<SCV, Pair<UnitType, TilePosition>> workerBuild = new TreeMap<>(new UnitComparator());
-    public Map<Worker, Position> workerDefenders = new TreeMap<>(new UnitComparator());
-    public Map<SCV, Building> repairerTask = new TreeMap<>(new UnitComparator());
-    public Map<SCV, Building> workerTask = new TreeMap<>(new UnitComparator());
-    public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>(new UnitComparator());
-    public long totalTime = 0;
+    public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
+    public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
+    public Map<SCV, Pair<UnitType, TilePosition>> workerBuild = new TreeMap<>();
+    public Map<Worker, Position> workerDefenders = new TreeMap<>();
+    public Map<SCV, Building> repairerTask = new TreeMap<>();
+    public Map<SCV, Building> workerTask = new TreeMap<>();
+    public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
     public Map<Position, MineralPatch> blockingMinerals = new HashMap<>();
     public Map<Position, CommandCenter> CCs = new HashMap<>();
     public Map<String, Squad> squads = new TreeMap<>();
-    public Map<Bunker, Set<Unit>> DBs = new TreeMap<>(new UnitComparator());
-    public Map<Unit, String> TTMs = new TreeMap<>(new UnitComparator());
-    public Map<Unit, EnemyBuilding> enemyBuildingMemory = new TreeMap<>(new UnitComparator());
-    public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>(new UnitComparator());
-    public Map<Worker, MineralPatch> workerMining = new TreeMap<>(new UnitComparator());
+    public Map<Bunker, Set<Unit>> DBs = new TreeMap<>();
+    public Map<Unit, String> TTMs = new TreeMap<>();
+    public Map<Unit, EnemyBuilding> enemyBuildingMemory = new TreeMap<>();
+    public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
+    public Map<Unit,WraithAgent> spectres = new TreeMap<>();
+    public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
-    public Pair<Integer, Integer> deltaCash = new Pair<Integer, Integer>(0, 0);
+    public Pair<Integer, Integer> deltaCash = new Pair<>(0, 0);
     public Pair<String, Unit> chosenMarine = null;
     public Player neutral;
     public Position attackPosition = null;
@@ -91,21 +83,29 @@ public class GameState extends GameHandler {
     public Area naturalRegion = null;
     public Set<Base> ScoutSLs = new HashSet<>();
     public Set<Base> SLs = new HashSet<>();
-    public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa", "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "X-Ray", "Yankee", "Zulu"));
-    public Set<Building> buildingLot = new TreeSet<>(new UnitComparator());
-    public Set<ComsatStation> CSs = new TreeSet<>(new UnitComparator());
-    public Set<Unit> enemyCombatUnitMemory = new TreeSet<>(new UnitComparator());
-    public Set<Unit> enemyInBase = new TreeSet<>(new UnitComparator());
-    public Set<Factory> Fs = new TreeSet<>(new UnitComparator());
-    public Set<Barracks> MBs = new TreeSet<>(new UnitComparator());
-    public Set<Starport> Ps = new TreeSet<>(new UnitComparator());
-    public Set<SupplyDepot> SBs = new TreeSet<>(new UnitComparator());
-    public Set<MissileTurret> Ts = new TreeSet<>(new UnitComparator());
-    public Set<ResearchingFacility> UBs = new TreeSet<>(new UnitComparator());
-    public Set<Worker> workerIdle = new TreeSet<>(new UnitComparator());
+    public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha", "Bravo", "Charlie", "Delta",
+            "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa",
+            "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "X-Ray", "Yankee", "Zulu"));
+    public Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
+            "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
+            "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",
+            "In Amber Clad", "Infinity", "Jericho", "Las Vegas", "Lawgiver", "Leviathan", "Long Night of Solace",
+            "Matador", "Penance", "Persephone", "Pillar of Autumn", "Pitiless", "Pompadour", "Providence", "Revenant",
+            "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
+    public Set<Building> buildingLot = new TreeSet<>();
+    public Set<ComsatStation> CSs = new TreeSet<>();
+    public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
+    public Set<Unit> enemyInBase = new TreeSet<>();
+    public Set<Factory> Fs = new TreeSet<>();
+    public Set<Barracks> MBs = new TreeSet<>();
+    public Set<Starport> Ps = new TreeSet<>();
+    public Set<SupplyDepot> SBs = new TreeSet<>();
+    public Set<MissileTurret> Ts = new TreeSet<>();
+    public Set<ResearchingFacility> UBs = new TreeSet<>();
+    public Set<Worker> workerIdle = new TreeSet<>();
     public Set<VultureAgent> agents = new TreeSet<>();
+    public SupplyMan supplyMan;
     public Strategy strat = new Strategy();
-    public String chosenSquad = null;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
     public TilePosition chosenBaseLocation = null;
@@ -130,16 +130,19 @@ public class GameState extends GameHandler {
     public UnitType chosenUnit = null;
     public UpgradeType chosenUpgrade = null;
     public boolean iReallyWantToExpand = false;
+    public int directionScoutMain;
+    public int maxWraiths = 5;
 
     public GameState(BW bw, BWTA bwta, BWEM bwem) {
         super(bw, bwta, bwem);
         initPlayers();
-        map = new BuildingMap(bw, ih.self(), bwem); // Check old source for bwta->bwem
+        map = new BuildingMap(bw, ih.self(), bwem);
         map.initMap();
         testMap = map.clone();
         inMap = new InfluenceMap(bw, ih.self(), bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
         mapSize = bwta.getStartLocations().size();
         simulator = new JFAP(bw);
+        supplyMan = new SupplyMan(self.getRace());
     }
 
     public void initPlayers() {
@@ -163,6 +166,8 @@ public class GameState extends GameHandler {
             BioMechBuild bM = new BioMechBuild();
             BioBuildFE bFE = new BioBuildFE();
             BioMechBuildFE bMFE = new BioMechBuildFE();
+            FullMech FM = new FullMech();
+            if(true) return new Strategy(FM);
             String map = bw.getBWMap().mapFileName();
             if (enemyRace == Race.Zerg && EI.naughty) {
                 return new Strategy(b);
@@ -205,19 +210,19 @@ public class GameState extends GameHandler {
                 Map<String, Pair<Integer, Integer>> strategies = new TreeMap<>();
                 Map<String, AStrategy> nameStrat = new TreeMap<>();
 
-//				strategies.put(bbs.name, new Pair<Integer,Integer>(0,0)); // BROKEN
+//				strategies.put(bbs.name, new Pair<>(0,0)); // BROKEN
 //				nameStrat.put(bbs.name, bbs);
 
-                strategies.put(bFE.name, new Pair<Integer, Integer>(0, 0));
+                strategies.put(bFE.name, new Pair<>(0, 0));
                 nameStrat.put(bFE.name, bFE);
 
-                strategies.put(bMFE.name, new Pair<Integer, Integer>(0, 0));
+                strategies.put(bMFE.name, new Pair<>(0, 0));
                 nameStrat.put(bMFE.name, bMFE);
 
-                strategies.put(b.name, new Pair<Integer, Integer>(0, 0));
+                strategies.put(b.name, new Pair<>(0, 0));
                 nameStrat.put(b.name, b);
 
-                strategies.put(bM.name, new Pair<Integer, Integer>(0, 0));
+                strategies.put(bM.name, new Pair<>(0, 0));
                 nameStrat.put(bM.name, bM);
 
                 for (StrategyOpponentHistory r : EI.history) {
@@ -347,15 +352,6 @@ public class GameState extends GameHandler {
         return self;
     }
 
-    public void initCCs() {
-        List<PlayerUnit> units = bw.getUnits(self);
-        for (PlayerUnit u : units) {
-            if (u.getInitialType() == UnitType.Terran_Command_Center) {
-                CCs.put(bwta.getRegion(u.getPosition()).getCenter(), (CommandCenter) u);
-            }
-        }
-    }
-
     public void addNewResources(Unit unit) {
         List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
         List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
@@ -365,7 +361,7 @@ public class GameState extends GameHandler {
         for (Geyser g : gas) {
             vespeneGeysers.put((VespeneGeyser) g.getUnit(), false);
         }
-        if (strat.name == "ProxyBBS") {
+        if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
         }
     }
@@ -416,7 +412,7 @@ public class GameState extends GameHandler {
         for (Unit u : auxGas) {
             refineriesAssigned.remove(u);
         }
-        if (strat.name == "ProxyBBS") {
+        if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
         }
     }
@@ -430,32 +426,39 @@ public class GameState extends GameHandler {
     }
 
     public void debugText() {
-        if (!ConfigManager.getConfig().debugText) return;
-        if(ih.allies().size() + ih.enemies().size() == 1){
-            bw.getMapDrawer().drawTextScreen(10, 5,
-                    ColorUtil.formatText(ih.self().getName(),ColorUtil.getColor(ih.self().getColor())) +
-                            ColorUtil.formatText(" vs ", ColorUtil.White )+
-                            ColorUtil.formatText(ih.enemy().getName(),ColorUtil.getColor(ih.enemy().getColor())));
+        try{
+            if (!ConfigManager.getConfig().debugText) return;
+            bw.getMapDrawer().drawTextScreen(320, 5, ColorUtil.formatText(supplyMan.getSupplyUsed() + "/" + supplyMan.getSupplyTotal(), ColorUtil.White));
+            if(ih.allies().size() + ih.enemies().size() == 1){
+                bw.getMapDrawer().drawTextScreen(10, 5,
+                        ColorUtil.formatText(ih.self().getName(),ColorUtil.getColor(ih.self().getColor())) +
+                                ColorUtil.formatText(" vs ", ColorUtil.White )+
+                                ColorUtil.formatText(ih.enemy().getName(),ColorUtil.getColor(ih.enemy().getColor())));
+            }
+            if (chosenScout != null) {
+                bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ",ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
+            } else {
+                bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ",ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
+            }
+            if (enemyBase != null) {
+                bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ",ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
+            } else {
+                bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ",ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
+            }
+            if (defense) {
+                bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White ) + ColorUtil.formatText("Yes", ColorUtil.Green));
+            } else {
+                bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White ) + ColorUtil.formatText("No", ColorUtil.Red));
+            }
+            bw.getMapDrawer().drawTextScreen(10, 65, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(strat.name, ColorUtil.Yellow));
+            if (enemyRace == Race.Zerg && EI.naughty) {
+                bw.getMapDrawer().drawTextScreen(10, 80, "Naughty Zerg: " + ColorUtil.formatText("yes", ColorUtil.Green));
+            }
+        } catch(Exception e){
+            System.err.println("debugText Exception");
+            e.printStackTrace();
         }
-        if (chosenScout != null) {
-            bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ",ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
-        } else {
-            bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ",ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
-        }
-        if (enemyBase != null) {
-            bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ",ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
-        } else {
-            bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ",ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
-        }
-        if (defense) {
-            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White ) + ColorUtil.formatText("Yes", ColorUtil.Green));
-        } else {
-            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White ) + ColorUtil.formatText("No", ColorUtil.Red));
-        }
-        bw.getMapDrawer().drawTextScreen(10, 65, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(strat.name, ColorUtil.Yellow));
-        if (enemyRace == Race.Zerg && EI.naughty) {
-            bw.getMapDrawer().drawTextScreen(10, 80, "Naughty Zerg: " + ColorUtil.formatText("yes", ColorUtil.Green));
-        }
+
     }
 
     public void debugScreen() {
@@ -468,6 +471,13 @@ public class GameState extends GameHandler {
         for (VultureAgent vulture : agents) {
             bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), vulture.statusToString());
         }
+
+        for (WraithAgent wraith : spectres.values()) {
+            bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), wraith.statusToString());
+            bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(0, UnitType.Terran_Wraith.dimensionUp())), // TODO test
+                    wraith.name);
+        }
+
         if (closestChoke != null) {
             bw.getMapDrawer().drawTextMap(closestChoke.getCenter().toPosition(), "Choke");
         }
@@ -483,8 +493,10 @@ public class GameState extends GameHandler {
             print(chosenBaseLocation, UnitType.Terran_Command_Center, Color.CYAN);
         }
         for (Entry<SCV, Pair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
-            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "ChosenBuilder");
+            print(u.getKey(), Color.TEAL);
+            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "Building " + u.getValue().first.toString());
             print(u.getValue().second, u.getValue().first, Color.TEAL);
+            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), getCenterFromBuilding(u.getValue().second.toPosition(), u.getValue().first), Color.RED);
         }
         if (chosenUnitToHarass != null) {
             print(chosenUnitToHarass, Color.RED);
@@ -515,15 +527,35 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawCircleMap(u.getPosition(), 300, Color.ORANGE);
         }
         for (Unit u : workerIdle) {
-            print(u, Color.GREEN);
+            print(u, Color.ORANGE);
         }
+
+        for(Entry<SCV, Building> u : workerTask.entrySet()){
+            print(u.getKey(), Color.TEAL);
+            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "Tasked: " + u.getValue().getInitialType().toString());
+            print(u.getValue(), Color.TEAL);
+            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
+        }
+
         for (Worker u : workerDefenders.keySet()) {
             print(u, Color.PURPLE);
             bw.getMapDrawer().drawTextMap(u.getPosition(), "Spartan");
         }
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
-            print(u.getKey(), Color.ORANGE);
+            print(u.getKey(), Color.CYAN);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
+        }
+        for (Entry<Worker, GasMiningFacility> u : workerGas.entrySet()) {
+            if(u.getKey().getOrder() == Order.HarvestGas) continue;
+            print(u.getKey(), Color.GREEN);
+            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
+        }
+        for(Entry<VespeneGeyser, Boolean> u : vespeneGeysers.entrySet()){
+            print(u.getKey(), Color.GREEN);
+            if(refineriesAssigned.containsKey(u.getKey())){
+                int gas = refineriesAssigned.get(u.getKey());
+                bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText(Integer.toString(gas),ColorUtil.White));
+            }
         }
         for (Entry<String, Squad> s : squads.entrySet()) {
             if (s.getValue().members.isEmpty()) continue;
@@ -533,7 +565,7 @@ public class GameState extends GameHandler {
         }
         for (Unit m : mineralsAssigned.keySet()) {
             print(m, Color.CYAN);
-            bw.getMapDrawer().drawTextMap(m.getPosition(), mineralsAssigned.get(m).toString());
+            bw.getMapDrawer().drawTextMap(m.getPosition(), ColorUtil.formatText(mineralsAssigned.get(m).toString(), ColorUtil.White));
         }
     }
 
@@ -783,42 +815,45 @@ public class GameState extends GameHandler {
             }
             return gg;
         }
-        String nombre = null;
-        while (nombre == null || squads.containsKey(nombre)) {
+        String name = null;
+        while (name == null || squads.containsKey(name)) {
             int index = new Random().nextInt(teamNames.size());
             Iterator<String> iter = teamNames.iterator();
             for (int i = 0; i < index; i++) {
-                nombre = iter.next();
+                name = iter.next();
             }
         }
-        return nombre;
+        return name;
     }
 
     public String addToSquad(Unit unit) {
-        String nombre = "";
+        String name = "";
         if (squads.size() == 0) {
             Squad aux = new Squad(getSquadName());
             aux.addToSquad(unit);
             squads.put(aux.name, aux);
-            nombre = aux.name;
+            name = aux.name;
         } else {
             String chosen = null;
             for (Entry<String, Squad> s : squads.entrySet()) {
-                if (s.getValue().members.size() < 12 && broodWarDistance(getSquadCenter(s.getValue()), unit.getPosition()) < 1000 && (chosen == null || broodWarDistance(unit.getPosition(), getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(), getSquadCenter(squads.get(chosen))))) {
+                if (s.getValue().members.size() < 12 && broodWarDistance(getSquadCenter(s.getValue()),
+                        unit.getPosition()) < 1000 && (chosen == null || broodWarDistance(unit.getPosition(),
+                        getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(),
+                        getSquadCenter(squads.get(chosen))))) {
                     chosen = s.getKey();
                 }
             }
             if (chosen != null) {
                 squads.get(chosen).addToSquad(unit);
-                nombre = chosen;
+                name = chosen;
             } else {
-                Squad nuevo = new Squad(getSquadName());
-                nuevo.addToSquad(unit);
-                squads.put(nuevo.name, nuevo);
-                nombre = nuevo.name;
+                Squad newSquad = new Squad(getSquadName());
+                newSquad.addToSquad(unit);
+                squads.put(newSquad.name, newSquad);
+                name  = newSquad.name;
             }
         }
-        return nombre;
+        return name;
     }
 
     public Position getSquadCenter(Squad s) {
@@ -861,7 +896,7 @@ public class GameState extends GameHandler {
 
     public void siegeTanks() {
         if (!squads.isEmpty()) {
-            Set<SiegeTank> tanks = new TreeSet<>(new UnitComparator());
+            Set<SiegeTank> tanks = new TreeSet<>();
             for (Entry<String, Squad> s : squads.entrySet()) {
                 tanks.addAll(s.getValue().getTanks());
             }
@@ -1271,7 +1306,7 @@ public class GameState extends GameHandler {
         if (bunker) {
             boolean bunkerDead = true;
             for (JFAPUnit unit : simulator.getState().first) {
-                if (unit.unitType == UnitType.Terran_Bunker) {
+                if (unit.unit.getInitialType() == UnitType.Terran_Bunker) {
                     bunkerDead = false;
                     break;
                 }
@@ -1412,23 +1447,49 @@ public class GameState extends GameHandler {
                 rem.add(vulture);
             }
         }
-        for (VultureAgent vult : rem) {
-            agents.remove(vult);
+        for (VultureAgent vulture : rem) {
+            agents.remove(vulture);
+        }
+
+        List<WraithAgent> wra = new ArrayList<>();
+        for (WraithAgent wraith : spectres.values()) {
+            boolean remove = wraith.runAgent();
+            if (remove) {
+                wra.add(wraith);
+            }
+        }
+        for (WraithAgent wraith : wra) {
+            spectres.remove(wraith);
         }
     }
 
     public void sendCustomMessage() {
         String name = EI.opponent.toLowerCase();
-
         if (name == "krasi0".toLowerCase()) {
             ih.sendText("Please be nice to me!");
         }
-        if (name == "hannes bredberg".toLowerCase()) {
-            ih.sendText("Dont you dare nuke me!");
+        if (name == "hannes bredberg".toLowerCase() || name == "hannesbredberg".toLowerCase()) {
+            ih.sendText("Don't you dare nuke me!");
         }
         if (name == "zercgberht" || name == "protecgberht") {
             ih.sendText("Hey there!, brother");
             ih.sendText("As the oldest of the three I'm not gonna lose");
         }
+    }
+
+    public String pickShipName() {
+        if(shipNames.isEmpty()) return "Pepe";
+        String name = null;
+        int index = new Random().nextInt(shipNames.size());
+        Iterator<String> iter = shipNames.iterator();
+        do {
+            name = iter.next();
+            index--;
+        }
+        while(index >= 0);
+
+        if(name == null) return "Pepe";
+        shipNames.remove(name);
+        return name;
     }
 }

@@ -36,6 +36,9 @@ public class ChooseTank extends Action {
                             }
                         }
                     } else {
+                        if(((GameState)this.handler).maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith)  > 0 && Math.random()*10 < 1){
+                            return State.FAILURE;
+                        }
                         if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * 2 +
                                 Util.countUnitTypeSelf(UnitType.Terran_Vulture)) {
                             Pair<Integer, Integer> cash = ((GameState) this.handler).getCash();
