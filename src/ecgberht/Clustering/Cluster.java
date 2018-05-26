@@ -10,7 +10,7 @@ import java.util.TreeSet;
 public class Cluster implements Comparable<Cluster>{
     public int score = 0;
     public Set<Unit> units = new TreeSet<>();
-    public Pair<Integer,Integer> mode = new Pair<>(0,0);
+    public Pair<Double,Double> mode = new Pair<>(0.0,0.0);
 
     @Override
     public int compareTo(Cluster o) {

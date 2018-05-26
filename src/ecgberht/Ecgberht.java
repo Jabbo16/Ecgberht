@@ -427,10 +427,10 @@ public class Ecgberht implements BWEventListener {
             //long frameStart = System.currentTimeMillis();
             gs.frameCount = ih.getFrameCount();
             if (gs.frameCount == 1000) gs.sendCustomMessage();
-            if(gs.frameCount == 2000){
+            if(gs.frameCount >= 2000){
                 Set<Unit> workers = new TreeSet<>();
                 for(Unit u : bw.getUnits(self)){
-                    if(u instanceof Worker) workers.add(u);
+                    if(u instanceof Worker && ((Worker) u).isCompleted()) workers.add(u);
                 }
                 MeanShift ms = new MeanShift(workers);
                 System.out.println("Inicializado meanShift");
@@ -441,7 +441,7 @@ public class Ecgberht implements BWEventListener {
             if(!clusters.isEmpty()){
                 int cluster = 0;
                 for(Cluster c : clusters){
-                    Position centroid = new Position(c.mode.first, c.mode.second);
+                    Position centroid = new Position(c.mode.first.intValue(), c.mode.second.intValue());
                     bw.getMapDrawer().drawCircleMap(centroid, 50, Color.RED);
                     bw.getMapDrawer().drawTextMap(centroid, Integer.toString(cluster));
                     cluster++;
