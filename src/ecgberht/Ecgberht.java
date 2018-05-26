@@ -19,6 +19,8 @@ import ecgberht.BuildingLot.FinishBuilding;
 import ecgberht.Bunker.ChooseBunkerToLoad;
 import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
+import ecgberht.Clustering.Cluster;
+import ecgberht.Clustering.MeanShift;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
 import ecgberht.Config.ConfigManager;
@@ -52,9 +54,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 public class Ecgberht implements BWEventListener {
@@ -82,6 +82,8 @@ public class Ecgberht implements BWEventListener {
     private static GameState gs;
     private BWTA bwta;
     private BWEM bwem;
+
+    List<Cluster> clusters = new ArrayList<>();
 
     private void run() {
         Ecgberht.bw = new BW(this);
@@ -425,6 +427,29 @@ public class Ecgberht implements BWEventListener {
             //long frameStart = System.currentTimeMillis();
             gs.frameCount = ih.getFrameCount();
             if (gs.frameCount == 1000) gs.sendCustomMessage();
+            if(gs.frameCount == 2000){
+                Set<Unit> workers = new TreeSet<>();
+                for(Unit u : bw.getUnits(self)){
+                    if(u instanceof Worker) workers.add(u);
+                }
+                MeanShift ms = new MeanShift(workers);
+                System.out.println("Inicializado meanShift");
+                clusters = ms.run();
+                System.out.println("Ejecutado meanShift");
+                System.out.println(clusters.size());
+            }
+            if(!clusters.isEmpty()){
+                int cluster = 0;
+                for(Cluster c : clusters){
+                    Position centroid = new Position(c.mode.first, c.mode.second);
+                    bw.getMapDrawer().drawCircleMap(centroid, 50, Color.RED);
+                    bw.getMapDrawer().drawTextMap(centroid, Integer.toString(cluster));
+                    cluster++;
+                    for(Unit u : c.units){
+                        bw.getMapDrawer().drawLineMap(u.getPosition(),centroid,Color.RED);
+                    }
+                }
+            }
             gs.print(gs.naturalRegion.getTop().toTilePosition(), Color.RED);
             gs.fix();
             gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
