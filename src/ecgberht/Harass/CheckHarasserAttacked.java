@@ -51,7 +51,7 @@ public class CheckHarasserAttacked extends Conditional {
                 }
                 return State.SUCCESS;
             } else {
-                boolean winHarass = ((GameState) this.handler).simulateHarass(((GameState) this.handler).chosenHarasser, attackers, 70);
+                boolean winHarass = ((GameState) this.handler).sim.simulateHarass(((GameState) this.handler).chosenHarasser, attackers, 70);
                 if (winHarass) {
                     if (workers == 1 && !attacker.equals(((GameState) this.handler).chosenUnitToHarass)) {
                         ((GameState) this.handler).chosenHarasser.attack(attacker);

@@ -16,4 +16,18 @@ public class Cluster implements Comparable<Cluster>{
     public int compareTo(Cluster o) {
         return this.score - o.score;
     }
+
+    public void updateCentroid(){
+        if(units.isEmpty()) return;
+        if(units.size() > 1){
+            Position point = new Position(0, 0);
+            for (Unit u : units) {
+                point = new Position(point.getX() + u.getPosition().getX(), point.getY() + u.getPosition().getY());
+            }
+            mode = new Pair<>((double)point.getX() / units.size(), (double)point.getY() / units.size());
+        } else{
+            Position pos = units.iterator().next().getPosition();
+            mode = new Pair<>((double)pos.getX(),(double)pos.getY());
+        }
+    }
 }

@@ -10,20 +10,24 @@ import java.util.Map.Entry;
 
 public class MeanShift {
     private int radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
-    private int iterations = 1000;
     private Map<Unit, Pair<Double,Double>> points = new TreeMap<>();
+    public long time = 0;
 
-    public MeanShift(Set<Unit> units){
+
+
+    public MeanShift(Collection<Unit> units){
         for(Unit u : units){
             Position p = u.getPosition();
             this.points.put(u, new Pair<>((double)p.getX(),(double)p.getY()));
         }
     }
 
-    public List<Cluster> run(){ // TODO fix, its a bit broken but seems like its usable
+    public List<Cluster> run(){
         try{
-            for(int iter = 0;iter< iterations;iter++){
-                System.out.println("-----Iter " + iter + "------");
+            time = System.currentTimeMillis();
+            int iterations = 50;
+            for(int iter = 0; iter< iterations; iter++){
+                //System.out.println("-----Iter " + iter + "------");
                 for(Entry<Unit, Pair<Double, Double>> i : points.entrySet()){
                     Pair<Double,Double> initial = i.getValue();
                     List<Pair<Double,Double>> neighbours = getNeighbours(i.getKey(),initial);
@@ -46,7 +50,7 @@ public class MeanShift {
                         newPoint.first = initial.first;
                     if(Double.isInfinite(newPoint.second) || Double.isNaN(newPoint.second)) // HACK
                         newPoint.second = initial.second;
-                    System.out.println("Original Point : " + initial + " , shifted point: " + newPoint);
+                    //System.out.println("Original Point : " + initial + " , shifted point: " + newPoint);
                     points.put(i.getKey(), newPoint);
                 }
             }
@@ -60,12 +64,14 @@ public class MeanShift {
                     c++;
                 }
                 if (c == clusters.size()) {
-                    Cluster clus = new Cluster();
-                    clus.mode = i.getValue();
-                    clusters.add(clus);
+                    Cluster cluster = new Cluster();
+                    cluster.mode = i.getValue();
+                    clusters.add(cluster);
                 }
                 clusters.get(c).units.add(i.getKey());
+                clusters.get(c).updateCentroid();
             }
+            time = System.currentTimeMillis() - time;
             return clusters;
         } catch(Exception e){
             System.err.println("MeanShift run exception");

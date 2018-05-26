@@ -433,10 +433,9 @@ public class Ecgberht implements BWEventListener {
                     if(u instanceof Worker && ((Worker) u).isCompleted()) workers.add(u);
                 }
                 MeanShift ms = new MeanShift(workers);
-                System.out.println("Inicializado meanShift");
+                //System.out.println("Initialized meanShift");
                 clusters = ms.run();
-                System.out.println("Ejecutado meanShift");
-                System.out.println(clusters.size());
+                //System.out.println("Executed meanShift, num of clusters: " + clusters.size() + " , time(ms): " + ms.time);
             }
             if(!clusters.isEmpty()){
                 int cluster = 0;

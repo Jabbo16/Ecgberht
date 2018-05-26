@@ -188,7 +188,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
             if (meleeOnly) {
                 sim = 5;
             }
-            if (!getGs().simulateHarass(unit, closeEnemies, sim)) {
+            if (!getGs().sim.simulateHarass(unit, closeEnemies, sim)) {
                 status = Status.RETREAT;
                 return;
             }

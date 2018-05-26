@@ -132,6 +132,7 @@ public class GameState extends GameHandler {
     public boolean iReallyWantToExpand = false;
     public int directionScoutMain;
     public int maxWraiths = 5;
+    public SimManager sim;
 
     public GameState(BW bw, BWTA bwta, BWEM bwem) {
         super(bw, bwta, bwem);
@@ -143,6 +144,7 @@ public class GameState extends GameHandler {
         mapSize = bwta.getStartLocations().size();
         simulator = new JFAP(bw);
         supplyMan = new SupplyMan(self.getRace());
+        sim = new SimManager(bw);
     }
 
     public void initPlayers() {
@@ -1272,83 +1274,6 @@ public class GameState extends GameHandler {
         }
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
 
-    }
-
-    public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
-        simulator.clear();
-        Pair<Boolean, Boolean> result = new Pair<>(true, false);
-        for (Unit u : friends) {
-            simulator.addUnitPlayer1(new JFAPUnit(u));
-        }
-        for (Unit u : enemies) {
-            simulator.addUnitPlayer2(new JFAPUnit(u));
-        }
-        jfap.Pair<Integer, Integer> presim_scores = simulator.playerScores();
-//		int presim_my_unit_count = simulator.getState().first.size();
-//		int presim_enemy_unit_count = simulator.getState().second.size();
-        simulator.simulate(frames);
-//		int postsim_my_unit_count = simulator.getState().first.size();
-//		int postsim_enemy_unit_count = simulator.getState().second.size();
-        jfap.Pair<Integer, Integer> postsim_scores = simulator.playerScores();
-//		int my_losses = presim_my_unit_count - postsim_my_unit_count;
-//		int enemy_losses = presim_enemy_unit_count - postsim_enemy_unit_count;
-        int my_score_diff = presim_scores.first - postsim_scores.first;
-        int enemy_score_diff = presim_scores.second - postsim_scores.second;
-//		System.out.println("----- SIM RESULTS -----");
-//		System.out.println("My losses : " + my_losses);
-//		System.out.println("Enemy losses : " + enemy_losses);
-//		System.out.println("My score diff : " + my_score_diff);
-//		System.out.println("Enemy score diff : " + enemy_score_diff);
-//		System.out.println("-----------------------");
-        if (enemy_score_diff * 2 < my_score_diff) {
-            result.first = false;
-        }
-        if (bunker) {
-            boolean bunkerDead = true;
-            for (JFAPUnit unit : simulator.getState().first) {
-                if (unit.unit.getInitialType() == UnitType.Terran_Bunker) {
-                    bunkerDead = false;
-                    break;
-                }
-            }
-            if (bunkerDead) {
-                result.second = true;
-            }
-        }
-
-        return result;
-    }
-
-    public boolean simulateHarass(Unit harasser, List<Unit> enemies, int frames) {
-        simulator.clear();
-        simulator.addUnitPlayer1(new JFAPUnit(harasser));
-        for (Unit u : enemies) {
-            simulator.addUnitPlayer2(new JFAPUnit(u));
-        }
-        int preSimFriendlyUnitCount = simulator.getState().first.size();
-        simulator.simulate(frames);
-        int postSimFriendlyUnitCount = simulator.getState().first.size();
-        int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
-        if (myLosses > 0) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean simulateHarass(Unit harasser, Set<Unit> enemies, int frames) {
-        simulator.clear();
-        simulator.addUnitPlayer1(new JFAPUnit(harasser));
-        for (Unit u : enemies) {
-            simulator.addUnitPlayer2(new JFAPUnit(u));
-        }
-        int preSimFriendlyUnitCount = simulator.getState().first.size();
-        simulator.simulate(frames);
-        int postSimFriendlyUnitCount = simulator.getState().first.size();
-        int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
-        if (myLosses > 0) {
-            return false;
-        }
-        return true;
     }
 
     public double getGroundDistance(TilePosition start, TilePosition end) {

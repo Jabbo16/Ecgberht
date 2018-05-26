@@ -58,7 +58,7 @@ public class SendDefenders extends Action {
             Pair<Boolean, Boolean> battleWin = new Pair<>(true, false);
             if (defenders != 1) {
                 if (((GameState) this.handler).enemyInBase.size() + friends.size() < 40) {
-                    battleWin = ((GameState) this.handler).simulateDefenseBattle(friends, ((GameState) this.handler).enemyInBase, 150, bunker);
+                    battleWin = ((GameState) this.handler).sim.simulateDefenseBattle(friends, ((GameState) this.handler).enemyInBase, 150, bunker);
                 }
                 if (((GameState) this.handler).enemyInBase.size() >= 3 * friends.size()) {
                     battleWin.first = false;

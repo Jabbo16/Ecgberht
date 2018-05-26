@@ -168,7 +168,7 @@ public class WraithAgent implements Comparable<WraithAgent> {
             return;
         } else {
             int sim = 150;
-            if (!getGs().simulateHarass(unit, closeEnemies, sim)) {
+            if (!getGs().sim.simulateHarass(unit, closeEnemies, sim)) {
                 status = Status.RETREAT;
                 return;
             }
