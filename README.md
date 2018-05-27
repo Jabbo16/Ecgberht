@@ -11,7 +11,7 @@
 Ecgberht is a `Starcraft: Brood War` AI written in Java.
 <p><img src="https://i.imgur.com/xUfYQ9H.png" width="48" height="48"/></p>
 
-Currently participating on the [SSCAIT](http://www.sscaitournament.com/) ladder:
+Currently participating in the [SSCAIT](http://www.sscaitournament.com/) ladder:
 
 [Ecgberht Profile on SSCAIT](http://www.sscaitournament.com/index.php?action=botDetails&bot=Ecgberht)
 
