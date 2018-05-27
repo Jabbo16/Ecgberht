@@ -1,8 +1,11 @@
 package ecgberht.Defense;
 
 import bwta.Region;
-import ecgberht.*;
+import ecgberht.EnemyBuilding;
+import ecgberht.GameState;
+import ecgberht.Squad;
 import ecgberht.Squad.Status;
+import ecgberht.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -25,8 +28,7 @@ public class CheckPerimeter extends Conditional {
         try {
             ((GameState) this.handler).enemyInBase.clear();
             ((GameState) this.handler).defense = false;
-            Set<Unit> enemyInvaders = new TreeSet<>();
-            enemyInvaders.addAll(((GameState) this.handler).enemyCombatUnitMemory);
+            Set<Unit> enemyInvaders = new TreeSet<>(((GameState) this.handler).enemyCombatUnitMemory);
             for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
                 if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
                     enemyInvaders.add(u.unit);

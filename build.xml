@@ -8,7 +8,7 @@
 		<unjar dest="./build/classes">
 			<fileset dir="./lib/" includes="*.jar" excludes="*-javadoc.jar"/>
 		</unjar>
-		<javac includeantruntime="false" srcdir="./src/" destdir="./build/classes"></javac>
+		<javac includeantruntime="false" srcdir="./src/" destdir="./build/classes"/>
 	</target>
 	<target name="sounds">
 		<copy todir="./build/classes">

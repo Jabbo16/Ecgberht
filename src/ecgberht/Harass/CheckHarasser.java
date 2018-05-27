@@ -20,12 +20,12 @@ public class CheckHarasser extends Conditional {
                 if (((GameState) this.handler).chosenHarasser.isIdle()) {
                     ((GameState) this.handler).chosenUnitToHarass = null;
                 }
-                ((GameState)this.handler).EI.defendHarass = true;
+                ((GameState) this.handler).EI.defendHarass = true;
                 return State.SUCCESS;
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

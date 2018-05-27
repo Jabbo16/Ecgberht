@@ -23,6 +23,8 @@ public class ProxyBBS extends AStrategy {
         supplyForFirstRefinery = 400;
         armyForAttack = 8;
         armyForExpand = 100;
+        facForArmory = 0;
+        numArmories = 0;
         initTrainUnits();
         initBuildUnits();
         initBuildAddons();

@@ -15,19 +15,21 @@ public class FullMech extends AStrategy {
         name = "FullMech";
         armyForBay = 20;
         armyForTurret = 10;
-        numBays = 2;
+        numBays = 1;
         raxPerCC = 1;
-        facPerCC = 3;
+        facPerCC = 2;
         numRaxForAca = 1;
         numRaxForFac = 1;
         bunker = true;
         supplyForFirstRefinery = 28;
         armyForAttack = 25;
-        armyForExpand = 10;
+        armyForExpand = 8;
         numCCForPort = 1;
         numFacForPort = 2;
-        numCCForScience = 2;
         portPerCC = 1;
+        numCCForScience = 2;
+        facForArmory = 2;
+        numArmories = 1;
         initTrainUnits();
         initBuildUnits();
         initBuildAddons();
@@ -45,7 +47,7 @@ public class FullMech extends AStrategy {
 
     @Override
     public void initBuildUnits() {
-        buildUnits.add(UnitType.Terran_Academy);
+        buildUnits.add(UnitType.Terran_Armory);
         buildUnits.add(UnitType.Terran_Engineering_Bay);
         buildUnits.add(UnitType.Terran_Missile_Turret);
         buildUnits.add(UnitType.Terran_Factory);
@@ -64,7 +66,6 @@ public class FullMech extends AStrategy {
 
     @Override
     public void initTechToResearch() {
-        techToResearch.add(TechType.Stim_Packs);
         techToResearch.add(TechType.Tank_Siege_Mode);
     }
 

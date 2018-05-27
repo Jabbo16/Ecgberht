@@ -2,5 +2,6 @@
     "debugConsole":true,
     "debugScreen":true,
     "debugText":true,
+    "enableLatcom":false,
     "sounds":false
 }

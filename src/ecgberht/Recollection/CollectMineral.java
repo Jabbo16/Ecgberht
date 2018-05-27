@@ -27,19 +27,21 @@ public class CollectMineral extends Action {
                     }
                 }
                 if (closestMineral != null) {
-                    ((GameState) this.handler).mineralsAssigned.put(closestMineral, ((GameState) this.handler).mineralsAssigned.get(closestMineral) + 1);
-                    ((GameState) this.handler).workerIdle.remove(chosen);
-                    ((GameState) this.handler).workerMining.put(chosen, closestMineral);
-                    chosen.gather(closestMineral, false);
-                    ((GameState) this.handler).chosenWorker = null;
-                    ((GameState) this.handler).mining++;
-                    return State.SUCCESS;
+                    if (chosen.gather(closestMineral, false)) {
+                        ((GameState) this.handler).mineralsAssigned.put(closestMineral, ((GameState) this.handler).mineralsAssigned.get(closestMineral) + 1);
+                        ((GameState) this.handler).workerIdle.remove(chosen);
+                        ((GameState) this.handler).workerMining.put(chosen, closestMineral);
+
+                        ((GameState) this.handler).chosenWorker = null;
+                        ((GameState) this.handler).mining++;
+                        return State.SUCCESS;
+                    }
                 }
             }
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

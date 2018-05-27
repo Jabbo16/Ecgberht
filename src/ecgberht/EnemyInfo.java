@@ -9,7 +9,7 @@ public class EnemyInfo {
     public int losses = 0;
     public boolean naughty = false;
     public boolean defendHarass = false;
-    public List<StrategyOpponentHistory> history = new ArrayList<StrategyOpponentHistory>();
+    public List<StrategyOpponentHistory> history = new ArrayList<>();
 
     public EnemyInfo(String opponent) {
         this.opponent = opponent;

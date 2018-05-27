@@ -20,7 +20,6 @@ import ecgberht.Bunker.ChooseBunkerToLoad;
 import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
 import ecgberht.Clustering.Cluster;
-import ecgberht.Clustering.MeanShift;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
 import ecgberht.Config.ConfigManager;
@@ -46,7 +45,10 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.*;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -54,7 +56,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class Ecgberht implements BWEventListener {
@@ -124,7 +128,7 @@ public class Ecgberht implements BWEventListener {
 
         self = bw.getInteractionHandler().self();
         ih = bw.getInteractionHandler();
-        if(!ConfigManager.getConfig().enableLatCom) ih.enableLatCom(false);
+        if (!ConfigManager.getConfig().enableLatCom) ih.enableLatCom(false);
         // game.enableFlag(1);
         // game.setLocalSpeed(0);
         System.out.println("Analyzing map...");
@@ -187,7 +191,7 @@ public class Ecgberht implements BWEventListener {
         ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
         CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
         TrainUnit tr = new TrainUnit("Train SCV", gs);
-        Selector<GameHandler> chooseUnit = new Selector<GameHandler>("Choose Recruit", cSCV);
+        Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cSCV);
 
         if (gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
             chooseUnit.addChild(cTan);
@@ -220,11 +224,12 @@ public class Ecgberht implements BWEventListener {
         ChooseBay cBay = new ChooseBay("Choose Bay", gs);
         ChooseTurret cTur = new ChooseTurret("Choose Turret", gs);
         ChooseAcademy cAca = new ChooseAcademy("Choose Academy", gs);
+        ChooseArmory cArm = new ChooseArmory("Choose Armory", gs);
         CheckResourcesBuilding crb = new CheckResourcesBuilding("Check Cash", gs);
         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<GameHandler>("Choose Building to build", cSup);
+        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cSup);
         if (gs.strat.bunker) {
             chooseBuildingBuild.addChild(cBun);
         }
@@ -235,6 +240,9 @@ public class Ecgberht implements BWEventListener {
         }
         if (gs.strat.buildUnits.contains(UnitType.Terran_Engineering_Bay)) {
             chooseBuildingBuild.addChild(cBay);
+        }
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Armory)) {
+            chooseBuildingBuild.addChild(cArm);
         }
         if (gs.strat.buildUnits.contains(UnitType.Terran_Factory)) {
             chooseBuildingBuild.addChild(cFar);
@@ -265,10 +273,10 @@ public class Ecgberht implements BWEventListener {
         SendScout sSc = new SendScout("Send Scout", gs);
         CheckVisibleBase cVB = new CheckVisibleBase("Check visible Base", gs);
         CheckEnemyBaseVisible cEBV = new CheckEnemyBaseVisible("Check Enemy Base Visible", gs);
-        Sequence scoutFalse = new Sequence("Scout False", cSc, chSc, sSc);
-        Selector<GameHandler> EnemyFound = new Selector<GameHandler>("Enemy found in base location", cEBV, sSc);
+        Sequence scoutFalse = new Sequence("Scout ", cSc, chSc, sSc);
+        Selector<GameHandler> EnemyFound = new Selector<>("Enemy found in base location", cEBV, sSc);
         Sequence scoutTrue = new Sequence("Scout True", cVB, EnemyFound);
-        Selector<GameHandler> Scouting = new Selector<GameHandler>("Select Scouting Plan", scoutFalse, scoutTrue);
+        Selector<GameHandler> Scouting = new Selector<>("Select Scouting Plan", scoutFalse, scoutTrue);
         scoutingTree = new BehavioralTree("Movement Tree");
         scoutingTree.addChild(Scouting);
     }
@@ -298,7 +306,7 @@ public class Ecgberht implements BWEventListener {
         ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
         ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
         ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
-        Selector<GameHandler> ChooseUP = new Selector<GameHandler>("Choose Upgrade");
+        Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) {
             ChooseUP.addChild(cWIU);
         }
@@ -354,7 +362,7 @@ public class Ecgberht implements BWEventListener {
         CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon", gs);
         ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station", gs);
         ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop", gs);
-        Selector<GameHandler> ChooseAddon = new Selector<GameHandler>("Choose Addon");
+        Selector<GameHandler> ChooseAddon = new Selector<>("Choose Addon");
         if (gs.strat.buildAddons.contains(UnitType.Terran_Machine_Shop)) {
             ChooseAddon.addChild(cMS);
         }
@@ -427,7 +435,7 @@ public class Ecgberht implements BWEventListener {
             //long frameStart = System.currentTimeMillis();
             gs.frameCount = ih.getFrameCount();
             if (gs.frameCount == 1000) gs.sendCustomMessage();
-            if(gs.frameCount >= 2000){
+            /*if(gs.frameCount >= 2000){
                 Set<Unit> workers = new TreeSet<>();
                 for(Unit u : bw.getUnits(self)){
                     if(u instanceof Worker && ((Worker) u).isCompleted()) workers.add(u);
@@ -448,11 +456,11 @@ public class Ecgberht implements BWEventListener {
                         bw.getMapDrawer().drawLineMap(u.getPosition(),centroid,Color.RED);
                     }
                 }
-            }
-            gs.print(gs.naturalRegion.getTop().toTilePosition(), Color.RED);
+            }*/
             gs.fix();
             gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             gs.updateEnemyBuildingsMemory();
+            gs.sim.onFrameSim();
             gs.runAgents();
             //gs.checkEnemyAttackingWT();
             buildingLotTree.run();
@@ -563,12 +571,12 @@ public class Ecgberht implements BWEventListener {
                             gs.map.updateMap(arg0.getTilePosition(), type, false);
                             gs.testMap = gs.map.clone();
                         }
-                        if(arg0 instanceof Addon) return;
-                        if(arg0 instanceof CommandCenter && ih.getFrameCount() == 0) return;
+                        if (arg0 instanceof Addon) return;
+                        if (arg0 instanceof CommandCenter && ih.getFrameCount() == 0) return;
                         SCV worker = ((Building) arg0).getBuildUnit();
-                        if(worker != null){
-                            if(gs.workerBuild.containsKey(worker)){
-                                if(type.equals(gs.workerBuild.get(worker).first)){
+                        if (worker != null) {
+                            if (gs.workerBuild.containsKey(worker)) {
+                                if (type.equals(gs.workerBuild.get(worker).first)) {
                                     gs.workerTask.put(worker, (Building) arg0);
                                     gs.deltaCash.first -= type.mineralPrice();
                                     gs.deltaCash.second -= type.gasPrice();
@@ -587,8 +595,8 @@ public class Ecgberht implements BWEventListener {
                         }*/
                     }
                 } else if (pU.getPlayer().getId() == self.getId()) {
-                    if(gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0); // TODO test
-                    if(arg0 instanceof Vulture) gs.vulturesTrained++;
+                    if (gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0); // TODO test
+                    if (arg0 instanceof Vulture) gs.vulturesTrained++;
                 }
             }
         } catch (Exception e) {
@@ -606,7 +614,7 @@ public class Ecgberht implements BWEventListener {
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = Util.getType(pU);
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {
-                if(gs.ih.getFrameCount() > 0) gs.supplyMan.onComplete(arg0); // TODO test
+                if (gs.ih.getFrameCount() > 0) gs.supplyMan.onComplete(arg0); // TODO test
                 if (type.isBuilding()) {
                     gs.builtBuildings++;
                     if (type.isRefinery()) {
@@ -658,6 +666,9 @@ public class Ecgberht implements BWEventListener {
                         if (type == UnitType.Terran_Science_Facility) {
                             gs.UBs.add((ResearchingFacility) arg0);
                         }
+                        if (type == UnitType.Terran_Armory) {
+                            gs.UBs.add((ResearchingFacility) arg0);
+                        }
                         if (type == UnitType.Terran_Supply_Depot) {
                             gs.SBs.add((SupplyDepot) arg0);
                         }
@@ -669,8 +680,8 @@ public class Ecgberht implements BWEventListener {
                         }
                         for (Entry<SCV, Building> u : gs.workerTask.entrySet()) {
                             if (u.getValue().equals(arg0)) {
-                                gs.workerTask.remove(u.getKey());
                                 gs.workerIdle.add(u.getKey());
+                                gs.workerTask.remove(u.getKey());
                                 break;
                             }
                         }
@@ -703,9 +714,9 @@ public class Ecgberht implements BWEventListener {
                             }
                         } else if (type == UnitType.Terran_Vulture) {
                             gs.agents.add(new VultureAgent(arg0));
-                        }else if (type == UnitType.Terran_Wraith) {
-                                String name = gs.pickShipName();
-                                gs.spectres.put(arg0,new WraithAgent(arg0, name));
+                        } else if (type == UnitType.Terran_Wraith) {
+                            String name = gs.pickShipName();
+                            gs.spectres.put(arg0, new WraithAgent(arg0, name));
                         } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
                             gs.addToSquad(arg0);
                             if (gs.strat.name != "ProxyBBS") {
@@ -784,7 +795,7 @@ public class Ecgberht implements BWEventListener {
                         gs.initDefensePosition = arg0.getTilePosition();
                     }
                 } else if (((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
-                    if(gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0); // TODO test
+                    if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0); // TODO test
                     if (type.isWorker()) {
                         if (gs.strat.name == "ProxyBBS") {
                             gs.removeFromSquad(arg0);
@@ -958,7 +969,7 @@ public class Ecgberht implements BWEventListener {
                         } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
                             gs.removeFromSquad(arg0);
                         } else if (type == UnitType.Terran_Vulture) {
-                            if(gs.agents.contains(new VultureAgent(arg0))) gs.agents.remove(new VultureAgent(arg0));
+                            if (gs.agents.contains(new VultureAgent(arg0))) gs.agents.remove(new VultureAgent(arg0));
                         } else if (type == UnitType.Terran_Wraith) {
                             String wraith = gs.spectres.get(arg0).name; // TODO fix casting, fix names
                             gs.shipNames.add(wraith);

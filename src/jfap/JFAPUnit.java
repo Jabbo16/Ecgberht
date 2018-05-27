@@ -31,7 +31,7 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
     protected int airMaxRange = 0;
     protected int airMinRange = 0;
     protected DamageType airDamageType = DamageType.Unknown;
-    protected  UnitType unitType = UnitType.Unknown;
+    protected UnitType unitType = UnitType.Unknown;
     protected Player player = null;
     protected boolean isOrganic = false;
     boolean didHealThisFrame = false;

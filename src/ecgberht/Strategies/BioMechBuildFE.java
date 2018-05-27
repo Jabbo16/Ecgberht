@@ -28,6 +28,8 @@ public class BioMechBuildFE extends AStrategy {
         supplyForFirstRefinery = 36;
         armyForAttack = 35;
         armyForExpand = 10;
+        facForArmory = 2;
+        numArmories = 1;
         initTrainUnits();
         initBuildUnits();
         initBuildAddons();
@@ -48,6 +50,7 @@ public class BioMechBuildFE extends AStrategy {
     public void initBuildUnits() {
         buildUnits.add(UnitType.Terran_Academy);
         buildUnits.add(UnitType.Terran_Engineering_Bay);
+        buildUnits.add(UnitType.Terran_Armory);
         buildUnits.add(UnitType.Terran_Missile_Turret);
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);

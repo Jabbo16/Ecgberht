@@ -38,15 +38,11 @@ public class SendDefenders extends Action {
             }
             Set<Unit> friends = new TreeSet<>();
             for (Squad s : ((GameState) this.handler).squads.values()) {
-                for (Unit u : s.members) {
-                    friends.add(u);
-                }
+                friends.addAll(s.members);
             }
             boolean bunker = false;
             if (!((GameState) this.handler).DBs.isEmpty()) {
-                for (Unit u : ((GameState) this.handler).DBs.keySet()) {
-                    friends.add(u);
-                }
+                friends.addAll(((GameState) this.handler).DBs.keySet());
                 bunker = true;
             }
             int defenders = 6;
@@ -165,7 +161,7 @@ public class SendDefenders extends Action {
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

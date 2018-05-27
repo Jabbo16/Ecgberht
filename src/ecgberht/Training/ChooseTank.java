@@ -36,7 +36,7 @@ public class ChooseTank extends Action {
                             }
                         }
                     } else {
-                        if(((GameState)this.handler).maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith)  > 0 && Math.random()*10 < 1){
+                        if (((GameState) this.handler).maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 < 1) {
                             return State.FAILURE;
                         }
                         if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * 2 +
@@ -59,7 +59,7 @@ public class ChooseTank extends Action {
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

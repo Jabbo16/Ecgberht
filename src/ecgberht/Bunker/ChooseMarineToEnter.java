@@ -32,7 +32,7 @@ public class ChooseMarineToEnter extends Action {
                             if (u instanceof Marine) {
                                 if ((closest == null || ((GameState) this.handler).broodWarDistance(b.getPosition(), u.getPosition()) <
                                         ((GameState) this.handler).broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
-                                    closest = new Pair<String, Unit>(s.getKey(), u);
+                                    closest = new Pair<>(s.getKey(), u);
                                 }
                             }
                         }
@@ -46,7 +46,7 @@ public class ChooseMarineToEnter extends Action {
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

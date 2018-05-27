@@ -17,10 +17,12 @@ public class WraithAgent implements Comparable<WraithAgent> {
     public WraithAgent(Unit unit) {
         this.unit = (Wraith) unit;
     }
+
     public WraithAgent(Unit unit, String name) {
         this.unit = (Wraith) unit;
         this.name = name;
     }
+
     enum Status {
         ATTACK, COMBAT, IDLE, RETREAT
     }
@@ -73,7 +75,6 @@ public class WraithAgent implements Comparable<WraithAgent> {
             if (frameLastOrder == actualFrame) {
                 return remove;
             }
-
             Status old = status;
             getNewStatus();
             if (old == status && status != Status.COMBAT && status != Status.ATTACK) {
@@ -86,8 +87,11 @@ public class WraithAgent implements Comparable<WraithAgent> {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
                 if (pos != null) {
                     if (pos.first != null && pos.second != null) {
-                        unit.attack(new Position(pos.first, pos.second));
-                        return remove;
+                        Position newPos = new Position(pos.first, pos.second);
+                        if (getGs().bw.getBWMap().isValidPosition(newPos)) {
+                            unit.attack(newPos);
+                            return remove;
+                        }
                     }
                 }
             }
@@ -103,7 +107,6 @@ public class WraithAgent implements Comparable<WraithAgent> {
                     break;
                 default:
                     break;
-
             }
             return remove;
         } catch (Exception e) {
@@ -161,7 +164,6 @@ public class WraithAgent implements Comparable<WraithAgent> {
                     closeEnemies.add(u.unit);
                 }
             }
-
         }
         if (closeEnemies.isEmpty()) {
             status = Status.ATTACK;
@@ -172,17 +174,7 @@ public class WraithAgent implements Comparable<WraithAgent> {
                 status = Status.RETREAT;
                 return;
             }
-            /*int cd = unit.getAirWeaponCooldown();
-            if (status == Status.COMBAT || status == Status.ATTACK) {
-                if (attackUnit != null) {
-                    int weaponRange = attackUnit instanceof AirAttacker ? ((AirAttacker) attackUnit).getAirWeaponMaxRange() : 0;
-                    if (weaponRange > type.groundWeapon().maxRange()) {
-                        return;
-                    }
-                }
-            }*/
         }
-
     }
 
     private void retreat() {
@@ -242,8 +234,8 @@ public class WraithAgent implements Comparable<WraithAgent> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Vulture)) {
+        if (o == this.unit) return true;
+        if (!(o instanceof Wraith) || !(o instanceof WraithAgent)) {
             return false;
         }
         WraithAgent wraith = (WraithAgent) o;

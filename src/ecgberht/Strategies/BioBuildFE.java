@@ -28,6 +28,8 @@ public class BioBuildFE extends AStrategy {
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;
+        facForArmory = 0;
+        numArmories = 0;
         initTrainUnits();
         initBuildUnits();
         initBuildAddons();

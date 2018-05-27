@@ -71,7 +71,7 @@ public class InfluenceMap {
             if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
                 influence *= -1;
             }
-            updateCellInfluence(new Pair<Point, Integer>(new Point(tile.getY(), tile.getX()), influence), type.isBuilding());
+            updateCellInfluence(new Pair<>(new Point(tile.getY(), tile.getX()), influence), type.isBuilding());
         } catch (Exception e) {
             System.err.println("updateInMap Exception");
             e.printStackTrace();
@@ -196,7 +196,7 @@ public class InfluenceMap {
                     }
                 }
             }
-            updateCellInfluence(new Pair<Point, Integer>(new Point(x, y), (int) map[x][y] * (-1)), true);
+            updateCellInfluence(new Pair<>(new Point(x, y), (int) map[x][y] * (-1)), true);
             return true;
         }
         return false;

@@ -7,7 +7,6 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -80,7 +79,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
                 return remove;
             }
             //if (actualFrame % getGs().getIH().getLatencyFrames() == 0) {
-                //return remove;
+            //return remove;
             //}
             Status old = status;
             getNewStatus();
@@ -94,8 +93,11 @@ public class VultureAgent implements Comparable<VultureAgent> {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
                 if (pos != null) {
                     if (pos.first != null && pos.second != null) {
-                        unit.attack(new Position(pos.first, pos.second));
-                        return remove;
+                        Position newPos = new Position(pos.first, pos.second);
+                        if (getGs().bw.getBWMap().isValidPosition(newPos)) {
+                            unit.attack(newPos);
+                            return remove;
+                        }
                     }
                 }
             }
@@ -123,7 +125,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
             return remove;
         } catch (Exception e) {
             System.err.println("Exception Vulture");
-            System.err.println(e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -157,7 +159,6 @@ public class VultureAgent implements Comparable<VultureAgent> {
     }
 
     private void getNewStatus() {
-
         Position myPos = unit.getPosition();
         if (getGs().enemyCombatUnitMemory.isEmpty()) {
             status = Status.ATTACK;
@@ -177,7 +178,6 @@ public class VultureAgent implements Comparable<VultureAgent> {
                     closeEnemies.add(u.unit);
                 }
             }
-
         }
         if (closeEnemies.isEmpty()) {
             status = Status.ATTACK;
@@ -232,7 +232,6 @@ public class VultureAgent implements Comparable<VultureAgent> {
                         return;
                     }
                 }
-
                 if (cd == 0) {
                     status = Status.COMBAT;
                     return;
@@ -309,11 +308,9 @@ public class VultureAgent implements Comparable<VultureAgent> {
                 distB = distA;
             }
         }
-
         if (chosen != null) {
             return chosen;
         }
-
         return null;
     }
 
@@ -321,7 +318,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
     public boolean equals(Object o) {
 
         if (o == this) return true;
-        if (!(o instanceof Vulture)) {
+        if (!(o instanceof Vulture) || !(o instanceof VultureAgent)) {
             return false;
         }
         VultureAgent vulture = (VultureAgent) o;

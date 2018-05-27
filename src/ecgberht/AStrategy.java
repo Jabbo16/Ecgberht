@@ -30,6 +30,8 @@ public abstract class AStrategy {
     public Set<UpgradeType> upgradesToResearch = new HashSet<>();
     public String name = "";
     public int armyForBay = 0;
+    public int facForArmory = 0;
+    public int numArmories = 0;
 
     public abstract void initStrategy();
 

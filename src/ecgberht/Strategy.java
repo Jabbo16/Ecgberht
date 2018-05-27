@@ -32,6 +32,10 @@ public class Strategy {
     public Set<UpgradeType> upgradesToResearch = new HashSet<>();
     public String name = "";
     public boolean isFine = false;
+    public int facForArmory = 0;
+    ;
+    public int numArmories = 0;
+    ;
 
     public Strategy() {
     }
@@ -60,5 +64,7 @@ public class Strategy {
         this.techToResearch = build.techToResearch;
         this.trainUnits = build.trainUnits;
         this.upgradesToResearch = build.upgradesToResearch;
+        this.facForArmory = build.facForArmory;
+        this.numArmories = build.numArmories;
     }
 }

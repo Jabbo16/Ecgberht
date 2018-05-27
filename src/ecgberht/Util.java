@@ -2,8 +2,6 @@ package ecgberht;
 
 import bwem.Base;
 import bwem.ChokePoint;
-import bwta.BaseLocation;
-import bwta.Chokepoint;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -24,16 +22,14 @@ public class Util {
         double side2 = Math.sqrt(Math.pow(Math.abs(p1.getY() - pos.getY()), 2) + Math.pow(Math.abs(p1.getX() - pos.getX()), 2));
         double side3 = Math.sqrt(Math.pow(Math.abs(p2.getY() - pos.getY()), 2) + Math.pow(Math.abs(p2.getX() - pos.getX()), 2));
         double semi_perimeter = (side1 + side2 + side3) / 2;
-        double area = Math.sqrt(semi_perimeter * (semi_perimeter - side1) * (semi_perimeter - side2) * (semi_perimeter - side3));
-        return area;
+        return Math.sqrt(semi_perimeter * (semi_perimeter - side1) * (semi_perimeter - side2) * (semi_perimeter - side3));
     }
 
 
     private static double areaOfRect(Position p1, Position p2, Position p3) {
         double side1 = Math.sqrt(Math.pow(Math.abs(p1.getY() - p2.getY()), 2) + Math.pow(Math.abs(p1.getX() - p2.getX()), 2));
         double side2 = Math.sqrt(Math.pow(Math.abs(p2.getY() - p3.getY()), 2) + Math.pow(Math.abs(p2.getX() - p3.getX()), 2));
-        double area = side1 * side2;
-        return area;
+        return side1 * side2;
     }
 
     private static boolean check(Position p1, Position p2, Position p3, Position p4, Position pos) {

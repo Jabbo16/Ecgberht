@@ -45,7 +45,7 @@ public class Squad {
         for (PlayerUnit u : members) {
             if (u instanceof Marine || u instanceof Firebat) {
                 if (u instanceof Marine ? !((Marine) u).isStimmed() : ((Firebat) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
-                    if ((u instanceof Marine) ? ((Marine) u).stimPack() : ((Firebat) u).stimPack());
+                    if ((u instanceof Marine) ? ((Marine) u).stimPack() : ((Firebat) u).stimPack()) ;
                 }
             }
         }
@@ -94,9 +94,9 @@ public class Squad {
                     }
                 }
 
-                if((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove && !u.getOrderTargetPosition().equals(attack)){ // TODO test change target position faster
-                    if(u instanceof MobileUnit){
-                        ((MobileUnit)u).attack(attack);
+                if ((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove && !u.getOrderTargetPosition().equals(attack)) { // TODO test change target position faster
+                    if (u instanceof MobileUnit) {
+                        ((MobileUnit) u).attack(attack);
                         continue;
                     }
                 }

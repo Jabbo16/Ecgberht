@@ -44,9 +44,9 @@ public class ColorUtil {
         return new String(newTextData);
     }
 
-    public static byte getColor(Color color){
-        if(color == null) return Clear_formatting;
-        switch(color){
+    public static byte getColor(Color color) {
+        if (color == null) return Clear_formatting;
+        switch (color) {
             case RED:
                 return Red;
             case BLUE:

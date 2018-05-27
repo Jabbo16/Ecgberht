@@ -4,7 +4,6 @@ import ecgberht.GameState;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Worker;
@@ -35,7 +34,7 @@ public class Expand extends Action {
                 return State.FAILURE;
             }
             ((GameState) this.handler).movingToExpand = false;
-            ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<UnitType, TilePosition>(UnitType.Terran_Command_Center, ((GameState) this.handler).chosenBaseLocation));
+            ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<>(UnitType.Terran_Command_Center, ((GameState) this.handler).chosenBaseLocation));
             ((GameState) this.handler).expanding = false;
             ((GameState) this.handler).chosenBaseLocation = null;
             ((GameState) this.handler).chosenBuilderBL = null;
@@ -43,7 +42,7 @@ public class Expand extends Action {
 
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

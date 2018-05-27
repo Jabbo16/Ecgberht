@@ -25,7 +25,7 @@ public class BaseLocationComparator implements Comparator<bwem.Base> {
                 if (start == null) {
                     start = getGs().getPlayer().getStartLocation().toPosition();
                 }
-                Base closestBase = Util.getClosestBaseLocation(start); // TODO similar method / change to BWEM
+                Base closestBase = Util.getClosestBaseLocation(start);
                 if (closestBase != null) {
                     if (Util.getClosestBaseLocation(start).getLocation().equals(a.getLocation())) {
                         return -1;
@@ -116,7 +116,7 @@ public class BaseLocationComparator implements Comparator<bwem.Base> {
             }
         } catch (Exception e) {
             System.err.println("Sorter");
-            System.err.println(e);
+            e.printStackTrace();
         }
         return 0;
     }

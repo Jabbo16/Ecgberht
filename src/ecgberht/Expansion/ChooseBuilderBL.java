@@ -22,10 +22,10 @@ public class ChooseBuilderBL extends Action {
             if (((GameState) this.handler).chosenBuilderBL != null) {
                 return State.SUCCESS;
             }
-            Unit closestWorker = null;
+            Worker closestWorker = null;
             Position chosen = ((GameState) this.handler).chosenBaseLocation.toPosition();
             if (!((GameState) this.handler).workerIdle.isEmpty()) {
-                for (Unit u : ((GameState) this.handler).workerIdle) {
+                for (Worker u : ((GameState) this.handler).workerIdle) {
                     double unitChosen = ((GameState) this.handler).broodWarDistance(u.getPosition(), chosen);
                     if (closestWorker == null) {
                         closestWorker = u;
@@ -38,7 +38,7 @@ public class ChooseBuilderBL extends Action {
                 }
             }
             if (!((GameState) this.handler).workerMining.isEmpty()) {
-                for (Unit u : ((GameState) this.handler).workerMining.keySet()) {
+                for (Worker u : ((GameState) this.handler).workerMining.keySet()) {
                     double unitChosen = ((GameState) this.handler).broodWarDistance(u.getPosition(), chosen);
                     if (closestWorker == null) {
                         closestWorker = u;
@@ -67,13 +67,13 @@ public class ChooseBuilderBL extends Action {
                 if (((GameState) this.handler).chosenWorker != null && ((GameState) this.handler).chosenWorker.equals(closestWorker)) {
                     ((GameState) this.handler).chosenWorker = null;
                 }
-                ((GameState) this.handler).chosenBuilderBL = (Worker) closestWorker;
+                ((GameState) this.handler).chosenBuilderBL = closestWorker;
                 return State.SUCCESS;
             }
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
-            System.err.println(e);
+            e.printStackTrace();
             return State.ERROR;
         }
     }

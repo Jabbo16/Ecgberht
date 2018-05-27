@@ -138,7 +138,7 @@ public class JFAP extends AJFAP {
 
     @Override
     public Pair<Set<JFAPUnit>, Set<JFAPUnit>> getState() {
-        return new Pair<Set<JFAPUnit>, Set<JFAPUnit>>(player1, player2);
+        return new Pair<>(player1, player2);
     }
 
     @Override

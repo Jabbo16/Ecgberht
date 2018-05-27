@@ -50,8 +50,7 @@ public class BuildingMap {
 
     @Override
     public BuildingMap clone() {
-        BuildingMap map2 = new BuildingMap(bw, self, height, width, map, bwem);
-        return map2;
+        return new BuildingMap(bw, self, height, width, map, bwem);
     }
 
     // Generates an initial building map
@@ -407,8 +406,7 @@ public class BuildingMap {
             i++;
             j++;
         }
-        TilePosition position = new TilePosition(coord[1], coord[0]);
-        return position;
+        return new TilePosition(coord[1], coord[0]);
     }
 
     public TilePosition findBunkerPosition(ChokePoint choke) {
@@ -467,7 +465,7 @@ public class BuildingMap {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e);
+            e.printStackTrace();
         }
         return true;
     }
@@ -518,7 +516,9 @@ public class BuildingMap {
         for (int ii = 0; ii < height; ii++) {
             for (int jj = 0; jj < width; jj++) {
                 try {
-                    sw.write(map[ii][jj]);
+                    if (sw != null) {
+                        sw.write(map[ii][jj]);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
