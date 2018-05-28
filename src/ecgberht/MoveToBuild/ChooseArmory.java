@@ -23,7 +23,7 @@ public class ChooseArmory extends Action {
             if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.facForArmory) {
                 return State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < ((GameState) this.handler).strat.numArmories) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < ((GameState) this.handler).strat.numArmories) {
                 for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Armory) {
                         return State.FAILURE;

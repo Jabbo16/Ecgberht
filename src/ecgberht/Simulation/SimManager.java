@@ -8,6 +8,8 @@ import ecgberht.Squad;
 import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.type.Color;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Attacker;
 import org.openbw.bwapi4j.unit.Bunker;
@@ -75,6 +77,24 @@ public class SimManager {
 
     private void simClusters() {
 
+    }
+
+    private void drawCluster(Cluster c, boolean ally){
+        int cluster = 0;
+        Color color = Color.RED;
+        if(ally) color = Color.GREEN;
+        Position centroid = new Position(c.mode.first.intValue(), c.mode.second.intValue());
+        getGs().getGame().getMapDrawer().drawCircleMap(centroid, 5, color, true);
+        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0,5)), Integer.toString(cluster));
+        cluster++;
+        for(Unit u : c.units){
+            getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
+        }
+    }
+
+    public void drawClusters(){
+        for(Cluster c : friendly) drawCluster(c, true);
+        for(Cluster c : enemies) drawCluster(c, false);
     }
 
     public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {

@@ -1,5 +1,6 @@
 package ecgberht.Defense;
 
+import bwem.area.Area;
 import bwta.Region;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
@@ -85,7 +86,9 @@ public class CheckPerimeter extends Conditional {
                 }
                 Position closestCC = ((GameState) this.handler).getNearestCC(u.getPosition());
                 if (closestCC != null) {
-                    if (!((GameState) this.handler).bwta.getRegion(u.getPosition()).getCenter().equals(((GameState) this.handler).bwta.getRegion(closestCC).getCenter())) {
+                    Area uArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
+                    Area closestCCArea = ((GameState) this.handler).bwem.getMap().getArea(closestCC.toTilePosition());
+                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) {
                         u.move(closestCC);
                     }
                 }

@@ -20,6 +20,7 @@ import ecgberht.Bunker.ChooseBunkerToLoad;
 import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
 import ecgberht.Clustering.Cluster;
+import ecgberht.Clustering.MeanShift;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
 import ecgberht.Config.ConfigManager;
@@ -45,10 +46,7 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -56,9 +54,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 public class Ecgberht implements BWEventListener {

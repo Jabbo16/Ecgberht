@@ -25,23 +25,29 @@ public class MeanShift {
         try {
             time = System.currentTimeMillis();
             int iterations = 50;
+            int bandwidth = 2;
+            double denominator;
+            double distance;
+            double weight;
+            Pair<Double, Double> numerator;
+            Pair<Double, Double> initial;
+            List<Pair<Double, Double>> neighbours;
+            Pair<Double, Double> newPoint;
             for (int iter = 0; iter < iterations; iter++) {
                 //System.out.println("-----Iter " + iter + "------");
                 for (Entry<Unit, Pair<Double, Double>> i : points.entrySet()) {
-                    Pair<Double, Double> initial = i.getValue();
-                    List<Pair<Double, Double>> neighbours = getNeighbours(i.getKey(), initial);
-                    Pair<Double, Double> numerator = new Pair<>(0.0, 0.0);
-                    double denominator = 0;
+                    initial = i.getValue();
+                    neighbours = getNeighbours(i.getKey(), initial);
+                    numerator = new Pair<>(0.0, 0.0);
+                    denominator = 0;
                     for (Pair<Double, Double> neighbour : neighbours) {
-                        double distance = euclideanDistance(neighbour, initial);
-                        int bandwidth = 2;
-                        double weight = gaussianKernel2(distance, bandwidth);
+                        distance = broodWarDistance(neighbour, initial);
+                        weight = gaussianKernel2(distance, bandwidth);
                         numerator = new Pair<>(numerator.first + weight * neighbour.first,
                                 numerator.second + weight * neighbour.second);
                         denominator += weight;
                     }
-                    Pair<Double, Double> newPoint = new Pair<>((numerator.first / denominator),
-                            (numerator.second / denominator));
+                    newPoint = new Pair<>((numerator.first / denominator), (numerator.second / denominator));
                     if (neighbours.isEmpty()) {
                         newPoint = initial;
                     }
@@ -57,7 +63,7 @@ public class MeanShift {
             for (Entry<Unit, Pair<Double, Double>> i : points.entrySet()) {
                 int c = 0;
                 for (Cluster cluster : clusters) {
-                    if (euclideanDistance(i.getValue(), cluster.mode) <= 400) {
+                    if (broodWarDistance(i.getValue(), cluster.mode) <= 400) {
                         break;
                     }
                     c++;
@@ -83,21 +89,32 @@ public class MeanShift {
         return Math.exp(-1.0 / 2.0 * (dist * dist) / (bandwidth * bandwidth));
     }
 
-    private double gaussianKernel(double dist, double bandwidth) {
+    /*private double gaussianKernel(double dist, double bandwidth) {
         return (1 / (bandwidth * Math.sqrt(2 * Math.PI))) * Math.exp(Math.pow(-0.5 * ((dist / bandwidth)), 2));
-    }
+    }*/
 
     private List<Pair<Double, Double>> getNeighbours(Unit unit, Pair<Double, Double> point) {
         List<Pair<Double, Double>> neighbours = new ArrayList<>();
         for (Entry<Unit, Pair<Double, Double>> u : this.points.entrySet()) {
             if (unit.equals(u.getKey())) continue;
-            double dist = euclideanDistance(point, u.getValue());
-            if (dist <= radius) neighbours.add(u.getValue());
+            if (broodWarDistance(point, u.getValue()) <= radius) neighbours.add(u.getValue());
         }
         return neighbours;
     }
 
-    private double euclideanDistance(Pair<Double, Double> point1, Pair<Double, Double> point2) {
+    /*private double euclideanDistance(Pair<Double, Double> point1, Pair<Double, Double> point2) {
         return Math.sqrt(Math.pow(point1.first - point2.first, 2) + Math.pow(point1.second - point2.second, 2));
+    }*/
+
+    //Credits to @PurpleWaveJadien
+    private double broodWarDistance(Pair<Double,Double> a, Pair<Double,Double> b) {
+        double dx = Math.abs(a.first - b.first);
+        double dy = Math.abs(a.second - b.second);
+        double d = Math.min(dx, dy);
+        double D = Math.max(dx, dy);
+        if (d < D / 4) {
+            return D;
+        }
+        return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
     }
 }

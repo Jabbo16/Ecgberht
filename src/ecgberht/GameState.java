@@ -466,6 +466,7 @@ public class GameState extends GameHandler {
 
     public void debugScreen() {
         if (!ConfigManager.getConfig().debugScreen) return;
+        sim.drawClusters();
         print(naturalRegion.getTop().toTilePosition(), Color.RED);
         Integer counter = 0;
         for (bwem.Base b : BLs) {
@@ -547,12 +548,12 @@ public class GameState extends GameHandler {
         }
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
             print(u.getKey(), Color.CYAN);
-            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
+            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.CYAN);
         }
         for (Entry<Worker, GasMiningFacility> u : workerGas.entrySet()) {
             if (u.getKey().getOrder() == Order.HarvestGas) continue;
             print(u.getKey(), Color.GREEN);
-            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
+            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.GREEN);
         }
         for (Entry<VespeneGeyser, Boolean> u : vespeneGeysers.entrySet()) {
             print(u.getKey(), Color.GREEN);
@@ -1274,7 +1275,6 @@ public class GameState extends GameHandler {
             return D;
         }
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
-
     }
 
     public double getGroundDistance(TilePosition start, TilePosition end) {
@@ -1385,7 +1385,7 @@ public class GameState extends GameHandler {
             }
         }
         for (WraithAgent wraith : wra) {
-            spectres.remove(wraith);
+            spectres.remove(wraith.unit);
         }
     }
 
