@@ -74,12 +74,6 @@ public class ChooseBaseLocation extends Action {
                 return State.FAILURE;
             }
             ((GameState) this.handler).chosenBaseLocation = valid.get(0).getLocation();
-//			System.out.println("----------------------------");
-//			System.out.println(((GameState)this.handler).chosenBaseLocation);
-//			System.out.println("Expanding : " + ((GameState)this.handler).expanding);
-//			System.out.println("Moving : " + ((GameState)this.handler).movingToExpand);
-//			System.out.println("DELTA " + ((GameState)this.handler).deltaCash.first);
-//			System.out.println("----------------------------");
             return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

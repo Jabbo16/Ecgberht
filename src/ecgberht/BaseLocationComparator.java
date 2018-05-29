@@ -7,7 +7,7 @@ import java.util.Comparator;
 
 import static ecgberht.Ecgberht.getGs;
 
-public class BaseLocationComparator implements Comparator<bwem.Base> {
+public class BaseLocationComparator implements Comparator<Base> {
     private boolean enemy = false;
 
     public BaseLocationComparator(boolean enemy) {
@@ -43,10 +43,10 @@ public class BaseLocationComparator implements Comparator<bwem.Base> {
                 }
                 double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
                 double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
-                if (distA == 0.0 && distB > 0.0) {
+                if (Double.compare(distA, 0.0) == 0 && Double.compare(distB, 0.0) > 0) {
                     return 1;
                 }
-                if (distB == 0.0 && distA > 0.0) {
+                if (Double.compare(distB, 0.0) == 0 && Double.compare(distA, 0.0) > 0) {
                     return -1;
                 }
                 if (getGs().strat.name != "FullBio" && getGs().strat.name != "FullBioFE") {
@@ -57,13 +57,13 @@ public class BaseLocationComparator implements Comparator<bwem.Base> {
                         return -1;
                     }
                 }
-                if (distA < distB && distA > 0.0) {
+                if (Double.compare(distA, distB) < 0 && Double.compare(distA, 0.0) > 0) {
                     if (getGs().blockedBLs.contains(a)) {
                         return 1;
                     }
                     return -1;
                 } else {
-                    if (distA > distB && distB > 0.0) {
+                    if (Double.compare(distA, distB) > 0 && Double.compare(distB, 0.0) > 0) {
                         if (getGs().blockedBLs.contains(b)) {
                             return -1;
                         }
@@ -87,10 +87,10 @@ public class BaseLocationComparator implements Comparator<bwem.Base> {
                 double distA = getGs().bwta.getGroundDistance(a.getLocation(), start.toTilePosition());
                 double distB = getGs().bwta.getGroundDistance(b.getLocation(), start.toTilePosition());
 
-                if (distA == 0.0 && distB > 0.0) {
+                if (Double.compare(distA, 0.0) == 0 && Double.compare(distB, 0.0) > 0) {
                     return 1;
                 }
-                if (distB == 0.0 && distA > 0.0) {
+                if (Double.compare(distB, 0.0) == 0 && Double.compare(distA, 0.0) > 0) {
                     return -1;
                 }
                 if ((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
@@ -99,13 +99,13 @@ public class BaseLocationComparator implements Comparator<bwem.Base> {
                 if ((!a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) && (b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
                     return -1;
                 }
-                if (distA < distB && distA > 0.0) {
+                if (Double.compare(distA, distB) < 0 && Double.compare(distA, 0.0) > 0) {
                     if (getGs().blockedBLs.contains(a)) {
                         return 1;
                     }
                     return 1;
                 } else {
-                    if (distA > distB && distB > 0.0) {
+                    if (Double.compare(distA, distB) > 0 && Double.compare(distB, 0.0) > 0) {
                         if (getGs().blockedBLs.contains(b)) {
                             return -1;
                         }

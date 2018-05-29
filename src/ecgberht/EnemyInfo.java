@@ -20,7 +20,7 @@ public class EnemyInfo {
         this.history = history;
         this.defendHarass = defendHarass;
         this.losses = Integer.parseInt(losses);
-        if (naughty == "true") {
+        if (naughty.equals("true")) {
             this.naughty = true;
         }
     }

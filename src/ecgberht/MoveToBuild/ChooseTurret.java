@@ -1,6 +1,7 @@
 package ecgberht.MoveToBuild;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -21,7 +22,8 @@ public class ChooseTurret extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForTurret) {
+            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForTurret &&
+                    !IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar)) {
                 return State.FAILURE;
             }
             boolean tech = false;

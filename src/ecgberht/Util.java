@@ -231,30 +231,30 @@ public class Util {
         return unit.getInitialType();
     }
 
-    public static WeaponType GetWeapon(Unit attacker, Unit target) {
+    public static WeaponType getWeapon(Unit attacker, Unit target) {
         UnitType attackerType = getType((PlayerUnit) attacker);
         UnitType targetType = getType(((PlayerUnit) target));
         if (attackerType == UnitType.Terran_Bunker) {
-            return GetWeapon(UnitType.Terran_Marine, targetType);
+            return getWeapon(UnitType.Terran_Marine, targetType);
         }
         if (attackerType == UnitType.Protoss_Carrier) {
-            return GetWeapon(UnitType.Protoss_Interceptor, targetType);
+            return getWeapon(UnitType.Protoss_Interceptor, targetType);
         }
         if (attackerType == UnitType.Protoss_Reaver) {
-            return GetWeapon(UnitType.Protoss_Scarab, targetType);
+            return getWeapon(UnitType.Protoss_Scarab, targetType);
         }
         return target.isFlying() ? attackerType.airWeapon() : attackerType.groundWeapon();
     }
 
-    private static WeaponType GetWeapon(UnitType attacker, UnitType target) {
+    private static WeaponType getWeapon(UnitType attacker, UnitType target) {
         if (attacker == UnitType.Terran_Bunker) {
-            return GetWeapon(UnitType.Terran_Marine, target);
+            return getWeapon(UnitType.Terran_Marine, target);
         }
         if (attacker == UnitType.Protoss_Carrier) {
-            return GetWeapon(UnitType.Protoss_Interceptor, target);
+            return getWeapon(UnitType.Protoss_Interceptor, target);
         }
         if (attacker == UnitType.Protoss_Reaver) {
-            return GetWeapon(UnitType.Protoss_Scarab, target);
+            return getWeapon(UnitType.Protoss_Scarab, target);
         }
         return target.isFlyer() ? attacker.airWeapon() : attacker.groundWeapon();
     }
@@ -286,7 +286,7 @@ public class Util {
         // We care about unit-target range and target-order position distance.
         int score = 5 * 32 * priority - range;
 
-        WeaponType targetWeapon = Util.GetWeapon(attacker, target);
+        WeaponType targetWeapon = Util.getWeapon(attacker, target);
         UnitType targetType = getType(target);
         // Adjust for special features.
         // This could adjust for relative speed and direction, so that we don't chase what we can't catch.

@@ -1,5 +1,7 @@
 package ecgberht;
 
+import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.task.Task;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Drone;
@@ -36,8 +38,13 @@ public class IntelligenceAgency {
     }
 
     public static boolean enemyHasType(UnitType type) {
-        for (HashSet<UnitType> set : enemyTypes.values()) {
-            if (set.contains(type)) return true;
+        if (enemyTypes.values().contains(type)) return true;
+        return false;
+    }
+
+    public static boolean enemyHasType(UnitType... types) {
+        for (UnitType type : types) {
+            if (enemyTypes.values().contains(type)) return true;
         }
         return false;
     }
@@ -71,12 +78,11 @@ public class IntelligenceAgency {
                 enemyBases.get(player).add(unit);
             }
         }
-
         // If player and type known skip
         if (enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;
-
             // Normal units (no workers and no real combat or support units)
-        else if (!type.isBuilding() && !type.isWorker() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type.supplyProvided() == 0))) {
+        else if (!type.isBuilding() && !type.isWorker() && (type.canAttack() || type.isSpellcaster() ||
+                (type.spaceProvided() > 0 && type.supplyProvided() == 0))) {
             if (!enemyTypes.containsKey(player)) {
                 HashSet<UnitType> aux = new HashSet<>();
                 aux.add(type);
@@ -198,6 +204,36 @@ public class IntelligenceAgency {
             if (unit instanceof Drone) {
                 if (drones.contains(unit)) drones.remove(unit);
             }
+        }
+    }
+
+    private static void detect5Pool() {
+        if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null && !getGs().EI.naughty) {
+            boolean found_pool = false;
+            int drones = IntelligenceAgency.getNumDrones();
+            for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
+                if (u.type == UnitType.Zerg_Spawning_Pool) {
+                    found_pool = true;
+                    break;
+                }
+            }
+            if (found_pool && drones <= 5) {
+                getGs().EI.naughty = true;
+                getGs().ih.sendText("Bad zerg!, bad!");
+                getGs().playSound("rushed.mp3");
+            }
+        }
+    }
+
+    public static void onFrame() {
+        switch (getGs().enemyRace) {
+            case Zerg:
+                detect5Pool();
+                break;
+            case Terran:
+                break;
+            case Protoss:
+                break;
         }
     }
 }

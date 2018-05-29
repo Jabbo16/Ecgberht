@@ -24,7 +24,6 @@ import org.openbw.bwapi4j.util.Pair;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -429,7 +428,6 @@ public class GameState extends GameHandler {
     public void debugText() {
         try {
             if (!ConfigManager.getConfig().debugText) return;
-            DecimalFormat df = new DecimalFormat("#.##");
             bw.getMapDrawer().drawTextScreen(320, 5, ColorUtil.formatText(supplyMan.getSupplyUsed() + "/" + supplyMan.getSupplyTotal(), ColorUtil.White));
             if (ih.allies().size() + ih.enemies().size() == 1) {
                 bw.getMapDrawer().drawTextScreen(10, 5,
@@ -568,9 +566,9 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawCircleMap(center, 80, Color.GREEN);
             bw.getMapDrawer().drawTextMap(center, s.getKey());
         }
-        for (Unit m : mineralsAssigned.keySet()) {
-            print(m, Color.CYAN);
-            bw.getMapDrawer().drawTextMap(m.getPosition(), ColorUtil.formatText(mineralsAssigned.get(m).toString(), ColorUtil.White));
+        for (Entry<MineralPatch, Integer> m : mineralsAssigned.entrySet()) {
+            print(m.getKey(), Color.CYAN);
+            bw.getMapDrawer().drawTextMap(m.getKey().getPosition(), ColorUtil.formatText(m.getValue().toString(), ColorUtil.White));
         }
     }
 
@@ -893,10 +891,10 @@ public class GameState extends GameHandler {
             return count;
         } else {
             for (Entry<String, Squad> s : squads.entrySet()) {
-                count += s.getValue().members.size();
+                count += s.getValue().getArmyCount();
             }
         }
-        return count + agents.size();
+        return count + agents.size() * 2 + spectres.size() * 2;
     }
 
     public void siegeTanks() {
@@ -1286,7 +1284,7 @@ public class GameState extends GameHandler {
             dist += broodWarDistance(start.toPosition(), center);
             start = center.toTilePosition();
         }
-        return dist += broodWarDistance(start.toPosition(), end.toPosition());
+        return dist + broodWarDistance(start.toPosition(), end.toPosition());
     }
 
     public Unit getUnitToAttack(Unit myUnit, Set<Unit> closeSim) {
@@ -1391,13 +1389,13 @@ public class GameState extends GameHandler {
 
     public void sendCustomMessage() {
         String name = EI.opponent.toLowerCase();
-        if (name == "krasi0".toLowerCase()) {
+        if (name.equals("krasi0".toLowerCase())) {
             ih.sendText("Please be nice to me!");
         }
-        if (name == "hannes bredberg".toLowerCase() || name == "hannesbredberg".toLowerCase()) {
+        if (name.equals("hannes bredberg".toLowerCase()) || name.equals("hannesbredberg".toLowerCase())) {
             ih.sendText("Don't you dare nuke me!");
         }
-        if (name == "zercgberht" || name == "protecgberht") {
+        if (name.equals("zercgberht") || name.equals("protecgberht")) {
             ih.sendText("Hey there!, brother");
             ih.sendText("As the oldest of the three I'm not gonna lose");
         }

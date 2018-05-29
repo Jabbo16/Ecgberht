@@ -15,18 +15,18 @@ import java.util.List;
 public class InfluenceMap {
 
     public double[][] map;
-    public final int bio = 1;
-    public final int defensive = 5;
-    public final int flying = 6;
-    public final int mech = 3;
-    public final int neutral = 3;
-    public final int ofensive = 4;
-    public final int propagation = 2;
-    public final int umbral = 3;
-    public BW bw;
-    public int height;
-    public int width;
-    public Player self;
+    private static final int bio = 1;
+    private static final int defensive = 5;
+    private static final int flying = 6;
+    private static final int mech = 3;
+    private static final int neutral = 3;
+    private static final int ofensive = 4;
+    private static final int propagation = 2;
+    private static final int umbral = 3;
+    private BW bw;
+    private int height;
+    private int width;
+    private Player self;
 
     public InfluenceMap(BW bw, Player self, int height, int width) {
         this.bw = bw;
@@ -207,29 +207,25 @@ public class InfluenceMap {
         FileWriter sw = null;
         try {
             sw = new FileWriter(fileName);
+            for (int ii = 0; ii < height; ii++) {
+                for (int jj = 0; jj < width; jj++) {
+                    try {
+                        sw.write(Integer.toString((int) map[ii][jj]));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (ii != height - 1) {
+                    try {
+                        sw.write("\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            sw.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        for (int ii = 0; ii < height; ii++) {
-            for (int jj = 0; jj < width; jj++) {
-                try {
-                    sw.write(Integer.toString((int) map[ii][jj]));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (ii != height - 1) {
-                try {
-                    sw.write("\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        try {
-            sw.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
         }
     }
 }

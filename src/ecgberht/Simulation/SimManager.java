@@ -79,22 +79,26 @@ public class SimManager {
 
     }
 
-    private void drawCluster(Cluster c, boolean ally){
-        int cluster = 0;
+    private void drawCluster(Cluster c, boolean ally, int id) {
         Color color = Color.RED;
-        if(ally) color = Color.GREEN;
-        Position centroid = new Position(c.mode.first.intValue(), c.mode.second.intValue());
+        if (ally) color = Color.GREEN;
+        Position centroid = new Position((int) c.modeX, (int) c.modeY);
         getGs().getGame().getMapDrawer().drawCircleMap(centroid, 5, color, true);
-        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0,5)), Integer.toString(cluster));
-        cluster++;
-        for(Unit u : c.units){
-            getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
-        }
+        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), Integer.toString(id));
+        for (Unit u : c.units) getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
     }
 
-    public void drawClusters(){
-        for(Cluster c : friendly) drawCluster(c, true);
-        for(Cluster c : enemies) drawCluster(c, false);
+    public void drawClusters() {
+        int cluster = 0;
+        for (Cluster c : friendly) {
+            drawCluster(c, true, cluster);
+            cluster++;
+        }
+        cluster = 0;
+        for (Cluster c : enemies) {
+            drawCluster(c, false, cluster);
+            cluster++;
+        }
     }
 
     public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {

@@ -17,7 +17,7 @@ import java.util.List;
 
 import static ecgberht.Ecgberht.getGs;
 
-public class BuildingMap {
+public class BuildingMap implements Cloneable {
 
     private Player self;
     private int height;
@@ -510,31 +510,27 @@ public class BuildingMap {
         FileWriter sw = null;
         try {
             sw = new FileWriter(fileName);
+            for (int ii = 0; ii < height; ii++) {
+                for (int jj = 0; jj < width; jj++) {
+                    try {
+                        if (sw != null) {
+                            sw.write(map[ii][jj]);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (ii != height - 1) {
+                    try {
+                        sw.write("\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            sw.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        for (int ii = 0; ii < height; ii++) {
-            for (int jj = 0; jj < width; jj++) {
-                try {
-                    if (sw != null) {
-                        sw.write(map[ii][jj]);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (ii != height - 1) {
-                try {
-                    sw.write("\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        try {
-            sw.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
         }
     }
 }

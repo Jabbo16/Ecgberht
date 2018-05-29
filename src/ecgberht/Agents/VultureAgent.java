@@ -269,9 +269,8 @@ public class VultureAgent implements Comparable<VultureAgent> {
     }
 
     private void attack() {
-        Position newAttackPos = null;
+        Position newAttackPos = selectNewAttack();
         if (attackPos == null) {
-            newAttackPos = selectNewAttack();
             attackPos = newAttackPos;
             if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
                 attackUnit = null;

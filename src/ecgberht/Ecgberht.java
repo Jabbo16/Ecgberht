@@ -20,7 +20,6 @@ import ecgberht.Bunker.ChooseBunkerToLoad;
 import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
 import ecgberht.Clustering.Cluster;
-import ecgberht.Clustering.MeanShift;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
 import ecgberht.Config.ConfigManager;
@@ -46,7 +45,10 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.*;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -54,7 +56,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class Ecgberht implements BWEventListener {
@@ -428,34 +432,12 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onFrame() {
         try {
-            //long frameStart = System.currentTimeMillis();
             gs.frameCount = ih.getFrameCount();
             if (gs.frameCount == 1000) gs.sendCustomMessage();
-            /*if(gs.frameCount >= 2000){
-                Set<Unit> workers = new TreeSet<>();
-                for(Unit u : bw.getUnits(self)){
-                    if(u instanceof Worker && ((Worker) u).isCompleted()) workers.add(u);
-                }
-                MeanShift ms = new MeanShift(workers);
-                //System.out.println("Initialized meanShift");
-                clusters = ms.run();
-                //System.out.println("Executed meanShift, num of clusters: " + clusters.size() + " , time(ms): " + ms.time);
-            }
-            if(!clusters.isEmpty()){
-                int cluster = 0;
-                for(Cluster c : clusters){
-                    Position centroid = new Position(c.mode.first.intValue(), c.mode.second.intValue());
-                    bw.getMapDrawer().drawCircleMap(centroid, 50, Color.RED);
-                    bw.getMapDrawer().drawTextMap(centroid, Integer.toString(cluster));
-                    cluster++;
-                    for(Unit u : c.units){
-                        bw.getMapDrawer().drawLineMap(u.getPosition(),centroid,Color.RED);
-                    }
-                }
-            }*/
             gs.fix();
             gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             gs.updateEnemyBuildingsMemory();
+            IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
             gs.runAgents();
             //gs.checkEnemyAttackingWT();
@@ -472,9 +454,7 @@ public class Ecgberht implements BWEventListener {
             botherTree.run();
             bunkerTree.run();
             scannerTree.run();
-            if (gs.strat.name == "ProxyBBS") {
-                gs.checkWorkerMilitia();
-            }
+            if (gs.strat.name == "ProxyBBS") gs.checkWorkerMilitia();
             gs.siegeTanks();
             defenseTree.run();
             attackTree.run();
@@ -482,35 +462,13 @@ public class Ecgberht implements BWEventListener {
             combatStimTree.run();
             gs.checkMainEnemyBase();
             gs.mergeSquads();
-            if (ih.getFrameCount() < 24 * 150 && gs.enemyBase != null && gs.enemyRace == Race.Zerg && !gs.EI.naughty) {
-                boolean found_pool = false;
-                int drones = IntelligenceAgency.getNumDrones();
-                for (EnemyBuilding u : gs.enemyBuildingMemory.values()) {
-                    if (u.type == UnitType.Zerg_Spawning_Pool) {
-                        found_pool = true;
-                        break;
-                    }
-                }
-                if (found_pool && drones <= 5) {
-                    gs.EI.naughty = true;
-                    ih.sendText("Bad zerg!, bad!");
-                    gs.playSound("rushed.mp3");
-                }
-            }
-            if (gs.frameCount > 0 && gs.frameCount % 5 == 0) {
-                gs.mineralLocking();
-            }
+            if (gs.frameCount > 0 && gs.frameCount % 5 == 0) gs.mineralLocking();
             gs.debugScreen();
             gs.debugText();
-            //long frameEnd = System.currentTimeMillis();
-            //long frameTotal = frameEnd - frameStart;
-            //gs.totalTime += frameTotal;
-            //bw.getMapDrawer().drawTextScreen(10, 65, "frameTime(ms): " + (String.valueOf(frameTotal)));
         } catch (Exception e) {
             System.err.println("onFrame Exception");
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -704,7 +662,7 @@ public class Ecgberht implements BWEventListener {
                                 if (tankS != null) {
                                     beforeSiege = tankS.attack;
                                 }
-                                if (beforeSiege != null && beforeSiege != null) {
+                                if (beforeSiege != null) {
                                     ((MobileUnit) arg0).attack(beforeSiege);
                                 }
                             }
@@ -844,7 +802,7 @@ public class Ecgberht implements BWEventListener {
                         if (gs.workerGas.containsKey(arg0)) { // TODO fix when destroyed
                             GasMiningFacility aux = gs.workerGas.get(arg0);
                             Integer auxInt = gs.refineriesAssigned.get(arg0);
-                            gs.refineriesAssigned.put(aux, auxInt--);
+                            gs.refineriesAssigned.put(aux, auxInt - 1);
                             gs.workerGas.remove(arg0);
                         }
 
@@ -978,7 +936,6 @@ public class Ecgberht implements BWEventListener {
             System.err.println("OnUnitDestroy Exception");
             e.printStackTrace();
         }
-
     }
 
     @Override

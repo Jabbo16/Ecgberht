@@ -18,7 +18,6 @@ public class ChooseBuilderBL extends Action {
     @Override
     public State execute() {
         try {
-
             if (((GameState) this.handler).chosenBuilderBL != null) {
                 return State.SUCCESS;
             }
@@ -50,7 +49,6 @@ public class ChooseBuilderBL extends Action {
                     }
                 }
             }
-
             if (closestWorker != null) {
                 if (!((GameState) this.handler).workerIdle.isEmpty() && ((GameState) this.handler).workerIdle.contains(closestWorker)) {
                     ((GameState) this.handler).workerIdle.remove(closestWorker);

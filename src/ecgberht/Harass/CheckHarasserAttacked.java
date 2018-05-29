@@ -71,17 +71,14 @@ public class CheckHarasserAttacked extends Conditional {
                             ((GameState) this.handler).chosenHarasser.move(kite);
                             ((GameState) this.handler).chosenUnitToHarass = null;
                         }
-
                     }
-
                     return State.FAILURE;
                 }
             }
-
             return State.SUCCESS;
         } catch (Exception e) {
-            //System.err.println(this.getClass().getSimpleName());
-            //e.printStackTrace();
+            System.err.println(this.getClass().getSimpleName());
+            e.printStackTrace();
             return State.ERROR;
         }
     }

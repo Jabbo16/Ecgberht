@@ -16,10 +16,10 @@ public class CheckResourcesCC extends Conditional {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).movingToExpand == true) {
+            if (((GameState) this.handler).movingToExpand) {
                 return State.SUCCESS;
             }
-            if (((GameState) this.handler).expanding == true) {
+            if (((GameState) this.handler).expanding) {
                 Pair<Integer, Integer> cash = ((GameState) this.handler).getCash();
                 if (cash.first >= (UnitType.Terran_Command_Center.mineralPrice()) && cash.second >= (UnitType.Terran_Command_Center.gasPrice())) {
                     return State.SUCCESS;
