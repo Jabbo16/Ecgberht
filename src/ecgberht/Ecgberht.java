@@ -22,7 +22,6 @@ import ecgberht.Bunker.EnterBunker;
 import ecgberht.Clustering.Cluster;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
-import ecgberht.Config.ConfigManager;
 import ecgberht.Defense.CheckPerimeter;
 import ecgberht.Defense.ChooseDefensePosition;
 import ecgberht.Defense.SendDefenders;
@@ -132,11 +131,9 @@ public class Ecgberht implements BWEventListener {
         // game.enableFlag(1);
         // game.setLocalSpeed(0);
         System.out.println("Analyzing map...");
-
         bwta = new BWTA();
         bwta.analyze();
         System.out.println("Map data ready");
-        //observer.toggle();
         bwem = new BWEM(bw);
         bwem.initialize();
         bwem.getMap().assignStartingLocationsToSuitableBases();
@@ -999,8 +996,8 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitShow(Unit arg0) {
         try {
-            if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding || arg0 instanceof Critter)
-                return;
+            if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding ||
+                    arg0 instanceof Critter) return;
             UnitType type = Util.getType((PlayerUnit) arg0);
             if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
                 IntelligenceAgency.onShow(arg0, type);
@@ -1011,14 +1008,12 @@ public class Ecgberht implements BWEventListener {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {
-
                     if (!gs.enemyBuildingMemory.containsKey(arg0)) {
                         gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
                         gs.inMap.updateMap(arg0, false);
                         gs.map.updateMap(arg0.getTilePosition(), type, false);
                     }
                 }
-
             }
         } catch (Exception e) {
             System.err.println("OnUnitShow Exception");

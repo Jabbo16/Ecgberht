@@ -29,9 +29,10 @@ public class CheckHarasserAttacked extends Conditional {
             int workers = 0;
             Set<Unit> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
-            for (PlayerUnit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getIH().enemy())) {
+            for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
                 if (!(u instanceof Building) && u instanceof Attacker && u.exists()) {
-                    Unit target = ((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() : ((Attacker) u).getTargetUnit();
+                    Unit target = ((Attacker) u).getTargetUnit() == null ? ((PlayerUnit)u).getOrderTarget() :
+                            ((Attacker) u).getTargetUnit();
                     if (target != null && target.equals(((GameState) this.handler).chosenHarasser)) {
                         if (u instanceof Worker) {
                             workers++;
@@ -46,7 +47,8 @@ public class CheckHarasserAttacked extends Conditional {
                 ((GameState) this.handler).EI.defendHarass = true;
             }
             if (attackers.isEmpty()) {
-                if (!((GameState) this.handler).getGame().getBWMap().isVisible(((GameState) this.handler).enemyBase.getLocation()) && ((GameState) this.handler).chosenUnitToHarass == null) {
+                if (!((GameState) this.handler).getGame().getBWMap().isVisible(((GameState) this.handler).enemyBase.getLocation()) &&
+                        ((GameState) this.handler).chosenUnitToHarass == null) {
                     ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyBase.getLocation().toPosition());
                 }
                 return State.SUCCESS;

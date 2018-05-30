@@ -17,6 +17,7 @@ public class CheckExplorer extends Conditional {
             if (!((GameState) this.handler).EI.defendHarass) {
                 return State.FAILURE;
             } else {
+                ((GameState) this.handler).chosenUnitToHarass = null;
                 return State.SUCCESS;
             }
         } catch (Exception e) {

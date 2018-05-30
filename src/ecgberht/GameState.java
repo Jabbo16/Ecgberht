@@ -10,7 +10,6 @@ import bwta.BWTA;
 import com.google.gson.Gson;
 import ecgberht.Agents.VultureAgent;
 import ecgberht.Agents.WraithAgent;
-import ecgberht.Config.ConfigManager;
 import ecgberht.Simulation.SimManager;
 import ecgberht.Squad.Status;
 import ecgberht.Strategies.*;

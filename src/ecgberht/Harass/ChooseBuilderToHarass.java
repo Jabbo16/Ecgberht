@@ -21,14 +21,14 @@ public class ChooseBuilderToHarass extends Action {
             if (((GameState) this.handler).enemyRace != Race.Terran) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).chosenUnitToHarass != null && ((GameState) this.handler).chosenUnitToHarass instanceof Worker) {
+            /*if (((GameState) this.handler).chosenUnitToHarass != null && ((GameState) this.handler).chosenUnitToHarass instanceof Worker) {
                 return State.FAILURE;
-            }
-            for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getIH().enemy())) {
+            }*/
+            for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
                 Unit aux = null;
                 if (((GameState) this.handler).enemyBase != null) {
                     if (u instanceof SCV && ((SCV) u).isConstructing()) {
-                        if (((GameState) this.handler).bwta.getRegion(u.getPosition()).getCenter().equals(((GameState) this.handler).bwta.getRegion(((GameState) this.handler).enemyBase.getLocation()).getCenter())) {
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).enemyBase.getLocation()))) {
                             if (((SCV) u).getBuildType().canProduce()) {
                                 ((GameState) this.handler).chosenUnitToHarass = u;
                                 return State.SUCCESS;
