@@ -112,7 +112,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onStart() {
         ConfigManager.readConfig();
-        if (!ConfigManager.getConfig().debugConsole) {
+        if (!ConfigManager.getConfig().ecgConfig.debugConsole) {
             // Disables System.err and System.Out
             OutputStream output = null;
             try {
@@ -127,9 +127,13 @@ public class Ecgberht implements BWEventListener {
 
         self = bw.getInteractionHandler().self();
         ih = bw.getInteractionHandler();
-        if (!ConfigManager.getConfig().enableLatCom) ih.enableLatCom(false);
-        // game.enableFlag(1);
-        // game.setLocalSpeed(0);
+        if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
+        if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
+        if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
+            ih.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
+        if (ConfigManager.getConfig().bwapiConfig.localSpeed >= 0)
+            ih.setLocalSpeed(ConfigManager.getConfig().bwapiConfig.localSpeed);
+        if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
         System.out.println("Analyzing map...");
         bwta = new BWTA();
         bwta.analyze();
@@ -431,6 +435,7 @@ public class Ecgberht implements BWEventListener {
         try {
             gs.frameCount = ih.getFrameCount();
             if (gs.frameCount == 1000) gs.sendCustomMessage();
+            IntelligenceAgency.updateBullets();
             gs.fix();
             gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             gs.updateEnemyBuildingsMemory();

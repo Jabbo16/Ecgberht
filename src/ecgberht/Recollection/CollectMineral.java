@@ -21,8 +21,14 @@ public class CollectMineral extends Action {
             Worker chosen = ((GameState) this.handler).chosenWorker;
             if (!((GameState) this.handler).mineralsAssigned.isEmpty()) {
                 MineralPatch closestMineral = null;
+                int workerPerPatch = 2;
+                if (((GameState) this.handler).frameCount < 5 &&
+                        ((GameState) this.handler).supplyMan.getSupplyUsed() <= 10) {
+                    workerPerPatch = 1;
+                }
                 for (Entry<MineralPatch, Integer> m : ((GameState) this.handler).mineralsAssigned.entrySet()) {
-                    if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral)) && m.getValue() < 2) {
+                    if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral))
+                            && m.getValue() < workerPerPatch) {
                         closestMineral = m.getKey();
                     }
                 }
@@ -31,7 +37,6 @@ public class CollectMineral extends Action {
                         ((GameState) this.handler).mineralsAssigned.put(closestMineral, ((GameState) this.handler).mineralsAssigned.get(closestMineral) + 1);
                         ((GameState) this.handler).workerIdle.remove(chosen);
                         ((GameState) this.handler).workerMining.put(chosen, closestMineral);
-
                         ((GameState) this.handler).chosenWorker = null;
                         ((GameState) this.handler).mining++;
                         return State.SUCCESS;

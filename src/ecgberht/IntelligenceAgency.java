@@ -1,25 +1,23 @@
 package ecgberht;
 
-import org.iaie.btree.BehavioralTree;
-import org.iaie.btree.task.Task;
+import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Drone;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
     private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
     private static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
-    private static TreeSet<Unit> drones = new TreeSet<>();
+    private static Set<Unit> drones = new TreeSet<>();
+    private static List<Bullet> enemyBullets = new ArrayList<>();
+    private static List<Bullet> allyBullets = new ArrayList<>();
 
     public static int getNumDrones() {
         return drones.size();
@@ -28,6 +26,16 @@ public class IntelligenceAgency {
     public static int getNumEnemyBases(String player) {
         if (enemyBases.containsKey(player)) return enemyBases.get(player).size();
         return 0;
+    }
+
+    public static void updateBullets() {
+        enemyBullets.clear();
+        allyBullets.clear();
+        for (Bullet b : getGs().getGame().getBullets()) {
+            if (!b.isExists()) continue;
+            if (Util.isEnemy(b.getPlayer())) enemyBullets.add(b);
+            else allyBullets.add(b);
+        }
     }
 
     public static boolean enemyHasType(String player, UnitType type) {

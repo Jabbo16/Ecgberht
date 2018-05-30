@@ -8,47 +8,68 @@ import java.nio.file.Paths;
 
 public class ConfigManager {
 
-    public static class EcgberhtConfig {
-        public boolean debugConsole;
-        public boolean debugScreen;
-        public boolean debugText;
-        public boolean sounds;
-        public boolean enableLatCom;
 
-        public EcgberhtConfig() { }
+    public static class Config {
+
+        public static class EcgberhtConfig {
+            public boolean debugConsole;
+            public boolean debugScreen;
+            public boolean debugText;
+            public boolean sounds;
+            public boolean enableLatCom;
+
+            public EcgberhtConfig() {
+            }
+        }
+
+        public static class BwapiConfig {
+            public int localSpeed = 42;
+            public int frameSkip;
+            public boolean userInput = true;
+            public boolean completeMapInformation;
+
+            public BwapiConfig() {
+            }
+        }
+
+        public EcgberhtConfig ecgConfig = new EcgberhtConfig();
+        public BwapiConfig bwapiConfig = new BwapiConfig();
+
+        public Config() {
+        }
     }
 
-    private static EcgberhtConfig config;
+    private static Config config;
 
     public static void readConfig() {
         Gson configJSON = new Gson();
         String path = "bwapi-data/AI/config.json";
         try {
             if (Files.exists(Paths.get(path))) {
-                config = configJSON.fromJson(new FileReader(path), EcgberhtConfig.class);
+                config = configJSON.fromJson(new FileReader(path), Config.class);
                 return;
             }
             path = "bwapi-data/read/config.json";
             if (Files.exists(Paths.get(path))) {
-                config = configJSON.fromJson(new FileReader(path), EcgberhtConfig.class);
+                config = configJSON.fromJson(new FileReader(path), Config.class);
                 return;
             }
             path = "config.json";
             if (Files.exists(Paths.get(path))) {
-                config = configJSON.fromJson(new FileReader(path), EcgberhtConfig.class);
+                config = configJSON.fromJson(new FileReader(path), Config.class);
                 return;
             }
-            config = new EcgberhtConfig();
+            config = new Config();
             return;
         } catch (Exception e) {
             System.err.println("readConfig Exception");
             e.printStackTrace();
-            config = new EcgberhtConfig();
+            config = new Config();
             return;
         }
     }
 
-    public static EcgberhtConfig getConfig() {
+    public static Config getConfig() {
         return config;
     }
 }

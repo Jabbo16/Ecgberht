@@ -7,7 +7,6 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.Worker;
 
 public class ChooseBuilderToHarass extends Action {
 

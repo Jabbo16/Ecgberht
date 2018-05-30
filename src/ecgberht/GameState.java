@@ -308,7 +308,7 @@ public class GameState extends GameHandler {
 
     public void playSound(String soundFile) {
         try {
-            if (!ConfigManager.getConfig().sounds) return;
+            if (!ConfigManager.getConfig().ecgConfig.sounds) return;
             String run = getClass().getResource("GameState.class").toString();
             if (run.startsWith("jar:") || run.startsWith("rsrc:")) {
                 InputStream fis = getClass().getClassLoader().getResourceAsStream(soundFile);
@@ -426,7 +426,7 @@ public class GameState extends GameHandler {
 
     public void debugText() {
         try {
-            if (!ConfigManager.getConfig().debugText) return;
+            if (!ConfigManager.getConfig().ecgConfig.debugText) return;
             bw.getMapDrawer().drawTextScreen(320, 5, ColorUtil.formatText(supplyMan.getSupplyUsed() + "/" + supplyMan.getSupplyTotal(), ColorUtil.White));
             if (ih.allies().size() + ih.enemies().size() == 1) {
                 bw.getMapDrawer().drawTextScreen(10, 5,
@@ -462,7 +462,7 @@ public class GameState extends GameHandler {
     }
 
     public void debugScreen() {
-        if (!ConfigManager.getConfig().debugScreen) return;
+        if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
         sim.drawClusters();
         print(naturalRegion.getTop().toTilePosition(), Color.RED);
         Integer counter = 0;
@@ -999,8 +999,10 @@ public class GameState extends GameHandler {
 
     public void mineralLocking() {
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
-            if (u.getKey().getTargetUnit() != null) {
-                if (!u.getKey().getTargetUnit().equals(u.getValue()) && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals() || u.getKey().isIdle()) {
+            if (u.getKey().isIdle() || (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())))
+                u.getKey().gather(u.getValue());
+            else if (u.getKey().getTargetUnit() != null) {
+                if (!u.getKey().getTargetUnit().equals(u.getValue()) && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals()) {
                     u.getKey().gather(u.getValue());
                 }
             }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EnemyInfo {
-    public String opponent = "";
+    public String opponent;
     public int wins = 0;
     public int losses = 0;
     public boolean naughty = false;
@@ -15,7 +15,7 @@ public class EnemyInfo {
         this.opponent = opponent;
     }
 
-    public EnemyInfo(String wins, String losses, List<StrategyOpponentHistory> history, String naughty, boolean defendHarass) {
+   /* public EnemyInfo(String wins, String losses, List<StrategyOpponentHistory> history, String naughty, boolean defendHarass) {
         this.wins = Integer.parseInt(wins);
         this.history = history;
         this.defendHarass = defendHarass;
@@ -23,7 +23,7 @@ public class EnemyInfo {
         if (naughty.equals("true")) {
             this.naughty = true;
         }
-    }
+    }*/
 
     public void updateStrategyOpponentHistory(String strategyName, int mapSize, boolean win) {
         for (StrategyOpponentHistory data : history) {

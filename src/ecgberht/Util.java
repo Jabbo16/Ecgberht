@@ -108,6 +108,7 @@ public class Util {
     }
 
     public static boolean isEnemy(Player player) {
+        if (player == null) return true;
         return getGs().players.get(player) == -1;
     }
 

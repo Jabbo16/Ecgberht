@@ -31,7 +31,7 @@ public class CheckHarasserAttacked extends Conditional {
             //Thanks to @N00byEdge for cleaner code
             for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
                 if (!(u instanceof Building) && u instanceof Attacker && u.exists()) {
-                    Unit target = ((Attacker) u).getTargetUnit() == null ? ((PlayerUnit)u).getOrderTarget() :
+                    Unit target = ((Attacker) u).getTargetUnit() == null ? ((PlayerUnit) u).getOrderTarget() :
                             ((Attacker) u).getTargetUnit();
                     if (target != null && target.equals(((GameState) this.handler).chosenHarasser)) {
                         if (u instanceof Worker) {

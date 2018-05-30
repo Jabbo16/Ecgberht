@@ -7,13 +7,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Attacker;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.PlayerUnit;
-import org.openbw.bwapi4j.unit.Unit;
-
-import java.util.Set;
-import java.util.TreeSet;
 
 public class Explore extends Conditional {
 

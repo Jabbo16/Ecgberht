@@ -1,7 +1,15 @@
 {
-    "debugConsole":true,
-    "debugScreen":true,
-    "debugText":true,
-    "enableLatcom":false,
-    "sounds":false
+    "bwapiConfig": {
+        "localSpeed": -1,
+        "frameSkip": 0,
+        "userInput": true,
+        "completeMapInformation": false
+    },
+    "ecgConfig": {
+        "debugConsole": true,
+        "debugScreen": true,
+        "debugText": true,
+        "enableLatcom": false,
+        "sounds": false
+    }
 }
