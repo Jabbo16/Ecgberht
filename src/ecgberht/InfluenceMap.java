@@ -14,7 +14,6 @@ import java.util.List;
 
 public class InfluenceMap {
 
-    public double[][] map;
     private static final int bio = 1;
     private static final int defensive = 5;
     private static final int flying = 6;
@@ -23,6 +22,7 @@ public class InfluenceMap {
     private static final int ofensive = 4;
     private static final int propagation = 2;
     private static final int umbral = 3;
+    public double[][] map;
     private BW bw;
     private int height;
     private int width;

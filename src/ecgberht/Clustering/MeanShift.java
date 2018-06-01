@@ -14,24 +14,9 @@ Thanks to @Yegers for improving performance
 */
 public class MeanShift {
 
-    static class UnitPos {
-
-        Unit unit;
-        double x;
-        double y;
-
-        public UnitPos(Unit unit, double x, double y) {
-            this.unit = unit;
-            this.x = x;
-            this.y = y;
-        }
-    }
-
+    public long time = 0;
     private double radius = Math.pow(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange(), 2);
     private List<UnitPos> points = new ArrayList<>();
-    public long time = 0;
-
-
     public MeanShift(Collection<Unit> units) {
         for (Unit u : units) {
             Position p = u.getPosition();
@@ -107,10 +92,6 @@ public class MeanShift {
         return Math.exp(-1.0 / 2.0 * distanceSquared / (bandwidth * bandwidth));
     }
 
-//	private double gaussianKernel(double dist, double bandwidth) {
-//		return (1 / (bandwidth * Math.sqrt(2 * Math.PI))) * Math.exp(Math.pow(-0.5 * ((dist / bandwidth)), 2));
-//	}
-
     private List<double[]> getNeighbours(Unit unit, double pointX, double pointY) {
         List<double[]> neighbours = new ArrayList<>();
         for (UnitPos u : this.points) {
@@ -121,7 +102,24 @@ public class MeanShift {
         return neighbours;
     }
 
+//	private double gaussianKernel(double dist, double bandwidth) {
+//		return (1 / (bandwidth * Math.sqrt(2 * Math.PI))) * Math.exp(Math.pow(-0.5 * ((dist / bandwidth)), 2));
+//	}
+
     private double euclideanDistanceSquared(double point1X, double point1Y, double point2X, double point2Y) {
         return Math.pow(point1X - point2X, 2) + Math.pow(point1Y - point2Y, 2);
+    }
+
+    static class UnitPos {
+
+        Unit unit;
+        double x;
+        double y;
+
+        public UnitPos(Unit unit, double x, double y) {
+            this.unit = unit;
+            this.x = x;
+            this.y = y;
+        }
     }
 }

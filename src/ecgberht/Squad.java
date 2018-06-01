@@ -12,16 +12,11 @@ import static ecgberht.Ecgberht.getGs;
 
 public class Squad {
 
-    public enum Status {
-        ATTACK, IDLE, DEFENSE
-    }
-
     public int lastFrameOrder = 0;
     public Position attack;
     public Set<PlayerUnit> members;
     public Status status;
     public String name;
-
     public Squad(String name) {
         this.name = name;
         members = new TreeSet<>();
@@ -187,8 +182,8 @@ public class Squad {
                         ((MobileUnit) u).move(start);
                         continue;
                     }
-                    Set<Unit> enemyToKite = new HashSet<>();
-                    Set<Unit> enemyToAttack = new HashSet<>();
+                    Set<Unit> enemyToKite = new TreeSet<>();
+                    Set<Unit> enemyToAttack = new TreeSet<>();
                     for (Unit e : enemy) {
                         UnitType eType = e.getInitialType();
                         if (eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
@@ -202,11 +197,11 @@ public class Squad {
                         }
                     }
                     for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
-                        if (b.type.canAttack()) {
+                        if (b.type.canAttack() || b.type == UnitType.Terran_Bunker) {
                             enemyToAttack.add(b.unit);
                         }
                     }
-                    if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeaponCooldown() > 0) {
+                    if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeapon().cooldown() > 0) {
                         if (!enemyToKite.isEmpty()) {
                             Position run = getGs().kiteAway(u, enemyToKite);
                             if (getGs().getGame().getBWMap().isValidPosition(run)) {
@@ -220,7 +215,6 @@ public class Squad {
                     } else if (attack != null && !u.isStartingAttack() && !u.isAttacking()) {
                         if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
                             Unit target = Util.getTarget(u, enemyToAttack);
-
                             Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
                                     ((Attacker) u).getTargetUnit());
                             if (lastTargetUnit != null) {
@@ -234,7 +228,6 @@ public class Squad {
                             ((MobileUnit) u).attack(attack);
                             continue;
                         }
-
                     }
                 }
             }
@@ -327,5 +320,9 @@ public class Squad {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public enum Status {
+        ATTACK, IDLE, DEFENSE
     }
 }

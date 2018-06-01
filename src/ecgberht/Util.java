@@ -293,7 +293,7 @@ public class Util {
         // This could adjust for relative speed and direction, so that we don't chase what we can't catch.
         if (range <= targetWeapon.maxRange()) {
             score += 5 * 32;
-        } else if (!((MobileUnit) target).isMoving()) {
+        } else if (target instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
             if (target instanceof SiegeTank) {
                 if (((SiegeTank) target).isSieged() || target.getOrder() == Order.Sieging || target.getOrder() == Order.Unsieging) {
                     score += 48;
@@ -302,7 +302,7 @@ public class Util {
                 }
             }
 
-        } else if (((MobileUnit) target).isBraking()) {
+        } else if (target instanceof MobileUnit && ((MobileUnit) target).isBraking()) {
             score += 16;
         } else if (targetType.topSpeed() >= getType(attacker).topSpeed()) {
             score -= 5 * 32;

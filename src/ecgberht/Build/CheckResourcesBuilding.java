@@ -25,20 +25,19 @@ public class CheckResourcesBuilding extends Conditional {
             TilePosition end = ((GameState) this.handler).chosenPosition;
             Position realEnd = ((GameState) this.handler).getCenterFromBuilding(end.toPosition(), ((GameState) this.handler).chosenToBuild);
 
-            if(((GameState)this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks){
-                if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) < 1){
+            if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks) {
+                if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 1) {
                     // TODO Improve
-                    if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(chosen, start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice()*2+40 + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()*2) + ((GameState) this.handler).deltaCash.second) {
+                    if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() * 2 + 40 + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice() * 2) + ((GameState) this.handler).deltaCash.second) {
                         return State.SUCCESS;
                     }
-                } else if(((GameState)this.handler).countUnit(UnitType.Terran_Barracks) == 1){
+                } else if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 1) {
 //                    if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(chosen, start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
-                        return State.SUCCESS;
+                    return State.SUCCESS;
 //                    }
                 }
                 return State.ERROR;
-            }
-            else if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(chosen, start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
+            } else if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
                 return State.SUCCESS;
             }
             return State.FAILURE;

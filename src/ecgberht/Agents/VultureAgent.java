@@ -15,14 +15,6 @@ import static ecgberht.Ecgberht.getGs;
 
 public class VultureAgent implements Comparable<VultureAgent> {
 
-    public VultureAgent(Unit unit) {
-        this.unit = (Vulture) unit;
-    }
-
-    enum Status {
-        ATTACK, KITE, COMBAT, IDLE, RETREAT
-    }
-
     public Vulture unit = null;
     UnitType type = UnitType.Terran_Vulture;
     boolean minesResearched = false;
@@ -34,6 +26,9 @@ public class VultureAgent implements Comparable<VultureAgent> {
     int actualFrame = 0;
     Set<Unit> closeEnemies = new HashSet<>();
     Set<Unit> closeWorkers = new HashSet<>();
+    public VultureAgent(Unit unit) {
+        this.unit = (Vulture) unit;
+    }
 
     public void placeMine(Position pos) {
         unit.spiderMine(pos);
@@ -332,5 +327,9 @@ public class VultureAgent implements Comparable<VultureAgent> {
     @Override
     public int compareTo(VultureAgent v1) {
         return this.unit.getId() - v1.unit.getId();
+    }
+
+    enum Status {
+        ATTACK, KITE, COMBAT, IDLE, RETREAT
     }
 }

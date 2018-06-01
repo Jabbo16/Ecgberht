@@ -8,8 +8,8 @@ import org.openbw.bwapi4j.unit.*;
 import java.util.Objects;
 
 public class JFAPUnit implements Comparable<JFAPUnit> {
-    protected int id = 0;
     public Unit unit;
+    protected int id = 0;
     protected int x = 0, y = 0;
     protected int health = 0;
     protected int maxHealth = 0;
@@ -34,10 +34,10 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
     protected UnitType unitType = UnitType.Unknown;
     protected Player player = null;
     protected boolean isOrganic = false;
-    boolean didHealThisFrame = false;
     protected int score = 0;
     protected int attackCooldownRemaining = 0;
     protected Race race = Race.Unknown;
+    boolean didHealThisFrame = false;
 
     public JFAPUnit(Unit u) {
         PlayerUnit pU = (PlayerUnit) u;

@@ -43,11 +43,11 @@ import org.openbw.bwapi4j.Player;
  * @author momartin
  */
 public abstract class GameHandler {
-    protected Player self;
     public BW bw;
     public InteractionHandler ih;
     public BWTA bwta;
     public BWEM bwem;
+    protected Player self;
 
     public GameHandler(BW bw, BWTA bwta, BWEM bwem) {
         this.bw = bw;

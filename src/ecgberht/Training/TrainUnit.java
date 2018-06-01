@@ -5,6 +5,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MachineShop;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 import org.openbw.bwapi4j.unit.TrainingFacility;
@@ -33,6 +34,8 @@ public class TrainUnit extends Action {
             }
             TrainingFacility chosen = ((GameState) this.handler).chosenBuilding;
             if (((GameState) this.handler).strat.name == "ProxyBBS") {
+                if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 2 &&
+                        ((GameState) this.handler).countUnit(UnitType.Terran_Supply_Depot) == 0) return State.FAILURE;
                 if (((GameState) this.handler).getSupply() > 0) {
                     chosen.train(((GameState) this.handler).chosenUnit);
                     return State.SUCCESS;

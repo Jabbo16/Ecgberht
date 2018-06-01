@@ -10,6 +10,7 @@ import ecgberht.Agents.VultureAgent;
 import ecgberht.Agents.WraithAgent;
 import ecgberht.Attack.CheckArmy;
 import ecgberht.Attack.ChooseAttackPosition;
+import ecgberht.Build.*;
 import ecgberht.BuildingLot.CheckBuildingsLot;
 import ecgberht.BuildingLot.ChooseBlotWorker;
 import ecgberht.BuildingLot.ChooseBuildingLot;
@@ -17,7 +18,6 @@ import ecgberht.BuildingLot.FinishBuilding;
 import ecgberht.Bunker.ChooseBunkerToLoad;
 import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
-import ecgberht.Clustering.Cluster;
 import ecgberht.CombatStim.CheckStimResearched;
 import ecgberht.CombatStim.Stim;
 import ecgberht.Defense.CheckPerimeter;
@@ -25,7 +25,6 @@ import ecgberht.Defense.ChooseDefensePosition;
 import ecgberht.Defense.SendDefenders;
 import ecgberht.Expansion.*;
 import ecgberht.Harass.*;
-import ecgberht.Build.*;
 import ecgberht.Recollection.CollectGas;
 import ecgberht.Recollection.CollectMineral;
 import ecgberht.Recollection.FreeWorker;
@@ -60,6 +59,9 @@ import java.util.TreeSet;
 
 public class Ecgberht implements BWEventListener {
 
+    private static BW bw;
+    private static InteractionHandler ih;
+    private static GameState gs;
     private BehavioralTree addonBuildTree;
     private BehavioralTree attackTree;
     private BehavioralTree botherTree;
@@ -77,16 +79,8 @@ public class Ecgberht implements BWEventListener {
     private BehavioralTree upgradeTree;
     private boolean first = false;
     private Player self;
-    private static BW bw;
-    private static InteractionHandler ih;
-    private static GameState gs;
     private BWTA bwta;
     private BWEM bwem;
-
-    private void run() {
-        Ecgberht.bw = new BW(this);
-        Ecgberht.bw.startGame();
-    }
 
     public static void main(String[] args) {
         new Ecgberht().run();
@@ -102,6 +96,11 @@ public class Ecgberht implements BWEventListener {
 
     public static GameState getGs() {
         return gs;
+    }
+
+    private void run() {
+        Ecgberht.bw = new BW(this);
+        Ecgberht.bw.startGame();
     }
 
     @Override
@@ -828,7 +827,8 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitMorph(Unit arg0) {
         UnitType type;
-        if (arg0 instanceof VespeneGeyser) type = arg0.getInitialType(); else type = Util.getType((PlayerUnit) arg0);
+        if (arg0 instanceof VespeneGeyser) type = arg0.getInitialType();
+        else type = Util.getType((PlayerUnit) arg0);
         if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
             if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
                 if (!gs.enemyBuildingMemory.containsKey(arg0)) {

@@ -1,7 +1,6 @@
 package ecgberht.Build;
 
 import ecgberht.GameState;
-import ecgberht.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -27,7 +26,7 @@ public class ChooseSupply extends Action {
                 return State.FAILURE;
             }
             //if(((GameState)this.handler).countUnit2(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
-            if ( ((GameState) this.handler).strat.name == "ProxyBBS" && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 2) {
+            if (((GameState) this.handler).strat.name == "ProxyBBS" && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
             if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).enemyRace == Race.Zerg) {

@@ -47,8 +47,8 @@ import java.util.List;
  */
 public abstract class Task {
 
-    private final String name;
     protected final List<Task> children;
+    private final String name;
     protected GameHandler handler;
     protected State state = State.RUNNING;
 

@@ -9,36 +9,6 @@ import java.nio.file.Paths;
 public class ConfigManager {
 
 
-    public static class Config {
-
-        public static class EcgberhtConfig {
-            public boolean debugConsole;
-            public boolean debugScreen;
-            public boolean debugText;
-            public boolean sounds;
-            public boolean enableLatCom;
-
-            public EcgberhtConfig() {
-            }
-        }
-
-        public static class BwapiConfig {
-            public int localSpeed = 42;
-            public int frameSkip;
-            public boolean userInput = true;
-            public boolean completeMapInformation;
-
-            public BwapiConfig() {
-            }
-        }
-
-        public EcgberhtConfig ecgConfig = new EcgberhtConfig();
-        public BwapiConfig bwapiConfig = new BwapiConfig();
-
-        public Config() {
-        }
-    }
-
     private static Config config;
 
     public static void readConfig() {
@@ -71,6 +41,36 @@ public class ConfigManager {
 
     public static Config getConfig() {
         return config;
+    }
+
+    public static class Config {
+
+        public EcgberhtConfig ecgConfig = new EcgberhtConfig();
+        public BwapiConfig bwapiConfig = new BwapiConfig();
+
+        public Config() {
+        }
+
+        public static class EcgberhtConfig {
+            public boolean debugConsole;
+            public boolean debugScreen;
+            public boolean debugText;
+            public boolean sounds;
+            public boolean enableLatCom;
+
+            public EcgberhtConfig() {
+            }
+        }
+
+        public static class BwapiConfig {
+            public int localSpeed = 42;
+            public int frameSkip;
+            public boolean userInput = true;
+            public boolean completeMapInformation;
+
+            public BwapiConfig() {
+            }
+        }
     }
 }
 

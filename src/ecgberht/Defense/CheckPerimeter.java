@@ -50,23 +50,26 @@ public class CheckPerimeter extends Conditional {
                             continue;
                         }
                     }
-                    for (Building c : ((GameState) this.handler).workerTask.values()) {
-                        if (!(c instanceof Bunker) && !(c instanceof CommandCenter)) continue;
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
-                            ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
-                        }
-                    }
+
                     for (Unit c : ((GameState) this.handler).SBs) {
                         if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
-                    for (Unit c : ((GameState) this.handler).MBs) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
-                            ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                    if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
+                        for (Building c : ((GameState) this.handler).workerTask.values()) {
+                            if (!(c instanceof Bunker) && !(c instanceof CommandCenter)) continue;
+                            if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+                                ((GameState) this.handler).enemyInBase.add(u);
+                                continue;
+                            }
+                        }
+                        for (Unit c : ((GameState) this.handler).MBs) {
+                            if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+                                ((GameState) this.handler).enemyInBase.add(u);
+                                continue;
+                            }
                         }
                     }
                 }

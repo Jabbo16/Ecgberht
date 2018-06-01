@@ -14,19 +14,6 @@ import static ecgberht.Ecgberht.getGs;
 
 public class WraithAgent implements Comparable<WraithAgent> {
 
-    public WraithAgent(Unit unit) {
-        this.unit = (Wraith) unit;
-    }
-
-    public WraithAgent(Unit unit, String name) {
-        this.unit = (Wraith) unit;
-        this.name = name;
-    }
-
-    enum Status {
-        ATTACK, COMBAT, IDLE, RETREAT
-    }
-
     public Wraith unit;
     public String name = "Pepe";
     UnitType type = UnitType.Terran_Wraith;
@@ -38,6 +25,13 @@ public class WraithAgent implements Comparable<WraithAgent> {
     int actualFrame = 0;
     Set<Unit> closeEnemies = new TreeSet<>();
     Set<Unit> closeWorkers = new TreeSet<>();
+    public WraithAgent(Unit unit) {
+        this.unit = (Wraith) unit;
+    }
+    public WraithAgent(Unit unit, String name) {
+        this.unit = (Wraith) unit;
+        this.name = name;
+    }
 
     public String statusToString() {
         if (status == Status.ATTACK) {
@@ -249,5 +243,9 @@ public class WraithAgent implements Comparable<WraithAgent> {
     @Override
     public int compareTo(WraithAgent v1) {
         return this.unit.getId() - v1.unit.getId();
+    }
+
+    enum Status {
+        ATTACK, COMBAT, IDLE, RETREAT
     }
 }

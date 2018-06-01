@@ -21,7 +21,7 @@ public class ChooseWeaponMechUp extends Action {
                 return State.FAILURE;
             }
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
-                if(!(u instanceof Armory)) continue;
+                if (!(u instanceof Armory)) continue;
                 if (u.canUpgrade(UpgradeType.Terran_Ship_Weapons) && !u.isResearching() && !u.isUpgrading() && ((GameState) this.handler).getPlayer().getUpgradeLevel(UpgradeType.Terran_Ship_Weapons) < 3) {
                     ((GameState) this.handler).chosenUnitUpgrader = u;
                     ((GameState) this.handler).chosenUpgrade = UpgradeType.Terran_Ship_Weapons;

@@ -25,12 +25,12 @@ import static ecgberht.Ecgberht.getGs;
 
 public class SimManager {
 
+    public long time;
     private List<Cluster> friendly = new ArrayList<>();
     private List<Cluster> enemies = new ArrayList<>();
     private List<SimInfo> simulations = new ArrayList<>();
     private JFAP simulator;
     private MeanShift clustering;
-    public long time;
 
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
