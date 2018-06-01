@@ -6,6 +6,7 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 
 public class ChooseMarineRange extends Action {
@@ -21,6 +22,7 @@ public class ChooseMarineRange extends Action {
                 return State.FAILURE;
             }
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
+                if(!(u instanceof Academy)) continue;
                 if (((GameState) this.handler).getPlayer().hasResearched(TechType.Stim_Packs) && ((GameState) this.handler).getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) < 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
                     ((GameState) this.handler).chosenUnitUpgrader = u;
                     ((GameState) this.handler).chosenUpgrade = UpgradeType.U_238_Shells;

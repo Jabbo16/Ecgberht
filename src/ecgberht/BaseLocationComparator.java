@@ -8,14 +8,14 @@ import java.util.Comparator;
 import static ecgberht.Ecgberht.getGs;
 
 public class BaseLocationComparator implements Comparator<Base> {
-    private boolean enemy = false;
+    private boolean enemy;
 
     public BaseLocationComparator(boolean enemy) {
         this.enemy = enemy;
     }
 
     @Override
-    public int compare(bwem.Base a, bwem.Base b) {
+    public int compare(Base a, Base b) {
         try {
             Position start = null;
             if (!enemy) {

@@ -24,9 +24,7 @@ public class Build extends Action {
             for (Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
                 if (u.getKey().getOrder() != Order.PlaceBuilding) {
                     SCV chosen = u.getKey();
-                    if (chosen.build(u.getValue().second, u.getValue().first)) {
-                        continue;
-                    }
+                    chosen.build(u.getValue().second, u.getValue().first);
                 }
             }
             return State.SUCCESS;

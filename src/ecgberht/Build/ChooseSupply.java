@@ -1,4 +1,4 @@
-package ecgberht.MoveToBuild;
+package ecgberht.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util;
@@ -27,7 +27,7 @@ public class ChooseSupply extends Action {
                 return State.FAILURE;
             }
             //if(((GameState)this.handler).countUnit2(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
-            if (Util.countUnitTypeSelf(UnitType.Terran_Barracks) < 2 && ((GameState) this.handler).strat.name == "ProxyBBS") {
+            if ( ((GameState) this.handler).strat.name == "ProxyBBS" && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
             if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).enemyRace == Race.Zerg) {

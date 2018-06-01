@@ -1,40 +1,50 @@
-package ecgberht.MoveToBuild;
+package ecgberht.Build;
 
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.IntelligenceAgency;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.EngineeringBay;
+import org.openbw.bwapi4j.unit.MissileTurret;
+import org.openbw.bwapi4j.unit.ResearchingFacility;
 import org.openbw.bwapi4j.util.Pair;
 
-public class ChooseAcademy extends Action {
+public class ChooseTurret extends Action {
 
-    public ChooseAcademy(String name, GameHandler gh) {
+    public ChooseTurret(String name, GameHandler gh) {
         super(name, gh);
     }
 
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Refinery) == 0) {
+            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForTurret &&
+                    !IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar)) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) >= ((GameState) this.handler).strat.numRaxForAca && Util.countUnitTypeSelf(UnitType.Terran_Academy) == 0) {
+            boolean tech = false;
+            for (ResearchingFacility ub : ((GameState) this.handler).UBs) {
+                if (ub instanceof EngineeringBay) {
+                    tech = true;
+                    break;
+                }
+            }
+            if (tech && ((GameState) this.handler).Ts.isEmpty()) {
                 for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Academy) {
+                    if (w.first == UnitType.Terran_Missile_Turret) {
                         return State.FAILURE;
                     }
                 }
                 for (Building w : ((GameState) this.handler).workerTask.values()) {
-                    if (w instanceof Academy) {
+                    if (w instanceof MissileTurret) {
                         return State.FAILURE;
                     }
                 }
-                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Academy;
+                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Missile_Turret;
                 return State.SUCCESS;
             }
             return State.FAILURE;

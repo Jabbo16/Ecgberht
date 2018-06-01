@@ -4,13 +4,13 @@ import ecgberht.GameState;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.unit.MachineShop;
+import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.unit.Armory;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 
-public class ChooseSiegeMode extends Action {
+public class ChooseArmorMechUp extends Action {
 
-    public ChooseSiegeMode(String name, GameHandler gh) {
+    public ChooseArmorMechUp(String name, GameHandler gh) {
         super(name, gh);
     }
 
@@ -21,10 +21,10 @@ public class ChooseSiegeMode extends Action {
                 return State.FAILURE;
             }
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
-                if(!(u instanceof MachineShop)) continue;
-                if (!((GameState) this.handler).getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
+                if(!(u instanceof Armory)) continue;
+                if (u.canUpgrade(UpgradeType.Terran_Vehicle_Plating) && !u.isResearching() && !u.isUpgrading() && ((GameState) this.handler).getPlayer().getUpgradeLevel(UpgradeType.Terran_Vehicle_Plating) < 3) {
                     ((GameState) this.handler).chosenUnitUpgrader = u;
-                    ((GameState) this.handler).chosenResearch = TechType.Tank_Siege_Mode;
+                    ((GameState) this.handler).chosenUpgrade = UpgradeType.Terran_Vehicle_Plating;
                     return State.SUCCESS;
                 }
             }

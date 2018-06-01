@@ -1,4 +1,4 @@
-package ecgberht.MoveToBuild;
+package ecgberht.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util;
@@ -7,34 +7,34 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Armory;
 import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.EngineeringBay;
 import org.openbw.bwapi4j.util.Pair;
 
-public class ChooseArmory extends Action {
+public class ChooseBay extends Action {
 
-    public ChooseArmory(String name, GameHandler gh) {
+    public ChooseBay(String name, GameHandler gh) {
         super(name, gh);
     }
 
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.facForArmory) {
+            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForBay) {
                 return State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < ((GameState) this.handler).strat.numArmories) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < ((GameState) this.handler).strat.numBays) {
                 for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Armory) {
+                    if (w.first == UnitType.Terran_Engineering_Bay) {
                         return State.FAILURE;
                     }
                 }
                 for (Building w : ((GameState) this.handler).workerTask.values()) {
-                    if (w instanceof Armory) {
+                    if (w instanceof EngineeringBay) {
                         return State.FAILURE;
                     }
                 }
-                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Armory;
+                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Engineering_Bay;
                 return State.SUCCESS;
             }
             return State.FAILURE;

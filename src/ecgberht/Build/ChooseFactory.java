@@ -1,4 +1,4 @@
-package ecgberht.MoveToBuild;
+package ecgberht.Build;
 
 import ecgberht.GameState;
 import org.iaie.btree.state.State;

@@ -163,12 +163,12 @@ public class GameState extends GameHandler {
     public Strategy initStrat() {
         try {
             BioBuild b = new BioBuild();
-            // ProxyBBS bbs = new ProxyBBS(); //TODO broken, fix
+             ProxyBBS bbs = new ProxyBBS(); //TODO broken, fix
             BioMechBuild bM = new BioMechBuild();
             BioBuildFE bFE = new BioBuildFE();
             BioMechBuildFE bMFE = new BioMechBuildFE();
             FullMech FM = new FullMech();
-            if (true) return new Strategy(FM);
+            if (true) return new Strategy(bbs);
             String map = bw.getBWMap().mapFileName();
             if (enemyRace == Race.Zerg && EI.naughty) {
                 return new Strategy(b);
@@ -1248,7 +1248,7 @@ public class GameState extends GameHandler {
                     continue;
                 }
                 List<Unit> circle = Util.getFriendlyUnitsInRadius(getSquadCenter(s), 190);
-                Set<Unit> different = new HashSet<>();
+                Set<Unit> different = new TreeSet<>();
                 different.addAll(circle);
                 different.addAll(s.members);
                 circle.retainAll(s.members);
@@ -1256,6 +1256,7 @@ public class GameState extends GameHandler {
                 if (circle.size() != s.members.size()) {
                     allFine = false;
                     for (Unit u : different) {
+                        if(!s.members.contains(u)) continue;
                         ((MobileUnit) u).attack(getSquadCenter(s));
                     }
                 }

@@ -95,7 +95,6 @@ public class IntelligenceAgency {
                 HashSet<UnitType> aux = new HashSet<>();
                 aux.add(type);
                 enemyTypes.put(player, aux);
-
             } else {
                 enemyTypes.get(player).add(type);
             }
@@ -106,7 +105,6 @@ public class IntelligenceAgency {
                 HashSet<UnitType> aux = new HashSet<>();
                 aux.add(UnitType.Zerg_Lurker);
                 enemyTypes.put(player, aux);
-
             } else {
                 enemyTypes.get(player).add(UnitType.Zerg_Lurker);
             }
@@ -119,7 +117,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Protoss_Arbiter);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Protoss_Arbiter);
                 }
@@ -129,7 +126,6 @@ public class IntelligenceAgency {
                     aux.add(UnitType.Protoss_Dark_Templar);
                     aux.add(UnitType.Protoss_High_Templar);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Protoss_Dark_Templar);
                     enemyTypes.get(player).add(UnitType.Protoss_High_Templar);
@@ -139,7 +135,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Protoss_Carrier);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Protoss_Carrier);
                 }
@@ -148,7 +143,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Protoss_Reaver);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Protoss_Reaver);
                 }
@@ -159,7 +153,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Zergling);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Zerg_Zergling);
                 }
@@ -168,7 +161,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Mutalisk);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Zerg_Mutalisk);
                 }
@@ -177,7 +169,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Hydralisk);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Zerg_Hydralisk);
                 }
@@ -186,7 +177,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Queen);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Zerg_Queen);
                 }
@@ -195,7 +185,6 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Defiler);
                     enemyTypes.put(player, aux);
-
                 } else {
                     enemyTypes.get(player).add(UnitType.Zerg_Defiler);
                 }

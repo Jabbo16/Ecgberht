@@ -61,6 +61,7 @@ public class Squad {
         return count;
     }
 
+    // Kiting broken, improve
     public void microUpdateOrder() {
         try {
             if (members.isEmpty()) {
@@ -159,7 +160,6 @@ public class Squad {
                     ((MobileUnit) u).move(sCenter);
                     continue;
                 }
-
                 Position lastTarget = (((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() :
                         ((MobileUnit) u).getTargetPosition());
                 if (lastTarget != null) {
