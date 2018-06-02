@@ -476,7 +476,7 @@ public class Ecgberht implements BWEventListener {
                         }
                         if (arg0 instanceof Addon) return;
                         if (arg0 instanceof CommandCenter && ih.getFrameCount() == 0) return;
-                        SCV worker = ((Building) arg0).getBuildUnit();
+                        SCV worker = (SCV) ((Building) arg0).getBuildUnit();
                         if (worker != null) {
                             if (gs.workerBuild.containsKey(worker)) {
                                 if (type.equals(gs.workerBuild.get(worker).first)) {

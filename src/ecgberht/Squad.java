@@ -201,7 +201,7 @@ public class Squad {
                             enemyToAttack.add(b.unit);
                         }
                     }
-                    if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeapon().cooldown() > 0) {
+                    if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeaponCooldown() > 0) {
                         if (!enemyToKite.isEmpty()) {
                             Position run = getGs().kiteAway(u, enemyToKite);
                             if (getGs().getGame().getBWMap().isValidPosition(run)) {
