@@ -17,6 +17,7 @@ public class Squad {
     public Set<PlayerUnit> members;
     public Status status;
     public String name;
+
     public Squad(String name) {
         this.name = name;
         members = new TreeSet<>();
@@ -38,12 +39,15 @@ public class Squad {
 
     public void giveStimOrder() {
         for (PlayerUnit u : members) {
-            if (u instanceof Marine || u instanceof Firebat) {
-                if (u instanceof Marine ? !((Marine) u).isStimmed() : ((Firebat) u).isStimmed() && u.isAttacking() &&
+            if (u instanceof Marine && !((Marine) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
+                ((Marine) u).stimPack();
+            }
+            /*if (u instanceof Marine || u instanceof Firebat) {
+                if ((u instanceof Marine ? !((Marine) u).isStimmed() : !((Firebat) u).isStimmed()) && u.isAttacking() &&
                         u.getHitPoints() >= 25) {
                     if ((u instanceof Marine) ? ((Marine) u).stimPack() : ((Firebat) u).stimPack()) ;
                 }
-            }
+            }*/
         }
     }
 
@@ -85,11 +89,11 @@ public class Squad {
                             }
                             continue;
                         }
-                    } else if (getGs().closestChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
-                        if (getGs().broodWarDistance(getGs().closestChoke.getCenter().toPosition(), sCenter) >= 200 &&
+                    } else if (getGs().mainChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
+                        if (getGs().broodWarDistance(getGs().mainChoke.getCenter().toPosition(), sCenter) >= 200 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
                             if (u.getOrder() != Order.Move) {
-                                ((MobileUnit) u).move(getGs().closestChoke.getCenter().toPosition());
+                                ((MobileUnit) u).move(getGs().mainChoke.getCenter().toPosition());
                             }
                             continue;
                         }
@@ -101,13 +105,7 @@ public class Squad {
                         }
                     }
                 }
-                if ((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove &&
-                        !u.getOrderTargetPosition().equals(attack)) { // TODO test change target position faster
-                    if (u instanceof MobileUnit) {
-                        ((MobileUnit) u).attack(attack);
-                        continue;
-                    }
-                }
+
                 // Experimental
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition())
                         && frameCount % 35 == 0) {
@@ -139,7 +137,7 @@ public class Squad {
                 }
                 if (u instanceof Medic && u.getOrder() != Order.MedicHeal) {
                     PlayerUnit chosen = getHealTarget(u, marinesToHeal);
-                    if (chosen != null) {
+                    if (chosen != null && u.getOrderTarget() != chosen) {
                         ((Medic) u).healing(chosen);
                         marinesToHeal.add(chosen);
                         continue;
@@ -159,6 +157,13 @@ public class Squad {
                         ((MobileUnit) u).getTargetPosition());
                 if (lastTarget != null) {
                     if (lastTarget.equals(attack)) {
+                        continue;
+                    }
+                }
+                if ((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove &&
+                        !u.getOrderTargetPosition().equals(attack)) { // TODO test change target position faster
+                    if (u instanceof MobileUnit) {
+                        ((MobileUnit) u).attack(attack);
                         continue;
                     }
                 }
@@ -213,7 +218,7 @@ public class Squad {
                             }
                         }
                     } else if (attack != null && !u.isStartingAttack() && !u.isAttacking()) {
-                        if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
+                        /*if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
                             Unit target = Util.getTarget(u, enemyToAttack);
                             Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
                                     ((Attacker) u).getTargetUnit());
@@ -223,7 +228,7 @@ public class Squad {
                                     continue;
                                 }
                             }
-                        }
+                        }*/
                         if (u.getOrder() == Order.Move) {
                             ((MobileUnit) u).attack(attack);
                             continue;

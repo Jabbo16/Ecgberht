@@ -12,7 +12,10 @@ import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,35 +41,34 @@ public class CheckPerimeter extends Conditional {
             for (Unit u : enemyInvaders) {
                 UnitType uType = Util.getType((PlayerUnit) u);
                 if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster()) && uType != UnitType.Zerg_Scourge && uType != UnitType.Protoss_Corsair)) {
+                    for (Unit c : ((GameState) this.handler).workerTask.values()) {
+                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                            ((GameState) this.handler).enemyInBase.add(u);
+                            continue;
+                        }
+                    }
                     for (Unit c : ((GameState) this.handler).CCs.values()) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 500) {
+                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 500) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).DBs.keySet()) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
 
                     for (Unit c : ((GameState) this.handler).SBs) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
-                        for (Building c : ((GameState) this.handler).workerTask.values()) {
-                            if (!(c instanceof Bunker) && !(c instanceof CommandCenter)) continue;
-                            if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
-                                ((GameState) this.handler).enemyInBase.add(u);
-                                continue;
-                            }
-                        }
                         for (Unit c : ((GameState) this.handler).MBs) {
-                            if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) < 200) {
+                            if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 ((GameState) this.handler).enemyInBase.add(u);
                                 continue;
                             }
@@ -76,9 +78,9 @@ public class CheckPerimeter extends Conditional {
             }
 
             if (!((GameState) this.handler).enemyInBase.isEmpty()) {
-                if ((((GameState) this.handler).getArmySize() >= 50 && ((GameState) this.handler).getArmySize() / ((GameState) this.handler).enemyInBase.size() > 10)) {
+                /*if ((((GameState) this.handler).getArmySize() >= 50 && ((GameState) this.handler).getArmySize() / ((GameState) this.handler).enemyInBase.size() > 10)) {
                     return State.FAILURE;
-                }
+                }*/
                 ((GameState) this.handler).defense = true;
                 return State.SUCCESS;
             }

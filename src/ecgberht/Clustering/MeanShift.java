@@ -17,6 +17,7 @@ public class MeanShift {
     public long time = 0;
     private double radius = Math.pow(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange(), 2);
     private List<UnitPos> points = new ArrayList<>();
+
     public MeanShift(Collection<Unit> units) {
         for (Unit u : units) {
             Position p = u.getPosition();

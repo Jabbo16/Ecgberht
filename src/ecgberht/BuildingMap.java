@@ -424,9 +424,8 @@ public class BuildingMap implements Cloneable {
             for (int jj = (y - j); jj <= (y + j); jj++) {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
                     if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
-                        if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalRegion)) {
-                            continue;
-                        }
+                        Area area = bwem.getMap().getArea(new TilePosition(jj, ii));
+                        if (area != null && area.equals(getGs().naturalRegion)) continue;
                         if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
@@ -447,19 +446,13 @@ public class BuildingMap implements Cloneable {
             Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
             Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
             List<Unit> blockers = Util.getUnitsInRectangle(topLeft, bottomRight); // Test
-
-            if (blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) {
-                return true;
-            }
-
-            if (blockers.isEmpty()) {
-                return false;
-            }
-            if (blockers.size() > 1) {
-                return true;
-            } else {
+            if (blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) return true;
+            if (blockers.isEmpty()) return false;
+            if (blockers.size() > 1) return true;
+            else {
                 Unit blocker = blockers.get(0);
-                if (((PlayerUnit) blocker).getPlayer().getId() == self.getId() && blocker instanceof Worker && ((Worker) blocker).getBuildType() == type) {
+                if (blocker instanceof PlayerUnit && ((PlayerUnit) blocker).getPlayer().getId() == self.getId() && blocker instanceof Worker &&
+                        ((Worker) blocker).getBuildType() == type) {
                     return false;
                 }
             }
@@ -476,7 +469,7 @@ public class BuildingMap implements Cloneable {
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
         int x = starting.getY();
         int y = starting.getX();
-        ChokePoint choke = getGs().closestChoke;
+        ChokePoint choke = getGs().mainChoke;
         int i = 4;
         int j = 4;
         //Finds the first valid tileposition starting around the given tileposition
@@ -486,10 +479,7 @@ public class BuildingMap implements Cloneable {
             for (int jj = (y - j); jj <= (y + j); jj++) {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
                     if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
-                        if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalRegion)) {
-                            continue;
-                        }
-
+                        if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalRegion)) continue;
                         if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter().toPosition());

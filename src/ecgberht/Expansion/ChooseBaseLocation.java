@@ -28,22 +28,23 @@ public class ChooseBaseLocation extends Action {
             if (((GameState) this.handler).chosenBaseLocation != null) {
                 return State.SUCCESS;
             }
-            TilePosition main = null;
-            if (((GameState) this.handler).MainCC != null) {
-                main = ((GameState) this.handler).MainCC.getTilePosition();
-            } else {
-                main = ((GameState) this.handler).getPlayer().getStartLocation();
-            }
+            TilePosition main;
+            if (((GameState) this.handler).MainCC != null)
+                main = ((GameState) this.handler).MainCC.second.getTilePosition();
+            else main = ((GameState) this.handler).getPlayer().getStartLocation();
+
             List<Base> valid = new ArrayList<>();
             for (Base b : ((GameState) this.handler).BLs) {
-                if (!((GameState) this.handler).CCs.containsKey(b.getArea().getTop().toPosition()) && !((GameState) this.handler).bwem.getMap().getPath(b.getLocation().toPosition(), main.toPosition()).isEmpty()) {
+                if (!((GameState) this.handler).CCs.containsKey(b.getArea().getTop().toPosition()) &&
+                        !((GameState) this.handler).bwem.getMap().getPath(b.getLocation().toPosition(), main.toPosition()).isEmpty()) {
                     valid.add(b);
                 }
             }
             List<Base> remove = new ArrayList<>();
             for (Base b : valid) {
                 for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
-                    if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null || !(u instanceof Attacker) || u instanceof Worker) {
+                    if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null ||
+                            !(u instanceof Attacker) || u instanceof Worker) {
                         continue;
                     }
                     if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
@@ -52,9 +53,8 @@ public class ChooseBaseLocation extends Action {
                     }
                 }
                 for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                    if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) {
-                        continue;
-                    }
+                    if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
+
                     if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
                         remove.add(b);
                         break;

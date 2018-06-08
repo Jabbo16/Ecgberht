@@ -17,9 +17,9 @@ dependencies {
 }
 
 task fatJar(type: Jar) {
-	from('src/') {
+    from('src/') {
       include  '*.mp3'
-   }
+    }
     manifest {
         attributes 'Main-Class': 'ecgberht.Ecgberht'
     }

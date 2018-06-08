@@ -64,7 +64,6 @@ public class ChoosePosition extends Action {
                         }
                     } else {
                         if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg) {
-
                             origin = ((GameState) this.handler).testMap.findBunkerPositionAntiPool();
                             if (origin != null) {
                                 ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
@@ -78,7 +77,7 @@ public class ChoosePosition extends Action {
                                     return State.SUCCESS;
                                 } else {
                                     if (((GameState) this.handler).MainCC != null) {
-                                        origin = ((GameState) this.handler).MainCC.getTilePosition();
+                                        origin = ((GameState) this.handler).MainCC.second.getTilePosition();
                                     } else {
                                         origin = ((GameState) this.handler).getPlayer().getStartLocation();
                                     }
@@ -86,14 +85,14 @@ public class ChoosePosition extends Action {
                             }
                         } else {
                             if (((GameState) this.handler).Ts.isEmpty()) {
-                                if (((GameState) this.handler).closestChoke != null) {
-                                    origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).closestChoke);
+                                if (((GameState) this.handler).mainChoke != null) {
+                                    origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
                                     if (origin != null) {
                                         ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                                         ((GameState) this.handler).chosenPosition = origin;
                                         return State.SUCCESS;
                                     } else {
-                                        origin = ((GameState) this.handler).closestChoke.getCenter().toTilePosition();
+                                        origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
                                     }
 
                                 }
@@ -108,10 +107,10 @@ public class ChoosePosition extends Action {
                     }
 
                 }
-                TilePosition posicion = ((GameState) this.handler).testMap.findPosition(((GameState) this.handler).chosenToBuild, origin);
+                TilePosition position = ((GameState) this.handler).testMap.findPosition(((GameState) this.handler).chosenToBuild, origin);
                 ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                if (posicion != null) {
-                    ((GameState) this.handler).chosenPosition = posicion;
+                if (position != null) {
+                    ((GameState) this.handler).chosenPosition = position;
                     return State.SUCCESS;
                 }
             }

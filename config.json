@@ -2,14 +2,14 @@
     "bwapiConfig": {
         "localSpeed": -1,
         "frameSkip": 0,
-        "userInput": true,
+        "userInput": false,
         "completeMapInformation": false
     },
     "ecgConfig": {
         "debugConsole": true,
         "debugScreen": true,
         "debugText": true,
-        "enableLatcom": false,
-        "sounds": false
+        "enableLatCom": true,
+        "sounds": true
     }
 }

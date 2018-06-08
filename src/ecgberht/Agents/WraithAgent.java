@@ -25,9 +25,11 @@ public class WraithAgent implements Comparable<WraithAgent> {
     int actualFrame = 0;
     Set<Unit> closeEnemies = new TreeSet<>();
     Set<Unit> closeWorkers = new TreeSet<>();
+
     public WraithAgent(Unit unit) {
         this.unit = (Wraith) unit;
     }
+
     public WraithAgent(Unit unit, String name) {
         this.unit = (Wraith) unit;
         this.name = name;
@@ -53,7 +55,7 @@ public class WraithAgent implements Comparable<WraithAgent> {
         try {
             boolean remove = false;
             if (unit.getHitPoints() <= 15) {
-                Position cc = getGs().MainCC.getPosition();
+                Position cc = getGs().MainCC.second.getPosition();
                 if (cc != null) {
                     unit.move(cc);
 
@@ -172,7 +174,7 @@ public class WraithAgent implements Comparable<WraithAgent> {
     }
 
     private void retreat() {
-        Unit CC = getGs().MainCC;
+        Unit CC = getGs().MainCC.second;
         if (CC != null) {
             unit.move(CC.getPosition());
         } else {
@@ -191,8 +193,10 @@ public class WraithAgent implements Comparable<WraithAgent> {
                 attackPos = null;
                 return;
             }
-            unit.attack(newAttackPos);
-            attackUnit = null;
+            if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
+                unit.attack(newAttackPos);
+                attackUnit = null;
+            }
             return;
         } else if (attackPos.equals(newAttackPos)) {
             return;

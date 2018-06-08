@@ -3,6 +3,7 @@
 	<target name="clean">
 		<delete dir="./build"/>
 	</target>
+
 	<target name="compile">
 		<mkdir dir="./build/classes"/>
 		<unjar dest="./build/classes">
@@ -10,12 +11,11 @@
 		</unjar>
 		<javac includeantruntime="false" srcdir="./src/" destdir="./build/classes"/>
 	</target>
-	<target name="sounds">
+
+	<target name="jar" depends="compile">
 		<copy todir="./build/classes">
 			<fileset dir="./src" includes="*.mp3"/>
 		</copy>
-	</target>
-	<target name="jar" depends="compile, sounds">
 		<mkdir dir="./build/jar"/>
 		<jar destfile="./build/jar/Ecgberht.jar" basedir="./build/classes">
 			<manifest>

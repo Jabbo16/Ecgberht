@@ -26,6 +26,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
     int actualFrame = 0;
     Set<Unit> closeEnemies = new HashSet<>();
     Set<Unit> closeWorkers = new HashSet<>();
+
     public VultureAgent(Unit unit) {
         this.unit = (Vulture) unit;
     }
@@ -57,7 +58,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
         try {
             boolean remove = false;
             if (unit.getHitPoints() <= 15) {
-                Position cc = getGs().MainCC.getPosition();
+                Position cc = getGs().MainCC.second.getPosition();
                 if (cc != null) {
                     unit.move(cc);
 
@@ -247,7 +248,7 @@ public class VultureAgent implements Comparable<VultureAgent> {
     }
 
     private void retreat() {
-        Unit CC = getGs().MainCC;
+        Unit CC = getGs().MainCC.second;
         if (CC != null) {
             unit.move(CC.getPosition());
         } else {
@@ -272,8 +273,10 @@ public class VultureAgent implements Comparable<VultureAgent> {
                 attackPos = null;
                 return;
             }
-            unit.attack(newAttackPos);
-            attackUnit = null;
+            if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
+                unit.attack(newAttackPos);
+                attackUnit = null;
+            }
             return;
         } else if (attackPos.equals(newAttackPos)) {
             return;

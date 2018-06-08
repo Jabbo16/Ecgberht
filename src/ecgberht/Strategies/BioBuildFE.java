@@ -24,7 +24,7 @@ public class BioBuildFE extends AStrategy {
         bunker = true;
         supplyForFirstRefinery = 36;
         armyForAttack = 30;
-        armyForExpand = 10;
+        armyForExpand = 6;
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;
@@ -51,9 +51,7 @@ public class BioBuildFE extends AStrategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) {
-            buildUnits.add(UnitType.Terran_Bunker);
-        }
+        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

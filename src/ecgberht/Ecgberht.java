@@ -112,16 +112,15 @@ public class Ecgberht implements BWEventListener {
             try {
                 output = new FileOutputStream("NUL:");
             } catch (FileNotFoundException e) {
-                //e.printStackTrace();
             }
             PrintStream nullOut = new PrintStream(output);
             System.setErr(nullOut);
             System.setOut(nullOut);
         }
-
         self = bw.getInteractionHandler().self();
         ih = bw.getInteractionHandler();
         if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
+        else ih.enableLatCom(true);
         if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
         if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
             ih.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
@@ -139,17 +138,14 @@ public class Ecgberht implements BWEventListener {
         gs.initEnemyRace();
         gs.readOpponentInfo();
         if (gs.enemyRace == Race.Zerg) {
-            if (gs.EI.naughty) {
-                gs.playSound("rushed.mp3");
-            }
+            if (gs.EI.naughty) gs.playSound("rushed.mp3");
         }
-        gs.EI.naughty = true;
         gs.strat = gs.initStrat();
         gs.initStartLocations();
         gs.initBaseLocations();
         gs.initBlockingMinerals();
         gs.checkBasesWithBLockingMinerals();
-        gs.initClosestChoke();
+        gs.initChokes();
 
         // Trees Initializations
         initCollectTree();
@@ -384,10 +380,10 @@ public class Ecgberht implements BWEventListener {
             if (gs.frameCount == 1000) gs.sendCustomMessage();
             IntelligenceAgency.updateBullets();
             gs.fix();
-            gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             gs.updateEnemyBuildingsMemory();
+            gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             IntelligenceAgency.onFrame();
-            gs.sim.onFrameSim();
+            //gs.sim.onFrameSim();
             gs.runAgents();
             //gs.checkEnemyAttackingWT();
             buildingLotTree.run();
@@ -461,6 +457,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitCreate(Unit arg0) {
         try {
+            if (arg0 == null) return;
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
                     || arg0 instanceof Critter)
                 return;
@@ -535,7 +532,8 @@ public class Ecgberht implements BWEventListener {
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
-                            if (gs.frameCount == 0) gs.MainCC = arg0;
+                            if (gs.frameCount == 0)
+                                gs.MainCC = new Pair<>(Util.getClosestBaseLocation(arg0.getPosition()), arg0);
                             gs.builtCC++;
                         }
                         if (type == UnitType.Terran_Comsat_Station) gs.CSs.add((ComsatStation) arg0);
@@ -570,8 +568,8 @@ public class Ecgberht implements BWEventListener {
                                 gs.TTMs.put(arg0, name);
                                 if (!gs.DBs.isEmpty()) {
                                     ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
-                                } else if (gs.closestChoke != null) {
-                                    ((MobileUnit) arg0).attack(gs.closestChoke.getCenter().toPosition());
+                                } else if (gs.mainChoke != null) {
+                                    ((MobileUnit) arg0).attack(gs.mainChoke.getCenter().toPosition());
                                 } else {
                                     ((MobileUnit) arg0).attack(Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toPosition());
                                 }
@@ -596,8 +594,8 @@ public class Ecgberht implements BWEventListener {
                                 if (!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
                                     if (!gs.DBs.isEmpty()) {
                                         ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
-                                    } else if (gs.closestChoke != null) {
-                                        ((MobileUnit) arg0).attack(gs.closestChoke.getCenter().toPosition());
+                                    } else if (gs.mainChoke != null) {
+                                        ((MobileUnit) arg0).attack(gs.mainChoke.getCenter().toPosition());
                                     } else {
                                         ((MobileUnit) arg0).attack(Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toPosition());
                                     }
@@ -755,7 +753,7 @@ public class Ecgberht implements BWEventListener {
                                     if (gs.CCs.size() > 0) {
                                         for (Unit c : gs.CCs.values()) {
                                             if (!c.equals(arg0)) {
-                                                gs.MainCC = u;
+                                                gs.MainCC = new Pair<>(Util.getClosestBaseLocation(u.getPosition()), u);
                                                 break;
                                             }
                                         }

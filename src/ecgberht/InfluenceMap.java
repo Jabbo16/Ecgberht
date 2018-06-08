@@ -168,7 +168,7 @@ public class InfluenceMap {
         double count = 0;
         int sX = start.getX();
         int sY = start.getY();
-        Pair<Integer, Integer> p = new Pair<>(0, 0);
+        Pair<Integer, Integer> p = new Pair<>(-1, -1);
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < width; y++) {
                 if (map[x][y] < count) {

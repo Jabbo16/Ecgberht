@@ -19,7 +19,6 @@ public class Expand extends Action {
     public State execute() {
         try {
             Worker chosen = ((GameState) this.handler).chosenBuilderBL;
-
             if (!chosen.build(((GameState) this.handler).chosenBaseLocation, UnitType.Terran_Command_Center)) {
                 ((GameState) this.handler).movingToExpand = false;
                 ((GameState) this.handler).expanding = false;
@@ -30,7 +29,6 @@ public class Expand extends Action {
                 ((GameState) this.handler).chosenBuilderBL = null;
                 ((GameState) this.handler).deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
                 ((GameState) this.handler).deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
-
                 return State.FAILURE;
             }
             ((GameState) this.handler).movingToExpand = false;

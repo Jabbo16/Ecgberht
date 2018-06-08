@@ -1,5 +1,6 @@
 package ecgberht.Scouting;
 
+import bwem.Base;
 import ecgberht.GameState;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -14,6 +15,13 @@ public class CheckScout extends Conditional {
     @Override
     public State execute() {
         try {
+            if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).mapSize == 2) {
+                for (Base b : ((GameState) this.handler).SLs) {
+                    if (b.equals(((GameState) this.handler).MainCC.first)) continue;
+                    ((GameState) this.handler).enemyBase = b;
+                    return State.FAILURE;
+                }
+            }
             if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).getPlayer().supplyUsed() >= 12 && ((GameState) this.handler).enemyBase == null) {
                 return State.SUCCESS;
             }

@@ -23,16 +23,21 @@ public class ChooseAttackPosition extends Action {
             }
             for (Squad u : ((GameState) this.handler).squads.values()) {
                 Pair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(((GameState) this.handler).getSquadCenter(u).toTilePosition(), true);
-                if (p.first != null && p.second != null) {
+                TilePosition attackPos = new TilePosition(p.first, p.second);
+                if (p.first != -1 && p.second != -1) {
                     if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
                         ((GameState) this.handler).firstProxyBBS = true;
                         ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");
                     }
-                    u.giveAttackOrder(new TilePosition(p.second, p.first).toPosition());
-                    u.status = Status.ATTACK;
-                    continue;
+                    if (((GameState) this.handler).getGame().getBWMap().isValidPosition(attackPos)) {
+                        u.giveAttackOrder(new TilePosition(p.second, p.first).toPosition());
+                        u.status = Status.ATTACK;
+                        continue;
+                    }
                 } else if (((GameState) this.handler).enemyBase != null) {
                     ((GameState) this.handler).attackPosition = ((GameState) this.handler).enemyBase.getLocation().toPosition();
+                    u.giveAttackOrder(((GameState) this.handler).enemyBase.getLocation().toPosition());
+                    u.status = Status.ATTACK;
                     continue;
                 } else {
                     u.status = Status.IDLE;
