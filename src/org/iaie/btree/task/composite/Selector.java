@@ -3,13 +3,13 @@
  * Department of Computer Science,
  * Carlos III de Madrid University, Madrid, Spain
  * http://plg.inf.uc3m.es
- * 
+ *
  * Copyright 2017, Nerea Luis, Moises Martinez
  *
  * (Questions/bug reports now to be sent to Moises Martinez)
  *
  * This file is part of IAIE.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -20,15 +20,15 @@
  *     * Neither the name of the IAIE API nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with IAIE. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  ************************************************************************/
 
 package org.iaie.btree.task.composite;
@@ -37,28 +37,27 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.Task;
 
 /**
- *
- * @author Moises Martinez <mmartinez at bebee.com>
  * @param <GameHandler>
+ * @author Moises Martinez <mmartinez at bebee.com>
  */
 public class Selector<GameHandler> extends Composite {
 
     public Selector(String name) {
         super(name, null);
     }
-    
-    public Selector(String name, Task ... tasks) {
+
+    public Selector(String name, Task... tasks) {
         super(name, null);
         this.addChildren(tasks);
-    }    
+    }
 
     @Override
-    public State run() {        
-        
-        for (int i = 0; i < this.children.size(); i++) {        
+    public State run() {
+
+        for (int i = 0; i < this.children.size(); i++) {
             if (this.children.get(i).run() == State.SUCCESS) return State.SUCCESS;
         }
-        
+
         return State.FAILURE;
     }
 }

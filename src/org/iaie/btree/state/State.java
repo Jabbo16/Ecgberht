@@ -6,7 +6,6 @@
 package org.iaie.btree.state;
 
 /**
- *
  * @author Moises Martinez <momartinm at gmail.com>
  */
 public enum State {

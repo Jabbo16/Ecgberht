@@ -1,23 +1,23 @@
 package ecgberht;
 
-import java.util.Objects;
-
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
 
+import java.util.Objects;
+
 public class EnemyBuilding {
-	public TilePosition pos = null;
-	public Unit unit = null;
-	public UnitType type = null;
+    public TilePosition pos = null;
+    public Unit unit = null;
+    public UnitType type = null;
 
-	public EnemyBuilding(Unit unit) {
-		this.unit = unit;
-		this.pos = unit.getTilePosition();
-		this.type = unit.getType();
-	}
+    public EnemyBuilding(Unit unit) {
+        this.unit = unit;
+        this.pos = unit.getTilePosition();
+        this.type = unit.getType();
+    }
 
-	@Override
+    @Override
     public boolean equals(Object o) {
 
         if (o == this) return true;
