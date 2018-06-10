@@ -7,78 +7,44 @@ import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static ecgberht.Ecgberht.getGs;
 
-public class WraithAgent implements Comparable<WraithAgent> {
+public class WraithAgent extends Agent implements Comparable<Wraith> {
 
     public Wraith unit;
     public String name = "Pepe";
-    UnitType type = UnitType.Terran_Wraith;
-    boolean cloackResearched = false;
-    Position attackPos = null;
-    Unit attackUnit = null;
-    Status status = Status.IDLE;
-    int frameLastOrder = 0;
-    int actualFrame = 0;
-    Set<Unit> closeEnemies = new TreeSet<>();
-    Set<Unit> closeWorkers = new TreeSet<>();
 
     public WraithAgent(Unit unit) {
+        super();
         this.unit = (Wraith) unit;
     }
 
     public WraithAgent(Unit unit, String name) {
+        super();
         this.unit = (Wraith) unit;
         this.name = name;
     }
 
-    public String statusToString() {
-        if (status == Status.ATTACK) {
-            return "Attack";
-        }
-        if (status == Status.COMBAT) {
-            return "Combat";
-        }
-        if (status == Status.RETREAT) {
-            return "Retreat";
-        }
-        if (status == Status.IDLE) {
-            return "Idle";
-        }
-        return "None";
-    }
-
+    @Override
     public boolean runAgent() {
         try {
             boolean remove = false;
             if (unit.getHitPoints() <= 15) {
                 Position cc = getGs().MainCC.second.getPosition();
-                if (cc != null) {
-                    unit.move(cc);
-
-                } else {
-                    unit.move(getGs().getPlayer().getStartLocation().toPosition());
-                }
+                if (cc != null) unit.move(cc);
+                else unit.move(getGs().getPlayer().getStartLocation().toPosition());
                 getGs().addToSquad(unit);
                 return true;
             }
             actualFrame = getGs().getIH().getFrameCount();
             closeEnemies.clear();
             closeWorkers.clear();
-            if (frameLastOrder == actualFrame) {
-                return remove;
-            }
+            if (frameLastOrder == actualFrame) return remove;
             Status old = status;
             getNewStatus();
-            if (old == status && status != Status.COMBAT && status != Status.ATTACK) {
-                return remove;
-            }
-            if (status != Status.COMBAT) {
-                attackUnit = null;
-            }
+            if (old == status && status != Status.COMBAT && status != Status.ATTACK) return remove;
+            if (status != Status.COMBAT) attackUnit = null;
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
                 if (pos != null) {
@@ -147,18 +113,12 @@ public class WraithAgent implements Comparable<WraithAgent> {
             return;
         }
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) {
-                closeWorkers.add(u);
-            }
-            if (getGs().broodWarDistance(u.getPosition(), myPos) <= 600) {
-                closeEnemies.add(u);
-            }
+            if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
+            if (getGs().broodWarDistance(u.getPosition(), myPos) <= 600) closeEnemies.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
             if ((u.unit instanceof AirAttacker || u.type == UnitType.Terran_Bunker) && u.unit.isCompleted()) {
-                if (getGs().broodWarDistance(myPos, u.pos.toPosition()) <= 600) {
-                    closeEnemies.add(u.unit);
-                }
+                if (getGs().broodWarDistance(myPos, u.pos.toPosition()) <= 600) closeEnemies.add(u.unit);
             }
         }
         if (closeEnemies.isEmpty()) {
@@ -175,11 +135,8 @@ public class WraithAgent implements Comparable<WraithAgent> {
 
     private void retreat() {
         Unit CC = getGs().MainCC.second;
-        if (CC != null) {
-            unit.move(CC.getPosition());
-        } else {
-            unit.move(getGs().getPlayer().getStartLocation().toPosition());
-        }
+        if (CC != null) unit.move(CC.getPosition());
+        else unit.move(getGs().getPlayer().getStartLocation().toPosition());
         attackPos = null;
         attackUnit = null;
     }
@@ -198,43 +155,13 @@ public class WraithAgent implements Comparable<WraithAgent> {
                 attackUnit = null;
             }
             return;
-        } else if (attackPos.equals(newAttackPos)) {
-            return;
-        }
-
-    }
-
-    private Position selectNewAttack() {
-        if (getGs().enemyBase != null) {
-            return getGs().enemyBase.getLocation().toPosition();
-        } else {
-            return getGs().EnemyBLs.get(1).getLocation().toPosition();
-        }
-    }
-
-    private Unit getUnitToAttack(Unit myUnit, Set<Unit> enemies) {
-        Unit chosen = null;
-        double distB = Double.MAX_VALUE;
-        for (Unit u : enemies) {
-            if (((PlayerUnit) u).isCloaked()) continue;
-            double distA = getGs().broodWarDistance(myUnit.getPosition(), u.getPosition());
-            if (chosen == null || distA < distB) {
-                chosen = u;
-                distB = distA;
-            }
-        }
-        if (chosen != null) {
-            return chosen;
-        }
-        return null;
+        } else if (attackPos.equals(newAttackPos)) return;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this.unit) return true;
-        if (!(o instanceof Wraith) || !(o instanceof WraithAgent)) {
-            return false;
-        }
+        if (!(o instanceof Wraith) || !(o instanceof WraithAgent)) return false;
         WraithAgent wraith = (WraithAgent) o;
         return unit.equals(wraith.unit);
     }
@@ -245,11 +172,8 @@ public class WraithAgent implements Comparable<WraithAgent> {
     }
 
     @Override
-    public int compareTo(WraithAgent v1) {
-        return this.unit.getId() - v1.unit.getId();
+    public int compareTo(Wraith v1) {
+        return this.unit.getId() - v1.getId();
     }
 
-    enum Status {
-        ATTACK, COMBAT, IDLE, RETREAT
-    }
 }

@@ -584,10 +584,10 @@ public class Ecgberht implements BWEventListener {
                                 }
                             }
                         } else if (type == UnitType.Terran_Vulture) {
-                            gs.agents.add(new VultureAgent(arg0));
+                            gs.agents.put(arg0, new VultureAgent(arg0));
                         } else if (type == UnitType.Terran_Wraith) {
                             String name = gs.pickShipName();
-                            gs.spectres.put(arg0, new WraithAgent(arg0, name));
+                            gs.agents.put(arg0, new WraithAgent(arg0, name));
                         } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
                             gs.addToSquad(arg0);
                             if (!gs.strat.name.equals("ProxyBBS")) {
@@ -807,11 +807,11 @@ public class Ecgberht implements BWEventListener {
                         } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
                             gs.removeFromSquad(arg0);
                         } else if (type == UnitType.Terran_Vulture) {
-                            if (gs.agents.contains(new VultureAgent(arg0))) gs.agents.remove(new VultureAgent(arg0));
+                            if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
                         } else if (type == UnitType.Terran_Wraith) {
-                            String wraith = gs.spectres.get(arg0).name; // TODO fix casting, fix names
+                            String wraith = ((WraithAgent) gs.agents.get(arg0)).name; // TODO fix casting, fix names
                             gs.shipNames.add(wraith);
-                            gs.spectres.remove(arg0);
+                            gs.agents.remove(arg0);
                         }
                     }
                 }

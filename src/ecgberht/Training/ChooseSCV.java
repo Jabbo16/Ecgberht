@@ -26,11 +26,9 @@ public class ChooseSCV extends Action {
                         break;
                     }
                 }
-                if (notTraining) {
-                    return State.FAILURE;
-                }
+                if (notTraining) return State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) < 50 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < ((GameState) this.handler).mineralsAssigned.size() * 2 + 3 && !((GameState) this.handler).CCs.isEmpty()) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 55 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < ((GameState) this.handler).mineralsAssigned.size() * 2 + +((GameState) this.handler).refineriesAssigned.size() * 3 + 3 && !((GameState) this.handler).CCs.isEmpty()) {
                 for (CommandCenter b : ((GameState) this.handler).CCs.values()) {
                     if (!b.isTraining() && !b.isBuildingAddon()) {
                         ((GameState) this.handler).chosenUnit = UnitType.Terran_SCV;

@@ -1,7 +1,5 @@
 package ecgberht.Simulation;
 
-import ecgberht.Agents.VultureAgent;
-import ecgberht.Agents.WraithAgent;
 import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.Squad;
@@ -49,11 +47,8 @@ public class SimManager {
         for (Squad s : getGs().squads.values()) {
             myUnits.addAll(s.members);
         }
-        for (VultureAgent v : getGs().agents) {
-            myUnits.add(v.unit);
-        }
-        for (WraithAgent w : getGs().spectres.values()) {
-            myUnits.add(w.unit);
+        for (Unit ag : getGs().agents.keySet()) {
+            myUnits.add(ag);
         }
         clustering = new MeanShift(myUnits);
         friendly = clustering.run();
