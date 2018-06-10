@@ -41,6 +41,7 @@ public class ChooseBuilderToHarass extends Action {
                     }
                 }
             }
+            ((GameState) this.handler).chosenUnitToHarass = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

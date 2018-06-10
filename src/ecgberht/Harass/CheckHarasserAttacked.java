@@ -43,9 +43,7 @@ public class CheckHarasserAttacked extends Conditional {
                     }
                 }
             }
-            if (workers > 1) {
-                ((GameState) this.handler).EI.defendHarass = true;
-            }
+            if (workers > 1) ((GameState) this.handler).EI.defendHarass = true;
             if (attackers.isEmpty()) {
                 if (!((GameState) this.handler).getGame().getBWMap().isVisible(((GameState) this.handler).enemyBase.getLocation()) &&
                         ((GameState) this.handler).chosenUnitToHarass == null) {
@@ -62,7 +60,6 @@ public class CheckHarasserAttacked extends Conditional {
                     }
                 } else {
                     if (((GameState) this.handler).chosenHarasser.getHitPoints() <= 15) {
-                        ((GameState) this.handler).getIH().sendText("Harasser: You will pay for this!, I will be back with friends");
                         ((GameState) this.handler).workerIdle.add(((GameState) this.handler).chosenHarasser);
                         ((GameState) this.handler).chosenHarasser.stop(winHarass);
                         ((GameState) this.handler).chosenHarasser = null;

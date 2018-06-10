@@ -13,14 +13,20 @@ import java.util.Map.Entry;
 import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
+
     private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
     private static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
     private static Set<Unit> drones = new TreeSet<>();
     private static List<Bullet> enemyBullets = new ArrayList<>();
     private static List<Bullet> allyBullets = new ArrayList<>();
+    private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
 
     public static int getNumDrones() {
         return drones.size();
+    }
+
+    public static EnemyStrats getEnemyStrat() {
+        return enemyStrat;
     }
 
     public static int getNumEnemyBases(String player) {
@@ -74,17 +80,13 @@ public class IntelligenceAgency {
         }
         // If base and player known skip
         if (enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;
-
         // Bases
         if (type.isResourceDepot()) {
             if (!enemyBases.containsKey(player)) {
                 TreeSet<Unit> aux = new TreeSet<>();
                 aux.add(unit);
                 enemyBases.put(player, aux);
-
-            } else {
-                enemyBases.get(player).add(unit);
-            }
+            } else enemyBases.get(player).add(unit);
         }
         // If player and type known skip
         if (enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;
@@ -95,9 +97,7 @@ public class IntelligenceAgency {
                 HashSet<UnitType> aux = new HashSet<>();
                 aux.add(type);
                 enemyTypes.put(player, aux);
-            } else {
-                enemyTypes.get(player).add(type);
-            }
+            } else enemyTypes.get(player).add(type);
         }
         // Eggs
         else if (type == UnitType.Zerg_Lurker_Egg) {
@@ -105,9 +105,7 @@ public class IntelligenceAgency {
                 HashSet<UnitType> aux = new HashSet<>();
                 aux.add(UnitType.Zerg_Lurker);
                 enemyTypes.put(player, aux);
-            } else {
-                enemyTypes.get(player).add(UnitType.Zerg_Lurker);
-            }
+            } else enemyTypes.get(player).add(UnitType.Zerg_Lurker);
         }
         // Buildings
         else if (type.isBuilding()) {
@@ -117,9 +115,7 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Protoss_Arbiter);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Protoss_Arbiter);
-                }
+                } else enemyTypes.get(player).add(UnitType.Protoss_Arbiter);
             } else if (type == UnitType.Protoss_Templar_Archives) {
                 if (!enemyTypes.containsKey(player)) {
                     HashSet<UnitType> aux = new HashSet<>();
@@ -135,17 +131,13 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Protoss_Carrier);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Protoss_Carrier);
-                }
+                } else enemyTypes.get(player).add(UnitType.Protoss_Carrier);
             } else if (type == UnitType.Protoss_Robotics_Support_Bay) {
                 if (!enemyTypes.containsKey(player)) {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Protoss_Reaver);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Protoss_Reaver);
-                }
+                } else enemyTypes.get(player).add(UnitType.Protoss_Reaver);
             }
             // Zerg tech
             else if (type == UnitType.Zerg_Spawning_Pool) {
@@ -153,41 +145,31 @@ public class IntelligenceAgency {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Zergling);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Zerg_Zergling);
-                }
+                } else enemyTypes.get(player).add(UnitType.Zerg_Zergling);
             } else if (type == UnitType.Zerg_Spire) {
                 if (!enemyTypes.containsKey(player)) {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Mutalisk);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Zerg_Mutalisk);
-                }
+                } else enemyTypes.get(player).add(UnitType.Zerg_Mutalisk);
             } else if (type == UnitType.Zerg_Hydralisk_Den) {
                 if (!enemyTypes.containsKey(player)) {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Hydralisk);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Zerg_Hydralisk);
-                }
+                } else enemyTypes.get(player).add(UnitType.Zerg_Hydralisk);
             } else if (type == UnitType.Zerg_Queens_Nest) {
                 if (!enemyTypes.containsKey(player)) {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Queen);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Zerg_Queen);
-                }
+                } else enemyTypes.get(player).add(UnitType.Zerg_Queen);
             } else if (type == UnitType.Zerg_Defiler_Mound) {
                 if (!enemyTypes.containsKey(player)) {
                     HashSet<UnitType> aux = new HashSet<>();
                     aux.add(UnitType.Zerg_Defiler);
                     enemyTypes.put(player, aux);
-                } else {
-                    enemyTypes.get(player).add(UnitType.Zerg_Defiler);
-                }
+                } else enemyTypes.get(player).add(UnitType.Zerg_Defiler);
             }
         }
     }
@@ -204,7 +186,7 @@ public class IntelligenceAgency {
         }
     }
 
-    private static void detect5Pool() {
+    private static void detectEarlyPool() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null && !getGs().EI.naughty) {
             boolean found_pool = false;
             int drones = IntelligenceAgency.getNumDrones();
@@ -215,6 +197,7 @@ public class IntelligenceAgency {
                 }
             }
             if (found_pool && drones <= 5) {
+                enemyStrat = EnemyStrats.EarlyPool;
                 getGs().EI.naughty = true;
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
@@ -222,15 +205,35 @@ public class IntelligenceAgency {
         }
     }
 
+    private static void detectZealotRush() {
+        if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null) {
+            int countGates = 0;
+            int probes = IntelligenceAgency.getNumDrones();
+            for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
+                if (u.type == UnitType.Protoss_Gateway) countGates++;
+            }
+            if (countGates >= 2 && probes <= 12) {
+                enemyStrat = EnemyStrats.ZealotRush;
+                getGs().ih.sendText("Nice gates you got there");
+                getGs().playSound("rushed.mp3");
+            }
+        }
+    }
+
     public static void onFrame() {
+        if (enemyStrat != EnemyStrats.Unknown) return;
         switch (getGs().enemyRace) {
             case Zerg:
-                detect5Pool();
+                detectEarlyPool();
                 break;
             case Terran:
                 break;
             case Protoss:
+                detectZealotRush();
                 break;
         }
     }
+
+
+    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, FastExpo}
 }

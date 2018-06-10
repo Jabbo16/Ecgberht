@@ -20,6 +20,8 @@ public class ChooseArmory extends Action {
     @Override
     public State execute() {
         try {
+            if (((GameState) this.handler).Fs.isEmpty()) return State.FAILURE;
+
             if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.facForArmory) {
                 return State.FAILURE;
             }
@@ -30,9 +32,7 @@ public class ChooseArmory extends Action {
                     }
                 }
                 for (Building w : ((GameState) this.handler).workerTask.values()) {
-                    if (w instanceof Armory) {
-                        return State.FAILURE;
-                    }
+                    if (w instanceof Armory) return State.FAILURE;
                 }
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Armory;
                 return State.SUCCESS;

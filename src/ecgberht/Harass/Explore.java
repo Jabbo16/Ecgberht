@@ -27,17 +27,7 @@ public class Explore extends Conditional {
                 ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyBase.getLocation().toPosition());
                 return State.SUCCESS;
             }
-            /*Set<Unit> attackers = new TreeSet<>();
-            //Thanks to @N00byEdge for cleaner code
-            for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
-                if (!(u instanceof Building) && u instanceof Attacker && u.exists()) {
-                    Unit target = ((Attacker) u).getTargetUnit() == null ? ((PlayerUnit)u).getOrderTarget() :
-                            ((Attacker) u).getTargetUnit();
-                    if (target != null && target.equals(((GameState) this.handler).chosenHarasser)) {
-                        attackers.add(u);
-                    }
-                }
-            }*/
+
             Position nextExplorePos = chooseExplorePos();
             if (((GameState) this.handler).chosenHarasser.getDistance(nextExplorePos) > 2 * 32) {
                 ((GameState) this.handler).chosenHarasser.move(nextExplorePos);

@@ -36,24 +36,14 @@ public class ChooseBarracks extends Action {
                 int count = 0;
                 boolean found = false;
                 for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Barracks) {
-                        count++;
-                    }
-                    if (w.first == UnitType.Terran_Factory) {
-                        found = true;
-                    }
+                    if (w.first == UnitType.Terran_Barracks) count++;
+                    if (w.first == UnitType.Terran_Factory) found = true;
                 }
                 for (Building w : ((GameState) this.handler).workerTask.values()) {
-                    if (w instanceof Barracks) {
-                        count++;
-                    }
-                    if (w instanceof Factory) {
-                        found = true;
-                    }
+                    if (w instanceof Barracks) count++;
+                    if (w instanceof Factory) found = true;
                 }
-                if (!((GameState) this.handler).Fs.isEmpty()) {
-                    found = true;
-                }
+                if (!((GameState) this.handler).Fs.isEmpty()) found = true;
                 if (count + ((GameState) this.handler).MBs.size() > ((GameState) this.handler).strat.numRaxForFac && !found) {
                     return State.FAILURE;
                 }

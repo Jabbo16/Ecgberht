@@ -414,12 +414,8 @@ public class GameState extends GameHandler {
             } else {
                 bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ", ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
             }
-            if (defense) {
-                bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
-            } else {
-                bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Defending: ", ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
-            }
-            bw.getMapDrawer().drawTextScreen(10, 65, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(strat.name, ColorUtil.Yellow));
+            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(strat.name, ColorUtil.Yellow));
+            bw.getMapDrawer().drawTextScreen(10, 65, ColorUtil.formatText("EnemyStrategy: ", ColorUtil.White) + ColorUtil.formatText(IntelligenceAgency.getEnemyStrat().toString(), ColorUtil.Yellow));
             bw.getMapDrawer().drawTextScreen(10, 80, ColorUtil.formatText("SimTime(ms): ", ColorUtil.White) + ColorUtil.formatText(String.valueOf(sim.time), ColorUtil.Teal));
             if (enemyRace == Race.Zerg && EI.naughty) {
                 bw.getMapDrawer().drawTextScreen(10, 95, ColorUtil.formatText("Naughty Zerg: ", ColorUtil.White) + ColorUtil.formatText("yes", ColorUtil.Green));
