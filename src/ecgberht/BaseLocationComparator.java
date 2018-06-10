@@ -9,7 +9,7 @@ import static ecgberht.Ecgberht.getGs;
 
 public class BaseLocationComparator implements Comparator<BaseLocation>{
 	private boolean enemy = false;
-	
+
 	public BaseLocationComparator(boolean enemy) {
 		this.enemy = enemy;
 	}
@@ -34,7 +34,6 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 						return 1;
 					}
 				}
-				
 				if(a.isIsland()) {
 					return 1;
 				}
@@ -72,14 +71,14 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 					}
 				}
 				return 1;
-			
+
 			} else {
 				if(getGs().enemyBase != null) {
 					start = getGs().enemyBase.getTilePosition();
 				}else {
 					return -1;
 				}
-				
+
 				if(a.isIsland()) {
 					return 1;
 				}
@@ -88,7 +87,7 @@ public class BaseLocationComparator implements Comparator<BaseLocation>{
 				}
 				double distA = getGs().getGroundDistance(a.getTilePosition(), start);
 				double distB = getGs().getGroundDistance(b.getTilePosition(), start);
-				
+
 				if(distA == 0.0 && distB > 0.0) {
 					return 1;
 				}
