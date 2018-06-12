@@ -1,6 +1,7 @@
 package ecgberht;
 
 import bwem.BWEM;
+import bwem.area.Area;
 import bwta.BWTA;
 import ecgberht.AddonBuild.BuildAddon;
 import ecgberht.AddonBuild.CheckResourcesAddon;
@@ -18,8 +19,6 @@ import ecgberht.BuildingLot.FinishBuilding;
 import ecgberht.Bunker.ChooseBunkerToLoad;
 import ecgberht.Bunker.ChooseMarineToEnter;
 import ecgberht.Bunker.EnterBunker;
-import ecgberht.CombatStim.CheckStimResearched;
-import ecgberht.CombatStim.Stim;
 import ecgberht.Defense.CheckPerimeter;
 import ecgberht.Defense.ChooseDefensePosition;
 import ecgberht.Defense.SendDefenders;
@@ -41,10 +40,7 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -68,7 +64,6 @@ public class Ecgberht implements BWEventListener {
     private BehavioralTree buildingLotTree;
     private BehavioralTree bunkerTree;
     private BehavioralTree collectTree;
-    private BehavioralTree combatStimTree;
     private BehavioralTree defenseTree;
     private BehavioralTree expandTree;
     private BehavioralTree buildTree;
@@ -157,7 +152,6 @@ public class Ecgberht implements BWEventListener {
         initUpgradeTree();
         initRepairTree();
         initExpandTree();
-        initCombatStimTree();
         initAddonBuildTree();
         initBuildingLotTree();
         initBunkerTree();
@@ -194,6 +188,7 @@ public class Ecgberht implements BWEventListener {
 
     private void initBuildTree() {
         Build b = new Build("Build", gs);
+        ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
         ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
         ChooseBarracks cBar = new ChooseBarracks("Choose Barracks", gs);
@@ -209,7 +204,7 @@ public class Ecgberht implements BWEventListener {
         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cSup);
+        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cE, cSup);
         if (gs.strat.bunker) chooseBuildingBuild.addChild(cBun);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
@@ -297,14 +292,6 @@ public class Ecgberht implements BWEventListener {
         expandTree.addChild(Expander);
     }
 
-    private void initCombatStimTree() {
-        CheckStimResearched cSR = new CheckStimResearched("Check if Stim Packs researched", gs);
-        Stim S = new Stim("Use Stim", gs);
-        Sequence Stimmer = new Sequence("Stimmer", cSR, S);
-        combatStimTree = new BehavioralTree("CombatStim Tree");
-        combatStimTree.addChild(Stimmer);
-    }
-
     private void initAddonBuildTree() {
         BuildAddon bA = new BuildAddon("Build Addon", gs);
         CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon", gs);
@@ -389,7 +376,7 @@ public class Ecgberht implements BWEventListener {
             buildingLotTree.run();
             repairTree.run();
             collectTree.run();
-            expandTree.run();
+            //expandTree.run();
             upgradeTree.run();
             buildTree.run();
             addonBuildTree.run();
@@ -403,7 +390,6 @@ public class Ecgberht implements BWEventListener {
             defenseTree.run();
             attackTree.run();
             gs.updateSquadOrderAndMicro();
-            combatStimTree.run();
             gs.checkMainEnemyBase();
             gs.mergeSquads();
             if (gs.frameCount > 0 && gs.frameCount % 5 == 0) gs.mineralLocking();
@@ -527,7 +513,7 @@ public class Ecgberht implements BWEventListener {
                         gs.builtRefinery++;
                     } else {
                         if (type == UnitType.Terran_Command_Center) {
-                            gs.CCs.put(bwem.getMap().getArea(arg0.getTilePosition()).getTopLeft().toPosition(), (CommandCenter) arg0);
+                            gs.CCs.put(Util.getClosestBaseLocation(bwem.getMap().getArea(arg0.getTilePosition()).getTop().toPosition()), (CommandCenter) arg0);
                             gs.addNewResources(arg0);
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
@@ -748,7 +734,7 @@ public class Ecgberht implements BWEventListener {
                                 if (u.getAddon() != null && gs.CSs.contains(u.getAddon())) {
                                     gs.CSs.remove(u.getAddon());
                                 }
-                                gs.CCs.remove(bwem.getMap().getArea(arg0.getTilePosition()).getTopLeft().toPosition());
+                                gs.CCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
                                 if (arg0.equals(gs.MainCC)) {
                                     if (gs.CCs.size() > 0) {
                                         for (Unit c : gs.CCs.values()) {

@@ -21,13 +21,15 @@ public class Move extends Action {
     public State execute() {
         try {
             Worker chosen = ((GameState) this.handler).chosenWorker;
-            boolean success = false;
-            if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Refinery) {
+            boolean success;
+            /*if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Refinery) {
                 success = chosen.build(((GameState) this.handler).chosenPosition, ((GameState) this.handler).chosenToBuild);
             } else {
                 Position realEnd = ((GameState) this.handler).getCenterFromBuilding(((GameState) this.handler).chosenPosition.toPosition(), ((GameState) this.handler).chosenToBuild);
                 success = chosen.move(realEnd);
-            }
+            }*/
+            Position realEnd = ((GameState) this.handler).getCenterFromBuilding(((GameState) this.handler).chosenPosition.toPosition(), ((GameState) this.handler).chosenToBuild);
+            success = chosen.move(realEnd);
             if (success) {
                 if (((GameState) this.handler).workerIdle.contains(chosen)) {
                     ((GameState) this.handler).workerIdle.remove(chosen);
@@ -41,10 +43,14 @@ public class Move extends Action {
                         }
                     }
                 }
+                if(((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center){
+                    ((GameState)this.handler).moveUnitFromChokeWhenExpand();
+                }
                 ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<>(((GameState) this.handler).chosenToBuild, ((GameState) this.handler).chosenPosition));
                 ((GameState) this.handler).deltaCash.first += ((GameState) this.handler).chosenToBuild.mineralPrice();
                 ((GameState) this.handler).deltaCash.second += ((GameState) this.handler).chosenToBuild.gasPrice();
                 ((GameState) this.handler).chosenWorker = null;
+                ((GameState) this.handler).chosenToBuild = null;
                 return State.SUCCESS;
             }
             return State.FAILURE;

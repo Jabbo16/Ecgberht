@@ -35,7 +35,7 @@ public class ChooseBaseLocation extends Action {
 
             List<Base> valid = new ArrayList<>();
             for (Base b : ((GameState) this.handler).BLs) {
-                if (!((GameState) this.handler).CCs.containsKey(b.getArea().getTop().toPosition()) &&
+                if (!((GameState) this.handler).CCs.containsKey(b) &&
                         !((GameState) this.handler).bwem.getMap().getPath(b.getLocation().toPosition(), main.toPosition()).isEmpty()) {
                     valid.add(b);
                 }

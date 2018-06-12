@@ -1,5 +1,7 @@
 package ecgberht.Build;
 
+import bwem.Base;
+import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Util;
 import org.iaie.btree.state.State;
@@ -9,11 +11,11 @@ import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Bunker;
-import org.openbw.bwapi4j.unit.MissileTurret;
-import org.openbw.bwapi4j.unit.VespeneGeyser;
+import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class ChoosePosition extends Action {
@@ -38,18 +40,53 @@ public class ChoosePosition extends Action {
                     }
                 }
 
+            } else if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
+                TilePosition main;
+                if (((GameState) this.handler).MainCC != null)
+                    main = ((GameState) this.handler).MainCC.second.getTilePosition();
+                else main = ((GameState) this.handler).getPlayer().getStartLocation();
+                List<Base> valid = new ArrayList<>();
+                for (Base b : ((GameState) this.handler).BLs) {
+                    if (!((GameState) this.handler).CCs.containsKey(b) &&
+                            !((GameState) this.handler).bwem.getMap().getPath(b.getLocation().toPosition(), main.toPosition()).isEmpty()) {
+                        valid.add(b);
+                    }
+                }
+                List<Base> remove = new ArrayList<>();
+                for (Base b : valid) {
+                    for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null ||
+                                !(u instanceof Attacker) || u instanceof Worker) {
+                            continue;
+                        }
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
+                            remove.add(b);
+                            break;
+                        }
+                    }
+                    for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
+
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
+                            remove.add(b);
+                            break;
+                        }
+                    }
+                }
+                valid.removeAll(remove);
+                if (valid.isEmpty()) return State.FAILURE;
+                ((GameState) this.handler).chosenPosition = valid.get(0).getLocation();
+                return State.SUCCESS;
             } else {
                 if (!((GameState) this.handler).workerBuild.isEmpty()) {
                     for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                         ((GameState) this.handler).testMap.updateMap(w.second, w.first, false);
                     }
                 }
-
                 if (!((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Bunker) && !((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
                     if (((GameState) this.handler).strat.proxy && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks) {
                         origin = new TilePosition(((GameState) this.handler).getGame().getBWMap().mapWidth() / 2, ((GameState) this.handler).getGame().getBWMap().mapHeight() / 2);
                     } else {
-                        //origin = BWTA.getRegion(jugador.getStartLocation()).getCenter().toTilePosition();
                         origin = self.getStartLocation();
                     }
                 } else {
@@ -114,7 +151,6 @@ public class ChoosePosition extends Action {
                     return State.SUCCESS;
                 }
             }
-
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

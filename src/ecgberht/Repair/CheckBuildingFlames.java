@@ -18,7 +18,9 @@ public class CheckBuildingFlames extends Action {
     @Override
     public State execute() {
         try {
-            boolean isBeingRepaired = false;
+            if(((GameState)this.handler).workerMining.isEmpty() && ((GameState)this.handler).getPlayer().minerals() == 0)
+                return State.FAILURE;
+            boolean isBeingRepaired;
             for (Bunker w : ((GameState) this.handler).DBs.keySet()) {
                 int count = 0;
                 if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints()) {

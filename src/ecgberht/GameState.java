@@ -66,7 +66,7 @@ public class GameState extends GameHandler {
     public Map<SCV, Building> workerTask = new TreeMap<>();
     public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
     public Map<Position, MineralPatch> blockingMinerals = new HashMap<>();
-    public Map<Position, CommandCenter> CCs = new HashMap<>();
+    public Map<Base, CommandCenter> CCs = new HashMap<>();
     public Map<String, Squad> squads = new TreeMap<>();
     public Map<Bunker, Set<Unit>> DBs = new TreeMap<>();
     public Map<Unit, String> TTMs = new TreeMap<>();
@@ -166,6 +166,7 @@ public class GameState extends GameHandler {
             BioBuildFE bFE = new BioBuildFE();
             BioMechBuildFE bMFE = new BioMechBuildFE();
             FullMech FM = new FullMech();
+            if(true) return new Strategy(bFE);
             String map = bw.getBWMap().mapFileName();
             if (enemyRace == Race.Zerg && EI.naughty) return new Strategy(b);
             if (EI.history.isEmpty()) {
@@ -665,10 +666,11 @@ public class GameState extends GameHandler {
         List<Unit> aux4 = new ArrayList<>();
         for (SCV r : repairerTask.keySet()) {
             if (r.equals(chosenScout)) chosenScout = null;
-            if (!r.isRepairing() || r.isIdle()) {
+            if (!r.isRepairing() || r.isIdle() || self.minerals() == 0) {
                 if (chosenRepairer != null) {
                     if (r.equals(chosenRepairer)) chosenRepairer = null;
                 }
+                r.stop(false);
                 workerIdle.add(r);
                 aux4.add(r);
             }
@@ -697,7 +699,7 @@ public class GameState extends GameHandler {
             chosenScout = null;
             ScoutSLs.clear();
             for (bwem.Base b : BLs) {
-                if (!CCs.containsKey(b.getArea().getTop().toPosition()) && bwta.isConnected(self.getStartLocation(), b.getLocation())) {
+                if (!CCs.containsKey(b) && bwta.isConnected(self.getStartLocation(), b.getLocation())) {
                     ScoutSLs.add(b);
                 }
             }

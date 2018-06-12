@@ -4,11 +4,11 @@ import ecgberht.GameState;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.MachineShop;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
-import org.openbw.bwapi4j.unit.TrainingFacility;
+import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.util.Pair;
 
 public class TrainUnit extends Action {
 
@@ -42,7 +42,8 @@ public class TrainUnit extends Action {
                 }
             }
 
-            if (((GameState) this.handler).getSupply() > 4 || ((GameState) this.handler).checkSupply() || ((GameState) this.handler).getPlayer().supplyTotal() >= 400) {
+            if (((GameState) this.handler).getSupply() > 4 || ((GameState) this.handler).checkSupply() ||
+                    ((GameState) this.handler).getPlayer().supplyTotal() >= 400) {
                 /*if (((GameState) this.handler).EI.naughty) { // TODO test
                     if (((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Bunker) == 0) {
                         if (((GameState) this.handler).getPlayer().minerals() + ((GameState) this.handler).deltaCash.first < 100) {
@@ -50,7 +51,18 @@ public class TrainUnit extends Action {
                         }
                     }
                 }*/
-
+                if(!((GameState)this.handler).defense){
+                    if(((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center){
+                        boolean found = false;
+                        for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                            if (w.first == UnitType.Terran_Command_Center) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) return State.FAILURE;
+                    }
+                }
                 chosen.train(((GameState) this.handler).chosenUnit);
                 return State.SUCCESS;
             }

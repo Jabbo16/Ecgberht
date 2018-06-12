@@ -26,13 +26,13 @@ public class CheckArmy extends Conditional {
             }
             if (((GameState) this.handler).getArmySize() >= ((GameState) this.handler).strat.armyForAttack && !((GameState) this.handler).defense) {
                 return State.SUCCESS;
-            } else if (((GameState) this.handler).defense) {
+            } /*else if (((GameState) this.handler).defense) {
                 if (!((GameState) this.handler).enemyInBase.isEmpty()) {
                     if ((((GameState) this.handler).getArmySize() > 50 && ((GameState) this.handler).getArmySize() / ((GameState) this.handler).enemyInBase.size() > 10)) {
                         return State.SUCCESS;
                     }
                 }
-            }
+            }*/
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

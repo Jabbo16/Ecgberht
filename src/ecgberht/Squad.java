@@ -2,6 +2,7 @@ package ecgberht;
 
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -10,13 +11,14 @@ import java.util.*;
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
 
-public class Squad {
+public class Squad implements Comparable<Squad>{
 
     public int lastFrameOrder = 0;
     public Position attack;
     public Set<PlayerUnit> members;
     public Status status;
     public String name;
+    public static boolean stimResearched;
 
     public Squad(String name) {
         this.name = name;
@@ -34,20 +36,6 @@ public class Squad {
         if (frameCount - lastFrameOrder > 0 && !pos.equals(attack)) {
             attack = pos;
             lastFrameOrder = frameCount;
-        }
-    }
-
-    public void giveStimOrder() {
-        for (PlayerUnit u : members) {
-            if (u instanceof Marine && !((Marine) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
-                ((Marine) u).stimPack();
-            }
-            /*if (u instanceof Marine || u instanceof Firebat) {
-                if ((u instanceof Marine ? !((Marine) u).isStimmed() : !((Firebat) u).isStimmed()) && u.isAttacking() &&
-                        u.getHitPoints() >= 25) {
-                    if ((u instanceof Marine) ? ((Marine) u).stimPack() : ((Firebat) u).stimPack()) ;
-                }
-            }*/
         }
     }
 
@@ -71,12 +59,20 @@ public class Squad {
             Position start = getGs().ih.self().getStartLocation().toPosition();
             Set<Unit> marinesToHeal = new HashSet<>();
             Position sCenter = getGs().getSquadCenter(this);
+            if(!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs)) stimResearched = true;
             for (PlayerUnit u : members) {
                 if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
                     continue;
                 }
                 if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
                     continue;
+                }
+                if(stimResearched && (u instanceof Marine || u instanceof Firebat)){
+                    if (u instanceof Marine && !((Marine) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
+                        ((Marine) u).stimPack();
+                    } else if (u instanceof Firebat && !((Firebat) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
+                        ((Firebat) u).stimPack();
+                    }
                 }
                 if (status == Status.IDLE) {
                     if (!getGs().DBs.isEmpty()) {
@@ -325,6 +321,11 @@ public class Squad {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public int compareTo(Squad o) {
+        return this.name.compareTo(o.name);
     }
 
     public enum Status {
