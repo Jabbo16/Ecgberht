@@ -74,7 +74,7 @@ public class Squad implements Comparable<Squad> {
                         ((MobileUnit) u).getTargetPosition());
 
                 boolean retreat = getGs().sim.getSimulation(u).win;
-                if (retreat) {
+                if (retreat && status != Status.DEFENSE) {
                     Position pos = getGs().getNearestCC(u.getPosition());
                     if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && lastTarget == null ||
                             (lastTarget != null && !lastTarget.equals(pos))) {
