@@ -28,7 +28,7 @@ public class MeanShift {
     public List<Cluster> run() {
         try {
             time = System.currentTimeMillis();
-            int iterations = 50;
+            int iterations = 10;
             int bandwidth = 2;
             for (int iter = 0; iter < iterations; iter++) {
                 //System.out.println("-----Iter " + iter + "------");
@@ -41,8 +41,7 @@ public class MeanShift {
                     double numeratorY = 0;
                     double denominator = 0;
                     for (double[] neighbour : neighbours) {
-                        double distanceSquared = euclideanDistanceSquared(
-                                neighbour[0], neighbour[1], initialX, initialY);
+                        double distanceSquared = euclideanDistanceSquared(neighbour[0], neighbour[1], initialX, initialY);
                         double weight = gaussianKernel2(distanceSquared, bandwidth);
                         numeratorX += weight * neighbour[0];
                         numeratorY += weight * neighbour[1];
@@ -54,10 +53,8 @@ public class MeanShift {
                         newPointX = initialX;
                         newPointY = initialY;
                     }
-                    if (Double.isInfinite(newPointX) || Double.isNaN(newPointX)) // HACK
-                        newPointX = initialX;
-                    if (Double.isInfinite(newPointY) || Double.isNaN(newPointY)) // HACK
-                        newPointY = initialY;
+                    if (Double.isInfinite(newPointX) || Double.isNaN(newPointX)) newPointX = initialX;  // HACK
+                    if (Double.isInfinite(newPointY) || Double.isNaN(newPointY)) newPointY = initialY; // HACK
                     //System.out.println("Original Point : " + initial + " , shifted point: " + newPoint);
                     points.set(i, new UnitPos(aux.unit, newPointX, newPointY));
                 }
@@ -66,9 +63,7 @@ public class MeanShift {
             for (UnitPos i : points) {
                 int c = 0;
                 for (Cluster cluster : clusters) {
-                    if (euclideanDistanceSquared(i.x, i.y, cluster.modeX, cluster.modeY) <= 400 * 400) {
-                        break;
-                    }
+                    if (euclideanDistanceSquared(i.x, i.y, cluster.modeX, cluster.modeY) <= 400 * 400) break;
                     c++;
                 }
                 if (c == clusters.size()) {
@@ -102,10 +97,6 @@ public class MeanShift {
         }
         return neighbours;
     }
-
-//	private double gaussianKernel(double dist, double bandwidth) {
-//		return (1 / (bandwidth * Math.sqrt(2 * Math.PI))) * Math.exp(Math.pow(-0.5 * ((dist / bandwidth)), 2));
-//	}
 
     private double euclideanDistanceSquared(double point1X, double point1Y, double point2X, double point2Y) {
         return Math.pow(point1X - point2X, 2) + Math.pow(point1Y - point2Y, 2);

@@ -47,7 +47,7 @@ public class Explore extends Conditional {
     }
 
     private Position chooseExplorePos() {
-        // Logic borrowed from LetaBot,
+        // Logic borrowed from LetaBot, should be improved/replaced
         int BaseSize = 10 * 32;
         int Xlocation = 0;
         int Ylocation = 0;

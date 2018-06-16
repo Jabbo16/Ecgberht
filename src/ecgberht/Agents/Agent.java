@@ -2,9 +2,12 @@ package ecgberht.Agents;
 
 import ecgberht.Util;
 import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.util.Pair;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,6 +24,7 @@ public abstract class Agent {
     int actualFrame = 0;
     Set<Unit> closeEnemies = new TreeSet<>();
     Set<Unit> closeWorkers = new TreeSet<>();
+    Unit myUnit;
 
     public String statusToString() {
         if (status == Status.ATTACK) return "Attack";
@@ -33,7 +37,12 @@ public abstract class Agent {
 
     Position selectNewAttack() {
         if (getGs().enemyBase != null) return getGs().enemyBase.getLocation().toPosition();
-        else return getGs().EnemyBLs.get(1).getLocation().toPosition();
+        Pair<Integer, Integer> p = getGs().inMap.getPosition(myUnit.getTilePosition(), true);
+        if (p.first != -1 && p.second != -1) {
+            Position attackPos = new TilePosition(p.first, p.second).toPosition();
+            if (getGs().getGame().getBWMap().isValidPosition(attackPos)) return attackPos;
+        }
+        return null;
     }
 
     Unit getUnitToAttack(Unit myUnit, Set<Unit> enemies) {
@@ -49,6 +58,14 @@ public abstract class Agent {
         }
         if (chosen != null) return chosen;
         return null;
+    }
+
+    protected void retreat() {
+        Position CC = getGs().getNearestCC(myUnit.getPosition());
+        if (CC != null) ((MobileUnit) myUnit).move(CC);
+        else ((MobileUnit) myUnit).move(getGs().getPlayer().getStartLocation().toPosition());
+        attackPos = null;
+        attackUnit = null;
     }
 
     public abstract boolean runAgent();

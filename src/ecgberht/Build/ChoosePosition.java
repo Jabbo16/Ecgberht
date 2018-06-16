@@ -54,6 +54,12 @@ public class ChoosePosition extends Action {
                 }
                 List<Base> remove = new ArrayList<>();
                 for (Base b : valid) {
+                    if (((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation())) {
+                        if (!((GameState) this.handler).getGame().getBWMap().isBuildable(b.getLocation(), true)) {
+                            remove.add(b);
+                            continue;
+                        }
+                    }
                     for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
                         if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null ||
                                 !(u instanceof Attacker) || u instanceof Worker) {

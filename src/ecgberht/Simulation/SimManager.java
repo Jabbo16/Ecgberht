@@ -29,6 +29,7 @@ public class SimManager {
     private List<SimInfo> simulations = new ArrayList<>();
     private JFAP simulator;
     private MeanShift clustering;
+    private double radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
 
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
@@ -66,12 +67,50 @@ public class SimManager {
         time = System.currentTimeMillis();
         reset();
         createClusters();
-
+        createSimInfos();
+        doSim();
         time = System.currentTimeMillis() - time;
     }
 
-    private void simClusters() {
+    private void createSimInfos() {
+        for (Cluster friend : friendly) {
+            SimInfo aux = new SimInfo();
+            for (Cluster enemy : enemies) {
+                if (getGs().broodWarDistance(friend.mode(), enemy.mode()) <= radius) {
+                    aux.enemies.add(enemy);
+                }
+            }
+            if (!aux.enemies.isEmpty()) {
+                aux.allies.add(friend);
+                simulations.add(aux);
+            }
+        }
+    }
 
+    private void doSim() {
+        for (SimInfo s : simulations) {
+            simulator.clear();
+            for (Cluster c : s.allies) {
+                for (Unit u : c.units) {
+                    JFAPUnit jU = new JFAPUnit(u);
+                    simulator.addUnitPlayer1(jU);
+                    s.stateBefore.first.add(jU);
+                }
+            }
+            for (Cluster c : s.enemies) {
+                for (Unit u : c.units) {
+                    JFAPUnit jU = new JFAPUnit(u);
+                    simulator.addUnitPlayer2(jU);
+                    s.stateBefore.second.add(jU);
+                }
+            }
+            s.preSimScore = simulator.playerScores();
+            simulator.simulate(90);
+            s.postSimScore = simulator.playerScores();
+            s.stateAfter = simulator.getState();
+            //Bad win sim logic, testing
+            s.win = ((s.preSimScore.second - s.postSimScore.second) * 2 < (s.preSimScore.first - s.postSimScore.first));
+        }
     }
 
     private void drawCluster(Cluster c, boolean ally, int id) {
@@ -96,24 +135,37 @@ public class SimManager {
         }
     }
 
+    public void drawSimInfos() {
+        for (SimInfo s : simulations) {
+            for (Cluster ally : s.allies) {
+                for (Cluster ally2 : s.allies) {
+                    if (ally.equals(ally2)) continue;
+                    getGs().getGame().getMapDrawer().drawLineMap(new Position((int) ally.modeX, (int) ally.modeY), new Position((int) ally2.modeX, (int) ally2.modeY), Color.GREEN);
+                }
+                for (Cluster enemy : s.enemies) {
+                    getGs().getGame().getMapDrawer().drawLineMap(new Position((int) enemy.modeX, (int) enemy.modeY), new Position((int) ally.modeX, (int) ally.modeY), Color.RED);
+                }
+            }
+            for (Cluster enemy : s.enemies) {
+                for (Cluster enemy2 : s.enemies) {
+                    if (enemy.equals(enemy2)) continue;
+                    getGs().getGame().getMapDrawer().drawLineMap(new Position((int) enemy.modeX, (int) enemy.modeY), new Position((int) enemy2.modeX, (int) enemy2.modeY), Color.RED);
+                }
+            }
+        }
+    }
+
     public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
         simulator.clear();
         org.openbw.bwapi4j.util.Pair<Boolean, Boolean> result = new org.openbw.bwapi4j.util.Pair<>(true, false);
-        for (Unit u : friends) {
-            simulator.addUnitPlayer1(new JFAPUnit(u));
-        }
-        for (Unit u : enemies) {
-            simulator.addUnitPlayer2(new JFAPUnit(u));
-        }
+        for (Unit u : friends) simulator.addUnitPlayer1(new JFAPUnit(u));
+        for (Unit u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u));
         jfap.Pair<Integer, Integer> presim_scores = simulator.playerScores();
         simulator.simulate(frames);
         jfap.Pair<Integer, Integer> postsim_scores = simulator.playerScores();
         int my_score_diff = presim_scores.first - postsim_scores.first;
         int enemy_score_diff = presim_scores.second - postsim_scores.second;
-
-        if (enemy_score_diff * 2 < my_score_diff) {
-            result.first = false;
-        }
+        if (enemy_score_diff * 2 < my_score_diff) result.first = false;
         if (bunker) {
             boolean bunkerDead = true;
             for (JFAPUnit unit : simulator.getState().first) {
@@ -154,6 +206,6 @@ public class SimManager {
                 return s;
             }
         }
-        return null;
+        return new SimInfo();
     }
 }

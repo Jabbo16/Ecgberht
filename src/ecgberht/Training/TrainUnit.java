@@ -7,7 +7,9 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.MachineShop;
+import org.openbw.bwapi4j.unit.ResearchingFacility;
+import org.openbw.bwapi4j.unit.TrainingFacility;
 import org.openbw.bwapi4j.util.Pair;
 
 public class TrainUnit extends Action {
@@ -51,8 +53,8 @@ public class TrainUnit extends Action {
                         }
                     }
                 }*/
-                if(!((GameState)this.handler).defense){
-                    if(((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center){
+                if (!((GameState) this.handler).defense) {
+                    if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
                         boolean found = false;
                         for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                             if (w.first == UnitType.Terran_Command_Center) {
@@ -60,7 +62,7 @@ public class TrainUnit extends Action {
                                 break;
                             }
                         }
-                        if(!found) return State.FAILURE;
+                        if (!found) return State.FAILURE;
                     }
                 }
                 chosen.train(((GameState) this.handler).chosenUnit);

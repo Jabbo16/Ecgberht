@@ -11,14 +11,14 @@ import java.util.*;
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
 
-public class Squad implements Comparable<Squad>{
+public class Squad implements Comparable<Squad> {
 
+    public static boolean stimResearched;
     public int lastFrameOrder = 0;
     public Position attack;
     public Set<PlayerUnit> members;
     public Status status;
     public String name;
-    public static boolean stimResearched;
 
     public Squad(String name) {
         this.name = name;
@@ -51,63 +51,65 @@ public class Squad implements Comparable<Squad>{
     // Kiting broken, improve
     public void microUpdateOrder() {
         try {
-            if (members.isEmpty()) {
-                return;
-            }
+            if (members.isEmpty()) return;
             Set<Unit> enemy = getGs().enemyCombatUnitMemory;
             int frameCount = getGs().frameCount;
             Position start = getGs().ih.self().getStartLocation().toPosition();
             Set<Unit> marinesToHeal = new HashSet<>();
             Position sCenter = getGs().getSquadCenter(this);
-            if(!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs)) stimResearched = true;
+            if (!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs)) stimResearched = true;
             for (PlayerUnit u : members) {
-                if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode) {
-                    continue;
-                }
+                if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode) continue;
                 if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
                     continue;
                 }
-                if(stimResearched && (u instanceof Marine || u instanceof Firebat)){
+                if (stimResearched && (u instanceof Marine || u instanceof Firebat)) {
                     if (u instanceof Marine && !((Marine) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
                         ((Marine) u).stimPack();
                     } else if (u instanceof Firebat && !((Firebat) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
                         ((Firebat) u).stimPack();
                     }
                 }
+                Position lastTarget = (((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() :
+                        ((MobileUnit) u).getTargetPosition());
+
+                boolean retreat = getGs().sim.getSimulation(u).win;
+                if (retreat) {
+                    Position pos = getGs().getNearestCC(u.getPosition());
+                    if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && lastTarget == null ||
+                            (lastTarget != null && !lastTarget.equals(pos))) {
+                        ((MobileUnit) u).move(pos);
+                        continue;
+                    }
+                }
                 if (status == Status.IDLE) {
+                    Position move = null;
                     if (!getGs().DBs.isEmpty()) {
                         Unit bunker = getGs().DBs.keySet().iterator().next();
                         if (bunker.exists() && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack &&
                                 !getGs().expanding && getGs().strat.name != "ProxyBBS") {
-                            if (u.getOrder() != Order.Move) {
-                                ((MobileUnit) u).move(bunker.getPosition());
-                            }
-                            continue;
+                            if (u.getOrder() != Order.Move) move = bunker.getPosition();
                         }
                     } else if (getGs().mainChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
                         if (getGs().broodWarDistance(getGs().mainChoke.getCenter().toPosition(), sCenter) >= 200 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
-                            if (u.getOrder() != Order.Move) {
-                                ((MobileUnit) u).move(getGs().mainChoke.getCenter().toPosition());
-                            }
-                            continue;
+                            if (u.getOrder() != Order.Move) move = getGs().mainChoke.getCenter().toPosition();
                         }
+                    } else if (getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
+                        if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) move = sCenter;
                     }
-                    if (getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
-                        if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) {
-                            ((MobileUnit) u).move(sCenter);
+                    if (move != null) {
+                        if (lastTarget == null || (lastTarget != null && !lastTarget.equals(move))) {
+                            ((MobileUnit) u).move(move);
                             continue;
                         }
                     }
                 }
-
                 // Experimental
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition())
                         && frameCount % 35 == 0) {
-                    if (members.size() == 1) {
-                        continue;
-                    }
+                    if (members.size() == 1) continue;
                     boolean gaveOrder = false;
                     List<Unit> circle = Util.getFriendlyUnitsInRadius(sCenter, 280); // TODO test
                     Set<Unit> different = new HashSet<>();
@@ -149,12 +151,9 @@ public class Squad implements Comparable<Squad>{
                     ((MobileUnit) u).move(sCenter);
                     continue;
                 }
-                Position lastTarget = (((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() :
-                        ((MobileUnit) u).getTargetPosition());
+
                 if (lastTarget != null) {
-                    if (lastTarget.equals(attack)) {
-                        continue;
-                    }
+                    if (lastTarget.equals(attack)) continue;
                 }
                 if ((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove &&
                         !u.getOrderTargetPosition().equals(attack)) { // TODO test change target position faster
@@ -164,9 +163,7 @@ public class Squad implements Comparable<Squad>{
                     }
                 }
                 int framesToOrder = 18;
-                if (u.getInitialType() == UnitType.Terran_Vulture) {
-                    framesToOrder = 12;
-                }
+                if (u.getInitialType() == UnitType.Terran_Vulture) framesToOrder = 12;
                 if (frameCount - u.getLastCommandFrame() >= framesToOrder) {
                     if (u.isIdle() && attack != null && status != Status.IDLE) {
                         lastTarget = (((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() :
@@ -258,9 +255,7 @@ public class Squad implements Comparable<Squad>{
     public Set<SiegeTank> getTanks() {
         Set<SiegeTank> aux = new HashSet<>();
         for (Unit u : members) {
-            if (u instanceof SiegeTank) {
-                aux.add((SiegeTank) u);
-            }
+            if (u instanceof SiegeTank) aux.add((SiegeTank) u);
         }
         return aux;
     }
@@ -268,9 +263,7 @@ public class Squad implements Comparable<Squad>{
     public Set<Unit> getMarines() {
         Set<Unit> aux = new TreeSet<>();
         for (Unit u : this.members) {
-            if (u instanceof Marine) {
-                aux.add(u);
-            }
+            if (u instanceof Marine) aux.add(u);
         }
         return aux;
     }
@@ -278,9 +271,7 @@ public class Squad implements Comparable<Squad>{
     public Set<Unit> getMedics() {
         Set<Unit> aux = new TreeSet<>();
         for (Unit u : this.members) {
-            if (u instanceof Medic) {
-                aux.add(u);
-            }
+            if (u instanceof Medic) aux.add(u);
         }
         return aux;
     }
@@ -291,29 +282,18 @@ public class Squad implements Comparable<Squad>{
             if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode && u.getOrder() == Order.Unsieging) {
                 continue;
             }
-            if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
-                continue;
-            }
+            if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) continue;
             Position lastTarget = ((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() :
                     ((MobileUnit) u).getTargetPosition();
-            if (lastTarget != null) {
-                if (lastTarget.equals(retreat)) {
-                    continue;
-                }
-            }
-            if (attack != null && frameCount != u.getLastCommandFrame()) {
-                ((MobileUnit) u).move(retreat);
-            }
+            if (lastTarget != null && lastTarget.equals(retreat)) continue;
+            if (attack != null && frameCount != u.getLastCommandFrame()) ((MobileUnit) u).move(retreat);
         }
     }
 
     @Override
     public boolean equals(Object o) {
-
         if (o == this) return true;
-        if (!(o instanceof Squad)) {
-            return false;
-        }
+        if (!(o instanceof Squad)) return false;
         Squad s = (Squad) o;
         return name.equals(s.name);
     }

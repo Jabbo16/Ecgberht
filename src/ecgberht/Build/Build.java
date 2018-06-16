@@ -10,6 +10,8 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.util.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class Build extends Action {
@@ -21,11 +23,21 @@ public class Build extends Action {
     @Override
     public State execute() {
         try {
+            List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
-                if (u.getKey().getOrder() != Order.PlaceBuilding) {
+                if (u.getKey().getOrder() != Order.PlaceBuilding && u.getKey().getDistance(u.getValue().second.toPosition()) <= 100) {
                     SCV chosen = u.getKey();
-                    chosen.build(u.getValue().second, u.getValue().first);
+                    if (((GameState) this.handler).canAfford(u.getValue().first) && !chosen.build(u.getValue().second, u.getValue().first)) {
+                        ((GameState) this.handler).deltaCash.first -= u.getValue().first.mineralPrice();
+                        ((GameState) this.handler).deltaCash.second -= u.getValue().first.gasPrice();
+                        toRemove.add(chosen);
+                    }
                 }
+            }
+            for (SCV s : toRemove) {
+                ((GameState) this.handler).workerBuild.remove(s);
+                s.stop(false);
+                ((GameState) this.handler).workerIdle.add(s);
             }
             return State.SUCCESS;
         } catch (Exception e) {

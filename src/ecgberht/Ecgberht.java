@@ -1,7 +1,6 @@
 package ecgberht;
 
 import bwem.BWEM;
-import bwem.area.Area;
 import bwta.BWTA;
 import ecgberht.AddonBuild.BuildAddon;
 import ecgberht.AddonBuild.CheckResourcesAddon;
@@ -22,7 +21,6 @@ import ecgberht.Bunker.EnterBunker;
 import ecgberht.Defense.CheckPerimeter;
 import ecgberht.Defense.ChooseDefensePosition;
 import ecgberht.Defense.SendDefenders;
-import ecgberht.Expansion.*;
 import ecgberht.Harass.*;
 import ecgberht.Recollection.CollectGas;
 import ecgberht.Recollection.CollectMineral;
@@ -40,7 +38,10 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.*;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -65,7 +66,6 @@ public class Ecgberht implements BWEventListener {
     private BehavioralTree bunkerTree;
     private BehavioralTree collectTree;
     private BehavioralTree defenseTree;
-    private BehavioralTree expandTree;
     private BehavioralTree buildTree;
     private BehavioralTree repairTree;
     private BehavioralTree scannerTree;
@@ -151,7 +151,6 @@ public class Ecgberht implements BWEventListener {
         initDefenseTree();
         initUpgradeTree();
         initRepairTree();
-        initExpandTree();
         initAddonBuildTree();
         initBuildingLotTree();
         initBunkerTree();
@@ -279,19 +278,6 @@ public class Ecgberht implements BWEventListener {
         repairTree.addChild(Repair);
     }
 
-    private void initExpandTree() {
-        CheckExpansion cE = new CheckExpansion("Check Expansion", gs);
-        CheckResourcesCC cRCC = new CheckResourcesCC("Check Resources CC", gs);
-        ChooseBaseLocation cBL = new ChooseBaseLocation("Choose Base Location", gs);
-        ChooseBuilderBL cBBL = new ChooseBuilderBL("Chose Builder Base Location", gs);
-        SendBuilderBL sBBL = new SendBuilderBL("Send Builder To BL", gs);
-        CheckVisibleBL cVBL = new CheckVisibleBL("Check Visible BL", gs);
-        Expand E = new Expand("Expand", gs);
-        Sequence Expander = new Sequence("Expander", cE, cRCC, cBL, cBBL, sBBL, cVBL, E);
-        expandTree = new BehavioralTree("Expand Tree");
-        expandTree.addChild(Expander);
-    }
-
     private void initAddonBuildTree() {
         BuildAddon bA = new BuildAddon("Build Addon", gs);
         CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon", gs);
@@ -370,13 +356,11 @@ public class Ecgberht implements BWEventListener {
             gs.updateEnemyBuildingsMemory();
             gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             IntelligenceAgency.onFrame();
-            //gs.sim.onFrameSim();
+            gs.sim.onFrameSim();
             gs.runAgents();
-            //gs.checkEnemyAttackingWT();
             buildingLotTree.run();
             repairTree.run();
             collectTree.run();
-            //expandTree.run();
             upgradeTree.run();
             buildTree.run();
             addonBuildTree.run();
@@ -643,7 +627,7 @@ public class Ecgberht implements BWEventListener {
                         gs.inMap.updateMap(arg0, true);
                         gs.enemyBuildingMemory.remove(arg0);
                         gs.initAttackPosition = arg0.getTilePosition();
-                        gs.map.updateMap(arg0.getTilePosition(), type, true);
+                        if (!type.isResourceDepot()) gs.map.updateMap(arg0.getTilePosition(), type, true);
                     } else {
                         gs.initDefensePosition = arg0.getTilePosition();
                     }
@@ -795,7 +779,7 @@ public class Ecgberht implements BWEventListener {
                         } else if (type == UnitType.Terran_Vulture) {
                             if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
                         } else if (type == UnitType.Terran_Wraith) {
-                            String wraith = ((WraithAgent) gs.agents.get(arg0)).name; // TODO fix casting, fix names
+                            String wraith = ((WraithAgent) gs.agents.get(arg0)).name; // TODO fix NPE
                             gs.shipNames.add(wraith);
                             gs.agents.remove(arg0);
                         }
@@ -874,7 +858,7 @@ public class Ecgberht implements BWEventListener {
                 if (gs.enemyRace == Race.Unknown && getGs().players.size() == 3) { // TODO Check
                     gs.enemyRace = type.getRace();
                 }
-                if (!type.isBuilding() || type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0) {
+                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type != UnitType.Zerg_Overlord))) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {

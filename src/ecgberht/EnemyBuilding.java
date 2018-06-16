@@ -9,9 +9,9 @@ import org.openbw.bwapi4j.unit.Unit;
 import java.util.Objects;
 
 public class EnemyBuilding {
-    public TilePosition pos = null;
-    public Building unit = null;
-    public UnitType type = null;
+    public TilePosition pos;
+    public Building unit;
+    public UnitType type;
 
     public EnemyBuilding(Unit unit) {
         this.unit = (Building) unit;

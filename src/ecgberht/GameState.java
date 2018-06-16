@@ -104,7 +104,7 @@ public class GameState extends GameHandler {
     public Set<ResearchingFacility> UBs = new TreeSet<>();
     public Set<Worker> workerIdle = new TreeSet<>();
     public SupplyMan supplyMan;
-    public Strategy strat = new Strategy();
+    public Strategy strat;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
     public TilePosition chosenBaseLocation = null;
@@ -166,32 +166,32 @@ public class GameState extends GameHandler {
             BioBuildFE bFE = new BioBuildFE();
             BioMechBuildFE bMFE = new BioMechBuildFE();
             FullMech FM = new FullMech();
-            if(true) return new Strategy(bFE);
+
             String map = bw.getBWMap().mapFileName();
-            if (enemyRace == Race.Zerg && EI.naughty) return new Strategy(b);
+            if (enemyRace == Race.Zerg && EI.naughty) return b;
             if (EI.history.isEmpty()) {
                 if (enemyRace == Race.Protoss) {
                     double random = Math.random();
-                    if (random > 0.5) return new Strategy(b);
-                    else return new Strategy(bM);
+                    if (random > 0.5) return b;
+                    else return bM;
                 }
                 if (mapSize == 2 && !map.contains("Heartbreak Ridge")) {
                     double random = Math.random();
-                    if (random > 0.5) return new Strategy(b);
-                    else return new Strategy(bM);
+                    if (random > 0.5) return b;
+                    else return bM;
                 }
                 if (map.contains("HeartbreakRidge")) {
                     double random = Math.random();
-                    if (random > 0.75) return new Strategy(bFE);
-                    else return new Strategy(b);
+                    if (random > 0.75) return bFE;
+                    else return b;
                 } else {
                     double random = Math.random();
-                    if (random > 0.5) return new Strategy(b);
-                    else return new Strategy(bM);
+                    if (random > 0.5) return b;
+                    else return bM;
                 }
             } else {
                 Map<String, Pair<Integer, Integer>> strategies = new TreeMap<>();
-                Map<String, AStrategy> nameStrat = new TreeMap<>();
+                Map<String, Strategy> nameStrat = new TreeMap<>();
 
                 strategies.put(bbs.name, new Pair<>(0, 0));
                 nameStrat.put(bbs.name, bbs);
@@ -224,11 +224,11 @@ public class GameState extends GameHandler {
                 double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double) (strategyGamesPlayed) : 0;
                 if (strategyGamesPlayed < 2) {
                     ih.sendText("I dont know you that well yet, lets pick the standard strategy");
-                    return new Strategy(b);
+                    return b;
                 }
                 if (strategyGamesPlayed > 0 && winRate > 0.74) {
                     ih.sendText("Using default Strategy with winrate " + winRate * 100 + "%");
-                    return new Strategy(b);
+                    return b;
                 }
                 double C = 0.5;
                 String bestUCBStrategy = null;
@@ -247,13 +247,13 @@ public class GameState extends GameHandler {
                     }
                 }
                 ih.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-                return new Strategy(nameStrat.get(bestUCBStrategy));
+                return nameStrat.get(bestUCBStrategy);
             }
         } catch (Exception e) {
             System.err.println("Error initStrat, loading default Strat");
             System.err.println(e);
             BioBuild b = new BioBuild();
-            return new Strategy(b);
+            return b;
 
         }
 
@@ -397,6 +397,10 @@ public class GameState extends GameHandler {
         try {
             if (!ConfigManager.getConfig().ecgConfig.debugText) return;
             bw.getMapDrawer().drawTextScreen(320, 5, ColorUtil.formatText(supplyMan.getSupplyUsed() + "/" + supplyMan.getSupplyTotal(), ColorUtil.White));
+            //bw.getMapDrawer().drawTextScreen(320, 20, ColorUtil.formatText(getArmySize() + "/" + strat.armyForAttack, ColorUtil.White));
+            //String defending = defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
+            //bw.getMapDrawer().drawTextScreen(320, 35, defending);
+
             if (ih.allies().size() + ih.enemies().size() == 1) {
                 bw.getMapDrawer().drawTextScreen(10, 5,
                         ColorUtil.formatText(ih.self().getName(), ColorUtil.getColor(ih.self().getColor())) +
@@ -427,14 +431,12 @@ public class GameState extends GameHandler {
 
     public void debugScreen() {
         if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
-        //sim.drawClusters();
         if (naturalRegion != null) print(naturalRegion.getTop().toTilePosition(), Color.RED);
         Integer counter = 0;
         for (bwem.Base b : BLs) {
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
             counter++;
         }
-
         for (Agent ag : agents.values()) {
             if (ag instanceof VultureAgent) {
                 VultureAgent vulture = (VultureAgent) ag;
@@ -666,11 +668,10 @@ public class GameState extends GameHandler {
         List<Unit> aux4 = new ArrayList<>();
         for (SCV r : repairerTask.keySet()) {
             if (r.equals(chosenScout)) chosenScout = null;
-            if (!r.isRepairing() || r.isIdle() || self.minerals() == 0) {
+            if (!r.isRepairing() || r.isIdle()) {
                 if (chosenRepairer != null) {
                     if (r.equals(chosenRepairer)) chosenRepairer = null;
                 }
-                r.stop(false);
                 workerIdle.add(r);
                 aux4.add(r);
             }
@@ -1135,6 +1136,15 @@ public class GameState extends GameHandler {
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
     }
 
+    public double broodWarDistance(double[] a, double[] b) {
+        double dx = Math.abs(a[0] - b[0]);
+        double dy = Math.abs(a[1] - b[1]);
+        double d = Math.min(dx, dy);
+        double D = Math.max(dx, dy);
+        if (d < D / 4) return D;
+        return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
+    }
+
     public double getGroundDistance(TilePosition start, TilePosition end) {
         double dist = 0.0;
         if (bwem.getMap().getArea(start) == null || bwem.getMap().getArea(end) == null) return Integer.MAX_VALUE;
@@ -1242,5 +1252,9 @@ public class GameState extends GameHandler {
         if (name == null) return "Pepe";
         shipNames.remove(name);
         return name;
+    }
+
+    public boolean canAfford(UnitType type) {
+        return (self.minerals() >= type.mineralPrice() && self.gas() >= type.gasPrice());
     }
 }

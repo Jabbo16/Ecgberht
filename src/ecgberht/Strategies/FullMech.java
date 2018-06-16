@@ -1,12 +1,13 @@
 package ecgberht.Strategies;
 
-import ecgberht.AStrategy;
+import ecgberht.Strategy;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class FullMech extends AStrategy {
+public class FullMech extends Strategy {
 
     public FullMech() {
+        super();
         initStrategy();
     }
 

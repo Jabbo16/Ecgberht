@@ -39,7 +39,6 @@ public class CheckHarasserAttacked extends Conditional {
                             attacker = u;
                         }
                         attackers.add(u);
-                        continue;
                     }
                 }
             }
@@ -61,7 +60,7 @@ public class CheckHarasserAttacked extends Conditional {
                 } else {
                     if (((GameState) this.handler).chosenHarasser.getHitPoints() <= 15) {
                         ((GameState) this.handler).workerIdle.add(((GameState) this.handler).chosenHarasser);
-                        ((GameState) this.handler).chosenHarasser.stop(winHarass);
+                        ((GameState) this.handler).chosenHarasser.stop(false);
                         ((GameState) this.handler).chosenHarasser = null;
                         ((GameState) this.handler).chosenUnitToHarass = null;
                     } else {

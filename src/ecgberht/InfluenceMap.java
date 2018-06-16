@@ -19,7 +19,7 @@ public class InfluenceMap {
     private static final int flying = 6;
     private static final int mech = 3;
     private static final int neutral = 3;
-    private static final int ofensive = 4;
+    private static final int offensive = 4;
     private static final int propagation = 2;
     private static final int umbral = 3;
     public double[][] map;
@@ -38,8 +38,8 @@ public class InfluenceMap {
 
     public void updateMap(Unit arg0, boolean destroyed) {
         try {
-            int influence = 0;
-            UnitType type = UnitType.Unknown;
+            int influence;
+            UnitType type;
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding) {
                 return;
             } else {
@@ -51,7 +51,7 @@ public class InfluenceMap {
                     influence = defensive;
                 } else {
                     if (type.canProduce()) {
-                        influence = ofensive;
+                        influence = offensive;
                     } else {
                         influence = neutral;
                     }
@@ -112,8 +112,8 @@ public class InfluenceMap {
         }
     }
 
-    public double getInfluence(Point celda) {
-        return map[celda.x][celda.y];
+    public double getInfluence(Point cell) {
+        return map[cell.x][cell.y];
     }
 
     public int getMyInfluenceLevel() {
@@ -173,11 +173,11 @@ public class InfluenceMap {
             for (int y = 0; y < width; y++) {
                 if (map[x][y] < count) {
                     if (attack) {
-                        if (fixMapa(x, y)) {
+                        if (fixMap(x, y)) {
                             continue;
                         }
                     }
-                    count = map[x][y] / Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2);
+                    count = map[x][y] / 2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2));
                     p.first = x;
                     p.second = y;
                 }
@@ -186,7 +186,7 @@ public class InfluenceMap {
         return p;
     }
 
-    public boolean fixMapa(int x, int y) {
+    public boolean fixMap(int x, int y) {
         TilePosition pos = new TilePosition(y, x);
         if (bw.getBWMap().isVisible(pos)) {
             for (Unit u : bw.getAllUnits()) {

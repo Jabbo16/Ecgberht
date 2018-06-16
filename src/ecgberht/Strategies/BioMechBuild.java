@@ -1,13 +1,14 @@
 package ecgberht.Strategies;
 
-import ecgberht.AStrategy;
+import ecgberht.Strategy;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
 
-public class BioMechBuild extends AStrategy {
+public class BioMechBuild extends Strategy {
 
     public BioMechBuild() {
+        super();
         initStrategy();
     }
 

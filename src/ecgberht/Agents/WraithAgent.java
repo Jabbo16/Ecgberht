@@ -7,23 +7,28 @@ import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static ecgberht.Ecgberht.getGs;
 
-public class WraithAgent extends Agent implements Comparable<Wraith> {
+public class WraithAgent extends Agent implements Comparable<Unit> {
 
     public Wraith unit;
     public String name = "Pepe";
+    private Set<Unit> airAttackers = new TreeSet<>();
 
     public WraithAgent(Unit unit) {
         super();
         this.unit = (Wraith) unit;
+        this.myUnit = unit;
     }
 
     public WraithAgent(Unit unit, String name) {
         super();
         this.unit = (Wraith) unit;
         this.name = name;
+        this.myUnit = unit;
     }
 
     @Override
@@ -40,6 +45,7 @@ public class WraithAgent extends Agent implements Comparable<Wraith> {
             actualFrame = getGs().getIH().getFrameCount();
             closeEnemies.clear();
             closeWorkers.clear();
+            airAttackers.clear();
             if (frameLastOrder == actualFrame) return remove;
             Status old = status;
             getNewStatus();
@@ -47,13 +53,11 @@ public class WraithAgent extends Agent implements Comparable<Wraith> {
             if (status != Status.COMBAT) attackUnit = null;
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
-                if (pos != null) {
-                    if (pos.first != null && pos.second != null) {
-                        Position newPos = new Position(pos.first, pos.second);
-                        if (getGs().bw.getBWMap().isValidPosition(newPos)) {
-                            unit.attack(newPos);
-                            return remove;
-                        }
+                if (pos.first != -1 && pos.second != -1) {
+                    Position newPos = new Position(pos.first, pos.second);
+                    if (getGs().bw.getBWMap().isValidPosition(newPos)) {
+                        unit.attack(newPos);
+                        return remove;
                     }
                 }
             }
@@ -114,31 +118,24 @@ public class WraithAgent extends Agent implements Comparable<Wraith> {
         }
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
-            if (getGs().broodWarDistance(u.getPosition(), myPos) <= 600) closeEnemies.add(u);
+            double dist = getGs().broodWarDistance(u.getPosition(), myPos);
+            if (dist <= 700) closeEnemies.add(u);
+            if (dist <= 700 && u instanceof AirAttacker) airAttackers.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
             if ((u.unit instanceof AirAttacker || u.type == UnitType.Terran_Bunker) && u.unit.isCompleted()) {
-                if (getGs().broodWarDistance(myPos, u.pos.toPosition()) <= 600) closeEnemies.add(u.unit);
+                if (getGs().broodWarDistance(myPos, u.pos.toPosition()) <= 700) closeEnemies.add(u.unit);
             }
         }
         if (closeEnemies.isEmpty()) {
             status = Status.ATTACK;
             return;
         } else {
-            int sim = 150;
-            if (!getGs().sim.simulateHarass(unit, closeEnemies, sim)) {
+            if (!airAttackers.isEmpty() && !getGs().sim.getSimulation(unit).win) {
                 status = Status.RETREAT;
                 return;
             }
         }
-    }
-
-    private void retreat() {
-        Unit CC = getGs().MainCC.second;
-        if (CC != null) unit.move(CC.getPosition());
-        else unit.move(getGs().getPlayer().getStartLocation().toPosition());
-        attackPos = null;
-        attackUnit = null;
     }
 
     private void attack() {
@@ -172,7 +169,7 @@ public class WraithAgent extends Agent implements Comparable<Wraith> {
     }
 
     @Override
-    public int compareTo(Wraith v1) {
+    public int compareTo(Unit v1) {
         return this.unit.getId() - v1.getId();
     }
 

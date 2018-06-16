@@ -1,11 +1,12 @@
 package ecgberht.Strategies;
 
-import ecgberht.AStrategy;
+import ecgberht.Strategy;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class ProxyBBS extends AStrategy {
+public class ProxyBBS extends Strategy {
 
     public ProxyBBS() {
+        super();
         initStrategy();
     }
 

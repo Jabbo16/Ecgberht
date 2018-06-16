@@ -10,7 +10,7 @@ import java.util.Objects;
 
 import static ecgberht.Ecgberht.getGs;
 
-public class VultureAgent extends Agent implements Comparable<Vulture> {
+public class VultureAgent extends Agent implements Comparable<Unit> {
 
     public Vulture unit;
     int mines = 3;
@@ -18,6 +18,7 @@ public class VultureAgent extends Agent implements Comparable<Vulture> {
     public VultureAgent(Unit unit) {
         super();
         this.unit = (Vulture) unit;
+        this.myUnit = unit;
     }
 
     public void placeMine(Position pos) {
@@ -45,13 +46,11 @@ public class VultureAgent extends Agent implements Comparable<Vulture> {
             if (status != Status.COMBAT) attackUnit = null;
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
-                if (pos != null) {
-                    if (pos.first != null && pos.second != null) {
-                        Position newPos = new Position(pos.first, pos.second);
-                        if (getGs().bw.getBWMap().isValidPosition(newPos)) {
-                            unit.attack(newPos);
-                            return remove;
-                        }
+                if (pos.first != -1 && pos.second != -1) {
+                    Position newPos = new Position(pos.first, pos.second);
+                    if (getGs().bw.getBWMap().isValidPosition(newPos)) {
+                        unit.attack(newPos);
+                        return remove;
                     }
                 }
             }
@@ -125,9 +124,7 @@ public class VultureAgent extends Agent implements Comparable<Vulture> {
             return;
         } else {
             boolean meleeOnly = checkOnlyMelees();
-            int sim = 80;
-            if (meleeOnly) sim = 5;
-            if (!getGs().sim.simulateHarass(unit, closeEnemies, sim)) {
+            if (!meleeOnly && !getGs().sim.getSimulation(unit).win) {
                 status = Status.RETREAT;
                 return;
             }
@@ -185,14 +182,6 @@ public class VultureAgent extends Agent implements Comparable<Vulture> {
         return true;
     }
 
-    private void retreat() {
-        Unit CC = getGs().MainCC.second;
-        if (CC != null) unit.move(CC.getPosition());
-        else unit.move(getGs().getPlayer().getStartLocation().toPosition());
-        attackPos = null;
-        attackUnit = null;
-    }
-
     private void kite() {
         Position kite = getGs().kiteAway(unit, closeEnemies);
         unit.move(kite);
@@ -230,7 +219,7 @@ public class VultureAgent extends Agent implements Comparable<Vulture> {
     }
 
     @Override
-    public int compareTo(Vulture v1) {
+    public int compareTo(Unit v1) {
         return this.unit.getId() - v1.getId();
     }
 }

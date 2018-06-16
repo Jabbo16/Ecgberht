@@ -29,7 +29,7 @@ public class ChooseExpand extends Action {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).iReallyWantToExpand || ((GameState) this.handler).getCash().first >= 500){
+            if (((GameState) this.handler).iReallyWantToExpand || ((GameState) this.handler).getCash().first >= 500) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }

@@ -2,6 +2,7 @@ package ecgberht.Clustering;
 
 import org.openbw.bwapi4j.unit.Unit;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -9,7 +10,6 @@ import java.util.TreeSet;
 Thanks to @Yegers for improving performance
 */
 public class Cluster {
-    public int score = 0;
     public Set<Unit> units = new TreeSet<>();
     public double modeX = 0;
     public double modeY = 0;
@@ -29,5 +29,10 @@ public class Cluster {
 
     public double[] mode() {
         return new double[]{modeX, modeY};
+    }
+
+    public boolean equals(Cluster cluster) {
+        if (cluster == null) return false;
+        return Arrays.equals(this.mode(), cluster.mode());
     }
 }

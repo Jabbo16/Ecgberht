@@ -43,8 +43,8 @@ public class Move extends Action {
                         }
                     }
                 }
-                if(((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center){
-                    ((GameState)this.handler).moveUnitFromChokeWhenExpand();
+                if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
+                    ((GameState) this.handler).moveUnitFromChokeWhenExpand();
                 }
                 ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<>(((GameState) this.handler).chosenToBuild, ((GameState) this.handler).chosenPosition));
                 ((GameState) this.handler).deltaCash.first += ((GameState) this.handler).chosenToBuild.mineralPrice();
