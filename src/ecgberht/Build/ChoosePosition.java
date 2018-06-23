@@ -128,7 +128,7 @@ public class ChoosePosition extends Action {
                             }
                         } else {
                             if (((GameState) this.handler).Ts.isEmpty()) {
-                                if (((GameState) this.handler).mainChoke != null) {
+                                if (((GameState) this.handler).mainChoke != null && ((GameState) this.handler).strat.name != "BioGreedyFE") {
                                     origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
                                     if (origin != null) {
                                         ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
@@ -138,6 +138,17 @@ public class ChoosePosition extends Action {
                                         origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
                                     }
 
+                                } else {
+                                    if (((GameState) this.handler).naturalChoke != null) {
+                                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).naturalChoke);
+                                        if (origin != null) {
+                                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                                            ((GameState) this.handler).chosenPosition = origin;
+                                            return State.SUCCESS;
+                                        } else {
+                                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                                        }
+                                    }
                                 }
                             } else {
                                 for (MissileTurret b : ((GameState) this.handler).Ts) {

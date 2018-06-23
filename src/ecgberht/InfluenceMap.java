@@ -36,6 +36,10 @@ public class InfluenceMap {
         map = new double[height][width];
     }
 
+    public void clear() {
+        map = new double[this.height][this.width];
+    }
+
     public void updateMap(Unit arg0, boolean destroyed) {
         try {
             int influence;
@@ -165,32 +169,38 @@ public class InfluenceMap {
     }
 
     public Pair<Integer, Integer> getPosition(TilePosition start, boolean attack) {
-        double count = 0;
-        int sX = start.getX();
-        int sY = start.getY();
-        Pair<Integer, Integer> p = new Pair<>(-1, -1);
-        for (int x = 0; x < height; x++) {
-            for (int y = 0; y < width; y++) {
-                if (map[x][y] < count) {
-                    if (attack) {
-                        if (fixMap(x, y)) {
-                            continue;
+        try {
+            double count = 0;
+            int sX = start.getX();
+            int sY = start.getY();
+            Pair<Integer, Integer> p = new Pair<>(-1, -1);
+            for (int x = 0; x < height; x++) {
+                for (int y = 0; y < width; y++) {
+                    if (map[x][y] < count) {
+                        if (attack) {
+                            if (fixMap(x, y)) {
+                                continue;
+                            }
                         }
+                        count = map[x][y] / 2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2));
+                        p.first = x;
+                        p.second = y;
                     }
-                    count = map[x][y] / 2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2));
-                    p.first = x;
-                    p.second = y;
                 }
             }
+            return p;
+        } catch (Exception e) {
+            System.err.println("getPosition InMap Exception");
+            e.printStackTrace();
+            return new Pair<>(-1, -1);
         }
-        return p;
     }
 
     public boolean fixMap(int x, int y) {
         TilePosition pos = new TilePosition(y, x);
         if (bw.getBWMap().isVisible(pos)) {
             for (Unit u : bw.getAllUnits()) {
-                if (u.getTilePosition().equals(pos)) {
+                if (u.exists() && u.getTilePosition().equals(pos)) {
                     if (u instanceof Building) {
                         return false;
                     }

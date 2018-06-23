@@ -18,6 +18,7 @@ public class ChooseDefensePosition extends Conditional {
     public State execute() {
         try {
             if (((GameState) this.handler).defense) {
+                ((GameState) this.handler).inMapUnits.clear();
                 for (Unit u : ((GameState) this.handler).enemyInBase) {
                     ((GameState) this.handler).inMapUnits.updateMap(u, false);
                 }

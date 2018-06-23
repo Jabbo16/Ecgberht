@@ -25,13 +25,18 @@ public class Build extends Action {
         try {
             List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
-                if (u.getKey().getOrder() != Order.PlaceBuilding && u.getKey().getDistance(u.getValue().second.toPosition()) <= 100) {
+                if (u.getKey().getOrder() != Order.PlaceBuilding && u.getKey().getDistance(u.getValue().second.toPosition()) <= 130) {
                     SCV chosen = u.getKey();
                     if (((GameState) this.handler).canAfford(u.getValue().first) && !chosen.build(u.getValue().second, u.getValue().first)) {
                         ((GameState) this.handler).deltaCash.first -= u.getValue().first.mineralPrice();
                         ((GameState) this.handler).deltaCash.second -= u.getValue().first.gasPrice();
                         toRemove.add(chosen);
                     }
+                } else if (u.getKey().isIdle() && ((GameState) this.handler).canAfford(u.getValue().first)) {
+                    SCV chosen = u.getKey();
+                    ((GameState) this.handler).deltaCash.first -= u.getValue().first.mineralPrice();
+                    ((GameState) this.handler).deltaCash.second -= u.getValue().first.gasPrice();
+                    toRemove.add(chosen);
                 }
             }
             for (SCV s : toRemove) {

@@ -1,6 +1,7 @@
 package ecgberht.Agents;
 
 import ecgberht.EnemyBuilding;
+import ecgberht.Simulation.SimInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -124,7 +125,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             return;
         } else {
             boolean meleeOnly = checkOnlyMelees();
-            if (!meleeOnly && !getGs().sim.getSimulation(unit).win) {
+            if (!meleeOnly && !getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).lose) {
                 status = Status.RETREAT;
                 return;
             }

@@ -66,10 +66,13 @@ public class ChooseRefinery extends Action {
                     return State.FAILURE;
                 }
             }
-
+            if (((GameState) this.handler).strat.name == "BioGreedyFE") {
+                if (!((GameState) this.handler).refineriesAssigned.isEmpty() && ((GameState) this.handler).CCs.size() <= 2) {
+                    return State.FAILURE;
+                }
+            }
             ((GameState) this.handler).chosenToBuild = UnitType.Terran_Refinery;
             return State.SUCCESS;
-
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();

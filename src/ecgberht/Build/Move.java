@@ -44,7 +44,9 @@ public class Move extends Action {
                     }
                 }
                 if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                    ((GameState) this.handler).moveUnitFromChokeWhenExpand();
+                    if (((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenPosition).equals(((GameState) this.handler).naturalRegion)) {
+                        ((GameState) this.handler).defendPosition = ((GameState) this.handler).naturalChoke.getCenter().toPosition();
+                    }
                 }
                 ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<>(((GameState) this.handler).chosenToBuild, ((GameState) this.handler).chosenPosition));
                 ((GameState) this.handler).deltaCash.first += ((GameState) this.handler).chosenToBuild.mineralPrice();

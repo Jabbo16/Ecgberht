@@ -1,5 +1,6 @@
 package ecgberht;
 
+import ecgberht.Strategies.BioBuild;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
@@ -201,6 +202,12 @@ public class IntelligenceAgency {
                 getGs().EI.naughty = true;
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
+                if (getGs().strat.name == "BioGreedyFE") {
+                    getGs().strat = new BioBuild();
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                }
+
             }
         }
     }
@@ -209,13 +216,20 @@ public class IntelligenceAgency {
         if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null) {
             int countGates = 0;
             int probes = IntelligenceAgency.getNumDrones();
+            boolean foundGas = false;
             for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
                 if (u.type == UnitType.Protoss_Gateway) countGates++;
+                if (u.type == UnitType.Protoss_Assimilator) foundGas = true;
             }
-            if (countGates >= 2 && probes <= 12) {
+            if (countGates >= 2 && probes <= 12 && !foundGas) {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
+                if (getGs().strat.name == "BioGreedyFE") {
+                    getGs().strat = new BioBuild();
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                }
             }
         }
     }

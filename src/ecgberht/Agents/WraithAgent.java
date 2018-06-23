@@ -1,6 +1,7 @@
 package ecgberht.Agents;
 
 import ecgberht.EnemyBuilding;
+import ecgberht.Simulation.SimInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -131,7 +132,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             status = Status.ATTACK;
             return;
         } else {
-            if (!airAttackers.isEmpty() && !getGs().sim.getSimulation(unit).win) {
+            if (!airAttackers.isEmpty() && !getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose) {
                 status = Status.RETREAT;
                 return;
             }

@@ -34,8 +34,12 @@ public class ChooseAttackPosition extends Action {
                         u.status = Status.ATTACK;
                         continue;
                     }
-                } else if (((GameState) this.handler).enemyBase != null) {
-                    ((GameState) this.handler).attackPosition = ((GameState) this.handler).enemyBase.getLocation().toPosition();
+                }
+                if (((GameState) this.handler).enemyBase != null) {
+                    if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
+                        ((GameState) this.handler).firstProxyBBS = true;
+                        ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");
+                    }
                     u.giveAttackOrder(((GameState) this.handler).enemyBase.getLocation().toPosition());
                     u.status = Status.ATTACK;
                     continue;

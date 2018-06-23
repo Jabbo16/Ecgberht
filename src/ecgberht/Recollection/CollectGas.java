@@ -30,14 +30,15 @@ public class CollectGas extends Action {
                     }
                 }
                 if (closestGeyser != null) {
-                    Integer aux = ((GameState) this.handler).refineriesAssigned.get(closestGeyser);
-                    aux++;
-                    ((GameState) this.handler).refineriesAssigned.put(closestGeyser, aux);
-                    ((GameState) this.handler).workerIdle.remove(chosen);
-                    ((GameState) this.handler).workerGas.put(chosen, closestGeyser);
-                    chosen.gather(closestGeyser, false);
-                    ((GameState) this.handler).chosenWorker = null;
-                    return State.SUCCESS;
+                    if (chosen.gather(closestGeyser, false)) {
+                        Integer aux = ((GameState) this.handler).refineriesAssigned.get(closestGeyser);
+                        aux++;
+                        ((GameState) this.handler).refineriesAssigned.put(closestGeyser, aux);
+                        ((GameState) this.handler).workerIdle.remove(chosen);
+                        ((GameState) this.handler).workerGas.put(chosen, closestGeyser);
+                        ((GameState) this.handler).chosenWorker = null;
+                        return State.SUCCESS;
+                    }
                 }
             }
             return State.FAILURE;

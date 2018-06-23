@@ -20,6 +20,13 @@ public class ChooseBarracks extends Action {
     @Override
     public State execute() {
         try {
+            if (((GameState) this.handler).strat.name == "BioGreedyFE" &&
+                    ((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) == 1 &&
+                    ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) > 1 &&
+                    ((GameState) this.handler).frameCount <= 24 * 240) {
+                return State.FAILURE;
+
+            }
             if (((GameState) this.handler).strat.name != "ProxyBBS") {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && ((GameState) this.handler).countUnit(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;

@@ -19,7 +19,7 @@ public class FreeWorker extends Action {
             if (!((GameState) this.handler).workerIdle.isEmpty()) {
                 int frame = ((GameState) this.handler).frameCount;
                 for (Worker w : ((GameState) this.handler).workerIdle) {
-                    if (w.isIdle() && w.getLastCommandFrame() != frame) {
+                    if (w.getLastCommandFrame() != frame) {
                         ((GameState) this.handler).chosenWorker = w;
                         return State.SUCCESS;
                     }

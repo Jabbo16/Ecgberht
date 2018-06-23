@@ -23,7 +23,6 @@ public class JFAP extends AJFAP {
     @Override
     public void addUnitPlayer1(JFAPUnit fu) {
         player1.add(fu);
-
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ecgberht;
 
+import ecgberht.Simulation.SimInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.TechType;
@@ -32,11 +33,7 @@ public class Squad implements Comparable<Squad> {
     }
 
     public void giveAttackOrder(Position pos) {
-        int frameCount = getGs().frameCount;
-        if (frameCount - lastFrameOrder > 0 && !pos.equals(attack)) {
-            attack = pos;
-            lastFrameOrder = frameCount;
-        }
+        if (!pos.equals(attack)) attack = pos;
     }
 
     public int getArmyCount() {
@@ -63,6 +60,9 @@ public class Squad implements Comparable<Squad> {
                 if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
                     continue;
                 }
+
+                Position lastTarget = u.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
+                        u.getOrderTargetPosition();
                 if (stimResearched && (u instanceof Marine || u instanceof Firebat)) {
                     if (u instanceof Marine && !((Marine) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
                         ((Marine) u).stimPack();
@@ -70,25 +70,14 @@ public class Squad implements Comparable<Squad> {
                         ((Firebat) u).stimPack();
                     }
                 }
-                Position lastTarget = (((MobileUnit) u).getTargetPosition() == null ? u.getOrderTargetPosition() :
-                        ((MobileUnit) u).getTargetPosition());
-
-                boolean retreat = getGs().sim.getSimulation(u).win;
-                if (retreat && status != Status.DEFENSE) {
-                    Position pos = getGs().getNearestCC(u.getPosition());
-                    if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && lastTarget == null ||
-                            (lastTarget != null && !lastTarget.equals(pos))) {
-                        ((MobileUnit) u).move(pos);
-                        continue;
-                    }
-                }
                 if (status == Status.IDLE) {
                     Position move = null;
-                    if (!getGs().DBs.isEmpty()) {
+                    if (getGs().defendPosition != null) {
+                        if (u.getOrder() != Order.Move) move = getGs().defendPosition;
+                    } else if (!getGs().DBs.isEmpty()) {
                         Unit bunker = getGs().DBs.keySet().iterator().next();
-                        if (bunker.exists() && getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 &&
-                                getGs().getArmySize() < getGs().strat.armyForAttack &&
-                                !getGs().expanding && getGs().strat.name != "ProxyBBS") {
+                        if (getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 &&
+                                getGs().getArmySize() < getGs().strat.armyForAttack && getGs().strat.name != "ProxyBBS") {
                             if (u.getOrder() != Order.Move) move = bunker.getPosition();
                         }
                     } else if (getGs().mainChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
@@ -100,12 +89,26 @@ public class Squad implements Comparable<Squad> {
                         if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) move = sCenter;
                     }
                     if (move != null) {
-                        if (lastTarget == null || (lastTarget != null && !lastTarget.equals(move))) {
+                        if (u.getOrder() == Order.Move) {
+                            if (u.getDistance(move) <= 300) ((MobileUnit) u).stop(false);
+                        } else if (lastTarget == null || (lastTarget != null && !lastTarget.equals(move))) {
                             ((MobileUnit) u).move(move);
                             continue;
                         }
                     }
                 }
+                boolean retreat = getGs().sim.getSimulation(u, SimInfo.SimType.MIX).lose;
+                String retreating = ColorUtil.formatText(retreat ? "Retreating" : "Fighting", ColorUtil.White);
+                getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getInitialType().tileHeight())), retreating);
+                if (retreat && status != Status.DEFENSE) {
+                    Position pos = getGs().getNearestCC(u.getPosition());
+                    if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
+                            (lastTarget != null && !lastTarget.equals(pos)))) {
+                        ((MobileUnit) u).move(pos);
+                        continue;
+                    }
+                }
+
                 // Experimental
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition())
                         && frameCount % 35 == 0) {
@@ -211,17 +214,19 @@ public class Squad implements Comparable<Squad> {
                             }
                         }
                     } else if (attack != null && !u.isStartingAttack() && !u.isAttacking()) {
-                        /*if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
-                            Unit target = Util.getTarget(u, enemyToAttack);
-                            Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
-                                    ((Attacker) u).getTargetUnit());
-                            if (lastTargetUnit != null) {
-                                if (!lastTargetUnit.equals(target)) {
-                                    ((Attacker) u).attack(target);
-                                    continue;
+                        if (getGs().strat.name == "ProxyBBS") {
+                            if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
+                                Unit target = Util.getTarget(u, enemyToAttack);
+                                Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
+                                        ((Attacker) u).getTargetUnit());
+                                if (lastTargetUnit != null) {
+                                    if (!lastTargetUnit.equals(target)) {
+                                        ((Attacker) u).attack(target);
+                                        continue;
+                                    }
                                 }
                             }
-                        }*/
+                        }
                         if (u.getOrder() == Order.Move) {
                             ((MobileUnit) u).attack(attack);
                             continue;

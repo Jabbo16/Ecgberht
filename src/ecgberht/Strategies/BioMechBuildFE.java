@@ -26,9 +26,9 @@ public class BioMechBuildFE extends Strategy {
         numCCForScience = 2;
         portPerCC = 0;
         bunker = true;
-        supplyForFirstRefinery = 36;
+        supplyForFirstRefinery = 38;
         armyForAttack = 35;
-        armyForExpand = 10;
+        armyForExpand = 9;
         facForArmory = 2;
         numArmories = 1;
         initTrainUnits();

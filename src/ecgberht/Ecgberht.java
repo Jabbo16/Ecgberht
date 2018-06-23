@@ -59,19 +59,19 @@ public class Ecgberht implements BWEventListener {
     private static BW bw;
     private static InteractionHandler ih;
     private static GameState gs;
-    private BehavioralTree addonBuildTree;
+    private static BehavioralTree addonBuildTree;
+    private static BehavioralTree buildTree;
+    private static BehavioralTree trainTree;
+    private static BehavioralTree upgradeTree;
     private BehavioralTree attackTree;
     private BehavioralTree botherTree;
     private BehavioralTree buildingLotTree;
     private BehavioralTree bunkerTree;
     private BehavioralTree collectTree;
     private BehavioralTree defenseTree;
-    private BehavioralTree buildTree;
     private BehavioralTree repairTree;
     private BehavioralTree scannerTree;
     private BehavioralTree scoutingTree;
-    private BehavioralTree trainTree;
-    private BehavioralTree upgradeTree;
     private boolean first = false;
     private Player self;
     private BWTA bwta;
@@ -91,6 +91,99 @@ public class Ecgberht implements BWEventListener {
 
     public static GameState getGs() {
         return gs;
+    }
+
+    public static void transition() {
+        initTrainTree();
+        initBuildTree();
+        initUpgradeTree();
+        initAddonBuildTree();
+    }
+
+    private static void initTrainTree() {
+        ChooseSCV cSCV = new ChooseSCV("Choose SCV", gs);
+        ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
+        ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
+        ChooseTank cTan = new ChooseTank("Choose Tank", gs);
+        ChooseVulture cVul = new ChooseVulture("Choose vulture", gs);
+        ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
+        CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
+        TrainUnit tr = new TrainUnit("Train SCV", gs);
+        Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cSCV);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
+        Sequence train = new Sequence("Train", chooseUnit, cr, tr);
+        trainTree = new BehavioralTree("Training Tree");
+        trainTree.addChild(train);
+    }
+
+    private static void initBuildTree() {
+        Build b = new Build("Build", gs);
+        ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
+        ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
+        ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
+        ChooseBarracks cBar = new ChooseBarracks("Choose Barracks", gs);
+        ChooseFactory cFar = new ChooseFactory("Choose Factory", gs);
+        ChoosePort cPor = new ChoosePort("Choose Star Port", gs);
+        ChooseScience cSci = new ChooseScience("Choose Science Facility", gs);
+        ChooseRefinery cRef = new ChooseRefinery("Choose Refinery", gs);
+        ChooseBay cBay = new ChooseBay("Choose Bay", gs);
+        ChooseTurret cTur = new ChooseTurret("Choose Turret", gs);
+        ChooseAcademy cAca = new ChooseAcademy("Choose Academy", gs);
+        ChooseArmory cArm = new ChooseArmory("Choose Armory", gs);
+        CheckResourcesBuilding crb = new CheckResourcesBuilding("Check Cash", gs);
+        ChoosePosition cp = new ChoosePosition("Choose Position", gs);
+        ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
+        Move m = new Move("Move to chosen building position", gs);
+        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cE, cSup);
+        if (gs.strat.bunker) chooseBuildingBuild.addChild(cBun);
+        chooseBuildingBuild.addChild(cTur);
+        chooseBuildingBuild.addChild(cRef);
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Engineering_Bay)) chooseBuildingBuild.addChild(cBay);
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Armory)) chooseBuildingBuild.addChild(cArm);
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Factory)) chooseBuildingBuild.addChild(cFar);
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addChild(cPor);
+        if (gs.strat.buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addChild(cSci);
+        chooseBuildingBuild.addChild(cBar);
+        Sequence buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
+        buildTree = new BehavioralTree("Building Tree");
+        buildTree.addChild(buildMove);
+    }
+
+    private static void initUpgradeTree() {
+        CheckResourcesUpgrade cRU = new CheckResourcesUpgrade("Check Resources Upgrade", gs);
+        ChooseArmorInfUp cAIU = new ChooseArmorInfUp("Choose Armor inf upgrade", gs);
+        ChooseWeaponInfUp cWIU = new ChooseWeaponInfUp("Choose Weapon inf upgrade", gs);
+        ChooseMarineRange cMR = new ChooseMarineRange("Choose Marine Range upgrade", gs);
+        ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
+        ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
+        ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
+        Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
+        if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
+        if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
+        if (gs.strat.techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
+        if (gs.strat.upgradesToResearch.contains(UpgradeType.U_238_Shells)) ChooseUP.addChild(cMR);
+        if (gs.strat.techToResearch.contains(TechType.Tank_Siege_Mode)) ChooseUP.addChild(cSM);
+        Sequence Upgrader = new Sequence("Upgrader", ChooseUP, cRU, rU);
+        upgradeTree = new BehavioralTree("Technology");
+        upgradeTree.addChild(Upgrader);
+    }
+
+    private static void initAddonBuildTree() {
+        BuildAddon bA = new BuildAddon("Build Addon", gs);
+        CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon", gs);
+        ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station", gs);
+        ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop", gs);
+        Selector<GameHandler> ChooseAddon = new Selector<>("Choose Addon");
+        if (gs.strat.buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addChild(cMS);
+        if (gs.strat.buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addChild(cCS);
+        Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
+        addonBuildTree = new BehavioralTree("Addon Build Tree");
+        addonBuildTree.addChild(Addon);
     }
 
     private void run() {
@@ -158,67 +251,6 @@ public class Ecgberht implements BWEventListener {
         initHarassTree();
     }
 
-    public void transition() {
-        initTrainTree();
-        initBuildTree();
-        initUpgradeTree();
-        initAddonBuildTree();
-    }
-
-    private void initTrainTree() {
-        ChooseSCV cSCV = new ChooseSCV("Choose SCV", gs);
-        ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
-        ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
-        ChooseTank cTan = new ChooseTank("Choose Tank", gs);
-        ChooseVulture cVul = new ChooseVulture("Choose vulture", gs);
-        ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
-        CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
-        TrainUnit tr = new TrainUnit("Train SCV", gs);
-        Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cSCV);
-        if (gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
-        if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
-        if (gs.strat.trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
-        if (gs.strat.trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
-        if (gs.strat.trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
-        Sequence train = new Sequence("Train", chooseUnit, cr, tr);
-        trainTree = new BehavioralTree("Training Tree");
-        trainTree.addChild(train);
-    }
-
-    private void initBuildTree() {
-        Build b = new Build("Build", gs);
-        ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
-        ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
-        ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
-        ChooseBarracks cBar = new ChooseBarracks("Choose Barracks", gs);
-        ChooseFactory cFar = new ChooseFactory("Choose Factory", gs);
-        ChoosePort cPor = new ChoosePort("Choose Star Port", gs);
-        ChooseScience cSci = new ChooseScience("Choose Science Facility", gs);
-        ChooseRefinery cRef = new ChooseRefinery("Choose Refinery", gs);
-        ChooseBay cBay = new ChooseBay("Choose Bay", gs);
-        ChooseTurret cTur = new ChooseTurret("Choose Turret", gs);
-        ChooseAcademy cAca = new ChooseAcademy("Choose Academy", gs);
-        ChooseArmory cArm = new ChooseArmory("Choose Armory", gs);
-        CheckResourcesBuilding crb = new CheckResourcesBuilding("Check Cash", gs);
-        ChoosePosition cp = new ChoosePosition("Choose Position", gs);
-        ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
-        Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cE, cSup);
-        if (gs.strat.bunker) chooseBuildingBuild.addChild(cBun);
-        chooseBuildingBuild.addChild(cTur);
-        chooseBuildingBuild.addChild(cRef);
-        if (gs.strat.buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
-        if (gs.strat.buildUnits.contains(UnitType.Terran_Engineering_Bay)) chooseBuildingBuild.addChild(cBay);
-        if (gs.strat.buildUnits.contains(UnitType.Terran_Armory)) chooseBuildingBuild.addChild(cArm);
-        if (gs.strat.buildUnits.contains(UnitType.Terran_Factory)) chooseBuildingBuild.addChild(cFar);
-        if (gs.strat.buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addChild(cPor);
-        if (gs.strat.buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addChild(cSci);
-        chooseBuildingBuild.addChild(cBar);
-        Sequence buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
-        buildTree = new BehavioralTree("Building Tree");
-        buildTree.addChild(buildMove);
-    }
-
     private void initScoutingTree() {
         CheckScout cSc = new CheckScout("Check Scout", gs);
         ChooseScout chSc = new ChooseScout("Choose Scouter", gs);
@@ -250,25 +282,6 @@ public class Ecgberht implements BWEventListener {
         defenseTree.addChild(Defense);
     }
 
-    private void initUpgradeTree() {
-        CheckResourcesUpgrade cRU = new CheckResourcesUpgrade("Check Resources Upgrade", gs);
-        ChooseArmorInfUp cAIU = new ChooseArmorInfUp("Choose Armor inf upgrade", gs);
-        ChooseWeaponInfUp cWIU = new ChooseWeaponInfUp("Choose Weapon inf upgrade", gs);
-        ChooseMarineRange cMR = new ChooseMarineRange("Choose Marine Range upgrade", gs);
-        ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
-        ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
-        ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
-        Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
-        if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
-        if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
-        if (gs.strat.techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
-        if (gs.strat.upgradesToResearch.contains(UpgradeType.U_238_Shells)) ChooseUP.addChild(cMR);
-        if (gs.strat.techToResearch.contains(TechType.Tank_Siege_Mode)) ChooseUP.addChild(cSM);
-        Sequence Upgrader = new Sequence("Upgrader", ChooseUP, cRU, rU);
-        upgradeTree = new BehavioralTree("Technology");
-        upgradeTree.addChild(Upgrader);
-    }
-
     private void initRepairTree() {
         CheckBuildingFlames cBF = new CheckBuildingFlames("Check building in flames", gs);
         ChooseRepairer cR = new ChooseRepairer("Choose Repairer", gs);
@@ -276,19 +289,6 @@ public class Ecgberht implements BWEventListener {
         Sequence Repair = new Sequence("Repair", cBF, cR, R);
         repairTree = new BehavioralTree("RepairTree");
         repairTree.addChild(Repair);
-    }
-
-    private void initAddonBuildTree() {
-        BuildAddon bA = new BuildAddon("Build Addon", gs);
-        CheckResourcesAddon cRA = new CheckResourcesAddon("Check Resources Addon", gs);
-        ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station", gs);
-        ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop", gs);
-        Selector<GameHandler> ChooseAddon = new Selector<>("Choose Addon");
-        if (gs.strat.buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addChild(cMS);
-        if (gs.strat.buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addChild(cCS);
-        Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
-        addonBuildTree = new BehavioralTree("Addon Build Tree");
-        addonBuildTree.addChild(Addon);
     }
 
     private void initBuildingLotTree() {
@@ -350,7 +350,8 @@ public class Ecgberht implements BWEventListener {
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
-            if (gs.frameCount == 1000) gs.sendCustomMessage();
+            if (gs.frameCount == 2000) gs.sendCustomMessage();
+            if (gs.frameCount % 1000 == 0) gs.resetInMap();
             IntelligenceAgency.updateBullets();
             gs.fix();
             gs.updateEnemyBuildingsMemory();
@@ -394,7 +395,7 @@ public class Ecgberht implements BWEventListener {
             ih.sendText("gg wp " + name);
         } else {
             gs.EI.losses++;
-            ih.sendText("gg wp! " + name + ", next game I will win!");
+            ih.sendText("gg wp! " + name + ", next game I will lose!");
         }
         gs.writeOpponentInfo(name);
     }
@@ -718,6 +719,9 @@ public class Ecgberht implements BWEventListener {
                                 if (u.getAddon() != null && gs.CSs.contains(u.getAddon())) {
                                     gs.CSs.remove(u.getAddon());
                                 }
+                                if (bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalRegion)) {
+                                    gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                }
                                 gs.CCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
                                 if (arg0.equals(gs.MainCC)) {
                                     if (gs.CCs.size() > 0) {
@@ -732,6 +736,7 @@ public class Ecgberht implements BWEventListener {
                                         break;
                                     }
                                 }
+                                break;
                             }
                         }
                         if (gs.CSs.contains(arg0)) gs.CSs.remove(arg0);

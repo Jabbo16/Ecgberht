@@ -33,6 +33,12 @@ public class ChooseExpand extends Action {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
+            if (((GameState) this.handler).strat.name == "BioGreedyFE") {
+                if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
+                    ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
+                    return State.SUCCESS;
+                }
+            }
             int workers = 0;
             for (Integer wt : ((GameState) this.handler).mineralsAssigned.values()) {
                 workers += wt;

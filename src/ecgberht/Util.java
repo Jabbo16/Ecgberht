@@ -5,14 +5,13 @@ import bwem.ChokePoint;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -233,5 +232,148 @@ public class Util {
             if (getGs().broodWarDistance(u.getPosition(), sCenter) <= radius) units.add(u);
         }
         return units;
+    }
+
+    // get a target for the ranged unit to attack
+    public static final Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
+        double highestPriority = 0.f;
+        Unit bestTarget = null;
+
+        // for each target possibility
+        for (Unit targetUnit : targets) {
+            double priority = getScore((PlayerUnit) rangedUnit, (PlayerUnit) targetUnit);
+
+            // if it's a higher priority, set it
+            if (bestTarget == null || priority > highestPriority) {
+                highestPriority = priority;
+                bestTarget = targetUnit;
+            }
+        }
+
+        return bestTarget;
+    }
+
+    private static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
+        int priority = getAttackPriority(attacker, target);     // 0..12
+        int range = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
+        // Let's say that 1 priority step is worth 160 pixels (5 tiles).
+        // We care about unit-target range and target-order position distance.
+        int score = 5 * 32 * priority - range;
+
+        WeaponType targetWeapon = Util.getWeapon(attacker, target);
+        UnitType targetType = getType(target);
+        // Adjust for special features.
+        // This could adjust for relative speed and direction, so that we don't chase what we can't catch.
+        if (range <= targetWeapon.maxRange()) {
+            score += 5 * 32;
+        } else if (target instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
+            if (target instanceof SiegeTank) {
+                if (((SiegeTank) target).isSieged() || target.getOrder() == Order.Sieging || target.getOrder() == Order.Unsieging) {
+                    score += 48;
+                } else {
+                    score += 24;
+                }
+            }
+
+        } else if (target instanceof MobileUnit && ((MobileUnit) target).isBraking()) {
+            score += 16;
+        } else if (targetType.topSpeed() >= getType(attacker).topSpeed()) {
+            score -= 5 * 32;
+        }
+
+        // Prefer targets that are already hurt.
+        if (targetType.getRace() == Race.Protoss && target.getShields() <= 5) {
+            score += 32;
+        }
+        if (target.getHitPoints() < targetType.maxHitPoints()) {
+            score += 24;
+        }
+
+        DamageType damage = targetWeapon.damageType();
+        if (damage == DamageType.Explosive) {
+            if (targetType.size() == UnitSizeType.Large) {
+                score += 32;
+            }
+        } else if (damage == DamageType.Concussive) {
+            if (targetType.size() == UnitSizeType.Small) {
+                score += 32;
+            }
+        }
+        return score;
+    }
+
+    //get the attack priority of a target unit
+    private static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
+        final UnitType targetType = getType(target);
+        // Exceptions if we're a ground unit.
+        if (target instanceof Burrowable) {
+            if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !((Burrowable) target).isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
+                return 12;
+            }
+        }
+
+        if (targetType == UnitType.Zerg_Lurker) {
+            return 12;
+        }
+
+        if (targetType == UnitType.Protoss_High_Templar) {
+            return 12;
+        }
+
+        if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) {
+            return 11;
+        }
+
+        // Droppers are as bad as threats. They may be loaded and are often isolated and safer to attack.
+        if (targetType == UnitType.Terran_Dropship || targetType == UnitType.Protoss_Shuttle) {
+            return 10;
+        }
+        // Also as bad are other dangerous things.
+        if (targetType == UnitType.Terran_Science_Vessel || targetType == UnitType.Zerg_Scourge || targetType == UnitType.Protoss_Observer) {
+            return 10;
+        }
+        // Next are workers.
+        if (targetType.isWorker()) {
+            if (getType(rangedUnit) == UnitType.Terran_Vulture) {
+                return 11;
+            }
+            if (target instanceof SCV) {
+                // Repairing or blocking a choke makes you critical.
+                if (((SCV) target).isRepairing()) {
+                    return 11;
+                }
+                // SCVs constructing are also important.
+                if (((SCV) target).isConstructing()) {
+                    return 10;
+                }
+            }
+            return 6;
+        }
+        // Important combat units that we may not have targeted above (esp. if we're a flyer).
+        if (targetType == UnitType.Protoss_Carrier || targetType == UnitType.Terran_Siege_Tank_Tank_Mode || targetType == UnitType.Terran_Siege_Tank_Siege_Mode) {
+            return 8;
+        }
+        // Short circuit: Give bunkers a lower priority to reduce bunker obsession.
+        if (targetType == UnitType.Terran_Bunker || targetType == UnitType.Zerg_Sunken_Colony || targetType == UnitType.Protoss_Photon_Cannon) {
+            return 6;
+        }
+        // Spellcasters are as important as key buildings.
+        // Also remember to target other non-threat combat units.
+        if (targetType.isSpellcaster() || targetType.groundWeapon() != WeaponType.None || targetType.airWeapon() != WeaponType.None) {
+            return 7;
+        }
+        // Templar tech and spawning pool are more important.
+        if (targetType == UnitType.Protoss_Templar_Archives) {
+            return 7;
+        }
+
+        if (targetType.gasPrice() > 0) {
+            return 4;
+        }
+        if (targetType.mineralPrice() > 0) {
+            return 3;
+        }
+        // Finally everything else.
+        return 1;
     }
 }

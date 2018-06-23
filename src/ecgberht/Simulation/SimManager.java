@@ -9,9 +9,7 @@ import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Color;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Attacker;
-import org.openbw.bwapi4j.unit.Bunker;
-import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
 import java.util.ArrayList;
@@ -57,6 +55,7 @@ public class SimManager {
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>(getGs().enemyCombatUnitMemory);
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
+            if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
             if (u instanceof Attacker || u instanceof Bunker) enemyUnits.add(u);
         }
         clustering = new MeanShift(enemyUnits);
@@ -77,40 +76,76 @@ public class SimManager {
             SimInfo aux = new SimInfo();
             for (Cluster enemy : enemies) {
                 if (getGs().broodWarDistance(friend.mode(), enemy.mode()) <= radius) {
-                    aux.enemies.add(enemy);
+                    aux.enemies.addAll(enemy.units);
                 }
             }
             if (!aux.enemies.isEmpty()) {
-                aux.allies.add(friend);
+                aux.allies.addAll(friend.units);
                 simulations.add(aux);
             }
         }
+        List<SimInfo> newSims = new ArrayList<>();
+        for (SimInfo s : simulations) {
+            SimInfo air = new SimInfo();
+            SimInfo ground = new SimInfo();
+            for (Unit u : s.allies) {
+                if (u.isFlying()) air.allies.add(u);
+                if (u instanceof GroundAttacker) ground.allies.add(u);
+            }
+            boolean emptyAir = air.allies.isEmpty();
+            boolean emptyGround = ground.allies.isEmpty();
+            if (emptyAir && emptyGround) continue;
+            for (Unit u : s.enemies) {
+                if (u instanceof AirAttacker) air.enemies.add(u);
+                if (u instanceof GroundAttacker) ground.enemies.add(u);
+            }
+            if (!emptyAir && !air.enemies.isEmpty()) {
+                air.type = SimInfo.SimType.AIR;
+                newSims.add(air);
+            }
+            if (!emptyGround && !ground.enemies.isEmpty()) {
+                ground.type = SimInfo.SimType.GROUND;
+                newSims.add(ground);
+            }
+        }
+        if (!newSims.isEmpty()) simulations.addAll(newSims);
     }
 
     private void doSim() {
         for (SimInfo s : simulations) {
             simulator.clear();
-            for (Cluster c : s.allies) {
-                for (Unit u : c.units) {
-                    JFAPUnit jU = new JFAPUnit(u);
-                    simulator.addUnitPlayer1(jU);
-                    s.stateBefore.first.add(jU);
-                }
+            for (Unit u : s.allies) {
+                JFAPUnit jU = new JFAPUnit(u);
+                simulator.addUnitPlayer1(jU);
+                s.stateBefore.first.add(jU);
             }
-            for (Cluster c : s.enemies) {
-                for (Unit u : c.units) {
-                    JFAPUnit jU = new JFAPUnit(u);
-                    simulator.addUnitPlayer2(jU);
-                    s.stateBefore.second.add(jU);
-                }
+            for (Unit u : s.enemies) {
+                JFAPUnit jU = new JFAPUnit(u);
+                simulator.addUnitPlayer2(jU);
+                s.stateBefore.second.add(jU);
             }
             s.preSimScore = simulator.playerScores();
             simulator.simulate(90);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
-            //Bad win sim logic, testing
-            s.win = ((s.preSimScore.second - s.postSimScore.second) * 2 < (s.preSimScore.first - s.postSimScore.first));
+            int ourLosses = s.preSimScore.first - s.postSimScore.first;
+            int enemyLosses = s.preSimScore.second - s.postSimScore.second;
+            if (enemyLosses - ourLosses >= 0) return;
+            simulator.simulate(300);
+            s.postSimScore = simulator.playerScores();
+            s.stateAfter = simulator.getState();
+            //Bad lose sim logic, testing
+            if (getGs().strat.name == "ProxyBBS") {
+                s.lose = !scoreCalc(s, 1.5) || s.stateAfter.first.isEmpty();
+            } else {
+                s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
+            }
         }
+    }
+
+    private boolean scoreCalc(SimInfo s, double rate) {
+        return ((s.preSimScore.second - s.postSimScore.second) * rate <= (s.preSimScore.first - s.postSimScore.first));
+
     }
 
     private void drawCluster(Cluster c, boolean ally, int id) {
@@ -132,26 +167,6 @@ public class SimManager {
         for (Cluster c : enemies) {
             drawCluster(c, false, cluster);
             cluster++;
-        }
-    }
-
-    public void drawSimInfos() {
-        for (SimInfo s : simulations) {
-            for (Cluster ally : s.allies) {
-                for (Cluster ally2 : s.allies) {
-                    if (ally.equals(ally2)) continue;
-                    getGs().getGame().getMapDrawer().drawLineMap(new Position((int) ally.modeX, (int) ally.modeY), new Position((int) ally2.modeX, (int) ally2.modeY), Color.GREEN);
-                }
-                for (Cluster enemy : s.enemies) {
-                    getGs().getGame().getMapDrawer().drawLineMap(new Position((int) enemy.modeX, (int) enemy.modeY), new Position((int) ally.modeX, (int) ally.modeY), Color.RED);
-                }
-            }
-            for (Cluster enemy : s.enemies) {
-                for (Cluster enemy2 : s.enemies) {
-                    if (enemy.equals(enemy2)) continue;
-                    getGs().getGame().getMapDrawer().drawLineMap(new Position((int) enemy.modeX, (int) enemy.modeY), new Position((int) enemy2.modeX, (int) enemy2.modeY), Color.RED);
-                }
-            }
         }
     }
 
@@ -199,10 +214,9 @@ public class SimManager {
         return true;
     }
 
-    public SimInfo getSimulation(Unit unit) { // TODO think how to deal with multiple cluster sims
-        JFAPUnit junit = new JFAPUnit(unit);
+    public SimInfo getSimulation(Unit unit, SimInfo.SimType type) {
         for (SimInfo s : simulations) {
-            if (s.stateAfter.first.contains(junit)) {
+            if (s.type == type && s.allies.contains(unit)) {
                 return s;
             }
         }
