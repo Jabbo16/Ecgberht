@@ -57,6 +57,7 @@ public class ConfigManager {
             public boolean debugText;
             public boolean sounds;
             public boolean enableLatCom;
+            public boolean sscait;
 
             public EcgberhtConfig() {
             }

@@ -112,10 +112,10 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 // Experimental
-                if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) {
+                if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition()) && getGs().supplyMan.getSupplyUsed() < 240) {
                     if (members.size() == 1) continue;
                     double dist = getGs().broodWarDistance(u.getPosition(), sCenter);
-                    if (dist >= 250) {
+                    if (dist >= 300) {
                         if (u.getOrderTargetPosition() != null) {
                             if (!u.getOrderTargetPosition().equals(sCenter)) {
                                 ((MobileUnit) u).attack(sCenter);
@@ -127,7 +127,7 @@ public class Squad implements Comparable<Squad> {
                 if (u instanceof Medic && u.getOrder() != Order.MedicHeal) {
                     PlayerUnit chosen = getHealTarget(u, marinesToHeal);
                     if (chosen != null && u.getOrderTarget() != chosen) {
-                        ((Medic) u).healing(chosen);
+                        ((Medic) u).heal(chosen);
                         marinesToHeal.add(chosen);
                         continue;
                     }

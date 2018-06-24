@@ -2,6 +2,7 @@ package ecgberht.Simulation;
 
 import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
+import ecgberht.ConfigManager;
 import ecgberht.Squad;
 import jfap.JFAP;
 import jfap.JFAPUnit;
@@ -28,9 +29,15 @@ public class SimManager {
     private JFAP simulator;
     private MeanShift clustering;
     private double radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+    private int shortSimFrames = 90;
+    private int longSimFrames = 300;
 
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
+        if(ConfigManager.getConfig().ecgConfig.sscait){
+            shortSimFrames = 70;
+            longSimFrames = 200;
+        }
     }
 
     private void reset() {
@@ -65,9 +72,11 @@ public class SimManager {
     public void onFrameSim() {
         time = System.currentTimeMillis();
         reset();
-        createClusters();
-        createSimInfos();
-        doSim();
+        if(!getGs().enemyCombatUnitMemory.isEmpty()){
+            createClusters();
+            createSimInfos();
+            doSim();
+        }
         time = System.currentTimeMillis() - time;
     }
 
@@ -125,13 +134,13 @@ public class SimManager {
                 s.stateBefore.second.add(jU);
             }
             s.preSimScore = simulator.playerScores();
-            simulator.simulate(90);
+            simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             int ourLosses = s.preSimScore.first - s.postSimScore.first;
             int enemyLosses = s.preSimScore.second - s.postSimScore.second;
             if (enemyLosses - ourLosses >= 0) return;
-            simulator.simulate(300);
+            simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing

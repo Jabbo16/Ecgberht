@@ -773,8 +773,8 @@ public class GameState extends GameHandler {
         } else {
             String chosen = null;
             for (Entry<String, Squad> s : squads.entrySet()) {
-                if (s.getValue().members.size() < 12 && broodWarDistance(getSquadCenter(s.getValue()),
-                        unit.getPosition()) < 1000 && (chosen == null || broodWarDistance(unit.getPosition(),
+                if (s.getValue().members.size() < 16 && broodWarDistance(getSquadCenter(s.getValue()),
+                        unit.getPosition()) <= 700 && (chosen == null || broodWarDistance(unit.getPosition(),
                         getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(),
                         getSquadCenter(squads.get(chosen))))) {
                     chosen = s.getKey();
@@ -1023,11 +1023,11 @@ public class GameState extends GameHandler {
             if (squads.size() < 2) return;
             for (Squad u1 : squads.values()) {
                 int u1_size = u1.members.size();
-                if (u1_size < 12) {
+                if (u1_size < 16) {
                     for (Squad u2 : squads.values()) {
-                        if (u2.name.equals(u1.name) || u2.members.size() > 11) continue;
+                        if (u2.name.equals(u1.name) || u2.members.size() > 15) continue;
                         if (broodWarDistance(getSquadCenter(u1), getSquadCenter(u2)) < 200) {
-                            if (u1_size + u2.members.size() > 12) continue;
+                            if (u1_size + u2.members.size() > 16) continue;
                             else {
                                 u1.members.addAll(u2.members);
                                 u2.members.clear();

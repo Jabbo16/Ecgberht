@@ -10,6 +10,7 @@
         "debugScreen": true,
         "debugText": true,
         "enableLatCom": true,
-        "sounds": false
+        "sounds": false,
+        "sscait": false
     }
 }
