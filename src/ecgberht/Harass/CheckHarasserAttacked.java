@@ -20,6 +20,11 @@ public class CheckHarasserAttacked extends Conditional {
     @Override
     public State execute() {
         try {
+            if (((GameState) this.handler).enemyBase == null) {
+                ((GameState) this.handler).chosenUnitToHarass = null;
+                ((GameState) this.handler).chosenHarasser = null;
+                return State.FAILURE;
+            }
             if (((GameState) this.handler).chosenUnitToHarass != null) {
                 if (!((GameState) this.handler).bw.getBWMap().isValidPosition(((GameState) this.handler).chosenUnitToHarass.getPosition())) {
                     ((GameState) this.handler).chosenUnitToHarass = null;

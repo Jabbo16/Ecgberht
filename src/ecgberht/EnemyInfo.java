@@ -15,16 +15,6 @@ public class EnemyInfo {
         this.opponent = opponent;
     }
 
-   /* public EnemyInfo(String wins, String losses, List<StrategyOpponentHistory> history, String naughty, boolean defendHarass) {
-        this.wins = Integer.parseInt(wins);
-        this.history = history;
-        this.defendHarass = defendHarass;
-        this.losses = Integer.parseInt(losses);
-        if (naughty.equals("true")) {
-            this.naughty = true;
-        }
-    }*/
-
     public void updateStrategyOpponentHistory(String strategyName, int mapSize, boolean win) {
         for (StrategyOpponentHistory data : history) {
             if (data.mapSize == mapSize && data.strategyName.equals(strategyName)) {

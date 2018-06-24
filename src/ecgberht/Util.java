@@ -98,6 +98,7 @@ public class Util {
 
     public static boolean isEnemy(Player player) {
         if (player == null) return true;
+        if (!getGs().players.containsKey(player)) return true;
         return getGs().players.get(player) == -1;
     }
 
@@ -157,6 +158,7 @@ public class Util {
 
     private static UnitType getZergType(PlayerUnit unit) {
         if (unit instanceof Zergling) return UnitType.Zerg_Zergling;
+        if (unit instanceof Extractor) return UnitType.Zerg_Extractor;
         if (unit instanceof Hydralisk) return UnitType.Zerg_Hydralisk;
         if (unit instanceof SporeColony) return UnitType.Zerg_Spore_Colony;
         if (unit instanceof SunkenColony) return UnitType.Zerg_Sunken_Colony;

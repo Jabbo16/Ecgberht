@@ -24,7 +24,7 @@ public class ChooseAttackPosition extends Action {
             for (Squad u : ((GameState) this.handler).squads.values()) {
                 Pair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(((GameState) this.handler).getSquadCenter(u).toTilePosition(), true);
                 if (p.first != -1 && p.second != -1) {
-                    TilePosition attackPos = new TilePosition(p.first, p.second);
+                    TilePosition attackPos = new TilePosition(p.second, p.first);
                     if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
                         ((GameState) this.handler).firstProxyBBS = true;
                         ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");

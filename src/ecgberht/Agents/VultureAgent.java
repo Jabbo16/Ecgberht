@@ -37,7 +37,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 getGs().addToSquad(unit);
                 return true;
             }
-            actualFrame = getGs().getIH().getFrameCount();
+            actualFrame = getGs().frameCount;
+            frameLastOrder = unit.getLastCommandFrame();
             closeEnemies.clear();
             closeWorkers.clear();
             if (frameLastOrder == actualFrame) return remove;
@@ -125,7 +126,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             return;
         } else {
             boolean meleeOnly = checkOnlyMelees();
-            if (!meleeOnly && !getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).lose) {
+            if (!meleeOnly && getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).lose) {
                 status = Status.RETREAT;
                 return;
             }

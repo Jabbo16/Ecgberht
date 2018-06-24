@@ -35,6 +35,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
+            if (!unit.exists()) return true;
             boolean remove = false;
             if (unit.getHitPoints() <= 15) {
                 Position cc = getGs().MainCC.second.getPosition();
@@ -43,7 +44,8 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 getGs().addToSquad(unit);
                 return true;
             }
-            actualFrame = getGs().getIH().getFrameCount();
+            actualFrame = getGs().frameCount;
+            frameLastOrder = unit.getLastCommandFrame();
             closeEnemies.clear();
             closeWorkers.clear();
             airAttackers.clear();
@@ -132,7 +134,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             status = Status.ATTACK;
             return;
         } else {
-            if (!airAttackers.isEmpty() && !getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose) {
+            if (!airAttackers.isEmpty() && getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose) {
                 status = Status.RETREAT;
                 return;
             }

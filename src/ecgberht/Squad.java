@@ -7,7 +7,10 @@ import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
@@ -60,7 +63,6 @@ public class Squad implements Comparable<Squad> {
                 if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
                     continue;
                 }
-
                 Position lastTarget = u.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
                         u.getOrderTargetPosition();
                 if (stimResearched && (u instanceof Marine || u instanceof Firebat)) {
@@ -90,7 +92,8 @@ public class Squad implements Comparable<Squad> {
                     }
                     if (move != null) {
                         if (u.getOrder() == Order.Move) {
-                            if (u.getDistance(move) <= 300) ((MobileUnit) u).stop(false);
+                            if (u.getDistance(move) <= UnitType.Terran_Marine.groundWeapon().maxRange())
+                                ((MobileUnit) u).stop(false);
                         } else if (lastTarget == null || (lastTarget != null && !lastTarget.equals(move))) {
                             ((MobileUnit) u).move(move);
                             continue;
@@ -108,33 +111,18 @@ public class Squad implements Comparable<Squad> {
                         continue;
                     }
                 }
-
                 // Experimental
-                if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition())
-                        && frameCount % 35 == 0) {
+                if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) {
                     if (members.size() == 1) continue;
-                    boolean gaveOrder = false;
-                    List<Unit> circle = Util.getFriendlyUnitsInRadius(sCenter, 280); // TODO test
-                    Set<Unit> different = new HashSet<>();
-                    different.addAll(circle);
-                    different.addAll(members);
-                    circle.retainAll(members);
-                    different.removeAll(circle);
-                    if (circle.size() != members.size()) {
-                        for (Unit m : different) {
-                            if (m.equals(u)) {
-                                if (u.getOrderTargetPosition() != null) {
-                                    if (!u.getOrderTargetPosition().equals(sCenter) &&
-                                            getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) {
-                                        ((MobileUnit) u).attack(sCenter);
-                                        gaveOrder = true;
-                                        break;
-                                    }
-                                }
+                    double dist = getGs().broodWarDistance(u.getPosition(), sCenter);
+                    if (dist >= 250) {
+                        if (u.getOrderTargetPosition() != null) {
+                            if (!u.getOrderTargetPosition().equals(sCenter)) {
+                                ((MobileUnit) u).attack(sCenter);
+                                continue;
                             }
                         }
                     }
-                    if (gaveOrder) continue;
                 }
                 if (u instanceof Medic && u.getOrder() != Order.MedicHeal) {
                     PlayerUnit chosen = getHealTarget(u, marinesToHeal);
@@ -145,12 +133,12 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 if (u.isIdle() && attack != null && frameCount != u.getLastCommandFrame() &&
-                        getGs().broodWarDistance(attack, u.getPosition()) > 500) {
+                        getGs().broodWarDistance(attack, u.getPosition()) >= 400) {
                     ((MobileUnit) u).attack(attack);
                     continue;
                 }
                 if (u.isAttacking() && attack == null && frameCount != u.getLastCommandFrame() &&
-                        getGs().broodWarDistance(sCenter, u.getPosition()) > 500) {
+                        getGs().broodWarDistance(sCenter, u.getPosition()) >= 500) {
                     ((MobileUnit) u).move(sCenter);
                     continue;
                 }
@@ -159,7 +147,7 @@ public class Squad implements Comparable<Squad> {
                     if (lastTarget.equals(attack)) continue;
                 }
                 if ((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove &&
-                        !u.getOrderTargetPosition().equals(attack)) { // TODO test change target position faster
+                        !u.getOrderTargetPosition().equals(attack)) {
                     if (u instanceof MobileUnit) {
                         ((MobileUnit) u).attack(attack);
                         continue;

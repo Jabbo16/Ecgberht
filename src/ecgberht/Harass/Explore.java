@@ -17,6 +17,11 @@ public class Explore extends Conditional {
     @Override
     public State execute() { // TODO improve
         try {
+            if (((GameState) this.handler).enemyBase == null) {
+                ((GameState) this.handler).chosenUnitToHarass = null;
+                ((GameState) this.handler).chosenHarasser = null;
+                return State.FAILURE;
+            }
             if (((GameState) this.handler).directionScoutMain == 0) {
                 ((GameState) this.handler).directionScoutMain = 1;
             }

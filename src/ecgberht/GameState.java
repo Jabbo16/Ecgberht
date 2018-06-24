@@ -133,6 +133,7 @@ public class GameState extends GameHandler {
     public SimManager sim;
     public ChokePoint naturalChoke;
     public Position defendPosition = null;
+    Area test = null;
 
     public GameState(BW bw, BWTA bwta, BWEM bwem) {
         super(bw, bwta, bwem);
@@ -191,29 +192,29 @@ public class GameState extends GameHandler {
                     else return bM;
                 }
             } else {
-                Map<String, Pair<Integer, Integer>> strategies = new TreeMap<>();
-                Map<String, Strategy> nameStrat = new TreeMap<>();
+                Map<String, Pair<Integer, Integer>> strategies = new LinkedHashMap<>();
+                Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
-                strategies.put(bbs.name, new Pair<>(0, 0));
-                nameStrat.put(bbs.name, bbs);
-
-                strategies.put(bFE.name, new Pair<>(0, 0));
-                nameStrat.put(bFE.name, bFE);
-
-                strategies.put(bMFE.name, new Pair<>(0, 0));
-                nameStrat.put(bMFE.name, bMFE);
-
-                strategies.put(FM.name, new Pair<>(0, 0));
-                nameStrat.put(FM.name, FM);
-
-                strategies.put(bGFE.name, new Pair<>(0, 0));
-                nameStrat.put(bGFE.name, bGFE);
+                strategies.put(b.name, new Pair<>(0, 0));
+                nameStrat.put(b.name, b);
 
                 strategies.put(bM.name, new Pair<>(0, 0));
                 nameStrat.put(bM.name, bM);
 
-                strategies.put(b.name, new Pair<>(0, 0));
-                nameStrat.put(b.name, b);
+                strategies.put(bGFE.name, new Pair<>(0, 0));
+                nameStrat.put(bGFE.name, bGFE);
+
+                strategies.put(FM.name, new Pair<>(0, 0));
+                nameStrat.put(FM.name, FM);
+
+                strategies.put(bbs.name, new Pair<>(0, 0));
+                nameStrat.put(bbs.name, bbs);
+
+                strategies.put(bMFE.name, new Pair<>(0, 0));
+                nameStrat.put(bMFE.name, bMFE);
+
+                strategies.put(bFE.name, new Pair<>(0, 0));
+                nameStrat.put(bFE.name, bFE);
 
                 for (StrategyOpponentHistory r : EI.history) {
                     if (strategies.containsKey(r.strategyName)) {
@@ -245,7 +246,7 @@ public class GameState extends GameHandler {
                     double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (strategyGamesPlayed)) : 0;
                     double ucbVal = sGamesPlayed == 0 ? C : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
                     double val = sWinRate + ucbVal;
-                    if (val >= bestUCBStrategyVal) {
+                    if (val > bestUCBStrategyVal) {
                         bestUCBStrategy = strat;
                         bestUCBStrategyVal = val;
                     }
@@ -436,6 +437,9 @@ public class GameState extends GameHandler {
     public void debugScreen() {
         if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
         if (naturalRegion != null) print(naturalRegion.getTop().toTilePosition(), Color.RED);
+        /*for(ChokePoint c : naturalRegion.getChokePoints()){
+            if(c.getGeometry().size() > 2) bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size()-1).toPosition(), Color.GREEN);
+        }*/
         Integer counter = 0;
         for (bwem.Base b : BLs) {
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
@@ -529,8 +533,7 @@ public class GameState extends GameHandler {
         for (Squad s : squads.values()) {
             if (s.members.isEmpty()) continue;
             Position center = getSquadCenter(s);
-            //if(s.attack != null) bw.getMapDrawer().drawLineMap(s.attack,center, Color.GREEN);
-            bw.getMapDrawer().drawCircleMap(center, 80, Color.GREEN);
+            bw.getMapDrawer().drawCircleMap(center, 90, Color.GREEN);
             bw.getMapDrawer().drawTextMap(center, ColorUtil.formatText(s.name, ColorUtil.White));
             bw.getMapDrawer().drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
         }
@@ -571,42 +574,6 @@ public class GameState extends GameHandler {
         BLs.addAll(bwem.getMap().getBases());
         Collections.sort(BLs, new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
     }
-
-    /*public void moveUnitFromChokeWhenExpand() {
-        try {
-            if (!squads.isEmpty() && chosenBaseLocation != null) {
-                Area chosenRegion = bwem.getMap().getArea(chosenBaseLocation);
-                if (chosenRegion != null) {
-                    if (chosenRegion.equals(naturalRegion)) {
-                        TilePosition mapCenter = new TilePosition(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
-                        List<ChokePoint> cs = chosenRegion.getChokePoints();
-                        ChokePoint closestChoke = null;
-                        for (ChokePoint c : cs) {
-                            if (!c.getCenter().toTilePosition().equals(this.mainChoke.getCenter().toTilePosition())) {
-                                double aux = broodWarDistance(c.getCenter().toPosition(), chosenBaseLocation.toPosition());
-                                if (aux > 0.0) {
-                                    if (closestChoke == null || aux < broodWarDistance(closestChoke.getCenter().toPosition(), mapCenter.toPosition())) {
-                                        closestChoke = c;
-                                    }
-                                }
-                            }
-                        }
-                        if (closestChoke != null) {
-                            for (Squad s : squads.values()) {
-                                if (s.status == Status.IDLE) {
-                                    s.giveAttackOrder(closestChoke.getCenter().toPosition());
-                                    s.status = Status.ATTACK;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("MoveUnitFromChokeWhenExpand");
-            System.err.println(e);
-        }
-    }*/
 
     public void fix() {
         if (defense && enemyInBase.isEmpty()) {
@@ -716,7 +683,9 @@ public class GameState extends GameHandler {
     public void initChokes() {
         // Main choke
         naturalRegion = BLs.get(1).getArea();
+        Area mainRegion = BLs.get(0).getArea();
         double distBest = Double.MAX_VALUE;
+
         for (ChokePoint choke : naturalRegion.getChokePoints()) {
             double dist = bwta.getGroundDistance(choke.getCenter().toTilePosition(), getPlayer().getStartLocation());
             if (dist < distBest && dist > 0.0) {
@@ -737,43 +706,46 @@ public class GameState extends GameHandler {
             naturalChoke = mainChoke;
             return;
         }
-        // Find area that shares the choke we need to defend
-        distBest = Double.MAX_VALUE;
-        Area second = null;
-        for (Area a : naturalRegion.getAccessibleNeighbors()) {
-            WalkPosition center = a.getTop();
-            double dist = center.toPosition().getDistance(bwem.getMap().getData().getMapData().getCenter());
-            if (bw.getBWMap().isValidPosition(center) && dist < distBest) {
-                second = a;
-                distBest = dist;
-            }
-        }
-        // Find second choke based on the connected area
-        distBest = Double.MAX_VALUE;
-        for (ChokePoint choke : naturalRegion.getChokePoints()) {
-            if (choke.getCenter() == mainChoke.getCenter()) continue;
-            if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
-            if (choke.getAreas().first != second && choke.getAreas().second != second) continue;
-            double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
-            if (dist < distBest) {
-                naturalChoke = choke;
-                distBest = dist;
-            }
-        }
-    }
 
-    public void checkUnitsBL(TilePosition BL, Unit chosen) {
-        UnitType type = UnitType.Terran_Command_Center;
-        Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
-        Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
-        List<Unit> blockers = Util.getUnitsInRectangle(topLeft, bottomRight);
-        if (!blockers.isEmpty()) {
-            for (Unit u : blockers) {
-                if (((PlayerUnit) u).getPlayer().getId() == self.getId() && !u.equals(chosen) && !(u instanceof Worker)) {
-                    ((MobileUnit) u).move(Util.getClosestChokepoint(BL.toPosition()).getCenter().toPosition());
+        // Find area that shares the choke we need to defend
+        if (bw.getBWMap().mapHash().compareTo("aab66dbf9c85f85c47c219277e1e36181fe5f9fc") != 0) {
+            distBest = Double.MAX_VALUE;
+            Area second = null;
+            for (Area a : naturalRegion.getAccessibleNeighbors()) {
+                if (a.getTop().equals(mainRegion.getTop())) continue;
+                WalkPosition center = a.getTop();
+                double dist = center.toPosition().getDistance(bwem.getMap().getData().getMapData().getCenter());
+                if (dist < distBest) {
+                    second = a;
+                    distBest = dist;
+                }
+            }
+            test = second;
+            // Find second choke based on the connected area
+            distBest = Double.MAX_VALUE;
+            for (ChokePoint choke : naturalRegion.getChokePoints()) {
+                if (choke.getCenter() == mainChoke.getCenter()) continue;
+                if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
+                if (choke.getAreas().first != second && choke.getAreas().second != second) continue;
+                double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
+                if (dist < distBest) {
+                    naturalChoke = choke;
+                    distBest = dist;
+                }
+            }
+        } else {
+            distBest = Double.MAX_VALUE;
+            for (ChokePoint choke : naturalRegion.getChokePoints()) {
+                if (choke.getCenter().equals(mainChoke.getCenter())) continue;
+                if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
+                double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
+                if (dist < distBest) {
+                    naturalChoke = choke;
+                    distBest = dist;
                 }
             }
         }
+
     }
 
     public String getSquadName() {
@@ -855,10 +827,14 @@ public class GameState extends GameHandler {
             Set<SiegeTank> tanks = new TreeSet<>();
             for (Entry<String, Squad> s : squads.entrySet()) tanks.addAll(s.getValue().getTanks());
             if (!tanks.isEmpty()) {
+                TreeSet<Unit> threats = new TreeSet<>(enemyCombatUnitMemory);
+                for (Unit u : enemyBuildingMemory.keySet()) {
+                    if (u instanceof Attacker || u instanceof Bunker) threats.add(u);
+                }
                 for (SiegeTank t : tanks) {
                     boolean far = false;
                     boolean close = false;
-                    for (Unit e : enemyCombatUnitMemory) {
+                    for (Unit e : threats) {
                         double distance = broodWarDistance(e.getPosition(), t.getPosition());
                         if (distance > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) continue;
                         if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) {

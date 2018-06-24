@@ -17,5 +17,6 @@ public class SimInfo {
     public Pair<Set<JFAPUnit>, Set<JFAPUnit>> stateBefore = new Pair<>(new TreeSet<>(), new TreeSet<>());
     public Pair<Set<JFAPUnit>, Set<JFAPUnit>> stateAfter = new Pair<>(new TreeSet<>(), new TreeSet<>());
     public boolean lose = false;
+
     public enum SimType {GROUND, AIR, MIX}
 }

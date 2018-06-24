@@ -372,6 +372,7 @@ public class BuildingMap implements Cloneable {
         if (buildingType.canBuildAddon()) {
             size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
         }
+        if (starting == null) starting = getGs().getPlayer().getStartLocation();
         int x = starting.getY();
         int y = starting.getX();
         int[] coord = new int[2];
@@ -417,6 +418,7 @@ public class BuildingMap implements Cloneable {
         int y = starting.toTilePosition().getX();
         int i = 10;
         int j = 10;
+        boolean expandBunker = choke.equals(getGs().naturalChoke);
         // Finds the first valid tileposition starting around the given tileposition
         TilePosition position = null;
         double dist = Double.MAX_VALUE;
@@ -425,7 +427,8 @@ public class BuildingMap implements Cloneable {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
                     if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
                         Area area = bwem.getMap().getArea(new TilePosition(jj, ii));
-                        if (area != null && area.equals(getGs().naturalRegion)) continue;
+                        if (area != null && area.equals(getGs().naturalRegion) && !expandBunker) continue;
+                        if (area != null && !area.equals(getGs().naturalRegion) && expandBunker) continue;
                         if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), starting);

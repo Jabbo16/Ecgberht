@@ -46,9 +46,7 @@ public class InfluenceMap {
             UnitType type;
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding) {
                 return;
-            } else {
-                type = Util.getType((PlayerUnit) arg0);
-            }
+            } else type = Util.getType((PlayerUnit) arg0);
             TilePosition tile = arg0.getTilePosition();
             if (type.isBuilding()) {
                 if (type.canAttack() || type.equals(UnitType.Terran_Bunker)) {

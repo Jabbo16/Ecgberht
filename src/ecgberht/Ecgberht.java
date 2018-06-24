@@ -38,10 +38,7 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -350,7 +347,9 @@ public class Ecgberht implements BWEventListener {
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
-            if (gs.frameCount == 2000) gs.sendCustomMessage();
+            if (gs.test != null)
+                gs.getGame().getMapDrawer().drawCircleMap(gs.test.getTop().toPosition(), 100, Color.ORANGE);
+            if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount % 1000 == 0) gs.resetInMap();
             IntelligenceAgency.updateBullets();
             gs.fix();
@@ -436,7 +435,6 @@ public class Ecgberht implements BWEventListener {
             UnitType type = Util.getType(pU);
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
                 if (arg0 instanceof Building) {
-                    gs.inMap.updateMap(arg0, false);
                     if (pU.getPlayer().getId() == self.getId()) {
                         if (!(arg0 instanceof CommandCenter)) {
                             gs.map.updateMap(arg0.getTilePosition(), type, false);
@@ -456,6 +454,7 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                     }
+                    gs.inMap.updateMap(arg0, false);
                 } else if (pU.getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0);
                     if (arg0 instanceof Vulture) gs.vulturesTrained++;
@@ -595,9 +594,7 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
                     || arg0 instanceof Critter) {
                 type = arg0.getInitialType();
-            } else {
-                type = Util.getType((PlayerUnit) arg0);
-            }
+            } else type = Util.getType((PlayerUnit) arg0);
             if (type.isMineralField()) {
                 if (gs.mineralsAssigned.containsKey(arg0)) {
                     gs.map.updateMap(arg0.getTilePosition(), type, true);
@@ -629,9 +626,7 @@ public class Ecgberht implements BWEventListener {
                         gs.enemyBuildingMemory.remove(arg0);
                         gs.initAttackPosition = arg0.getTilePosition();
                         if (!type.isResourceDepot()) gs.map.updateMap(arg0.getTilePosition(), type, true);
-                    } else {
-                        gs.initDefensePosition = arg0.getTilePosition();
-                    }
+                    } else gs.initDefensePosition = arg0.getTilePosition();
                 } else if (((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (type.isWorker()) {
@@ -644,7 +639,6 @@ public class Ecgberht implements BWEventListener {
                         }
                         if (gs.workerIdle.contains(arg0)) gs.workerIdle.remove(arg0);
                         if (gs.chosenScout != null && arg0.equals(gs.chosenScout)) gs.chosenScout = null;
-
                         if (gs.chosenHarasser != null && arg0.equals(gs.chosenHarasser)) {
                             gs.chosenHarasser = null;
                             gs.chosenUnitToHarass = null;
@@ -858,7 +852,8 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding ||
                     arg0 instanceof Critter) return;
             UnitType type = Util.getType((PlayerUnit) arg0);
-            if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
+            Player p = ((PlayerUnit) arg0).getPlayer();
+            if (p != null && Util.isEnemy(p)) {
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().players.size() == 3) { // TODO Check
                     gs.enemyRace = type.getRace();
@@ -868,7 +863,9 @@ public class Ecgberht implements BWEventListener {
                 }
                 if (type.isBuilding()) {
                     if (!gs.enemyBuildingMemory.containsKey(arg0)) {
+
                         gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
+
                         gs.inMap.updateMap(arg0, false);
                         gs.map.updateMap(arg0.getTilePosition(), type, false);
                     }

@@ -148,6 +148,15 @@ public class ChoosePosition extends Action {
                                         } else {
                                             origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
                                         }
+                                    } else {
+                                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
+                                        if (origin != null) {
+                                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                                            ((GameState) this.handler).chosenPosition = origin;
+                                            return State.SUCCESS;
+                                        } else {
+                                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                                        }
                                     }
                                 }
                             } else {
