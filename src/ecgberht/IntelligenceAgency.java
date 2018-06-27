@@ -30,11 +30,20 @@ public class IntelligenceAgency {
         return enemyStrat;
     }
 
+    /**
+     * Returns the number of bases or resource depots that a {@link org.openbw.bwapi4j.Player} owns
+     *
+     * @param player Player to check
+     * @return Number of bases
+     */
     public static int getNumEnemyBases(String player) {
         if (enemyBases.containsKey(player)) return enemyBases.get(player).size();
         return 0;
     }
 
+    /**
+     * Updates visible bullets
+     */
     public static void updateBullets() {
         enemyBullets.clear();
         allyBullets.clear();
@@ -187,6 +196,9 @@ public class IntelligenceAgency {
         }
     }
 
+    /**
+     * Detects if the enemy its doing a 4 or 5 Pool strat
+     */
     private static void detectEarlyPool() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null && !getGs().EI.naughty) {
             boolean found_pool = false;
@@ -212,7 +224,10 @@ public class IntelligenceAgency {
         }
     }
 
-    private static void detectZealotRush() {
+    /**
+     * Detects if the enemy its doing a "Zealot Rush" strat
+     */
+    private static void detectZealotRush() { // TODO let a few SCVs at the bunker to repair
         if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null) {
             int countGates = 0;
             int probes = IntelligenceAgency.getNumDrones();

@@ -3,6 +3,7 @@ package ecgberht.Simulation;
 import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
+import ecgberht.EnemyBuilding;
 import ecgberht.Squad;
 import jfap.JFAP;
 import jfap.JFAPUnit;
@@ -34,12 +35,15 @@ public class SimManager {
 
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
-        if(ConfigManager.getConfig().ecgConfig.sscait){
+        if (ConfigManager.getConfig().ecgConfig.sscait) {
             shortSimFrames = 70;
             longSimFrames = 200;
         }
     }
 
+    /**
+     * Clears all the info, clusters, SimInfos and the simulator
+     */
     private void reset() {
         friendly.clear();
         enemies.clear();
@@ -47,32 +51,37 @@ public class SimManager {
         simulations.clear();
     }
 
+    /**
+     * Using allied and enemy units create the clusters with them
+     */
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
         for (Squad s : getGs().squads.values()) {
+            //if(s.status == Squad.Status.DEFENSE) continue;
             myUnits.addAll(s.members);
         }
-        for (Unit ag : getGs().agents.keySet()) {
-            myUnits.add(ag);
-        }
+        myUnits.addAll(getGs().DBs.keySet()); // Bunkers
+        for (Unit ag : getGs().agents.keySet()) myUnits.add(ag);
         clustering = new MeanShift(myUnits);
         friendly = clustering.run();
-
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>(getGs().enemyCombatUnitMemory);
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
-            if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
             if (u instanceof Attacker || u instanceof Bunker) enemyUnits.add(u);
         }
         clustering = new MeanShift(enemyUnits);
         enemies = clustering.run();
     }
 
+    /**
+     * Main method that runs every frame
+     * If needed creates the clusters and SimInfos and run the simulations on them
+     */
     public void onFrameSim() {
         time = System.currentTimeMillis();
         reset();
-        if(!getGs().enemyCombatUnitMemory.isEmpty()){
+        if (!noNeedForSim()) {
             createClusters();
             createSimInfos();
             doSim();
@@ -80,10 +89,40 @@ public class SimManager {
         time = System.currentTimeMillis() - time;
     }
 
+    /**
+     * Checks if there is no need to do extra work simulating, useful to save cpu power
+     *
+     * @return True if there is no need for running {@link #onFrameSim()}, else returns false
+     */
+    private boolean noNeedForSim() {
+        boolean foundThreats = false;
+        int workerThreats = 0;
+        for (Unit u : getGs().enemyCombatUnitMemory) {
+            if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) {
+                foundThreats = true;
+                break;
+            }
+            if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
+        }
+        if (foundThreats) return false;
+        for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
+            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    /**
+     * Using the clusters creates different SimInfos based on distance between them
+     */
     private void createSimInfos() {
         for (Cluster friend : friendly) {
+            if (friend.units.isEmpty()) continue;
             SimInfo aux = new SimInfo();
             for (Cluster enemy : enemies) {
+                if (enemy.units.isEmpty()) continue;
                 if (getGs().broodWarDistance(friend.mode(), enemy.mode()) <= radius) {
                     aux.enemies.addAll(enemy.units);
                 }
@@ -120,7 +159,12 @@ public class SimManager {
         if (!newSims.isEmpty()) simulations.addAll(newSims);
     }
 
+    /**
+     * Updates the SimInfos created with the results of the simulations
+     */
     private void doSim() {
+        int energy = 0;
+        for (ComsatStation s : getGs().CSs) energy += s.getEnergy();
         for (SimInfo s : simulations) {
             simulator.clear();
             for (Unit u : s.allies) {
@@ -129,10 +173,16 @@ public class SimManager {
                 s.stateBefore.first.add(jU);
             }
             for (Unit u : s.enemies) {
+                if (!((PlayerUnit) u).isDetected() && energy >= 50 && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
+                    s.lose = true;
+                    energy -= 50;
+                    break;
+                }
                 JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer2(jU);
                 s.stateBefore.second.add(jU);
             }
+            if (s.lose) continue;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();
@@ -152,11 +202,25 @@ public class SimManager {
         }
     }
 
+    /**
+     * Given a SimInfo and a rate deduces if a battle is won by the bot
+     *
+     * @param s    SimInfo simulated
+     * @param rate Rate or ratio for comparing enemy and ally units score
+     * @return True if the battle simulated is advantageous for the bot
+     */
     private boolean scoreCalc(SimInfo s, double rate) {
         return ((s.preSimScore.second - s.postSimScore.second) * rate <= (s.preSimScore.first - s.postSimScore.first));
 
     }
 
+    /**
+     * Draws a cluster on the screen
+     *
+     * @param c    The cluster to be drawn
+     * @param ally If true draws the cluster using green lines otherwise red lines
+     * @param id   Cluster identifier
+     */
     private void drawCluster(Cluster c, boolean ally, int id) {
         Color color = Color.RED;
         if (ally) color = Color.GREEN;
@@ -166,6 +230,9 @@ public class SimManager {
         for (Unit u : c.units) getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
     }
 
+    /**
+     * Draws the clusters created on the screen
+     */
     public void drawClusters() {
         int cluster = 0;
         for (Cluster c : friendly) {
@@ -179,6 +246,7 @@ public class SimManager {
         }
     }
 
+    // TODO improve and search for bunkers SimInfos
     public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
         simulator.clear();
         org.openbw.bwapi4j.util.Pair<Boolean, Boolean> result = new org.openbw.bwapi4j.util.Pair<>(true, false);
@@ -199,35 +267,50 @@ public class SimManager {
                     break;
                 }
             }
-            if (bunkerDead) {
-                result.second = true;
-            }
+            if (bunkerDead) result.second = true;
         }
 
         return result;
     }
 
+    // TODO improve and search for harasser SimInfo
     public boolean simulateHarass(Unit harasser, Collection<Unit> enemies, int frames) {
         simulator.clear();
         simulator.addUnitPlayer1(new JFAPUnit(harasser));
-        for (Unit u : enemies) {
-            simulator.addUnitPlayer2(new JFAPUnit(u));
-        }
+        for (Unit u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u));
         int preSimFriendlyUnitCount = simulator.getState().first.size();
         simulator.simulate(frames);
         int postSimFriendlyUnitCount = simulator.getState().first.size();
         int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
-        if (myLosses > 0) {
-            return false;
-        }
+        if (myLosses > 0) return false;
         return true;
     }
 
+    /**
+     * Returns the SimInfo that an allied Unit belongs to
+     *
+     * @param unit The unit to check
+     * @param type Type of simulation to search, ground, air or mix
+     * @return SimInfo that contains the unit given by parameter and matches SimType
+     */
     public SimInfo getSimulation(Unit unit, SimInfo.SimType type) {
         for (SimInfo s : simulations) {
-            if (s.type == type && s.allies.contains(unit)) {
-                return s;
-            }
+            if (s.type == type && s.allies.contains(unit)) return s;
+        }
+        return new SimInfo();
+    }
+
+    /**
+     * Returns the SimInfo that an allied Unit belongs to
+     *
+     * @param unit  The unit to check
+     * @param enemy Where to look at
+     * @return First SimInfo found that contains the unit given by parameter
+     */
+    public SimInfo getSimulation(Unit unit, boolean enemy) {
+        for (SimInfo s : simulations) {
+            if (!enemy && s.allies.contains(unit)) return s;
+            if (enemy && s.enemies.contains(unit)) return s;
         }
         return new SimInfo();
     }

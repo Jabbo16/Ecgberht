@@ -2,7 +2,7 @@
     "bwapiConfig": {
         "localSpeed": -1,
         "frameSkip": 0,
-        "userInput": false,
+        "userInput": true,
         "completeMapInformation": false
     },
     "ecgConfig": {

@@ -23,10 +23,11 @@ public class CheckScan extends Conditional {
             if (((GameState) this.handler).CSs.isEmpty()) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).getIH().getFrameCount() - ((GameState) this.handler).startCount > 24) {
+            if (((GameState) this.handler).frameCount - ((GameState) this.handler).startCount > 40 + ((GameState) this.handler).getIH().getLatency()) {
                 for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
                     PlayerUnit pU = (PlayerUnit) u;
                     if ((pU.isCloaked() || (pU instanceof Burrowable && ((Burrowable) pU).isBurrowed())) && !pU.isDetected() && u instanceof Attacker) {
+                        if (((GameState) this.handler).sim.getSimulation(u, true).allies.isEmpty()) continue;
                         ((GameState) this.handler).checkScan = u.getTilePosition();
                         return State.SUCCESS;
                     }

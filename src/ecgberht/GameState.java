@@ -448,13 +448,13 @@ public class GameState extends GameHandler {
         for (Agent ag : agents.values()) {
             if (ag instanceof VultureAgent) {
                 VultureAgent vulture = (VultureAgent) ag;
-                bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), ag.statusToString());
+                bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
             }
             if (ag instanceof WraithAgent) {
                 WraithAgent wraith = (WraithAgent) ag;
-                bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ag.statusToString());
+                bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(0,
-                        UnitType.Terran_Wraith.dimensionUp())), wraith.name);
+                        UnitType.Terran_Wraith.dimensionUp())), ColorUtil.formatText(wraith.name, ColorUtil.White));
             }
         }
         if (mainChoke != null) bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), "MainChoke");
@@ -822,7 +822,7 @@ public class GameState extends GameHandler {
         return count + agents.size() * 2;
     }
 
-    public void siegeTanks() {
+    public void siegeTanks() { // TODO merge with Squad logic
         if (!squads.isEmpty()) {
             Set<SiegeTank> tanks = new TreeSet<>();
             for (Entry<String, Squad> s : squads.entrySet()) tanks.addAll(s.getValue().getTanks());
@@ -852,10 +852,10 @@ public class GameState extends GameHandler {
                         continue;
                     }
                     if (far) {
-                        if (!t.isSieged() && t.getOrder() != Order.Sieging) t.siege();
+                        if (!t.isSieged() && t.getOrder() != Order.Sieging && Math.random() < 0.05) t.siege();
                         continue;
                     }
-                    if (t.isSieged() && t.getOrder() != Order.Unsieging) t.unsiege();
+                    if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() < 0.05) t.unsiege();
                 }
             }
         }
@@ -1063,14 +1063,14 @@ public class GameState extends GameHandler {
     }
 
     /**
-     * Credits and Thanks to Yegers for the method
+     * Credits and thanks to Yegers for the method
+     * Number of workers needed to sustain a number of units.
+     * This method assumes that the required buildings are available.
+     * Example usage: to sustain building 2 marines at the same time from 2 barracks.
      *
      * @param units List of units that are to be sustained.
      * @return Number of workers required.
      * @author Yegers
-     * Number of workers needed to sustain a number of units.
-     * This method assumes that the required buildings are available.
-     * Example usage: to sustain building 2 marines at the same time from 2 barracks.
      */
     public double mineralGatherRateNeeded(final List<UnitType> units) {
         double mineralsRequired = 0.0;
@@ -1104,7 +1104,6 @@ public class GameState extends GameHandler {
             }
             for (Unit u : aux) workerMining.remove(u);
         }
-
     }
 
     //Credits to @PurpleWaveJadien
@@ -1203,7 +1202,13 @@ public class GameState extends GameHandler {
             boolean remove = ag.runAgent();
             if (remove) rem.add(ag);
         }
-        for (Agent ag : rem) agents.remove(ag);
+        for (Agent ag : rem) {
+            agents.remove(ag);
+            if (ag instanceof WraithAgent) {
+                String wraith = ((WraithAgent) ag).name;
+                shipNames.add(wraith);
+            }
+        }
     }
 
     public void sendCustomMessage() {
@@ -1248,5 +1253,22 @@ public class GameState extends GameHandler {
         for (Unit u : bw.getUnits(self)) {
             if (u instanceof Building && u.exists()) inMap.updateMap(u, false);
         }
+    }
+
+    public void sendRandomMessage() {
+        if (Math.random() < 0.79) return;
+        ih.sendText("What do you call a Zealot smoking weed?");
+        ih.sendText("A High Templar");
+    }
+
+    public void alwaysPools() {
+        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht"));
+        if (enemyRace == Race.Zerg) {
+            if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
+                EI.naughty = true;
+                return;
+            }
+        }
+        EI.naughty = false;
     }
 }

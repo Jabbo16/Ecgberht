@@ -387,7 +387,8 @@ public class BuildingMap implements Cloneable {
                     if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
                         if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
                             if (buildingType == UnitType.Terran_Bunker) {
-                                if (!bwem.getMap().getArea(new TilePosition(jj, ii)).equals(bwem.getMap().getArea(self.getStartLocation()))) {
+                                Area bunk = bwem.getMap().getArea(new TilePosition(jj, ii));
+                                if (bunk != null && !bunk.equals(bwem.getMap().getArea(self.getStartLocation()))) {
                                     continue;
                                 }
                             }

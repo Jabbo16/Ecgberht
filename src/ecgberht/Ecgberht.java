@@ -222,6 +222,7 @@ public class Ecgberht implements BWEventListener {
         gs = new GameState(bw, bwta, bwem);
         gs.initEnemyRace();
         gs.readOpponentInfo();
+        gs.alwaysPools();
         if (gs.enemyRace == Race.Zerg) {
             if (gs.EI.naughty) gs.playSound("rushed.mp3");
         }
@@ -350,13 +351,15 @@ public class Ecgberht implements BWEventListener {
             if (gs.test != null)
                 gs.getGame().getMapDrawer().drawCircleMap(gs.test.getTop().toPosition(), 100, Color.ORANGE);
             if (gs.frameCount == 1500) gs.sendCustomMessage();
-            if (gs.frameCount % 1000 == 0) gs.resetInMap();
+            if (gs.frameCount == 2300) gs.sendRandomMessage();
+            if (gs.frameCount % 3000 == 0) gs.resetInMap();
             IntelligenceAgency.updateBullets();
             gs.fix();
             gs.updateEnemyBuildingsMemory();
             gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
+            gs.sim.drawClusters();
             gs.runAgents();
             buildingLotTree.run();
             repairTree.run();
@@ -387,16 +390,21 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onEnd(boolean arg0) {
-        String name = ih.enemy().getName();
-        gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
-        if (arg0) {
-            gs.EI.wins++;
-            ih.sendText("gg wp " + name);
-        } else {
-            gs.EI.losses++;
-            ih.sendText("gg wp! " + name + ", next game I will lose!");
+        try {
+            String name = ih.enemy().getName();
+            gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
+            if (arg0) {
+                gs.EI.wins++;
+                ih.sendText("gg wp " + name);
+            } else {
+                gs.EI.losses++;
+                ih.sendText("gg wp! " + name + ", next game I will not lose!");
+            }
+            gs.writeOpponentInfo(name);
+        } catch (Exception e) {
+            System.err.println("onEnd Exception");
+            e.printStackTrace();
         }
-        gs.writeOpponentInfo(name);
     }
 
     @Override
@@ -777,8 +785,8 @@ public class Ecgberht implements BWEventListener {
                             gs.removeFromSquad(arg0);
                         } else if (type == UnitType.Terran_Vulture) {
                             if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
-                        } else if (type == UnitType.Terran_Wraith) {
-                            String wraith = ((WraithAgent) gs.agents.get(arg0)).name; // TODO fix NPE
+                        } else if (type == UnitType.Terran_Wraith && gs.agents.containsKey(arg0)) {
+                            String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
                             gs.shipNames.add(wraith);
                             gs.agents.remove(arg0);
                         }
@@ -793,34 +801,39 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onUnitMorph(Unit arg0) {
-        UnitType type;
-        if (arg0 instanceof VespeneGeyser) type = arg0.getInitialType();
-        else type = Util.getType((PlayerUnit) arg0);
-        if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
-            if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
-                if (!gs.enemyBuildingMemory.containsKey(arg0)) {
-                    gs.inMap.updateMap(arg0, false);
-                    gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
+        try {
+            UnitType type;
+            if (arg0 instanceof VespeneGeyser) type = arg0.getInitialType();
+            else type = Util.getType((PlayerUnit) arg0);
+            if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
+                if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
+                    if (!gs.enemyBuildingMemory.containsKey(arg0)) {
+                        gs.inMap.updateMap(arg0, false);
+                        gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
+                    }
                 }
             }
-        }
-        if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
-            for (Entry<GasMiningFacility, Integer> r : gs.refineriesAssigned.entrySet()) {
-                if (r.getKey().getTilePosition().equals(arg0.getTilePosition())) {
-                    gs.map.updateMap(arg0.getTilePosition(), type, false);
-                    gs.testMap = gs.map.clone();
-                    break;
+            if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
+                for (Entry<GasMiningFacility, Integer> r : gs.refineriesAssigned.entrySet()) {
+                    if (r.getKey().getTilePosition().equals(arg0.getTilePosition())) {
+                        gs.map.updateMap(arg0.getTilePosition(), type, false);
+                        gs.testMap = gs.map.clone();
+                        break;
+                    }
+                }
+                for (Entry<SCV, Pair<UnitType, TilePosition>> u : gs.workerBuild.entrySet()) {
+                    if (u.getKey().equals(((Building) arg0).getBuildUnit()) && u.getValue().first == type) {
+                        gs.workerBuild.remove(u.getKey());
+                        gs.workerTask.put(u.getKey(), (Building) arg0);
+                        gs.deltaCash.first -= type.mineralPrice();
+                        gs.deltaCash.second -= type.gasPrice();
+                        break;
+                    }
                 }
             }
-            for (Entry<SCV, Pair<UnitType, TilePosition>> u : gs.workerBuild.entrySet()) {
-                if (u.getKey().equals(((Building) arg0).getBuildUnit()) && u.getValue().first == type) {
-                    gs.workerBuild.remove(u.getKey());
-                    gs.workerTask.put(u.getKey(), (Building) arg0);
-                    gs.deltaCash.first -= type.mineralPrice();
-                    gs.deltaCash.second -= type.gasPrice();
-                    break;
-                }
-            }
+        } catch (Exception e) {
+            System.err.println("onUnitMorph Exception");
+            e.printStackTrace();
         }
     }
 
@@ -859,13 +872,12 @@ public class Ecgberht implements BWEventListener {
                     gs.enemyRace = type.getRace();
                 }
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type != UnitType.Zerg_Overlord))) {
+                    if (arg0 instanceof Worker && !((Worker) arg0).isAttacking()) return;
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {
                     if (!gs.enemyBuildingMemory.containsKey(arg0)) {
-
                         gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
-
                         gs.inMap.updateMap(arg0, false);
                         gs.map.updateMap(arg0.getTilePosition(), type, false);
                     }
