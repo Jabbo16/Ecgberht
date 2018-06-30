@@ -11,6 +11,7 @@
         "debugText": true,
         "enableLatCom": true,
         "sounds": false,
-        "sscait": false
+        "sscait": false,
+        "forceStrat": ""
     }
 }

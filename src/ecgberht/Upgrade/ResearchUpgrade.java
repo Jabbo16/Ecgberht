@@ -44,6 +44,7 @@ public class ResearchUpgrade extends Action {
                     return State.SUCCESS;
                 }
             }
+            ((GameState) this.handler).chosenUnitUpgrader = null;
             ((GameState) this.handler).chosenUpgrade = null;
             ((GameState) this.handler).chosenResearch = null;
             return State.FAILURE;

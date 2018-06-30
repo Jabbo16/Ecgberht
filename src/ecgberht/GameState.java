@@ -76,7 +76,7 @@ public class GameState extends GameHandler {
     public Map<Player, Integer> players = new HashMap<>();
     public Pair<Integer, Integer> deltaCash = new Pair<>(0, 0);
     public Pair<String, Unit> chosenMarine = null;
-    public Player neutral;
+    public Player neutral = null;
     public Position attackPosition = null;
     public Race enemyRace = Race.Unknown;
     public Area naturalRegion = null;
@@ -131,7 +131,7 @@ public class GameState extends GameHandler {
     public int directionScoutMain;
     public int maxWraiths = 5;
     public SimManager sim;
-    public ChokePoint naturalChoke;
+    public ChokePoint naturalChoke = null;
     public Position defendPosition = null;
     Area test = null;
 
@@ -168,10 +168,10 @@ public class GameState extends GameHandler {
             BioMechBuildFE bMFE = new BioMechBuildFE();
             FullMech FM = new FullMech();
             BioGreedyFE bGFE = new BioGreedyFE();
-            //if (true) return bbs;
             String map = bw.getBWMap().mapFileName();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
-            if (EI.history.isEmpty()) {
+            String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
+            if (EI.history.isEmpty() && forcedStrat.equals("")) {
                 if (enemyRace == Race.Protoss) {
                     double random = Math.random();
                     if (random > 0.5) return b;
@@ -216,6 +216,10 @@ public class GameState extends GameHandler {
                 strategies.put(bFE.name, new Pair<>(0, 0));
                 nameStrat.put(bFE.name, bFE);
 
+                if (!forcedStrat.equals("") && nameStrat.containsKey(forcedStrat)) {
+                    ih.sendText("Picked forced strategy " + forcedStrat);
+                    return nameStrat.get(forcedStrat);
+                }
                 for (StrategyOpponentHistory r : EI.history) {
                     if (strategies.containsKey(r.strategyName)) {
                         strategies.get(r.strategyName).first += r.wins;
@@ -257,8 +261,7 @@ public class GameState extends GameHandler {
         } catch (Exception e) {
             System.err.println("Error initStrat, loading default Strat");
             System.err.println(e);
-            BioBuild b = new BioBuild();
-            return b;
+            return new BioBuild();
 
         }
 
@@ -372,14 +375,14 @@ public class GameState extends GameHandler {
         for (Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) { // TODO test
             for (Geyser g : gas) {
                 if (pm.getKey().equals(g.getUnit())) {
-                    List<Unit> aux = new ArrayList<>();
+                    List<Worker> aux = new ArrayList<>();
                     for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
                         if (pm.getKey().equals(w.getValue())) {
                             aux.add(w.getKey());
                             workerIdle.add(w.getKey());
                         }
                     }
-                    for (Unit u : aux) workerGas.remove(u);
+                    for (Worker u : aux) workerGas.remove(u);
                     auxGas.add(pm.getKey());
                 }
             }
@@ -576,31 +579,20 @@ public class GameState extends GameHandler {
     }
 
     public void fix() {
-        if (defense && enemyInBase.isEmpty()) {
-            defense = false;
-        }
-        if (frameCount < 5) {
-            for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
-                if (mineralsAssigned.get(w.getValue()) == 0) {
-                    mineralsAssigned.put(w.getValue(), 1);
-                    w.getKey().gather(w.getValue());
-                }
-            }
-        }
+        if (defense && enemyInBase.isEmpty()) defense = false;
         List<String> squadsToClean = new ArrayList<>();
         for (Squad s : squads.values()) {
             List<Unit> aux = new ArrayList<>();
             for (Unit u : s.members) {
                 if (!u.exists()) aux.add(u);
             }
-
             if (s.members.isEmpty() || aux.size() == s.members.size()) {
                 squadsToClean.add(s.name);
                 continue;
             } else s.members.removeAll(aux);
 
         }
-        List<Unit> bunkers = new ArrayList<>();
+        List<Bunker> bunkers = new ArrayList<>();
         for (Entry<Bunker, Set<Unit>> u : DBs.entrySet()) {
             if (u.getKey().exists()) continue;
             for (Unit m : u.getValue()) {
@@ -608,7 +600,22 @@ public class GameState extends GameHandler {
             }
             bunkers.add(u.getKey());
         }
-        for (Unit c : bunkers) DBs.remove(c);
+        for (Bunker c : bunkers) DBs.remove(c);
+
+        List<Worker> removeMining = new ArrayList<>();
+        for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
+            if (repairerTask.containsKey(w.getKey())) {
+                if (w.getKey().isGatheringMinerals()) {
+                    repairerTask.remove(w.getKey());
+                    continue;
+                }
+                if (((SCV) w.getKey()).isRepairing()) {
+                    mineralsAssigned.put(w.getValue(), mineralsAssigned.get(w.getValue()) - 1);
+                    removeMining.add(w.getKey());
+                }
+            }
+        }
+        for (Worker u : removeMining) workerMining.remove(u);
 
         for (String name : squadsToClean) squads.remove(name);
 
@@ -638,14 +645,15 @@ public class GameState extends GameHandler {
         for (Unit u : aux3) workerBuild.remove(u);
 
         List<Unit> aux4 = new ArrayList<>();
-        for (SCV r : repairerTask.keySet()) {
-            if (r.equals(chosenScout)) chosenScout = null;
-            if (!r.isRepairing() || r.isIdle()) {
+        for (Entry<SCV, Building> r : repairerTask.entrySet()) {
+            if ((!r.getKey().isRepairing() || r.getKey().isIdle()) && (!(r.getValue() instanceof Bunker)
+                    && IntelligenceAgency.getEnemyStrat() != IntelligenceAgency.EnemyStrats.ZealotRush || countUnit(UnitType.Terran_Command_Center) > 1)) {
                 if (chosenRepairer != null) {
                     if (r.equals(chosenRepairer)) chosenRepairer = null;
                 }
-                workerIdle.add(r);
-                aux4.add(r);
+                workerIdle.add(r.getKey());
+                r.getKey().stop(false);
+                aux4.add(r.getKey());
             }
         }
         for (Unit u : aux4) repairerTask.remove(u);
@@ -968,38 +976,71 @@ public class GameState extends GameHandler {
 
     public TilePosition getBunkerPositionAntiPool() {
         try {
-            TilePosition rax = MBs.iterator().next().getTilePosition();
-            UnitType bunker = UnitType.Terran_Bunker;
+            TilePosition startTile = MBs.iterator().next().getTilePosition();
+            TilePosition searchTile = CCs.values().iterator().next().getTilePosition();
+            UnitType type = UnitType.Terran_Bunker;
             int dist = 0;
             TilePosition chosen = null;
-            while (chosen == null) {
+            while (chosen == null || dist < 5) {
                 List<TilePosition> sides = new ArrayList<>();
-                if (rax.getY() - bunker.tileHeight() - dist >= 0) {
-                    TilePosition up = new TilePosition(rax.getX(), rax.getY() - bunker.tileHeight() - dist);
+                if (startTile.getY() - type.tileHeight() - dist >= 0) {
+                    TilePosition up = new TilePosition(startTile.getX(), startTile.getY() - type.tileHeight() - dist);
                     sides.add(up);
                 }
-                if (rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist < bw.getBWMap().mapHeight()) {
-                    TilePosition down = new TilePosition(rax.getX(), rax.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
+                if (startTile.getY() + UnitType.Terran_Barracks.tileHeight() + dist < bw.getBWMap().mapHeight()) {
+                    TilePosition down = new TilePosition(startTile.getX(), startTile.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
                     sides.add(down);
                 }
-                if (rax.getX() - bunker.tileWidth() - dist >= 0) {
-                    TilePosition left = new TilePosition(rax.getX() - bunker.tileWidth() - dist, rax.getY());
+                if (startTile.getX() - type.tileWidth() - dist >= 0) {
+                    TilePosition left = new TilePosition(startTile.getX() - type.tileWidth() - dist, startTile.getY());
                     sides.add(left);
                 }
-                if (rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist < bw.getBWMap().mapWidth()) {
-                    TilePosition right = new TilePosition(rax.getX() + UnitType.Terran_Barracks.tileWidth() + dist, rax.getY());
+                if (startTile.getX() + UnitType.Terran_Barracks.tileWidth() + dist < bw.getBWMap().mapWidth()) {
+                    TilePosition right = new TilePosition(startTile.getX() + UnitType.Terran_Barracks.tileWidth() + dist, startTile.getY());
                     sides.add(right);
                 }
                 for (TilePosition tile : sides) {
-                    if ((chosen == null && bw.canBuildHere(tile, bunker)) || (mainChoke.getCenter().toTilePosition().getDistance(tile) < mainChoke.getCenter().toTilePosition().getDistance(chosen) && bw.canBuildHere(tile, bunker))) {
-                        chosen = tile;
+                    if (tile == null) continue;
+                    if ((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen))) {
+                        if (bw.canBuildHere(tile, type)) chosen = tile;
+                    }
+                }
+                dist++;
+            }
+            startTile = CCs.values().iterator().next().getTilePosition();
+            UnitType ccType = UnitType.Terran_Command_Center;
+            searchTile = mainChoke.getCenter().toTilePosition();
+            dist = 0;
+            while (dist < 2) {
+                List<TilePosition> sides = new ArrayList<>();
+                if (startTile.getY() - type.tileHeight() - dist >= 0) {
+                    TilePosition up = new TilePosition(startTile.getX(), startTile.getY() - type.tileHeight() - dist);
+                    sides.add(up);
+                }
+                if (startTile.getY() + ccType.tileHeight() + dist < bw.getBWMap().mapHeight()) {
+                    TilePosition down = new TilePosition(startTile.getX(), startTile.getY() + ccType.tileHeight() + dist);
+                    sides.add(down);
+                }
+                if (startTile.getX() - type.tileWidth() - dist >= 0) {
+                    TilePosition left = new TilePosition(startTile.getX() - type.tileWidth() - dist, startTile.getY());
+                    sides.add(left);
+                }
+                if (startTile.getX() + ccType.tileWidth() + dist < bw.getBWMap().mapWidth()) {
+                    TilePosition right = new TilePosition(startTile.getX() + ccType.tileWidth() + dist, startTile.getY());
+                    sides.add(right);
+                }
+                for (TilePosition tile : sides) {
+                    if (tile == null) continue;
+                    if ((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen))) {
+                        if (bw.canBuildHere(tile, type)) chosen = tile;
                     }
                 }
                 dist++;
             }
             return chosen;
         } catch (Exception e) {
-            System.err.println(e);
+            System.err.println("BunkerAntiPool");
+            e.printStackTrace();
             return null;
         }
 
@@ -1262,7 +1303,7 @@ public class GameState extends GameHandler {
     }
 
     public void alwaysPools() {
-        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht"));
+        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll"));
         if (enemyRace == Race.Zerg) {
             if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
                 EI.naughty = true;

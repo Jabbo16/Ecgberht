@@ -22,17 +22,13 @@ public class ChooseRepairer extends Action {
             Position chosen = ((GameState) this.handler).chosenBuildingRepair.getPosition();
             int frame = ((GameState) this.handler).frameCount;
             for (Worker u : ((GameState) this.handler).workerIdle) {
-                if (u.getLastCommandFrame() == frame) {
-                    continue;
-                }
+                if (u.getLastCommandFrame() == frame) continue;
                 if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
                     closestWorker = (SCV) u;
                 }
             }
             for (Worker u : ((GameState) this.handler).workerMining.keySet()) {
-                if (u.getLastCommandFrame() == frame) {
-                    continue;
-                }
+                if (u.getLastCommandFrame() == frame) continue;
                 if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
                     closestWorker = (SCV) u;
                 }

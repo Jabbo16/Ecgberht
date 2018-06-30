@@ -18,7 +18,7 @@ public class CheckScan extends Conditional {
     }
 
     @Override
-    public State execute() { // TODO Test timer
+    public State execute() {
         try {
             if (((GameState) this.handler).CSs.isEmpty()) {
                 return State.FAILURE;

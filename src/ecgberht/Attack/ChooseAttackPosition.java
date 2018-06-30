@@ -22,6 +22,7 @@ public class ChooseAttackPosition extends Action {
                 return State.FAILURE;
             }
             for (Squad u : ((GameState) this.handler).squads.values()) {
+                if (u.members.isEmpty()) continue;
                 Pair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(((GameState) this.handler).getSquadCenter(u).toTilePosition(), true);
                 if (p.first != -1 && p.second != -1) {
                     TilePosition attackPos = new TilePosition(p.second, p.first);

@@ -57,7 +57,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
                 if (pos.first != -1 && pos.second != -1) {
-                    Position newPos = new Position(pos.first, pos.second);
+                    Position newPos = new Position(pos.second, pos.first);
                     if (getGs().bw.getBWMap().isValidPosition(newPos)) {
                         unit.attack(newPos);
                         return remove;
@@ -89,9 +89,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         Unit toAttack = getUnitToAttack(unit, closeEnemies);
         if (toAttack != null) {
             if (attackUnit != null) {
-                if (attackUnit.equals(toAttack)) {
-                    return;
-                }
+                if (attackUnit.equals(toAttack)) return;
             }
             unit.attack(toAttack);
             attackUnit = toAttack;
@@ -161,7 +159,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean equals(Object o) {
         if (o == this.unit) return true;
-        if (!(o instanceof Wraith) || !(o instanceof WraithAgent)) return false;
+        if (!(o instanceof WraithAgent)) return false;
         WraithAgent wraith = (WraithAgent) o;
         return unit.equals(wraith.unit);
     }

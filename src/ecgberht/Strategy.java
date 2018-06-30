@@ -5,9 +5,10 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-public abstract class Strategy {
+public abstract class Strategy implements Comparable<Strategy> {
 
     public boolean bunker = false;
     public boolean proxy = false;
@@ -45,4 +46,22 @@ public abstract class Strategy {
     public abstract void initTechToResearch();
 
     public abstract void initUpgradesToResearch();
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Strategy)) return false;
+        Strategy strat = (Strategy) o;
+        return strat.name.equals(this.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public int compareTo(Strategy v1) {
+        return this.name.compareTo(v1.name);
+    }
 }

@@ -34,7 +34,7 @@ public class Util {
         return unit.getInitialType();
     }
 
-    protected static UnitType getType(PlayerUnit unit) { // TODO TEST
+    protected static UnitType getType(PlayerUnit unit) {
         Race race = unit.getPlayer().getRace();
         UnitType type = UnitType.Unknown;
         if (race == Race.Terran) type = getTerranType(unit);

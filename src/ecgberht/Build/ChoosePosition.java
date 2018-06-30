@@ -107,13 +107,13 @@ public class ChoosePosition extends Action {
                         }
                     } else {
                         if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg) {
-                            origin = ((GameState) this.handler).testMap.findBunkerPositionAntiPool();
+                            origin = ((GameState) this.handler).getBunkerPositionAntiPool();
                             if (origin != null) {
                                 ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                                 ((GameState) this.handler).chosenPosition = origin;
                                 return State.SUCCESS;
                             } else {
-                                origin = ((GameState) this.handler).getBunkerPositionAntiPool();
+                                origin = ((GameState) this.handler).testMap.findBunkerPositionAntiPool();
                                 if (origin != null) {
                                     ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                                     ((GameState) this.handler).chosenPosition = origin;

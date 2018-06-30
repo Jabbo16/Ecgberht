@@ -71,8 +71,8 @@ public class Ecgberht implements BWEventListener {
     private BehavioralTree scoutingTree;
     private boolean first = false;
     private Player self;
-    private BWTA bwta;
-    private BWEM bwem;
+    private BWTA bwta = null;
+    private BWEM bwem = null;
 
     public static void main(String[] args) {
         new Ecgberht().run();

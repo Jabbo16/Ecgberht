@@ -27,19 +27,17 @@ public class CheckResourcesBuilding extends Conditional {
 
             if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks) {
                 if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 1) {
-                    // TODO Improve
                     if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() * 2 + 40 + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice() * 2) + ((GameState) this.handler).deltaCash.second) {
                         return State.SUCCESS;
                     }
-                } else if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 1) {
-//                    if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(chosen, start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
-                    return State.SUCCESS;
-//                    }
-                }
+                } else if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 1) return State.SUCCESS;
                 return State.ERROR;
             } else if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
                 return State.SUCCESS;
             }
+            ((GameState) this.handler).chosenWorker = null;
+            ((GameState) this.handler).chosenPosition = null;
+            ((GameState) this.handler).chosenToBuild = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

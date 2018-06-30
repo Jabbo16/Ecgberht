@@ -21,16 +21,8 @@ public class Move extends Action {
     public State execute() {
         try {
             Worker chosen = ((GameState) this.handler).chosenWorker;
-            boolean success;
-            /*if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Refinery) {
-                success = chosen.build(((GameState) this.handler).chosenPosition, ((GameState) this.handler).chosenToBuild);
-            } else {
-                Position realEnd = ((GameState) this.handler).getCenterFromBuilding(((GameState) this.handler).chosenPosition.toPosition(), ((GameState) this.handler).chosenToBuild);
-                success = chosen.move(realEnd);
-            }*/
             Position realEnd = ((GameState) this.handler).getCenterFromBuilding(((GameState) this.handler).chosenPosition.toPosition(), ((GameState) this.handler).chosenToBuild);
-            success = chosen.move(realEnd);
-            if (success) {
+            if (chosen.move(realEnd)) {
                 if (((GameState) this.handler).workerIdle.contains(chosen)) {
                     ((GameState) this.handler).workerIdle.remove(chosen);
                 } else {

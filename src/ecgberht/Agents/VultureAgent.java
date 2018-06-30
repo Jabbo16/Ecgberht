@@ -49,7 +49,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
                 if (pos.first != -1 && pos.second != -1) {
-                    Position newPos = new Position(pos.first, pos.second);
+                    Position newPos = new Position(pos.second, pos.first);
                     if (getGs().bw.getBWMap().isValidPosition(newPos)) {
                         unit.attack(newPos);
                         return remove;
@@ -210,7 +210,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof Vulture) || !(o instanceof VultureAgent)) return false;
+        if (!(o instanceof VultureAgent)) return false;
         VultureAgent vulture = (VultureAgent) o;
         return unit.equals(vulture.unit);
     }

@@ -58,6 +58,7 @@ public class ConfigManager {
             public boolean sounds;
             public boolean enableLatCom;
             public boolean sscait;
+            public String forceStrat = "";
 
             public EcgberhtConfig() {
             }

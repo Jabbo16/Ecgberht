@@ -46,20 +46,21 @@ public class Util {
 
     public static List<Unit> getUnitsInRectangle(Position topLeft, Position bottomRight) { //TODO test
         List<Unit> units = new ArrayList<>();
+        if (!getGs().getGame().getBWMap().isVisible(topLeft.toTilePosition()) || !getGs().getGame().getBWMap().isVisible(bottomRight.toTilePosition()))
+            return units;
         for (Unit u : getGs().bw.getAllUnits()) {
             if (!u.exists()) continue;
             Position pos = u.getPosition();
-            Position p1 = topLeft;
             Position p2 = new Position(bottomRight.getX(), topLeft.getY());
             Position p3 = new Position(topLeft.getX(), bottomRight.getY());
-            Position p4 = bottomRight;
-            if (check(p1, p2, p3, p4, pos)) units.add(u);
+            if (check(topLeft, p2, p3, bottomRight, pos)) units.add(u);
         }
         return units;
     }
 
     public static List<Unit> getUnitsOnTile(TilePosition tile) { //TODO test
         List<Unit> units = new ArrayList<>();
+        if (!getGs().getGame().getBWMap().isVisible(tile)) return units;
         for (Unit u : getGs().bw.getAllUnits()) {
             if (!u.exists()) continue;
             if (u.getTilePosition().equals(tile)) units.add(u);
@@ -70,7 +71,7 @@ public class Util {
     public static int countUnitTypeSelf(UnitType type) {
         int count = 0;
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
-            if (getType(((PlayerUnit) u)) == type) count++;
+            if (u.exists() && getType(((PlayerUnit) u)) == type) count++;
         }
         return count;
     }
@@ -185,7 +186,7 @@ public class Util {
         return unit.getInitialType();
     }
 
-    public static UnitType getType(PlayerUnit unit) { // TODO TEST
+    public static UnitType getType(PlayerUnit unit) {
         Race race = unit.getPlayer().getRace();
         UnitType type = UnitType.Unknown;
         if (race == Race.Terran) type = getTerranType(unit);

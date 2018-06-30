@@ -45,9 +45,7 @@ public class ChooseSupply extends Action {
                             }
                         }
                     }
-                    if (!found_bunker) {
-                        return State.FAILURE;
-                    }
+                    if (!found_bunker) return State.FAILURE;
                 }
                 boolean found_rax = false;
                 for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
@@ -63,10 +61,7 @@ public class ChooseSupply extends Action {
                         }
                     }
                 }
-                if (!found_rax) {
-                    return State.FAILURE;
-                }
-
+                if (!found_rax) return State.FAILURE;
             }
             if (((GameState) this.handler).getSupply() <= 4 * ((GameState) this.handler).getCombatUnitsBuildings()) {
                 for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {

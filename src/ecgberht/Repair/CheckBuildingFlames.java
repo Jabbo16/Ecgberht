@@ -2,12 +2,16 @@ package ecgberht.Repair;
 
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
+
+import java.util.Map;
 
 public class CheckBuildingFlames extends Action {
 
@@ -18,19 +22,26 @@ public class CheckBuildingFlames extends Action {
     @Override
     public State execute() {
         try {
+            for (Map.Entry<SCV, Building> u : ((GameState) this.handler).repairerTask.entrySet()) {
+                if (u.getValue().maxHitPoints() != u.getValue().getHitPoints() &&
+                        (u.getKey().getOrder() != Order.Repair || u.getKey().getOrder() != Order.MoveToRepair)) {
+                    u.getKey().repair((Mechanical) u.getValue());
+                }
+            }
             boolean isBeingRepaired;
+            boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush;
             for (Bunker w : ((GameState) this.handler).DBs.keySet()) {
                 int count = 0;
-                if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints()) {
+                if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints() ||
+                        (cheesed && ((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) < 2)) {
                     for (Building r : ((GameState) this.handler).repairerTask.values()) {
-                        if (w.equals(r)) {
-                            count++;
-                        }
+                        if (w.equals(r)) count++;
                     }
-                    if (count < 2 && ((GameState) this.handler).defense) {
+                    if (count < 2 && (((GameState) this.handler).defense || cheesed)) {
                         ((GameState) this.handler).chosenBuildingRepair = w;
                         return State.SUCCESS;
-                    } else if (count == 0) {
+                    }
+                    if (count == 0) {
                         ((GameState) this.handler).chosenBuildingRepair = w;
                         return State.SUCCESS;
                     }
