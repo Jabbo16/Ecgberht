@@ -24,8 +24,20 @@ public class Build extends Action {
             //List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
                 if (u.getKey().getOrder() != Order.PlaceBuilding && ((GameState) this.handler).canAfford(u.getValue().first)) {
-                    SCV chosen = u.getKey();
-                    chosen.build(u.getValue().second, u.getValue().first);
+                    if (u.getValue().first == UnitType.Terran_Bunker) {
+                        SCV chosen = u.getKey();
+                        if (!chosen.build(u.getValue().second, u.getValue().first)) {
+                            ((GameState) this.handler).deltaCash.first -= u.getValue().first.mineralPrice();
+                            ((GameState) this.handler).deltaCash.second -= u.getValue().first.gasPrice();
+                            ((GameState) this.handler).workerBuild.remove(chosen);
+                            chosen.stop(false);
+                            ((GameState) this.handler).workerIdle.add(chosen);
+                        }
+                    } else {
+                        SCV chosen = u.getKey();
+                        chosen.build(u.getValue().second, u.getValue().first);
+                    }
+
                 }
             }
                 /*if ((u.getKey().getOrder() != Order.PlaceBuilding || ((GameState) this.handler).frameCount % 24*10 == 0)

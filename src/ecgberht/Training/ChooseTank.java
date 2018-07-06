@@ -21,7 +21,8 @@ public class ChooseTank extends Action {
         try {
             if (!((GameState) this.handler).Fs.isEmpty()) {
                 if (((GameState) this.handler).siegeResearched) {
-                    if (((GameState) this.handler).strat.name != "FullMech") {
+                    if (!((GameState) this.handler).strat.name.equals("FullMech") &&
+                            !((GameState) this.handler).strat.name.equals("MechGreedyFE")) {
                         if (Util.countUnitTypeSelf(UnitType.Terran_Vulture) == 0) {
                             return State.FAILURE;
                         }
@@ -36,7 +37,8 @@ public class ChooseTank extends Action {
                             }
                         }
                     } else {
-                        if (((GameState) this.handler).maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 < 1) {
+                        if (((GameState) this.handler).strat.trainUnits.contains(UnitType.Terran_Wraith) &&
+                                ((GameState) this.handler).maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 <= 1) {
                             return State.FAILURE;
                         }
                         if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * 2 +

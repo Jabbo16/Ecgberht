@@ -1,6 +1,7 @@
 package ecgberht.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -40,18 +41,14 @@ public class ChooseRefinery extends Action {
                         break;
                     }
                 }
-                if (((GameState) this.handler).MBs.isEmpty() && found == false) {
-                    return State.FAILURE;
-                }
+                if (((GameState) this.handler).MBs.isEmpty() && !found) return State.FAILURE;
             }
             int count = 0;
             VespeneGeyser geyser = null;
             for (Entry<VespeneGeyser, Boolean> r : ((GameState) this.handler).vespeneGeysers.entrySet()) {
                 if (r.getValue()) {
                     count++;
-                } else {
-                    geyser = r.getKey();
-                }
+                } else geyser = r.getKey();
             }
             if (count == ((GameState) this.handler).vespeneGeysers.size()) {
                 return State.FAILURE;
@@ -66,8 +63,11 @@ public class ChooseRefinery extends Action {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).strat.name == "BioGreedyFE") {
-                if (!((GameState) this.handler).refineriesAssigned.isEmpty() && ((GameState) this.handler).CCs.size() <= 2) {
+            if (((GameState) this.handler).strat.name.equals("BioGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("MechGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
+                if (!((GameState) this.handler).refineriesAssigned.isEmpty() && ((GameState) this.handler).CCs.size() <= 2
+                        && Util.countUnitTypeSelf(UnitType.Terran_SCV) < 30) {
                     return State.FAILURE;
                 }
             }

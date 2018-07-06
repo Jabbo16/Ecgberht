@@ -20,14 +20,16 @@ public class ChooseBarracks extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).strat.name == "BioGreedyFE" &&
+            if ((((GameState) this.handler).strat.name.equals("BioGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("MechGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) &&
                     ((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) == 1 &&
                     ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) > 1 &&
                     ((GameState) this.handler).frameCount <= 24 * 240) {
                 return State.FAILURE;
 
             }
-            if (((GameState) this.handler).strat.name != "ProxyBBS") {
+            if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && ((GameState) this.handler).countUnit(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;
                 }
@@ -35,9 +37,7 @@ public class ChooseBarracks extends Action {
                     return State.FAILURE;
                 }
             } else {
-                if (((GameState) this.handler).getPlayer().supplyUsed() < 16) {
-                    return State.FAILURE;
-                }
+                if (((GameState) this.handler).getPlayer().supplyUsed() < 16) return State.FAILURE;
             }
             if (((GameState) this.handler).strat.buildUnits.contains(UnitType.Terran_Factory)) {
                 int count = 0;

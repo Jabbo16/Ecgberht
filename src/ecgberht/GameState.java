@@ -9,6 +9,7 @@ import bwem.unit.Mineral;
 import bwta.BWTA;
 import com.google.gson.Gson;
 import ecgberht.Agents.Agent;
+import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.VultureAgent;
 import ecgberht.Agents.WraithAgent;
 import ecgberht.Simulation.SimManager;
@@ -168,6 +169,8 @@ public class GameState extends GameHandler {
             BioMechBuildFE bMFE = new BioMechBuildFE();
             FullMech FM = new FullMech();
             BioGreedyFE bGFE = new BioGreedyFE();
+            MechGreedyFE mGFE = new MechGreedyFE();
+            BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             String map = bw.getBWMap().mapFileName();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
@@ -204,11 +207,18 @@ public class GameState extends GameHandler {
                 strategies.put(bGFE.name, new Pair<>(0, 0));
                 nameStrat.put(bGFE.name, bGFE);
 
+                strategies.put(bMGFE.name, new Pair<>(0, 0));
+                nameStrat.put(bMGFE.name, bGFE);
+
                 strategies.put(FM.name, new Pair<>(0, 0));
                 nameStrat.put(FM.name, FM);
 
                 strategies.put(bbs.name, new Pair<>(0, 0));
                 nameStrat.put(bbs.name, bbs);
+
+                strategies.put(mGFE.name, new Pair<>(0, 0));
+                nameStrat.put(mGFE.name, bGFE);
+
 
                 strategies.put(bMFE.name, new Pair<>(0, 0));
                 nameStrat.put(bMFE.name, bMFE);
@@ -243,7 +253,8 @@ public class GameState extends GameHandler {
                 String bestUCBStrategy = null;
                 double bestUCBStrategyVal = Double.MIN_VALUE;
                 for (String strat : strategies.keySet()) {
-                    if (map.contains("HeartbreakRidge") && (strat == "BioMechFE" || strat == "BioMech" || strat == "FullMech")) {
+                    if (map.contains("HeartbreakRidge") && (strat.equals("BioMechFE") || strat.equals("BioMech") ||
+                            strat.equals("FullMech"))) {
                         continue;
                     }
                     int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
@@ -259,10 +270,9 @@ public class GameState extends GameHandler {
                 return nameStrat.get(bestUCBStrategy);
             }
         } catch (Exception e) {
-            System.err.println("Error initStrat, loading default Strat");
-            System.err.println(e);
+            System.err.println("Error initStrat, using default strategy");
+            e.printStackTrace();
             return new BioBuild();
-
         }
 
     }
@@ -452,8 +462,10 @@ public class GameState extends GameHandler {
             if (ag instanceof VultureAgent) {
                 VultureAgent vulture = (VultureAgent) ag;
                 bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
-            }
-            if (ag instanceof WraithAgent) {
+            } else if (ag instanceof VesselAgent) {
+                VesselAgent vessel = (VesselAgent) ag;
+                bw.getMapDrawer().drawTextMap(vessel.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
+            } else if (ag instanceof WraithAgent) {
                 WraithAgent wraith = (WraithAgent) ag;
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(0,
@@ -588,10 +600,10 @@ public class GameState extends GameHandler {
             }
             if (s.members.isEmpty() || aux.size() == s.members.size()) {
                 squadsToClean.add(s.name);
-                continue;
             } else s.members.removeAll(aux);
 
         }
+        for (String s : squadsToClean) squads.remove(s);
         List<Bunker> bunkers = new ArrayList<>();
         for (Entry<Bunker, Set<Unit>> u : DBs.entrySet()) {
             if (u.getKey().exists()) continue;
@@ -616,6 +628,27 @@ public class GameState extends GameHandler {
             }
         }
         for (Worker u : removeMining) workerMining.remove(u);
+
+        List<Worker> removeGas = new ArrayList<>();
+        for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
+            if (!w.getKey().isGatheringGas()) {
+                removeGas.add(w.getKey());
+                refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
+                w.getKey().stop(false);
+                workerIdle.add(w.getKey());
+            }
+        }
+        for (Worker u : removeGas) workerGas.remove(u);
+
+        List<Worker> removeTask = new ArrayList<>();
+        for (Entry<SCV, Building> w : workerTask.entrySet()) {
+            if (!w.getKey().isConstructing() || w.getValue().isCompleted()) removeTask.add(w.getKey());
+        }
+        for (Worker u : removeTask) {
+            workerTask.remove(u);
+            u.stop(false);
+            workerIdle.add(u);
+        }
 
         for (String name : squadsToClean) squads.remove(name);
 
@@ -652,7 +685,6 @@ public class GameState extends GameHandler {
                     if (r.equals(chosenRepairer)) chosenRepairer = null;
                 }
                 workerIdle.add(r.getKey());
-                r.getKey().stop(false);
                 aux4.add(r.getKey());
             }
         }
@@ -660,18 +692,19 @@ public class GameState extends GameHandler {
 
         List<Unit> aux5 = new ArrayList<>();
         for (Worker r : workerDefenders.keySet()) {
-            if (r.isIdle() || r.isGatheringMinerals()) {
+            if (!r.exists()) aux5.add(r);
+            else if (r.isIdle() || r.isGatheringMinerals()) {
                 workerIdle.add(r);
                 aux5.add(r);
             }
         }
         for (Unit u : aux5) workerDefenders.remove(u);
 
-        List<String> aux6 = new ArrayList<>();
+        /*List<String> aux6 = new ArrayList<>();
         for (Squad u : squads.values()) {
             if (u.members.isEmpty()) aux6.add(u.name);
         }
-        for (String s : aux6) squads.remove(s);
+        for (String s : aux6) squads.remove(s);*/
     }
 
     public void checkMainEnemyBase() {
@@ -687,7 +720,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    // Based on BWEB, thanks @Fawx
+    // Based on BWEB, thanks @Fawx, https://github.com/Cmccrave/BWEB
     public void initChokes() {
         // Main choke
         naturalRegion = BLs.get(1).getArea();
@@ -781,8 +814,8 @@ public class GameState extends GameHandler {
         } else {
             String chosen = null;
             for (Entry<String, Squad> s : squads.entrySet()) {
-                if (s.getValue().members.size() < 16 && broodWarDistance(getSquadCenter(s.getValue()),
-                        unit.getPosition()) <= 700 && (chosen == null || broodWarDistance(unit.getPosition(),
+                if (s.getValue().members.size() < 16 && (s.getValue().members.isEmpty() || broodWarDistance(getSquadCenter(s.getValue()),
+                        unit.getPosition()) <= 700) && (chosen == null || broodWarDistance(unit.getPosition(),
                         getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(),
                         getSquadCenter(squads.get(chosen))))) {
                     chosen = s.getKey();
@@ -803,19 +836,26 @@ public class GameState extends GameHandler {
 
     public Position getSquadCenter(Squad s) {
         Position point = new Position(0, 0);
+        int sumWeights = 0;
+        if (s.members.size() == 1) return s.members.iterator().next().getPosition();
         for (Unit u : s.members) {
-            if (s.members.size() == 1) return u.getPosition();
-            point = new Position(point.getX() + u.getPosition().getX(), point.getY() + u.getPosition().getY());
+            int weight = Util.getWeight(u);
+            sumWeights += weight;
+            point = new Position(point.getX() + u.getPosition().getX() * weight, point.getY() + u.getPosition().getY() * weight);
         }
-        return new Position(point.getX() / s.members.size(), point.getY() / s.members.size());
+        return new Position(point.getX() / sumWeights, point.getY() / sumWeights);
 
     }
 
     public void removeFromSquad(Unit unit) {
         for (Entry<String, Squad> s : squads.entrySet()) {
             if (s.getValue().members.contains(unit)) {
-                if (s.getValue().members.size() == 1) squads.remove(s.getKey());
-                else s.getValue().members.remove(unit);
+                if (s.getValue().members.size() == 1) {
+                    if (s.getValue().detector != null) {
+                        ((VesselAgent) agents.get(s.getValue().detector.unit)).follow = null;
+                    }
+                    squads.remove(s.getKey());
+                } else s.getValue().members.remove(unit);
                 break;
             }
         }
@@ -976,6 +1016,7 @@ public class GameState extends GameHandler {
 
     public TilePosition getBunkerPositionAntiPool() {
         try {
+            if (MBs.isEmpty() || CCs.isEmpty()) return null;
             TilePosition startTile = MBs.iterator().next().getTilePosition();
             TilePosition searchTile = CCs.values().iterator().next().getTilePosition();
             UnitType type = UnitType.Terran_Bunker;
@@ -1063,10 +1104,11 @@ public class GameState extends GameHandler {
             if (squads.isEmpty()) return;
             if (squads.size() < 2) return;
             for (Squad u1 : squads.values()) {
+                if (u1.members.isEmpty()) continue;
                 int u1_size = u1.members.size();
                 if (u1_size < 16) {
                     for (Squad u2 : squads.values()) {
-                        if (u2.name.equals(u1.name) || u2.members.size() > 15) continue;
+                        if (u2.name.equals(u1.name) || u2.members.size() > 15 || u2.members.isEmpty()) continue;
                         if (broodWarDistance(getSquadCenter(u1), getSquadCenter(u2)) < 200) {
                             if (u1_size + u2.members.size() > 16) continue;
                             else {
@@ -1081,17 +1123,26 @@ public class GameState extends GameHandler {
             }
             Set<Squad> aux = new TreeSet<>();
             for (Squad u : squads.values()) {
-                if (u.members.isEmpty()) aux.add(u);
+                if (u.members.isEmpty()) {
+                    if (u.detector != null) {
+                        ((VesselAgent) agents.get(u.detector.unit)).follow = null;
+                        u.detector = null;
+                    }
+                    aux.add(u);
+                }
             }
             squads.values().removeAll(aux);
         } catch (Exception e) {
             System.err.println("mergeSquads");
-            System.err.println(e);
+            e.printStackTrace();
         }
     }
 
     public void updateSquadOrderAndMicro() {
-        for (Squad u : squads.values()) u.microUpdateOrder();
+        for (Squad u : squads.values()) {
+            if (u.members.isEmpty()) continue;
+            u.microUpdateOrder();
+        }
     }
 
     public int countUnit(UnitType type) {
@@ -1248,6 +1299,8 @@ public class GameState extends GameHandler {
             if (ag instanceof WraithAgent) {
                 String wraith = ((WraithAgent) ag).name;
                 shipNames.add(wraith);
+            } else if (ag instanceof VesselAgent) {
+                ((VesselAgent) ag).follow = null;
             }
         }
     }
@@ -1311,5 +1364,19 @@ public class GameState extends GameHandler {
             }
         }
         EI.naughty = false;
+    }
+
+    public Squad chooseVesselSquad(Position pos) {
+        Squad chosen = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Squad s : squads.values()) {
+            if (s.members.isEmpty() || s.detector != null) continue;
+            double dist = broodWarDistance(getSquadCenter(s), pos);
+            if (dist < bestDist) {
+                chosen = s;
+                bestDist = dist;
+            }
+        }
+        return chosen;
     }
 }

@@ -24,7 +24,7 @@ public class BioGreedyFE extends Strategy {
         numRaxForFac = 3;
         numCCForPort = 2;
         numCCForScience = 2;
-        portPerCC = 1;
+        portPerCC = 0;
         bunker = true;
         supplyForFirstRefinery = 38;
         armyForAttack = 25;
@@ -58,6 +58,7 @@ public class BioGreedyFE extends Strategy {
     @Override
     public void initBuildAddons() {
         buildAddons.add(UnitType.Terran_Comsat_Station);
+        buildAddons.add(UnitType.Terran_Control_Tower);
     }
 
     @Override

@@ -57,12 +57,11 @@ public class SimManager {
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
-        for (Squad s : getGs().squads.values()) {
-            //if(s.status == Squad.Status.DEFENSE) continue;
+        for (Squad s : getGs().squads.values()) { // Squads
             myUnits.addAll(s.members);
         }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
-        for (Unit ag : getGs().agents.keySet()) myUnits.add(ag);
+        myUnits.addAll(getGs().agents.keySet()); // Agents
         clustering = new MeanShift(myUnits);
         friendly = clustering.run();
         // Enemy Clusters
@@ -97,6 +96,7 @@ public class SimManager {
     private boolean noNeedForSim() {
         boolean foundThreats = false;
         int workerThreats = 0;
+        if (getGs().squads.isEmpty() && getGs().agents.isEmpty()) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) {
                 foundThreats = true;

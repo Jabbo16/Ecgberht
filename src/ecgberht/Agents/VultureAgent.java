@@ -29,7 +29,6 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
-            boolean remove = false;
             if (unit.getHitPoints() <= 15) {
                 Position cc = getGs().MainCC.second.getPosition();
                 if (cc != null) unit.move(cc);
@@ -41,10 +40,10 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             frameLastOrder = unit.getLastCommandFrame();
             closeEnemies.clear();
             closeWorkers.clear();
-            if (frameLastOrder == actualFrame) return remove;
+            if (frameLastOrder == actualFrame) return false;
             Status old = status;
             getNewStatus();
-            if (old == status && status != Status.COMBAT && status != Status.ATTACK) return remove;
+            if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT) attackUnit = null;
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
@@ -52,7 +51,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                     Position newPos = new Position(pos.second, pos.first);
                     if (getGs().bw.getBWMap().isValidPosition(newPos)) {
                         unit.attack(newPos);
-                        return remove;
+                        return false;
                     }
                 }
             }
@@ -72,9 +71,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 default:
                     break;
             }
-            return remove;
+            return false;
         } catch (Exception e) {
-            System.err.println("Exception Vulture");
+            System.err.println("Exception VultureAgent");
             e.printStackTrace();
         }
         return false;
@@ -114,7 +113,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         }
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
-            if (getGs().broodWarDistance(u.getPosition(), myPos) < 600) closeEnemies.add(u);
+            if (getGs().broodWarDistance(u.getPosition(), myPos) <= 600) closeEnemies.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
             if ((u.type.canAttack() || u.type == UnitType.Terran_Bunker) && u.unit.isCompleted()) {
@@ -186,8 +185,10 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         Position kite = getGs().kiteAway(unit, closeEnemies);
-        unit.move(kite);
-        attackPos = null;
+        if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
+        Position target = unit.getOrderTargetPosition();
+        if (target != null && !target.equals(kite)) unit.move(kite);
+        if (target == null) unit.move(kite);
     }
 
     private void attack() {

@@ -3,6 +3,7 @@ package ecgberht.Strategies;
 import ecgberht.Strategy;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 
 public class FullMech extends Strategy {
 
@@ -54,15 +55,14 @@ public class FullMech extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) {
-            buildUnits.add(UnitType.Terran_Bunker);
-        }
+        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override
     public void initBuildAddons() {
         buildAddons.add(UnitType.Terran_Comsat_Station);
         buildAddons.add(UnitType.Terran_Machine_Shop);
+        buildAddons.add(UnitType.Terran_Control_Tower);
     }
 
     @Override
@@ -72,6 +72,7 @@ public class FullMech extends Strategy {
 
     @Override
     public void initUpgradesToResearch() {
-
+        upgradesToResearch.add(UpgradeType.Terran_Vehicle_Weapons);
+        upgradesToResearch.add(UpgradeType.Terran_Vehicle_Plating);
     }
 }

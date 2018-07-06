@@ -40,9 +40,7 @@ public class ProxyBBS extends Strategy {
 
     @Override
     public void initBuildUnits() {
-        if (bunker) {
-            buildUnits.add(UnitType.Terran_Bunker);
-        }
+        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

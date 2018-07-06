@@ -86,16 +86,17 @@ public class CheckPerimeter extends Conditional {
             }
             int cFrame = ((GameState) this.handler).frameCount;
             for (Worker u : ((GameState) this.handler).workerDefenders.keySet()) {
-                if (u.getLastCommandFrame() == cFrame) {
-                    continue;
+                if (u.getLastCommandFrame() == cFrame) continue;
+                Position closestDefense = null;
+                if (((GameState) this.handler).EI.naughty) {
+                    if (!((GameState) this.handler).DBs.isEmpty())
+                        closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();
                 }
-                Position closestCC = ((GameState) this.handler).getNearestCC(u.getPosition());
-                if (closestCC != null) {
+                if (closestDefense == null) closestDefense = ((GameState) this.handler).getNearestCC(u.getPosition());
+                if (closestDefense != null) {
                     Area uArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
-                    Area closestCCArea = ((GameState) this.handler).bwem.getMap().getArea(closestCC.toTilePosition());
-                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) {
-                        u.move(closestCC);
-                    }
+                    Area closestCCArea = ((GameState) this.handler).bwem.getMap().getArea(closestDefense.toTilePosition());
+                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) u.move(closestDefense);
                 }
             }
             for (Squad u : ((GameState) this.handler).squads.values()) {

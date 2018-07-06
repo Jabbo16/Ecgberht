@@ -36,7 +36,6 @@ public class ChoosePosition extends Action {
                             ((GameState) this.handler).chosenPosition = g.getKey().getTilePosition();
                             return State.SUCCESS;
                         }
-
                     }
                 }
 
@@ -121,14 +120,15 @@ public class ChoosePosition extends Action {
                                 } else {
                                     if (((GameState) this.handler).MainCC != null) {
                                         origin = ((GameState) this.handler).MainCC.second.getTilePosition();
-                                    } else {
-                                        origin = ((GameState) this.handler).getPlayer().getStartLocation();
-                                    }
+                                    } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
                                 }
                             }
                         } else {
                             if (((GameState) this.handler).Ts.isEmpty()) {
-                                if (((GameState) this.handler).mainChoke != null && ((GameState) this.handler).strat.name != "BioGreedyFE") {
+                                if (((GameState) this.handler).mainChoke != null &&
+                                        !((GameState) this.handler).strat.name.equals("MechGreedyFE") &&
+                                        !((GameState) this.handler).strat.name.equals("BioGreedyFE") &&
+                                        !((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
                                     origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
                                     if (origin != null) {
                                         ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();

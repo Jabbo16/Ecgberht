@@ -58,6 +58,7 @@ public class BioBuildFE extends Strategy {
     @Override
     public void initBuildAddons() {
         buildAddons.add(UnitType.Terran_Comsat_Station);
+        buildAddons.add(UnitType.Terran_Control_Tower);
     }
 
     @Override

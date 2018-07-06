@@ -214,7 +214,7 @@ public class IntelligenceAgency {
                 getGs().EI.naughty = true;
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name == "BioGreedyFE") {
+                if (getGs().strat.name == "BioGreedyFE" || getGs().strat.name.equals("MechGreedyFE")) {
                     getGs().strat = new BioBuild();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -240,7 +240,7 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name == "BioGreedyFE") {
+                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     getGs().strat = new BioBuild();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();

@@ -49,7 +49,7 @@ public class Util {
         if (!getGs().getGame().getBWMap().isVisible(topLeft.toTilePosition()) || !getGs().getGame().getBWMap().isVisible(bottomRight.toTilePosition()))
             return units;
         for (Unit u : getGs().bw.getAllUnits()) {
-            if (!u.exists()) continue;
+            if (!u.exists() || !u.isVisible()) continue;
             Position pos = u.getPosition();
             Position p2 = new Position(bottomRight.getX(), topLeft.getY());
             Position p3 = new Position(topLeft.getX(), bottomRight.getY());
@@ -314,41 +314,23 @@ public class Util {
                 return 12;
             }
         }
-
-        if (targetType == UnitType.Zerg_Lurker) {
-            return 12;
-        }
-
-        if (targetType == UnitType.Protoss_High_Templar) {
-            return 12;
-        }
-
-        if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) {
-            return 11;
-        }
-
+        if (targetType == UnitType.Zerg_Lurker) return 12;
+        if (targetType == UnitType.Protoss_High_Templar) return 12;
+        if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
         // Droppers are as bad as threats. They may be loaded and are often isolated and safer to attack.
-        if (targetType == UnitType.Terran_Dropship || targetType == UnitType.Protoss_Shuttle) {
-            return 10;
-        }
+        if (targetType == UnitType.Terran_Dropship || targetType == UnitType.Protoss_Shuttle) return 10;
         // Also as bad are other dangerous things.
         if (targetType == UnitType.Terran_Science_Vessel || targetType == UnitType.Zerg_Scourge || targetType == UnitType.Protoss_Observer) {
             return 10;
         }
         // Next are workers.
         if (targetType.isWorker()) {
-            if (getType(rangedUnit) == UnitType.Terran_Vulture) {
-                return 11;
-            }
+            if (getType(rangedUnit) == UnitType.Terran_Vulture) return 11;
             if (target instanceof SCV) {
                 // Repairing or blocking a choke makes you critical.
-                if (((SCV) target).isRepairing()) {
-                    return 11;
-                }
+                if (((SCV) target).isRepairing()) return 11;
                 // SCVs constructing are also important.
-                if (((SCV) target).isConstructing()) {
-                    return 10;
-                }
+                if (((SCV) target).isConstructing()) return 10;
             }
             return 6;
         }
@@ -366,17 +348,16 @@ public class Util {
             return 7;
         }
         // Templar tech and spawning pool are more important.
-        if (targetType == UnitType.Protoss_Templar_Archives) {
-            return 7;
-        }
+        if (targetType == UnitType.Protoss_Templar_Archives) return 7;
 
-        if (targetType.gasPrice() > 0) {
-            return 4;
-        }
-        if (targetType.mineralPrice() > 0) {
-            return 3;
-        }
+        if (targetType.gasPrice() > 0) return 4;
+        if (targetType.mineralPrice() > 0) return 3;
         // Finally everything else.
+        return 1;
+    }
+
+    public static int getWeight(Unit u) {
+        if (u instanceof SiegeTank) return 3;
         return 1;
     }
 }

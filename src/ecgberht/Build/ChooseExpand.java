@@ -33,7 +33,9 @@ public class ChooseExpand extends Action {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
-            if (((GameState) this.handler).strat.name == "BioGreedyFE") {
+            if (((GameState) this.handler).strat.name.equals("BioGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("MechGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
                     ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                     return State.SUCCESS;

@@ -21,7 +21,7 @@ public class TrainUnit extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).strat.name == "BioMech") {
+            if (((GameState) this.handler).strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
                 boolean mShop = false;
                 for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                     if (u instanceof MachineShop) {

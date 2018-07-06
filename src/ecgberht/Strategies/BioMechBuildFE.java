@@ -56,15 +56,14 @@ public class BioMechBuildFE extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) {
-            buildUnits.add(UnitType.Terran_Bunker);
-        }
+        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override
     public void initBuildAddons() {
         buildAddons.add(UnitType.Terran_Comsat_Station);
         buildAddons.add(UnitType.Terran_Machine_Shop);
+        buildAddons.add(UnitType.Terran_Control_Tower);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ecgberht;
 
+import ecgberht.Agents.VesselAgent;
 import ecgberht.Simulation.SimInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
@@ -23,6 +24,7 @@ public class Squad implements Comparable<Squad> {
     public Set<PlayerUnit> members;
     public Status status;
     public String name;
+    public VesselAgent detector;
 
     public Squad(String name) {
         this.name = name;
