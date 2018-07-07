@@ -889,7 +889,6 @@ public class Ecgberht implements BWEventListener {
                     gs.enemyRace = type.getRace();
                 }
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type != UnitType.Zerg_Overlord))) {
-                    if (arg0 instanceof Worker && !((Worker) arg0).isAttacking()) return;
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {

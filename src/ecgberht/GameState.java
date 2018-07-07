@@ -172,7 +172,6 @@ public class GameState extends GameHandler {
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             String map = bw.getBWMap().mapFileName();
-            if (enemyRace == Race.Zerg && EI.naughty) return b;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
 
             Map<String, Pair<Integer, Integer>> strategies = new LinkedHashMap<>();

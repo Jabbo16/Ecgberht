@@ -24,7 +24,7 @@ public class CheckBuildingFlames extends Action {
         try {
             for (Map.Entry<SCV, Building> u : ((GameState) this.handler).repairerTask.entrySet()) {
                 if (u.getValue().maxHitPoints() != u.getValue().getHitPoints() &&
-                        (u.getKey().getOrder() != Order.Repair || u.getKey().getOrder() != Order.MoveToRepair)) {
+                        u.getKey().getOrder() != Order.Repair && u.getKey().getOrder() != Order.MoveToRepair) {
                     u.getKey().repair((Mechanical) u.getValue());
                 }
             }

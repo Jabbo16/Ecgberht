@@ -65,7 +65,11 @@ public class SimManager {
         clustering = new MeanShift(myUnits);
         friendly = clustering.run();
         // Enemy Clusters
-        List<Unit> enemyUnits = new ArrayList<>(getGs().enemyCombatUnitMemory);
+        List<Unit> enemyUnits = new ArrayList<>();
+        for (Unit u : getGs().enemyCombatUnitMemory) {
+            if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
+            enemyUnits.add(u);
+        }
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
             if (u instanceof Attacker || u instanceof Bunker) enemyUnits.add(u);
         }
