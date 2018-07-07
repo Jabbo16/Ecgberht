@@ -22,6 +22,9 @@ public class ChooseSituationalUnit extends Action {
         try {
             // Testing vessels
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2) return State.FAILURE;
+            String strat = ((GameState) this.handler).strat.name;
+            if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && ((GameState) this.handler).CCs.size() < 3)
+                return State.FAILURE;
             boolean tower = false;
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                 if (u instanceof ControlTower) {

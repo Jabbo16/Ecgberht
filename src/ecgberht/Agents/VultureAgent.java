@@ -3,6 +3,7 @@ package ecgberht.Agents;
 import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
 import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
@@ -48,7 +49,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (status == Status.ATTACK && unit.isIdle()) {
                 Pair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
                 if (pos.first != -1 && pos.second != -1) {
-                    Position newPos = new Position(pos.second, pos.first);
+                    Position newPos = new TilePosition(pos.second, pos.first).toPosition();
                     if (getGs().bw.getBWMap().isValidPosition(newPos)) {
                         unit.attack(newPos);
                         return false;
@@ -136,6 +137,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                     if (weaponRange > type.groundWeapon().maxRange()) return;
                 }
                 if (cd > 0) {
+                    attackUnit = null;
+                    attackPos = null;
                     status = Status.KITE;
                     return;
                 }

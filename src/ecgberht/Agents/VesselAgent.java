@@ -117,21 +117,24 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         Position myPos = unit.getPosition();
         int maxScore = 0;
         PlayerUnit chosen = null;
-        if (follow != null && !follow.members.isEmpty() && unit.getEnergy() >= 100 && follow.status != Squad.Status.IDLE) {
-            for (PlayerUnit u : follow.members) {
+        Set<Unit> targets = new TreeSet<>(follow.members);
+        targets.addAll(getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).allies);
+        if (follow != null && !targets.isEmpty() && unit.getEnergy() >= 100 && follow.status != Squad.Status.IDLE) {
+            for (Unit u : targets) {
+                if (!(u instanceof MobileUnit)) continue;
                 int score = 1;
-                if (!u.isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
+                if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
                 if (u instanceof Mechanical) score = 5;
                 if (u instanceof Marine) score = 3;
                 if (u instanceof SCV || u instanceof Medic) score = 1;
-                score *= u.maxHitPoints() / u.getHitPoints();
+                score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints();
                 if (chosen == null || score > maxScore) {
-                    chosen = u;
+                    chosen = (PlayerUnit) u;
                     maxScore = score;
                 }
             }
         }
-        if (maxScore > 2 && chosen != null) {
+        if (maxScore > 2) {
             status = Status.DMATRIX;
             target = chosen;
             return;

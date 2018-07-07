@@ -174,101 +174,79 @@ public class GameState extends GameHandler {
             String map = bw.getBWMap().mapFileName();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
-            if (EI.history.isEmpty() && forcedStrat.equals("")) {
-                if (enemyRace == Race.Protoss) {
-                    double random = Math.random();
-                    if (random > 0.5) return b;
-                    else return bM;
-                }
-                if (mapSize == 2 && !map.contains("Heartbreak Ridge")) {
-                    double random = Math.random();
-                    if (random > 0.5) return b;
-                    else return bM;
-                }
-                if (map.contains("HeartbreakRidge")) {
-                    double random = Math.random();
-                    if (random > 0.75) return bFE;
-                    else return b;
-                } else {
-                    double random = Math.random();
-                    if (random > 0.5) return b;
-                    else return bM;
-                }
-            } else {
-                Map<String, Pair<Integer, Integer>> strategies = new LinkedHashMap<>();
-                Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
-                strategies.put(b.name, new Pair<>(0, 0));
-                nameStrat.put(b.name, b);
+            Map<String, Pair<Integer, Integer>> strategies = new LinkedHashMap<>();
+            Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
-                strategies.put(bM.name, new Pair<>(0, 0));
-                nameStrat.put(bM.name, bM);
+            strategies.put(b.name, new Pair<>(0, 0));
+            nameStrat.put(b.name, b);
 
-                strategies.put(bGFE.name, new Pair<>(0, 0));
-                nameStrat.put(bGFE.name, bGFE);
+            strategies.put(bM.name, new Pair<>(0, 0));
+            nameStrat.put(bM.name, bM);
 
-                strategies.put(bMGFE.name, new Pair<>(0, 0));
-                nameStrat.put(bMGFE.name, bGFE);
+            strategies.put(bGFE.name, new Pair<>(0, 0));
+            nameStrat.put(bGFE.name, bGFE);
 
-                strategies.put(FM.name, new Pair<>(0, 0));
-                nameStrat.put(FM.name, FM);
+            strategies.put(bMGFE.name, new Pair<>(0, 0));
+            nameStrat.put(bMGFE.name, bGFE);
 
-                strategies.put(bbs.name, new Pair<>(0, 0));
-                nameStrat.put(bbs.name, bbs);
+            strategies.put(FM.name, new Pair<>(0, 0));
+            nameStrat.put(FM.name, FM);
 
-                strategies.put(mGFE.name, new Pair<>(0, 0));
-                nameStrat.put(mGFE.name, bGFE);
+            strategies.put(bbs.name, new Pair<>(0, 0));
+            nameStrat.put(bbs.name, bbs);
 
+            strategies.put(mGFE.name, new Pair<>(0, 0));
+            nameStrat.put(mGFE.name, bGFE);
 
-                strategies.put(bMFE.name, new Pair<>(0, 0));
-                nameStrat.put(bMFE.name, bMFE);
+            strategies.put(bMFE.name, new Pair<>(0, 0));
+            nameStrat.put(bMFE.name, bMFE);
 
-                strategies.put(bFE.name, new Pair<>(0, 0));
-                nameStrat.put(bFE.name, bFE);
+            strategies.put(bFE.name, new Pair<>(0, 0));
+            nameStrat.put(bFE.name, bFE);
 
-                if (!forcedStrat.equals("") && nameStrat.containsKey(forcedStrat)) {
-                    ih.sendText("Picked forced strategy " + forcedStrat);
-                    return nameStrat.get(forcedStrat);
-                }
-                for (StrategyOpponentHistory r : EI.history) {
-                    if (strategies.containsKey(r.strategyName)) {
-                        strategies.get(r.strategyName).first += r.wins;
-                        strategies.get(r.strategyName).second += r.losses;
-                    }
-                }
-                int totalGamesPlayed = EI.wins + EI.losses;
-                int DefaultStrategyWins = strategies.get(b.name).first;
-                int DefaultStrategyLosses = strategies.get(b.name).second;
-                int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
-                double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double) (strategyGamesPlayed) : 0;
-                if (strategyGamesPlayed < 2) {
-                    ih.sendText("I dont know you that well yet, lets pick the standard strategy");
-                    return b;
-                }
-                if (strategyGamesPlayed > 0 && winRate > 0.74) {
-                    ih.sendText("Using default Strategy with winrate " + winRate * 100 + "%");
-                    return b;
-                }
-                double C = 0.5;
-                String bestUCBStrategy = null;
-                double bestUCBStrategyVal = Double.MIN_VALUE;
-                for (String strat : strategies.keySet()) {
-                    if (map.contains("HeartbreakRidge") && (strat.equals("BioMechFE") || strat.equals("BioMech") ||
-                            strat.equals("FullMech"))) {
-                        continue;
-                    }
-                    int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
-                    double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (strategyGamesPlayed)) : 0;
-                    double ucbVal = sGamesPlayed == 0 ? C : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
-                    double val = sWinRate + ucbVal;
-                    if (val > bestUCBStrategyVal) {
-                        bestUCBStrategy = strat;
-                        bestUCBStrategyVal = val;
-                    }
-                }
-                ih.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-                return nameStrat.get(bestUCBStrategy);
+            if (!forcedStrat.equals("") && nameStrat.containsKey(forcedStrat)) {
+                ih.sendText("Picked forced strategy " + forcedStrat);
+                return nameStrat.get(forcedStrat);
             }
+            for (StrategyOpponentHistory r : EI.history) {
+                if (strategies.containsKey(r.strategyName)) {
+                    strategies.get(r.strategyName).first += r.wins;
+                    strategies.get(r.strategyName).second += r.losses;
+                }
+            }
+            int totalGamesPlayed = EI.wins + EI.losses;
+            int DefaultStrategyWins = strategies.get(b.name).first;
+            int DefaultStrategyLosses = strategies.get(b.name).second;
+            int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
+            double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double) (strategyGamesPlayed) : 0;
+            if (strategyGamesPlayed < 1) {
+                ih.sendText("I dont know you that well yet, lets pick the standard strategy");
+                return b;
+            }
+            if (strategyGamesPlayed > 0 && winRate > 0.74) {
+                ih.sendText("Using default Strategy with winrate " + winRate * 100 + "%");
+                return b;
+            }
+            double C = 0.5;
+            String bestUCBStrategy = null;
+            double bestUCBStrategyVal = Double.MIN_VALUE;
+            for (String strat : strategies.keySet()) {
+                if (map.contains("HeartbreakRidge") && (strat.equals("BioMechFE") || strat.equals("BioMech") ||
+                        strat.equals("FullMech"))) {
+                    continue;
+                }
+                int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
+                double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (strategyGamesPlayed)) : 0;
+                double ucbVal = sGamesPlayed == 0 ? C : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
+                double val = sWinRate + ucbVal;
+                if (val > bestUCBStrategyVal) {
+                    bestUCBStrategy = strat;
+                    bestUCBStrategyVal = val;
+                }
+            }
+            ih.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+            return nameStrat.get(bestUCBStrategy);
         } catch (Exception e) {
             System.err.println("Error initStrat, using default strategy");
             e.printStackTrace();
@@ -1266,26 +1244,33 @@ public class GameState extends GameHandler {
 
     // Credits to @Yegers for a better kite method
     public Position kiteAway(final Unit unit, final Set<Unit> enemies) {
-        if (enemies.isEmpty()) return null;
-        Position ownPosition = unit.getPosition();
-        List<Pair<Double, Double>> vectors = new ArrayList<>();
-        double minDistance = Double.MAX_VALUE;
-        for (Unit enemy : enemies) {
-            Position enemyPosition = enemy.getPosition();
-            Pair<Double, Double> unitV = new Pair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
-            double distance = ownPosition.getDistance(enemyPosition);
-            if (distance < minDistance) minDistance = distance;
-            unitV.first = (1 / distance) * unitV.first;
-            unitV.second = (1 / distance) * unitV.second;
-            vectors.add(unitV);
+        try {
+            if (enemies.isEmpty()) return null;
+            Position ownPosition = unit.getPosition();
+            List<Pair<Double, Double>> vectors = new ArrayList<>();
+            double minDistance = Double.MAX_VALUE;
+            for (Unit enemy : enemies) {
+                if (!enemy.isVisible()) continue;
+                Position enemyPosition = enemy.getPosition();
+                Pair<Double, Double> unitV = new Pair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
+                double distance = ownPosition.getDistance(enemyPosition);
+                if (distance < minDistance) minDistance = distance;
+                unitV.first = (1 / distance) * unitV.first;
+                unitV.second = (1 / distance) * unitV.second;
+                vectors.add(new Pair<>(unitV.first, unitV.second));
+            }
+            minDistance = 2 * minDistance * minDistance;
+            for (Pair<Double, Double> vector : vectors) {
+                vector.first *= minDistance;
+                vector.second *= minDistance;
+            }
+            Pair<Double, Double> sumAll = Util.sumPosition(vectors);
+            return Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
+        } catch (Exception e) {
+            System.err.println("KiteAway Exception");
+            e.printStackTrace();
+            return new Position(-1, -1);
         }
-        minDistance = 2 * minDistance * minDistance;
-        for (final Pair<Double, Double> vector : vectors) {
-            vector.first *= minDistance;
-            vector.second *= minDistance;
-        }
-        Pair<Double, Double> sumAll = Util.sumPosition(vectors);
-        return Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
     }
 
     public void runAgents() {

@@ -1,7 +1,6 @@
 package ecgberht.Defense;
 
 import bwem.area.Area;
-import bwta.Region;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Squad;
@@ -12,11 +11,10 @@ import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.PlayerUnit;
-import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.Worker;
+import org.openbw.bwapi4j.unit.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -34,13 +32,16 @@ public class CheckPerimeter extends Conditional {
             ((GameState) this.handler).defense = false;
             Set<Unit> enemyInvaders = new TreeSet<>(((GameState) this.handler).enemyCombatUnitMemory);
             for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
+                if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce()
+                        || u.type.isRefinery() || u.type == UnitType.Terran_Barracks) {
                     enemyInvaders.add(u.unit);
                 }
             }
             for (Unit u : enemyInvaders) {
                 UnitType uType = Util.getType((PlayerUnit) u);
-                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster()) && uType != UnitType.Zerg_Scourge && uType != UnitType.Protoss_Corsair)) {
+                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || (u instanceof Loadable &&
+                        !(u instanceof Overlord))) && uType != UnitType.Zerg_Scourge &&
+                        uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {
                     for (Unit c : ((GameState) this.handler).workerTask.values()) {
                         if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
@@ -59,9 +60,14 @@ public class CheckPerimeter extends Conditional {
                             continue;
                         }
                     }
-
                     for (Unit c : ((GameState) this.handler).SBs) {
                         if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                            ((GameState) this.handler).enemyInBase.add(u);
+                            continue;
+                        }
+                    }
+                    for (ResearchingFacility c : ((GameState) this.handler).UBs) {
+                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), ((Unit) c).getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
@@ -76,7 +82,6 @@ public class CheckPerimeter extends Conditional {
                     }
                 }
             }
-
             if (!((GameState) this.handler).enemyInBase.isEmpty()) {
                 /*if ((((GameState) this.handler).getArmySize() >= 50 && ((GameState) this.handler).getArmySize() / ((GameState) this.handler).enemyInBase.size() > 10)) {
                     return State.FAILURE;
@@ -85,28 +90,41 @@ public class CheckPerimeter extends Conditional {
                 return State.SUCCESS;
             }
             int cFrame = ((GameState) this.handler).frameCount;
+            List<Worker> toDelete = new ArrayList<>();
             for (Worker u : ((GameState) this.handler).workerDefenders.keySet()) {
                 if (u.getLastCommandFrame() == cFrame) continue;
                 Position closestDefense = null;
                 if (((GameState) this.handler).EI.naughty) {
-                    if (!((GameState) this.handler).DBs.isEmpty())
+                    if (!((GameState) this.handler).DBs.isEmpty()) {
                         closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();
+                        u.move(closestDefense);
+                        toDelete.add(u);
+                        continue;
+                    }
                 }
-                if (closestDefense == null) closestDefense = ((GameState) this.handler).getNearestCC(u.getPosition());
+                closestDefense = ((GameState) this.handler).getNearestCC(u.getPosition());
                 if (closestDefense != null) {
                     Area uArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
                     Area closestCCArea = ((GameState) this.handler).bwem.getMap().getArea(closestDefense.toTilePosition());
-                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) u.move(closestDefense);
+                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) {
+                        u.move(closestDefense);
+                        toDelete.add(u);
+                    }
                 }
+            }
+            for (Worker u : toDelete) {
+                u.stop(false);
+                ((GameState) this.handler).workerDefenders.remove(u);
+                ((GameState) this.handler).workerIdle.add(u);
             }
             for (Squad u : ((GameState) this.handler).squads.values()) {
                 if (u.status == Status.DEFENSE) {
                     Position closestCC = ((GameState) this.handler).getNearestCC(((GameState) this.handler).getSquadCenter(u));
                     if (closestCC != null) {
-                        Region squad = ((GameState) this.handler).bwta.getRegion(((GameState) this.handler).getSquadCenter(u));
-                        Region regCC = ((GameState) this.handler).bwta.getRegion(closestCC);
+                        Area squad = ((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).getSquadCenter(u).toTilePosition());
+                        Area regCC = ((GameState) this.handler).bwem.getMap().getArea(closestCC.toTilePosition());
                         if (squad != null && regCC != null) {
-                            if (!squad.getCenter().equals(regCC.getCenter())) {
+                            if (!squad.equals(regCC)) {
                                 if (!((GameState) this.handler).DBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
                                     u.giveMoveOrder(((GameState) this.handler).DBs.keySet().iterator().next().getPosition());
                                 } else {

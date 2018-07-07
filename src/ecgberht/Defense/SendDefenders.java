@@ -96,38 +96,30 @@ public class SendDefenders extends Action {
                 for (Entry<Worker, Position> u : ((GameState) this.handler).workerDefenders.entrySet()) {
                     if (frame == u.getKey().getLastCommandFrame()) continue;
                     if (((GameState) this.handler).attackPosition != null) {
-                        if (u.getKey().isIdle() || !((GameState) this.handler).attackPosition.equals(u.getValue())) {
-                            ((GameState) this.handler).workerDefenders.put(u.getKey(), ((GameState) this.handler).attackPosition);
-                            if (((GameState) this.handler).enemyInBase.size() == 1) {
-                                Unit scouter = ((GameState) this.handler).enemyInBase.iterator().next();
-                                if (scouter instanceof Worker) {
-                                    Unit lastTarget = u.getKey().getOrderTarget();
-                                    if (lastTarget != null) {
-                                        if (lastTarget.equals(scouter)) continue;
-                                    }
-                                    u.getKey().attack(scouter);
+                        ((GameState) this.handler).workerDefenders.put(u.getKey(), ((GameState) this.handler).attackPosition);
+                        if (((GameState) this.handler).enemyInBase.size() == 1 && ((GameState) this.handler).enemyInBase.iterator().next() instanceof Worker) {
+                            Unit scouter = ((GameState) this.handler).enemyInBase.iterator().next();
+                            Unit lastTarget = u.getKey().getOrderTarget();
+                            if (lastTarget != null && lastTarget.equals(scouter)) continue;
+                            u.getKey().attack(scouter);
+                        } else {
+                            Position closestDefense = null;
+                            if (((GameState) this.handler).EI.naughty) {
+                                if (!((GameState) this.handler).DBs.isEmpty())
+                                    closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();
+                                if (closestDefense == null)
+                                    closestDefense = ((GameState) this.handler).getNearestCC(u.getKey().getPosition());
+                                if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange()) {
+                                    u.getKey().move(closestDefense);
+                                    continue;
                                 }
-                            } else {
-                                Position closestDefense = null;
-                                if (((GameState) this.handler).EI.naughty) {
-                                    if (!((GameState) this.handler).DBs.isEmpty())
-                                        closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();
-                                    if (closestDefense == null)
-                                        closestDefense = ((GameState) this.handler).getNearestCC(u.getKey().getPosition());
-                                    if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange()) {
-                                        u.getKey().move(closestDefense);
-                                        continue;
-                                    }
-                                }
-                                Unit toAttack = ((GameState) this.handler).getUnitToAttack(u.getKey(), ((GameState) this.handler).enemyInBase);
-                                if (toAttack != null) {
-                                    Unit lastTarget = u.getKey().getOrderTarget();
-                                    if (lastTarget != null) {
-                                        if (lastTarget.equals(toAttack)) continue;
-                                    }
-                                    u.getKey().attack(toAttack);
-                                } else u.getKey().attack(((GameState) this.handler).attackPosition);
                             }
+                            Unit toAttack = ((GameState) this.handler).getUnitToAttack(u.getKey(), ((GameState) this.handler).enemyInBase);
+                            if (toAttack != null) {
+                                Unit lastTarget = u.getKey().getOrderTarget();
+                                if (lastTarget != null && lastTarget.equals(toAttack)) continue;
+                                u.getKey().attack(toAttack);
+                            } else u.getKey().attack(((GameState) this.handler).attackPosition);
                         }
                     }
                 }
@@ -144,6 +136,7 @@ public class SendDefenders extends Action {
                     }
                 }
             }
+            ((GameState) this.handler).attackPosition = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

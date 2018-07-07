@@ -41,7 +41,7 @@ public class MechGreedyFE extends Strategy {
     @Override
     public void initTrainUnits() {
         trainUnits.add(UnitType.Terran_Marine);
-        trainUnits.add(UnitType.Terran_Vulture);
+        //trainUnits.add(UnitType.Terran_Vulture); // TODO fix vultures
         trainUnits.add(UnitType.Terran_Siege_Tank_Tank_Mode);
         trainUnits.add(UnitType.Terran_Wraith);
     }

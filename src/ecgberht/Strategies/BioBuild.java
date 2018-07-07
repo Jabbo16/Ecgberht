@@ -24,8 +24,8 @@ public class BioBuild extends Strategy {
         numRaxForFac = 4;
         bunker = true;
         supplyForFirstRefinery = 36;
-        armyForAttack = 40;
-        armyForExpand = 18;
+        armyForAttack = 32;
+        armyForExpand = 15;
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;
@@ -52,9 +52,7 @@ public class BioBuild extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) {
-            buildUnits.add(UnitType.Terran_Bunker);
-        }
+        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

@@ -23,7 +23,7 @@ public class ChooseDefensePosition extends Conditional {
                     ((GameState) this.handler).inMapUnits.updateMap(u, false);
                 }
                 Pair<Integer, Integer> p = ((GameState) this.handler).inMapUnits.getPosition(((GameState) this.handler).initDefensePosition, false);
-                if (p.first != null && p.second != null) {
+                if (p.first != -1 && p.second != -1) {
                     ((GameState) this.handler).attackPosition = new TilePosition(p.second, p.first).toPosition();
                     return State.SUCCESS;
                 }
