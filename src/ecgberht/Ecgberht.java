@@ -29,6 +29,7 @@ import ecgberht.Repair.Repair;
 import ecgberht.Scanner.CheckScan;
 import ecgberht.Scanner.Scan;
 import ecgberht.Scouting.*;
+import ecgberht.Strategies.BioBuild;
 import ecgberht.Training.*;
 import ecgberht.Upgrade.*;
 import org.iaie.btree.BehavioralTree;
@@ -36,7 +37,10 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.*;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -196,63 +200,71 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onStart() {
-        ConfigManager.readConfig();
-        if (!ConfigManager.getConfig().ecgConfig.debugConsole) {
-            // Disables System.err and System.Out
-            OutputStream output = null;
-            try {
-                output = new FileOutputStream("NUL:");
-            } catch (FileNotFoundException e) {
+        try {
+            ConfigManager.readConfig();
+            if (!ConfigManager.getConfig().ecgConfig.debugConsole) {
+                // Disables System.err and System.Out
+                OutputStream output = null;
+                try {
+                    output = new FileOutputStream("NUL:");
+                } catch (FileNotFoundException e) {
+                }
+                PrintStream nullOut = new PrintStream(output);
+                System.setErr(nullOut);
+                System.setOut(nullOut);
             }
-            PrintStream nullOut = new PrintStream(output);
-            System.setErr(nullOut);
-            System.setOut(nullOut);
+            self = bw.getInteractionHandler().self();
+            ih = bw.getInteractionHandler();
+            if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
+            else ih.enableLatCom(true);
+            if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
+            if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
+                ih.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
+            if (ConfigManager.getConfig().bwapiConfig.localSpeed >= 0)
+                ih.setLocalSpeed(ConfigManager.getConfig().bwapiConfig.localSpeed);
+            if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
+            System.out.println("Analyzing map...");
+            bwta = new BWTA();
+            bwta.analyze();
+            System.out.println("Map data ready");
+            bwem = new BWEM(bw);
+            if (bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) { // Hitchhiker
+                ih.sendText("Hitchhiker :(");
+            }
+            bwem.initialize();
+            bwem.getMap().assignStartingLocationsToSuitableBases();
+            gs = new GameState(bw, bwta, bwem);
+            gs.initEnemyRace();
+            gs.readOpponentInfo();
+            gs.alwaysPools();
+            if (gs.enemyRace == Race.Zerg) {
+                if (gs.EI.naughty) gs.playSound("rushed.mp3");
+            }
+            gs.strat = gs.initStrat();
+            gs.initStartLocations();
+            gs.initBaseLocations();
+            gs.initBlockingMinerals();
+            gs.checkBasesWithBLockingMinerals();
+            gs.initChokes();
+            // Trees Initializations
+            initCollectTree();
+            initTrainTree();
+            initBuildTree();
+            initScoutingTree();
+            initAttackTree();
+            initDefenseTree();
+            initUpgradeTree();
+            initRepairTree();
+            initAddonBuildTree();
+            initBuildingLotTree();
+            initBunkerTree();
+            initScanTree();
+            initHarassTree();
+        } catch (Exception e) {
+            System.err.println("onStart Exception");
+            e.printStackTrace();
         }
-        self = bw.getInteractionHandler().self();
-        ih = bw.getInteractionHandler();
-        if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
-        else ih.enableLatCom(true);
-        if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
-        if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
-            ih.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
-        if (ConfigManager.getConfig().bwapiConfig.localSpeed >= 0)
-            ih.setLocalSpeed(ConfigManager.getConfig().bwapiConfig.localSpeed);
-        if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
-        System.out.println("Analyzing map...");
-        bwta = new BWTA();
-        bwta.analyze();
-        System.out.println("Map data ready");
-        bwem = new BWEM(bw);
-        bwem.initialize();
-        bwem.getMap().assignStartingLocationsToSuitableBases();
-        gs = new GameState(bw, bwta, bwem);
-        gs.initEnemyRace();
-        gs.readOpponentInfo();
-        gs.alwaysPools();
-        if (gs.enemyRace == Race.Zerg) {
-            if (gs.EI.naughty) gs.playSound("rushed.mp3");
-        }
-        gs.strat = gs.initStrat();
-        gs.initStartLocations();
-        gs.initBaseLocations();
-        gs.initBlockingMinerals();
-        gs.checkBasesWithBLockingMinerals();
-        gs.initChokes();
 
-        // Trees Initializations
-        initCollectTree();
-        initTrainTree();
-        initBuildTree();
-        initScoutingTree();
-        initAttackTree();
-        initDefenseTree();
-        initUpgradeTree();
-        initRepairTree();
-        initAddonBuildTree();
-        initBuildingLotTree();
-        initBunkerTree();
-        initScanTree();
-        initHarassTree();
     }
 
     private void initScoutingTree() {
@@ -354,11 +366,33 @@ public class Ecgberht implements BWEventListener {
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
-            if (gs.test != null)
-                gs.getGame().getMapDrawer().drawCircleMap(gs.test.getTop().toPosition(), 100, Color.ORANGE);
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
-            if (gs.frameCount % 3000 == 0) gs.resetInMap();
+            if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
+                gs.getIH().sendText("RIP"); // Hitchhiker
+                gs.getIH().leaveGame();
+            }
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
+                    gs.strat.name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
+                BioBuild b = new BioBuild();
+                b.buildUnits.remove(UnitType.Terran_Bunker);
+                gs.strat = b;
+                gs.maxWraiths = 5;
+                transition();
+            }
+            //if (gs.frameCount % 3000 == 0) gs.resetInMap();
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
+                    !gs.strat.name.equals("PlasmaWraithHell")) { // Plasma special eggs
+                for (Unit u : bw.getAllUnits()) {
+                    if (u.getInitialType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
+                        continue;
+                    if (!u.isVisible() && gs.enemyCombatUnitMemory.contains(u)) gs.enemyCombatUnitMemory.remove(u);
+                    else if (u.getInitialType() == UnitType.Zerg_Egg &&
+                            !Util.isEnemy(((PlayerUnit) u).getPlayer())) {
+                        gs.enemyCombatUnitMemory.add(u);
+                    }
+                }
+            }
             IntelligenceAgency.updateBullets();
             gs.fix();
             gs.updateEnemyBuildingsMemory();
@@ -397,6 +431,8 @@ public class Ecgberht implements BWEventListener {
     public void onEnd(boolean arg0) {
         try {
             String name = ih.enemy().getName();
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
+                gs.strat.name = "PlasmaWraithHell";
             gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
             if (arg0) {
                 gs.EI.wins++;
@@ -501,7 +537,6 @@ public class Ecgberht implements BWEventListener {
                         }
                         for (Entry<SCV, Building> u : gs.workerTask.entrySet()) {
                             if (u.getValue().equals(arg0)) {
-                                //TODO WTF
                                 gs.workerGas.put(u.getKey(), (GasMiningFacility) arg0);
                                 gs.workerTask.remove(u.getKey());
                                 break;
@@ -572,8 +607,12 @@ public class Ecgberht implements BWEventListener {
                             gs.agents.put(arg0, v);
                             gs.squads.get(s.name).detector = v;
                         } else if (type == UnitType.Terran_Wraith) {
-                            String name = gs.pickShipName();
-                            gs.agents.put(arg0, new WraithAgent(arg0, name));
+                            if (gs.strat.name.equals("PlasmaWraithHell")) {
+                                gs.addToSquad(arg0);
+                            } else {
+                                String name = gs.pickShipName();
+                                gs.agents.put(arg0, new WraithAgent(arg0, name));
+                            }
                         } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
                             gs.addToSquad(arg0);
                             if (!gs.strat.name.equals("ProxyBBS")) {
@@ -801,7 +840,9 @@ public class Ecgberht implements BWEventListener {
                                 gs.agents.remove(arg0);
                             }
                         } else if (type == UnitType.Terran_Wraith) {
-                            if (gs.agents.containsKey(arg0)) {
+                            if (gs.strat.name.equals("PlasmaWraithHell")) {
+                                gs.removeFromSquad(arg0);
+                            } else if (gs.agents.containsKey(arg0)) {
                                 String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
                                 gs.shipNames.add(wraith);
                                 gs.agents.remove(arg0);

@@ -16,6 +16,11 @@ dependencies {
     compile fileTree(dir: 'lib', include: ['*.jar'], exclude: ['*-javadoc.jar'])
 }
 
+task copyConfig(type: Copy) {
+    from file("config.json")
+    into file("build/libs/")
+}
+
 task fatJar(type: Jar) {
     from('src/') {
       include  '*.mp3'
@@ -26,3 +31,4 @@ task fatJar(type: Jar) {
 	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
+fatJar.dependsOn copyConfig

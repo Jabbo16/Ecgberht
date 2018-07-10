@@ -5,6 +5,7 @@ import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
 import ecgberht.Squad;
+import ecgberht.Util;
 import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;
@@ -68,6 +69,7 @@ public class SimManager {
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
+            if (u.getInitialType() == UnitType.Zerg_Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
             enemyUnits.add(u);
         }
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
@@ -101,6 +103,7 @@ public class SimManager {
         boolean foundThreats = false;
         int workerThreats = 0;
         if (getGs().squads.isEmpty() && getGs().agents.isEmpty()) return true;
+        if (getGs().getArmySize() >= getGs().enemyCombatUnitMemory.size() * 6) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) {
                 foundThreats = true;

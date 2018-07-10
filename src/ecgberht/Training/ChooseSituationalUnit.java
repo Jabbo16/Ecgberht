@@ -8,6 +8,7 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.ControlTower;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
+import org.openbw.bwapi4j.unit.ScienceFacility;
 import org.openbw.bwapi4j.unit.Starport;
 
 
@@ -26,13 +27,16 @@ public class ChooseSituationalUnit extends Action {
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && ((GameState) this.handler).CCs.size() < 3)
                 return State.FAILURE;
             boolean tower = false;
+            boolean science = false;
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                 if (u instanceof ControlTower) {
                     tower = true;
-                    break;
+                } else if (u instanceof ScienceFacility) {
+                    science = true;
                 }
+                if (science && tower) break;
             }
-            if (!tower) return State.FAILURE;
+            if (!tower || !science) return State.FAILURE;
             for (Starport s : ((GameState) this.handler).Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                     ((GameState) this.handler).chosenUnit = UnitType.Terran_Science_Vessel;

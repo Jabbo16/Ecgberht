@@ -1,6 +1,7 @@
 package ecgberht.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -29,13 +30,17 @@ public class ChooseExpand extends Action {
                     return State.FAILURE;
                 }
             }
+            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
+                return State.FAILURE;
+            }
             if (((GameState) this.handler).iReallyWantToExpand || ((GameState) this.handler).getCash().first >= 500) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
             if (((GameState) this.handler).strat.name.equals("BioGreedyFE") ||
                     ((GameState) this.handler).strat.name.equals("MechGreedyFE") ||
-                    ((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
+                    ((GameState) this.handler).strat.name.equals("BioMechGreedyFE") ||
+                    ((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
                     ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                     return State.SUCCESS;

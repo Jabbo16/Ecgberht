@@ -7,6 +7,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.PlayerUnit;
+import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +29,11 @@ public class CheckEnemyBaseVisible extends Action {
                     if (((GameState) this.handler).broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
                         ((GameState) this.handler).enemyBase = Util.getClosestBaseLocation(u.pos.toPosition());
                         ((GameState) this.handler).ScoutSLs = new HashSet<>();
-                        ((GameState) this.handler).chosenHarasser = ((GameState) this.handler).chosenScout;
+                        if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+                            ((GameState) this.handler).addToSquad(((GameState) this.handler).chosenScout);
+                        } else {
+                            ((GameState) this.handler).chosenHarasser = (Worker) ((GameState) this.handler).chosenScout;
+                        }
                         ((GameState) this.handler).chosenScout = null;
                         ((GameState) this.handler).getIH().sendText("!");
                         ((GameState) this.handler).playSound("gear.mp3");

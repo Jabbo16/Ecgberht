@@ -31,7 +31,8 @@ public class CheckResourcesBuilding extends Conditional {
                         return State.SUCCESS;
                     }
                 } else if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 1) return State.SUCCESS;
-                return State.ERROR;
+
+                return State.FAILURE;
             } else if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
                 return State.SUCCESS;
             }

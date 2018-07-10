@@ -27,8 +27,8 @@ public class ChooseBarracks extends Action {
                     ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) > 1 &&
                     ((GameState) this.handler).frameCount <= 24 * 240) {
                 return State.FAILURE;
-
             }
+
             if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && ((GameState) this.handler).countUnit(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;
@@ -54,6 +54,11 @@ public class ChooseBarracks extends Action {
                 if (count + ((GameState) this.handler).MBs.size() > ((GameState) this.handler).strat.numRaxForFac && !found) {
                     return State.FAILURE;
                 }
+            }
+            if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).MBs.size()
+                    && ((GameState) this.handler).getPlayer().minerals() >= 600) {
+                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Barracks;
+                return State.SUCCESS;
             }
             if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < ((GameState) this.handler).strat.raxPerCC * ((GameState) this.handler).CCs.size()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Barracks;

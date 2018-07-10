@@ -45,6 +45,14 @@ public class ChoosePosition extends Action {
                     main = ((GameState) this.handler).MainCC.second.getTilePosition();
                 else main = ((GameState) this.handler).getPlayer().getStartLocation();
                 List<Base> valid = new ArrayList<>();
+                if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+                    for (Base b : ((GameState) this.handler).specialBLs) {
+                        if (!((GameState) this.handler).CCs.containsKey(b)) {
+                            ((GameState) this.handler).chosenPosition = b.getLocation();
+                            return State.SUCCESS;
+                        }
+                    }
+                }
                 for (Base b : ((GameState) this.handler).BLs) {
                     if (!((GameState) this.handler).CCs.containsKey(b) &&
                             !((GameState) this.handler).bwem.getMap().getPath(b.getLocation().toPosition(), main.toPosition()).isEmpty()) {

@@ -241,28 +241,26 @@ public class Util {
     public static final Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
         double highestPriority = 0.f;
         Unit bestTarget = null;
-
         // for each target possibility
         for (Unit targetUnit : targets) {
             double priority = getScore((PlayerUnit) rangedUnit, (PlayerUnit) targetUnit);
-
             // if it's a higher priority, set it
             if (bestTarget == null || priority > highestPriority) {
                 highestPriority = priority;
                 bestTarget = targetUnit;
             }
         }
-
         return bestTarget;
     }
 
+    // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
     private static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
         int priority = getAttackPriority(attacker, target);     // 0..12
         int range = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
         // Let's say that 1 priority step is worth 160 pixels (5 tiles).
         // We care about unit-target range and target-order position distance.
         int score = 5 * 32 * priority - range;
-
+        if (target.getInitialType() == UnitType.Zerg_Egg) return score;
         WeaponType targetWeapon = Util.getWeapon(attacker, target);
         UnitType targetType = getType(target);
         // Adjust for special features.
@@ -305,7 +303,7 @@ public class Util {
         return score;
     }
 
-    //get the attack priority of a target unit
+    // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
     private static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
         final UnitType targetType = getType(target);
         // Exceptions if we're a ground unit.
@@ -315,6 +313,7 @@ public class Util {
             }
         }
         if (targetType == UnitType.Zerg_Lurker) return 12;
+        if (targetType == UnitType.Zerg_Egg) return 5;
         if (targetType == UnitType.Protoss_High_Templar) return 12;
         if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
         // Droppers are as bad as threats. They may be loaded and are often isolated and safer to attack.

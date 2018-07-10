@@ -14,10 +14,11 @@ public class CheckHarasser extends Conditional {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).chosenHarasser == null) {
-                return State.FAILURE;
-            } else {
-                if (((GameState) this.handler).chosenHarasser.isIdle()) {
+            if (((GameState) this.handler).chosenHarasser == null) return State.FAILURE;
+            else {
+                if (((GameState) this.handler).chosenHarasser.isIdle() ||
+                        !((GameState) this.handler).chosenHarasser.isMoving() ||
+                        !((GameState) this.handler).chosenHarasser.isAttacking()) {
                     ((GameState) this.handler).chosenUnitToHarass = null;
                 }
                 ((GameState) this.handler).EI.defendHarass = true;

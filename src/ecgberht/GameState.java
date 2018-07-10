@@ -6,6 +6,7 @@ import bwem.ChokePoint;
 import bwem.area.Area;
 import bwem.unit.Geyser;
 import bwem.unit.Mineral;
+import bwem.unit.Neutral;
 import bwta.BWTA;
 import com.google.gson.Gson;
 import ecgberht.Agents.Agent;
@@ -119,7 +120,7 @@ public class GameState extends GameHandler {
     public Unit chosenBunker = null;
     public Worker chosenHarasser = null;
     public SCV chosenRepairer = null;
-    public Worker chosenScout = null;
+    public Unit chosenScout = null;
     public Unit chosenUnitToHarass = null;
     public ResearchingFacility chosenUnitUpgrader = null;
     public Worker chosenWorker = null;
@@ -134,7 +135,9 @@ public class GameState extends GameHandler {
     public SimManager sim;
     public ChokePoint naturalChoke = null;
     public Position defendPosition = null;
-    Area test = null;
+    public List<Base> specialBLs = new ArrayList<>();
+    public Map<Base, Neutral> blockedBases = new HashMap<>();
+
 
     public GameState(BW bw, BWTA bwta, BWEM bwem) {
         super(bw, bwta, bwem);
@@ -173,7 +176,11 @@ public class GameState extends GameHandler {
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             String map = bw.getBWMap().mapFileName();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
-
+            if (enemyRace == Race.Zerg && EI.naughty) return b;
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
+                maxWraiths = 200; // HELL
+                return new PlasmaWraithHell();
+            }
             Map<String, Pair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
@@ -262,15 +269,67 @@ public class GameState extends GameHandler {
     }
 
     public void initBlockingMinerals() {
+        int amount = 0;
+        if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) amount = 16; // Valkyries
         for (MineralPatch u : bw.getMineralPatches()) {
-            if (u.getResources() == 0) blockingMinerals.put(u.getPosition(), u);
+            if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
+
+        for (Base b : BLs) {
+            if (b.isStartingLocation()) continue;
+            if (skipWeirdBlocking(b)) continue;
+            if (weirdBlocking(b)) {
+                blockedBLs.add(b);
+            } else {
+                for (ChokePoint p : b.getArea().getChokePoints()) {
+                    Neutral n = p.getBlockingNeutral();
+                    if (n != null) {
+                        print(n.getUnit(), Color.RED);
+                        if (n.getBlockedAreas().contains(b.getArea())) {
+                            blockedBases.put(b, n);
+                            blockedBLs.add(b);
+                        }
+                    }
+                }
+            }
+        }
+        /*for(ChokePoint p : bwem.getMap().getChokePoints()){
+            Neutral n =  p.getBlockingNeutral();
+            if(n != null){
+                print(n.getUnit(), Color.RED);
+                for(Base b : BLs){
+                    if(b.isStartingLocation()) continue;
+                    if(n.getBlockedAreas().contains(b.getArea()) || weirdBlocking(b)){
+                        blockedBases.put(b, n);
+                        blockedBLs.add(b);
+                    }
+                }
+            }
+        }*/
+    }
+
+    private boolean skipWeirdBlocking(Base b) {
+        if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) {
+            if (b.getLocation().equals(new TilePosition(25, 67)) || b.getLocation().equals(new TilePosition(99, 67))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean weirdBlocking(Base b) {
+        if (bw.getBWMap().mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) {
+            if (b.getLocation().equals(new TilePosition(6, 119))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void checkBasesWithBLockingMinerals() {
         if (blockingMinerals.isEmpty()) return;
         for (bwem.Base b : BLs) {
-            if (b.isStartingLocation()) continue;
+            if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
             for (ChokePoint c : b.getArea().getChokePoints()) {
                 for (Position m : blockingMinerals.keySet()) {
                     if (broodWarDistance(m, c.getCenter().toPosition()) < 40) {
@@ -426,12 +485,19 @@ public class GameState extends GameHandler {
 
     public void debugScreen() {
         if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
-        if (naturalRegion != null) print(naturalRegion.getTop().toTilePosition(), Color.RED);
-        /*for(ChokePoint c : naturalRegion.getChokePoints()){
+        if (naturalRegion != null) {
+            print(naturalRegion.getTop().toTilePosition(), Color.RED);
+            for (ChokePoint c : naturalRegion.getChokePoints()) {
+                if (c.getGeometry().size() > 2)
+                    bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size() - 1).toPosition(), Color.GREEN);
+            }
+        }
+       /* for(ChokePoint c : bwem.getMap().getChokePoints()){
             if(c.getGeometry().size() > 2) bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size()-1).toPosition(), Color.GREEN);
         }*/
         Integer counter = 0;
         for (bwem.Base b : BLs) {
+            //bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), b.getLocation().toString());
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
             counter++;
         }
@@ -565,6 +631,36 @@ public class GameState extends GameHandler {
     public void initBaseLocations() {
         BLs.addAll(bwem.getMap().getBases());
         Collections.sort(BLs, new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
+        if (strat.name.equals("PlasmaWraithHell")) {
+            specialBLs.add(BLs.get(0));
+            if (BLs.get(0).getLocation().equals(new TilePosition(77, 63))) { // Start 1
+                for (Base b : BLs) {
+                    TilePosition pos = b.getLocation();
+                    if (pos.equals(new TilePosition(85, 42)) || pos.equals(new TilePosition(85, 83))) {
+                        specialBLs.add(b);
+                    }
+                }
+                return;
+            }
+            if (BLs.get(0).getLocation().equals(new TilePosition(14, 110))) { // Start 2
+                for (Base b : BLs) {
+                    TilePosition pos = b.getLocation();
+                    if (pos.equals(new TilePosition(39, 118)) || pos.equals(new TilePosition(7, 90))) {
+                        specialBLs.add(b);
+                    }
+                }
+                return;
+            }
+            if (BLs.get(0).getLocation().equals(new TilePosition(14, 14))) { // Start 3
+                for (Base b : BLs) {
+                    TilePosition pos = b.getLocation();
+                    if (pos.equals(new TilePosition(36, 6)) || pos.equals(new TilePosition(7, 37))) {
+                        specialBLs.add(b);
+                    }
+                }
+                return;
+            }
+        }
     }
 
     public void fix() {
@@ -629,9 +725,11 @@ public class GameState extends GameHandler {
 
         for (String name : squadsToClean) squads.remove(name);
 
-        if (chosenScout != null && chosenScout.isIdle()) {
-            workerIdle.add(chosenScout);
-            chosenScout = null;
+        if (!strat.name.equals("PlasmaWraithHell")) {
+            if (chosenScout != null && ((Worker) chosenScout).isIdle()) {
+                workerIdle.add((Worker) chosenScout);
+                chosenScout = null;
+            }
         }
         if (chosenBuilderBL != null && (chosenBuilderBL.isIdle() || chosenBuilderBL.isGatheringGas() || chosenBuilderBL.isGatheringMinerals())) {
             workerIdle.add(chosenBuilderBL);
@@ -656,12 +754,13 @@ public class GameState extends GameHandler {
 
         List<Unit> aux4 = new ArrayList<>();
         for (Entry<SCV, Building> r : repairerTask.entrySet()) {
-            if ((!r.getKey().isRepairing() || r.getKey().isIdle()) && (!(r.getValue() instanceof Bunker)
+            if (r.getValue().getHitPoints() == r.getValue().maxHitPoints() && (!(r.getValue() instanceof Bunker)
                     && IntelligenceAgency.getEnemyStrat() != IntelligenceAgency.EnemyStrats.ZealotRush || countUnit(UnitType.Terran_Command_Center) > 1)) {
                 if (chosenRepairer != null) {
                     if (r.equals(chosenRepairer)) chosenRepairer = null;
                 }
                 workerIdle.add(r.getKey());
+                r.getKey().stop(false);
                 aux4.add(r.getKey());
             }
         }
@@ -690,7 +789,10 @@ public class GameState extends GameHandler {
             chosenScout = null;
             ScoutSLs.clear();
             for (bwem.Base b : BLs) {
-                if (!CCs.containsKey(b) && bwta.isConnected(self.getStartLocation(), b.getLocation())) {
+                if (!CCs.containsKey(b)) {
+                    if (!strat.name.equals("PlasmaWraithHell") && !bwta.isConnected(self.getStartLocation(), b.getLocation())) {
+                        continue;
+                    }
                     ScoutSLs.add(b);
                 }
             }
@@ -699,71 +801,99 @@ public class GameState extends GameHandler {
 
     // Based on BWEB, thanks @Fawx, https://github.com/Cmccrave/BWEB
     public void initChokes() {
-        // Main choke
-        naturalRegion = BLs.get(1).getArea();
-        Area mainRegion = BLs.get(0).getArea();
-        double distBest = Double.MAX_VALUE;
-
-        for (ChokePoint choke : naturalRegion.getChokePoints()) {
-            double dist = bwta.getGroundDistance(choke.getCenter().toTilePosition(), getPlayer().getStartLocation());
-            if (dist < distBest && dist > 0.0) {
-                mainChoke = choke;
-                distBest = dist;
-            }
-        }
-        if (mainChoke != null) {
-            initAttackPosition = mainChoke.getCenter().toTilePosition();
-            initDefensePosition = mainChoke.getCenter().toTilePosition();
-        } else {
-            initAttackPosition = self.getStartLocation();
-            initDefensePosition = self.getStartLocation();
-        }
-        // Natural choke
-        // Exception for maps with a natural behind the main such as Crossing Fields
-        if (bwta.getGroundDistance(self.getStartLocation(), bwem.getMap().getData().getMapData().getCenter().toTilePosition()) < bwta.getGroundDistance(BLs.get(1).getLocation(), bwem.getMap().getData().getMapData().getCenter().toTilePosition())) {
-            naturalChoke = mainChoke;
-            return;
-        }
-
-        // Find area that shares the choke we need to defend
-        if (bw.getBWMap().mapHash().compareTo("aab66dbf9c85f85c47c219277e1e36181fe5f9fc") != 0) {
-            distBest = Double.MAX_VALUE;
-            Area second = null;
-            for (Area a : naturalRegion.getAccessibleNeighbors()) {
-                if (a.getTop().equals(mainRegion.getTop())) continue;
-                WalkPosition center = a.getTop();
-                double dist = center.toPosition().getDistance(bwem.getMap().getData().getMapData().getCenter());
-                if (dist < distBest) {
-                    second = a;
-                    distBest = dist;
-                }
-            }
-            test = second;
-            // Find second choke based on the connected area
-            distBest = Double.MAX_VALUE;
+        try {
+            // Main choke
+            naturalRegion = BLs.get(1).getArea();
+            Area mainRegion = BLs.get(0).getArea();
+            double distBest = Double.MAX_VALUE;
             for (ChokePoint choke : naturalRegion.getChokePoints()) {
-                if (choke.getCenter() == mainChoke.getCenter()) continue;
-                if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
-                if (choke.getAreas().first != second && choke.getAreas().second != second) continue;
-                double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
-                if (dist < distBest) {
-                    naturalChoke = choke;
+                double dist = bwta.getGroundDistance(choke.getCenter().toTilePosition(), getPlayer().getStartLocation());
+                if (dist < distBest && dist > 0.0) {
+                    mainChoke = choke;
                     distBest = dist;
                 }
             }
-        } else {
-            distBest = Double.MAX_VALUE;
-            for (ChokePoint choke : naturalRegion.getChokePoints()) {
-                if (choke.getCenter().equals(mainChoke.getCenter())) continue;
-                if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
-                double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
-                if (dist < distBest) {
-                    naturalChoke = choke;
-                    distBest = dist;
+            if (mainChoke != null) {
+                initAttackPosition = mainChoke.getCenter().toTilePosition();
+                initDefensePosition = mainChoke.getCenter().toTilePosition();
+            } else {
+                initAttackPosition = self.getStartLocation();
+                initDefensePosition = self.getStartLocation();
+            }
+            // Natural choke
+            // Exception for maps with a natural behind the main such as Crossing Fields
+            if (bwta.getGroundDistance(self.getStartLocation(), bwem.getMap().getData().getMapData().getCenter().toTilePosition()) < bwta.getGroundDistance(BLs.get(1).getLocation(), bwem.getMap().getData().getMapData().getCenter().toTilePosition())) {
+                naturalChoke = mainChoke;
+                return;
+            }
+            //System.out.println(bw.getInteractionHandler().getRandomSeed());
+            // Find area that shares the choke we need to defend
+            if (bw.getBWMap().mapHash().compareTo("33527b4ce7662f83485575c4b1fcad5d737dfcf1") == 0 &&
+                    BLs.get(0).getLocation().equals(new TilePosition(8, 9))) { // Luna special start location
+                naturalChoke = mainChoke;
+                mainChoke = BLs.get(0).getArea().getChokePoints().get(0);
+            } else if (bw.getBWMap().mapHash().compareTo("8000dc6116e405ab878c14bb0f0cde8efa4d640c") == 0 &&
+                    (BLs.get(0).getLocation().equals(new TilePosition(117, 51)) ||
+                            BLs.get(0).getLocation().equals(new TilePosition(43, 118)))) { // Alchemist special start location
+                naturalChoke = mainChoke;
+                double distMax = Double.MAX_VALUE;
+                for (ChokePoint p : BLs.get(0).getArea().getChokePoints()) {
+                    double dist = p.getCenter().toPosition().getDistance(naturalChoke.getCenter().toPosition());
+                    if (dist < distMax) {
+                        mainChoke = p;
+                        distMax = dist;
+                    }
+                }
+                if (BLs.get(0).getLocation().equals(new TilePosition(117, 51))) {
+                    distMax = Double.MIN_VALUE;
+                    for (ChokePoint p : BLs.get(1).getArea().getChokePoints()) {
+                        double dist = p.getCenter().toPosition().getDistance(mainChoke.getCenter().toPosition());
+                        if (dist > distMax) {
+                            naturalChoke = p;
+                            distMax = dist;
+                        }
+                    }
+                }
+            } else if (bw.getBWMap().mapHash().compareTo("aab66dbf9c85f85c47c219277e1e36181fe5f9fc") != 0) {
+                distBest = Double.MAX_VALUE;
+                Area second = null;
+                for (Area a : naturalRegion.getAccessibleNeighbors()) {
+                    if (a.getTop().equals(mainRegion.getTop())) continue;
+                    WalkPosition center = a.getTop();
+                    double dist = center.toPosition().getDistance(bwem.getMap().getData().getMapData().getCenter());
+                    if (dist < distBest) {
+                        second = a;
+                        distBest = dist;
+                    }
+                }
+                // Find second choke based on the connected area
+                distBest = Double.MAX_VALUE;
+                for (ChokePoint choke : naturalRegion.getChokePoints()) {
+                    if (choke.getCenter() == mainChoke.getCenter()) continue;
+                    if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
+                    if (choke.getAreas().first != second && choke.getAreas().second != second) continue;
+                    double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
+                    if (dist < distBest) {
+                        naturalChoke = choke;
+                        distBest = dist;
+                    }
+                }
+            } else {
+                distBest = Double.MAX_VALUE;
+                for (ChokePoint choke : naturalRegion.getChokePoints()) {
+                    if (choke.getCenter().equals(mainChoke.getCenter())) continue;
+                    if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
+                    double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
+                    if (dist < distBest) {
+                        naturalChoke = choke;
+                        distBest = dist;
+                    }
                 }
             }
+        } catch (Exception e) {
+            System.err.println("initChokes Exception");
+            e.printStackTrace();
         }
-
     }
 
     public String getSquadName() {
@@ -1249,7 +1379,7 @@ public class GameState extends GameHandler {
             List<Pair<Double, Double>> vectors = new ArrayList<>();
             double minDistance = Double.MAX_VALUE;
             for (Unit enemy : enemies) {
-                if (!enemy.isVisible()) continue;
+                if (!enemy.exists() || !enemy.isVisible()) continue;
                 Position enemyPosition = enemy.getPosition();
                 Pair<Double, Double> unitV = new Pair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
                 double distance = ownPosition.getDistance(enemyPosition);

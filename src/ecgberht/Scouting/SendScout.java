@@ -5,6 +5,8 @@ import ecgberht.GameState;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.MobileUnit;
+import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +25,27 @@ public class SendScout extends Action {
                 if (!((GameState) this.handler).ScoutSLs.isEmpty()) {
                     List<Base> aux = new ArrayList<>();
                     for (Base b : ((GameState) this.handler).ScoutSLs) {
-                        if (((GameState) this.handler).bwta.isConnected(b.getLocation(), ((GameState) this.handler).chosenScout.getTilePosition())) {
-                            if (((GameState) this.handler).chosenScout.move(b.getLocation().toPosition())) {
+                        if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+                            if (((MobileUnit) ((GameState) this.handler).chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
-                        } else {
-                            aux.add(b);
-                        }
+                        } else if (((GameState) this.handler).bwta.isConnected(b.getLocation(), ((GameState) this.handler).chosenScout.getTilePosition())) {
+                            if (((MobileUnit) ((GameState) this.handler).chosenScout).move(b.getLocation().toPosition())) {
+                                return State.SUCCESS;
+                            }
+                        } else aux.add(b);
                     }
                     ((GameState) this.handler).ScoutSLs.removeAll(aux);
                 }
             }
-            ((GameState) this.handler).workerIdle.add(((GameState) this.handler).chosenScout);
-            ((GameState) this.handler).chosenScout.stop(false);
+            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+                ((GameState) this.handler).addToSquad(((GameState) this.handler).chosenScout);
+                ((MobileUnit) ((GameState) this.handler).chosenScout).stop(false);
+                ((GameState) this.handler).chosenScout = null;
+                return State.FAILURE;
+            }
+            ((GameState) this.handler).workerIdle.add((Worker) ((GameState) this.handler).chosenScout);
+            ((MobileUnit) ((GameState) this.handler).chosenScout).stop(false);
             ((GameState) this.handler).chosenScout = null;
             return State.FAILURE;
         } catch (Exception e) {

@@ -13,10 +13,7 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class CheckPerimeter extends Conditional {
 
@@ -42,8 +39,9 @@ public class CheckPerimeter extends Conditional {
                 if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || (u instanceof Loadable &&
                         !(u instanceof Overlord))) && uType != UnitType.Zerg_Scourge &&
                         uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {
-                    for (Unit c : ((GameState) this.handler).workerTask.values()) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                    for (Map.Entry<SCV, Building> c : ((GameState) this.handler).workerTask.entrySet()) {
+                        int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
+                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
@@ -93,7 +91,7 @@ public class CheckPerimeter extends Conditional {
             List<Worker> toDelete = new ArrayList<>();
             for (Worker u : ((GameState) this.handler).workerDefenders.keySet()) {
                 if (u.getLastCommandFrame() == cFrame) continue;
-                Position closestDefense = null;
+                Position closestDefense;
                 if (((GameState) this.handler).EI.naughty) {
                     if (!((GameState) this.handler).DBs.isEmpty()) {
                         closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();

@@ -10,6 +10,8 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.util.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class Build extends Action {
@@ -21,7 +23,7 @@ public class Build extends Action {
     @Override
     public State execute() {
         try {
-            //List<SCV> toRemove = new ArrayList<>();
+            List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
                 if (u.getKey().getOrder() != Order.PlaceBuilding && ((GameState) this.handler).canAfford(u.getValue().first)) {
                     if (u.getValue().first == UnitType.Terran_Bunker) {
@@ -29,10 +31,13 @@ public class Build extends Action {
                         if (!chosen.build(u.getValue().second, u.getValue().first)) {
                             ((GameState) this.handler).deltaCash.first -= u.getValue().first.mineralPrice();
                             ((GameState) this.handler).deltaCash.second -= u.getValue().first.gasPrice();
-                            ((GameState) this.handler).workerBuild.remove(chosen);
+                            toRemove.add(chosen);
                             chosen.stop(false);
                             ((GameState) this.handler).workerIdle.add(chosen);
                         }
+                    } else if (u.getValue().first == UnitType.Terran_Command_Center) {
+                        SCV chosen = u.getKey();
+                        chosen.build(u.getValue().second, u.getValue().first);
                     } else {
                         SCV chosen = u.getKey();
                         chosen.build(u.getValue().second, u.getValue().first);
@@ -40,6 +45,7 @@ public class Build extends Action {
 
                 }
             }
+            for (SCV s : toRemove) ((GameState) this.handler).workerBuild.remove(s);
                 /*if ((u.getKey().getOrder() != Order.PlaceBuilding || ((GameState) this.handler).frameCount % 24*10 == 0)
                         && u.getKey().getDistance(u.getValue().second.toPosition()) <= 130) {
                     SCV chosen = u.getKey();
@@ -56,11 +62,7 @@ public class Build extends Action {
                     toRemove.add(chosen);
                 }
             }
-            for (SCV s : toRemove) {
-                ((GameState) this.handler).workerBuild.remove(s);
-                s.move(((GameState)this.handler).getNearestCC(s.getPosition()));
-                ((GameState) this.handler).workerIdle.add(s);
-            }*/
+            */
             return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

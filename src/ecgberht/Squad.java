@@ -80,24 +80,24 @@ public class Squad implements Comparable<Squad> {
                         if (u.getOrder() != Order.Move) move = getGs().defendPosition;
                     } else if (!getGs().DBs.isEmpty()) {
                         Unit bunker = getGs().DBs.keySet().iterator().next();
-                        if (getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 170 &&
-                                getGs().getArmySize() < getGs().strat.armyForAttack && getGs().strat.name != "ProxyBBS") {
+                        if (getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 180 &&
+                                getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().strat.name.equals("ProxyBBS")) {
                             if (u.getOrder() != Order.Move) move = bunker.getPosition();
                         }
-                    } else if (getGs().mainChoke != null && !getGs().EI.naughty && getGs().strat.name != "ProxyBBS") {
+                    } else if (getGs().mainChoke != null && !getGs().EI.naughty && !getGs().strat.name.equals("ProxyBBS")) {
                         if (getGs().broodWarDistance(getGs().mainChoke.getCenter().toPosition(), sCenter) >= 200 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
                             if (u.getOrder() != Order.Move) move = getGs().mainChoke.getCenter().toPosition();
                         }
-                    } else if (getGs().broodWarDistance(u.getPosition(), sCenter) >= 200 && u.getOrder() != Order.Move) {
+                    } else if (getGs().broodWarDistance(u.getPosition(), sCenter) >= 180 && u.getOrder() != Order.Move) {
                         if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) move = sCenter;
                     }
                     if (move != null) {
-                        if (u.getOrder() == Order.Move) {
+                        if (u.getOrder() == Order.AttackMove || u.getOrder() == Order.HealMove) {
                             if (u.getDistance(move) <= UnitType.Terran_Marine.groundWeapon().maxRange())
                                 ((MobileUnit) u).stop(false);
-                        } else if (lastTarget == null || (lastTarget != null && !lastTarget.equals(move))) {
-                            ((MobileUnit) u).move(move);
+                        } else if (u.getDistance(move) > UnitType.Terran_Marine.groundWeapon().maxRange() && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
+                            ((MobileUnit) u).attack(move);
                             continue;
                         }
                     }
@@ -117,12 +117,10 @@ public class Squad implements Comparable<Squad> {
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition()) && getGs().supplyMan.getSupplyUsed() < 240) {
                     if (members.size() == 1) continue;
                     double dist = getGs().broodWarDistance(u.getPosition(), sCenter);
-                    if (dist >= 300) {
-                        if (u.getOrderTargetPosition() != null) {
-                            if (!u.getOrderTargetPosition().equals(sCenter)) {
-                                ((MobileUnit) u).attack(sCenter);
-                                continue;
-                            }
+                    if (dist >= 300 && u.getOrderTargetPosition() != null) {
+                        if (!u.getOrderTargetPosition().equals(sCenter)) {
+                            ((MobileUnit) u).attack(sCenter);
+                            continue;
                         }
                     }
                 }
@@ -144,10 +142,20 @@ public class Squad implements Comparable<Squad> {
                     ((MobileUnit) u).move(sCenter);
                     continue;
                 }
-
-                if (lastTarget != null) {
-                    if (lastTarget.equals(attack)) continue;
+                if (!getGs().strat.name.equals("PlasmaWraithHell") &&
+                        getGs().getGame().getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
+                    if (!(u instanceof Attacker)) continue;
+                    Unit target = Util.getTarget(u, getGs().enemyCombatUnitMemory);
+                    Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
+                            ((Attacker) u).getTargetUnit());
+                    if (lastTargetUnit != null) {
+                        if (!lastTargetUnit.equals(target)) {
+                            ((Attacker) u).attack(target);
+                            continue;
+                        }
+                    }
                 }
+                if (lastTarget != null && lastTarget.equals(attack)) continue;
                 if ((status == Status.ATTACK) && u.getOrder() != null && u.getOrder() == Order.AttackMove &&
                         !u.getOrderTargetPosition().equals(attack)) {
                     if (u instanceof MobileUnit) {
@@ -197,14 +205,10 @@ public class Squad implements Comparable<Squad> {
                             Position run = getGs().kiteAway(u, enemyToKite);
                             if (getGs().getGame().getBWMap().isValidPosition(run)) {
                                 ((MobileUnit) u).move(run);
-                                continue;
-                            } else {
-                                ((MobileUnit) u).move(getGs().getPlayer().getStartLocation().toPosition());
-                                continue;
-                            }
+                            } else ((MobileUnit) u).move(getGs().getPlayer().getStartLocation().toPosition());
                         }
                     } else if (attack != null && !u.isStartingAttack() && !u.isAttacking()) {
-                        if (getGs().strat.name == "ProxyBBS") {
+                        if (getGs().strat.name.equals("ProxyBBS")) {
                             if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
                                 Unit target = Util.getTarget(u, enemyToAttack);
                                 Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
@@ -219,7 +223,6 @@ public class Squad implements Comparable<Squad> {
                         }
                         if (u.getOrder() == Order.Move) {
                             ((MobileUnit) u).attack(attack);
-                            continue;
                         }
                     }
                 }

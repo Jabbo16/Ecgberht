@@ -1,7 +1,6 @@
 package ecgberht.Harass;
 
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.GameState;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -25,14 +24,13 @@ public class Explore extends Conditional {
             if (((GameState) this.handler).directionScoutMain == 0) {
                 ((GameState) this.handler).directionScoutMain = 1;
             }
-            Base enemyBase = ((GameState) this.handler).enemyBase;
+            /*Base enemyBase = ((GameState) this.handler).enemyBase;
             Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(enemyBase.getLocation());
             Area harasserArea = ((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenHarasser.getTilePosition());
             if (harasserArea != null && enemyArea != null && !harasserArea.equals(enemyArea)) {
                 ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyBase.getLocation().toPosition());
                 return State.SUCCESS;
-            }
-
+            }*/
             Position nextExplorePos = chooseExplorePos();
             if (((GameState) this.handler).chosenHarasser.getDistance(nextExplorePos) > 2 * 32) {
                 ((GameState) this.handler).chosenHarasser.move(nextExplorePos);
@@ -53,6 +51,7 @@ public class Explore extends Conditional {
 
     private Position chooseExplorePos() {
         // Logic borrowed from LetaBot, should be improved/replaced
+        // Credits to Martin Rooijackers
         int BaseSize = 10 * 32;
         int Xlocation = 0;
         int Ylocation = 0;

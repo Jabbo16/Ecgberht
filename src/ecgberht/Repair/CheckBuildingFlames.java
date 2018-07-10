@@ -7,7 +7,6 @@ import ecgberht.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -24,7 +23,7 @@ public class CheckBuildingFlames extends Action {
         try {
             for (Map.Entry<SCV, Building> u : ((GameState) this.handler).repairerTask.entrySet()) {
                 if (u.getValue().maxHitPoints() != u.getValue().getHitPoints() &&
-                        u.getKey().getOrder() != Order.Repair && u.getKey().getOrder() != Order.MoveToRepair) {
+                        !u.getKey().isRepairing()) {
                     u.getKey().repair((Mechanical) u.getValue());
                 }
             }

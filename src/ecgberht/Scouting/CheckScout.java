@@ -15,6 +15,10 @@ public class CheckScout extends Conditional {
     @Override
     public State execute() {
         try {
+            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+                if (((GameState) this.handler).squads.isEmpty()) return State.FAILURE;
+                return State.SUCCESS;
+            }
             if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).mapSize == 2) {
                 for (Base b : ((GameState) this.handler).SLs) {
                     if (b.equals(((GameState) this.handler).MainCC.first)) continue;

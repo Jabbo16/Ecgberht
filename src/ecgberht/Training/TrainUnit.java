@@ -31,13 +31,19 @@ public class TrainUnit extends Action {
                 }
                 if (!((GameState) this.handler).Fs.isEmpty() && mShop && (!((GameState) this.handler).getPlayer().isResearching(TechType.Tank_Siege_Mode) &&
                         !((GameState) this.handler).getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && ((GameState) this.handler).vulturesTrained >= 2) {
+                    ((GameState) this.handler).chosenBuilding = null;
+                    ((GameState) this.handler).chosenToBuild = null;
                     return State.FAILURE;
                 }
             }
             TrainingFacility chosen = ((GameState) this.handler).chosenBuilding;
             if (((GameState) this.handler).strat.name == "ProxyBBS") {
                 if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 2 &&
-                        ((GameState) this.handler).countUnit(UnitType.Terran_Supply_Depot) == 0) return State.FAILURE;
+                        ((GameState) this.handler).countUnit(UnitType.Terran_Supply_Depot) == 0) {
+                    ((GameState) this.handler).chosenBuilding = null;
+                    ((GameState) this.handler).chosenToBuild = null;
+                    return State.FAILURE;
+                }
                 if (((GameState) this.handler).getSupply() > 0) {
                     chosen.train(((GameState) this.handler).chosenUnit);
                     return State.SUCCESS;
@@ -62,7 +68,11 @@ public class TrainUnit extends Action {
                                 break;
                             }
                         }
-                        if (!found) return State.FAILURE;
+                        if (!found) {
+                            ((GameState) this.handler).chosenBuilding = null;
+                            ((GameState) this.handler).chosenToBuild = null;
+                            return State.FAILURE;
+                        }
                     }
                 }
                 chosen.train(((GameState) this.handler).chosenUnit);
