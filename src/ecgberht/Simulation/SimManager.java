@@ -29,7 +29,6 @@ public class SimManager {
     private List<Cluster> enemies = new ArrayList<>();
     private List<SimInfo> simulations = new ArrayList<>();
     private JFAP simulator;
-    private MeanShift clustering;
     private double radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
     private int shortSimFrames = 90;
     private int longSimFrames = 300;
@@ -63,7 +62,7 @@ public class SimManager {
         }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
-        clustering = new MeanShift(myUnits);
+        MeanShift clustering = new MeanShift(myUnits);
         friendly = clustering.run();
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();

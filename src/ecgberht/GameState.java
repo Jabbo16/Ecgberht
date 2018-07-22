@@ -318,7 +318,7 @@ public class GameState extends GameHandler {
     }
 
     private boolean weirdBlocking(Base b) {
-        if (bw.getBWMap().mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) {
+        if (bw.getBWMap().mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) { // CIG destination / SSCAIT destination
             if (b.getLocation().equals(new TilePosition(6, 119))) {
                 return true;
             }
@@ -495,6 +495,9 @@ public class GameState extends GameHandler {
        /* for(ChokePoint c : bwem.getMap().getChokePoints()){
             if(c.getGeometry().size() > 2) bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size()-1).toPosition(), Color.GREEN);
         }*/
+        for (MineralPatch d : blockingMinerals.values()) {
+            print(d, Color.RED);
+        }
         Integer counter = 0;
         for (bwem.Base b : BLs) {
             //bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), b.getLocation().toString());
@@ -752,7 +755,7 @@ public class GameState extends GameHandler {
         }
         for (Unit u : aux3) workerBuild.remove(u);
 
-        List<Unit> aux4 = new ArrayList<>();
+        /*List<Unit> aux4 = new ArrayList<>();
         for (Entry<SCV, Building> r : repairerTask.entrySet()) {
             if (r.getValue().getHitPoints() == r.getValue().maxHitPoints() && (!(r.getValue() instanceof Bunker)
                     && IntelligenceAgency.getEnemyStrat() != IntelligenceAgency.EnemyStrats.ZealotRush || countUnit(UnitType.Terran_Command_Center) > 1)) {
@@ -764,7 +767,7 @@ public class GameState extends GameHandler {
                 aux4.add(r.getKey());
             }
         }
-        for (Unit u : aux4) repairerTask.remove(u);
+        for (Unit u : aux4) repairerTask.remove(u);*/
 
         List<Unit> aux5 = new ArrayList<>();
         for (Worker r : workerDefenders.keySet()) {

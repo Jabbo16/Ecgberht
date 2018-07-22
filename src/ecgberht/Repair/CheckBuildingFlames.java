@@ -10,6 +10,8 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class CheckBuildingFlames extends Action {
@@ -21,12 +23,21 @@ public class CheckBuildingFlames extends Action {
     @Override
     public State execute() {
         try {
+            List<SCV> toRemove = new ArrayList<>();
             for (Map.Entry<SCV, Building> u : ((GameState) this.handler).repairerTask.entrySet()) {
                 if (u.getValue().maxHitPoints() != u.getValue().getHitPoints() &&
                         !u.getKey().isRepairing()) {
                     u.getKey().repair((Mechanical) u.getValue());
+                } else if (((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) < 2 && u.getValue() instanceof Bunker &&
+                        IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush) {
+                    continue;
+                } else {
+                    u.getKey().stop(false);
+                    ((GameState) this.handler).workerIdle.add(u.getKey());
+                    toRemove.add(u.getKey());
                 }
             }
+            for (SCV s : toRemove) ((GameState) this.handler).repairerTask.remove(s);
             boolean isBeingRepaired;
             boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush;
             for (Bunker w : ((GameState) this.handler).DBs.keySet()) {
