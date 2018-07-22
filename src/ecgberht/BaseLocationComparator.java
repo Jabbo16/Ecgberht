@@ -12,6 +12,7 @@ public class BaseLocationComparator implements Comparator<Base> {
 
     public BaseLocationComparator(Base base) {
         this.base = base;
+        for (Base b : getGs().blockedBLs) System.out.println(b.getLocation());
     }
 
     @Override

@@ -632,7 +632,6 @@ public class GameState extends GameHandler {
     }
 
     public void initBaseLocations() {
-        BLs.addAll(bwem.getMap().getBases());
         Collections.sort(BLs, new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
         if (strat.name.equals("PlasmaWraithHell")) {
             specialBLs.add(BLs.get(0));

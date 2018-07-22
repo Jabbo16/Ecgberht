@@ -242,8 +242,9 @@ public class Ecgberht implements BWEventListener {
             }
             gs.strat = gs.initStrat();
             gs.initStartLocations();
-            gs.initBaseLocations();
+            gs.BLs.addAll(bwem.getMap().getBases());
             gs.initBlockingMinerals();
+            gs.initBaseLocations();
             gs.checkBasesWithBLockingMinerals();
             gs.initChokes();
             // Trees Initializations
