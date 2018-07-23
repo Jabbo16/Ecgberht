@@ -689,6 +689,7 @@ public class Ecgberht implements BWEventListener {
                         if (gs.strat.name == "ProxyBBS") gs.removeFromSquad(arg0);
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
+                                gs.workerIdle.add((Worker) arg0);
                                 gs.repairerTask.remove(r);
                                 break;
                             }

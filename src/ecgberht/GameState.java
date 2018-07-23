@@ -689,7 +689,7 @@ public class GameState extends GameHandler {
         }
         for (Bunker c : bunkers) DBs.remove(c);
 
-        List<Worker> removeMining = new ArrayList<>();
+        /*List<Worker> removeMining = new ArrayList<>();
         for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
             if (repairerTask.containsKey(w.getKey())) {
                 if (w.getKey().isGatheringMinerals()) {
@@ -702,7 +702,7 @@ public class GameState extends GameHandler {
                 }
             }
         }
-        for (Worker u : removeMining) workerMining.remove(u);
+        for (Worker u : removeMining) workerMining.remove(u);*/
 
         List<Worker> removeGas = new ArrayList<>();
         for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {

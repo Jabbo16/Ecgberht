@@ -179,9 +179,9 @@ public class SimManager {
                 s.stateBefore.first.add(jU);
             }
             for (Unit u : s.enemies) {
-                if (!((PlayerUnit) u).isDetected() && energy >= 50 && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
-                    s.lose = true;
-                    energy -= 50;
+                if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
+                    if (energy >= 50) energy -= 50;
+                    else s.lose = true;
                     break;
                 }
                 JFAPUnit jU = new JFAPUnit(u);
