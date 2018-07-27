@@ -65,6 +65,8 @@ public class Squad implements Comparable<Squad> {
                 if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
                     continue;
                 }
+                if (u.isLockedDown() || u.isMaelstrommed() || ((MobileUnit) u).isStasised() || ((MobileUnit) u).getTransport() != null)
+                    continue;
                 Position lastTarget = u.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
                         u.getOrderTargetPosition();
                 if (stimResearched && (u instanceof Marine || u instanceof Firebat)) {

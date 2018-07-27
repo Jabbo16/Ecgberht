@@ -1,37 +1,39 @@
 package ecgberht;
 
 import bwem.BWEM;
-import bwta.BWTA;
-import ecgberht.AddonBuild.*;
+import bwem.Base;
+import ecgberht.Agents.DropShipAgent;
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.VultureAgent;
 import ecgberht.Agents.WraithAgent;
-import ecgberht.Attack.CheckArmy;
-import ecgberht.Attack.ChooseAttackPosition;
-import ecgberht.Build.*;
-import ecgberht.BuildingLot.CheckBuildingsLot;
-import ecgberht.BuildingLot.ChooseBlotWorker;
-import ecgberht.BuildingLot.ChooseBuildingLot;
-import ecgberht.BuildingLot.FinishBuilding;
-import ecgberht.Bunker.ChooseBunkerToLoad;
-import ecgberht.Bunker.ChooseMarineToEnter;
-import ecgberht.Bunker.EnterBunker;
-import ecgberht.Defense.CheckPerimeter;
-import ecgberht.Defense.ChooseDefensePosition;
-import ecgberht.Defense.SendDefenders;
-import ecgberht.Harass.*;
-import ecgberht.Recollection.CollectGas;
-import ecgberht.Recollection.CollectMineral;
-import ecgberht.Recollection.FreeWorker;
-import ecgberht.Repair.CheckBuildingFlames;
-import ecgberht.Repair.ChooseRepairer;
-import ecgberht.Repair.Repair;
-import ecgberht.Scanner.CheckScan;
-import ecgberht.Scanner.Scan;
-import ecgberht.Scouting.*;
+import ecgberht.BehaviourTrees.AddonBuild.*;
+import ecgberht.BehaviourTrees.Attack.CheckArmy;
+import ecgberht.BehaviourTrees.Attack.ChooseAttackPosition;
+import ecgberht.BehaviourTrees.Build.*;
+import ecgberht.BehaviourTrees.BuildingLot.CheckBuildingsLot;
+import ecgberht.BehaviourTrees.BuildingLot.ChooseBlotWorker;
+import ecgberht.BehaviourTrees.BuildingLot.ChooseBuildingLot;
+import ecgberht.BehaviourTrees.BuildingLot.FinishBuilding;
+import ecgberht.BehaviourTrees.Bunker.ChooseBunkerToLoad;
+import ecgberht.BehaviourTrees.Bunker.ChooseMarineToEnter;
+import ecgberht.BehaviourTrees.Bunker.EnterBunker;
+import ecgberht.BehaviourTrees.Defense.CheckPerimeter;
+import ecgberht.BehaviourTrees.Defense.ChooseDefensePosition;
+import ecgberht.BehaviourTrees.Defense.SendDefenders;
+import ecgberht.BehaviourTrees.Harass.*;
+import ecgberht.BehaviourTrees.IslandExpansion.*;
+import ecgberht.BehaviourTrees.Recollection.CollectGas;
+import ecgberht.BehaviourTrees.Recollection.CollectMineral;
+import ecgberht.BehaviourTrees.Recollection.FreeWorker;
+import ecgberht.BehaviourTrees.Repair.CheckBuildingFlames;
+import ecgberht.BehaviourTrees.Repair.ChooseRepairer;
+import ecgberht.BehaviourTrees.Repair.Repair;
+import ecgberht.BehaviourTrees.Scanner.CheckScan;
+import ecgberht.BehaviourTrees.Scanner.Scan;
+import ecgberht.BehaviourTrees.Scouting.*;
+import ecgberht.BehaviourTrees.Training.*;
+import ecgberht.BehaviourTrees.Upgrade.*;
 import ecgberht.Strategies.BioBuild;
-import ecgberht.Training.*;
-import ecgberht.Upgrade.*;
 import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
@@ -71,9 +73,9 @@ public class Ecgberht implements BWEventListener {
     private BehavioralTree repairTree;
     private BehavioralTree scannerTree;
     private BehavioralTree scoutingTree;
+    private BehavioralTree islandTree;
     private boolean first = false;
     private Player self;
-    private BWTA bwta = null;
     private BWEM bwem = null;
 
     public static void main(String[] args) {
@@ -193,6 +195,26 @@ public class Ecgberht implements BWEventListener {
         addonBuildTree.addChild(Addon);
     }
 
+    private void initIslandTree() {
+        CheckIslands chI = new CheckIslands("Check islands", gs);
+        CheckExpandingIsland cEI = new CheckExpandingIsland("Check Expanding To Island", gs);
+        CheckDropped chD = new CheckDropped("Check Dropped", gs);
+        CheckBlockingMinerals cBM = new CheckBlockingMinerals("Check Blocking minerals", gs);
+        CheckResourcesIsland cRI = new CheckResourcesIsland("Check resources Island", gs);
+        MoveIsland mI = new MoveIsland("Move Island", gs);
+        ChooseDropShip cD = new ChooseDropShip("Choose DropShip", gs);
+        ChooseIsland cI = new ChooseIsland("Choose Island", gs);
+        ChooseWorkerDrop cWD = new ChooseWorkerDrop("Choose Worker Drop", gs);
+        SendToDrop sD = new SendToDrop("Send To Drop", gs);
+        Sequence chooseThings = new Sequence("Choose things", cD, cI, cWD, sD);
+        Sequence expand = new Sequence("Island expand", cEI, chD, cBM, cRI, mI);
+        Selector expanding = new Selector("Check if already expanding", expand, cEI, chooseThings);
+        Sequence islandExpansion = new Sequence("island expansion", chI, expanding);
+        islandTree = new BehavioralTree("islandTree");
+        islandTree.addChild(islandExpansion);
+
+    }
+
     private void run() {
         Ecgberht.bw = new BW(this);
         Ecgberht.bw.startGame();
@@ -223,17 +245,13 @@ public class Ecgberht implements BWEventListener {
             if (ConfigManager.getConfig().bwapiConfig.localSpeed >= 0)
                 ih.setLocalSpeed(ConfigManager.getConfig().bwapiConfig.localSpeed);
             if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
-            System.out.println("Analyzing map...");
-            bwta = new BWTA();
-            bwta.analyze();
-            System.out.println("Map data ready");
             bwem = new BWEM(bw);
             if (bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) { // Hitchhiker
                 ih.sendText("Hitchhiker :(");
             }
             bwem.initialize();
             bwem.getMap().assignStartingLocationsToSuitableBases();
-            gs = new GameState(bw, bwta, bwem);
+            gs = new GameState(bw, bwem);
             gs.initEnemyRace();
             gs.readOpponentInfo();
             gs.alwaysPools();
@@ -242,7 +260,11 @@ public class Ecgberht implements BWEventListener {
             }
             gs.strat = gs.initStrat();
             gs.initStartLocations();
-            gs.BLs.addAll(bwem.getMap().getBases());
+            for (Base b : bwem.getMap().getBases()) {
+                if (b.getArea().getAccessibleNeighbors().isEmpty()) {
+                    gs.islandBases.add(b);
+                } else gs.BLs.add(b);
+            }
             gs.initBlockingMinerals();
             gs.initBaseLocations();
             gs.checkBasesWithBLockingMinerals();
@@ -261,6 +283,7 @@ public class Ecgberht implements BWEventListener {
             initBunkerTree();
             initScanTree();
             initHarassTree();
+            initIslandTree();
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
@@ -405,6 +428,7 @@ public class Ecgberht implements BWEventListener {
             repairTree.run();
             collectTree.run();
             upgradeTree.run();
+            islandTree.run();
             buildTree.run();
             addonBuildTree.run();
             trainTree.run();
@@ -602,6 +626,17 @@ public class Ecgberht implements BWEventListener {
                             }
                         } else if (type == UnitType.Terran_Vulture) {
                             gs.agents.put(arg0, new VultureAgent(arg0));
+
+                        } else if (type == UnitType.Terran_Dropship) {
+                            DropShipAgent d = new DropShipAgent(arg0);
+                            /*d.setTarget(gs.enemyBase.getCenter());
+                            Entry<Worker, MineralPatch> scv = gs.workerMining.entrySet().iterator().next();
+                            gs.mineralsAssigned.put(scv.getValue(),  gs.mineralsAssigned.get(scv.getValue()) - 1);
+                            gs.workerMining.remove(scv.getKey());
+                            scv.getKey().stop(false);
+                            d.setCargo(new TreeSet<>(Arrays.asList(scv.getKey())));*/
+                            gs.agents.put(arg0, d);
+
                         } else if (type == UnitType.Terran_Science_Vessel) {
                             Squad s = gs.chooseVesselSquad(arg0.getPosition());
                             VesselAgent v = new VesselAgent(arg0, s);
@@ -835,6 +870,8 @@ public class Ecgberht implements BWEventListener {
                         } else if (type == UnitType.Terran_Vulture) {
                             if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
                             else gs.removeFromSquad(arg0);
+                        } else if (type == UnitType.Terran_Dropship) {
+                            if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
                         } else if (type == UnitType.Terran_Science_Vessel) {
                             if (gs.agents.containsKey(arg0)) {
                                 VesselAgent v = (VesselAgent) gs.agents.get(arg0);

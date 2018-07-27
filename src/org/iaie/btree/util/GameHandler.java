@@ -34,7 +34,6 @@
 package org.iaie.btree.util;
 
 import bwem.BWEM;
-import bwta.BWTA;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.InteractionHandler;
 import org.openbw.bwapi4j.Player;
@@ -45,15 +44,13 @@ import org.openbw.bwapi4j.Player;
 public abstract class GameHandler {
     public BW bw;
     public InteractionHandler ih;
-    public BWTA bwta;
     public BWEM bwem;
     protected Player self;
 
-    public GameHandler(BW bw, BWTA bwta, BWEM bwem) {
+    public GameHandler(BW bw, BWEM bwem) {
         this.bw = bw;
         this.ih = bw.getInteractionHandler();
         this.self = bw.getInteractionHandler().self();
-        this.bwta = bwta;
         this.bwem = bwem;
     }
 }

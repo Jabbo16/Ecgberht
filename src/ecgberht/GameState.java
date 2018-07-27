@@ -7,12 +7,8 @@ import bwem.area.Area;
 import bwem.unit.Geyser;
 import bwem.unit.Mineral;
 import bwem.unit.Neutral;
-import bwta.BWTA;
 import com.google.gson.Gson;
-import ecgberht.Agents.Agent;
-import ecgberht.Agents.VesselAgent;
-import ecgberht.Agents.VultureAgent;
-import ecgberht.Agents.WraithAgent;
+import ecgberht.Agents.*;
 import ecgberht.Simulation.SimManager;
 import ecgberht.Strategies.*;
 import jfap.JFAP;
@@ -61,7 +57,7 @@ public class GameState extends GameHandler {
     public List<Base> EnemyBLs = new ArrayList<>();
     public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
     public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
-    public Map<SCV, Pair<UnitType, TilePosition>> workerBuild = new TreeMap<>();
+    public Map<SCV, Pair<UnitType, TilePosition>> workerBuild = new HashMap<>();
     public Map<Worker, Position> workerDefenders = new TreeMap<>();
     public Map<SCV, Building> repairerTask = new TreeMap<>();
     public Map<SCV, Building> workerTask = new TreeMap<>();
@@ -137,16 +133,22 @@ public class GameState extends GameHandler {
     public Position defendPosition = null;
     public List<Base> specialBLs = new ArrayList<>();
     public Map<Base, Neutral> blockedBases = new HashMap<>();
+    public Set<Base> islandBases = new HashSet<>();
+    public DropShipAgent chosenDropShip;
+    public Base chosenIsland = null;
+    public Worker chosenWorkerDrop = null;
+    public Map<Base, CommandCenter> islandCCs = new HashMap<>();
+    public boolean islandExpand;
 
 
-    public GameState(BW bw, BWTA bwta, BWEM bwem) {
-        super(bw, bwta, bwem);
+    public GameState(BW bw, BWEM bwem) {
+        super(bw, bwem);
         initPlayers();
         map = new BuildingMap(bw, ih.self(), bwem);
         map.initMap();
         testMap = map.clone();
         inMap = new InfluenceMap(bw, ih.self(), bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
-        mapSize = bwta.getStartLocations().size();
+        mapSize = bw.getBWMap().getStartPositions().size();
         simulator = new JFAP(bw);
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimManager(bw);
@@ -499,10 +501,13 @@ public class GameState extends GameHandler {
             print(d, Color.RED);
         }
         Integer counter = 0;
-        for (bwem.Base b : BLs) {
+        for (Base b : BLs) {
             //bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), b.getLocation().toString());
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
             counter++;
+        }
+        for (Base b : islandBases) {
+            bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), "ISLAND");
         }
         for (Agent ag : agents.values()) {
             if (ag instanceof VultureAgent) {
@@ -516,6 +521,9 @@ public class GameState extends GameHandler {
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(0,
                         UnitType.Terran_Wraith.dimensionUp())), ColorUtil.formatText(wraith.name, ColorUtil.White));
+            } else if (ag instanceof DropShipAgent) {
+                DropShipAgent dropShip = (DropShipAgent) ag;
+                bw.getMapDrawer().drawTextMap(dropShip.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
             }
         }
         if (mainChoke != null) bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), "MainChoke");
@@ -533,6 +541,7 @@ public class GameState extends GameHandler {
         }
         for (Entry<SCV, Pair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             print(u.getKey(), Color.TEAL);
+            bw.getMapDrawer().drawTextMap(u.getKey().getPosition().subtract(new Position(0, UnitType.Terran_SCV.tileHeight() * 8)), u.getKey().getLastCommand().toString());
             bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "Building " + u.getValue().first.toString());
             print(u.getValue().second, u.getValue().first, Color.TEAL);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), getCenterFromBuilding(u.getValue().second.toPosition(), u.getValue().first), Color.RED);
@@ -792,7 +801,7 @@ public class GameState extends GameHandler {
             ScoutSLs.clear();
             for (bwem.Base b : BLs) {
                 if (!CCs.containsKey(b)) {
-                    if (!strat.name.equals("PlasmaWraithHell") && !bwta.isConnected(self.getStartLocation(), b.getLocation())) {
+                    if (!strat.name.equals("PlasmaWraithHell") && !bwem.getMap().getPath(self.getStartLocation().toPosition(), b.getLocation().toPosition()).isEmpty()) {
                         continue;
                     }
                     ScoutSLs.add(b);
@@ -809,7 +818,7 @@ public class GameState extends GameHandler {
             Area mainRegion = BLs.get(0).getArea();
             double distBest = Double.MAX_VALUE;
             for (ChokePoint choke : naturalRegion.getChokePoints()) {
-                double dist = bwta.getGroundDistance(choke.getCenter().toTilePosition(), getPlayer().getStartLocation());
+                double dist = Util.getGroundDistance(choke.getCenter().toPosition(), getPlayer().getStartLocation().toPosition());
                 if (dist < distBest && dist > 0.0) {
                     mainChoke = choke;
                     distBest = dist;
@@ -824,7 +833,7 @@ public class GameState extends GameHandler {
             }
             // Natural choke
             // Exception for maps with a natural behind the main such as Crossing Fields
-            if (bwta.getGroundDistance(self.getStartLocation(), bwem.getMap().getData().getMapData().getCenter().toTilePosition()) < bwta.getGroundDistance(BLs.get(1).getLocation(), bwem.getMap().getData().getMapData().getCenter().toTilePosition())) {
+            if (Util.getGroundDistance(self.getStartLocation().toPosition(), bwem.getMap().getData().getMapData().getCenter()) < Util.getGroundDistance(BLs.get(1).getLocation().toPosition(), bwem.getMap().getData().getMapData().getCenter())) {
                 naturalChoke = mainChoke;
                 return;
             }
@@ -1051,7 +1060,7 @@ public class GameState extends GameHandler {
     //TODO Real maths
     public int getMineralsWhenReaching(TilePosition start, TilePosition end) {
         double rate = getMineralRate();
-        double distance = bwta.getGroundDistance(start, end);
+        double distance = Util.getGroundDistance(start.toPosition(), end.toPosition());
         double frames = distance / 2.55;
         return (int) (rate * frames);
     }
@@ -1326,17 +1335,6 @@ public class GameState extends GameHandler {
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
     }
 
-    public double getGroundDistance(TilePosition start, TilePosition end) {
-        double dist = 0.0;
-        if (bwem.getMap().getArea(start) == null || bwem.getMap().getArea(end) == null) return Integer.MAX_VALUE;
-        for (TilePosition cpp : bwta.getShortestPath(start, end)) {
-            Position center = cpp.toPosition();
-            dist += broodWarDistance(start.toPosition(), center);
-            start = center.toTilePosition();
-        }
-        return dist + broodWarDistance(start.toPosition(), end.toPosition());
-    }
-
     public Unit getUnitToAttack(Unit myUnit, Set<Unit> closeSim) {
         Unit chosen = null;
         Set<Unit> workers = new TreeSet<>();
@@ -1423,7 +1421,7 @@ public class GameState extends GameHandler {
 
     public void sendCustomMessage() {
         String name = EI.opponent.toLowerCase();
-        if (name.equals("krasi0".toLowerCase())) ih.sendText("Please be nice to me!");
+        if (name.equals("krasi0".toLowerCase())) ih.sendText("Please don't bully me too much!");
         else if (name.equals("hannes bredberg".toLowerCase()) || name.equals("hannesbredberg".toLowerCase())) {
             ih.sendText("Don't you dare nuke me!");
         } else if (name.equals("zercgberht")) {

@@ -5,6 +5,7 @@ import bwem.ChokePoint;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
@@ -120,7 +121,7 @@ public class Util {
         ChokePoint closestChoke = null;
         double dist = Double.MAX_VALUE;
         for (ChokePoint choke : getGs().bwem.getMap().getChokePoints()) {
-            double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), choke.getCenter().toTilePosition());
+            double cDist = getGroundDistance(pos, choke.getCenter().toPosition());
             if (cDist == 0.0) continue;
             if (closestChoke == null || cDist < dist) {
                 closestChoke = choke;
@@ -147,7 +148,7 @@ public class Util {
         Base closestBase = null;
         double dist = Double.MAX_VALUE;
         for (Base base : getGs().bwem.getMap().getBases()) {
-            double cDist = getGs().bwta.getGroundDistance(pos.toTilePosition(), base.getLocation());
+            double cDist = getGroundDistance(pos, base.getLocation().toPosition());
             if (cDist == 0.0) continue;
             if (closestBase == null || cDist < dist) {
                 closestBase = base;
@@ -356,7 +357,17 @@ public class Util {
     }
 
     public static int getWeight(Unit u) {
-        if (u instanceof SiegeTank) return 3;
+        if (u instanceof SiegeTank) return 4;
         return 1;
+    }
+
+    public static int getGroundDistance(Position start, Position end) {
+        MutableInt dist = new MutableInt();
+        getGs().bwem.getMap().getPath(start, end, dist);
+        return dist.intValue();
+    }
+
+    public static boolean isConnected(TilePosition start, TilePosition end) {
+        return !getGs().bwem.getMap().getPath(start.toPosition(), end.toPosition()).isEmpty();
     }
 }
