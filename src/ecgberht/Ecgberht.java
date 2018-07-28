@@ -283,7 +283,7 @@ public class Ecgberht implements BWEventListener {
             initBunkerTree();
             initScanTree();
             initHarassTree();
-            initIslandTree();
+            //initIslandTree(); // TODO uncomment when BWAPI island bug is fixed
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
@@ -428,7 +428,7 @@ public class Ecgberht implements BWEventListener {
             repairTree.run();
             collectTree.run();
             upgradeTree.run();
-            islandTree.run();
+            //islandTree.run(); // TODO uncomment when BWAPI island bug is fixed
             buildTree.run();
             addonBuildTree.run();
             trainTree.run();

@@ -24,7 +24,7 @@ public class FullMech extends Strategy {
         numRaxForFac = 1;
         bunker = true;
         supplyForFirstRefinery = 28;
-        armyForAttack = 25;
+        armyForAttack = 30;
         armyForExpand = 8;
         numCCForPort = 1;
         numFacForPort = 2;

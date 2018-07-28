@@ -40,9 +40,8 @@ public class ChoosePosition extends Action {
                         }
                     }
                 }
-
             } else if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                if (!((GameState) this.handler).islandBases.isEmpty()) {
+                /*if (!((GameState) this.handler).islandBases.isEmpty()) { // TODO uncomment when BWAPI island bug is fixed
                     if (((GameState) this.handler).islandCCs.isEmpty()) {
                         if (((GameState) this.handler).islandExpand) return State.FAILURE;
                         for (Agent u : ((GameState) this.handler).agents.values()) {
@@ -52,7 +51,7 @@ public class ChoosePosition extends Action {
                             }
                         }
                     }
-                }
+                }*/
                 TilePosition main;
                 if (((GameState) this.handler).MainCC != null)
                     main = ((GameState) this.handler).MainCC.second.getTilePosition();
