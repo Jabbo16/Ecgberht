@@ -420,7 +420,7 @@ public class Ecgberht implements BWEventListener {
             IntelligenceAgency.updateBullets();
             gs.fix();
             gs.updateEnemyBuildingsMemory();
-            gs.inMapUnits = new InfluenceMap(bw, self, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
+            gs.inMapUnits = new InfluenceMap(bw, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
             gs.runAgents();
@@ -679,7 +679,7 @@ public class Ecgberht implements BWEventListener {
     }
 
     @Override
-    public void onUnitDestroy(Unit arg0) { //TODO Fix NPEs
+    public void onUnitDestroy(Unit arg0) {
         try {
             UnitType type;
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding

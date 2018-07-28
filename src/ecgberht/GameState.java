@@ -147,7 +147,7 @@ public class GameState extends GameHandler {
         map = new BuildingMap(bw, ih.self(), bwem);
         map.initMap();
         testMap = map.clone();
-        inMap = new InfluenceMap(bw, ih.self(), bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
+        inMap = new InfluenceMap(bw, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
         mapSize = bw.getBWMap().getStartPositions().size();
         simulator = new JFAP(bw);
         supplyMan = new SupplyMan(self.getRace());
@@ -156,7 +156,7 @@ public class GameState extends GameHandler {
 
     public void initPlayers() {
         for (Player p : bw.getAllPlayers()) {
-            //if(p.isObserver()) continue;
+            //if(p.isObserver()) continue; // TODO uncomment when bwapi client bug is fixed
             if (p.isNeutral()) {
                 players.put(p, 0);
                 neutral = p;
@@ -280,34 +280,17 @@ public class GameState extends GameHandler {
         for (Base b : BLs) {
             if (b.isStartingLocation()) continue;
             if (skipWeirdBlocking(b)) continue;
-            if (weirdBlocking(b)) {
-                blockedBLs.add(b);
-            } else {
+            if (weirdBlocking(b)) blockedBLs.add(b);
+            else {
                 for (ChokePoint p : b.getArea().getChokePoints()) {
                     Neutral n = p.getBlockingNeutral();
-                    if (n != null) {
-                        print(n.getUnit(), Color.RED);
-                        if (n.getBlockedAreas().contains(b.getArea())) {
-                            blockedBases.put(b, n);
-                            blockedBLs.add(b);
-                        }
-                    }
-                }
-            }
-        }
-        /*for(ChokePoint p : bwem.getMap().getChokePoints()){
-            Neutral n =  p.getBlockingNeutral();
-            if(n != null){
-                print(n.getUnit(), Color.RED);
-                for(Base b : BLs){
-                    if(b.isStartingLocation()) continue;
-                    if(n.getBlockedAreas().contains(b.getArea()) || weirdBlocking(b)){
+                    if (n != null && n.getBlockedAreas().contains(b.getArea())) {
                         blockedBases.put(b, n);
                         blockedBLs.add(b);
                     }
                 }
             }
-        }*/
+        }
     }
 
     private boolean skipWeirdBlocking(Base b) {
@@ -321,9 +304,7 @@ public class GameState extends GameHandler {
 
     private boolean weirdBlocking(Base b) {
         if (bw.getBWMap().mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) { // CIG destination / SSCAIT destination
-            if (b.getLocation().equals(new TilePosition(6, 119))) {
-                return true;
-            }
+            if (b.getLocation().equals(new TilePosition(6, 119))) return true;
         }
         return false;
     }
@@ -497,18 +478,13 @@ public class GameState extends GameHandler {
        /* for(ChokePoint c : bwem.getMap().getChokePoints()){
             if(c.getGeometry().size() > 2) bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size()-1).toPosition(), Color.GREEN);
         }*/
-        for (MineralPatch d : blockingMinerals.values()) {
-            print(d, Color.RED);
-        }
-        Integer counter = 0;
+        for (MineralPatch d : blockingMinerals.values()) print(d, Color.RED);
+        int counter = 0;
         for (Base b : BLs) {
-            //bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), b.getLocation().toString());
-            bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), counter.toString());
+            bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), Integer.toString(counter));
             counter++;
         }
-        for (Base b : islandBases) {
-            bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), "ISLAND");
-        }
+        for (Base b : islandBases) bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), "ISLAND");
         for (Agent ag : agents.values()) {
             if (ag instanceof VultureAgent) {
                 VultureAgent vulture = (VultureAgent) ag;
@@ -579,7 +555,6 @@ public class GameState extends GameHandler {
             print(u.getValue(), Color.TEAL);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
         }
-
         for (Worker u : workerDefenders.keySet()) {
             print(u, Color.PURPLE);
             bw.getMapDrawer().drawTextMap(u.getPosition(), "Spartan");
@@ -642,7 +617,7 @@ public class GameState extends GameHandler {
 
     public void initBaseLocations() {
         Collections.sort(BLs, new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
-        if (strat.name.equals("PlasmaWraithHell")) {
+        if (strat.name.equals("PlasmaWraithHell")) { // Special logic for Plasma
             specialBLs.add(BLs.get(0));
             if (BLs.get(0).getLocation().equals(new TilePosition(77, 63))) { // Start 1
                 for (Base b : BLs) {
@@ -669,7 +644,6 @@ public class GameState extends GameHandler {
                         specialBLs.add(b);
                     }
                 }
-                return;
             }
         }
     }
@@ -682,10 +656,8 @@ public class GameState extends GameHandler {
             for (Unit u : s.members) {
                 if (!u.exists()) aux.add(u);
             }
-            if (s.members.isEmpty() || aux.size() == s.members.size()) {
-                squadsToClean.add(s.name);
-            } else s.members.removeAll(aux);
-
+            if (s.members.isEmpty() || aux.size() == s.members.size()) squadsToClean.add(s.name);
+            else s.members.removeAll(aux);
         }
         for (String s : squadsToClean) squads.remove(s);
         List<Bunker> bunkers = new ArrayList<>();
@@ -837,7 +809,6 @@ public class GameState extends GameHandler {
                 naturalChoke = mainChoke;
                 return;
             }
-            //System.out.println(bw.getInteractionHandler().getRandomSeed());
             // Find area that shares the choke we need to defend
             if (bw.getBWMap().mapHash().compareTo("33527b4ce7662f83485575c4b1fcad5d737dfcf1") == 0 &&
                     BLs.get(0).getLocation().equals(new TilePosition(8, 9))) { // Luna special start location
@@ -1198,7 +1169,7 @@ public class GameState extends GameHandler {
             }
             return chosen;
         } catch (Exception e) {
-            System.err.println("BunkerAntiPool");
+            System.err.println("getBunkerPositionAntiPool Exception");
             e.printStackTrace();
             return null;
         }
@@ -1209,7 +1180,7 @@ public class GameState extends GameHandler {
         List<Unit> aux = new ArrayList<>();
         for (EnemyBuilding u : enemyBuildingMemory.values()) {
             if (bw.getBWMap().isVisible(u.pos)) {
-                if (!Util.getUnitsOnTile(u.pos).contains(u.unit)) aux.add(u.unit); // TODO test
+                if (!Util.getUnitsOnTile(u.pos).contains(u.unit)) aux.add(u.unit);
                 else if (u.unit.isVisible()) u.pos = u.unit.getTilePosition();
                 u.type = Util.getType(u.unit);
             }
@@ -1316,7 +1287,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    //Credits to @PurpleWaveJadien
+    //Credits to @PurpleWaveJadien / Dan
     public double broodWarDistance(Position a, Position b) {
         double dx = Math.abs(a.getX() - b.getX());
         double dy = Math.abs(a.getY() - b.getY());
@@ -1367,8 +1338,7 @@ public class GameState extends GameHandler {
             }
         }
         if (chosen != null) return chosen;
-        if (worker != null) return worker;
-        return null;
+        return worker;
     }
 
     // Credits to @Yegers for a better kite method
@@ -1382,7 +1352,7 @@ public class GameState extends GameHandler {
                 if (!enemy.exists() || !enemy.isVisible()) continue;
                 Position enemyPosition = enemy.getPosition();
                 Pair<Double, Double> unitV = new Pair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
-                double distance = ownPosition.getDistance(enemyPosition);
+                double distance = broodWarDistance(ownPosition, enemyPosition);
                 if (distance < minDistance) minDistance = distance;
                 unitV.first = (1 / distance) * unitV.first;
                 unitV.second = (1 / distance) * unitV.second;
@@ -1409,13 +1379,11 @@ public class GameState extends GameHandler {
             if (remove) rem.add(ag);
         }
         for (Agent ag : rem) {
-            agents.remove(ag);
             if (ag instanceof WraithAgent) {
                 String wraith = ((WraithAgent) ag).name;
                 shipNames.add(wraith);
-            } else if (ag instanceof VesselAgent) {
-                ((VesselAgent) ag).follow = null;
-            }
+            } else if (ag instanceof VesselAgent) ((VesselAgent) ag).follow = null;
+            agents.remove(ag.myUnit);
         }
     }
 
@@ -1464,9 +1432,15 @@ public class GameState extends GameHandler {
     }
 
     public void sendRandomMessage() {
-        if (Math.random() < 0.79) return;
-        ih.sendText("What do you call a Zealot smoking weed?");
-        ih.sendText("A High Templar");
+        if (Math.random() < 0.80) return;
+        if (Math.random() < 0.50) {
+            ih.sendText("What do you call a Zealot smoking weed?");
+            ih.sendText("A High Templar");
+        } else {
+            ih.sendText("Why shouldn't you ask a Protoss for advice?");
+            ih.sendText("Because the ones who give the feedback are always high!");
+        }
+
     }
 
     public void alwaysPools() {

@@ -1,8 +1,6 @@
 package ecgberht.BehaviourTrees.Build;
 
 import bwem.Base;
-import ecgberht.Agents.Agent;
-import ecgberht.Agents.DropShipAgent;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Util;

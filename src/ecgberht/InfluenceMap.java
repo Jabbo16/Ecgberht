@@ -1,7 +1,6 @@
 package ecgberht;
 
 import org.openbw.bwapi4j.BW;
-import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -19,6 +18,7 @@ public class InfluenceMap {
     private static final int flying = 6;
     private static final int mech = 3;
     private static final int neutral = 3;
+    private static final int depot = 6;
     private static final int offensive = 4;
     private static final int propagation = 2;
     private static final int umbral = 3;
@@ -26,11 +26,9 @@ public class InfluenceMap {
     private BW bw;
     private int height;
     private int width;
-    private Player self;
 
-    public InfluenceMap(BW bw, Player self, int height, int width) {
+    public InfluenceMap(BW bw, int height, int width) {
         this.bw = bw;
-        this.self = self;
         this.height = height;
         this.width = width;
         map = new double[height][width];
@@ -44,35 +42,20 @@ public class InfluenceMap {
         try {
             int influence;
             UnitType type;
-            if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding) {
+            if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding)
                 return;
-            } else type = Util.getType((PlayerUnit) arg0);
+            else type = Util.getType((PlayerUnit) arg0);
             TilePosition tile = arg0.getTilePosition();
             if (type.isBuilding()) {
-                if (type.canAttack() || type.equals(UnitType.Terran_Bunker)) {
-                    influence = defensive;
-                } else {
-                    if (type.canProduce()) {
-                        influence = offensive;
-                    } else {
-                        influence = neutral;
-                    }
-                }
-            } else {
-                if (type.isFlyer()) {
-                    influence = flying;
-                } else if (type.isMechanical()) {
-                    influence = mech;
-                } else {
-                    influence = bio;
-                }
-            }
-            if (destroyed) {
-                influence *= -1;
-            }
-            if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
-                influence *= -1;
-            }
+                if (type.canAttack() || type.equals(UnitType.Terran_Bunker)) influence = defensive;
+                else if (type.isResourceDepot()) influence = depot;
+                else if (type.canProduce()) influence = offensive;
+                else influence = neutral;
+            } else if (type.isFlyer()) influence = flying;
+            else if (type.isMechanical()) influence = mech;
+            else influence = bio;
+            if (destroyed) influence *= -1;
+            if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) influence *= -1;
             updateCellInfluence(new Pair<>(new Point(tile.getY(), tile.getX()), influence), type.isBuilding());
         } catch (Exception e) {
             System.err.println("updateInMap Exception");
@@ -84,23 +67,15 @@ public class InfluenceMap {
         map[tile.first.x][tile.first.y] += tile.second;
         if (!building) {
             int init_i = 0;
-            if (tile.first.y - propagation > init_i) {
-                init_i = tile.first.y - propagation;
-            }
-            int fin_i = width - 1;
-            if (tile.first.y + propagation < fin_i) {
-                fin_i = tile.first.y + propagation;
-            }
+            if (tile.first.y - propagation > init_i) init_i = tile.first.y - propagation;
+            int end_i = width - 1;
+            if (tile.first.y + propagation < end_i) end_i = tile.first.y + propagation;
             int init_j = 0;
-            if (tile.first.x - propagation > init_j) {
-                init_j = tile.first.x - propagation;
-            }
-            int fin_j = height - 1;
-            if (tile.first.x + propagation < fin_j) {
-                fin_j = tile.first.x + propagation;
-            }
-            for (int ii = init_i; ii <= fin_i; ii++) {
-                for (int jj = init_j; jj <= fin_j; jj++) {
+            if (tile.first.x - propagation > init_j) init_j = tile.first.x - propagation;
+            int end_j = height - 1;
+            if (tile.first.x + propagation < end_j) end_j = tile.first.x + propagation;
+            for (int ii = init_i; ii <= end_i; ii++) {
+                for (int jj = init_j; jj <= end_j; jj++) {
                     if (!(jj == tile.first.x && ii == tile.first.y))
                         map[jj][ii] += Math.round(tile.second / Math.pow(1 + Math.sqrt(Math.pow(ii - tile.first.y, 2) + Math.pow(jj - tile.first.x, 2)), 2));
                 }
@@ -109,9 +84,7 @@ public class InfluenceMap {
     }
 
     public void updateCellsInfluence(List<Pair<Point, Integer>> tiles) {
-        for (Pair<Point, Integer> p : tiles) {
-            updateCellInfluence(p, true);
-        }
+        for (Pair<Point, Integer> p : tiles) updateCellInfluence(p, true);
     }
 
     public double getInfluence(Point cell) {
@@ -122,9 +95,7 @@ public class InfluenceMap {
         int myInfluence = 0;
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < width; y++) {
-                if (map[x][y] > 0) {
-                    myInfluence += map[x][y];
-                }
+                if (map[x][y] > 0) myInfluence += map[x][y];
             }
         }
         return myInfluence;
@@ -134,9 +105,7 @@ public class InfluenceMap {
         int enemyInfluence = 0;
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < width; y++) {
-                if (map[x][y] < 0) {
-                    enemyInfluence += map[x][y];
-                }
+                if (map[x][y] < 0) enemyInfluence += map[x][y];
             }
         }
         return enemyInfluence;
@@ -146,9 +115,7 @@ public class InfluenceMap {
         int count = 0;
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < width; y++) {
-                if (map[x][y] > 0) {
-                    count++;
-                }
+                if (map[x][y] > 0) count++;
             }
         }
         return count;
@@ -158,9 +125,7 @@ public class InfluenceMap {
         int count = 0;
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < width; y++) {
-                if (map[x][y] < 0) {
-                    count++;
-                }
+                if (map[x][y] < 0) count++;
             }
         }
         return count;
@@ -175,12 +140,8 @@ public class InfluenceMap {
             for (int x = 0; x < height; x++) {
                 for (int y = 0; y < width; y++) {
                     if (map[x][y] < count) {
-                        if (attack) {
-                            if (fixMap(x, y)) {
-                                continue;
-                            }
-                        }
-                        count = map[x][y] / 2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2));
+                        if (attack && fixMap(x, y)) continue;
+                        count = map[x][y] / (2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2)));
                         p.first = x;
                         p.second = y;
                     }
@@ -198,11 +159,7 @@ public class InfluenceMap {
         TilePosition pos = new TilePosition(y, x);
         if (bw.getBWMap().isVisible(pos)) {
             for (Unit u : bw.getAllUnits()) {
-                if (u.exists() && u.getTilePosition().equals(pos)) {
-                    if (u instanceof Building) {
-                        return false;
-                    }
-                }
+                if (u.exists() && u.getTilePosition().equals(pos) && u instanceof Building) return false;
             }
             updateCellInfluence(new Pair<>(new Point(x, y), (int) map[x][y] * (-1)), true);
             return true;

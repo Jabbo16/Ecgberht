@@ -22,8 +22,8 @@ public class ChooseSituationalUnit extends Action {
     public State execute() {
         try {
             // Testing dropships
-            if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
-            boolean tower = false;
+            /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
+
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                 if (u instanceof ControlTower) {
                     tower = true;
@@ -37,9 +37,10 @@ public class ChooseSituationalUnit extends Action {
                     ((GameState) this.handler).chosenBuilding = s;
                     return State.SUCCESS;
                 }
-            }
+            }*/
 
             // Testing vessels
+            boolean tower;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2) return State.FAILURE;
             String strat = ((GameState) this.handler).strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && ((GameState) this.handler).CCs.size() < 3)

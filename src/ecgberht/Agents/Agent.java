@@ -16,6 +16,7 @@ import static ecgberht.Ecgberht.getGs;
 
 public abstract class Agent {
 
+    public Unit myUnit;
     Status status = Status.IDLE;
     UnitType type = UnitType.Terran_Vulture;
     Position attackPos = null;
@@ -24,7 +25,6 @@ public abstract class Agent {
     int actualFrame = 0;
     Set<Unit> closeEnemies = new TreeSet<>();
     Set<Unit> closeWorkers = new TreeSet<>();
-    Unit myUnit;
 
     public String statusToString() {
         if (status == Status.ATTACK) return "Attack";
