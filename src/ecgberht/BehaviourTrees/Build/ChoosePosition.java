@@ -27,6 +27,7 @@ public class ChoosePosition extends Action {
     @Override
     public State execute() {
         try {
+            if (((GameState) this.handler).chosenToBuild == UnitType.None) return State.FAILURE;
             Player self = ((GameState) this.handler).getPlayer();
             TilePosition origin = null;
             if (((GameState) this.handler).chosenToBuild.isRefinery()) {

@@ -1,6 +1,7 @@
 package ecgberht.Strategies;
 
 import ecgberht.Strategy;
+import ecgberht.Util;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
@@ -18,12 +19,12 @@ public class BioMechGreedyFE extends Strategy {
         armyForBay = 15;
         armyForTurret = 10;
         numBays = 1;
-        raxPerCC = 3;
+        raxPerCC = 2;
         facPerCC = 1;
         numRaxForAca = 2;
         numRaxForFac = 2;
-        numCCForPort = 2;
-        numCCForScience = 2;
+        numCCForPort = 3;
+        numCCForScience = 3;
         portPerCC = 0;
         bunker = true;
         supplyForFirstRefinery = 38;
@@ -76,5 +77,10 @@ public class BioMechGreedyFE extends Strategy {
         upgradesToResearch.add(UpgradeType.Terran_Vehicle_Weapons);
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Armor);
         upgradesToResearch.add(UpgradeType.U_238_Shells);
+    }
+
+    @Override
+    public boolean requiredUnitsForAttack() {
+        return Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) >= 3;
     }
 }

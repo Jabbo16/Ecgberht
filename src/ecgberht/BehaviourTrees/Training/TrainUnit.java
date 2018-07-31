@@ -5,10 +5,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.MachineShop;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
 import org.openbw.bwapi4j.unit.TrainingFacility;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -21,7 +18,8 @@ public class TrainUnit extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
+            if (((GameState) this.handler).chosenUnit == UnitType.None) return State.FAILURE;
+           /* if (((GameState) this.handler).strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
                 boolean mShop = false;
                 for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                     if (u instanceof MachineShop) {
@@ -35,7 +33,7 @@ public class TrainUnit extends Action {
                     ((GameState) this.handler).chosenToBuild = null;
                     return State.FAILURE;
                 }
-            }
+            }*/
             TrainingFacility chosen = ((GameState) this.handler).chosenBuilding;
             if (((GameState) this.handler).strat.name == "ProxyBBS") {
                 if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 2 &&

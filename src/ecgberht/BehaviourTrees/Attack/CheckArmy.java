@@ -23,7 +23,7 @@ public class CheckArmy extends Conditional {
                 }
             }
             if (((GameState) this.handler).getArmySize() >= ((GameState) this.handler).strat.armyForAttack &&
-                    !((GameState) this.handler).defense) {
+                    !((GameState) this.handler).defense && ((GameState) this.handler).requiredUnitsForAttack()) {
                 return State.SUCCESS;
             } /*else if (((GameState) this.handler).defense) {
                 if (!((GameState) this.handler).enemyInBase.isEmpty()) {

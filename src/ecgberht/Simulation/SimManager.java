@@ -32,12 +32,14 @@ public class SimManager {
     private double radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
     private int shortSimFrames = 90;
     private int longSimFrames = 300;
+    private int iterations = 10;
 
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
         if (ConfigManager.getConfig().ecgConfig.sscait) {
             shortSimFrames = 70;
             longSimFrames = 200;
+            iterations = 5;
         }
     }
 
@@ -63,7 +65,7 @@ public class SimManager {
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
         MeanShift clustering = new MeanShift(myUnits);
-        friendly = clustering.run();
+        friendly = clustering.run(iterations);
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
@@ -75,7 +77,7 @@ public class SimManager {
             if (u instanceof Attacker || u instanceof Bunker) enemyUnits.add(u);
         }
         clustering = new MeanShift(enemyUnits);
-        enemies = clustering.run();
+        enemies = clustering.run(iterations);
     }
 
     /**

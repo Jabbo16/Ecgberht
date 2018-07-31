@@ -1,6 +1,7 @@
 package ecgberht.Strategies;
 
 import ecgberht.Strategy;
+import ecgberht.Util;
 import org.openbw.bwapi4j.type.UnitType;
 
 public class ProxyBBS extends Strategy {
@@ -56,5 +57,10 @@ public class ProxyBBS extends Strategy {
     @Override
     public void initUpgradesToResearch() {
 
+    }
+
+    @Override
+    public boolean requiredUnitsForAttack() {
+        return Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4;
     }
 }

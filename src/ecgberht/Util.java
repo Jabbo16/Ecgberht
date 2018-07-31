@@ -72,7 +72,9 @@ public class Util {
     public static int countUnitTypeSelf(UnitType type) {
         int count = 0;
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
-            if (u.exists() && getType(((PlayerUnit) u)) == type) count++;
+            if (!u.exists()) continue;
+            if (!type.isBuilding() && !((PlayerUnit) u).isCompleted()) continue;
+            if (getType(((PlayerUnit) u)) == type) count++;
         }
         return count;
     }
@@ -215,6 +217,13 @@ public class Util {
         if (attacker == UnitType.Protoss_Carrier) return getWeapon(UnitType.Protoss_Interceptor, target);
         if (attacker == UnitType.Protoss_Reaver) return getWeapon(UnitType.Protoss_Scarab, target);
         return target.isFlyer() ? attacker.airWeapon() : attacker.groundWeapon();
+    }
+
+    public static WeaponType getWeapon(UnitType attacker) {
+        if (attacker == UnitType.Terran_Bunker) return UnitType.Terran_Marine.groundWeapon();
+        if (attacker == UnitType.Protoss_Carrier) return UnitType.Protoss_Interceptor.airWeapon();
+        if (attacker == UnitType.Protoss_Reaver) return UnitType.Protoss_Scarab.groundWeapon();
+        return attacker.groundWeapon() != WeaponType.None ? attacker.groundWeapon() : attacker.airWeapon();
     }
 
     private static boolean canAttack(PlayerUnit attacker, PlayerUnit target) {

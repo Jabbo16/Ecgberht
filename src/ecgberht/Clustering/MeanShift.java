@@ -26,10 +26,9 @@ public class MeanShift {
         }
     }
 
-    public List<Cluster> run() {
+    public List<Cluster> run(int iterations) {
         try {
             time = System.currentTimeMillis();
-            int iterations = 10;
             int bandwidth = 2;
             for (int iter = 0; iter < iterations; iter++) {
                 //System.out.println("-----Iter " + iter + "------");

@@ -984,7 +984,7 @@ public class GameState extends GameHandler {
                             break;
                         }
                     }
-                    if (close && !far) {
+                    if (close) {
                         if (t.isSieged() && t.getOrder() != Order.Unsieging) t.unsiege();
                         continue;
                     }
@@ -1354,17 +1354,18 @@ public class GameState extends GameHandler {
                 Pair<Double, Double> unitV = new Pair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
                 double distance = broodWarDistance(ownPosition, enemyPosition);
                 if (distance < minDistance) minDistance = distance;
-                unitV.first = (1 / distance) * unitV.first;
-                unitV.second = (1 / distance) * unitV.second;
+                //unitV.first = (1 / distance) * unitV.first;
+                //unitV.second = (1 / distance) * unitV.second;
                 vectors.add(new Pair<>(unitV.first, unitV.second));
             }
-            minDistance = 2 * minDistance * minDistance;
+           /* minDistance = 2 * (minDistance * minDistance);
             for (Pair<Double, Double> vector : vectors) {
                 vector.first *= minDistance;
                 vector.second *= minDistance;
-            }
+            }*/
             Pair<Double, Double> sumAll = Util.sumPosition(vectors);
-            return Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
+            Position kitePos = Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
+            return kitePos;
         } catch (Exception e) {
             System.err.println("KiteAway Exception");
             e.printStackTrace();
@@ -1466,5 +1467,9 @@ public class GameState extends GameHandler {
             }
         }
         return chosen;
+    }
+
+    public boolean requiredUnitsForAttack() {
+        return strat.requiredUnitsForAttack();
     }
 }

@@ -6,6 +6,7 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.HashSet;
@@ -57,7 +58,7 @@ public class Squad implements Comparable<Squad> {
             Set<Unit> enemy = getGs().enemyCombatUnitMemory;
             int frameCount = getGs().frameCount;
             Position start = getGs().ih.self().getStartLocation().toPosition();
-            Set<Unit> marinesToHeal = new HashSet<>();
+            Set<Unit> marinesToHeal = new TreeSet<>();
             Position sCenter = getGs().getSquadCenter(this);
             if (!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs)) stimResearched = true;
             for (PlayerUnit u : members) {
@@ -95,10 +96,12 @@ public class Squad implements Comparable<Squad> {
                         if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) move = sCenter;
                     }
                     if (move != null) {
+                        WeaponType weapon = Util.getWeapon(u.getInitialType());
+                        int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
                         if (u.getOrder() == Order.AttackMove || u.getOrder() == Order.HealMove) {
-                            if (u.getDistance(move) <= UnitType.Terran_Marine.groundWeapon().maxRange())
+                            if (u.getDistance(move) <= range)
                                 ((MobileUnit) u).stop(false);
-                        } else if (u.getDistance(move) > UnitType.Terran_Marine.groundWeapon().maxRange() && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
+                        } else if (u.getDistance(move) > range && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
                             ((MobileUnit) u).attack(move);
                             continue;
                         }
@@ -107,7 +110,7 @@ public class Squad implements Comparable<Squad> {
                 boolean retreat = getGs().sim.getSimulation(u, SimInfo.SimType.MIX).lose;
                 String retreating = ColorUtil.formatText(retreat ? "Retreating" : "Fighting", ColorUtil.White);
                 getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getInitialType().tileHeight())), retreating);
-                if (retreat && status != Status.DEFENSE) {
+                if (!((MobileUnit) u).isDefenseMatrixed() && retreat && status != Status.DEFENSE) {
                     Position pos = getGs().getNearestCC(u.getPosition());
                     if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
                             (lastTarget != null && !lastTarget.equals(pos)))) {
@@ -198,9 +201,7 @@ public class Squad implements Comparable<Squad> {
                         }
                     }
                     for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
-                        if (b.type.canAttack() || b.type == UnitType.Terran_Bunker) {
-                            enemyToAttack.add(b.unit);
-                        }
+                        if (b.type.canAttack() || b.type == UnitType.Terran_Bunker) enemyToAttack.add(b.unit);
                     }
                     if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeaponCooldown() > 0) {
                         if (!enemyToKite.isEmpty()) {

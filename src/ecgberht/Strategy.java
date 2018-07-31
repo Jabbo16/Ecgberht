@@ -64,4 +64,8 @@ public abstract class Strategy implements Comparable<Strategy> {
     public int compareTo(Strategy v1) {
         return this.name.compareTo(v1.name);
     }
+
+    public boolean requiredUnitsForAttack() {
+        return true;
+    }
 }

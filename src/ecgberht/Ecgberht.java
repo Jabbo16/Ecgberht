@@ -103,6 +103,7 @@ public class Ecgberht implements BWEventListener {
 
     private static void initTrainTree() {
         ChooseSituationalUnit cSU = new ChooseSituationalUnit("Choose situational unit", gs);
+        ChooseNothingTrain cNT = new ChooseNothingTrain("Choose Nothing To Train", gs);
         ChooseSCV cSCV = new ChooseSCV("Choose SCV", gs);
         ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
         ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
@@ -111,7 +112,7 @@ public class Ecgberht implements BWEventListener {
         ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
         CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
         TrainUnit tr = new TrainUnit("Train SCV", gs);
-        Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cSU, cSCV);
+        Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cNT, cSU, cSCV);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
@@ -125,6 +126,7 @@ public class Ecgberht implements BWEventListener {
     private static void initBuildTree() {
         Build b = new Build("Build", gs);
         ChooseSituationalBuilding cSB = new ChooseSituationalBuilding("Choose situational building", gs);
+        ChooseNothingBuilding cNB = new ChooseNothingBuilding("Choose Nothing", gs);
         ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
         ChooseBunker cBun = new ChooseBunker("Choose Bunker", gs);
@@ -141,7 +143,7 @@ public class Ecgberht implements BWEventListener {
         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cSB, cE, cSup);
+        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cNB, cSB, cE, cSup);
         if (gs.strat.bunker) chooseBuildingBuild.addChild(cBun);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
@@ -235,6 +237,7 @@ public class Ecgberht implements BWEventListener {
                 System.setErr(nullOut);
                 System.setOut(nullOut);
             }
+            DataTraining.copyOnStart();
             self = bw.getInteractionHandler().self();
             ih = bw.getInteractionHandler();
             if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
@@ -404,7 +407,7 @@ public class Ecgberht implements BWEventListener {
                 gs.maxWraiths = 5;
                 transition();
             }
-            //if (gs.frameCount % 3000 == 0) gs.resetInMap();
+            if (gs.frameCount % 3500 == 0) gs.resetInMap();
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
                     !gs.strat.name.equals("PlasmaWraithHell")) { // Plasma special eggs
                 for (Unit u : bw.getAllUnits()) {
@@ -467,6 +470,7 @@ public class Ecgberht implements BWEventListener {
                 ih.sendText("gg wp! " + name + ", next game I will not lose!");
             }
             gs.writeOpponentInfo(name);
+            DataTraining.writeTravelData();
         } catch (Exception e) {
             System.err.println("onEnd Exception");
             e.printStackTrace();
@@ -519,6 +523,11 @@ public class Ecgberht implements BWEventListener {
                         SCV worker = (SCV) ((Building) arg0).getBuildUnit();
                         if (worker != null) {
                             if (gs.workerBuild.containsKey(worker)) {
+                                DataTraining.TravelData t = DataTraining.travelData.get(worker);
+                                if (t != null) {
+                                    t.frames = gs.frameCount - t.frames;
+                                    DataTraining.travelData.put(worker, t);
+                                }
                                 if (type.equals(gs.workerBuild.get(worker).first)) {
                                     gs.workerTask.put(worker, (Building) arg0);
                                     gs.deltaCash.first -= type.mineralPrice();
@@ -572,6 +581,9 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         if (type == UnitType.Terran_Command_Center) {
                             gs.CCs.put(Util.getClosestBaseLocation(bwem.getMap().getArea(arg0.getTilePosition()).getTop().toPosition()), (CommandCenter) arg0);
+                            if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() > 2) gs.strat.raxPerCC = 3;
+                            else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3)
+                                gs.strat.raxPerCC = 2;
                             gs.addNewResources(arg0);
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
@@ -770,6 +782,9 @@ public class Ecgberht implements BWEventListener {
                             gs.workerTask.remove(arg0);
                         }
                         if (gs.workerBuild.containsKey(arg0)) {
+                            if (DataTraining.travelData.containsKey(arg0)) {
+                                DataTraining.travelData.remove(arg0);
+                            }
                             gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
                             gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
                             gs.workerBuild.remove(arg0);

@@ -124,7 +124,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 if (!(u instanceof MobileUnit)) continue;
                 int score = 1;
                 if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
-                if (u instanceof Mechanical) score = 5;
+                if (u instanceof Mechanical) score = 6;
                 if (u instanceof Marine) score = 3;
                 if (u instanceof SCV || u instanceof Medic) score = 1;
                 score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints();
@@ -156,7 +156,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         }
         if (getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).lose) {
             status = Status.RETREAT;
-            return;
         } else if (getGs().broodWarDistance(unit.getPosition(), center) >= 80) {
             status = Status.FOLLOW;
         } else status = Status.IDLE;
