@@ -37,15 +37,6 @@ Main features:
 Requisites:
 
 * [32-bits JDK8 (Java Development Kit)](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-* [Apache Ant (optional)](https://ant.apache.org/bindownload.cgi)
-
-### Apache Ant
-
-Just run the following command, recommended having Ant binaries at Path:
-
-`ant clean jar`
-
-Ecgberht jar file will be generated at `build/jar` folder.
 
 ### Gradle
 
