@@ -6,6 +6,7 @@ import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitSizeType;
 import org.openbw.bwapi4j.type.UnitType;
 
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -27,12 +28,8 @@ public class JFAP extends AJFAP {
 
     @Override
     public void addIfCombatUnitPlayer1(JFAPUnit fu) {
-        if (fu.unitType == UnitType.Protoss_Interceptor) {
-            return;
-        }
-        if (fu.groundDamage > 0 || fu.airDamage > 0 || fu.unitType == UnitType.Terran_Medic) {
-            addUnitPlayer1(fu);
-        }
+        if (fu.unitType == UnitType.Protoss_Interceptor) return;
+        if (fu.groundDamage > 0 || fu.airDamage > 0 || fu.unitType == UnitType.Terran_Medic) addUnitPlayer1(fu);
     }
 
     @Override
@@ -49,43 +46,32 @@ public class JFAP extends AJFAP {
 
     @Override
     public void simulate(int nFrames) {
-        while (nFrames > 0) {
-            if (player1.isEmpty() || player2.isEmpty()) {
-                break;
-            }
-            didSomething = false;
-            isimulate();
-
-            if (!didSomething) {
-                break;
-            }
-            nFrames--;
-        }
+            this.nFrames = nFrames;
+            simulate();
+            this.nFrames = 96;
     }
 
     @Override
     public void simulate() {
-        int nFrames = this.nFrames;
-        while (nFrames > 0) {
-            if (player1.isEmpty() || player2.isEmpty()) {
-                break;
+        try {
+            int nFrames = this.nFrames;
+            while (nFrames > 0) {
+                if (player1.isEmpty() || player2.isEmpty()) break;
+                didSomething = false;
+                iSimulate();
+                if (!didSomething) break;
+                nFrames--;
             }
-            didSomething = false;
-            isimulate();
-
-            if (!didSomething) {
-                break;
-            }
-            nFrames--;
+        } catch (Exception e){
+            System.err.print("JFAP Exception");
+            e.printStackTrace();
         }
     }
 
     private int score(final JFAPUnit fu) {
         if (fu.health > 0 && fu.maxHealth > 0) {
             int bunker = 0;
-            if ((fu.unitType == UnitType.Terran_Bunker)) {
-                bunker = 1;
-            }
+            if ((fu.unitType == UnitType.Terran_Bunker)) bunker = 1;
             return ((fu.score * fu.health) / (fu.maxHealth * 2)) + bunker * UnitType.Terran_Marine.destroyScore() * 4;
         }
         return 0;
@@ -94,12 +80,8 @@ public class JFAP extends AJFAP {
     @Override
     public Pair<Integer, Integer> playerScores() {
         Pair<Integer, Integer> res = new Pair<>(0, 0);
-        for (final JFAPUnit u : player1) {
-            res.first += score(u);
-        }
-        for (final JFAPUnit u : player2) {
-            res.second += score(u);
-        }
+        for (final JFAPUnit u : player1) res.first += score(u);
+        for (final JFAPUnit u : player2) res.second += score(u);
         return res;
     }
 
@@ -107,14 +89,10 @@ public class JFAP extends AJFAP {
     public Pair<Integer, Integer> playerScoresUnits() {
         Pair<Integer, Integer> res = new Pair<>(0, 0);
         for (final JFAPUnit u : player1) {
-            if (!u.unitType.isBuilding()) {
-                res.first += score(u);
-            }
+            if (!u.unitType.isBuilding()) res.first += score(u);
         }
         for (final JFAPUnit u : player2) {
-            if (!u.unitType.isBuilding()) {
-                res.second += score(u);
-            }
+            if (!u.unitType.isBuilding()) res.second += score(u);
         }
         return res;
     }
@@ -123,14 +101,10 @@ public class JFAP extends AJFAP {
     public Pair<Integer, Integer> playerScoresBuildings() {
         Pair<Integer, Integer> res = new Pair<>(0, 0);
         for (final JFAPUnit u : player1) {
-            if (u.unitType.isBuilding()) {
-                res.first += score(u);
-            }
+            if (u.unitType.isBuilding()) res.first += score(u);
         }
         for (final JFAPUnit u : player2) {
-            if (u.unitType.isBuilding()) {
-                res.second += score(u);
-            }
+            if (u.unitType.isBuilding()) res.second += score(u);
         }
         return res;
     }
@@ -156,23 +130,14 @@ public class JFAP extends AJFAP {
             damage -= fu.shields + (fu.shieldArmor << 8);
             fu.shields = 0;
         }
-
-        if (damage == 0)
-            return;
-
+        if (damage == 0) return;
         damage -= fu.armor << 8;
         if (damageType == DamageType.Concussive) {
-            if (fu.unitSize == UnitSizeType.Large) {
-                damage = damage / 4;
-            } else if (fu.unitSize == UnitSizeType.Medium) {
-                damage = damage / 2;
-            }
+            if (fu.unitSize == UnitSizeType.Large) damage = damage / 4;
+            else if (fu.unitSize == UnitSizeType.Medium) damage = damage / 2;
         } else if (damageType == DamageType.Explosive) {
-            if (fu.unitSize == UnitSizeType.Small)
-                damage = damage / 2;
-            else if (fu.unitSize == UnitSizeType.Medium) {
-                damage = (damage * 3) / 4;
-            }
+            if (fu.unitSize == UnitSizeType.Small) damage = damage / 2;
+            else if (fu.unitSize == UnitSizeType.Medium) damage = (damage * 3) / 4;
         }
         fu.health -= Math.max(128, damage);
     }
@@ -188,7 +153,7 @@ public class JFAP extends AJFAP {
                 ut == UnitType.Protoss_Scarab);
     }
 
-    private void unitsim(JFAPUnit fu, Set<JFAPUnit> enemyUnits) {
+    private void unitSim(JFAPUnit fu, Set<JFAPUnit> enemyUnits) {
         if (fu.attackCooldownRemaining > 0) {
             didSomething = true;
             return;
@@ -204,13 +169,11 @@ public class JFAP extends AJFAP {
                         closestEnemy = enemy;
                     }
                 }
-            } else {
-                if (fu.groundDamage > 0) {
-                    final int d = distButNotReally(fu, enemy);
-                    if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRange) {
-                        closestDist = d;
-                        closestEnemy = enemy;
-                    }
+            } else if (fu.groundDamage > 0) {
+                final int d = distButNotReally(fu, enemy);
+                if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRange) {
+                    closestDist = d;
+                    closestEnemy = enemy;
                 }
             }
         }
@@ -227,10 +190,8 @@ public class JFAP extends AJFAP {
             } else {
                 dealDamage(closestEnemy, fu.groundDamage, fu.groundDamageType);
                 fu.attackCooldownRemaining = fu.groundCooldown;
-                if (fu.elevation != -1 && closestEnemy.elevation != -1) {
-                    if (closestEnemy.elevation > fu.elevation) {
-                        fu.attackCooldownRemaining += fu.groundCooldown;
-                    }
+                if (fu.elevation != -1 && closestEnemy.elevation != -1 && closestEnemy.elevation > fu.elevation) {
+                    fu.attackCooldownRemaining += fu.groundCooldown;
                 }
             }
             if (closestEnemy.health < 1) {
@@ -283,38 +244,28 @@ public class JFAP extends AJFAP {
                         closestEnemy = enemy;
                     }
                 }
-            } else {
-                if (fu.groundDamage > 0) {
-
-                    int d = distButNotReally(fu, enemy);
-                    if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRange) {
-                        closestDist = d;
-                        closestEnemy = enemy;
-                    }
+            } else if (fu.groundDamage > 0) {
+                int d = distButNotReally(fu, enemy);
+                if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRange) {
+                    closestDist = d;
+                    closestEnemy = enemy;
                 }
             }
         }
         if (closestEnemy != null && Math.sqrt(closestDist) <= fu.speed) {
-            if (closestEnemy.flying) {
-                dealDamage(closestEnemy, fu.airDamage, fu.airDamageType);
-            } else {
-                dealDamage(closestEnemy, fu.groundDamage, fu.groundDamageType);
-            }
+            if (closestEnemy.flying) dealDamage(closestEnemy, fu.airDamage, fu.airDamageType);
+            else dealDamage(closestEnemy, fu.groundDamage, fu.groundDamageType);
             if (closestEnemy.health < 1) {
                 final JFAPUnit temp = closestEnemy;
                 player.remove(closestEnemy);
-                closestEnemy = null;
                 unitDeath(temp, player);
             }
-
             didSomething = true;
             return true;
         } else {
             if (closestEnemy != null && Math.sqrt(closestDist) > fu.speed) {
-
                 final int dx = closestEnemy.x - fu.x;
                 final int dy = closestEnemy.y - fu.y;
-
                 fu.x += (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
                 fu.y += (int) (dy * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
                 didSomething = true;
@@ -323,72 +274,41 @@ public class JFAP extends AJFAP {
         return false;
     }
 
-    private void simUnit(JFAPUnit unit, Set<JFAPUnit> player1, Set<JFAPUnit> player2) {
-        if (isSuicideUnit(unit.unitType)) {
-            final boolean unitDied = suicideSim(unit, player2);
-            if (unitDied) {
-                player1.remove(unit);
-            }
-        } else {
-            if (unit.unitType == UnitType.Terran_Medic)
-                medicsim(unit, player1);
-            else {
-                unitsim(unit, player2);
-            }
-        }
+    private void simUnit(Iterator<JFAPUnit> unit, Set<JFAPUnit> player1, Set<JFAPUnit> player2) {
+        JFAPUnit ju = unit.next();
+        if (isSuicideUnit(ju.unitType)) {
+            final boolean unitDied = suicideSim(ju, player2);
+            if (unitDied) unit.remove();
+        } else if (ju.unitType == UnitType.Terran_Medic) medicsim(ju, player1);
+        else unitSim(ju, player2);
     }
 
     private void updateUnit(JFAPUnit fu) {
-        if (fu.attackCooldownRemaining > 0) {
-            --fu.attackCooldownRemaining;
-        }
-
-        if (fu.didHealThisFrame) {
-            fu.didHealThisFrame = false;
-        }
-
+        if (fu.attackCooldownRemaining > 0) --fu.attackCooldownRemaining;
+        if (fu.didHealThisFrame) fu.didHealThisFrame = false;
         if (fu.race == Race.Zerg) {
-            if (fu.health < fu.maxHealth) {
-                fu.health += 4;
-            }
-            if (fu.health > fu.maxHealth) {
-                fu.health = fu.maxHealth;
-            }
+            if (fu.health < fu.maxHealth) fu.health += 4;
+            if (fu.health > fu.maxHealth) fu.health = fu.maxHealth;
         } else if (fu.race == Race.Protoss) {
-            if (fu.shields < fu.maxShields) {
-                fu.shields += 7;
-            }
-            if (fu.shields > fu.maxShields) {
-                fu.shields = fu.maxShields;
-            }
+            if (fu.shields < fu.maxShields) fu.shields += 7;
+            if (fu.shields > fu.maxShields) fu.shields = fu.maxShields;
         }
     }
 
-    private void isimulate() {
-        for (JFAPUnit fu : player1) {
-            simUnit(fu, player1, player2);
-        }
-
-        for (JFAPUnit fu : player2) {
-            simUnit(fu, player2, player1);
-        }
-
-        for (JFAPUnit fu : player1) {
-            updateUnit(fu);
-        }
-
-        for (JFAPUnit fu : player2) {
-            updateUnit(fu);
-        }
+    private void iSimulate() {
+        Iterator<JFAPUnit> it1 = player1.iterator();
+        while(it1.hasNext()) simUnit(it1, player1, player2);
+        Iterator<JFAPUnit> it2 = player2.iterator();
+        while(it2.hasNext()) simUnit(it2, player2, player1);
+        for (JFAPUnit fu : player1) updateUnit(fu);
+        for (JFAPUnit fu : player2) updateUnit(fu);
     }
 
     private void unitDeath(JFAPUnit fu, Set<JFAPUnit> player) {
         if (fu.unitType == UnitType.Terran_Bunker) {
             JFAPUnit m = convertToUnitType(fu, UnitType.Terran_Marine);
             m.unitType = UnitType.Terran_Marine;
-            for (int i = 0; i < 4; ++i) {
-                player.add(m);
-            }
+            for (int i = 0; i < 4; ++i) player.add(m);
         }
     }
 
