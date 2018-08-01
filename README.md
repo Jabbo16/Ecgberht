@@ -40,7 +40,7 @@ Requisites:
 
 ### Gradle
 
-With Gradle there is no need of extra dependencies as I included a Gradle wrapper, just run execute the following command at Ecgberht root folder:
+With Gradle there is no need of extra dependencies as a Gradle wrapper its included in the repository, just run execute the following command at Ecgberht root folder:
 
 `./gradlew clean fatjar`
 
