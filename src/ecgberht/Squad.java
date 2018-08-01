@@ -107,10 +107,14 @@ public class Squad implements Comparable<Squad> {
                         }
                     }
                 }
-                boolean retreat = getGs().sim.getSimulation(u, SimInfo.SimType.MIX).lose;
+                SimInfo s = getGs().sim.getSimulation(u, SimInfo.SimType.MIX);
+                boolean retreat = s.lose;
+                if (!retreat || status == Status.DEFENSE || ((MobileUnit) u).isDefenseMatrixed() || getGs().sim.farFromFight(u, s)) {
+                    retreat = false;
+                }
                 String retreating = ColorUtil.formatText(retreat ? "Retreating" : "Fighting", ColorUtil.White);
                 getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getInitialType().tileHeight())), retreating);
-                if (!((MobileUnit) u).isDefenseMatrixed() && retreat && status != Status.DEFENSE) {
+                if (retreat) {
                     Position pos = getGs().getNearestCC(u.getPosition());
                     if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
                             (lastTarget != null && !lastTarget.equals(pos)))) {

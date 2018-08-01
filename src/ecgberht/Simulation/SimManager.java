@@ -12,6 +12,7 @@ import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Color;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 import org.openbw.bwapi4j.util.Pair;
 
@@ -37,8 +38,8 @@ public class SimManager {
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
         if (ConfigManager.getConfig().ecgConfig.sscait) {
-            shortSimFrames = 70;
-            longSimFrames = 200;
+            shortSimFrames = 50;
+            longSimFrames = 180;
             iterations = 5;
         }
     }
@@ -59,9 +60,7 @@ public class SimManager {
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
-        for (Squad s : getGs().squads.values()) { // Squads
-            myUnits.addAll(s.members);
-        }
+        for (Squad s : getGs().squads.values()) myUnits.addAll(s.members); // Squads
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
         MeanShift clustering = new MeanShift(myUnits);
@@ -172,7 +171,7 @@ public class SimManager {
      */
     private void doSim() {
         int energy = 0;
-        for (ComsatStation s : getGs().CSs) energy += s.getEnergy();
+        for (ComsatStation s : getGs().CSs) energy += s.getEnergy() % 50;
         for (SimInfo s : simulations) {
             simulator.clear();
             for (Unit u : s.allies) {
@@ -182,7 +181,7 @@ public class SimManager {
             }
             for (Unit u : s.enemies) {
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
-                    if (energy >= 50) energy -= 50;
+                    if (energy >= 1) energy -= 1;
                     else s.lose = true;
                     break;
                 }
@@ -202,11 +201,8 @@ public class SimManager {
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
-            if (getGs().strat.name == "ProxyBBS") {
-                s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
-            } else {
-                s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
-            }
+            if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
+            else s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
         }
     }
 
@@ -290,8 +286,7 @@ public class SimManager {
         simulator.simulate(frames);
         int postSimFriendlyUnitCount = simulator.getState().first.size();
         int myLosses = preSimFriendlyUnitCount - postSimFriendlyUnitCount;
-        if (myLosses > 0) return false;
-        return true;
+        return myLosses <= 0;
     }
 
     /**
@@ -321,5 +316,19 @@ public class SimManager {
             if (enemy && s.enemies.contains(unit)) return s;
         }
         return new SimInfo();
+    }
+
+    /**
+     * Returns true if the unit is far from the fight and not getting attacked
+     *
+     * @param u The unit to check
+     * @param s The SimInfo the unit should belong
+     * @return True if the unit is not getting attacked and far from the fight
+     */
+    public boolean farFromFight(Unit u, SimInfo s) { // TODO test
+        if (!s.allies.contains(u)) return true;
+        WeaponType weapon = Util.getWeapon(u.getInitialType());
+        int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
+        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getCentroid(s.enemies)) > range * 1.5;
     }
 }

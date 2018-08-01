@@ -379,4 +379,11 @@ public class Util {
     public static boolean isConnected(TilePosition start, TilePosition end) {
         return !getGs().bwem.getMap().getPath(start.toPosition(), end.toPosition()).isEmpty();
     }
+
+    public static Position getCentroid(Set<Unit> units) {
+        Position point = new Position(0, 0);
+        if (units.size() == 1) return units.iterator().next().getPosition();
+        for (Unit u : units) point = point.add(u.getPosition());
+        return point;
+    }
 }

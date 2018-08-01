@@ -890,7 +890,7 @@ public class Ecgberht implements BWEventListener {
                         } else if (type == UnitType.Terran_Science_Vessel) {
                             if (gs.agents.containsKey(arg0)) {
                                 VesselAgent v = (VesselAgent) gs.agents.get(arg0);
-                                gs.squads.get(v.follow.name).detector = null;
+                                if (gs.squads.containsKey(v.follow.name)) gs.squads.get(v.follow.name).detector = null;
                                 gs.agents.remove(arg0);
                             }
                         } else if (type == UnitType.Terran_Wraith) {
