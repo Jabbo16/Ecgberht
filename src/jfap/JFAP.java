@@ -46,9 +46,9 @@ public class JFAP extends AJFAP {
 
     @Override
     public void simulate(int nFrames) {
-            this.nFrames = nFrames;
-            simulate();
-            this.nFrames = 96;
+        this.nFrames = nFrames;
+        simulate();
+        this.nFrames = 96;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class JFAP extends AJFAP {
                 if (!didSomething) break;
                 nFrames--;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             System.err.print("JFAP Exception");
             e.printStackTrace();
         }
@@ -297,9 +297,9 @@ public class JFAP extends AJFAP {
 
     private void iSimulate() {
         Iterator<JFAPUnit> it1 = player1.iterator();
-        while(it1.hasNext()) simUnit(it1, player1, player2);
+        while (it1.hasNext()) simUnit(it1, player1, player2);
         Iterator<JFAPUnit> it2 = player2.iterator();
-        while(it2.hasNext()) simUnit(it2, player2, player1);
+        while (it2.hasNext()) simUnit(it2, player2, player1);
         for (JFAPUnit fu : player1) updateUnit(fu);
         for (JFAPUnit fu : player2) updateUnit(fu);
     }

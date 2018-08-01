@@ -252,7 +252,7 @@ public class IntelligenceAgency {
      * Detects if the enemy its doing a "Zealot Rush" strat
      */
     private static void detectMechRush() {
-        if (getGs().frameCount < 24 * 170 && getGs().enemyBase != null) {
+        if (getGs().frameCount < 24 * 210 && getGs().enemyBase != null) {
             int countFactories = 0;
             int countRax = 0;
             boolean foundGas = false;

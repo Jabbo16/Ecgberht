@@ -217,36 +217,42 @@ public class GameState extends GameHandler {
                 ih.sendText("Picked forced strategy " + forcedStrat);
                 return nameStrat.get(forcedStrat);
             }
+
+            int totalGamesPlayed = EI.wins + EI.losses;
+            if (totalGamesPlayed < 1) {
+                ih.sendText("I dont know you that well yet, lets pick the standard strategy");
+                return b;
+            }
             for (StrategyOpponentHistory r : EI.history) {
                 if (strategies.containsKey(r.strategyName)) {
                     strategies.get(r.strategyName).first += r.wins;
                     strategies.get(r.strategyName).second += r.losses;
                 }
             }
-            int totalGamesPlayed = EI.wins + EI.losses;
-            int DefaultStrategyWins = strategies.get(b.name).first;
-            int DefaultStrategyLosses = strategies.get(b.name).second;
-            int strategyGamesPlayed = DefaultStrategyWins + DefaultStrategyLosses;
-            double winRate = strategyGamesPlayed > 0 ? DefaultStrategyWins / (double) (strategyGamesPlayed) : 0;
-            if (strategyGamesPlayed < 1) {
-                ih.sendText("I dont know you that well yet, lets pick the standard strategy");
-                return b;
+            double maxWinRate = 0.0;
+            String bestStrat = null;
+            for (Entry<String, Pair<Integer, Integer>> s : strategies.entrySet()) {
+                double winRate = (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0;
+                if (winRate > 0.74 && winRate > maxWinRate) {
+                    maxWinRate = winRate;
+                    bestStrat = s.getKey();
+                }
             }
-            if (strategyGamesPlayed > 0 && winRate > 0.74) {
-                ih.sendText("Using default Strategy with winrate " + winRate * 100 + "%");
-                return b;
+            if (maxWinRate != 0.0 && bestStrat != null) {
+                ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "%");
+                return nameStrat.get(bestStrat);
             }
-            double C = 0.5;
+            double C = 0.7;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (String strat : strategies.keySet()) {
-                if (map.contains("HeartbreakRidge") && (strat.equals("BioMechFE") || strat.equals("BioMech") ||
-                        strat.equals("FullMech"))) {
+                if (map.contains("HeartbreakRidge") &&
+                        nameStrat.get(strat).trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                     continue;
                 }
                 int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
-                double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (strategyGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? C : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
+                double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (sGamesPlayed)) : 0;
+                double ucbVal = sGamesPlayed == 0 ? 0.45 : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat;
@@ -992,7 +998,8 @@ public class GameState extends GameHandler {
                         if (!t.isSieged() && t.getOrder() != Order.Sieging && Math.random() < 0.05) t.siege();
                         continue;
                     }
-                    if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() < 0.05) t.unsiege();
+                    if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() < 0.05 && frameCount % 10 == 0)
+                        t.unsiege();
                 }
             }
         }

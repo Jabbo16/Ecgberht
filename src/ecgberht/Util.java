@@ -366,7 +366,7 @@ public class Util {
     }
 
     public static int getWeight(Unit u) {
-        if (u instanceof SiegeTank) return 4;
+        if (u instanceof SiegeTank) return 6;
         return 1;
     }
 
