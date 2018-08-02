@@ -965,46 +965,6 @@ public class GameState extends GameHandler {
         return count + agents.size() * 2;
     }
 
-    public void siegeTanks() { // TODO merge with Squad logic
-        if (!squads.isEmpty()) {
-            Set<SiegeTank> tanks = new TreeSet<>();
-            for (Entry<String, Squad> s : squads.entrySet()) tanks.addAll(s.getValue().getTanks());
-            if (!tanks.isEmpty()) {
-                TreeSet<Unit> threats = new TreeSet<>(enemyCombatUnitMemory);
-                for (Unit u : enemyBuildingMemory.keySet()) {
-                    if (u instanceof Attacker || u instanceof Bunker) threats.add(u);
-                }
-                for (SiegeTank t : tanks) {
-                    boolean far = false;
-                    boolean close = false;
-                    for (Unit e : threats) {
-                        double distance = broodWarDistance(e.getPosition(), t.getPosition());
-                        if (distance > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) continue;
-                        if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) {
-                            close = true;
-                            break;
-                        }
-                        UnitType eType = Util.getType((PlayerUnit) e);
-                        if (Util.isEnemy(((PlayerUnit) e).getPlayer()) && !(e instanceof Worker) && !eType.isFlyer() && (eType.canAttack() || eType == UnitType.Terran_Bunker)) {
-                            far = true;
-                            break;
-                        }
-                    }
-                    if (close) {
-                        if (t.isSieged() && t.getOrder() != Order.Unsieging) t.unsiege();
-                        continue;
-                    }
-                    if (far) {
-                        if (!t.isSieged() && t.getOrder() != Order.Sieging && Math.random() < 0.05) t.siege();
-                        continue;
-                    }
-                    if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() < 0.05 && frameCount % 10 == 0)
-                        t.unsiege();
-                }
-            }
-        }
-    }
-
     public boolean checkSupply() {
         for (Pair<UnitType, TilePosition> w : workerBuild.values()) {
             if (w.first == UnitType.Terran_Supply_Depot) return true;

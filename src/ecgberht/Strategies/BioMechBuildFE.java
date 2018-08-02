@@ -78,6 +78,7 @@ public class BioMechBuildFE extends Strategy {
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Weapons);
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Armor);
         upgradesToResearch.add(UpgradeType.U_238_Shells);
+        upgradesToResearch.add(UpgradeType.Terran_Vehicle_Weapons);
     }
 
     @Override

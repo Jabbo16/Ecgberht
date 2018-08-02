@@ -74,7 +74,8 @@ public class Util {
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
             if (!u.exists()) continue;
             if (!type.isBuilding() && !((PlayerUnit) u).isCompleted()) continue;
-            if (getType(((PlayerUnit) u)) == type) count++;
+            if (type == UnitType.Terran_Siege_Tank_Tank_Mode && u instanceof SiegeTank) count++;
+            else if (getType(((PlayerUnit) u)) == type) count++;
         }
         return count;
     }
@@ -266,7 +267,7 @@ public class Util {
     // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
     private static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
         int priority = getAttackPriority(attacker, target);     // 0..12
-        int range = (int) getGs().broodWarDistance(attacker.getPosition(), target.getPosition());           // 0..map size in pixels
+        int range = attacker.getDistance(target);           // 0..map size in pixels
         // Let's say that 1 priority step is worth 160 pixels (5 tiles).
         // We care about unit-target range and target-order position distance.
         int score = 5 * 32 * priority - range;

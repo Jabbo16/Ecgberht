@@ -440,7 +440,6 @@ public class Ecgberht implements BWEventListener {
             bunkerTree.run();
             scannerTree.run();
             if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia();
-            gs.siegeTanks();
             defenseTree.run();
             attackTree.run();
             gs.updateSquadOrderAndMicro();
@@ -461,6 +460,8 @@ public class Ecgberht implements BWEventListener {
             String name = ih.enemy().getName();
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
                 gs.strat.name = "PlasmaWraithHell";
+            String oldStrat = IntelligenceAgency.getStartStrat();
+            if (oldStrat != null && !oldStrat.equals(gs.strat.name)) gs.strat.name = oldStrat;
             gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
             if (arg0) {
                 gs.EI.wins++;

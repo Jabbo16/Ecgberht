@@ -61,11 +61,11 @@ public class Squad implements Comparable<Squad> {
             Set<Unit> marinesToHeal = new TreeSet<>();
             Position sCenter = getGs().getSquadCenter(this);
             if (!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs)) stimResearched = true;
+            for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
+                if (!b.unit.isVisible()) continue;
+                if (b.type.canAttack() || b.type == UnitType.Terran_Bunker) enemy.add(b.unit);
+            }
             for (PlayerUnit u : members) {
-                if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode) continue;
-                if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && u.getOrder() == Order.Sieging) {
-                    continue;
-                }
                 if (u.isLockedDown() || u.isMaelstrommed() || ((MobileUnit) u).isStasised() || ((MobileUnit) u).getTransport() != null)
                     continue;
                 Position lastTarget = u.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
@@ -75,6 +75,30 @@ public class Squad implements Comparable<Squad> {
                         ((Marine) u).stimPack();
                     } else if (u instanceof Firebat && !((Firebat) u).isStimmed() && u.isAttacking() && u.getHitPoints() >= 25) {
                         ((Firebat) u).stimPack();
+                    }
+                }
+                if (u instanceof SiegeTank) {
+                    SiegeTank t = (SiegeTank) u;
+                    if (t.isSieged() && u.getOrder() == Order.Unsieging) continue;
+                    if (!t.isSieged() && u.getOrder() == Order.Sieging) continue;
+                    if (status == Status.IDLE && t.isSieged()) return;
+                    boolean found = false;
+                    for (Unit e : enemy) {
+                        if (e.isFlying() || e instanceof Worker) continue;
+                        double distance = u.getDistance(e);
+                        if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        if (!t.isSieged() && t.getOrder() != Order.Sieging) {
+                            t.siege();
+                            continue;
+                        }
+                    } else if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() * 10 <= 2) {
+                        t.unsiege();
+                        continue;
                     }
                 }
                 if (status == Status.IDLE) {
@@ -100,7 +124,9 @@ public class Squad implements Comparable<Squad> {
                         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
                         if (u.getOrder() == Order.AttackMove || u.getOrder() == Order.HealMove) {
                             if (u.getDistance(move) <= range)
-                                ((MobileUnit) u).stop(false);
+                                if (u instanceof SiegeTank && !((SiegeTank) u).isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
+                                    ((SiegeTank) u).siege();
+                                } else ((MobileUnit) u).stop(false);
                         } else if (u.getDistance(move) > range && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
                             ((MobileUnit) u).attack(move);
                             continue;
@@ -196,16 +222,13 @@ public class Squad implements Comparable<Squad> {
                         UnitType eType = e.getInitialType();
                         if (eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
                         enemyToAttack.add(e);
-                        if (!e.getInitialType().isFlyer() && e.getInitialType().groundWeapon().maxRange() <= 32
+                        if (!(e instanceof Building) && !e.getInitialType().isFlyer() && e.getInitialType().groundWeapon().maxRange() <= 32
                                 && e.getInitialType() != UnitType.Terran_Medic) {
                             if (getGs().broodWarDistance(u.getPosition(), e.getPosition()) <=
                                     u.getInitialType().groundWeapon().maxRange()) {
                                 enemyToKite.add(e);
                             }
                         }
-                    }
-                    for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
-                        if (b.type.canAttack() || b.type == UnitType.Terran_Bunker) enemyToAttack.add(b.unit);
                     }
                     if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeaponCooldown() > 0) {
                         if (!enemyToKite.isEmpty()) {
@@ -215,19 +238,19 @@ public class Squad implements Comparable<Squad> {
                             } else ((MobileUnit) u).move(getGs().getPlayer().getStartLocation().toPosition());
                         }
                     } else if (attack != null && !u.isStartingAttack() && !u.isAttacking()) {
-                        if (getGs().strat.name.equals("ProxyBBS")) {
-                            if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
-                                Unit target = Util.getTarget(u, enemyToAttack);
-                                Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
-                                        ((Attacker) u).getTargetUnit());
-                                if (lastTargetUnit != null) {
-                                    if (!lastTargetUnit.equals(target)) {
-                                        ((Attacker) u).attack(target);
-                                        continue;
-                                    }
+                        //if (getGs().strat.name.equals("ProxyBBS")) {
+                        if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
+                            Unit target = Util.getTarget(u, enemyToAttack);
+                            Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
+                                    ((Attacker) u).getTargetUnit());
+                            if (lastTargetUnit != null) {
+                                if (!lastTargetUnit.equals(target)) {
+                                    ((Attacker) u).attack(target);
+                                    continue;
                                 }
                             }
                         }
+                        //}
                         if (u.getOrder() == Order.Move) {
                             ((MobileUnit) u).attack(attack);
                         }

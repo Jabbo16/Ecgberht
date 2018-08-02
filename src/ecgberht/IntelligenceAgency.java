@@ -19,13 +19,18 @@ public class IntelligenceAgency {
 
     private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
     private static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
-    private static Set<Unit> workers = new TreeSet<>();
+    private static Set<Unit> enemyWorkers = new TreeSet<>();
     private static List<Bullet> enemyBullets = new ArrayList<>();
     private static List<Bullet> allyBullets = new ArrayList<>();
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
+    private static String startStrat = null;
 
-    public static int getNumWorkers() {
-        return workers.size();
+    private static int getNumEnemyWorkers() {
+        return enemyWorkers.size();
+    }
+
+    static String getStartStrat() {
+        return startStrat;
     }
 
     public static EnemyStrats getEnemyStrat() {
@@ -46,7 +51,7 @@ public class IntelligenceAgency {
     /**
      * Updates visible bullets
      */
-    public static void updateBullets() {
+    static void updateBullets() {
         enemyBullets.clear();
         allyBullets.clear();
         for (Bullet b : getGs().getGame().getBullets()) {
@@ -83,9 +88,9 @@ public class IntelligenceAgency {
         }
     }
 
-    public static void onShow(Unit unit, UnitType type) {
+    static void onShow(Unit unit, UnitType type) {
         String player = ((PlayerUnit) unit).getPlayer().getName();
-        if (unit instanceof Worker && !workers.contains(unit)) workers.add(unit);
+        if (unit instanceof Worker && !enemyWorkers.contains(unit)) enemyWorkers.add(unit);
 
         // If base and player known skip
         if (enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;
@@ -99,8 +104,8 @@ public class IntelligenceAgency {
         }
         // If player and type known skip
         if (enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;
-            // Normal units (no workers and no real combat or support units)
-        else if (!type.isBuilding() && !type.isWorker() && (type.canAttack() || type.isSpellcaster() ||
+        // Normal units (no enemyWorkers and no real combat or support units)
+        if (!type.isBuilding() && !type.isWorker() && (type.canAttack() || type.isSpellcaster() ||
                 (type.spaceProvided() > 0 && type.supplyProvided() == 0))) {
             if (!enemyTypes.containsKey(player)) {
                 HashSet<UnitType> aux = new HashSet<>();
@@ -183,14 +188,14 @@ public class IntelligenceAgency {
         }
     }
 
-    public static void onDestroy(Unit unit, UnitType type) {
+    static void onDestroy(Unit unit, UnitType type) {
         String player = ((PlayerUnit) unit).getPlayer().getName();
         if (type.isResourceDepot() && enemyBases.containsKey(player)) {
             if (enemyBases.get(player).contains(unit)) enemyBases.get(player).remove(unit);
         }
         if (getGs().enemyRace == Race.Zerg) {
             if (unit instanceof Drone) {
-                if (workers.contains(unit)) workers.remove(unit);
+                if (enemyWorkers.contains(unit)) enemyWorkers.remove(unit);
             }
         }
     }
@@ -201,7 +206,7 @@ public class IntelligenceAgency {
     private static void detectEarlyPool() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null && !getGs().EI.naughty) {
             boolean found_pool = false;
-            int drones = IntelligenceAgency.getNumWorkers();
+            int drones = IntelligenceAgency.getNumEnemyWorkers();
             for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
                 if (u.type == UnitType.Zerg_Spawning_Pool) {
                     found_pool = true;
@@ -213,7 +218,8 @@ public class IntelligenceAgency {
                 getGs().EI.naughty = true;
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name == "BioGreedyFE" || getGs().strat.name.equals("MechGreedyFE")) {
+                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
+                    startStrat = getGs().strat.name;
                     getGs().strat = new BioBuild();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -229,7 +235,7 @@ public class IntelligenceAgency {
     private static void detectZealotRush() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyBase != null) {
             int countGates = 0;
-            int probes = IntelligenceAgency.getNumWorkers();
+            int probes = IntelligenceAgency.getNumEnemyWorkers();
             boolean foundGas = false;
             for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
                 if (u.type == UnitType.Protoss_Gateway) countGates++;
@@ -240,6 +246,7 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
+                    startStrat = getGs().strat.name;
                     getGs().strat = new BioBuild();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -266,11 +273,13 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Nice Mech strat you got there");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE")) {
+                    startStrat = getGs().strat.name;
                     getGs().strat = new BioMechBuildFE();
                     Ecgberht.transition();
                     return;
                 }
                 if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
+                    startStrat = getGs().strat.name;
                     getGs().strat = new BioMechBuildFE();
                     Ecgberht.transition();
                 }
@@ -278,7 +287,7 @@ public class IntelligenceAgency {
         }
     }
 
-    public static void onFrame() {
+    static void onFrame() {
         if (enemyStrat != EnemyStrats.Unknown) return;
         switch (getGs().enemyRace) {
             case Zerg:
