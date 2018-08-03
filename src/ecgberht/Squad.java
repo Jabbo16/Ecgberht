@@ -19,13 +19,13 @@ import static ecgberht.Ecgberht.getGs;
 
 public class Squad implements Comparable<Squad> {
 
-    public static boolean stimResearched;
+    private static boolean stimResearched;
     public int lastFrameOrder = 0;
     public Position attack;
     public Set<PlayerUnit> members;
     public Status status;
     public String name;
-    public VesselAgent detector;
+    VesselAgent detector;
 
     public Squad(String name) {
         this.name = name;
@@ -34,7 +34,7 @@ public class Squad implements Comparable<Squad> {
         attack = null;
     }
 
-    public void addToSquad(Unit unit) {
+    void addToSquad(Unit unit) {
         this.members.add((PlayerUnit) unit);
     }
 
@@ -42,7 +42,7 @@ public class Squad implements Comparable<Squad> {
         if (!pos.equals(attack)) attack = pos;
     }
 
-    public int getArmyCount() {
+    int getArmyCount() {
         int count = 0;
         for (Unit u : members) {
             count++;
@@ -51,8 +51,7 @@ public class Squad implements Comparable<Squad> {
         return count;
     }
 
-    // Kiting broken, improve
-    public void microUpdateOrder() {
+    void microUpdateOrder() {
         try {
             if (members.isEmpty()) return;
             Set<Unit> enemy = getGs().enemyCombatUnitMemory;
@@ -238,22 +237,20 @@ public class Squad implements Comparable<Squad> {
                             } else ((MobileUnit) u).move(getGs().getPlayer().getStartLocation().toPosition());
                         }
                     } else if (attack != null && !u.isStartingAttack() && !u.isAttacking()) {
-                        //if (getGs().strat.name.equals("ProxyBBS")) {
-                        if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
-                            Unit target = Util.getTarget(u, enemyToAttack);
-                            Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
-                                    ((Attacker) u).getTargetUnit());
-                            if (lastTargetUnit != null) {
-                                if (!lastTargetUnit.equals(target)) {
-                                    ((Attacker) u).attack(target);
-                                    continue;
+                        if (getGs().strat.name.equals("ProxyBBS")) {
+                            if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
+                                Unit target = Util.getTarget(u, enemyToAttack);
+                                Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? u.getOrderTarget() :
+                                        ((Attacker) u).getTargetUnit());
+                                if (lastTargetUnit != null) {
+                                    if (!lastTargetUnit.equals(target)) {
+                                        ((Attacker) u).attack(target);
+                                        continue;
+                                    }
                                 }
                             }
                         }
-                        //}
-                        if (u.getOrder() == Order.Move) {
-                            ((MobileUnit) u).attack(attack);
-                        }
+                        if (u.getOrder() == Order.Move) ((MobileUnit) u).attack(attack);
                     }
                 }
             }

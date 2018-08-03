@@ -242,7 +242,7 @@ public class GameState extends GameHandler {
                 ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "%");
                 return nameStrat.get(bestStrat);
             }
-            double C = 0.7;
+            double C = 0.5;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (String strat : strategies.keySet()) {
@@ -252,7 +252,7 @@ public class GameState extends GameHandler {
                 }
                 int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
                 double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.45 : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
+                double ucbVal = sGamesPlayed == 0 ? 0.5 : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat;

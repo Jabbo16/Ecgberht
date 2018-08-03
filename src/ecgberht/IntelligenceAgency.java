@@ -1,6 +1,7 @@
 package ecgberht;
 
 import ecgberht.Strategies.BioBuild;
+import ecgberht.Strategies.BioBuildFE;
 import ecgberht.Strategies.BioMechBuildFE;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.type.Race;
@@ -248,6 +249,11 @@ public class IntelligenceAgency {
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     startStrat = getGs().strat.name;
                     getGs().strat = new BioBuild();
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
+                    startStrat = getGs().strat.name;
+                    getGs().strat = new BioBuildFE();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
