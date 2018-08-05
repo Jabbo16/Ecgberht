@@ -32,7 +32,7 @@ public class SupplyMan {
     }
 
     public void onComplete(Unit unit) {
-        if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof Base) {
+        if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
             UnitType type = Util.getType((PlayerUnit) unit);
             if (type.supplyProvided() > 0) supplyTotal += type.supplyProvided();
         }
@@ -40,7 +40,7 @@ public class SupplyMan {
 
     public void onDestroy(Unit unit) {
         UnitType type = Util.getType((PlayerUnit) unit);
-        if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof Base) {
+        if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
             if (type.supplyProvided() > 0) supplyTotal -= type.supplyProvided();
             return;
         }
