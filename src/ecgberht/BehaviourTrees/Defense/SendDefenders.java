@@ -9,7 +9,7 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 import java.util.Map.Entry;
 import java.util.Set;
@@ -46,7 +46,7 @@ public class SendDefenders extends Action {
             if (((GameState) this.handler).enemyInBase.size() == 1 && ((GameState) this.handler).enemyInBase.iterator().next() instanceof Worker) {
                 defenders = 1;
             }
-            Pair<Boolean, Boolean> battleWin = new Pair<>(true, false);
+            MutablePair<Boolean, Boolean> battleWin = new MutablePair<>(true, false);
             if (defenders != 1) {
                 if (((GameState) this.handler).enemyInBase.size() + friends.size() < 40) {
                     battleWin = ((GameState) this.handler).sim.simulateDefenseBattle(friends, ((GameState) this.handler).enemyInBase, 150, bunker);

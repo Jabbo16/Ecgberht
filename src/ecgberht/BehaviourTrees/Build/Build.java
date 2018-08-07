@@ -9,7 +9,7 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.SCV;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Build extends Action {
     public State execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
-            for (Entry<SCV, Pair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
+            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
                 if (u.getKey().getOrder() != Order.PlaceBuilding && ((GameState) this.handler).canAfford(u.getValue().first)) {
                     SCV chosen = u.getKey();
                     if (u.getValue().first == UnitType.Terran_Bunker) {

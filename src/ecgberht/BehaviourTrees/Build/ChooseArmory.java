@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -9,7 +10,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Armory;
 import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.util.Pair;
 
 public class ChooseArmory extends Action {
 
@@ -26,7 +26,7 @@ public class ChooseArmory extends Action {
                 return State.FAILURE;
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < ((GameState) this.handler).strat.numArmories) {
-                for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Armory) {
                         return State.FAILURE;
                     }

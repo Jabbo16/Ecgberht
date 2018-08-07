@@ -1,11 +1,11 @@
 package ecgberht;
 
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.awt.*;
 import java.io.FileWriter;
@@ -57,14 +57,14 @@ public class InfluenceMap {
             else influence = bio;
             if (destroyed) influence *= -1;
             if (Util.isEnemy(((PlayerUnit) arg0).getPlayer())) influence *= -1;
-            updateCellInfluence(new Pair<>(new Point(tile.getY(), tile.getX()), influence), type.isBuilding());
+            updateCellInfluence(new MutablePair<>(new Point(tile.getY(), tile.getX()), influence), type.isBuilding());
         } catch (Exception e) {
             System.err.println("updateInMap Exception");
             e.printStackTrace();
         }
     }
 
-    public void updateCellInfluence(Pair<Point, Integer> tile, boolean building) {
+    public void updateCellInfluence(MutablePair<Point, Integer> tile, boolean building) {
         map[tile.first.x][tile.first.y] += tile.second;
         if (!building) {
             int init_i = 0;
@@ -84,8 +84,8 @@ public class InfluenceMap {
         }
     }
 
-    public void updateCellsInfluence(List<Pair<Point, Integer>> tiles) {
-        for (Pair<Point, Integer> p : tiles) updateCellInfluence(p, true);
+    public void updateCellsInfluence(List<MutablePair<Point, Integer>> tiles) {
+        for (MutablePair<Point, Integer> p : tiles) updateCellInfluence(p, true);
     }
 
     public double getInfluence(Point cell) {
@@ -132,12 +132,12 @@ public class InfluenceMap {
         return count;
     }
 
-    public Pair<Integer, Integer> getPosition(TilePosition start, boolean attack) {
+    public MutablePair<Integer, Integer> getPosition(TilePosition start, boolean attack) {
         try {
             double count = 0;
             int sX = start.getX();
             int sY = start.getY();
-            Pair<Integer, Integer> p = new Pair<>(-1, -1);
+            MutablePair<Integer, Integer> p = new MutablePair<>(-1, -1);
             for (int x = 0; x < height; x++) {
                 for (int y = 0; y < width; y++) {
                     if (map[x][y] < count) {
@@ -152,7 +152,7 @@ public class InfluenceMap {
         } catch (Exception e) {
             System.err.println("getPosition InMap Exception");
             e.printStackTrace();
-            return new Pair<>(-1, -1);
+            return new MutablePair<>(-1, -1);
         }
     }
 
@@ -162,7 +162,7 @@ public class InfluenceMap {
             for (Unit u : bw.getAllUnits()) {
                 if (u.exists() && u.getTilePosition().equals(pos) && u instanceof Building) return false;
             }
-            updateCellInfluence(new Pair<>(new Point(x, y), (int) map[x][y] * (-1)), true);
+            updateCellInfluence(new MutablePair<>(new Point(x, y), (int) map[x][y] * (-1)), true);
             return true;
         }
         return false;

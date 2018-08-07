@@ -7,7 +7,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 public class ChooseAttackPosition extends Action {
 
@@ -23,7 +23,7 @@ public class ChooseAttackPosition extends Action {
             }
             for (Squad u : ((GameState) this.handler).squads.values()) {
                 if (u.members.isEmpty()) continue;
-                Pair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(((GameState) this.handler).getSquadCenter(u).toTilePosition(), true);
+                MutablePair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(((GameState) this.handler).getSquadCenter(u).toTilePosition(), true);
                 if (p.first != -1 && p.second != -1) {
                     TilePosition attackPos = new TilePosition(p.second, p.first);
                     if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {

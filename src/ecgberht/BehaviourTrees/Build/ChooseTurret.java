@@ -11,7 +11,7 @@ import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.EngineeringBay;
 import org.openbw.bwapi4j.unit.MissileTurret;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 public class ChooseTurret extends Action {
 
@@ -34,7 +34,7 @@ public class ChooseTurret extends Action {
                 }
             }
             if (tech && ((GameState) this.handler).Ts.isEmpty()) {
-                for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Missile_Turret) {
                         return State.FAILURE;
                     }

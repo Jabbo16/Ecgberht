@@ -9,7 +9,7 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Factory;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 public class ChooseBarracks extends Action {
 
@@ -42,7 +42,7 @@ public class ChooseBarracks extends Action {
             if (((GameState) this.handler).strat.buildUnits.contains(UnitType.Terran_Factory)) {
                 int count = 0;
                 boolean found = false;
-                for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Barracks) count++;
                     if (w.first == UnitType.Terran_Factory) found = true;
                 }

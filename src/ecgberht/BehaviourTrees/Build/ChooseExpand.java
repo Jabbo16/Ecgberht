@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -9,7 +10,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.CommandCenter;
-import org.openbw.bwapi4j.util.Pair;
 
 public class ChooseExpand extends Action {
 
@@ -20,7 +20,7 @@ public class ChooseExpand extends Action {
     @Override
     public State execute() {
         try {
-            for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+            for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                 if (w.first == UnitType.Terran_Command_Center) {
                     return State.FAILURE;
                 }

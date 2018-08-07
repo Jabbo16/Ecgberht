@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -9,7 +10,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.util.Pair;
 
 public class ChooseAcademy extends Action {
 
@@ -24,7 +24,7 @@ public class ChooseAcademy extends Action {
                 return State.FAILURE;
             }
             if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) >= ((GameState) this.handler).strat.numRaxForAca && Util.countUnitTypeSelf(UnitType.Terran_Academy) == 0) {
-                for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Academy) {
                         return State.FAILURE;
                     }

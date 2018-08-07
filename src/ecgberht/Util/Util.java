@@ -8,7 +8,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,9 +91,9 @@ public class Util {
         return sum;
     }
 
-    public static Pair<Double, Double> sumPosition(List<Pair<Double, Double>> vectors) {
-        Pair<Double, Double> sum = new Pair<>(0.0, 0.0);
-        for (Pair<Double, Double> p : vectors) {
+    public static MutablePair<Double, Double> sumPosition(List<MutablePair<Double, Double>> vectors) {
+        MutablePair<Double, Double> sum = new MutablePair<>(0.0, 0.0);
+        for (MutablePair<Double, Double> p : vectors) {
             sum.first += p.first;
             sum.second += p.second;
         }

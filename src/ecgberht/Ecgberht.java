@@ -34,6 +34,7 @@ import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
 import ecgberht.Strategies.BioBuild;
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.composite.Selector;
@@ -45,7 +46,6 @@ import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -591,7 +591,7 @@ public class Ecgberht implements BWEventListener {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
                             if (gs.frameCount == 0)
-                                gs.MainCC = new Pair<>(Util.getClosestBaseLocation(arg0.getPosition()), arg0);
+                                gs.MainCC = new MutablePair<>(Util.getClosestBaseLocation(arg0.getPosition()), arg0);
                             gs.builtCC++;
                         }
                         if (type == UnitType.Terran_Comsat_Station) gs.CSs.add((ComsatStation) arg0);
@@ -830,7 +830,7 @@ public class Ecgberht implements BWEventListener {
                                     if (gs.CCs.size() > 0) {
                                         for (Unit c : gs.CCs.values()) {
                                             if (!c.equals(arg0)) {
-                                                gs.MainCC = new Pair<>(Util.getClosestBaseLocation(u.getPosition()), u);
+                                                gs.MainCC = new MutablePair<>(Util.getClosestBaseLocation(u.getPosition()), u);
                                                 break;
                                             }
                                         }
@@ -935,7 +935,7 @@ public class Ecgberht implements BWEventListener {
                         break;
                     }
                 }
-                for (Entry<SCV, Pair<UnitType, TilePosition>> u : gs.workerBuild.entrySet()) {
+                for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gs.workerBuild.entrySet()) {
                     if (u.getKey().equals(((Building) arg0).getBuildUnit()) && u.getValue().first == type) {
                         gs.workerBuild.remove(u.getKey());
                         gs.workerTask.put(u.getKey(), (Building) arg0);

@@ -1,5 +1,6 @@
 package ecgberht.Agents;
 
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -7,7 +8,6 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,7 +36,7 @@ public abstract class Agent {
     }
 
     Position selectNewAttack() {
-        Pair<Integer, Integer> p = getGs().inMap.getPosition(myUnit.getTilePosition(), true);
+        MutablePair<Integer, Integer> p = getGs().inMap.getPosition(myUnit.getTilePosition(), true);
         if (p.first != -1 && p.second != -1) {
             Position attackPos = new TilePosition(p.second, p.first).toPosition();
             if (getGs().getGame().getBWMap().isValidPosition(attackPos)) return attackPos;
