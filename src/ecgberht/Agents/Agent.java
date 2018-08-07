@@ -1,6 +1,6 @@
 package ecgberht.Agents;
 
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;

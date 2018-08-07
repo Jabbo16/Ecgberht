@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Repair;
 
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;

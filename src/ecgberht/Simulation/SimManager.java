@@ -5,7 +5,7 @@ import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
 import ecgberht.Squad;
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;

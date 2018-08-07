@@ -2,6 +2,7 @@ package ecgberht;
 
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.TechType;

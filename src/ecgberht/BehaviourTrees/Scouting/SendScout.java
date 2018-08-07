@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import bwem.Base;
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
