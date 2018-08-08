@@ -1,27 +1,25 @@
-version: build {build} {branch}
+version: build {build}
 
-os: Visual Studio 2017
+branches:
+  only:
+  - master
 
-platform: x86
- 
-clone_depth: 50
-
-install:
-  - cmd: SET PATH=C:\Progra~2\Java\jdk1.8.0\bin;%PATH%
-  - cmd: SET JAVA_HOME=C:\Progra~2\Java\jdk1.8.0
-  - cmd: echo %PATH%
-  - cmd: echo %JAVA_HOME%
-  - cmd: java -version
+image: 
+  - Visual Studio 2017
 
 build:
   verbosity: detailed
 
 build_script:
-  - gradlew.bat clean fatjar --info --no-daemon
+  - gradlew.bat clean fatjar --info
 
 cache:
-  - C:\Users\appveyor\.gradle
+  - '%USERPROFILE%\.gradle'
 
+artifacts:
+  - path: 'build\libs\*.*'
+    name: Ecgberht
+    
 notifications:
   - provider: Email
     to:
