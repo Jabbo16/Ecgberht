@@ -7,7 +7,7 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.TrainingFacility;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 public class TrainUnit extends Action {
 
@@ -60,7 +60,7 @@ public class TrainUnit extends Action {
                 if (!((GameState) this.handler).defense) {
                     if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
                         boolean found = false;
-                        for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                        for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                             if (w.first == UnitType.Terran_Command_Center) {
                                 found = true;
                                 break;

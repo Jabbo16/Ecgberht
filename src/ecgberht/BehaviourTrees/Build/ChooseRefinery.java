@@ -1,7 +1,8 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -11,7 +12,6 @@ import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Refinery;
 import org.openbw.bwapi4j.unit.VespeneGeyser;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.util.Map.Entry;
 
@@ -29,7 +29,7 @@ public class ChooseRefinery extends Action {
             }
             if (((GameState) this.handler).refineriesAssigned.size() == 1) {
                 boolean found = false;
-                for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Barracks) {
                         found = true;
                         break;
@@ -53,7 +53,7 @@ public class ChooseRefinery extends Action {
             if (count == ((GameState) this.handler).vespeneGeysers.size()) {
                 return State.FAILURE;
             }
-            for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+            for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                 if (w.first == UnitType.Terran_Refinery) {
                     return State.FAILURE;
                 }

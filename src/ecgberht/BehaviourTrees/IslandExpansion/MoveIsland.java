@@ -9,7 +9,7 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Worker;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 public class MoveIsland extends Action {
 
@@ -25,7 +25,7 @@ public class MoveIsland extends Action {
             TilePosition chosenTile = ((GameState) this.handler).chosenIsland.getLocation();
             Position realEnd = ((GameState) this.handler).getCenterFromBuilding(chosenTile.toPosition(), chosenType);
             if (chosen.move(realEnd)) {
-                ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<>(chosenType, chosenTile));
+                ((GameState) this.handler).workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
                 ((GameState) this.handler).deltaCash.first += chosenType.mineralPrice();
                 ((GameState) this.handler).deltaCash.second += chosenType.gasPrice();
                 ((GameState) this.handler).chosenWorkerDrop = null;

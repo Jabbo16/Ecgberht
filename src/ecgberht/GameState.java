@@ -11,12 +11,18 @@ import com.google.gson.Gson;
 import ecgberht.Agents.*;
 import ecgberht.Simulation.SimManager;
 import ecgberht.Strategies.*;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import jfap.JFAP;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.*;
+import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.InteractionHandler;
+import org.openbw.bwapi4j.Player;
+import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.WalkPosition;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -57,7 +63,7 @@ public class GameState extends GameHandler {
     public List<Base> EnemyBLs = new ArrayList<>();
     public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
     public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
-    public Map<SCV, Pair<UnitType, TilePosition>> workerBuild = new HashMap<>();
+    public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
     public Map<Worker, Position> workerDefenders = new TreeMap<>();
     public Map<SCV, Building> repairerTask = new TreeMap<>();
     public Map<SCV, Building> workerTask = new TreeMap<>();
@@ -72,8 +78,8 @@ public class GameState extends GameHandler {
     public Map<Unit, Agent> agents = new TreeMap<>();
     public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
-    public Pair<Integer, Integer> deltaCash = new Pair<>(0, 0);
-    public Pair<String, Unit> chosenMarine = null;
+    public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
+    public MutablePair<String, Unit> chosenMarine = null;
     public Player neutral = null;
     public Position attackPosition = null;
     public Race enemyRace = Race.Unknown;
@@ -120,7 +126,7 @@ public class GameState extends GameHandler {
     public Unit chosenUnitToHarass = null;
     public ResearchingFacility chosenUnitUpgrader = null;
     public Worker chosenWorker = null;
-    public Pair<Base, Unit> MainCC = null;
+    public MutablePair<Base, Unit> MainCC = null;
     public UnitType chosenAddon = null;
     public UnitType chosenToBuild = null;
     public UnitType chosenUnit = null;
@@ -183,34 +189,34 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            Map<String, Pair<Integer, Integer>> strategies = new LinkedHashMap<>();
+            Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
-            strategies.put(b.name, new Pair<>(0, 0));
+            strategies.put(b.name, new MutablePair<>(0, 0));
             nameStrat.put(b.name, b);
 
-            strategies.put(bM.name, new Pair<>(0, 0));
+            strategies.put(bM.name, new MutablePair<>(0, 0));
             nameStrat.put(bM.name, bM);
 
-            strategies.put(bGFE.name, new Pair<>(0, 0));
+            strategies.put(bGFE.name, new MutablePair<>(0, 0));
             nameStrat.put(bGFE.name, bGFE);
 
-            strategies.put(bMGFE.name, new Pair<>(0, 0));
+            strategies.put(bMGFE.name, new MutablePair<>(0, 0));
             nameStrat.put(bMGFE.name, bGFE);
 
-            strategies.put(FM.name, new Pair<>(0, 0));
+            strategies.put(FM.name, new MutablePair<>(0, 0));
             nameStrat.put(FM.name, FM);
 
-            strategies.put(bbs.name, new Pair<>(0, 0));
+            strategies.put(bbs.name, new MutablePair<>(0, 0));
             nameStrat.put(bbs.name, bbs);
 
-            strategies.put(mGFE.name, new Pair<>(0, 0));
+            strategies.put(mGFE.name, new MutablePair<>(0, 0));
             nameStrat.put(mGFE.name, bGFE);
 
-            strategies.put(bMFE.name, new Pair<>(0, 0));
+            strategies.put(bMFE.name, new MutablePair<>(0, 0));
             nameStrat.put(bMFE.name, bMFE);
 
-            strategies.put(bFE.name, new Pair<>(0, 0));
+            strategies.put(bFE.name, new MutablePair<>(0, 0));
             nameStrat.put(bFE.name, bFE);
 
             if (!forcedStrat.equals("") && nameStrat.containsKey(forcedStrat)) {
@@ -231,7 +237,7 @@ public class GameState extends GameHandler {
             }
             double maxWinRate = 0.0;
             String bestStrat = null;
-            for (Entry<String, Pair<Integer, Integer>> s : strategies.entrySet()) {
+            for (Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
                 double winRate = (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0;
                 if (winRate > 0.74 && winRate > maxWinRate) {
                     maxWinRate = winRate;
@@ -428,8 +434,8 @@ public class GameState extends GameHandler {
         }
     }
 
-    public Pair<Integer, Integer> getCash() {
-        return new Pair<>(self.minerals(), self.gas());
+    public MutablePair<Integer, Integer> getCash() {
+        return new MutablePair<>(self.minerals(), self.gas());
     }
 
     public int getSupply() {
@@ -522,7 +528,7 @@ public class GameState extends GameHandler {
         if (chosenBaseLocation != null) {
             print(chosenBaseLocation, UnitType.Terran_Command_Center, Color.CYAN);
         }
-        for (Entry<SCV, Pair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
+        for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             print(u.getKey(), Color.TEAL);
             bw.getMapDrawer().drawTextMap(u.getKey().getPosition().subtract(new Position(0, UnitType.Terran_SCV.tileHeight() * 8)), u.getKey().getLastCommand().toString());
             bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "Building " + u.getValue().first.toString());
@@ -731,7 +737,7 @@ public class GameState extends GameHandler {
         if (chosenBuilderBL != null && workerIdle.contains(chosenBuilderBL)) workerIdle.remove(chosenBuilderBL);
 
         List<Unit> aux3 = new ArrayList<>();
-        for (Entry<SCV, Pair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
+        for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             if ((u.getKey().isIdle() || u.getKey().isGatheringGas() || u.getKey().isGatheringMinerals()) &&
                     broodWarDistance(u.getKey().getPosition(), u.getValue().second.toPosition()) > 100) {
                 aux3.add(u.getKey());
@@ -860,7 +866,7 @@ public class GameState extends GameHandler {
                 for (ChokePoint choke : naturalRegion.getChokePoints()) {
                     if (choke.getCenter() == mainChoke.getCenter()) continue;
                     if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
-                    if (choke.getAreas().first != second && choke.getAreas().second != second) continue;
+                    if (choke.getAreas().getFirst() != second && choke.getAreas().getSecond() != second) continue;
                     double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());
                     if (dist < distBest) {
                         naturalChoke = choke;
@@ -967,7 +973,7 @@ public class GameState extends GameHandler {
     }
 
     public boolean checkSupply() {
-        for (Pair<UnitType, TilePosition> w : workerBuild.values()) {
+        for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
             if (w.first == UnitType.Terran_Supply_Depot) return true;
         }
         for (Building w : workerTask.values()) {
@@ -1204,7 +1210,7 @@ public class GameState extends GameHandler {
 
     public int countUnit(UnitType type) {
         int count = 0;
-        for (Pair<UnitType, TilePosition> w : workerBuild.values()) {
+        for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
             if (w.first == type) count++;
         }
         count += Util.countUnitTypeSelf(type);
@@ -1314,24 +1320,24 @@ public class GameState extends GameHandler {
         try {
             if (enemies.isEmpty()) return null;
             Position ownPosition = unit.getPosition();
-            List<Pair<Double, Double>> vectors = new ArrayList<>();
+            List<MutablePair<Double, Double>> vectors = new ArrayList<>();
             double minDistance = Double.MAX_VALUE;
             for (Unit enemy : enemies) {
                 if (!enemy.exists() || !enemy.isVisible()) continue;
                 Position enemyPosition = enemy.getPosition();
-                Pair<Double, Double> unitV = new Pair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
+                MutablePair<Double, Double> unitV = new MutablePair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
                 double distance = broodWarDistance(ownPosition, enemyPosition);
                 if (distance < minDistance) minDistance = distance;
                 //unitV.first = (1 / distance) * unitV.first;
                 //unitV.second = (1 / distance) * unitV.second;
-                vectors.add(new Pair<>(unitV.first, unitV.second));
+                vectors.add(new MutablePair<>(unitV.first, unitV.second));
             }
            /* minDistance = 2 * (minDistance * minDistance);
             for (Pair<Double, Double> vector : vectors) {
                 vector.first *= minDistance;
                 vector.second *= minDistance;
             }*/
-            Pair<Double, Double> sumAll = Util.sumPosition(vectors);
+            MutablePair<Double, Double> sumAll = Util.sumPosition(vectors);
             Position kitePos = Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
             return kitePos;
         } catch (Exception e) {

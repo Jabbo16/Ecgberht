@@ -8,7 +8,7 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Worker;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 public class CheckResourcesBuilding extends Conditional {
 
@@ -19,7 +19,7 @@ public class CheckResourcesBuilding extends Conditional {
     @Override
     public State execute() {
         try {
-            Pair<Integer, Integer> cash = ((GameState) this.handler).getCash();
+            MutablePair<Integer, Integer> cash = ((GameState) this.handler).getCash();
             Worker chosen = ((GameState) this.handler).chosenWorker;
             TilePosition start = chosen.getTilePosition();
             TilePosition end = ((GameState) this.handler).chosenPosition;

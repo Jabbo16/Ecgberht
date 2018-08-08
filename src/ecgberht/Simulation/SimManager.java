@@ -5,7 +5,8 @@ import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
 import ecgberht.Squad;
-import ecgberht.Util;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;
@@ -14,7 +15,6 @@ import org.openbw.bwapi4j.type.Color;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -251,9 +251,9 @@ public class SimManager {
     }
 
     // TODO improve and search for bunkers SimInfos
-    public Pair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
+    public MutablePair<Boolean, Boolean> simulateDefenseBattle(Set<Unit> friends, Set<Unit> enemies, int frames, boolean bunker) {
         simulator.clear();
-        org.openbw.bwapi4j.util.Pair<Boolean, Boolean> result = new org.openbw.bwapi4j.util.Pair<>(true, false);
+        MutablePair<Boolean, Boolean> result = new MutablePair<>(true, false);
         for (Unit u : friends) simulator.addUnitPlayer1(new JFAPUnit(u));
         for (Unit u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u));
         jfap.Pair<Integer, Integer> presim_scores = simulator.playerScores();

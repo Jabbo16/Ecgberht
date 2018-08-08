@@ -2,7 +2,8 @@ package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.DataTraining;
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -11,7 +12,6 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Worker;
-import org.openbw.bwapi4j.util.Pair;
 
 public class Move extends Action {
 
@@ -44,7 +44,7 @@ public class Move extends Action {
                         }
                     }
                 }
-                ((GameState) this.handler).workerBuild.put((SCV) chosen, new Pair<>(((GameState) this.handler).chosenToBuild, ((GameState) this.handler).chosenPosition));
+                ((GameState) this.handler).workerBuild.put((SCV) chosen, new MutablePair<>(((GameState) this.handler).chosenToBuild, ((GameState) this.handler).chosenPosition));
                 ((GameState) this.handler).deltaCash.first += ((GameState) this.handler).chosenToBuild.mineralPrice();
                 ((GameState) this.handler).deltaCash.second += ((GameState) this.handler).chosenToBuild.gasPrice();
                 ((GameState) this.handler).chosenWorker = null;

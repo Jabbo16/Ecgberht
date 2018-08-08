@@ -1,13 +1,13 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Factory;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 
 public class ChooseTank extends Action {
@@ -47,7 +47,7 @@ public class ChooseTank extends Action {
                 String strat = ((GameState) this.handler).strat.name;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
-                    Pair<Integer, Integer> cash = ((GameState) this.handler).getCash();
+                    MutablePair<Integer, Integer> cash = ((GameState) this.handler).getCash();
                     if (cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) {
                         return State.FAILURE;
                     }

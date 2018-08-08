@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Attack;
 
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;

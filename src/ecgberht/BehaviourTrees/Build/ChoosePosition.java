@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Build;
 import bwem.Base;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -12,7 +12,7 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
-import org.openbw.bwapi4j.util.Pair;
+import ecgberht.Util.MutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +102,7 @@ public class ChoosePosition extends Action {
                 return State.SUCCESS;
             } else {
                 if (!((GameState) this.handler).workerBuild.isEmpty()) {
-                    for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                    for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                         ((GameState) this.handler).testMap.updateMap(w.second, w.first, false);
                     }
                 }

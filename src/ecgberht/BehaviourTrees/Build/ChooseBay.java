@@ -1,7 +1,8 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
-import ecgberht.Util;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -9,7 +10,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.EngineeringBay;
-import org.openbw.bwapi4j.util.Pair;
 
 public class ChooseBay extends Action {
 
@@ -24,7 +24,7 @@ public class ChooseBay extends Action {
                 return State.FAILURE;
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < ((GameState) this.handler).strat.numBays) {
-                for (Pair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Engineering_Bay) {
                         return State.FAILURE;
                     }
