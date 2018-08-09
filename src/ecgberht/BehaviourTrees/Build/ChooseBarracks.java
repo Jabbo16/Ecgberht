@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util.MutablePair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -9,7 +10,6 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Factory;
-import ecgberht.Util.MutablePair;
 
 public class ChooseBarracks extends Action {
 

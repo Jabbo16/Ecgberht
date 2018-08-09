@@ -11,16 +11,13 @@ import com.google.gson.Gson;
 import ecgberht.Agents.*;
 import ecgberht.Simulation.SimManager;
 import ecgberht.Strategies.*;
+import ecgberht.Util.BaseLocationComparator;
+import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.BW;
-import org.openbw.bwapi4j.InteractionHandler;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.WalkPosition;
+import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
@@ -32,120 +29,122 @@ import java.util.Map.Entry;
 
 public class GameState extends GameHandler {
 
-    public Base enemyBase = null;
+    public Area enemyMainArea = null;
+    public Area enemyNaturalArea = null;
+    public Area naturalArea = null;
+    public Base chosenIsland = null;
+    public Base enemyMainBase = null;
+    public Base enemyNaturalBase = null;
+    public Base enemyStartBase = null;
     public boolean defense = false;
     public boolean enemyIsRandom = true;
     public boolean expanding = false;
     public boolean firstProxyBBS = false;
+    public boolean firstScout = true;
+    public boolean iReallyWantToExpand = false;
+    public boolean islandExpand;
     public boolean movingToExpand = false;
     public boolean siegeResearched = false;
+    public Building chosenBuildingLot = null;
+    public Building chosenBuildingRepair = null;
     public BuildingMap map;
     public BuildingMap testMap;
     public ChokePoint mainChoke = null;
+    public ChokePoint naturalChoke = null;
+    public DropShipAgent chosenDropShip;
     public EnemyInfo EI = new EnemyInfo(ih.enemy().getName());
+    public ExtendibleByAddon chosenBuildingAddon = null;
     public Gson enemyInfoJSON = new Gson();
     public InfluenceMap inMap;
     public InfluenceMap inMapUnits;
     public int builtBuildings;
     public int builtCC;
     public int builtRefinery;
+    public int directionScoutMain;
     public int frameCount;
     public int mapSize = 2;
+    public int maxWraiths = 5;
     public int mining;
     public int startCount;
-    public int trainedCombatUnits;
-    public int trainedWorkers;
     public int vulturesTrained = 0;
     public int workerCountToSustain = 0;
     public JFAP simulator;
     public List<Base> blockedBLs = new ArrayList<>();
     public List<Base> BLs = new ArrayList<>();
     public List<Base> EnemyBLs = new ArrayList<>();
-    public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
+    public List<Base> specialBLs = new ArrayList<>();
+    public Map<Base, CommandCenter> CCs = new HashMap<>();
+    public Map<Base, CommandCenter> islandCCs = new HashMap<>();
+    public Map<Base, Neutral> blockedBases = new HashMap<>();
+    public Map<Bunker, Set<Unit>> DBs = new TreeMap<>();
     public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
-    public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
-    public Map<Worker, Position> workerDefenders = new TreeMap<>();
+    public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
+    public Map<Player, Integer> players = new HashMap<>();
+    public Map<Position, MineralPatch> blockingMinerals = new HashMap<>();
     public Map<SCV, Building> repairerTask = new TreeMap<>();
     public Map<SCV, Building> workerTask = new TreeMap<>();
-    public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
-    public Map<Position, MineralPatch> blockingMinerals = new HashMap<>();
-    public Map<Base, CommandCenter> CCs = new HashMap<>();
+    public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
     public Map<String, Squad> squads = new TreeMap<>();
-    public Map<Bunker, Set<Unit>> DBs = new TreeMap<>();
-    public Map<Unit, String> TTMs = new TreeMap<>();
-    public Map<Unit, EnemyBuilding> enemyBuildingMemory = new TreeMap<>();
-    public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
     public Map<Unit, Agent> agents = new TreeMap<>();
+    public Map<Unit, EnemyBuilding> enemyBuildingMemory = new TreeMap<>();
+    public Map<Unit, String> TTMs = new TreeMap<>();
+    public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
+    public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
     public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
-    public Map<Player, Integer> players = new HashMap<>();
+    public Map<Worker, Position> workerDefenders = new TreeMap<>();
+    public MutablePair<Base, Unit> MainCC = null;
     public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
     public MutablePair<String, Unit> chosenMarine = null;
     public Player neutral = null;
-    public Position attackPosition = null;
+    public Position attackPosition;
+    public Position defendPosition = null;
     public Race enemyRace = Race.Unknown;
-    public Area naturalRegion = null;
+    public ResearchingFacility chosenUnitUpgrader = null;
+    public SCV chosenRepairer = null;
+    public Set<Barracks> MBs = new TreeSet<>();
+    public Set<Base> islandBases = new HashSet<>();
     public Set<Base> ScoutSLs = new HashSet<>();
     public Set<Base> SLs = new HashSet<>();
-    public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha", "Bravo", "Charlie", "Delta",
-            "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa",
-            "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "X-Ray", "Yankee", "Zulu"));
+    public Set<Building> buildingLot = new TreeSet<>();
+    public Set<ComsatStation> CSs = new TreeSet<>();
+    public Set<Factory> Fs = new TreeSet<>();
+    public Set<MissileTurret> Ts = new TreeSet<>();
+    public Set<ResearchingFacility> UBs = new TreeSet<>();
+    public Set<Starport> Ps = new TreeSet<>();
     public Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
             "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",
             "In Amber Clad", "Infinity", "Jericho", "Las Vegas", "Lawgiver", "Leviathan", "Long Night of Solace",
             "Matador", "Penance", "Persephone", "Pillar of Autumn", "Pitiless", "Pompadour", "Providence", "Revenant",
             "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
-    public Set<Building> buildingLot = new TreeSet<>();
-    public Set<ComsatStation> CSs = new TreeSet<>();
+    public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha", "Bravo", "Charlie", "Delta",
+            "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa",
+            "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "X-Ray", "Yankee", "Zulu"));
+    public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
-    public Set<Factory> Fs = new TreeSet<>();
-    public Set<Barracks> MBs = new TreeSet<>();
-    public Set<Starport> Ps = new TreeSet<>();
-    public Set<SupplyDepot> SBs = new TreeSet<>();
-    public Set<MissileTurret> Ts = new TreeSet<>();
-    public Set<ResearchingFacility> UBs = new TreeSet<>();
     public Set<Worker> workerIdle = new TreeSet<>();
-    public SupplyMan supplyMan;
+    public SimManager sim;
     public Strategy strat;
+    public SupplyMan supplyMan;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
     public TilePosition chosenBaseLocation = null;
     public TilePosition chosenPosition = null;
     public TilePosition initAttackPosition = null;
     public TilePosition initDefensePosition = null;
-    public Worker chosenBuilderBL = null;
     public TrainingFacility chosenBuilding = null;
-    public ExtendibleByAddon chosenBuildingAddon = null;
-    public Building chosenBuildingLot = null;
-    public Building chosenBuildingRepair = null;
     public Unit chosenBunker = null;
-    public Worker chosenHarasser = null;
-    public SCV chosenRepairer = null;
     public Unit chosenScout = null;
     public Unit chosenUnitToHarass = null;
-    public ResearchingFacility chosenUnitUpgrader = null;
-    public Worker chosenWorker = null;
-    public MutablePair<Base, Unit> MainCC = null;
     public UnitType chosenAddon = null;
     public UnitType chosenToBuild = null;
     public UnitType chosenUnit = null;
     public UpgradeType chosenUpgrade = null;
-    public boolean iReallyWantToExpand = false;
-    public int directionScoutMain;
-    public int maxWraiths = 5;
-    public SimManager sim;
-    public ChokePoint naturalChoke = null;
-    public Position defendPosition = null;
-    public List<Base> specialBLs = new ArrayList<>();
-    public Map<Base, Neutral> blockedBases = new HashMap<>();
-    public Set<Base> islandBases = new HashSet<>();
-    public DropShipAgent chosenDropShip;
-    public Base chosenIsland = null;
+    public Worker chosenBuilderBL = null;
+    public Worker chosenHarasser = null;
+    public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
-    public Map<Base, CommandCenter> islandCCs = new HashMap<>();
-    public boolean islandExpand;
-
 
     public GameState(BW bw, BWEM bwem) {
         super(bw, bwem);
@@ -306,7 +305,7 @@ public class GameState extends GameHandler {
     }
 
     private boolean skipWeirdBlocking(Base b) {
-        if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) {
+        if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) { // Valkyries
             if (b.getLocation().equals(new TilePosition(25, 67)) || b.getLocation().equals(new TilePosition(99, 67))) {
                 return true;
             }
@@ -442,7 +441,7 @@ public class GameState extends GameHandler {
         return (self.supplyTotal() - self.supplyUsed());
     }
 
-    public void debugText() {
+    void debugText() {
         try {
             if (!ConfigManager.getConfig().ecgConfig.debugText) return;
             bw.getMapDrawer().drawTextScreen(320, 5, ColorUtil.formatText(supplyMan.getSupplyUsed() + "/" + supplyMan.getSupplyTotal(), ColorUtil.White));
@@ -461,7 +460,7 @@ public class GameState extends GameHandler {
             } else {
                 bw.getMapDrawer().drawTextScreen(10, 20, ColorUtil.formatText("Scouting: ", ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
             }
-            if (enemyBase != null) {
+            if (enemyMainBase != null) {
                 bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ", ColorUtil.White) + ColorUtil.formatText("Yes", ColorUtil.Green));
             } else {
                 bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ", ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
@@ -479,11 +478,11 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void debugScreen() {
+    void debugScreen() {
         if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
-        if (naturalRegion != null) {
-            print(naturalRegion.getTop().toTilePosition(), Color.RED);
-            for (ChokePoint c : naturalRegion.getChokePoints()) {
+        if (naturalArea != null) {
+            print(naturalArea.getTop().toTilePosition(), Color.RED);
+            for (ChokePoint c : naturalArea.getChokePoints()) {
                 if (c.getGeometry().size() > 2)
                     bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size() - 1).toPosition(), Color.GREEN);
             }
@@ -494,10 +493,11 @@ public class GameState extends GameHandler {
         for (MineralPatch d : blockingMinerals.values()) print(d, Color.RED);
         int counter = 0;
         for (Base b : BLs) {
-            bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), Integer.toString(counter));
+            bw.getMapDrawer().drawTextMap(getCenterFromBuilding(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
             counter++;
         }
-        for (Base b : islandBases) bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), "ISLAND");
+        for (Base b : islandBases)
+            bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
         for (Agent ag : agents.values()) {
             if (ag instanceof VultureAgent) {
                 VultureAgent vulture = (VultureAgent) ag;
@@ -515,14 +515,20 @@ public class GameState extends GameHandler {
                 bw.getMapDrawer().drawTextMap(dropShip.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
             }
         }
-        if (mainChoke != null) bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), "MainChoke");
-        if (naturalChoke != null) bw.getMapDrawer().drawTextMap(naturalChoke.getCenter().toPosition(), "NatChoke");
+        if (enemyStartBase != null)
+            bw.getMapDrawer().drawTextMap(enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));
+        if (enemyNaturalBase != null)
+            bw.getMapDrawer().drawTextMap(enemyNaturalBase.getLocation().toPosition(), ColorUtil.formatText("EnemyNaturalBase", ColorUtil.White));
+        if (mainChoke != null)
+            bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), ColorUtil.formatText("MainChoke", ColorUtil.White));
+        if (naturalChoke != null)
+            bw.getMapDrawer().drawTextMap(naturalChoke.getCenter().toPosition(), ColorUtil.formatText("NatChoke", ColorUtil.White));
         if (chosenBuilderBL != null) {
-            bw.getMapDrawer().drawTextMap(chosenBuilderBL.getPosition(), "BuilderBL");
+            bw.getMapDrawer().drawTextMap(chosenBuilderBL.getPosition(), ColorUtil.formatText("BuilderBL", ColorUtil.White));
             print(chosenBuilderBL, Color.BLUE);
         }
         if (chosenHarasser != null) {
-            bw.getMapDrawer().drawTextMap(chosenHarasser.getPosition(), "Harasser");
+            bw.getMapDrawer().drawTextMap(chosenHarasser.getPosition(), ColorUtil.formatText("Harasser", ColorUtil.White));
             print(chosenHarasser, Color.BLUE);
         }
         if (chosenBaseLocation != null) {
@@ -530,24 +536,25 @@ public class GameState extends GameHandler {
         }
         for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             print(u.getKey(), Color.TEAL);
-            bw.getMapDrawer().drawTextMap(u.getKey().getPosition().subtract(new Position(0, UnitType.Terran_SCV.tileHeight() * 8)), u.getKey().getLastCommand().toString());
-            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "Building " + u.getValue().first.toString());
+            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Building " + u.getValue().first.toString(), ColorUtil.White));
             print(u.getValue().second, u.getValue().first, Color.TEAL);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), getCenterFromBuilding(u.getValue().second.toPosition(), u.getValue().first), Color.RED);
         }
         if (chosenUnitToHarass != null) {
             print(chosenUnitToHarass, Color.RED);
-            bw.getMapDrawer().drawTextMap(chosenUnitToHarass.getPosition(), "UnitToHarass");
+            bw.getMapDrawer().drawTextMap(chosenUnitToHarass.getPosition(), ColorUtil.formatText("UnitToHarass", ColorUtil.White));
         }
         for (SCV r : repairerTask.keySet()) {
             print(r, Color.YELLOW);
-            bw.getMapDrawer().drawTextMap(r.getPosition(), "Repairer");
+            bw.getMapDrawer().drawTextMap(r.getPosition(), ColorUtil.formatText("Repairer", ColorUtil.White));
         }
+        for (EnemyBuilding b : enemyBuildingMemory.values()) print(b.pos, b.type, Color.RED);
         if (chosenScout != null) {
-            bw.getMapDrawer().drawTextMap(chosenScout.getPosition(), "Scouter");
+            bw.getMapDrawer().drawTextMap(chosenScout.getPosition(), ColorUtil.formatText("Scouter", ColorUtil.White));
             print(chosenScout, Color.PURPLE);
         }
-        if (chosenRepairer != null) bw.getMapDrawer().drawTextMap(chosenRepairer.getPosition(), "ChosenRepairer");
+        if (chosenRepairer != null)
+            bw.getMapDrawer().drawTextMap(chosenRepairer.getPosition(), ColorUtil.formatText("ChosenRepairer", ColorUtil.White));
         for (ChokePoint c : bwem.getMap().getChokePoints()) {
             List<WalkPosition> sides = c.getGeometry();
             if (sides.size() == 3) {
@@ -564,13 +571,13 @@ public class GameState extends GameHandler {
         for (Unit u : workerIdle) print(u, Color.ORANGE);
         for (Entry<SCV, Building> u : workerTask.entrySet()) {
             print(u.getKey(), Color.TEAL);
-            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), "Tasked: " + u.getValue().getInitialType().toString());
+            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Tasked: " + u.getValue().getInitialType().toString(), ColorUtil.White));
             print(u.getValue(), Color.TEAL);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
         }
         for (Worker u : workerDefenders.keySet()) {
             print(u, Color.PURPLE);
-            bw.getMapDrawer().drawTextMap(u.getPosition(), "Spartan");
+            bw.getMapDrawer().drawTextMap(u.getPosition(), ColorUtil.formatText("SpartanSCV", ColorUtil.White));
         }
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
             print(u.getKey(), Color.CYAN);
@@ -629,7 +636,7 @@ public class GameState extends GameHandler {
     }
 
     public void initBaseLocations() {
-        Collections.sort(BLs, new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
+        BLs.sort(new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
         if (strat.name.equals("PlasmaWraithHell")) { // Special logic for Plasma
             specialBLs.add(BLs.get(0));
             if (BLs.get(0).getLocation().equals(new TilePosition(77, 63))) { // Start 1
@@ -682,21 +689,6 @@ public class GameState extends GameHandler {
             bunkers.add(u.getKey());
         }
         for (Bunker c : bunkers) DBs.remove(c);
-
-        /*List<Worker> removeMining = new ArrayList<>();
-        for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
-            if (repairerTask.containsKey(w.getKey())) {
-                if (w.getKey().isGatheringMinerals()) {
-                    repairerTask.remove(w.getKey());
-                    continue;
-                }
-                if (((SCV) w.getKey()).isRepairing()) {
-                    mineralsAssigned.put(w.getValue(), mineralsAssigned.get(w.getValue()) - 1);
-                    removeMining.add(w.getKey());
-                }
-            }
-        }
-        for (Worker u : removeMining) workerMining.remove(u);*/
 
         List<Worker> removeGas = new ArrayList<>();
         for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
@@ -781,7 +773,7 @@ public class GameState extends GameHandler {
 
     public void checkMainEnemyBase() {
         if (enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
-            enemyBase = null;
+            enemyMainBase = null;
             chosenScout = null;
             ScoutSLs.clear();
             for (bwem.Base b : BLs) {
@@ -799,10 +791,10 @@ public class GameState extends GameHandler {
     public void initChokes() {
         try {
             // Main choke
-            naturalRegion = BLs.get(1).getArea();
+            naturalArea = BLs.get(1).getArea();
             Area mainRegion = BLs.get(0).getArea();
             double distBest = Double.MAX_VALUE;
-            for (ChokePoint choke : naturalRegion.getChokePoints()) {
+            for (ChokePoint choke : naturalArea.getChokePoints()) {
                 double dist = Util.getGroundDistance(choke.getCenter().toPosition(), getPlayer().getStartLocation().toPosition());
                 if (dist < distBest && dist > 0.0) {
                     mainChoke = choke;
@@ -852,7 +844,7 @@ public class GameState extends GameHandler {
             } else if (bw.getBWMap().mapHash().compareTo("aab66dbf9c85f85c47c219277e1e36181fe5f9fc") != 0) {
                 distBest = Double.MAX_VALUE;
                 Area second = null;
-                for (Area a : naturalRegion.getAccessibleNeighbors()) {
+                for (Area a : naturalArea.getAccessibleNeighbors()) {
                     if (a.getTop().equals(mainRegion.getTop())) continue;
                     WalkPosition center = a.getTop();
                     double dist = center.toPosition().getDistance(bwem.getMap().getData().getMapData().getCenter());
@@ -863,7 +855,7 @@ public class GameState extends GameHandler {
                 }
                 // Find second choke based on the connected area
                 distBest = Double.MAX_VALUE;
-                for (ChokePoint choke : naturalRegion.getChokePoints()) {
+                for (ChokePoint choke : naturalArea.getChokePoints()) {
                     if (choke.getCenter() == mainChoke.getCenter()) continue;
                     if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
                     if (choke.getAreas().getFirst() != second && choke.getAreas().getSecond() != second) continue;
@@ -875,7 +867,7 @@ public class GameState extends GameHandler {
                 }
             } else {
                 distBest = Double.MAX_VALUE;
-                for (ChokePoint choke : naturalRegion.getChokePoints()) {
+                for (ChokePoint choke : naturalArea.getChokePoints()) {
                     if (choke.getCenter().equals(mainChoke.getCenter())) continue;
                     if (choke.isBlocked() || choke.getGeometry().size() <= 3) continue;
                     double dist = choke.getCenter().toPosition().getDistance(self.getStartLocation().toPosition());

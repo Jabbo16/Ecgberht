@@ -23,14 +23,14 @@ public class CheckScout extends Conditional {
             if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).mapSize == 2) {
                 for (Base b : ((GameState) this.handler).SLs) {
                     if (b.equals(((GameState) this.handler).MainCC.first)) continue;
-                    ((GameState) this.handler).enemyBase = b;
+                    ((GameState) this.handler).enemyMainBase = b;
                     return State.FAILURE;
                 }
             }
             if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).mapSize == 2 && ((GameState) this.handler).countUnit(UnitType.Terran_Supply_Depot) == 0) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).getPlayer().supplyUsed() >= 12 && ((GameState) this.handler).enemyBase == null) {
+            if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).getPlayer().supplyUsed() >= 12 && ((GameState) this.handler).enemyMainBase == null) {
                 return State.SUCCESS;
             }
             return State.FAILURE;

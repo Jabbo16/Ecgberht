@@ -20,7 +20,7 @@ public class CheckHarasserAttacked extends Conditional {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).enemyBase == null) {
+            if (((GameState) this.handler).enemyMainBase == null) {
                 ((GameState) this.handler).chosenUnitToHarass = null;
                 ((GameState) this.handler).chosenHarasser = null;
                 return State.FAILURE;
@@ -49,9 +49,9 @@ public class CheckHarasserAttacked extends Conditional {
             }
             if (workers > 1) ((GameState) this.handler).EI.defendHarass = true;
             if (attackers.isEmpty()) {
-                if (!((GameState) this.handler).getGame().getBWMap().isVisible(((GameState) this.handler).enemyBase.getLocation()) &&
+                if (!((GameState) this.handler).getGame().getBWMap().isVisible(((GameState) this.handler).enemyMainBase.getLocation()) &&
                         ((GameState) this.handler).chosenUnitToHarass == null) {
-                    ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyBase.getLocation().toPosition());
+                    ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyMainBase.getLocation().toPosition());
                 }
                 return State.SUCCESS;
             } else {

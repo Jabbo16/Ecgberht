@@ -16,7 +16,7 @@ public class Explore extends Conditional {
     @Override
     public State execute() { // TODO improve
         try {
-            if (((GameState) this.handler).enemyBase == null) {
+            if (((GameState) this.handler).enemyMainBase == null) {
                 ((GameState) this.handler).chosenUnitToHarass = null;
                 ((GameState) this.handler).chosenHarasser = null;
                 return State.FAILURE;
@@ -24,11 +24,11 @@ public class Explore extends Conditional {
             if (((GameState) this.handler).directionScoutMain == 0) {
                 ((GameState) this.handler).directionScoutMain = 1;
             }
-            /*Base enemyBase = ((GameState) this.handler).enemyBase;
-            Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(enemyBase.getLocation());
+            /*Base enemyMainBase = ((GameState) this.handler).enemyMainBase;
+            Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(enemyMainBase.getLocation());
             Area harasserArea = ((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenHarasser.getTilePosition());
             if (harasserArea != null && enemyArea != null && !harasserArea.equals(enemyArea)) {
-                ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyBase.getLocation().toPosition());
+                ((GameState) this.handler).chosenHarasser.move(((GameState) this.handler).enemyMainBase.getLocation().toPosition());
                 return State.SUCCESS;
             }*/
             Position nextExplorePos = chooseExplorePos();
@@ -55,7 +55,7 @@ public class Explore extends Conditional {
         int BaseSize = 10 * 32;
         int Xlocation = 0;
         int Ylocation = 0;
-        Base enemyBase = ((GameState) this.handler).enemyBase;
+        Base enemyBase = ((GameState) this.handler).enemyMainBase;
         if (((GameState) this.handler).directionScoutMain == 1) {
             Xlocation = enemyBase.getLocation().toPosition().getX() + BaseSize;
             Ylocation = enemyBase.getLocation().toPosition().getY() + BaseSize;

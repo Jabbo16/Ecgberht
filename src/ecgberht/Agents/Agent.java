@@ -41,7 +41,7 @@ public abstract class Agent {
             Position attackPos = new TilePosition(p.second, p.first).toPosition();
             if (getGs().getGame().getBWMap().isValidPosition(attackPos)) return attackPos;
         }
-        if (getGs().enemyBase != null) return getGs().enemyBase.getLocation().toPosition();
+        if (getGs().enemyMainBase != null) return getGs().enemyMainBase.getLocation().toPosition();
         return null;
     }
 

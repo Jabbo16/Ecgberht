@@ -38,8 +38,8 @@ public class CheckScan extends Conditional {
                 if (((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
-                if (((GameState) this.handler).enemyBase != null) {
-                    if (((GameState) this.handler).enemyBase.getLocation().equals(b.getLocation())) {
+                if (((GameState) this.handler).enemyMainBase != null) {
+                    if (((GameState) this.handler).enemyMainBase.getLocation().equals(b.getLocation())) {
                         continue;
                     }
                 }

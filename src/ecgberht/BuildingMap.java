@@ -429,8 +429,8 @@ public class BuildingMap implements Cloneable {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
                     if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
                         Area area = bwem.getMap().getArea(new TilePosition(jj, ii));
-                        if (area != null && area.equals(getGs().naturalRegion) && !expandBunker) continue;
-                        if (area != null && !area.equals(getGs().naturalRegion) && expandBunker) continue;
+                        if (area != null && area.equals(getGs().naturalArea) && !expandBunker) continue;
+                        if (area != null && !area.equals(getGs().naturalArea) && expandBunker) continue;
                         if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
@@ -484,7 +484,7 @@ public class BuildingMap implements Cloneable {
             for (int jj = (y - j); jj <= (y + j); jj++) {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
                     if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
-                        if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalRegion)) continue;
+                        if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalArea)) continue;
                         if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter().toPosition());

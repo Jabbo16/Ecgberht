@@ -3,6 +3,7 @@ package ecgberht.BehaviourTrees.Build;
 import bwem.Base;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -12,7 +13,6 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
-import ecgberht.Util.MutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,22 +77,24 @@ public class ChoosePosition extends Action {
                             continue;
                         }
                     }
-                    for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null ||
-                                !(u instanceof Attacker) || u instanceof Worker) {
-                            continue;
+                    if (b.getArea() != ((GameState) this.handler).naturalArea) {
+                        for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
+                            if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null ||
+                                    !(u instanceof Attacker) || u instanceof Worker) {
+                                continue;
+                            }
+                            if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
+                                remove.add(b);
+                                break;
+                            }
                         }
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
-                            remove.add(b);
-                            break;
-                        }
-                    }
-                    for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
+                        for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
+                            if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
 
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
-                            remove.add(b);
-                            break;
+                            if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
+                                remove.add(b);
+                                break;
+                            }
                         }
                     }
                 }

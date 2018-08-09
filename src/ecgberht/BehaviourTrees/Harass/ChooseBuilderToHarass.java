@@ -25,9 +25,9 @@ public class ChooseBuilderToHarass extends Action {
             }*/
             for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
                 Unit aux = null;
-                if (((GameState) this.handler).enemyBase != null) {
+                if (((GameState) this.handler).enemyMainBase != null) {
                     if (u instanceof SCV && ((SCV) u).isConstructing()) {
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).enemyBase.getLocation()))) {
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).enemyMainBase.getLocation()))) {
                             if (((SCV) u).getBuildType().canProduce()) {
                                 ((GameState) this.handler).chosenUnitToHarass = u;
                                 return State.SUCCESS;

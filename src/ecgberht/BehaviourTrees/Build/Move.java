@@ -38,7 +38,7 @@ public class Move extends Action {
                     }
                 }
                 if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                    if (((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenPosition).equals(((GameState) this.handler).naturalRegion)) {
+                    if (((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenPosition).equals(((GameState) this.handler).naturalArea)) {
                         if (((GameState) this.handler).naturalChoke != null) {
                             ((GameState) this.handler).defendPosition = ((GameState) this.handler).naturalChoke.getCenter().toPosition();
                         }

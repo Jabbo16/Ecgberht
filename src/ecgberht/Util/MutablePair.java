@@ -2,6 +2,7 @@ package ecgberht.Util;
 
 import java.util.Objects;
 
+// Thanks to @adakitesystems for this class
 public class MutablePair<K, V> {
 
     public K first;

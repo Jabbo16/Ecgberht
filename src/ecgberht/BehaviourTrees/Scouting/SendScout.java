@@ -22,7 +22,7 @@ public class SendScout extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).enemyBase == null) {
+            if (((GameState) this.handler).enemyMainBase == null) {
                 if (!((GameState) this.handler).ScoutSLs.isEmpty()) {
                     List<Base> aux = new ArrayList<>();
                     for (Base b : ((GameState) this.handler).ScoutSLs) {

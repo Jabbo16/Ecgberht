@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
+import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -11,8 +12,6 @@ import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.HashSet;
 import java.util.List;
-
-//import ecgberht.BaseLocationComparator;
 
 public class CheckEnemyBaseVisible extends Action {
 
@@ -27,7 +26,7 @@ public class CheckEnemyBaseVisible extends Action {
             if (!enemies.isEmpty()) {
                 for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
                     if (((GameState) this.handler).broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
-                        ((GameState) this.handler).enemyBase = Util.getClosestBaseLocation(u.pos.toPosition());
+                        ((GameState) this.handler).enemyMainBase = Util.getClosestBaseLocation(u.pos.toPosition());
                         ((GameState) this.handler).ScoutSLs = new HashSet<>();
                         if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
                             ((GameState) this.handler).addToSquad(((GameState) this.handler).chosenScout);
@@ -39,7 +38,13 @@ public class CheckEnemyBaseVisible extends Action {
                         ((GameState) this.handler).playSound("gear.mp3");
                         ((GameState) this.handler).EnemyBLs.clear();
                         ((GameState) this.handler).EnemyBLs.addAll(((GameState) this.handler).BLs);
-                        //((GameState)this.handler).EnemyBLs.sort(new BaseLocationComparator(true));
+                        ((GameState) this.handler).EnemyBLs.sort(new BaseLocationComparator(((GameState) this.handler).enemyMainBase));
+                        if (((GameState) this.handler).firstScout) {
+                            ((GameState) this.handler).enemyStartBase = ((GameState) this.handler).enemyMainBase;
+                            ((GameState) this.handler).enemyMainArea = ((GameState) this.handler).enemyStartBase.getArea();
+                            ((GameState) this.handler).enemyNaturalBase = ((GameState) this.handler).EnemyBLs.get(1);
+                            ((GameState) this.handler).enemyNaturalArea = ((GameState) this.handler).enemyNaturalBase.getArea();
+                        }
                         return State.SUCCESS;
                     }
                 }

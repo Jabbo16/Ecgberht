@@ -19,9 +19,9 @@ public class ChooseBuildingToHarass extends Action {
                 return State.FAILURE;
             }
             for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                if (((GameState) this.handler).enemyBase != null) {
+                if (((GameState) this.handler).enemyMainBase != null) {
                     if (u.type.isBuilding()) {
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).enemyBase.getLocation()))) {
+                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).enemyMainBase.getLocation()))) {
                             ((GameState) this.handler).chosenUnitToHarass = u.unit;
                             return State.SUCCESS;
                         }

@@ -2,6 +2,7 @@ package ecgberht;
 
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.Util.ColorUtil;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
@@ -10,10 +11,7 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
@@ -77,21 +75,25 @@ public class Squad implements Comparable<Squad> {
                         ((Firebat) u).stimPack();
                     }
                 }
-                if (u instanceof SiegeTank) {
+                if (u instanceof SiegeTank) { // TODO unsiege if enemies are close enough
                     SiegeTank t = (SiegeTank) u;
                     if (t.isSieged() && u.getOrder() == Order.Unsieging) continue;
                     if (!t.isSieged() && u.getOrder() == Order.Sieging) continue;
                     if (status == Status.IDLE && t.isSieged()) return;
                     boolean found = false;
+                    boolean close = false;
                     for (Unit e : enemy) {
                         if (e.isFlying() || e instanceof Worker) continue;
                         double distance = u.getDistance(e);
-                        if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
+                        if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
                             found = true;
-                            break;
                         }
+                        if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) {
+                            close = true;
+                        }
+                        if (found && close) break;
                     }
-                    if (found) {
+                    if (found && !close) {
                         if (!t.isSieged() && t.getOrder() != Order.Sieging) {
                             t.siege();
                             continue;
@@ -123,7 +125,7 @@ public class Squad implements Comparable<Squad> {
                         WeaponType weapon = Util.getWeapon(u.getInitialType());
                         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
                         if (u.getOrder() == Order.AttackMove || u.getOrder() == Order.HealMove) {
-                            if (u.getDistance(move) <= range)
+                            if (u.getDistance(move) <= range * ((double) (new Random().nextInt((10 + 1) - 6) + 6)) / 10.0)
                                 if (u instanceof SiegeTank && !((SiegeTank) u).isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
                                     ((SiegeTank) u).siege();
                                 } else ((MobileUnit) u).stop(false);

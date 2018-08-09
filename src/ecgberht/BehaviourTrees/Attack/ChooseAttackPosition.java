@@ -3,11 +3,11 @@ package ecgberht.BehaviourTrees.Attack;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
+import ecgberht.Util.MutablePair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
-import ecgberht.Util.MutablePair;
 
 public class ChooseAttackPosition extends Action {
 
@@ -36,12 +36,12 @@ public class ChooseAttackPosition extends Action {
                         continue;
                     }
                 }
-                if (((GameState) this.handler).enemyBase != null) {
+                if (((GameState) this.handler).enemyMainBase != null) {
                     if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
                         ((GameState) this.handler).firstProxyBBS = true;
                         ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");
                     }
-                    u.giveAttackOrder(((GameState) this.handler).enemyBase.getLocation().toPosition());
+                    u.giveAttackOrder(((GameState) this.handler).enemyMainBase.getLocation().toPosition());
                     u.status = Status.ATTACK;
                     continue;
                 } else {

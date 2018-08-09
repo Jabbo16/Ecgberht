@@ -2,11 +2,11 @@ package ecgberht.Agents;
 
 import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.Util.MutablePair;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
-import ecgberht.Util.MutablePair;
 
 import java.util.Objects;
 import java.util.Set;
