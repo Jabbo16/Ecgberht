@@ -60,26 +60,18 @@ public class BuildingMap implements Cloneable {
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
                 TilePosition x = new TilePosition(ii, jj);
-                if (bw.getBWMap().isBuildable(x, false)) {
-                    map[jj][ii] = "6";
-                } else {
-                    map[jj][ii] = "0";
-                }
+                if (bw.getBWMap().isBuildable(x, false)) map[jj][ii] = "6";
+                else map[jj][ii] = "0";
             }
         }
         // Finds minerals and geysers
         for (MineralPatch resource : bw.getMineralPatches()) {
             TilePosition resourceTile = resource.getTilePosition();
-
             TilePosition resourceSize = resource.getInitialType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
                 for (int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
-                    if (i < 0 || i >= height || j < 0 || j >= width) {
-                        continue;
-                    }
-                    if (map[i][j] != "V") {
-                        map[i][j] = "M";
-                    }
+                    if (i < 0 || i >= height || j < 0 || j >= width) continue;
+                    if (!map[i][j].equals("V")) map[i][j] = "M";
                 }
             }
         }
@@ -88,9 +80,7 @@ public class BuildingMap implements Cloneable {
             TilePosition resourceSize = resource.getInitialType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
                 for (int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
-                    if (i < 0 || i >= height || j < 0 || j >= width) {
-                        continue;
-                    }
+                    if (i < 0 || i >= height || j < 0 || j >= width) continue;
                     map[i][j] = "V";
                 }
             }
@@ -100,9 +90,7 @@ public class BuildingMap implements Cloneable {
                 TilePosition starting = b.getLocation();
                 for (int i = starting.getY(); i < starting.getY() + UnitType.Terran_Command_Center.tileHeight(); i++) {
                     for (int j = starting.getX(); j < starting.getX() + UnitType.Terran_Command_Center.tileWidth(); j++) {
-                        if (i < 0 || i >= height || j < 0 || j >= width) {
-                            continue;
-                        }
+                        if (i < 0 || i >= height || j < 0 || j >= width) continue;
                         map[i][j] = "E";
                     }
                 }
@@ -116,142 +104,81 @@ public class BuildingMap implements Cloneable {
     }
 
     // Fills the map with the correct values for each tile
-    public String[][] fillMap(String[][] map) {
+    private String[][] fillMap(String[][] map) {
         int height = map.length;
         int width = map[0].length;
         for (int jj = height - 1; jj >= 0; jj--) {
-            if (map[jj][width - 1] != "M" && map[jj][width - 1] != "V" && map[jj][width - 1] != "0" && map[jj][width - 1] != "E" && map[jj][width - 1] != "B") {
-                if (jj == this.height - 1 || width - 1 == this.width - 1) {
-                    map[jj][width - 1] = "1";
-                }
+            if (!map[jj][width - 1].equals("M") && !map[jj][width - 1].equals("V") && !map[jj][width - 1].equals("0")
+                    && !map[jj][width - 1].equals("E") && !map[jj][width - 1].equals("B")
+                    && (jj == this.height - 1 || width - 1 == this.width - 1)) {
+                map[jj][width - 1] = "1";
             }
         }
         for (int ii = width - 1; ii >= 0; ii--) {
-            if (map[height - 1][ii] != "M" && map[height - 1][ii] != "V" && map[height - 1][ii] != "0" && map[height - 1][ii] != "E" && map[height - 1][ii] != "B") {
-                if (height - 1 == this.height - 1 || ii == this.width - 1) {
-                    map[height - 1][ii] = "1";
-                }
+            if (!map[height - 1][ii].equals("M") && !map[height - 1][ii].equals("V") && !map[height - 1][ii].equals("0")
+                    && !map[height - 1][ii].equals("E") && !map[height - 1][ii].equals("B")
+                    && (height - 1 == this.height - 1 || ii == this.width - 1)) {
+                map[height - 1][ii] = "1";
             }
         }
         // Sets to "B" adjacent tiles to 0,M,V by the left and top with value "6"
         for (int jj = height - 1; jj >= 0; jj--) {
             for (int ii = width - 1; ii >= 0; ii--) {
-                if (map[jj][ii] == "E" || map[jj][ii] == "M" || map[jj][ii] == "V") {
-                    if (jj - 1 >= 0) {
-                        if (map[jj - 1][ii] == "6") {
-                            map[jj - 1][ii] = "B";
-                        }
-                    }
-                    if (ii - 1 >= 0) {
-                        if (map[jj][ii - 1] == "6") {
-                            map[jj][ii - 1] = "B";
-                        }
-                    }
-                    if (jj - 1 >= 0 && ii - 1 >= 0) {
-                        if (map[jj - 1][ii - 1] == "6") {
-                            map[jj - 1][ii - 1] = "B";
-                        }
-                    }
-                    if (jj + 1 < height) {
-                        if (map[jj + 1][ii] == "6") {
-                            map[jj + 1][ii] = "B";
-                        }
-                    }
-                    if (ii + 1 < width) {
-                        if (map[jj][ii + 1] == "6") {
-                            map[jj][ii + 1] = "B";
-                        }
-                    }
-                    if (jj + 1 < height && ii + 1 < width) {
-                        if (map[jj + 1][ii + 1] == "6") {
-                            map[jj + 1][ii + 1] = "B";
-                        }
-                    }
-                    if (jj - 1 >= 0 && ii + 1 < width) {
-                        if (map[jj - 1][ii + 1] == "6") {
-                            map[jj - 1][ii + 1] = "B";
-                        }
-                    }
-                    if (jj + 1 < height && ii - 1 >= 0) {
-                        if (map[jj + 1][ii - 1] == "6") {
-                            map[jj + 1][ii - 1] = "B";
-                        }
-                    }
+                if (map[jj][ii].equals("E") || map[jj][ii].equals("M") || map[jj][ii].equals("V")) {
+                    if (jj - 1 >= 0 && map[jj - 1][ii].equals("6")) map[jj - 1][ii] = "B";
+                    if (ii - 1 >= 0 && map[jj][ii - 1].equals("6")) map[jj][ii - 1] = "B";
+                    if (jj - 1 >= 0 && ii - 1 >= 0 && map[jj - 1][ii - 1].equals("6")) map[jj - 1][ii - 1] = "B";
+                    if (jj + 1 < height && map[jj + 1][ii].equals("6")) map[jj + 1][ii] = "B";
+                    if (ii + 1 < width && map[jj][ii + 1].equals("6")) map[jj][ii + 1] = "B";
+                    if (jj + 1 < height && ii + 1 < width && map[jj + 1][ii + 1].equals("6")) map[jj + 1][ii + 1] = "B";
+                    if (jj - 1 >= 0 && ii + 1 < width && map[jj - 1][ii + 1].equals("6")) map[jj - 1][ii + 1] = "B";
+                    if (jj + 1 < height && ii - 1 >= 0 && map[jj + 1][ii - 1].equals("6")) map[jj + 1][ii - 1] = "B";
                 }
             }
         }
         for (int jj = height - 1; jj > 0; jj--) {
             for (int ii = width - 1; ii > 0; ii--) {
-                if (map[jj][ii] == "B" || map[jj][ii] == "0" || map[jj][ii] == "M" || map[jj][ii] == "V" || map[jj][ii] == "E") {
-                    if (map[jj - 1][ii] == "6") {
-                        map[jj - 1][ii] = "1";
-                    }
-                    if (map[jj][ii - 1] == "6") {
-                        map[jj][ii - 1] = "1";
-                    }
-                    if (map[jj - 1][ii - 1] == "6") {
-                        map[jj - 1][ii - 1] = "1";
-                    }
+                if (map[jj][ii].equals("B") || map[jj][ii].equals("0") || map[jj][ii].equals("M")
+                        || map[jj][ii].equals("V") || map[jj][ii].equals("E")) {
+                    if (map[jj - 1][ii].equals("6")) map[jj - 1][ii] = "1";
+                    if (map[jj][ii - 1].equals("6")) map[jj][ii - 1] = "1";
+                    if (map[jj - 1][ii - 1].equals("6")) map[jj - 1][ii - 1] = "1";
                 }
             }
         }
         for (int jj = height - 1; jj > 0; jj--) {
             for (int ii = width - 1; ii > 0; ii--) {
-                if (map[jj][ii] == "1") {
-                    if (map[jj - 1][ii] == "6") {
-                        map[jj - 1][ii] = "2";
-                    }
-                    if (map[jj][ii - 1] == "6") {
-                        map[jj][ii - 1] = "2";
-                    }
-                    if (map[jj - 1][ii - 1] == "6") {
-                        map[jj - 1][ii - 1] = "2";
-                    }
+                if (map[jj][ii].equals("1")) {
+                    if (map[jj - 1][ii].equals("6")) map[jj - 1][ii] = "2";
+                    if (map[jj][ii - 1].equals("6")) map[jj][ii - 1] = "2";
+                    if (map[jj - 1][ii - 1].equals("6")) map[jj - 1][ii - 1] = "2";
                 }
             }
         }
         for (int jj = height - 1; jj > 0; jj--) {
             for (int ii = width - 1; ii > 0; ii--) {
-                if (map[jj][ii] == "2") {
-                    if (map[jj - 1][ii] == "6") {
-                        map[jj - 1][ii] = "3";
-                    }
-                    if (map[jj][ii - 1] == "6") {
-                        map[jj][ii - 1] = "3";
-                    }
-                    if (map[jj - 1][ii - 1] == "6") {
-                        map[jj - 1][ii - 1] = "3";
-                    }
+                if (map[jj][ii].equals("2")) {
+                    if (map[jj - 1][ii].equals("6")) map[jj - 1][ii] = "3";
+                    if (map[jj][ii - 1].equals("6")) map[jj][ii - 1] = "3";
+                    if (map[jj - 1][ii - 1].equals("6")) map[jj - 1][ii - 1] = "3";
                 }
             }
         }
         for (int jj = height - 1; jj > 0; jj--) {
             for (int ii = width - 1; ii > 0; ii--) {
-                if (map[jj][ii] == "3") {
-                    if (map[jj - 1][ii] == "6") {
-                        map[jj - 1][ii] = "4";
-                    }
-                    if (map[jj][ii - 1] == "6") {
-                        map[jj][ii - 1] = "4";
-                    }
-                    if (map[jj - 1][ii - 1] == "6") {
-                        map[jj - 1][ii - 1] = "4";
-                    }
+                if (map[jj][ii].equals("3")) {
+                    if (map[jj - 1][ii].equals("6")) map[jj - 1][ii] = "4";
+                    if (map[jj][ii - 1].equals("6")) map[jj][ii - 1] = "4";
+                    if (map[jj - 1][ii - 1].equals("6")) map[jj - 1][ii - 1] = "4";
                 }
             }
         }
         for (int jj = height - 1; jj > 0; jj--) {
             for (int ii = width - 1; ii > 0; ii--) {
-                if (map[jj][ii] == "4") {
-                    if (map[jj - 1][ii] == "6") {
-                        map[jj - 1][ii] = "5";
-                    }
-                    if (map[jj][ii - 1] == "6") {
-                        map[jj][ii - 1] = "5";
-                    }
-                    if (map[jj - 1][ii - 1] == "6") {
-                        map[jj - 1][ii - 1] = "5";
-                    }
+                if (map[jj][ii].equals("4")) {
+                    if (map[jj - 1][ii].equals("6")) map[jj - 1][ii] = "5";
+                    if (map[jj][ii - 1].equals("6")) map[jj][ii - 1] = "5";
+                    if (map[jj - 1][ii - 1].equals("6")) map[jj - 1][ii - 1] = "5";
                 }
             }
         }
@@ -266,28 +193,18 @@ public class BuildingMap implements Cloneable {
         //Updates the map with the next building to be built
         for (int i = position.getY() - 1; i < position.getY() + tamY + 1; i++) {
             for (int j = position.getX() - 1; j < position.getX() + tamX + 1; j++) {
-                if (i < 0 || i >= height || j < 0 || j >= width) {
-                    continue;
-                }
+                if (i < 0 || i >= height || j < 0 || j >= width) continue;
                 if (destroyed) {
-                    if (i == position.getY() - 1 || i == position.getY() + tamY || j == position.getX() - 1 || j == position.getX() + tamX) {
-                        if (map[i][j] != "0") {
-                            map[i][j] = "6";
-                        }
-                    } else {
-                        if (map[i][j] != "V") {
-                            map[i][j] = "6";
-                        }
-                    }
-                } else {
-                    if (i != position.getY() - 1 && i != position.getY() + tamY && j != position.getX() - 1 && j != position.getX() + tamX) {
-                        if (map[i][j] != "M" && map[i][j] != "V" && map[i][j] != "0" && map[i][j] != "E" && map[i][j] != "B") {
-                            if (building == UnitType.Terran_Bunker) {
-                                map[i][j] = "0";
-                            } else {
-                                map[i][j] = "E";
-                            }
-                        }
+                    if (i == position.getY() - 1 || i == position.getY() + tamY || j == position.getX() - 1
+                            || j == position.getX() + tamX) {
+                        if (!map[i][j].equals("0")) map[i][j] = "6";
+                    } else if (!map[i][j].equals("V")) map[i][j] = "6";
+                } else if (i != position.getY() - 1 && i != position.getY() + tamY && j != position.getX() - 1
+                        && j != position.getX() + tamX) {
+                    if (!map[i][j].equals("M") && !map[i][j].equals("V") && !map[i][j].equals("0")
+                            && !map[i][j].equals("E") && !map[i][j].equals("B")) {
+                        if (building == UnitType.Terran_Bunker) map[i][j] = "0";
+                        else map[i][j] = "E";
                     }
                 }
             }
@@ -295,24 +212,17 @@ public class BuildingMap implements Cloneable {
         if (building.canBuildAddon()) {
             for (int i = position.getY() + tamY; i > position.getY() + tamY - 4; i--) {
                 for (int j = position.getX() + tamX - 1; j < position.getX() + tamX + 3; j++) {
-                    if (i < 0 || i >= height || j < 0 || j >= width) {
-                        continue;
-                    }
+                    if (i < 0 || i >= height || j < 0 || j >= width) continue;
                     if (destroyed) {
-                        if (i == position.getY() + tamY - 3 || i == position.getY() + tamY || j == position.getX() + tamX + 2 || j == position.getX() + tamX - 1) {
-                            if (map[i][j] != "0") {
-                                map[i][j] = "6";
-                            }
-                        } else {
-                            if (map[i][j] != "V") {
-                                map[i][j] = "6";
-                            }
-                        }
-                    } else {
-                        if (i != position.getY() + tamY - 3 && i != position.getY() + tamY && j != position.getX() + tamX + 2 && j != position.getX() + tamX - 1) {
-                            if (map[i][j] != "M" && map[i][j] != "V" && map[i][j] != "0" && map[i][j] != "E" && map[i][j] != "B") {
-                                map[i][j] = "E";
-                            }
+                        if (i == position.getY() + tamY - 3 || i == position.getY() + tamY
+                                || j == position.getX() + tamX + 2 || j == position.getX() + tamX - 1) {
+                            if (!map[i][j].equals("0")) map[i][j] = "6";
+                        } else if (!map[i][j].equals("V")) map[i][j] = "6";
+                    } else if (i != position.getY() + tamY - 3 && i != position.getY() + tamY
+                            && j != position.getX() + tamX + 2 && j != position.getX() + tamX - 1) {
+                        if (!map[i][j].equals("M") && !map[i][j].equals("V") && !map[i][j].equals("0")
+                                && !map[i][j].equals("E") && !map[i][j].equals("B")) {
+                            map[i][j] = "E";
                         }
                     }
                 }
@@ -320,33 +230,24 @@ public class BuildingMap implements Cloneable {
         }
         // Finds the corners around the building
         int init_i = 0;
-        if (position.getY() - height > 0) {
-            init_i = position.getY() - height;
-        }
-        int fin_i = height;
-        if (position.getY() + tamY + height < height) {
-            fin_i = position.getY() + tamY + height;
-        }
+        if (position.getY() - height > 0) init_i = position.getY() - height;
+        int end_i = height;
+        if (position.getY() + tamY + height < height) end_i = position.getY() + tamY + height;
         int init_j = 0;
-        if (position.getX() - width > 0) {
-            init_j = position.getX() - width;
-        }
+        if (position.getX() - width > 0) init_j = position.getX() - width;
         int fin_j = width;
-        if (position.getX() + tamX + width < width) {
-            fin_j = position.getX() + tamX + width;
-        }
+        if (position.getX() + tamX + width < width) fin_j = position.getX() + tamX + width;
         // Generates a submatrix as a portion of the map delimited by the corners and resets the 1,2,3 values for 4
-        String[][] submap = new String[fin_i - init_i][fin_j - init_j];
+        String[][] submap = new String[end_i - init_i][fin_j - init_j];
         int i = 0;
-        int j = 0;
-        for (int ii = init_i; ii < fin_i; ii++) {
+        int j;
+        for (int ii = init_i; ii < end_i; ii++) {
             j = 0;
             for (int jj = init_j; jj < fin_j; jj++) {
-                if (map[ii][jj] == "M" || map[ii][jj] == "V" || map[ii][jj] == "0" || map[ii][jj] == "E" || map[ii][jj] == "B") {
+                if (map[ii][jj].equals("M") || map[ii][jj].equals("V") || map[ii][jj].equals("0")
+                        || map[ii][jj].equals("E") || map[ii][jj].equals("B")) {
                     submap[i][j] = map[ii][jj];
-                } else {
-                    submap[i][j] = "6";
-                }
+                } else submap[i][j] = "6";
                 j++;
             }
             i++;
@@ -354,8 +255,7 @@ public class BuildingMap implements Cloneable {
         submap = fillMap(submap);
         // Updates the map using the submatrix
         i = 0;
-        j = 0;
-        for (int ii = init_i; ii < fin_i; ii++) {
+        for (int ii = init_i; ii < end_i; ii++) {
             j = 0;
             for (int jj = init_j; jj < fin_j; jj++) {
                 map[ii][jj] = submap[i][j];
@@ -380,20 +280,20 @@ public class BuildingMap implements Cloneable {
         int i = 2;
         int j = 2;
         boolean control = false;
-
         // Finds the first valid tileposition starting around the given tileposition
         while (!control) {
             for (int ii = (x - i); ii <= (x + i); ii++) {
                 for (int jj = (y - j); jj <= (y + j); jj++) {
                     if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-                        if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
+                        if ((!map[ii][jj].equals("M") && !map[ii][jj].equals("V") && !map[ii][jj].equals("E")
+                                && !map[ii][jj].equals("B")) && Integer.parseInt(map[ii][jj]) >= size) {
                             if (buildingType == UnitType.Terran_Bunker) {
                                 Area bunk = bwem.getMap().getArea(new TilePosition(jj, ii));
                                 if (bunk != null && !bunk.equals(bwem.getMap().getArea(self.getStartLocation()))) {
                                     continue;
                                 }
                             }
-                            if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), buildingType)) {
+                            if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), buildingType)) {
                                 coord[0] = ii;
                                 coord[1] = jj;
                                 control = true;
@@ -427,11 +327,12 @@ public class BuildingMap implements Cloneable {
         for (int ii = (x - i); ii <= (x + i); ii++) {
             for (int jj = (y - j); jj <= (y + j); jj++) {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-                    if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
+                    if ((!map[ii][jj].equals("M") && !map[ii][jj].equals("V") && !map[ii][jj].equals("E")
+                            && !map[ii][jj].equals("B")) && Integer.parseInt(map[ii][jj]) >= size) {
                         Area area = bwem.getMap().getArea(new TilePosition(jj, ii));
                         if (area != null && area.equals(getGs().naturalArea) && !expandBunker) continue;
                         if (area != null && !area.equals(getGs().naturalArea) && expandBunker) continue;
-                        if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
+                        if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
                             if (position == null || newDist < dist) {
@@ -451,21 +352,18 @@ public class BuildingMap implements Cloneable {
             Position topLeft = new Position(BL.getX() * TilePosition.SIZE_IN_PIXELS, BL.getY() * TilePosition.SIZE_IN_PIXELS);
             Position bottomRight = new Position(topLeft.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, topLeft.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
             List<Unit> blockers = Util.getUnitsInRectangle(topLeft, bottomRight); // Test
-            if (blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) return true;
-            if (blockers.isEmpty()) return false;
-            if (blockers.size() > 1) return true;
+            if (blockers.isEmpty() && !getGs().getGame().canBuildHere(BL, type)) return false;
+            if (blockers.isEmpty()) return true;
+            if (blockers.size() > 1) return false;
             else {
                 Unit blocker = blockers.get(0);
-                if (blocker instanceof PlayerUnit && ((PlayerUnit) blocker).getPlayer().getId() == self.getId() && blocker instanceof Worker &&
-                        ((Worker) blocker).getBuildType() == type) {
-                    return false;
-                }
+                return blocker instanceof PlayerUnit && ((PlayerUnit) blocker).getPlayer().getId() == self.getId() && blocker instanceof Worker &&
+                        ((Worker) blocker).getBuildType() == type;
             }
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
+        return false;
     }
 
     public TilePosition findBunkerPositionAntiPool() {
@@ -483,9 +381,10 @@ public class BuildingMap implements Cloneable {
         for (int ii = (x - i); ii <= (x + i); ii++) {
             for (int jj = (y - j); jj <= (y + j); jj++) {
                 if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-                    if ((map[ii][jj] != "M" && map[ii][jj] != "V" && map[ii][jj] != "E" && map[ii][jj] != "B") && Integer.parseInt(map[ii][jj]) >= size) {
+                    if ((!map[ii][jj].equals("M") && !map[ii][jj].equals("V") && !map[ii][jj].equals("E")
+                            && !map[ii][jj].equals("B")) && Integer.parseInt(map[ii][jj]) >= size) {
                         if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalArea)) continue;
-                        if (!checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
+                        if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             double newDist = getGs().broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter().toPosition());
                             if (bunkerPlace == null || newDist < dist) {
@@ -508,9 +407,7 @@ public class BuildingMap implements Cloneable {
             for (int ii = 0; ii < height; ii++) {
                 for (int jj = 0; jj < width; jj++) {
                     try {
-                        if (sw != null) {
-                            sw.write(map[ii][jj]);
-                        }
+                        sw.write(map[ii][jj]);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

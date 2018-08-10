@@ -19,12 +19,11 @@ public class ChooseNothingBuilding extends Action {
     @Override
     public State execute() {
         try {
-
             // Bio Builds and no Stim
             boolean stim = ((GameState) this.handler).strat.techToResearch.contains(TechType.Stim_Packs);
             if (stim && !((GameState) this.handler).getPlayer().hasResearched(TechType.Stim_Packs) &&
                     !((GameState) this.handler).getPlayer().isResearching(TechType.Stim_Packs)
-                    && (int) ((GameState) this.handler).UBs.stream().filter(u -> u instanceof Academy).count() >= 1 ) {
+                    && (int) ((GameState) this.handler).UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
                 ((GameState) this.handler).chosenToBuild = UnitType.None;
                 return State.SUCCESS;
             }

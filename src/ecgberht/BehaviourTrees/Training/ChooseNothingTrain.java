@@ -6,6 +6,7 @@ import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.Factory;
 import org.openbw.bwapi4j.unit.MachineShop;
 
@@ -18,7 +19,15 @@ public class ChooseNothingTrain extends Action {
     @Override
     public State execute() {
         try {
-            // Mech builds and no siege // TODO test
+            // Bio Builds and no Stim
+            boolean stim = ((GameState) this.handler).strat.techToResearch.contains(TechType.Stim_Packs);
+            if (stim && !((GameState) this.handler).getPlayer().hasResearched(TechType.Stim_Packs) &&
+                    !((GameState) this.handler).getPlayer().isResearching(TechType.Stim_Packs)
+                    && (int) ((GameState) this.handler).UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
+                ((GameState) this.handler).chosenUnit = UnitType.None;
+                return State.SUCCESS;
+            }
+            // Mech builds and no siege
             boolean siege = ((GameState) this.handler).strat.techToResearch.contains(TechType.Tank_Siege_Mode);
             if (siege && ((GameState) this.handler).CCs.size() >= 2 &&
                     !((GameState) this.handler).getPlayer().hasResearched(TechType.Tank_Siege_Mode) &&
