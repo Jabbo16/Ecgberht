@@ -582,17 +582,19 @@ public class Ecgberht implements BWEventListener {
                         gs.builtRefinery++;
                     } else {
                         if (type == UnitType.Terran_Command_Center) {
-                            gs.CCs.put(Util.getClosestBaseLocation(bwem.getMap().getArea(arg0.getTilePosition()).getTop().toPosition()), (CommandCenter) arg0);
+                            Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
+                            gs.CCs.put(ccBase, (CommandCenter) arg0);
                             if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() > 2) gs.strat.raxPerCC = 3;
-                            else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3)
-                                gs.strat.raxPerCC = 2;
+                            else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3) gs.strat.raxPerCC = 2;
                             gs.addNewResources(arg0);
+                            if(gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense) gs.workerTransfer();
+                            if(gs.frameCount != 0 && gs.firstExpand) gs.firstExpand = false;
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
-                            if (gs.frameCount == 0)
+                            if (gs.frameCount == 0){
                                 gs.MainCC = new MutablePair<>(Util.getClosestBaseLocation(arg0.getPosition()), arg0);
-                            gs.builtCC++;
+                            }
                         }
                         if (type == UnitType.Terran_Comsat_Station) gs.CSs.add((ComsatStation) arg0);
                         if (type == UnitType.Terran_Bunker) gs.DBs.put((Bunker) arg0, new TreeSet<>());
@@ -642,12 +644,6 @@ public class Ecgberht implements BWEventListener {
 
                         } else if (type == UnitType.Terran_Dropship) {
                             DropShipAgent d = new DropShipAgent(arg0);
-                            /*d.setTarget(gs.enemyMainBase.getCenter());
-                            Entry<Worker, MineralPatch> scv = gs.workerMining.entrySet().iterator().next();
-                            gs.mineralsAssigned.put(scv.getValue(),  gs.mineralsAssigned.get(scv.getValue()) - 1);
-                            gs.workerMining.remove(scv.getKey());
-                            scv.getKey().stop(false);
-                            d.setCargo(new TreeSet<>(Arrays.asList(scv.getKey())));*/
                             gs.agents.put(arg0, d);
 
                         } else if (type == UnitType.Terran_Science_Vessel) {

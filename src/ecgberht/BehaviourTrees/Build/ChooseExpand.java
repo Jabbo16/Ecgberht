@@ -47,11 +47,11 @@ public class ChooseExpand extends Action {
                     return State.SUCCESS;
                 }
             }
-            int workers = 0;
+            int workers = ((GameState)this.handler).workerIdle.size();
             for (Integer wt : ((GameState) this.handler).mineralsAssigned.values()) {
                 workers += wt;
             }
-            if (((GameState) this.handler).mineralsAssigned.size() * 2 <= workers &&
+            if (((GameState) this.handler).mineralsAssigned.size() * 2 <= workers - 1 &&
                     ((GameState) this.handler).getArmySize() >= ((GameState) this.handler).strat.armyForExpand) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;

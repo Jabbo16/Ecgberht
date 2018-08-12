@@ -7,6 +7,7 @@ import bwem.area.Area;
 import bwem.unit.Geyser;
 import bwem.unit.Mineral;
 import bwem.unit.Neutral;
+import bwem.unit.NeutralImpl;
 import com.google.gson.Gson;
 import ecgberht.Agents.*;
 import ecgberht.Simulation.SimManager;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class GameState extends GameHandler {
 
@@ -58,7 +60,6 @@ public class GameState extends GameHandler {
     public InfluenceMap inMap;
     public InfluenceMap inMapUnits;
     public int builtBuildings;
-    public int builtCC;
     public int builtRefinery;
     public int directionScoutMain;
     public int frameCount;
@@ -145,6 +146,7 @@ public class GameState extends GameHandler {
     public Worker chosenHarasser = null;
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
+    public boolean firstExpand = true;
 
     public GameState(BW bw, BWEM bwem) {
         super(bw, bwem);
@@ -1437,5 +1439,39 @@ public class GameState extends GameHandler {
 
     public boolean requiredUnitsForAttack() {
         return strat.requiredUnitsForAttack();
+    }
+
+    void workerTransfer() {
+        int numWorkersToTransfer = (workerIdle.size() + workerMining.size()) / 2;
+        List<Unit> minerals = BLs.get(1).getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
+        boolean hardStuck = false;
+        while(numWorkersToTransfer != 0 && !hardStuck){
+            MineralPatch chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
+            if(chosenMineral == null) break;
+            Worker chosen = null;
+            if(!workerIdle.isEmpty()){
+                chosen = workerIdle.iterator().next();
+                mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
+                workerMining.put(chosen,chosenMineral);
+                workerIdle.remove(chosen);
+                numWorkersToTransfer--;
+                continue;
+            }
+            MineralPatch oldPatch = null;
+            for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
+                if(minerals.contains(w.getValue())) continue;
+                chosen = w.getKey();
+                oldPatch = w.getValue();
+                break;
+            }
+            if(chosen != null && oldPatch != null){
+                mineralsAssigned.put(oldPatch, mineralsAssigned.get(oldPatch) - 1);
+                mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
+                workerMining.put(chosen,chosenMineral);
+                numWorkersToTransfer--;
+                continue;
+            }
+            hardStuck = true;
+        }
     }
 }
