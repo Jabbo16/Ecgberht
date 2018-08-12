@@ -161,7 +161,7 @@ public class GameState extends GameHandler {
         sim = new SimManager(bw);
     }
 
-    public void initPlayers() {
+    private void initPlayers() {
         for (Player p : bw.getAllPlayers()) {
             //if(p.isObserver()) continue; // TODO uncomment when bwapi client bug is fixed
             if (p.isNeutral()) {
@@ -172,7 +172,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public Strategy initStrat() {
+    Strategy initStrat() {
         try {
             BioBuild b = new BioBuild();
             ProxyBBS bbs = new ProxyBBS();
@@ -276,7 +276,7 @@ public class GameState extends GameHandler {
 
     }
 
-    public void initEnemyRace() {
+    void initEnemyRace() {
         if (ih.enemy().getRace() != Race.Unknown) {
             enemyRace = ih.enemy().getRace();
             enemyIsRandom = false;
@@ -289,7 +289,6 @@ public class GameState extends GameHandler {
         for (MineralPatch u : bw.getMineralPatches()) {
             if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
-
         for (Base b : BLs) {
             if (b.isStartingLocation()) continue;
             if (skipWeirdBlocking(b)) continue;
@@ -308,21 +307,19 @@ public class GameState extends GameHandler {
 
     private boolean skipWeirdBlocking(Base b) {
         if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) { // Valkyries
-            if (b.getLocation().equals(new TilePosition(25, 67)) || b.getLocation().equals(new TilePosition(99, 67))) {
-                return true;
-            }
+            return b.getLocation().equals(new TilePosition(25, 67)) || b.getLocation().equals(new TilePosition(99, 67));
         }
         return false;
     }
 
     private boolean weirdBlocking(Base b) {
         if (bw.getBWMap().mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) { // CIG destination / SSCAIT destination
-            if (b.getLocation().equals(new TilePosition(6, 119))) return true;
+            return b.getLocation().equals(new TilePosition(6, 119));
         }
         return false;
     }
 
-    public void checkBasesWithBLockingMinerals() {
+    void checkBasesWithBLockingMinerals() {
         if (blockingMinerals.isEmpty()) return;
         for (bwem.Base b : BLs) {
             if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
@@ -382,7 +379,7 @@ public class GameState extends GameHandler {
         return self;
     }
 
-    public void addNewResources(Unit unit) {
+    void addNewResources(Unit unit) {
         List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
         List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
         for (Mineral m : minerals) mineralsAssigned.put((MineralPatch) m.getUnit(), 0);
@@ -392,7 +389,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void removeResources(Unit unit) {
+    void removeResources(Unit unit) {
         List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
         List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
         for (Mineral m : minerals) {
@@ -611,23 +608,23 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void print(Unit u, Color color) {
+    private void print(Unit u, Color color) {
         bw.getMapDrawer().drawBoxMap(u.getLeft(), u.getTop(), u.getRight(), u.getBottom(), color);
     }
 
-    public void print(TilePosition u, UnitType type, Color color) {
+    private void print(TilePosition u, UnitType type, Color color) {
         Position leftTop = new Position(u.getX() * TilePosition.SIZE_IN_PIXELS, u.getY() * TilePosition.SIZE_IN_PIXELS);
         Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
         bw.getMapDrawer().drawBoxMap(leftTop, rightBottom, color);
     }
 
-    public void print(TilePosition u, Color color) {
+    private void print(TilePosition u, Color color) {
         Position leftTop = new Position(u.getX() * TilePosition.SIZE_IN_PIXELS, u.getY() * TilePosition.SIZE_IN_PIXELS);
         Position rightBottom = new Position(leftTop.getX() + TilePosition.SIZE_IN_PIXELS, leftTop.getY() + TilePosition.SIZE_IN_PIXELS);
         bw.getMapDrawer().drawBoxMap(leftTop, rightBottom, color);
     }
 
-    public void initStartLocations() {
+    void initStartLocations() {
         Base startBot = Util.getClosestBaseLocation(self.getStartLocation().toPosition());
         for (bwem.Base b : bwem.getMap().getBases()) {
             if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) {
@@ -637,7 +634,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void initBaseLocations() {
+    void initBaseLocations() {
         BLs.sort(new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
         if (strat.name.equals("PlasmaWraithHell")) { // Special logic for Plasma
             specialBLs.add(BLs.get(0));
@@ -670,7 +667,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void fix() {
+    void fix() {
         if (defense && enemyInBase.isEmpty()) defense = false;
         List<String> squadsToClean = new ArrayList<>();
         for (Squad s : squads.values()) {
@@ -713,8 +710,6 @@ public class GameState extends GameHandler {
             workerIdle.add(u);
         }
 
-        for (String name : squadsToClean) squads.remove(name);
-
         if (!strat.name.equals("PlasmaWraithHell")) {
             if (chosenScout != null && ((Worker) chosenScout).isIdle()) {
                 workerIdle.add((Worker) chosenScout);
@@ -742,20 +737,6 @@ public class GameState extends GameHandler {
         }
         for (Unit u : aux3) workerBuild.remove(u);
 
-        /*List<Unit> aux4 = new ArrayList<>();
-        for (Entry<SCV, Building> r : repairerTask.entrySet()) {
-            if (r.getValue().getHitPoints() == r.getValue().maxHitPoints() && (!(r.getValue() instanceof Bunker)
-                    && IntelligenceAgency.getEnemyStrat() != IntelligenceAgency.EnemyStrats.ZealotRush || countUnit(UnitType.Terran_Command_Center) > 1)) {
-                if (chosenRepairer != null) {
-                    if (r.equals(chosenRepairer)) chosenRepairer = null;
-                }
-                workerIdle.add(r.getKey());
-                r.getKey().stop(false);
-                aux4.add(r.getKey());
-            }
-        }
-        for (Unit u : aux4) repairerTask.remove(u);*/
-
         List<Unit> aux5 = new ArrayList<>();
         for (Worker r : workerDefenders.keySet()) {
             if (!r.exists()) aux5.add(r);
@@ -765,15 +746,9 @@ public class GameState extends GameHandler {
             }
         }
         for (Unit u : aux5) workerDefenders.remove(u);
-
-        /*List<String> aux6 = new ArrayList<>();
-        for (Squad u : squads.values()) {
-            if (u.members.isEmpty()) aux6.add(u.name);
-        }
-        for (String s : aux6) squads.remove(s);*/
     }
 
-    public void checkMainEnemyBase() {
+    void checkMainEnemyBase() {
         if (enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
             enemyMainBase = null;
             chosenScout = null;
@@ -790,7 +765,7 @@ public class GameState extends GameHandler {
     }
 
     // Based on BWEB, thanks @Fawx, https://github.com/Cmccrave/BWEB
-    public void initChokes() {
+    void initChokes() {
         try {
             // Main choke
             naturalArea = BLs.get(1).getArea();
@@ -885,7 +860,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public String getSquadName() {
+    private String getSquadName() {
         if (teamNames.size() == squads.size()) {
             String gg = null;
             while (gg == null || squads.containsKey(gg)) gg = "RandomSquad" + new Random().toString();
@@ -983,7 +958,7 @@ public class GameState extends GameHandler {
         return count;
     }
 
-    public double getMineralRate() {
+    private double getMineralRate() {
         double rate = 0.0;
         if (frameCount > 0) rate = ((double) self.gatheredMinerals() - 50) / frameCount;
         return rate;
@@ -991,8 +966,7 @@ public class GameState extends GameHandler {
 
     public Position getCenterFromBuilding(Position leftTop, UnitType type) {
         Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
-        Position center = new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
-        return center;
+        return new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
 
     }
 
@@ -1004,7 +978,7 @@ public class GameState extends GameHandler {
         return (int) (rate * frames);
     }
 
-    public void mineralLocking() {
+    void mineralLocking() {
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
             if (u.getKey().isIdle() || (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())))
                 u.getKey().gather(u.getValue());
@@ -1030,7 +1004,7 @@ public class GameState extends GameHandler {
         return null;
     }
 
-    public void readOpponentInfo() {
+    void readOpponentInfo() {
         String name = ih.enemy().getName();
         String path = "bwapi-data/read/" + name + ".json";
         try {
@@ -1046,7 +1020,6 @@ public class GameState extends GameHandler {
             path = "bwapi-data/AI/" + name + ".json";
             if (Files.exists(Paths.get(path))) {
                 EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
-                return;
             }
         } catch (Exception e) {
             System.err.println("readOpponentInfo");
@@ -1054,7 +1027,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void writeOpponentInfo(String name) {
+    void writeOpponentInfo(String name) {
         String dir = "bwapi-data/write/";
         String path = dir + name + ".json";
         ih.sendText("Writing result to: " + path);
@@ -1067,7 +1040,7 @@ public class GameState extends GameHandler {
             out.println(print);
         } catch (FileNotFoundException e) {
             System.err.println("writeOpponentInfo");
-            System.err.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -1099,8 +1072,9 @@ public class GameState extends GameHandler {
                 }
                 for (TilePosition tile : sides) {
                     if (tile == null) continue;
-                    if ((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen))) {
-                        if (bw.canBuildHere(tile, type)) chosen = tile;
+                    if (((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen)))
+                            && bw.canBuildHere(tile, type)) {
+                        chosen = tile;
                     }
                 }
                 dist++;
@@ -1144,7 +1118,7 @@ public class GameState extends GameHandler {
 
     }
 
-    public void updateEnemyBuildingsMemory() {
+    void updateEnemyBuildingsMemory() {
         List<Unit> aux = new ArrayList<>();
         for (EnemyBuilding u : enemyBuildingMemory.values()) {
             if (bw.getBWMap().isVisible(u.pos)) {
@@ -1156,7 +1130,7 @@ public class GameState extends GameHandler {
         for (Unit u : aux) enemyBuildingMemory.remove(u);
     }
 
-    public void mergeSquads() {
+    void mergeSquads() {
         try {
             if (squads.isEmpty()) return;
             if (squads.size() < 2) return;
@@ -1195,7 +1169,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void updateSquadOrderAndMicro() {
+    void updateSquadOrderAndMicro() {
         for (Squad u : squads.values()) {
             if (u.members.isEmpty()) continue;
             u.microUpdateOrder();
@@ -1221,7 +1195,7 @@ public class GameState extends GameHandler {
      * @return Number of workers required.
      * @author Yegers
      */
-    public double mineralGatherRateNeeded(final List<UnitType> units) {
+    private double mineralGatherRateNeeded(final List<UnitType> units) {
         double mineralsRequired = 0.0;
         double m2f = (4.53 / 100.0) / 65.0;
         double SaturationX2_Slope = -1.5;
@@ -1234,7 +1208,7 @@ public class GameState extends GameHandler {
         return Math.ceil(workersRequired);
     }
 
-    public void checkWorkerMilitia() {
+    void checkWorkerMilitia() {
         if (countUnit(UnitType.Terran_Barracks) == 2) {
             List<Unit> aux = new ArrayList<>();
             int count = workerMining.size();
@@ -1341,7 +1315,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void runAgents() {
+    void runAgents() {
         List<Agent> rem = new ArrayList<>();
         for (Agent ag : agents.values()) {
             boolean remove = ag.runAgent();
@@ -1356,7 +1330,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void sendCustomMessage() {
+    void sendCustomMessage() {
         String name = EI.opponent.toLowerCase();
         if (name.equals("krasi0".toLowerCase())) ih.sendText("Please don't bully me too much!");
         else if (name.equals("hannes bredberg".toLowerCase()) || name.equals("hannesbredberg".toLowerCase())) {
@@ -1366,7 +1340,7 @@ public class GameState extends GameHandler {
         } else ih.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
     }
 
-    public String pickShipName() {
+    String pickShipName() {
         if (shipNames.isEmpty()) return "Pepe";
         String name;
         int index = new Random().nextInt(shipNames.size());
@@ -1385,7 +1359,7 @@ public class GameState extends GameHandler {
         return (self.minerals() >= type.mineralPrice() && self.gas() >= type.gasPrice());
     }
 
-    public void resetInMap() {
+    void resetInMap() {
         inMap.clear();
         List<Unit> rem = new ArrayList<>();
         for (EnemyBuilding u : enemyBuildingMemory.values()) {
@@ -1400,7 +1374,7 @@ public class GameState extends GameHandler {
         }
     }
 
-    public void sendRandomMessage() {
+    void sendRandomMessage() {
         if (Math.random() < 0.80) return;
         if (Math.random() < 0.50) {
             ih.sendText("What do you call a Zealot smoking weed?");
@@ -1412,7 +1386,7 @@ public class GameState extends GameHandler {
 
     }
 
-    public void alwaysPools() {
+    void alwaysPools() {
         List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll"));
         if (enemyRace == Race.Zerg) {
             if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
@@ -1445,29 +1419,29 @@ public class GameState extends GameHandler {
         int numWorkersToTransfer = (workerIdle.size() + workerMining.size()) / 2;
         List<Unit> minerals = BLs.get(1).getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
         boolean hardStuck = false;
-        while(numWorkersToTransfer != 0 && !hardStuck){
+        while (numWorkersToTransfer != 0 && !hardStuck) {
             MineralPatch chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
-            if(chosenMineral == null) break;
+            if (chosenMineral == null) break;
             Worker chosen = null;
-            if(!workerIdle.isEmpty()){
+            if (!workerIdle.isEmpty()) {
                 chosen = workerIdle.iterator().next();
                 mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
-                workerMining.put(chosen,chosenMineral);
+                workerMining.put(chosen, chosenMineral);
                 workerIdle.remove(chosen);
                 numWorkersToTransfer--;
                 continue;
             }
             MineralPatch oldPatch = null;
             for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
-                if(minerals.contains(w.getValue())) continue;
+                if (minerals.contains(w.getValue())) continue;
                 chosen = w.getKey();
                 oldPatch = w.getValue();
                 break;
             }
-            if(chosen != null && oldPatch != null){
+            if (chosen != null && oldPatch != null) {
                 mineralsAssigned.put(oldPatch, mineralsAssigned.get(oldPatch) - 1);
                 mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
-                workerMining.put(chosen,chosenMineral);
+                workerMining.put(chosen, chosenMineral);
                 numWorkersToTransfer--;
                 continue;
             }

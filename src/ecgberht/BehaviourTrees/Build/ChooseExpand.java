@@ -47,7 +47,7 @@ public class ChooseExpand extends Action {
                     return State.SUCCESS;
                 }
             }
-            int workers = ((GameState)this.handler).workerIdle.size();
+            int workers = ((GameState) this.handler).workerIdle.size();
             for (Integer wt : ((GameState) this.handler).mineralsAssigned.values()) {
                 workers += wt;
             }

@@ -585,14 +585,16 @@ public class Ecgberht implements BWEventListener {
                             Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
                             gs.CCs.put(ccBase, (CommandCenter) arg0);
                             if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() > 2) gs.strat.raxPerCC = 3;
-                            else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3) gs.strat.raxPerCC = 2;
+                            else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3)
+                                gs.strat.raxPerCC = 2;
                             gs.addNewResources(arg0);
-                            if(gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense) gs.workerTransfer();
-                            if(gs.frameCount != 0 && gs.firstExpand) gs.firstExpand = false;
+                            if (gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense)
+                                gs.workerTransfer();
+                            if (gs.frameCount != 0 && gs.firstExpand) gs.firstExpand = false;
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
-                            if (gs.frameCount == 0){
+                            if (gs.frameCount == 0) {
                                 gs.MainCC = new MutablePair<>(Util.getClosestBaseLocation(arg0.getPosition()), arg0);
                             }
                         }

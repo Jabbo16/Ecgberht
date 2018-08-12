@@ -28,6 +28,7 @@ public class IntelligenceAgency {
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
     private static String startStrat = null;
     private static boolean exploredMinerals = false;
+
     private static int getNumEnemyWorkers() {
         return enemyWorkers.size();
     }
@@ -287,8 +288,7 @@ public class IntelligenceAgency {
                     startStrat = getGs().strat.name;
                     getGs().strat = new BioMechBuildFE();
                     Ecgberht.transition();
-                }
-                else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
+                } else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
                     startStrat = getGs().strat.name;
                     getGs().strat = new BioMechBuildFE();
                     Ecgberht.transition();
@@ -300,19 +300,19 @@ public class IntelligenceAgency {
     }
 
     static void onFrame() {
-        if(getGs().enemyStartBase == null) return;
+        if (getGs().enemyStartBase == null) return;
         if (enemyStrat != EnemyStrats.Unknown) return;
-        if(!exploredMinerals) exploredMinerals = checkExploredEnemyMinerals();
+        if (!exploredMinerals) exploredMinerals = checkExploredEnemyMinerals();
         switch (getGs().enemyRace) {
             case Zerg:
-                if(detectEarlyPool()) return;
+                if (detectEarlyPool()) return;
                 break;
             case Terran:
-                if(detectMechRush()) return;
+                if (detectMechRush()) return;
                 break;
             case Protoss:
-                if(detectZealotRush()) return;
-                if(detectCannonRush()) return;
+                if (detectZealotRush()) return;
+                if (detectCannonRush()) return;
                 break;
         }
     }
@@ -320,9 +320,9 @@ public class IntelligenceAgency {
     private static boolean detectCannonRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
             boolean foundForge = false;
-            if(exploredMinerals){
+            if (exploredMinerals) {
                 for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-                    if (u.type == UnitType.Protoss_Forge && getGs().bwem.getMap().getArea(u.pos).equals(getGs().enemyMainArea)){
+                    if (u.type == UnitType.Protoss_Forge && getGs().bwem.getMap().getArea(u.pos).equals(getGs().enemyMainArea)) {
                         foundForge = true;
                         break;
                     }
@@ -332,7 +332,7 @@ public class IntelligenceAgency {
             for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
                 if ((u.type == UnitType.Protoss_Pylon || u.type == UnitType.Protoss_Photon_Cannon) &&
                         (getGs().bwem.getMap().getArea(u.pos).equals(getGs().BLs.get(0).getArea())
-                                || getGs().bwem.getMap().getArea(u.pos).equals(getGs().BLs.get(1).getArea()))){
+                                || getGs().bwem.getMap().getArea(u.pos).equals(getGs().BLs.get(1).getArea()))) {
                     somethingInMyBase = true;
                     break;
                 }
@@ -358,9 +358,9 @@ public class IntelligenceAgency {
         return false;
     }
 
-    private static boolean checkExploredEnemyMinerals(){
-        for(Mineral m : getGs().enemyStartBase.getMinerals()){
-            if(!getGs().getGame().getBWMap().isExplored(m.getUnit().getTilePosition())) return false;
+    private static boolean checkExploredEnemyMinerals() {
+        for (Mineral m : getGs().enemyStartBase.getMinerals()) {
+            if (!getGs().getGame().getBWMap().isExplored(m.getUnit().getTilePosition())) return false;
         }
         return true;
     }
