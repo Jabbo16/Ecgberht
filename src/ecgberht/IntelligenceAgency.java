@@ -1,5 +1,6 @@
 package ecgberht;
 
+import bwem.unit.Mineral;
 import ecgberht.Strategies.BioBuild;
 import ecgberht.Strategies.BioBuildFE;
 import ecgberht.Strategies.BioMechBuildFE;
@@ -26,7 +27,7 @@ public class IntelligenceAgency {
     private static List<Bullet> allyBullets = new ArrayList<>();
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
     private static String startStrat = null;
-
+    private static boolean exploredMinerals = false;
     private static int getNumEnemyWorkers() {
         return enemyWorkers.size();
     }
@@ -205,8 +206,8 @@ public class IntelligenceAgency {
     /**
      * Detects if the enemy its doing a 4 or 5 Pool strat
      */
-    private static void detectEarlyPool() {
-        if (getGs().frameCount < 24 * 150 && getGs().enemyMainBase != null && !getGs().EI.naughty) {
+    private static boolean detectEarlyPool() {
+        if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && !getGs().EI.naughty && exploredMinerals) {
             boolean found_pool = false;
             int drones = IntelligenceAgency.getNumEnemyWorkers();
             for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
@@ -226,16 +227,17 @@ public class IntelligenceAgency {
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
-
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * Detects if the enemy its doing a "Zealot Rush" strat
      */
-    private static void detectZealotRush() {
-        if (getGs().frameCount < 24 * 150 && getGs().enemyMainBase != null) {
+    private static boolean detectZealotRush() {
+        if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && exploredMinerals) {
             int countGates = 0;
             int probes = IntelligenceAgency.getNumEnemyWorkers();
             boolean foundGas = false;
@@ -258,15 +260,17 @@ public class IntelligenceAgency {
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * Detects if the enemy its doing a "Zealot Rush" strat
      */
-    private static void detectMechRush() {
-        if (getGs().frameCount < 24 * 210 && getGs().enemyMainBase != null) {
+    private static boolean detectMechRush() {
+        if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null && exploredMinerals) {
             int countFactories = 0;
             int countRax = 0;
             boolean foundGas = false;
@@ -283,32 +287,83 @@ public class IntelligenceAgency {
                     startStrat = getGs().strat.name;
                     getGs().strat = new BioMechBuildFE();
                     Ecgberht.transition();
-                    return;
                 }
-                if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
+                else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
                     startStrat = getGs().strat.name;
                     getGs().strat = new BioMechBuildFE();
                     Ecgberht.transition();
                 }
+                return true;
             }
         }
+        return false;
     }
 
     static void onFrame() {
+        if(getGs().enemyStartBase == null) return;
         if (enemyStrat != EnemyStrats.Unknown) return;
+        if(!exploredMinerals) exploredMinerals = checkExploredEnemyMinerals();
         switch (getGs().enemyRace) {
             case Zerg:
-                detectEarlyPool();
+                if(detectEarlyPool()) return;
                 break;
             case Terran:
-                detectMechRush();
+                if(detectMechRush()) return;
                 break;
             case Protoss:
-                detectZealotRush();
+                if(detectZealotRush()) return;
+                if(detectCannonRush()) return;
                 break;
         }
     }
 
+    private static boolean detectCannonRush() {
+        if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
+            boolean foundForge = false;
+            if(exploredMinerals){
+                for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
+                    if (u.type == UnitType.Protoss_Forge && getGs().bwem.getMap().getArea(u.pos).equals(getGs().enemyMainArea)){
+                        foundForge = true;
+                        break;
+                    }
+                }
+            }
+            boolean somethingInMyBase = false;
+            for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
+                if ((u.type == UnitType.Protoss_Pylon || u.type == UnitType.Protoss_Photon_Cannon) &&
+                        (getGs().bwem.getMap().getArea(u.pos).equals(getGs().BLs.get(0).getArea())
+                                || getGs().bwem.getMap().getArea(u.pos).equals(getGs().BLs.get(1).getArea()))){
+                    somethingInMyBase = true;
+                    break;
+                }
+            }
+            if (foundForge || somethingInMyBase) {
+                enemyStrat = EnemyStrats.CannonRush;
+                getGs().ih.sendText("Cannon rusher ಠ_ಠ");
+                getGs().playSound("rushed.mp3");
+                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
+                    startStrat = getGs().strat.name;
+                    getGs().strat = new BioBuild();
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
+                    startStrat = getGs().strat.name;
+                    getGs().strat = new BioBuildFE();
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkExploredEnemyMinerals(){
+        for(Mineral m : getGs().enemyStartBase.getMinerals()){
+            if(!getGs().getGame().getBWMap().isExplored(m.getUnit().getTilePosition())) return false;
+        }
+        return true;
+    }
 
     public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, MechRush}
 }
