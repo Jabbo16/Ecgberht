@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class GameState extends GameHandler {
@@ -700,6 +701,12 @@ public class GameState extends GameHandler {
         }
         for (Worker u : removeGas) workerGas.remove(u);
 
+        if (frameCount % 500 == 0) {
+            Map<MineralPatch, Long> mineralCount = workerMining.values().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            for (Entry<MineralPatch, Long> p : mineralCount.entrySet())
+                mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
+        }
+
         List<Worker> removeTask = new ArrayList<>();
         for (Entry<SCV, Building> w : workerTask.entrySet()) {
             if (!w.getKey().isConstructing() || w.getValue().isCompleted()) removeTask.add(w.getKey());
@@ -952,10 +959,8 @@ public class GameState extends GameHandler {
     }
 
     public int getCombatUnitsBuildings() {
-        int count;
-        count = MBs.size() + Fs.size();
-        if (count == 0) return 1;
-        return count;
+        int count = MBs.size() + Fs.size();
+        return count == 0 ? 1 : count;
     }
 
     private double getMineralRate() {
@@ -982,10 +987,9 @@ public class GameState extends GameHandler {
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
             if (u.getKey().isIdle() || (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())))
                 u.getKey().gather(u.getValue());
-            else if (u.getKey().getTargetUnit() != null) {
-                if (!u.getKey().getTargetUnit().equals(u.getValue()) && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals()) {
-                    u.getKey().gather(u.getValue());
-                }
+            else if (u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
+                    && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals()) {
+                u.getKey().gather(u.getValue());
             }
         }
     }
@@ -1306,8 +1310,7 @@ public class GameState extends GameHandler {
                 vector.second *= minDistance;
             }*/
             MutablePair<Double, Double> sumAll = Util.sumPosition(vectors);
-            Position kitePos = Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
-            return kitePos;
+            return Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
         } catch (Exception e) {
             System.err.println("KiteAway Exception");
             e.printStackTrace();
@@ -1356,7 +1359,7 @@ public class GameState extends GameHandler {
     }
 
     public boolean canAfford(UnitType type) {
-        return (self.minerals() >= type.mineralPrice() && self.gas() >= type.gasPrice());
+        return self.minerals() >= type.mineralPrice() && self.gas() >= type.gasPrice();
     }
 
     void resetInMap() {
@@ -1365,7 +1368,6 @@ public class GameState extends GameHandler {
         for (EnemyBuilding u : enemyBuildingMemory.values()) {
             if (bw.getBWMap().isVisible(u.pos) && !u.unit.isVisible()) {
                 rem.add(u.unit);
-                continue;
             } else inMap.updateMap(u.unit, false);
         }
         for (Unit u : rem) enemyBuildingMemory.remove(u);

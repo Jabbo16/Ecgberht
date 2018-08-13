@@ -41,8 +41,16 @@ public class BuildingMap implements Cloneable {
         this.self = self;
         this.height = height;
         this.width = width;
-        this.map = map.clone();
+        this.map = copyMap(map);
         this.bwem = bwem;
+    }
+
+    private String[][] copyMap(String[][] map) {
+        String[][] copiedMap = new String[map.length][map[0].length];
+        for (int ii = 0; ii < map.length; ii++) {
+            System.arraycopy(map[ii], 0, copiedMap[ii], 0, map[0].length);
+        }
+        return copiedMap;
     }
 
     public String[][] getMap() {
