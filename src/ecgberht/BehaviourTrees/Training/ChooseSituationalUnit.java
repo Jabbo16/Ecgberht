@@ -6,10 +6,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.ControlTower;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
-import org.openbw.bwapi4j.unit.ScienceFacility;
-import org.openbw.bwapi4j.unit.Starport;
+import org.openbw.bwapi4j.unit.*;
 
 
 public class ChooseSituationalUnit extends Action {
@@ -48,16 +45,24 @@ public class ChooseSituationalUnit extends Action {
             tower = false;
             boolean science = false;
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
-                if (u instanceof ControlTower) {
-                    tower = true;
-                } else if (u instanceof ScienceFacility) {
-                    science = true;
-                }
+                if (u instanceof ControlTower) tower = true;
+                else if (u instanceof ScienceFacility) science = true;
                 if (science && tower) break;
             }
             if (!tower || !science) return State.FAILURE;
             for (Starport s : ((GameState) this.handler).Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
+                    if(((GameState)this.handler).getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
+                    && ((GameState)this.handler).getCash().first >= UnitType.Terran_Science_Vessel.mineralPrice() + 50){
+                        for (Barracks b : ((GameState) this.handler).MBs) {
+                            if (!b.isTraining()) {
+                                ((GameState) this.handler).chosenUnit = UnitType.Terran_Marine;
+                                ((GameState) this.handler).chosenBuilding = b;
+                                return State.SUCCESS;
+                            }
+                        }
+                    }
+
                     ((GameState) this.handler).chosenUnit = UnitType.Terran_Science_Vessel;
                     ((GameState) this.handler).chosenBuilding = s;
                     return State.SUCCESS;

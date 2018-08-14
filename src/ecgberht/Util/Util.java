@@ -371,9 +371,15 @@ public class Util {
     }
 
     public static int getGroundDistance(Position start, Position end) {
-        MutableInt dist = new MutableInt();
-        getGs().bwem.getMap().getPath(start, end, dist);
-        return dist.intValue();
+        try{
+            MutableInt dist = new MutableInt();
+            getGs().bwem.getMap().getPath(start, end, dist);
+            return dist.intValue();
+        } catch (Exception e){
+            System.err.println("Ground Distance Exception");
+            e.printStackTrace();
+            return Integer.MAX_VALUE;
+        }
     }
 
     public static boolean isConnected(TilePosition start, TilePosition end) {

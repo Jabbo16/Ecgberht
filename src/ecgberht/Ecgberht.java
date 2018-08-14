@@ -163,6 +163,7 @@ public class Ecgberht implements BWEventListener {
 
     private static void initUpgradeTree() {
         CheckResourcesUpgrade cRU = new CheckResourcesUpgrade("Check Resources Upgrade", gs);
+        ChooseIrradiate cI = new ChooseIrradiate("Choose Irradiate", gs);
         ChooseArmorMechUp cAMU = new ChooseArmorMechUp("Choose Armor mech upgrade", gs);
         ChooseWeaponMechUp cWMU = new ChooseWeaponMechUp("Choose weapon mech upgrade", gs);
         ChooseArmorInfUp cAIU = new ChooseArmorInfUp("Choose Armor inf upgrade", gs);
@@ -172,6 +173,7 @@ public class Ecgberht implements BWEventListener {
         ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
         ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
         Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
+        if (gs.enemyRace == Race.Zerg) ChooseUP.addChild(cI);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
         if (gs.strat.techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
@@ -966,15 +968,20 @@ public class Ecgberht implements BWEventListener {
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && Util.isEnemy(p)) {
                 IntelligenceAgency.onShow(arg0, type);
-                if (gs.enemyRace == Race.Unknown && getGs().players.size() == 3)
-                    gs.enemyRace = type.getRace(); // TODO Check
+                if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1){ // TODO Check
+                    gs.enemyRace = type.getRace();
+                    if(gs.enemyRace == Race.Zerg) initUpgradeTree();
+                }
+
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type != UnitType.Zerg_Overlord))) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
-                if (type.isBuilding() && !gs.enemyBuildingMemory.containsKey(arg0)) {
+                if (type.isBuilding()) {
                     gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
-                    gs.inMap.updateMap(arg0, false);
-                    gs.map.updateMap(arg0.getTilePosition(), type, false);
+                    if(!gs.enemyBuildingMemory.containsKey(arg0)){
+                        gs.inMap.updateMap(arg0, false);
+                        gs.map.updateMap(arg0.getTilePosition(), type, false);
+                    }
                 }
             }
         } catch (Exception e) {

@@ -448,7 +448,7 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextScreen(320, 20, ColorUtil.formatText(getArmySize() + "/" + strat.armyForAttack, ColorUtil.White));
             String defending = defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
             bw.getMapDrawer().drawTextScreen(320, 35, defending);
-
+            bw.getMapDrawer().drawTextScreen(320, 50, ColorUtil.formatText(chosenUnit.toString(), ColorUtil.White));
             if (ih.allies().size() + ih.enemies().size() == 1) {
                 bw.getMapDrawer().drawTextScreen(10, 5,
                         ColorUtil.formatText(ih.self().getName(), ColorUtil.getColor(ih.self().getColor())) +

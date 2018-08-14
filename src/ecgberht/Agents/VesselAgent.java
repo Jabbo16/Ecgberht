@@ -5,6 +5,7 @@ import ecgberht.Simulation.SimInfo;
 import ecgberht.Squad;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -18,7 +19,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
 
     public ScienceVessel unit;
     public Squad follow;
-    Status status = Status.IDLE;
+    private Status status = Status.IDLE;
     private Set<Unit> airAttackers = new TreeSet<>();
     private Position center;
     private Unit target;
@@ -31,6 +32,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     public String statusToString() {
+        if (status == Status.IRRADIATE) return "Irradiate";
+        if (status == Status.DMATRIX) return "DefenseMatrix";
         if (status == Status.KITE) return "Kite";
         if (status == Status.FOLLOW) return "Follow";
         if (status == Status.RETREAT) return "Retreat";
@@ -44,7 +47,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             if (!unit.exists()) return true;
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
-
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
             if (follow == null || follow.members.isEmpty()) follow = getGs().chooseVesselSquad(unit.getPosition());
@@ -56,6 +58,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             center = getGs().getSquadCenter(follow);
             getNewStatus();
             switch (status) {
+                case IRRADIATE:
+                    irradiate();
                 case DMATRIX:
                     dMatrix();
                     break;
@@ -78,6 +82,14 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void irradiate() {
+        if (target != null) {
+            if (!target.exists()) target = null;
+            else if (unit.getOrder() != Order.CastIrradiate) unit.irradiate((Organic) target);
+            target = null;
+        }
     }
 
     private void dMatrix() {
@@ -117,10 +129,33 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         Position myPos = unit.getPosition();
         int maxScore = 0;
         PlayerUnit chosen = null;
-        Set<Unit> targets = new TreeSet<>(follow.members);
-        targets.addAll(getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).allies);
-        if (follow != null && !targets.isEmpty() && unit.getEnergy() >= 100 && follow.status != Squad.Status.IDLE) {
-            for (Unit u : targets) {
+        // Irradiate
+        Set<Unit> irradiateTargets = new TreeSet<>(getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies);
+        if(follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && unit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE){
+            for (Unit u : irradiateTargets) { // TODO improve: check close enemies and no irradiate if not necessary
+                if (!(u instanceof Organic)) continue;
+                int score = 1;
+                if (((MobileUnit) u).isIrradiated()) continue;
+                if (u instanceof Lurker) score = 8;
+                if (u instanceof Mutalisk) score = 5;
+                if (u instanceof Zergling) score = 3;
+                score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints(); // change to number of close units
+                if (chosen == null || score > maxScore) {
+                    chosen = (PlayerUnit) u;
+                    maxScore = score;
+                }
+            }
+            if (maxScore > 2) {
+                status = Status.IRRADIATE;
+                target = chosen;
+                return;
+            }
+        }
+        chosen = null;
+        maxScore = 0;
+        Set<Unit> matrixTargets = new TreeSet<>(getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).allies);
+        if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
+            for (Unit u : matrixTargets) {
                 if (!(u instanceof MobileUnit)) continue;
                 int score = 1;
                 if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
@@ -133,12 +168,13 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     maxScore = score;
                 }
             }
+            if (maxScore > 2) {
+                status = Status.DMATRIX;
+                target = chosen;
+                return;
+            }
         }
-        if (maxScore > 2) {
-            status = Status.DMATRIX;
-            target = chosen;
-            return;
-        }
+
         for (Unit u : getGs().enemyCombatUnitMemory) {
             double dist = getGs().broodWarDistance(u.getPosition(), myPos);
             if (dist <= 700 && u instanceof AirAttacker) airAttackers.add(u);
@@ -180,6 +216,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 
-    enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT}
+    enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT, IRRADIATE}
 
 }
