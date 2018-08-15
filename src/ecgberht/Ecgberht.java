@@ -33,7 +33,7 @@ import ecgberht.BehaviourTrees.Scanner.Scan;
 import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
-import ecgberht.Strategies.BioBuild;
+import ecgberht.Strategies.FullBio;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree;
@@ -404,13 +404,13 @@ public class Ecgberht implements BWEventListener {
             }
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
                     gs.strat.name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
-                BioBuild b = new BioBuild();
+                FullBio b = new FullBio();
                 b.buildUnits.remove(UnitType.Terran_Bunker);
                 gs.strat = b;
                 gs.maxWraiths = 5;
                 transition();
             }
-            if (gs.frameCount % 3500 == 0) gs.resetInMap();
+            if (gs.frameCount % 2500 == 0) gs.resetInMap();
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
                     !gs.strat.name.equals("PlasmaWraithHell")) { // Plasma special eggs
                 for (Unit u : bw.getAllUnits()) {
@@ -968,9 +968,9 @@ public class Ecgberht implements BWEventListener {
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && Util.isEnemy(p)) {
                 IntelligenceAgency.onShow(arg0, type);
-                if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1){ // TODO Check
+                if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) { // TODO Check
                     gs.enemyRace = type.getRace();
-                    if(gs.enemyRace == Race.Zerg) initUpgradeTree();
+                    if (gs.enemyRace == Race.Zerg) initUpgradeTree();
                 }
 
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type != UnitType.Zerg_Overlord))) {
@@ -978,7 +978,7 @@ public class Ecgberht implements BWEventListener {
                 }
                 if (type.isBuilding()) {
                     gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
-                    if(!gs.enemyBuildingMemory.containsKey(arg0)){
+                    if (!gs.enemyBuildingMemory.containsKey(arg0)) {
                         gs.inMap.updateMap(arg0, false);
                         gs.map.updateMap(arg0.getTilePosition(), type, false);
                     }

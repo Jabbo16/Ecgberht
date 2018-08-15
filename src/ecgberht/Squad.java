@@ -109,16 +109,16 @@ public class Squad implements Comparable<Squad> {
                         if (u.getOrder() != Order.Move) move = getGs().defendPosition;
                     } else if (!getGs().DBs.isEmpty()) {
                         Unit bunker = getGs().DBs.keySet().iterator().next();
-                        if (getGs().broodWarDistance(bunker.getPosition(), sCenter) >= 180 &&
+                        if (Util.broodWarDistance(bunker.getPosition(), sCenter) >= 180 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().strat.name.equals("ProxyBBS")) {
                             if (u.getOrder() != Order.Move) move = bunker.getPosition();
                         }
                     } else if (getGs().mainChoke != null && !getGs().EI.naughty && !getGs().strat.name.equals("ProxyBBS")) {
-                        if (getGs().broodWarDistance(getGs().mainChoke.getCenter().toPosition(), sCenter) >= 200 &&
+                        if (Util.broodWarDistance(getGs().mainChoke.getCenter().toPosition(), sCenter) >= 200 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
                             if (u.getOrder() != Order.Move) move = getGs().mainChoke.getCenter().toPosition();
                         }
-                    } else if (getGs().broodWarDistance(u.getPosition(), sCenter) >= 180 && u.getOrder() != Order.Move) {
+                    } else if (Util.broodWarDistance(u.getPosition(), sCenter) >= 180 && u.getOrder() != Order.Move) {
                         if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) move = sCenter;
                     }
                     if (move != null) {
@@ -144,7 +144,7 @@ public class Squad implements Comparable<Squad> {
                 getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getInitialType().tileHeight())), retreating);
                 if (retreat) {
                     Position pos = getGs().getNearestCC(u.getPosition());
-                    if (getGs().broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
+                    if (Util.broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
                             (lastTarget != null && !lastTarget.equals(pos)))) {
                         ((MobileUnit) u).move(pos);
                         continue;
@@ -153,7 +153,7 @@ public class Squad implements Comparable<Squad> {
                 // Experimental
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition()) && getGs().supplyMan.getSupplyUsed() < 240) {
                     if (members.size() == 1) continue;
-                    double dist = getGs().broodWarDistance(u.getPosition(), sCenter);
+                    double dist = Util.broodWarDistance(u.getPosition(), sCenter);
                     if (dist >= 300 && u.getOrderTargetPosition() != null) {
                         if (!u.getOrderTargetPosition().equals(sCenter)) {
                             ((MobileUnit) u).attack(sCenter);
@@ -170,12 +170,12 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 if (u.isIdle() && attack != null && frameCount != u.getLastCommandFrame() &&
-                        getGs().broodWarDistance(attack, u.getPosition()) >= 400) {
+                        Util.broodWarDistance(attack, u.getPosition()) >= 400) {
                     ((MobileUnit) u).attack(attack);
                     continue;
                 }
                 if (u.isAttacking() && attack == null && frameCount != u.getLastCommandFrame() &&
-                        getGs().broodWarDistance(sCenter, u.getPosition()) >= 500) {
+                        Util.broodWarDistance(sCenter, u.getPosition()) >= 500) {
                     ((MobileUnit) u).move(sCenter);
                     continue;
                 }
@@ -226,7 +226,7 @@ public class Squad implements Comparable<Squad> {
                         enemyToAttack.add(e);
                         if (!(e instanceof Building) && !e.getInitialType().isFlyer() && e.getInitialType().groundWeapon().maxRange() <= 32
                                 && e.getInitialType() != UnitType.Terran_Medic) {
-                            if (getGs().broodWarDistance(u.getPosition(), e.getPosition()) <=
+                            if (Util.broodWarDistance(u.getPosition(), e.getPosition()) <=
                                     u.getInitialType().groundWeapon().maxRange()) {
                                 enemyToKite.add(e);
                             }
@@ -271,7 +271,7 @@ public class Squad implements Comparable<Squad> {
             if (((PlayerUnit) m).getHitPoints() == m.getInitialType().maxHitPoints() || marinesToHeal.contains(m)) {
                 continue;
             }
-            double distA = getGs().broodWarDistance(m.getPosition(), u.getPosition());
+            double distA = Util.broodWarDistance(m.getPosition(), u.getPosition());
             if (chosen == null || distA < dist) {
                 chosen = (PlayerUnit) m;
                 dist = distA;

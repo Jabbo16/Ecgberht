@@ -110,7 +110,7 @@ public class Util {
         ChokePoint closestChoke = null;
         double dist = Double.MAX_VALUE;
         for (ChokePoint choke : getGs().bwem.getMap().getChokePoints()) {
-            double cDist = getGs().broodWarDistance(pos, choke.getCenter().toPosition());
+            double cDist = broodWarDistance(pos, choke.getCenter().toPosition());
             if (closestChoke == null || cDist < dist) {
                 closestChoke = choke;
                 dist = cDist;
@@ -137,7 +137,7 @@ public class Util {
         Base closestBase = null;
         double dist = Double.MAX_VALUE;
         for (Base base : getGs().bwem.getMap().getBases()) {
-            double cDist = getGs().broodWarDistance(pos, base.getLocation().toPosition());
+            double cDist = broodWarDistance(pos, base.getLocation().toPosition());
             if (closestBase == null || cDist < dist) {
                 closestBase = base;
                 dist = cDist;
@@ -242,7 +242,7 @@ public class Util {
     public static List<Unit> getFriendlyUnitsInRadius(Position sCenter, int radius) {
         List<Unit> units = new ArrayList<>();
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
-            if (getGs().broodWarDistance(u.getPosition(), sCenter) <= radius) units.add(u);
+            if (broodWarDistance(u.getPosition(), sCenter) <= radius) units.add(u);
         }
         return units;
     }
@@ -371,11 +371,11 @@ public class Util {
     }
 
     public static int getGroundDistance(Position start, Position end) {
-        try{
+        try {
             MutableInt dist = new MutableInt();
             getGs().bwem.getMap().getPath(start, end, dist);
             return dist.intValue();
-        } catch (Exception e){
+        } catch (Exception e) {
             System.err.println("Ground Distance Exception");
             e.printStackTrace();
             return Integer.MAX_VALUE;
@@ -391,5 +391,50 @@ public class Util {
         if (units.size() == 1) return units.iterator().next().getPosition();
         for (Unit u : units) point = point.add(u.getPosition());
         return point;
+    }
+
+    //Credits to @PurpleWaveJadien / Dan
+    public static double broodWarDistance(Position a, Position b) {
+        return broodWarDistance(a.getX(), a.getY(), b.getX(), b.getY());
+    }
+
+    //Credits to @PurpleWaveJadien / Dan
+    public static double broodWarDistance(int x00, int y00, int x01, int y01) {
+        double dx = Math.abs(x00 - x01);
+        double dy = Math.abs(y00 - y01);
+        double d = Math.min(dx, dy);
+        double D = Math.max(dx, dy);
+        if (d < D / 4) return D;
+        return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
+    }
+
+    //Credits to @PurpleWaveJadien / Dan
+    public static double broodWarDistance(double[] a, double[] b) {
+        double dx = Math.abs(a[0] - b[0]);
+        double dy = Math.abs(a[1] - b[1]);
+        double d = Math.min(dx, dy);
+        double D = Math.max(dx, dy);
+        if (d < D / 4) return D;
+        return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
+    }
+
+    //Credits to @PurpleWaveJadien / Dan
+    public double broodWarDistanceBox(Position p0, Position p1, Position p2, Position p3) {
+        return broodWarDistanceBox(p0.getX(), p0.getY(), p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
+    }
+
+    //Credits to @PurpleWaveJadien / Dan
+    public double broodWarDistanceBox(int x00, int y00, int x01, int y01, int x10, int y10, int x11, int y11) {
+        if (x11 < x00) {
+            if (y11 < y00) return broodWarDistance(x11, y11, x00, y00);
+            else if (y10 > y01) return broodWarDistance(x11, y10, x00, y01);
+            else return x00 - x11;
+        } else if (x10 > x01) {
+            if (y11 < y00) return broodWarDistance(x10, y11, x01, y00);
+            else if (y10 > y01) return broodWarDistance(x10, y10, x01, y01);
+            else return x10 - x01;
+        } else if (y11 < y00) return y00 - y11;
+        else if (y10 > y01) return y10 - y01;
+        return 0;
     }
 }

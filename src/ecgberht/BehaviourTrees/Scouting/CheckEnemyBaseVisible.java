@@ -25,7 +25,7 @@ public class CheckEnemyBaseVisible extends Action {
             List<PlayerUnit> enemies = ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getIH().enemy());
             if (!enemies.isEmpty()) {
                 for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                    if (((GameState) this.handler).broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
+                    if (Util.broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
                         ((GameState) this.handler).enemyMainBase = Util.getClosestBaseLocation(u.pos.toPosition());
                         ((GameState) this.handler).ScoutSLs = new HashSet<>();
                         if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {

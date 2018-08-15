@@ -3,6 +3,7 @@ package ecgberht.Agents;
 import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -88,25 +89,15 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     private void combat() {
         Unit toAttack = getUnitToAttack(unit, closeEnemies);
         if (toAttack != null) {
-            if (attackUnit != null) {
-                if (attackUnit.equals(toAttack)) return;
-            }
+            if (attackUnit != null && attackUnit.equals(toAttack)) return;
             unit.attack(toAttack);
             attackUnit = toAttack;
-        } else {
-            if (!closeWorkers.isEmpty()) {
-                toAttack = getUnitToAttack(unit, closeWorkers);
-                if (toAttack != null) {
-                    if (attackUnit != null) {
-                        if (attackUnit.equals(toAttack)) {
-                            return;
-                        } else {
-                            unit.attack(toAttack);
-                            attackUnit = toAttack;
-                            attackPos = null;
-                        }
-                    }
-                }
+        } else if (!closeWorkers.isEmpty()) {
+            toAttack = getUnitToAttack(unit, closeWorkers);
+            if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
+                unit.attack(toAttack);
+                attackUnit = toAttack;
+                attackPos = null;
             }
         }
     }
@@ -119,27 +110,21 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         }
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
-            double dist = getGs().broodWarDistance(u.getPosition(), myPos);
+            double dist = Util.broodWarDistance(u.getPosition(), myPos);
             if (dist <= 700) closeEnemies.add(u);
             if (dist <= 700 && u instanceof AirAttacker) airAttackers.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
             if (!getGs().getGame().getBWMap().isVisible(u.pos)) continue;
-            double dist = getGs().broodWarDistance(u.pos.toPosition(), myPos);
+            double dist = Util.broodWarDistance(u.pos.toPosition(), myPos);
             if (dist <= 700) closeEnemies.add(u.unit);
             if (dist <= 700 && (u.unit instanceof AirAttacker || u.type == UnitType.Terran_Bunker) && u.unit.isCompleted()) {
                 airAttackers.add(u.unit);
             }
         }
-        if (closeEnemies.isEmpty()) {
-            status = Status.ATTACK;
-            return;
-        } else {
-            if (!airAttackers.isEmpty() && getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose) {
-                status = Status.RETREAT;
-                return;
-            }
-        }
+        if (closeEnemies.isEmpty()) status = Status.ATTACK;
+        else if (!airAttackers.isEmpty() && getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose)
+            status = Status.RETREAT;
     }
 
     private void attack() {
@@ -155,8 +140,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 unit.attack(newAttackPos);
                 attackUnit = null;
             }
-            return;
-        } else if (attackPos.equals(newAttackPos)) return;
+        }
     }
 
     @Override

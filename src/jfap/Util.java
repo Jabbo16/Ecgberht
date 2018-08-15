@@ -1,5 +1,6 @@
 package jfap;
 
+import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;

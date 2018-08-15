@@ -3,6 +3,7 @@ package ecgberht.BehaviourTrees.Bunker;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -30,8 +31,8 @@ public class ChooseMarineToEnter extends Action {
                     for (Entry<String, Squad> s : ((GameState) this.handler).squads.entrySet()) {
                         for (Unit u : s.getValue().members) {
                             if (u instanceof Marine) {
-                                if ((closest == null || ((GameState) this.handler).broodWarDistance(b.getPosition(), u.getPosition()) <
-                                        ((GameState) this.handler).broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
+                                if ((closest == null || Util.broodWarDistance(b.getPosition(), u.getPosition()) <
+                                        Util.broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
                                     closest = new MutablePair<>(s.getKey(), u);
                                 }
                             }

@@ -52,8 +52,8 @@ public class ChooseSituationalUnit extends Action {
             if (!tower || !science) return State.FAILURE;
             for (Starport s : ((GameState) this.handler).Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
-                    if(((GameState)this.handler).getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
-                    && ((GameState)this.handler).getCash().first >= UnitType.Terran_Science_Vessel.mineralPrice() + 50){
+                    if (((GameState) this.handler).getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
+                            && ((GameState) this.handler).getCash().first >= UnitType.Terran_Science_Vessel.mineralPrice() + 50) {
                         for (Barracks b : ((GameState) this.handler).MBs) {
                             if (!b.isTraining()) {
                                 ((GameState) this.handler).chosenUnit = UnitType.Terran_Marine;

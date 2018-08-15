@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 
 import bwem.Base;
 import ecgberht.GameState;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -22,7 +23,7 @@ public class ChooseIsland extends Action {
             Position drop = ((GameState) this.handler).chosenDropShip.unit.getPosition();
             for (Base b : ((GameState) this.handler).islandBases) {
                 if (((GameState) this.handler).CCs.containsKey(b)) continue;
-                double dist = ((GameState) this.handler).broodWarDistance(b.getLocation().toPosition(), drop);
+                double dist = Util.broodWarDistance(b.getLocation().toPosition(), drop);
                 if (dist < distMax) {
                     distMax = dist;
                     chosen = b;

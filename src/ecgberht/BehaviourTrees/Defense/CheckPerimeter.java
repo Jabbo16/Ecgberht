@@ -41,38 +41,38 @@ public class CheckPerimeter extends Conditional {
                         uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {
                     for (Map.Entry<SCV, Building> c : ((GameState) this.handler).workerTask.entrySet()) {
                         int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
+                        if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).CCs.values()) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 500) {
+                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 500) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).DBs.keySet()) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).SBs) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     for (ResearchingFacility c : ((GameState) this.handler).UBs) {
-                        if (((GameState) this.handler).broodWarDistance(u.getPosition(), ((Unit) c).getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.getPosition(), ((Unit) c).getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             continue;
                         }
                     }
                     if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                         for (Unit c : ((GameState) this.handler).MBs) {
-                            if (((GameState) this.handler).broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                            if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 ((GameState) this.handler).enemyInBase.add(u);
                                 continue;
                             }

@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -24,7 +25,7 @@ public class ChooseWorkerToHarass extends Action {
                 if (((GameState) this.handler).enemyMainBase != null) {
                     if (u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
                         if (((Worker) u).getOrder() != Order.Move) continue;
-                        if (((GameState) this.handler).broodWarDistance(((GameState) this.handler).enemyMainBase.getLocation().toPosition(), ((GameState) this.handler).chosenHarasser.getPosition()) <= 700) {
+                        if (Util.broodWarDistance(((GameState) this.handler).enemyMainBase.getLocation().toPosition(), ((GameState) this.handler).chosenHarasser.getPosition()) <= 700) {
                             ((GameState) this.handler).chosenUnitToHarass = u;
                             return State.SUCCESS;
                         }

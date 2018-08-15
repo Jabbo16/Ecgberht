@@ -3,6 +3,7 @@ package ecgberht.Agents;
 import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -83,25 +84,15 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private void combat() {
         Unit toAttack = getUnitToAttack(unit, closeEnemies);
         if (toAttack != null) {
-            if (attackUnit != null) {
-                if (attackUnit.equals(toAttack)) return;
-            }
+            if (attackUnit != null && attackUnit.equals(toAttack)) return;
             unit.attack(toAttack);
             attackUnit = toAttack;
-        } else {
-            if (!closeWorkers.isEmpty()) {
-                toAttack = getUnitToAttack(unit, closeWorkers);
-                if (toAttack != null) {
-                    if (attackUnit != null) {
-                        if (attackUnit.equals(toAttack)) {
-                            return;
-                        } else {
-                            unit.attack(toAttack);
-                            attackUnit = toAttack;
-                            attackPos = null;
-                        }
-                    }
-                }
+        } else if (!closeWorkers.isEmpty()) {
+            toAttack = getUnitToAttack(unit, closeWorkers);
+            if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
+                unit.attack(toAttack);
+                attackUnit = toAttack;
+                attackPos = null;
             }
         }
     }
@@ -114,16 +105,15 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         }
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
-            if (getGs().broodWarDistance(u.getPosition(), myPos) <= 600) closeEnemies.add(u);
+            if (Util.broodWarDistance(u.getPosition(), myPos) <= 600) closeEnemies.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
             if ((u.type.canAttack() || u.type == UnitType.Terran_Bunker) && u.unit.isCompleted()) {
-                if (getGs().broodWarDistance(myPos, u.pos.toPosition()) <= 600) closeEnemies.add(u.unit);
+                if (Util.broodWarDistance(myPos, u.pos.toPosition()) <= 600) closeEnemies.add(u.unit);
             }
         }
         if (closeEnemies.isEmpty()) {
             status = Status.ATTACK;
-            return;
         } else {
             boolean meleeOnly = checkOnlyMelees();
             if (!meleeOnly && getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).lose) {
@@ -147,33 +137,26 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 if (attackUnit == null) {
                     Unit closest = getUnitToAttack(unit, closeEnemies);
                     if (closest != null) {
-                        double dist = getGs().broodWarDistance(unit.getPosition(), closest.getPosition());
+                        double dist = Util.broodWarDistance(unit.getPosition(), closest.getPosition());
                         double speed = type.topSpeed();
                         double timeToEnter = 0.0;
-                        if (speed > .00001) {
-                            timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
-                        }
+                        if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
                         if (timeToEnter >= cd) {
                             status = Status.COMBAT;
                             return;
                         }
                     }
                 } else {
-                    double dist = getGs().broodWarDistance(unit.getPosition(), attackUnit.getPosition());
+                    double dist = Util.broodWarDistance(unit.getPosition(), attackUnit.getPosition());
                     double speed = type.topSpeed();
                     double timeToEnter = 0.0;
-                    if (speed > .00001) {
-                        timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
-                    }
+                    if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
                     if (timeToEnter >= cd) {
                         status = Status.COMBAT;
                         return;
                     }
                 }
-                if (cd == 0) {
-                    status = Status.COMBAT;
-                    return;
-                }
+                if (cd == 0) status = Status.COMBAT;
             }
         }
     }

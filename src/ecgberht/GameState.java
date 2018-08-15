@@ -175,11 +175,11 @@ public class GameState extends GameHandler {
 
     Strategy initStrat() {
         try {
-            BioBuild b = new BioBuild();
+            FullBio b = new FullBio();
             ProxyBBS bbs = new ProxyBBS();
-            BioMechBuild bM = new BioMechBuild();
-            BioBuildFE bFE = new BioBuildFE();
-            BioMechBuildFE bMFE = new BioMechBuildFE();
+            BioMech bM = new BioMech();
+            FullBioFE bFE = new FullBioFE();
+            BioMechFE bMFE = new BioMechFE();
             FullMech FM = new FullMech();
             BioGreedyFE bGFE = new BioGreedyFE();
             MechGreedyFE mGFE = new MechGreedyFE();
@@ -191,6 +191,7 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
+            if (true) return bGFE;
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
@@ -272,7 +273,7 @@ public class GameState extends GameHandler {
         } catch (Exception e) {
             System.err.println("Error initStrat, using default strategy");
             e.printStackTrace();
-            return new BioBuild();
+            return new FullBio();
         }
 
     }
@@ -326,7 +327,7 @@ public class GameState extends GameHandler {
             if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
             for (ChokePoint c : b.getArea().getChokePoints()) {
                 for (Position m : blockingMinerals.keySet()) {
-                    if (broodWarDistance(m, c.getCenter().toPosition()) < 40) {
+                    if (Util.broodWarDistance(m, c.getCenter().toPosition()) < 40) {
                         blockedBLs.add(b);
                         break;
                     }
@@ -735,7 +736,7 @@ public class GameState extends GameHandler {
         List<Unit> aux3 = new ArrayList<>();
         for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             if ((u.getKey().isIdle() || u.getKey().isGatheringGas() || u.getKey().isGatheringMinerals()) &&
-                    broodWarDistance(u.getKey().getPosition(), u.getValue().second.toPosition()) > 100) {
+                    Util.broodWarDistance(u.getKey().getPosition(), u.getValue().second.toPosition()) > 100) {
                 aux3.add(u.getKey());
                 deltaCash.first -= u.getValue().first.mineralPrice();
                 deltaCash.second -= u.getValue().first.gasPrice();
@@ -759,8 +760,7 @@ public class GameState extends GameHandler {
         if (enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
             enemyMainBase = null;
             chosenScout = null;
-            ScoutSLs.clear();
-            for (bwem.Base b : BLs) {
+            for (Base b : BLs) {
                 if (!CCs.containsKey(b)) {
                     if (!strat.name.equals("PlasmaWraithHell") && !bwem.getMap().getPath(self.getStartLocation().toPosition(), b.getLocation().toPosition()).isEmpty()) {
                         continue;
@@ -892,9 +892,9 @@ public class GameState extends GameHandler {
         } else {
             String chosen = null;
             for (Entry<String, Squad> s : squads.entrySet()) {
-                if (s.getValue().members.size() < 16 && (s.getValue().members.isEmpty() || broodWarDistance(getSquadCenter(s.getValue()),
-                        unit.getPosition()) <= 700) && (chosen == null || broodWarDistance(unit.getPosition(),
-                        getSquadCenter(s.getValue())) < broodWarDistance(unit.getPosition(),
+                if (s.getValue().members.size() < 16 && (s.getValue().members.isEmpty() || Util.broodWarDistance(getSquadCenter(s.getValue()),
+                        unit.getPosition()) <= 700) && (chosen == null || Util.broodWarDistance(unit.getPosition(),
+                        getSquadCenter(s.getValue())) < Util.broodWarDistance(unit.getPosition(),
                         getSquadCenter(squads.get(chosen))))) {
                     chosen = s.getKey();
                 }
@@ -998,7 +998,7 @@ public class GameState extends GameHandler {
         Unit chosen = null;
         double distance = Double.MAX_VALUE;
         for (Unit u : CCs.values()) {
-            double distance_aux = broodWarDistance(u.getPosition(), position);
+            double distance_aux = Util.broodWarDistance(u.getPosition(), position);
             if (distance_aux > 0.0 && (chosen == null || distance_aux < distance)) {
                 chosen = u;
                 distance = distance_aux;
@@ -1134,6 +1134,13 @@ public class GameState extends GameHandler {
         for (Unit u : aux) enemyBuildingMemory.remove(u);
     }
 
+    private boolean checkSameAttack(Squad s1, Squad s2) {
+        if (s1.attack == null && s2.attack == null) return true;
+        if (s1.attack == null) return false;
+        if (s2.attack == null) return false;
+        return s1.attack.equals(s2.attack);
+    }
+
     void mergeSquads() {
         try {
             if (squads.isEmpty()) return;
@@ -1141,11 +1148,11 @@ public class GameState extends GameHandler {
             for (Squad u1 : squads.values()) {
                 if (u1.members.isEmpty()) continue;
                 int u1_size = u1.members.size();
-                if (u1_size < 16) {
+                if (u1_size < 18) {
                     for (Squad u2 : squads.values()) {
-                        if (u2.name.equals(u1.name) || u2.members.size() > 15 || u2.members.isEmpty()) continue;
-                        if (broodWarDistance(getSquadCenter(u1), getSquadCenter(u2)) < 200) {
-                            if (u1_size + u2.members.size() > 16) continue;
+                        if (u2.name.equals(u1.name) || u2.members.size() > 17 || u2.members.isEmpty()) continue;
+                        if (Util.broodWarDistance(getSquadCenter(u1), getSquadCenter(u2)) <= 200) {
+                            if (u1_size + u2.members.size() > 18) continue;
                             else {
                                 u1.members.addAll(u2.members);
                                 u2.members.clear();
@@ -1233,25 +1240,6 @@ public class GameState extends GameHandler {
         }
     }
 
-    //Credits to @PurpleWaveJadien / Dan
-    public double broodWarDistance(Position a, Position b) {
-        double dx = Math.abs(a.getX() - b.getX());
-        double dy = Math.abs(a.getY() - b.getY());
-        double d = Math.min(dx, dy);
-        double D = Math.max(dx, dy);
-        if (d < D / 4) return D;
-        return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
-    }
-
-    public double broodWarDistance(double[] a, double[] b) {
-        double dx = Math.abs(a[0] - b[0]);
-        double dy = Math.abs(a[1] - b[1]);
-        double d = Math.min(dx, dy);
-        double D = Math.max(dx, dy);
-        if (d < D / 4) return D;
-        return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
-    }
-
     public Unit getUnitToAttack(Unit myUnit, Set<Unit> closeSim) {
         Unit chosen = null;
         Set<Unit> workers = new TreeSet<>();
@@ -1265,7 +1253,7 @@ public class GameState extends GameHandler {
         if (!workers.isEmpty()) {
             double distB = Double.MAX_VALUE;
             for (Unit u : workers) {
-                double distA = broodWarDistance(myUnit.getPosition(), u.getPosition());
+                double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
                 if (worker == null || distA < distB) {
                     worker = u;
                     distB = distA;
@@ -1276,7 +1264,7 @@ public class GameState extends GameHandler {
         if (!combatUnits.isEmpty()) {
             double distB = Double.MAX_VALUE;
             for (Unit u : combatUnits) {
-                double distA = broodWarDistance(myUnit.getPosition(), u.getPosition());
+                double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
                 if (chosen == null || distA < distB) {
                     chosen = u;
                     distB = distA;
@@ -1298,7 +1286,7 @@ public class GameState extends GameHandler {
                 if (!enemy.exists() || !enemy.isVisible()) continue;
                 Position enemyPosition = enemy.getPosition();
                 MutablePair<Double, Double> unitV = new MutablePair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
-                double distance = broodWarDistance(ownPosition, enemyPosition);
+                double distance = Util.broodWarDistance(ownPosition, enemyPosition);
                 if (distance < minDistance) minDistance = distance;
                 //unitV.first = (1 / distance) * unitV.first;
                 //unitV.second = (1 / distance) * unitV.second;
@@ -1404,7 +1392,7 @@ public class GameState extends GameHandler {
         double bestDist = Double.MAX_VALUE;
         for (Squad s : squads.values()) {
             if (s.members.isEmpty() || s.detector != null) continue;
-            double dist = broodWarDistance(getSquadCenter(s), pos);
+            double dist = Util.broodWarDistance(getSquadCenter(s), pos);
             if (dist < bestDist) {
                 chosen = s;
                 bestDist = dist;

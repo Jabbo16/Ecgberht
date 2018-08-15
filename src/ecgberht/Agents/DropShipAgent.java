@@ -1,5 +1,6 @@
 package ecgberht.Agents;
 
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.unit.Dropship;
@@ -131,7 +132,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         if (pickingUp == null) {
             double distB = Double.MAX_VALUE;
             for (Unit u : cargoWanted) {
-                double distA = getGs().broodWarDistance(unit.getPosition(), u.getPosition());
+                double distA = Util.broodWarDistance(unit.getPosition(), u.getPosition());
                 if (pickingUp == null || distA < distB) {
                     pickingUp = u;
                     distB = distA;
@@ -168,7 +169,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         }
         if (status == Status.MOVING) {
             if (target == null) return Status.IDLE;
-            if (getGs().broodWarDistance(unit.getPosition(), target) < 200) return Status.DROP;
+            if (Util.broodWarDistance(unit.getPosition(), target) < 200) return Status.DROP;
             return Status.MOVING;
         }
         if (status == Status.DROP) {
@@ -176,7 +177,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
             else return Status.DROP;
         }
         if (status == Status.RETREAT) {
-            if (target != null && getGs().broodWarDistance(unit.getPosition(), target) <= 64) return Status.IDLE;
+            if (target != null && Util.broodWarDistance(unit.getPosition(), target) <= 64) return Status.IDLE;
             else return Status.RETREAT;
         }
         return Status.IDLE;

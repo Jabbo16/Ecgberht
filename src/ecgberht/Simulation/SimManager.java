@@ -130,7 +130,7 @@ public class SimManager {
             SimInfo aux = new SimInfo();
             for (Cluster enemy : enemies) {
                 if (enemy.units.isEmpty()) continue;
-                if (getGs().broodWarDistance(friend.mode(), enemy.mode()) <= radius) {
+                if (Util.broodWarDistance(friend.mode(), enemy.mode()) <= radius) {
                     aux.enemies.addAll(enemy.units);
                 }
             }

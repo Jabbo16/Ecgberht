@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import bwem.Base;
 import ecgberht.GameState;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -27,7 +28,7 @@ public class CheckScout extends Conditional {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).mapSize == 2 && ((GameState) this.handler).countUnit(UnitType.Terran_Supply_Depot) == 0) {
+            if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).mapSize == 2 && Util.countUnitTypeSelf(UnitType.Terran_Supply_Depot) == 0) {
                 return State.FAILURE;
             }
             if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).getPlayer().supplyUsed() >= 12 && ((GameState) this.handler).enemyMainBase == null) {

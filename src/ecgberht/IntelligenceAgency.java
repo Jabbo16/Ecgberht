@@ -1,9 +1,9 @@
 package ecgberht;
 
 import bwem.unit.Mineral;
-import ecgberht.Strategies.BioBuild;
-import ecgberht.Strategies.BioBuildFE;
-import ecgberht.Strategies.BioMechBuildFE;
+import ecgberht.Strategies.BioMechFE;
+import ecgberht.Strategies.FullBio;
+import ecgberht.Strategies.FullBioFE;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.type.Race;
@@ -224,7 +224,7 @@ public class IntelligenceAgency {
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioBuild();
+                    getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
@@ -252,12 +252,12 @@ public class IntelligenceAgency {
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioBuild();
+                    getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioBuildFE();
+                    getGs().strat = new FullBioFE();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
@@ -286,11 +286,11 @@ public class IntelligenceAgency {
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioMechBuildFE();
+                    getGs().strat = new BioMechFE();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioMechBuildFE();
+                    getGs().strat = new BioMechFE();
                     Ecgberht.transition();
                 }
                 return true;
@@ -343,12 +343,12 @@ public class IntelligenceAgency {
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioBuild();
+                    getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
                     startStrat = getGs().strat.name;
-                    getGs().strat = new BioBuildFE();
+                    getGs().strat = new FullBioFE();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
