@@ -203,7 +203,7 @@ public class Util {
         return unit.getInitialType();
     }
 
-    public static WeaponType getWeapon(Unit attacker, Unit target) {
+    private static WeaponType getWeapon(Unit attacker, Unit target) {
         UnitType attackerType = getType((PlayerUnit) attacker);
         UnitType targetType = getType(((PlayerUnit) target));
         if (attackerType == UnitType.Terran_Bunker) return getWeapon(UnitType.Terran_Marine, targetType);
@@ -248,7 +248,7 @@ public class Util {
     }
 
     // get a target for the ranged unit to attack
-    public static final Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
+    public static Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
         double highestPriority = 0.f;
         Unit bestTarget = null;
         // for each target possibility
@@ -261,6 +261,23 @@ public class Util {
             }
         }
         return bestTarget;
+    }
+
+
+    public static String raceToString(Race race) {
+        switch (race) {
+            case Zerg:
+                return "Zerg";
+            case Terran:
+                return "Terran";
+            case Protoss:
+                return "Protoss";
+            case Random:
+                return "Random";
+            case Unknown:
+                return "Random";
+        }
+        return "Unknown";
     }
 
     // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma

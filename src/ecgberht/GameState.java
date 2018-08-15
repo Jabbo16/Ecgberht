@@ -55,7 +55,7 @@ public class GameState extends GameHandler {
     public ChokePoint mainChoke = null;
     public ChokePoint naturalChoke = null;
     public DropShipAgent chosenDropShip;
-    public EnemyInfo EI = new EnemyInfo(ih.enemy().getName());
+    public EnemyInfo EI = new EnemyInfo(ih.enemy().getName(), ih.enemy().getRace());
     public ExtendibleByAddon chosenBuildingAddon = null;
     public Gson enemyInfoJSON = new Gson();
     public InfluenceMap inMap;
@@ -191,7 +191,6 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if (true) return bGFE;
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
@@ -1025,9 +1024,10 @@ public class GameState extends GameHandler {
             if (Files.exists(Paths.get(path))) {
                 EI = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
             }
+
         } catch (Exception e) {
             System.err.println("readOpponentInfo");
-            System.err.println(e);
+            e.printStackTrace();
         }
     }
 

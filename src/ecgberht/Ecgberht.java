@@ -261,6 +261,7 @@ public class Ecgberht implements BWEventListener {
             gs = new GameState(bw, bwem);
             gs.initEnemyRace();
             gs.readOpponentInfo();
+            if (gs.EI.race == null) gs.EI.race = Util.raceToString(bw.getInteractionHandler().enemy().getRace());
             gs.alwaysPools();
             if (gs.enemyRace == Race.Zerg) {
                 if (gs.EI.naughty) gs.playSound("rushed.mp3");
