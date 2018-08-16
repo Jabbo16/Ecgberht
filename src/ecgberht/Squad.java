@@ -79,7 +79,7 @@ public class Squad implements Comparable<Squad> {
                     SiegeTank t = (SiegeTank) u;
                     if (t.isSieged() && u.getOrder() == Order.Unsieging) continue;
                     if (!t.isSieged() && u.getOrder() == Order.Sieging) continue;
-                    if (status == Status.IDLE && t.isSieged()) return;
+                    if (status == Status.IDLE && t.isSieged()) continue;
                     boolean found = false;
                     boolean close = false;
                     for (Unit e : enemy) {
@@ -88,9 +88,7 @@ public class Squad implements Comparable<Squad> {
                         if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
                             found = true;
                         }
-                        if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) {
-                            close = true;
-                        }
+                        if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) close = true;
                         if (found && close) break;
                     }
                     if (found && !close) {

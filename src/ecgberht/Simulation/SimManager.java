@@ -12,6 +12,7 @@ import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Color;
+import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
@@ -130,9 +131,7 @@ public class SimManager {
             SimInfo aux = new SimInfo();
             for (Cluster enemy : enemies) {
                 if (enemy.units.isEmpty()) continue;
-                if (Util.broodWarDistance(friend.mode(), enemy.mode()) <= radius) {
-                    aux.enemies.addAll(enemy.units);
-                }
+                if (Util.broodWarDistance(friend.mode(), enemy.mode()) <= radius) aux.enemies.addAll(enemy.units);
             }
             if (!aux.enemies.isEmpty()) {
                 aux.allies.addAll(friend.units);
@@ -171,7 +170,9 @@ public class SimManager {
      */
     private void doSim() {
         int energy = 0;
-        for (ComsatStation s : getGs().CSs) energy += s.getEnergy() % 50;
+        for (ComsatStation s : getGs().CSs){
+            if(s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() % 50;
+        }
         for (SimInfo s : simulations) {
             simulator.clear();
             for (Unit u : s.allies) {
