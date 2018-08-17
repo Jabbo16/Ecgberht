@@ -595,13 +595,14 @@ public class GameState extends GameHandler {
                 bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText(Integer.toString(gas), ColorUtil.White));
             }
         }
-        for (Squad s : squads.values()) {
+        sim.drawClusters();
+        /*for (Squad s : squads.values()) {
             if (s.members.isEmpty()) continue;
             Position center = getSquadCenter(s);
             bw.getMapDrawer().drawCircleMap(center, 90, Color.GREEN);
             bw.getMapDrawer().drawTextMap(center, ColorUtil.formatText(s.name, ColorUtil.White));
             bw.getMapDrawer().drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
-        }
+        }*/
         for (Entry<MineralPatch, Integer> m : mineralsAssigned.entrySet()) {
             print(m.getKey(), Color.CYAN);
             if (m.getValue() == 0) continue;
@@ -760,12 +761,11 @@ public class GameState extends GameHandler {
             enemyMainBase = null;
             chosenScout = null;
             for (Base b : BLs) {
-                if (!CCs.containsKey(b)) {
-                    if (!strat.name.equals("PlasmaWraithHell") && !bwem.getMap().getPath(self.getStartLocation().toPosition(), b.getLocation().toPosition()).isEmpty()) {
-                        continue;
-                    }
-                    ScoutSLs.add(b);
+                if(CCs.containsKey(b)) continue;
+                if (!strat.name.equals("PlasmaWraithHell") && b.getArea().getAccessibleNeighbors().isEmpty()) {
+                    continue;
                 }
+                ScoutSLs.add(b);
             }
         }
     }

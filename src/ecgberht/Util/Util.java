@@ -263,7 +263,6 @@ public class Util {
         return bestTarget;
     }
 
-
     public static String raceToString(Race race) {
         switch (race) {
             case Zerg:

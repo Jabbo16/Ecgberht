@@ -60,7 +60,7 @@ public class IntelligenceAgency {
         allyBullets.clear();
         for (Bullet b : getGs().getGame().getBullets()) {
             if (!b.isExists()) continue;
-            if (Util.isEnemy(b.getPlayer())) enemyBullets.add(b);
+            if (b.getPlayer().isEnemy()) enemyBullets.add(b);
             else allyBullets.add(b);
         }
     }

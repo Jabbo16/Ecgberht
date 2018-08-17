@@ -108,7 +108,7 @@ public class MeanShift {
         double x;
         double y;
 
-        public UnitPos(Unit unit, double x, double y) {
+        UnitPos(Unit unit, double x, double y) {
             this.unit = unit;
             this.x = x;
             this.y = y;
