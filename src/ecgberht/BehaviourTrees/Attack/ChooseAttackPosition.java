@@ -18,12 +18,12 @@ public class ChooseAttackPosition extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).squads.isEmpty()) {
+            if (((GameState) this.handler).sqManager.squads.isEmpty()) {
                 return State.FAILURE;
             }
-            for (Squad u : ((GameState) this.handler).squads.values()) {
+            for (Squad u : ((GameState) this.handler).sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                MutablePair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(((GameState) this.handler).getSquadCenter(u).toTilePosition(), true);
+                MutablePair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(u.getSquadCenter().toTilePosition(), true);
                 if (p.first != -1 && p.second != -1) {
                     TilePosition attackPos = new TilePosition(p.second, p.first);
                     if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
@@ -43,10 +43,7 @@ public class ChooseAttackPosition extends Action {
                     }
                     u.giveAttackOrder(((GameState) this.handler).enemyMainBase.getLocation().toPosition());
                     u.status = Status.ATTACK;
-                    continue;
-                } else {
-                    u.status = Status.IDLE;
-                }
+                } else u.status = Status.IDLE;
             }
             return State.SUCCESS;
         } catch (Exception e) {

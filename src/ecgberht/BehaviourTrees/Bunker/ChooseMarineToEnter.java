@@ -22,19 +22,17 @@ public class ChooseMarineToEnter extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).squads.isEmpty()) {
+            if (((GameState) this.handler).sqManager.squads.isEmpty()) {
                 return State.FAILURE;
             }
             for (Bunker b : ((GameState) this.handler).DBs.keySet()) {
                 if (b.getTilePosition().equals(((GameState) this.handler).chosenBunker.getTilePosition())) {
-                    MutablePair<String, Unit> closest = null;
-                    for (Entry<String, Squad> s : ((GameState) this.handler).squads.entrySet()) {
+                    MutablePair<Integer, Unit> closest = null;
+                    for (Entry<Integer, Squad> s : ((GameState) this.handler).sqManager.squads.entrySet()) {
                         for (Unit u : s.getValue().members) {
-                            if (u instanceof Marine) {
-                                if ((closest == null || Util.broodWarDistance(b.getPosition(), u.getPosition()) <
-                                        Util.broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
-                                    closest = new MutablePair<>(s.getKey(), u);
-                                }
+                            if (u instanceof Marine && (closest == null || Util.broodWarDistance(b.getPosition(), u.getPosition()) <
+                                    Util.broodWarDistance(b.getPosition(), closest.second.getPosition()))) {
+                                closest = new MutablePair<>(s.getKey(), u);
                             }
                         }
                     }

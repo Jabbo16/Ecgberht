@@ -34,7 +34,7 @@ public class SendDefenders extends Action {
                 air_only = false;
             }
             Set<Unit> friends = new TreeSet<>();
-            for (Squad s : ((GameState) this.handler).squads.values()) {
+            for (Squad s : ((GameState) this.handler).sqManager.squads.values()) {
                 friends.addAll(s.members);
             }
             boolean bunker = false;
@@ -125,7 +125,7 @@ public class SendDefenders extends Action {
                 }
             } else {
                 if (((GameState) this.handler).strat.name != "ProxyBBS") {
-                    for (Entry<String, Squad> u : ((GameState) this.handler).squads.entrySet()) {
+                    for (Entry<Integer, Squad> u : ((GameState) this.handler).sqManager.squads.entrySet()) {
                         if (((GameState) this.handler).attackPosition != null) {
                             u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
                             u.getValue().status = Status.DEFENSE;

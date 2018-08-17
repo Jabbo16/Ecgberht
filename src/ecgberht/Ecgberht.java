@@ -448,7 +448,6 @@ public class Ecgberht implements BWEventListener {
             attackTree.run();
             gs.updateSquadOrderAndMicro();
             gs.checkMainEnemyBase();
-            gs.mergeSquads();
             if (gs.frameCount > 0 && gs.frameCount % 5 == 0) gs.mineralLocking();
             gs.debugScreen();
             gs.debugText();
@@ -626,11 +625,22 @@ public class Ecgberht implements BWEventListener {
                 } else {
                     if (type.isWorker()) {
                         gs.workerIdle.add((Worker) arg0);
-                    } else {
-                        if (type == UnitType.Terran_Siege_Tank_Tank_Mode) {
-                            if (!gs.TTMs.containsKey(arg0)) {
-                                String name = gs.addToSquad(arg0);
-                                gs.TTMs.put(arg0, name);
+                    } else if (type == UnitType.Terran_Vulture) {
+                        gs.agents.put(arg0, new VultureAgent(arg0));
+                    } else if (type == UnitType.Terran_Dropship) {
+                        DropShipAgent d = new DropShipAgent(arg0);
+                        gs.agents.put(arg0, d);
+                    } else if (type == UnitType.Terran_Science_Vessel) {
+                        VesselAgent v = new VesselAgent(arg0);
+                        gs.agents.put(arg0, v);
+                    } else if (type == UnitType.Terran_Wraith) {
+                        if (!gs.strat.name.equals("PlasmaWraithHell")) {
+                            String name = gs.pickShipName();
+                            gs.agents.put(arg0, new WraithAgent(arg0, name));
+                        }
+                    } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
+                        if (!gs.strat.name.equals("ProxyBBS")) {
+                            if (!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
                                 if (!gs.DBs.isEmpty()) {
                                     ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
                                 } else if (gs.mainChoke != null) {
@@ -638,48 +648,9 @@ public class Ecgberht implements BWEventListener {
                                 } else {
                                     ((MobileUnit) arg0).attack(Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toPosition());
                                 }
-                            } else {
-                                Squad tankS = gs.squads.get(gs.TTMs.get(arg0));
-                                Position beforeSiege = null;
-                                if (tankS != null) beforeSiege = tankS.attack;
-                                if (beforeSiege != null) ((MobileUnit) arg0).attack(beforeSiege);
                             }
-                        } else if (type == UnitType.Terran_Vulture) {
-                            gs.agents.put(arg0, new VultureAgent(arg0));
-
-                        } else if (type == UnitType.Terran_Dropship) {
-                            DropShipAgent d = new DropShipAgent(arg0);
-                            gs.agents.put(arg0, d);
-
-                        } else if (type == UnitType.Terran_Science_Vessel) {
-                            Squad s = gs.chooseVesselSquad(arg0.getPosition());
-                            VesselAgent v = new VesselAgent(arg0, s);
-                            gs.agents.put(arg0, v);
-                            gs.squads.get(s.name).detector = v;
-                        } else if (type == UnitType.Terran_Wraith) {
-                            if (gs.strat.name.equals("PlasmaWraithHell")) {
-                                gs.addToSquad(arg0);
-                            } else {
-                                String name = gs.pickShipName();
-                                gs.agents.put(arg0, new WraithAgent(arg0, name));
-                            }
-                        } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
-                            gs.addToSquad(arg0);
-                            if (!gs.strat.name.equals("ProxyBBS")) {
-                                if (!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
-                                    if (!gs.DBs.isEmpty()) {
-                                        ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
-                                    } else if (gs.mainChoke != null) {
-                                        ((MobileUnit) arg0).attack(gs.mainChoke.getCenter().toPosition());
-                                    } else {
-                                        ((MobileUnit) arg0).attack(Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toPosition());
-                                    }
-                                }
-                            } else {
-                                if (new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
-                                    ((MobileUnit) arg0).attack(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
-                                }
-                            }
+                        } else if (new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
+                            ((MobileUnit) arg0).attack(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
                         }
                     }
                 }
@@ -688,7 +659,6 @@ public class Ecgberht implements BWEventListener {
             System.err.println("onUnitComplete exception");
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -733,8 +703,7 @@ public class Ecgberht implements BWEventListener {
                     } else gs.initDefensePosition = arg0.getTilePosition();
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
-                    if (arg0 instanceof Worker) {
-                        if (gs.strat.name.equals("ProxyBBS")) gs.removeFromSquad(arg0);
+                    if (arg0 instanceof Worker)
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
                                 gs.workerIdle.add((Worker) arg0);
@@ -849,7 +818,7 @@ public class Ecgberht implements BWEventListener {
                         if (gs.Ts.contains(arg0)) gs.Ts.remove(arg0);
                         if (gs.Ps.contains(arg0)) gs.Ps.remove(arg0);
                         if (type == UnitType.Terran_Bunker && gs.DBs.containsKey(arg0)) {
-                            for (Unit u : gs.DBs.get(arg0)) gs.addToSquad(u);
+                            //for (Unit u : gs.DBs.get(arg0)) gs.addToSquad(u);
                             gs.DBs.remove(arg0);
                         }
                         // TODO test
@@ -868,32 +837,20 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                         gs.testMap = gs.map.clone();
-                    } else if (type == UnitType.Terran_Siege_Tank_Siege_Mode || type == UnitType.Terran_Siege_Tank_Tank_Mode) {
-                        if (gs.TTMs.containsKey(arg0)) {
-                            gs.TTMs.remove(arg0);
-                            gs.removeFromSquad(arg0);
-                        }
-                    } else if (type == UnitType.Terran_Marine || type == UnitType.Terran_Medic) {
-                        gs.removeFromSquad(arg0);
                     } else if (type == UnitType.Terran_Vulture) {
                         if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
-                        else gs.removeFromSquad(arg0);
                     } else if (type == UnitType.Terran_Dropship) {
                         if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
                     } else if (type == UnitType.Terran_Science_Vessel) {
                         if (gs.agents.containsKey(arg0)) {
                             VesselAgent v = (VesselAgent) gs.agents.get(arg0);
-                            if (gs.squads.containsKey(v.follow.name)) gs.squads.get(v.follow.name).detector = null;
                             gs.agents.remove(arg0);
                         }
                     } else if (type == UnitType.Terran_Wraith) {
-                        if (gs.strat.name.equals("PlasmaWraithHell")) {
-                            gs.removeFromSquad(arg0);
-                        } else if (gs.agents.containsKey(arg0)) {
-                            String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
-                            gs.shipNames.add(wraith);
-                            gs.agents.remove(arg0);
-                        } else gs.removeFromSquad(arg0);
+                    if (!gs.strat.name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
+                        String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
+                        gs.shipNames.add(wraith);
+                        gs.agents.remove(arg0);
                     }
                 }
             }

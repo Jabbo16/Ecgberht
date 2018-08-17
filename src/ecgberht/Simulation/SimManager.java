@@ -61,7 +61,9 @@ public class SimManager {
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
-        for (Squad s : getGs().squads.values()) myUnits.addAll(s.members); // Squads
+        for (Unit u : getGs().getGame().getUnits(getGs().getPlayer())){
+            if(isArmyUnit(u)) myUnits.add(u);
+        }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
         MeanShift clustering = new MeanShift(myUnits);
@@ -80,6 +82,14 @@ public class SimManager {
         enemies = clustering.run(iterations);
     }
 
+    private boolean isArmyUnit(Unit u) {
+        if(!u.exists() || (u instanceof PlayerUnit && !((PlayerUnit) u).isCompleted())) return false;
+        if(u instanceof Building) return false;
+        if(u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+        return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
+                || u instanceof Vulture || u instanceof Wraith;
+    }
+
     /**
      * Main method that runs every frame
      * If needed creates the clusters and SimInfos and run the simulations on them
@@ -87,10 +97,13 @@ public class SimManager {
     public void onFrameSim() {
         time = System.currentTimeMillis();
         reset();
-        if (!noNeedForSim()) {
-            createClusters();
-            createSimInfos();
-            doSim();
+        createClusters();
+        if(!friendly.isEmpty()){
+            getGs().sqManager.createSquads(friendly);
+            if (!noNeedForSim()) {
+                createSimInfos();
+                doSim();
+            }
         }
         time = System.currentTimeMillis() - time;
     }
@@ -103,7 +116,7 @@ public class SimManager {
     private boolean noNeedForSim() {
         boolean foundThreats = false;
         int workerThreats = 0;
-        if (getGs().squads.isEmpty() && getGs().agents.isEmpty()) return true;
+        if ((friendly.isEmpty() || enemies.isEmpty()) && getGs().agents.isEmpty()) return true;
         if (getGs().getArmySize() >= getGs().enemyCombatUnitMemory.size() * 6) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) {

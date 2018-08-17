@@ -25,11 +25,10 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     private Position center;
     private Unit target;
 
-    public VesselAgent(Unit unit, Squad s) {
+    public VesselAgent(Unit unit) {
         super();
         this.unit = (ScienceVessel) unit;
         this.myUnit = unit;
-        follow = s;
     }
 
     public String statusToString() {
@@ -50,13 +49,13 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             frameLastOrder = unit.getLastCommandFrame();
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
-            if (follow == null || follow.members.isEmpty()) follow = getGs().chooseVesselSquad(unit.getPosition());
+            if (follow == null || follow.members.isEmpty()) follow = chooseVesselSquad();
             if (follow == null) {
                 status = Status.RETREAT;
                 retreat();
                 return false;
             }
-            center = getGs().getSquadCenter(follow);
+            center = follow.getSquadCenter();
             getNewStatus();
             switch (status) {
                 case IRRADIATE:
@@ -83,6 +82,19 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private Squad chooseVesselSquad() {
+        Squad chosen = null;
+        double distMax = Double.MAX_VALUE;
+        for(Squad s : getGs().sqManager.squads.values()){
+            double dist = s.getSquadCenter().getDistance(this.unit.getPosition());
+            if(chosen == null || dist < distMax){
+                chosen = s;
+                distMax = dist;
+            }
+        }
+        return chosen;
     }
 
     private void irradiate() {

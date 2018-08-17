@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Bunker;
 
 import ecgberht.GameState;
+import ecgberht.Squad;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -21,12 +22,12 @@ public class EnterBunker extends Action {
     @Override
     public State execute() {
         try {
-            MutablePair<String, Unit> m = ((GameState) this.handler).chosenMarine;
+            MutablePair<Integer, Unit> m = ((GameState) this.handler).chosenMarine;
             for (Entry<Bunker, Set<Unit>> b : ((GameState) this.handler).DBs.entrySet()) {
                 if (b.getKey().equals(((GameState) this.handler).chosenBunker)) {
                     if (b.getKey().load((MobileUnit) m.second)) {
                         b.getValue().add(m.second);
-                        ((GameState) this.handler).squads.get(m.first).members.remove(m.second);
+                        ((GameState) this.handler).sqManager.squads.get(m.first).members.remove(m.second);
                         return State.SUCCESS;
                     }
                 }

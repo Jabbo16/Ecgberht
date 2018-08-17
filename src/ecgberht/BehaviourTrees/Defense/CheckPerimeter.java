@@ -115,18 +115,18 @@ public class CheckPerimeter extends Conditional {
                 ((GameState) this.handler).workerDefenders.remove(u);
                 ((GameState) this.handler).workerIdle.add(u);
             }
-            for (Squad u : ((GameState) this.handler).squads.values()) {
+            for (Squad u : ((GameState) this.handler).sqManager.squads.values()) {
                 if (u.status == Status.DEFENSE) {
-                    Position closestCC = ((GameState) this.handler).getNearestCC(((GameState) this.handler).getSquadCenter(u));
+                    Position closestCC = ((GameState) this.handler).getNearestCC(u.getSquadCenter());
                     if (closestCC != null) {
-                        Area squad = ((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).getSquadCenter(u).toTilePosition());
+                        Area squad = ((GameState) this.handler).bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
                         Area regCC = ((GameState) this.handler).bwem.getMap().getArea(closestCC.toTilePosition());
                         if (squad != null && regCC != null) {
                             if (!squad.equals(regCC)) {
                                 if (!((GameState) this.handler).DBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
                                     u.giveMoveOrder(((GameState) this.handler).DBs.keySet().iterator().next().getPosition());
                                 } else {
-                                    u.giveMoveOrder(Util.getClosestChokepoint(((GameState) this.handler).getSquadCenter(u)).getCenter().toPosition());
+                                    u.giveMoveOrder(Util.getClosestChokepoint(u.getSquadCenter()).getCenter().toPosition());
                                 }
                                 u.status = Status.IDLE;
                                 u.attack = null;

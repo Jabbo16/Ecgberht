@@ -19,33 +19,31 @@ public class ChooseScout extends Action {
     public State execute() {
         try {
             if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                for (Squad s : ((GameState) this.handler).squads.values()) {
+                for (Squad s : ((GameState) this.handler).sqManager.squads.values()) {
                     for (Unit u : s.members) {
                         if (u instanceof Wraith) {
                             ((GameState) this.handler).chosenScout = u;
-                            ((GameState) this.handler).removeFromSquad(u);
+                            s.members.remove(u);
                             return State.SUCCESS;
                         }
                     }
                 }
             }
-            for (Worker u : ((GameState) this.handler).workerIdle) {
-                ((GameState) this.handler).chosenScout = u;
-                ((GameState) this.handler).workerIdle.remove(u);
-                break;
+            if(!((GameState) this.handler).workerIdle.isEmpty()){
+                Worker chosen = ((GameState) this.handler).workerIdle.iterator().next();
+                ((GameState) this.handler).chosenScout = chosen;
+                ((GameState) this.handler).workerIdle.remove(chosen);
             }
             if (((GameState) this.handler).chosenScout == null) {
                 for (Worker u : ((GameState) this.handler).workerMining.keySet()) {
                     if (!u.isCarryingMinerals()) {
                         ((GameState) this.handler).chosenScout = u;
                         ((GameState) this.handler).workerMining.remove(u);
+                        break;
                     }
-                    break;
                 }
             }
-            if (((GameState) this.handler).chosenScout != null) {
-                return State.SUCCESS;
-            }
+            if (((GameState) this.handler).chosenScout != null) return State.SUCCESS;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

@@ -86,17 +86,15 @@ public class GameState extends GameHandler {
     public Map<SCV, Building> repairerTask = new TreeMap<>();
     public Map<SCV, Building> workerTask = new TreeMap<>();
     public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
-    public Map<String, Squad> squads = new TreeMap<>();
     public Map<Unit, Agent> agents = new TreeMap<>();
     public Map<Unit, EnemyBuilding> enemyBuildingMemory = new TreeMap<>();
-    public Map<Unit, String> TTMs = new TreeMap<>();
     public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
     public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
     public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
     public Map<Worker, Position> workerDefenders = new TreeMap<>();
     public MutablePair<Base, Unit> MainCC = null;
     public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
-    public MutablePair<String, Unit> chosenMarine = null;
+    public MutablePair<Integer, Unit> chosenMarine = null;
     public Player neutral = null;
     public Position attackPosition;
     public Position defendPosition = null;
@@ -119,14 +117,12 @@ public class GameState extends GameHandler {
             "In Amber Clad", "Infinity", "Jericho", "Las Vegas", "Lawgiver", "Leviathan", "Long Night of Solace",
             "Matador", "Penance", "Persephone", "Pillar of Autumn", "Pitiless", "Pompadour", "Providence", "Revenant",
             "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
-    public Set<String> teamNames = new TreeSet<>(Arrays.asList("Alpha", "Bravo", "Charlie", "Delta",
-            "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa",
-            "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "X-Ray", "Yankee", "Zulu"));
     public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
     public Set<Worker> workerIdle = new TreeSet<>();
     public SimManager sim;
+    public SquadManager sqManager = new SquadManager();
     public Strategy strat;
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
@@ -671,17 +667,7 @@ public class GameState extends GameHandler {
 
     void fix() {
         if (defense && enemyInBase.isEmpty()) defense = false;
-        List<String> squadsToClean = new ArrayList<>();
-        for (Squad s : squads.values()) {
-            List<Unit> aux = new ArrayList<>();
-            for (Unit u : s.members) {
-                if (!u.exists()) aux.add(u);
-            }
-            if (s.members.isEmpty() || aux.size() == s.members.size()) squadsToClean.add(s.name);
-            else s.members.removeAll(aux);
-        }
-        for (String s : squadsToClean) squads.remove(s);
-        List<Bunker> bunkers = new ArrayList<>();
+        /*List<Bunker> bunkers = new ArrayList<>();
         for (Entry<Bunker, Set<Unit>> u : DBs.entrySet()) {
             if (u.getKey().exists()) continue;
             for (Unit m : u.getValue()) {
@@ -689,7 +675,7 @@ public class GameState extends GameHandler {
             }
             bunkers.add(u.getKey());
         }
-        for (Bunker c : bunkers) DBs.remove(c);
+        for (Bunker c : bunkers) DBs.remove(c);*/
 
         List<Worker> removeGas = new ArrayList<>();
         for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
@@ -866,84 +852,10 @@ public class GameState extends GameHandler {
         }
     }
 
-    private String getSquadName() {
-        if (teamNames.size() == squads.size()) {
-            String gg = null;
-            while (gg == null || squads.containsKey(gg)) gg = "RandomSquad" + new Random().toString();
-            return gg;
-        }
-        String name = null;
-        while (name == null || squads.containsKey(name)) {
-            int index = new Random().nextInt(teamNames.size());
-            Iterator<String> iter = teamNames.iterator();
-            for (int i = 0; i < index; i++) name = iter.next();
-        }
-        return name;
-    }
-
-    public String addToSquad(Unit unit) {
-        String name;
-        if (squads.size() == 0) {
-            Squad aux = new Squad(getSquadName());
-            aux.addToSquad(unit);
-            squads.put(aux.name, aux);
-            name = aux.name;
-        } else {
-            String chosen = null;
-            for (Entry<String, Squad> s : squads.entrySet()) {
-                if (s.getValue().members.size() < 16 && (s.getValue().members.isEmpty() || Util.broodWarDistance(getSquadCenter(s.getValue()),
-                        unit.getPosition()) <= 700) && (chosen == null || Util.broodWarDistance(unit.getPosition(),
-                        getSquadCenter(s.getValue())) < Util.broodWarDistance(unit.getPosition(),
-                        getSquadCenter(squads.get(chosen))))) {
-                    chosen = s.getKey();
-                }
-            }
-            if (chosen != null) {
-                squads.get(chosen).addToSquad(unit);
-                name = chosen;
-            } else {
-                Squad newSquad = new Squad(getSquadName());
-                newSquad.addToSquad(unit);
-                squads.put(newSquad.name, newSquad);
-                name = newSquad.name;
-            }
-        }
-        return name;
-    }
-
-    public Position getSquadCenter(Squad s) {
-        Position point = new Position(0, 0);
-        int sumWeights = 0;
-        if (s.members.size() == 1) return s.members.iterator().next().getPosition();
-        for (Unit u : s.members) {
-            int weight = Util.getWeight(u);
-            sumWeights += weight;
-            point = new Position(point.getX() + u.getPosition().getX() * weight, point.getY() + u.getPosition().getY() * weight);
-        }
-        return new Position(point.getX() / sumWeights, point.getY() / sumWeights);
-
-    }
-
-    public void removeFromSquad(Unit unit) {
-        for (Entry<String, Squad> s : squads.entrySet()) {
-            if (s.getValue().members.contains(unit)) {
-                if (s.getValue().members.size() == 1) {
-                    if (s.getValue().detector != null) {
-                        ((VesselAgent) agents.get(s.getValue().detector.unit)).follow = null;
-                    }
-                    squads.remove(s.getKey());
-                } else s.getValue().members.remove(unit);
-                break;
-            }
-        }
-    }
-
     public int getArmySize() {
         int count = 0;
-        if (squads.isEmpty()) return count;
-        else {
-            for (Entry<String, Squad> s : squads.entrySet()) count += s.getValue().getArmyCount();
-        }
+        if (sqManager.squads.isEmpty()) return count;
+        else for (Squad s : sqManager.squads.values()) count += s.getArmyCount();
         return count + agents.size() * 2;
     }
 
@@ -1134,54 +1046,8 @@ public class GameState extends GameHandler {
         for (Unit u : aux) enemyBuildingMemory.remove(u);
     }
 
-    private boolean checkSameAttack(Squad s1, Squad s2) {
-        if (s1.attack == null && s2.attack == null) return true;
-        if (s1.attack == null) return false;
-        if (s2.attack == null) return false;
-        return s1.attack.equals(s2.attack);
-    }
-
-    void mergeSquads() {
-        try {
-            if (squads.isEmpty()) return;
-            if (squads.size() < 2) return;
-            for (Squad u1 : squads.values()) {
-                if (u1.members.isEmpty()) continue;
-                int u1_size = u1.members.size();
-                if (u1_size < 18) {
-                    for (Squad u2 : squads.values()) {
-                        if (u2.name.equals(u1.name) || u2.members.size() > 17 || u2.members.isEmpty()) continue;
-                        if (Util.broodWarDistance(getSquadCenter(u1), getSquadCenter(u2)) <= 200) {
-                            if (u1_size + u2.members.size() > 18) continue;
-                            else {
-                                u1.members.addAll(u2.members);
-                                u2.members.clear();
-                            }
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-            Set<Squad> aux = new TreeSet<>();
-            for (Squad u : squads.values()) {
-                if (u.members.isEmpty()) {
-                    if (u.detector != null) {
-                        ((VesselAgent) agents.get(u.detector.unit)).follow = null;
-                        u.detector = null;
-                    }
-                    aux.add(u);
-                }
-            }
-            squads.values().removeAll(aux);
-        } catch (Exception e) {
-            System.err.println("mergeSquads");
-            e.printStackTrace();
-        }
-    }
-
     void updateSquadOrderAndMicro() {
-        for (Squad u : squads.values()) {
+        for (Squad u : sqManager.squads.values()) {
             if (u.members.isEmpty()) continue;
             u.microUpdateOrder();
         }
@@ -1227,7 +1093,7 @@ public class GameState extends GameHandler {
                 if (count <= workerCountToSustain) break;
                 if (!scv.getKey().isCarryingMinerals()) {
                     scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
-                    addToSquad(scv.getKey());
+                    //addToSquad(scv.getKey()); // TODO store this scvs somewhere
                     if (mineralsAssigned.containsKey(scv.getValue())) {
                         mining--;
                         mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
@@ -1385,20 +1251,6 @@ public class GameState extends GameHandler {
             }
         }
         EI.naughty = false;
-    }
-
-    public Squad chooseVesselSquad(Position pos) {
-        Squad chosen = null;
-        double bestDist = Double.MAX_VALUE;
-        for (Squad s : squads.values()) {
-            if (s.members.isEmpty() || s.detector != null) continue;
-            double dist = Util.broodWarDistance(getSquadCenter(s), pos);
-            if (dist < bestDist) {
-                chosen = s;
-                bestDist = dist;
-            }
-        }
-        return chosen;
     }
 
     public boolean requiredUnitsForAttack() {
