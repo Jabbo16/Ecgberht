@@ -339,7 +339,7 @@ public class IntelligenceAgency {
             }
             if (foundForge || somethingInMyBase) {
                 enemyStrat = EnemyStrats.CannonRush;
-                getGs().ih.sendText("Cannon rusher ಠ_ಠ");
+                getGs().ih.sendText("Cannon rusher T_T");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     startStrat = getGs().strat.name;

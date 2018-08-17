@@ -61,7 +61,7 @@ public class SimManager {
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
-        for (Unit u : getGs().getGame().getUnits(getGs().getPlayer())){
+        for (Unit u : getGs().myArmy){
             if(isArmyUnit(u)) myUnits.add(u);
         }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
@@ -83,8 +83,7 @@ public class SimManager {
     }
 
     private boolean isArmyUnit(Unit u) {
-        if(!u.exists() || (u instanceof PlayerUnit && !((PlayerUnit) u).isCompleted())) return false;
-        if(u instanceof Building) return false;
+        if(!u.exists()) return false;
         if(u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
         return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
                 || u instanceof Vulture || u instanceof Wraith;

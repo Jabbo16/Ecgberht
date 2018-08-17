@@ -111,12 +111,7 @@ public class GameState extends GameHandler {
     public Set<MissileTurret> Ts = new TreeSet<>();
     public Set<ResearchingFacility> UBs = new TreeSet<>();
     public Set<Starport> Ps = new TreeSet<>();
-    public Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
-            "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
-            "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",
-            "In Amber Clad", "Infinity", "Jericho", "Las Vegas", "Lawgiver", "Leviathan", "Long Night of Solace",
-            "Matador", "Penance", "Persephone", "Pillar of Autumn", "Pitiless", "Pompadour", "Providence", "Revenant",
-            "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
+    public Set<Unit> myArmy = new TreeSet<>();
     public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
@@ -144,6 +139,12 @@ public class GameState extends GameHandler {
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
     public boolean firstExpand = true;
+    Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
+            "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
+            "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",
+            "In Amber Clad", "Infinity", "Jericho", "Las Vegas", "Lawgiver", "Leviathan", "Long Night of Solace",
+            "Matador", "Penance", "Persephone", "Pillar of Autumn", "Pitiless", "Pompadour", "Providence", "Revenant",
+            "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
 
     public GameState(BW bw, BWEM bwem) {
         super(bw, bwem);
@@ -592,11 +593,13 @@ public class GameState extends GameHandler {
             }
         }
         sim.drawClusters();
-        /*for (Squad s : squads.values()) {
+        for(Squad s : sqManager.squads.values()){
+            if(s.status == Squad.Status.ATTACK && s.attack != null) bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
+        }
+        /*for (Squad s : sqManager.squads.values()) {
             if (s.members.isEmpty()) continue;
-            Position center = getSquadCenter(s);
+            Position center = s.getSquadCenter();
             bw.getMapDrawer().drawCircleMap(center, 90, Color.GREEN);
-            bw.getMapDrawer().drawTextMap(center, ColorUtil.formatText(s.name, ColorUtil.White));
             bw.getMapDrawer().drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
         }*/
         for (Entry<MineralPatch, Integer> m : mineralsAssigned.entrySet()) {
@@ -747,7 +750,7 @@ public class GameState extends GameHandler {
             enemyMainBase = null;
             chosenScout = null;
             for (Base b : BLs) {
-                if(CCs.containsKey(b)) continue;
+                if (CCs.containsKey(b)) continue;
                 if (!strat.name.equals("PlasmaWraithHell") && b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }

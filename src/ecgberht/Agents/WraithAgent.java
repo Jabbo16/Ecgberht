@@ -42,6 +42,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 Position cc = getGs().MainCC.second.getPosition();
                 if (cc != null) unit.move(cc);
                 else unit.move(getGs().getPlayer().getStartLocation().toPosition());
+                getGs().myArmy.add(unit);
                 return true;
             }
             actualFrame = getGs().frameCount;

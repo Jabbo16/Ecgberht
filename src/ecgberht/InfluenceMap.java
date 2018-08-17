@@ -135,14 +135,13 @@ public class InfluenceMap {
     public MutablePair<Integer, Integer> getPosition(TilePosition start, boolean attack) {
         try {
             double count = 0;
-            int sX = start.getX();
-            int sY = start.getY();
             MutablePair<Integer, Integer> p = new MutablePair<>(-1, -1);
             for (int x = 0; x < height; x++) {
                 for (int y = 0; y < width; y++) {
                     if (map[x][y] < count) {
                         if (attack && fixMap(x, y)) continue;
-                        count = map[x][y] / (2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2)));
+                        //count = map[x][y] / (2 * (Math.pow(1 + Math.sqrt(Math.pow(x - sY, 2) + Math.pow(y - sX, 2)), 2)));
+                        count = getEuclideanDist(x, y, start);
                         p.first = x;
                         p.second = y;
                     }
@@ -156,7 +155,15 @@ public class InfluenceMap {
         }
     }
 
-    public boolean fixMap(int x, int y) {
+    private double getEuclideanDist(int x, int y, TilePosition start){
+        return map[x][y] / (2 * (Math.pow(1 + Math.sqrt(Math.pow(x - start.getY(), 2) + Math.pow(y - start.getX(), 2)), 2)));
+    }
+
+    private double getGroundDist(int x, int y, TilePosition start){ // SLOW!!
+        return Util.getGroundDistance(new TilePosition(y, x).toPosition(), start.toPosition());
+    }
+
+    private boolean fixMap(int x, int y) {
         TilePosition pos = new TilePosition(y, x);
         if (bw.getBWMap().isVisible(pos)) {
             for (Unit u : bw.getAllUnits()) {

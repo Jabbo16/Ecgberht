@@ -154,7 +154,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     if (u.equals(close) || !(close instanceof Organic)) continue;
                     if (close.getDistance(u) <= 64) closeUnits++;
                 }
-                if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 11 : 10;
+                if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 12 : 10;
                 else if (u instanceof Mutalisk) score = 7;
                 else if (u instanceof Zergling) score = 4;
                 score *= ((double) ((PlayerUnit) u).getHitPoints()) / (double) (((PlayerUnit) u).maxHitPoints()); //Prefer healthy units

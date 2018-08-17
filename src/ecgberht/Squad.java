@@ -92,7 +92,7 @@ public class Squad implements Comparable<Squad> {
                         ((Firebat) u).stimPack();
                     }
                 }
-                if (u instanceof SiegeTank) { // TODO unsiege if enemies are close enough
+                if (u instanceof SiegeTank) {
                     SiegeTank t = (SiegeTank) u;
                     if (t.isSieged() && pU.getOrder() == Order.Unsieging) continue;
                     if (!t.isSieged() && pU.getOrder() == Order.Sieging) continue;
@@ -184,13 +184,13 @@ public class Squad implements Comparable<Squad> {
                         continue;
                     }
                 }
-                if (pU.isIdle() && attack != null && frameCount != pU.getLastCommandFrame() &&
+                if ((pU.isIdle() || pU.getOrder() == Order.PlayerGuard) && attack != null && frameCount != pU.getLastCommandFrame() &&
                         Util.broodWarDistance(attack, u.getPosition()) >= 400) {
                     ((MobileUnit) u).attack(attack);
                     continue;
                 }
                 if (pU.isAttacking() && attack == null && frameCount != pU.getLastCommandFrame() &&
-                        Util.broodWarDistance(sCenter, u.getPosition()) >= 500) {
+                        Util.broodWarDistance(sCenter, u.getPosition()) >= 450) {
                     ((MobileUnit) u).move(sCenter);
                     continue;
                 }
@@ -208,12 +208,10 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 if (lastTarget != null && lastTarget.equals(attack)) continue;
-                if ((status == Status.ATTACK) && pU.getOrder() != null && pU.getOrder() == Order.AttackMove &&
-                        !pU.getOrderTargetPosition().equals(attack)) {
-                    if (u instanceof MobileUnit) {
-                        ((MobileUnit) u).attack(attack);
-                        continue;
-                    }
+                if (status == Status.ATTACK && (pU.getOrder() == Order.AttackMove || pU.getOrder() == Order.PlayerGuard)
+                        && !pU.getOrderTargetPosition().equals(attack) && u instanceof MobileUnit) {
+                    ((MobileUnit) u).attack(attack);
+                    continue;
                 }
                 int framesToOrder = 18;
                 if (u.getInitialType() == UnitType.Terran_Vulture) framesToOrder = 12;
@@ -255,17 +253,12 @@ public class Squad implements Comparable<Squad> {
                             } else ((MobileUnit) u).move(getGs().getPlayer().getStartLocation().toPosition());
                         }
                     } else if (attack != null && !pU.isStartingAttack() && !pU.isAttacking()) {
-                        if (getGs().strat.name.equals("ProxyBBS")) {
-                            if (!enemyToAttack.isEmpty() && u instanceof Attacker) {
-                                Unit target = Util.getTarget(u, enemyToAttack);
-                                Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? pU.getOrderTarget() :
-                                        ((Attacker) u).getTargetUnit());
-                                if (lastTargetUnit != null) {
-                                    if (!lastTargetUnit.equals(target)) {
-                                        ((Attacker) u).attack(target);
-                                        continue;
-                                    }
-                                }
+                        if (getGs().strat.name.equals("ProxyBBS") && !enemyToAttack.isEmpty() && u instanceof Attacker) {
+                            Unit target = Util.getTarget(u, enemyToAttack);
+                            Unit lastTargetUnit = (((Attacker) u).getTargetUnit() == null ? pU.getOrderTarget() : ((Attacker) u).getTargetUnit());
+                            if (lastTargetUnit != null && !lastTargetUnit.equals(target)) {
+                                ((Attacker) u).attack(target);
+                                continue;
                             }
                         }
                         if (pU.getOrder() == Order.Move) ((MobileUnit) u).attack(attack);

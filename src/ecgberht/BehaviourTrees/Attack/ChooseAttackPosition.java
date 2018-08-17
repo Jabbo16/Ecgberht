@@ -26,18 +26,17 @@ public class ChooseAttackPosition extends Action {
                 MutablePair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(u.getSquadCenter().toTilePosition(), true);
                 if (p.first != -1 && p.second != -1) {
                     TilePosition attackPos = new TilePosition(p.second, p.first);
-                    if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
+                    if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                         ((GameState) this.handler).firstProxyBBS = true;
                         ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");
                     }
                     if (((GameState) this.handler).getGame().getBWMap().isValidPosition(attackPos)) {
-                        u.giveAttackOrder(new TilePosition(p.second, p.first).toPosition());
+                        u.giveAttackOrder(attackPos.toPosition());
                         u.status = Status.ATTACK;
-                        continue;
                     }
                 }
-                if (((GameState) this.handler).enemyMainBase != null) {
-                    if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name == "ProxyBBS") {
+                else if (((GameState) this.handler).enemyMainBase != null) {
+                    if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                         ((GameState) this.handler).firstProxyBBS = true;
                         ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");
                     }
