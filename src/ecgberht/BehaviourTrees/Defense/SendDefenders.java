@@ -28,15 +28,11 @@ public class SendDefenders extends Action {
             boolean cannon_rush = false;
             for (Unit u : ((GameState) this.handler).enemyInBase) {
                 if (u.isFlying() || ((PlayerUnit) u).isCloaked()) continue;
-                if (!cannon_rush) {
-                    if (u instanceof Pylon || u instanceof PhotonCannon) cannon_rush = true;
-                }
+                if (!cannon_rush && (u instanceof Pylon || u instanceof PhotonCannon)) cannon_rush = true;
                 air_only = false;
             }
             Set<Unit> friends = new TreeSet<>();
-            for (Squad s : ((GameState) this.handler).sqManager.squads.values()) {
-                friends.addAll(s.members);
-            }
+            for (Squad s : ((GameState) this.handler).sqManager.squads.values()) friends.addAll(s.members);
             boolean bunker = false;
             if (!((GameState) this.handler).DBs.isEmpty()) {
                 friends.addAll(((GameState) this.handler).DBs.keySet());
@@ -124,7 +120,7 @@ public class SendDefenders extends Action {
                     }
                 }
             } else {
-                if (((GameState) this.handler).strat.name != "ProxyBBS") {
+                if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                     for (Entry<Integer, Squad> u : ((GameState) this.handler).sqManager.squads.entrySet()) {
                         if (((GameState) this.handler).attackPosition != null) {
                             u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);

@@ -36,11 +36,8 @@ public abstract class Agent {
     }
 
     Position selectNewAttack() {
-        MutablePair<Integer, Integer> p = getGs().inMap.getPosition(myUnit.getTilePosition(), true);
-        if (p.first != -1 && p.second != -1) {
-            Position attackPos = new TilePosition(p.second, p.first).toPosition();
-            if (getGs().getGame().getBWMap().isValidPosition(attackPos)) return attackPos;
-        }
+        Position p = Util.chooseAttackPosition(myUnit.getPosition(), false);
+        if (p != null && getGs().getGame().getBWMap().isValidPosition(p)) return p;
         if (getGs().enemyMainBase != null) return getGs().enemyMainBase.getLocation().toPosition();
         return null;
     }

@@ -411,7 +411,6 @@ public class Ecgberht implements BWEventListener {
                 gs.maxWraiths = 5;
                 transition();
             }
-            if (gs.frameCount % 2500 == 0) gs.resetInMap();
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
                     !gs.strat.name.equals("PlasmaWraithHell")) { // Plasma special eggs
                 for (Unit u : bw.getAllUnits()) {
@@ -427,7 +426,6 @@ public class Ecgberht implements BWEventListener {
             IntelligenceAgency.updateBullets();
             gs.fix();
             gs.updateEnemyBuildingsMemory();
-            gs.inMapUnits = new InfluenceMap(bw, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
             gs.runAgents();
@@ -541,7 +539,6 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                     }
-                    gs.inMap.updateMap(arg0, false);
                 } else if (pU.getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0);
                     if (arg0 instanceof Vulture) gs.vulturesTrained++;
@@ -696,7 +693,6 @@ public class Ecgberht implements BWEventListener {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
                     if (type.isBuilding()) {
-                        gs.inMap.updateMap(arg0, true);
                         gs.enemyBuildingMemory.remove(arg0);
                         gs.initAttackPosition = arg0.getTilePosition();
                         if (!type.isResourceDepot()) gs.map.updateMap(arg0.getTilePosition(), type, true);
@@ -704,6 +700,7 @@ public class Ecgberht implements BWEventListener {
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
+                        if(gs.strat.name.equals("ProxyBBS") && gs.myArmy.contains(arg0)) gs.myArmy.remove(arg0);
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
                                 gs.workerIdle.add((Worker) arg0);
@@ -760,7 +757,6 @@ public class Ecgberht implements BWEventListener {
                             gs.workerBuild.remove(arg0);
                         }
                     } else if (type.isBuilding()) {
-                        gs.inMap.updateMap(arg0, true);
                         if (type != UnitType.Terran_Command_Center) {
                             gs.map.updateMap(arg0.getTilePosition(), type, true);
                         }
@@ -864,11 +860,10 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof VespeneGeyser) type = arg0.getInitialType();
             else type = Util.getType((PlayerUnit) arg0);
             // TODO VespeneGeyser morphs
-            if (arg0 instanceof PlayerUnit && Util.isEnemy(((PlayerUnit) arg0).getPlayer()) && arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
-                if (!gs.enemyBuildingMemory.containsKey(arg0)) {
-                    gs.inMap.updateMap(arg0, false);
-                    gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
-                }
+            if (arg0 instanceof PlayerUnit && Util.isEnemy(((PlayerUnit) arg0).getPlayer())
+                    && arg0 instanceof Building
+                    && !(arg0 instanceof GasMiningFacility) && !gs.enemyBuildingMemory.containsKey(arg0)){
+                gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
             }
             if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                 for (Entry<GasMiningFacility, Integer> r : gs.refineriesAssigned.entrySet()) {
@@ -934,7 +929,6 @@ public class Ecgberht implements BWEventListener {
                 if (type.isBuilding()) {
                     gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
                     if (!gs.enemyBuildingMemory.containsKey(arg0)) {
-                        gs.inMap.updateMap(arg0, false);
                         gs.map.updateMap(arg0.getTilePosition(), type, false);
                     }
                 }

@@ -58,8 +58,6 @@ public class GameState extends GameHandler {
     public EnemyInfo EI = new EnemyInfo(ih.enemy().getName(), ih.enemy().getRace());
     public ExtendibleByAddon chosenBuildingAddon = null;
     public Gson enemyInfoJSON = new Gson();
-    public InfluenceMap inMap;
-    public InfluenceMap inMapUnits;
     public int builtBuildings;
     public int builtRefinery;
     public int directionScoutMain;
@@ -152,7 +150,6 @@ public class GameState extends GameHandler {
         map = new BuildingMap(bw, ih.self(), bwem);
         map.initMap();
         testMap = map.clone();
-        inMap = new InfluenceMap(bw, bw.getBWMap().mapHeight(), bw.getBWMap().mapWidth());
         mapSize = bw.getBWMap().getStartPositions().size();
         simulator = new JFAP(bw);
         supplyMan = new SupplyMan(self.getRace());
@@ -502,6 +499,7 @@ public class GameState extends GameHandler {
             } else if (ag instanceof VesselAgent) {
                 VesselAgent vessel = (VesselAgent) ag;
                 bw.getMapDrawer().drawTextMap(vessel.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
+                if(vessel.follow != null) bw.getMapDrawer().drawLineMap(vessel.unit.getPosition(), vessel.follow.getSquadCenter(), Color.YELLOW);
             } else if (ag instanceof WraithAgent) {
                 WraithAgent wraith = (WraithAgent) ag;
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
@@ -1096,7 +1094,8 @@ public class GameState extends GameHandler {
                 if (count <= workerCountToSustain) break;
                 if (!scv.getKey().isCarryingMinerals()) {
                     scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
-                    //addToSquad(scv.getKey()); // TODO store this scvs somewhere
+                    //addToSquad(scv.getKey());
+                    myArmy.add(scv.getKey());
                     if (mineralsAssigned.containsKey(scv.getValue())) {
                         mining--;
                         mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
@@ -1219,20 +1218,6 @@ public class GameState extends GameHandler {
         return self.minerals() >= type.mineralPrice() && self.gas() >= type.gasPrice();
     }
 
-    void resetInMap() {
-        inMap.clear();
-        List<Unit> rem = new ArrayList<>();
-        for (EnemyBuilding u : enemyBuildingMemory.values()) {
-            if (bw.getBWMap().isVisible(u.pos) && !u.unit.isVisible()) {
-                rem.add(u.unit);
-            } else inMap.updateMap(u.unit, false);
-        }
-        for (Unit u : rem) enemyBuildingMemory.remove(u);
-        for (Unit u : bw.getUnits(self)) {
-            if (u instanceof Building && u.exists()) inMap.updateMap(u, false);
-        }
-    }
-
     void sendRandomMessage() {
         if (Math.random() < 0.80) return;
         if (Math.random() < 0.50) {
@@ -1242,7 +1227,6 @@ public class GameState extends GameHandler {
             ih.sendText("Why shouldn't you ask a Protoss for advice?");
             ih.sendText("Because the ones who give the feedback are always high!");
         }
-
     }
 
     void alwaysPools() {

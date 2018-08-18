@@ -6,6 +6,7 @@ import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -47,14 +48,11 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             getNewStatus();
             if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT) attackUnit = null;
-            if (status == Status.ATTACK && unit.isIdle()) {
-                MutablePair<Integer, Integer> pos = getGs().inMap.getPosition(unit.getTilePosition(), true);
-                if (pos.first != -1 && pos.second != -1) {
-                    Position newPos = new TilePosition(pos.second, pos.first).toPosition();
-                    if (getGs().bw.getBWMap().isValidPosition(newPos)) {
-                        unit.attack(newPos);
-                        return false;
-                    }
+            if (status == Status.ATTACK && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
+               Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
+                if (pos != null && getGs().bw.getBWMap().isValidPosition(pos)) {
+                    unit.attack(pos);
+                    return false;
                 }
             }
             switch (status) {

@@ -3,11 +3,11 @@ package ecgberht.BehaviourTrees.Attack;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
-import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
-import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.Position;
 
 public class ChooseAttackPosition extends Action {
 
@@ -23,15 +23,14 @@ public class ChooseAttackPosition extends Action {
             }
             for (Squad u : ((GameState) this.handler).sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                MutablePair<Integer, Integer> p = ((GameState) this.handler).inMap.getPosition(u.getSquadCenter().toTilePosition(), true);
-                if (p.first != -1 && p.second != -1) {
-                    TilePosition attackPos = new TilePosition(p.second, p.first);
+                Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
+                if (attackPos != null) {
                     if (!((GameState) this.handler).firstProxyBBS && ((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                         ((GameState) this.handler).firstProxyBBS = true;
                         ((GameState) this.handler).getIH().sendText("Get ready for a party in your house!");
                     }
                     if (((GameState) this.handler).getGame().getBWMap().isValidPosition(attackPos)) {
-                        u.giveAttackOrder(attackPos.toPosition());
+                        u.giveAttackOrder(attackPos);
                         u.status = Status.ATTACK;
                     }
                 }

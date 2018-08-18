@@ -49,7 +49,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             frameLastOrder = unit.getLastCommandFrame();
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
-            if (follow == null || follow.members.isEmpty()) follow = chooseVesselSquad();
+            follow = chooseVesselSquad();
             if (follow == null) {
                 status = Status.RETREAT;
                 retreat();
@@ -86,12 +86,13 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
 
     private Squad chooseVesselSquad() {
         Squad chosen = null;
-        double distMax = Double.MAX_VALUE;
+        double scoreMax = Double.MIN_VALUE;
         for(Squad s : getGs().sqManager.squads.values()){
             double dist = s.getSquadCenter().getDistance(this.unit.getPosition());
-            if(chosen == null || dist < distMax){
+            double score = s.members.size() / (2.5 * dist); // TODO adjust distance ponderation
+            if(chosen == null || score > scoreMax){
                 chosen = s;
-                distMax = dist;
+                scoreMax = dist;
             }
         }
         return chosen;
