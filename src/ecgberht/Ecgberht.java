@@ -509,8 +509,7 @@ public class Ecgberht implements BWEventListener {
         try {
             if (arg0 == null) return;
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
-                    || arg0 instanceof Critter)
-                return;
+                    || arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = Util.getType(pU);
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
@@ -554,7 +553,7 @@ public class Ecgberht implements BWEventListener {
     public void onUnitComplete(Unit arg0) {
         try {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
-                    || arg0 instanceof Critter) {
+                    || arg0 instanceof Critter || arg0 instanceof ScannerSweep) {
                 return;
             }
             PlayerUnit pU = (PlayerUnit) arg0;
@@ -664,7 +663,7 @@ public class Ecgberht implements BWEventListener {
         try {
             UnitType type;
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
-                    || arg0 instanceof Critter) {
+                    || arg0 instanceof Critter || arg0 instanceof ScannerSweep) {
                 type = arg0.getInitialType();
             } else type = Util.getType((PlayerUnit) arg0);
             if (type.isMineralField()) {
@@ -913,7 +912,7 @@ public class Ecgberht implements BWEventListener {
     public void onUnitShow(Unit arg0) {
         try {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding ||
-                    arg0 instanceof Critter) return;
+                    arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             UnitType type = Util.getType((PlayerUnit) arg0);
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && Util.isEnemy(p)) {
