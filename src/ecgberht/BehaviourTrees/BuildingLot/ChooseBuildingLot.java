@@ -35,7 +35,7 @@ public class ChooseBuildingLot extends Action {
                     }
                     ((GameState) this.handler).chosenBuildingLot = b;
                 } else {
-                    if ((double) b.getHitPoints() / (double) Util.getType((PlayerUnit) b).maxHitPoints() <= 0.1) {
+                    if ((double) b.getHitPoints() / (double) b.getType().maxHitPoints() <= 0.1) {
                         b.cancelConstruction();
                         aux.add(b);
                     }

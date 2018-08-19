@@ -259,9 +259,9 @@ public class SimManager {
         MutablePair<Boolean, Boolean> result = new MutablePair<>(true, false);
         for (Unit u : friends) simulator.addUnitPlayer1(new JFAPUnit(u));
         for (Unit u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u));
-        jfap.Pair<Integer, Integer> presim_scores = simulator.playerScores();
+        jfap.MutablePair<Integer, Integer> presim_scores = simulator.playerScores();
         simulator.simulate(frames);
-        jfap.Pair<Integer, Integer> postsim_scores = simulator.playerScores();
+        jfap.MutablePair<Integer, Integer> postsim_scores = simulator.playerScores();
         int my_score_diff = presim_scores.first - postsim_scores.first;
         int enemy_score_diff = presim_scores.second - postsim_scores.second;
         if (enemy_score_diff * 2 < my_score_diff) result.first = false;
@@ -269,7 +269,7 @@ public class SimManager {
             boolean bunkerDead = true;
             for (JFAPUnit unit : simulator.getState().first) {
                 if (unit.unit == null) continue;
-                if (unit.unit.getInitialType() == UnitType.Terran_Bunker) {
+                if (unit.unit.getType() == UnitType.Terran_Bunker) {
                     bunkerDead = false;
                     break;
                 }
@@ -330,7 +330,7 @@ public class SimManager {
      */
     public boolean farFromFight(Unit u, SimInfo s) { // TODO test
         if (!s.allies.contains(u)) return true;
-        WeaponType weapon = Util.getWeapon(u.getInitialType());
+        WeaponType weapon = Util.getWeapon(u.getType());
         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
         return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u,s.enemies)) > range * 1.5;
     }

@@ -28,19 +28,19 @@ public class SupplyMan {
 
     public void onCreate(Unit unit) {
         if (unit instanceof Building) return;
-        UnitType type = Util.getType((PlayerUnit) unit);
+        UnitType type = unit.getType();
         if (type.supplyRequired() > 0) supplyUsed += type.supplyRequired();
     }
 
     public void onComplete(Unit unit) {
         if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
-            UnitType type = Util.getType((PlayerUnit) unit);
+            UnitType type = unit.getType();
             if (type.supplyProvided() > 0) supplyTotal += type.supplyProvided();
         }
     }
 
     public void onDestroy(Unit unit) {
-        UnitType type = Util.getType((PlayerUnit) unit);
+        UnitType type = unit.getType();
         if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
             if (type.supplyProvided() > 0) supplyTotal -= type.supplyProvided();
             return;

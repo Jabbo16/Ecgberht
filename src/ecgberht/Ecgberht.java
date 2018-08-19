@@ -511,7 +511,7 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
                     || arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             PlayerUnit pU = (PlayerUnit) arg0;
-            UnitType type = Util.getType(pU);
+            UnitType type = arg0.getType();
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
                 if (arg0 instanceof Building) {
                     if (pU.getPlayer().getId() == self.getId()) {
@@ -557,7 +557,7 @@ public class Ecgberht implements BWEventListener {
                 return;
             }
             PlayerUnit pU = (PlayerUnit) arg0;
-            UnitType type = Util.getType(pU);
+            UnitType type = arg0.getType();
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {
                 if (gs.ih.getFrameCount() > 0) gs.supplyMan.onComplete(arg0);
                 if (type.isBuilding()) {
@@ -661,11 +661,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitDestroy(Unit arg0) {
         try {
-            UnitType type;
-            if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
-                    || arg0 instanceof Critter || arg0 instanceof ScannerSweep) {
-                type = arg0.getInitialType();
-            } else type = Util.getType((PlayerUnit) arg0);
+            UnitType type = arg0.getType();
             if (type.isMineralField()) {
                 if (gs.mineralsAssigned.containsKey(arg0)) {
                     gs.map.updateMap(arg0.getTilePosition(), type, true);
@@ -855,9 +851,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitMorph(Unit arg0) {
         try {
-            UnitType type;
-            if (arg0 instanceof VespeneGeyser) type = arg0.getInitialType();
-            else type = Util.getType((PlayerUnit) arg0);
+            UnitType type = arg0.getType();
             // TODO VespeneGeyser morphs
             if (arg0 instanceof PlayerUnit && Util.isEnemy(((PlayerUnit) arg0).getPlayer())
                     && arg0 instanceof Building
@@ -913,7 +907,7 @@ public class Ecgberht implements BWEventListener {
         try {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding ||
                     arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
-            UnitType type = Util.getType((PlayerUnit) arg0);
+            UnitType type = arg0.getType();
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && Util.isEnemy(p)) {
                 IntelligenceAgency.onShow(arg0, type);

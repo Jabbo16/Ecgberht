@@ -75,7 +75,7 @@ public class Util {
             if (!u.exists()) continue;
             if (!type.isBuilding() && !((PlayerUnit) u).isCompleted()) continue;
             if (type == UnitType.Terran_Siege_Tank_Tank_Mode && u instanceof SiegeTank) count++;
-            else if (getType(((PlayerUnit) u)) == type) count++;
+            else if (u.getType() == type) count++;
         }
         return count;
     }
@@ -161,52 +161,9 @@ public class Util {
         return closestBase;
     }
 
-    private static UnitType getZergType(PlayerUnit unit) {
-        if (unit instanceof Zergling) return UnitType.Zerg_Zergling;
-        if (unit instanceof Extractor) return UnitType.Zerg_Extractor;
-        if (unit instanceof Hydralisk) return UnitType.Zerg_Hydralisk;
-        if (unit instanceof SporeColony) return UnitType.Zerg_Spore_Colony;
-        if (unit instanceof SunkenColony) return UnitType.Zerg_Sunken_Colony;
-        if (unit instanceof Mutalisk) return UnitType.Zerg_Mutalisk;
-        if (unit instanceof Lurker) return UnitType.Zerg_Lurker;
-        if (unit instanceof Queen) return UnitType.Zerg_Queen;
-        if (unit instanceof Ultralisk) return UnitType.Zerg_Ultralisk;
-        if (unit instanceof Guardian) return UnitType.Zerg_Guardian;
-        if (unit instanceof Defiler) return UnitType.Zerg_Defiler;
-        if (unit instanceof GreaterSpire) return UnitType.Zerg_Greater_Spire;
-        return unit.getInitialType();
-    }
-
-    private static UnitType getTerranType(PlayerUnit unit) {
-        if (unit instanceof SiegeTank) {
-            SiegeTank t = (SiegeTank) unit;
-            return t.isSieged() ? UnitType.Terran_Siege_Tank_Siege_Mode : UnitType.Terran_Siege_Tank_Tank_Mode;
-        }
-        return unit.getInitialType();
-    }
-
-    private static UnitType getProtossType(PlayerUnit unit) {
-        if (unit instanceof Archon) return UnitType.Protoss_Archon;
-        return unit.getInitialType();
-    }
-
-    public static UnitType getType(PlayerUnit unit) {
-        Race race = unit.getPlayer().getRace();
-        UnitType type = UnitType.Unknown;
-        if (race == Race.Terran) type = getTerranType(unit);
-        if (type != UnitType.Unknown) return type;
-        if (race == Race.Zerg) type = getZergType(unit);
-        if (type != UnitType.Unknown) return type;
-        if (race == Race.Protoss) {
-            type = getProtossType(unit);
-            if (type.getRace() != race) return type.getRace() == Race.Zerg ? getZergType(unit) : getTerranType(unit);
-        }
-        return unit.getInitialType();
-    }
-
     private static WeaponType getWeapon(Unit attacker, Unit target) {
-        UnitType attackerType = getType((PlayerUnit) attacker);
-        UnitType targetType = getType(((PlayerUnit) target));
+        UnitType attackerType = attacker.getType();
+        UnitType targetType = target.getType();
         if (attackerType == UnitType.Terran_Bunker) return getWeapon(UnitType.Terran_Marine, targetType);
         if (attackerType == UnitType.Protoss_Carrier) return getWeapon(UnitType.Protoss_Interceptor, targetType);
         if (attackerType == UnitType.Protoss_Reaver) return getWeapon(UnitType.Protoss_Scarab, targetType);
@@ -289,7 +246,7 @@ public class Util {
         int score = 5 * 32 * priority - range;
         if (target.getInitialType() == UnitType.Zerg_Egg) return score;
         WeaponType targetWeapon = Util.getWeapon(attacker, target);
-        UnitType targetType = getType(target);
+        UnitType targetType = target.getType();
         // Adjust for special features.
         // This could adjust for relative speed and direction, so that we don't chase what we can't catch.
         if (range <= targetWeapon.maxRange()) {
@@ -305,7 +262,7 @@ public class Util {
 
         } else if (target instanceof MobileUnit && ((MobileUnit) target).isBraking()) {
             score += 16;
-        } else if (targetType.topSpeed() >= getType(attacker).topSpeed()) {
+        } else if (targetType.topSpeed() >= attacker.getType().topSpeed()) {
             score -= 5 * 32;
         }
 
@@ -332,7 +289,7 @@ public class Util {
 
     // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
     private static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
-        final UnitType targetType = getType(target);
+        final UnitType targetType = target.getType();
         // Exceptions if we're a ground unit.
         if (target instanceof Burrowable) {
             if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !((Burrowable) target).isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
@@ -351,7 +308,7 @@ public class Util {
         }
         // Next are workers.
         if (targetType.isWorker()) {
-            if (getType(rangedUnit) == UnitType.Terran_Vulture) return 11;
+            if (rangedUnit.getType() == UnitType.Terran_Vulture) return 11;
             if (target instanceof SCV) {
                 // Repairing or blocking a choke makes you critical.
                 if (((SCV) target).isRepairing()) return 11;
@@ -453,7 +410,7 @@ public class Util {
     private static double getScoreAttackPosition(Building unit) {
         if (unit instanceof ResourceDepot) return 8;
         if (unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
-        if (unit.getInitialType().canAttack() || unit instanceof Bunker) return 6;
+        if (unit.getType().canAttack() || unit instanceof Bunker) return 6;
         return 3;
     }
 

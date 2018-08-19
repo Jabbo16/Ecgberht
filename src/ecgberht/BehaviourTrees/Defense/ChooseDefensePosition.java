@@ -30,7 +30,7 @@ public class ChooseDefensePosition extends Conditional {
     }
 
     private double getScore(Unit unit) {
-        if (unit instanceof Building && unit.getInitialType().canAttack() || unit instanceof Bunker) return 6;
+        if (unit instanceof Building && unit.getType().canAttack() || unit instanceof Bunker) return 6;
         else if (unit instanceof Building) return 5;
         else if (unit instanceof Organic) return 2;
         else if (unit instanceof Worker) return 1;

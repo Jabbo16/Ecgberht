@@ -1,10 +1,8 @@
 package ecgberht;
 
-import ecgberht.Util.Util;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Objects;
@@ -17,7 +15,7 @@ public class EnemyBuilding {
     public EnemyBuilding(Unit unit) {
         this.unit = (Building) unit;
         this.pos = unit.getTilePosition();
-        this.type = Util.getType((PlayerUnit) unit);
+        this.type = unit.getType();
     }
 
     @Override

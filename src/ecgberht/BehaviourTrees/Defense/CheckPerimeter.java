@@ -35,7 +35,7 @@ public class CheckPerimeter extends Conditional {
                 }
             }
             for (Unit u : enemyInvaders) {
-                UnitType uType = Util.getType((PlayerUnit) u);
+                UnitType uType = u.getType();
                 if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || (u instanceof Loadable &&
                         !(u instanceof Overlord))) && uType != UnitType.Zerg_Scourge &&
                         uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {

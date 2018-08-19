@@ -567,7 +567,7 @@ public class GameState extends GameHandler {
         for (Unit u : workerIdle) print(u, Color.ORANGE);
         for (Entry<SCV, Building> u : workerTask.entrySet()) {
             print(u.getKey(), Color.TEAL);
-            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Tasked: " + u.getValue().getInitialType().toString(), ColorUtil.White));
+            bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Tasked: " + u.getValue().getType().toString(), ColorUtil.White));
             print(u.getValue(), Color.TEAL);
             bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
         }
@@ -1043,7 +1043,7 @@ public class GameState extends GameHandler {
             if (bw.getBWMap().isVisible(u.pos)) {
                 if (!Util.getUnitsOnTile(u.pos).contains(u.unit)) aux.add(u.unit);
                 else if (u.unit.isVisible()) u.pos = u.unit.getTilePosition();
-                u.type = Util.getType(u.unit);
+                u.type = u.unit.getType();
             }
         }
         for (Unit u : aux) enemyBuildingMemory.remove(u);
@@ -1116,7 +1116,7 @@ public class GameState extends GameHandler {
         Set<Unit> combatUnits = new TreeSet<>();
         Unit worker = null;
         for (Unit u : closeSim) {
-            if (u.getInitialType().isWorker()) workers.add(u);
+            if (u instanceof Worker) workers.add(u);
             if (!(u instanceof Worker) && (u instanceof Attacker)) combatUnits.add(u);
         }
         if (combatUnits.isEmpty() && workers.isEmpty()) return null;

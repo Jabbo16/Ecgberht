@@ -44,7 +44,7 @@ public abstract class Agent {
         Unit chosen = null;
         double distB = Double.MAX_VALUE;
         for (Unit u : enemies) {
-            if (Util.getType((PlayerUnit) u).isFlyer() || ((PlayerUnit) u).isCloaked()) continue;
+            if (u.getType().isFlyer() || ((PlayerUnit) u).isCloaked()) continue;
             double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
             if (chosen == null || distA < distB) {
                 chosen = u;

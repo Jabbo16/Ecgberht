@@ -103,14 +103,14 @@ public class CheckBuildingFlames extends Action {
             }
             isBeingRepaired = false;
             for (ResearchingFacility b : ((GameState) this.handler).UBs) {
-                if (Util.getType((PlayerUnit) b).maxHitPoints() != ((PlayerUnit) b).getHitPoints()) {
+                if (b.getType().maxHitPoints() != b.getHitPoints()) {
                     for (Building r : ((GameState) this.handler).repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
                     }
                     if (!isBeingRepaired) {
-                        ((GameState) this.handler).chosenBuildingRepair = (Building) b;
+                        ((GameState) this.handler).chosenBuildingRepair = b;
                         return State.SUCCESS;
                     }
                 }

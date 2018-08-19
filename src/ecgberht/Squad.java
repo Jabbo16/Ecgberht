@@ -137,7 +137,7 @@ public class Squad implements Comparable<Squad> {
                         if (getGame().getBWMap().isWalkable(sCenter.toWalkPosition())) move = sCenter;
                     }
                     if (move != null) {
-                        WeaponType weapon = Util.getWeapon(u.getInitialType());
+                        WeaponType weapon = Util.getWeapon(u.getType());
                         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
                         if (pU.getOrder() == Order.AttackMove || pU.getOrder() == Order.HealMove) {
                             if (u.getDistance(move) <= range * ((double) (new Random().nextInt((10 + 1) - 6) + 6)) / 10.0)
@@ -156,7 +156,7 @@ public class Squad implements Comparable<Squad> {
                     retreat = false;
                 }
                 String retreating = ColorUtil.formatText(retreat ? "Retreating" : "Fighting", ColorUtil.White);
-                getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getInitialType().tileHeight())), retreating);
+                getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getType().tileHeight())), retreating);
                 if (retreat) {
                     Position pos = getGs().getNearestCC(u.getPosition());
                     if (Util.broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
@@ -214,7 +214,7 @@ public class Squad implements Comparable<Squad> {
                     continue;
                 }
                 int framesToOrder = 18;
-                if (u.getInitialType() == UnitType.Terran_Vulture) framesToOrder = 12;
+                if (u.getType() == UnitType.Terran_Vulture) framesToOrder = 12;
                 if (frameCount - pU.getLastCommandFrame() >= framesToOrder) {
                     if (pU.isIdle() && attack != null && status != Status.IDLE) {
                         lastTarget = (((MobileUnit) u).getTargetPosition() == null ? pU.getOrderTargetPosition() :
@@ -234,13 +234,13 @@ public class Squad implements Comparable<Squad> {
                     Set<Unit> enemyToKite = new TreeSet<>();
                     Set<Unit> enemyToAttack = new TreeSet<>();
                     for (Unit e : enemy) {
-                        UnitType eType = e.getInitialType();
+                        UnitType eType = e.getType();
                         if (eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
                         enemyToAttack.add(e);
-                        if (!(e instanceof Building) && !e.getInitialType().isFlyer() && e.getInitialType().groundWeapon().maxRange() <= 32
-                                && e.getInitialType() != UnitType.Terran_Medic) {
+                        if (!(e instanceof Building) && !e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32
+                                && e.getType() != UnitType.Terran_Medic) {
                             if (Util.broodWarDistance(u.getPosition(), e.getPosition()) <=
-                                    u.getInitialType().groundWeapon().maxRange()) {
+                                    u.getType().groundWeapon().maxRange()) {
                                 enemyToKite.add(e);
                             }
                         }
@@ -276,7 +276,7 @@ public class Squad implements Comparable<Squad> {
         PlayerUnit chosen = null;
         double dist = Double.MAX_VALUE;
         for (Unit m : marines) {
-            if (((PlayerUnit) m).getHitPoints() == m.getInitialType().maxHitPoints() || marinesToHeal.contains(m)) {
+            if (((PlayerUnit) m).getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) {
                 continue;
             }
             double distA = Util.broodWarDistance(m.getPosition(), u.getPosition());
@@ -316,10 +316,10 @@ public class Squad implements Comparable<Squad> {
         int frameCount = getGs().frameCount;
         for (Unit u : members) {
             PlayerUnit pU = (PlayerUnit) u;
-            if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) {
+            if (u.getType() == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) {
                 continue;
             }
-            if (u.getInitialType() == UnitType.Terran_Siege_Tank_Tank_Mode && pU.getOrder() == Order.Sieging) continue;
+            if (u.getType() == UnitType.Terran_Siege_Tank_Tank_Mode && pU.getOrder() == Order.Sieging) continue;
             Position lastTarget = ((MobileUnit) u).getTargetPosition() == null ? pU.getOrderTargetPosition() :
                     ((MobileUnit) u).getTargetPosition();
             if (lastTarget != null && lastTarget.equals(retreat)) continue;
