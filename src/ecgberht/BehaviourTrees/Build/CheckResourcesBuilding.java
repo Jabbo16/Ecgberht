@@ -19,7 +19,7 @@ public class CheckResourcesBuilding extends Conditional {
     @Override
     public State execute() {
         try {
-            if(((GameState) this.handler).chosenPosition == null){
+            if (((GameState) this.handler).chosenPosition == null) {
                 ((GameState) this.handler).chosenWorker = null;
                 ((GameState) this.handler).chosenToBuild = null;
                 return State.FAILURE;

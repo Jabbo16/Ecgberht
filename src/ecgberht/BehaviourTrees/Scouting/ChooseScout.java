@@ -29,7 +29,7 @@ public class ChooseScout extends Action {
                     }
                 }
             }
-            if(!((GameState) this.handler).workerIdle.isEmpty()){
+            if (!((GameState) this.handler).workerIdle.isEmpty()) {
                 Worker chosen = ((GameState) this.handler).workerIdle.iterator().next();
                 ((GameState) this.handler).chosenScout = chosen;
                 ((GameState) this.handler).workerIdle.remove(chosen);

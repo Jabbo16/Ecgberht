@@ -4,7 +4,6 @@ import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
-import ecgberht.Squad;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
@@ -61,8 +60,8 @@ public class SimManager {
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
-        for (Unit u : getGs().myArmy){
-            if(isArmyUnit(u)) myUnits.add(u);
+        for (Unit u : getGs().myArmy) {
+            if (isArmyUnit(u)) myUnits.add(u);
         }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
@@ -82,8 +81,8 @@ public class SimManager {
     }
 
     private boolean isArmyUnit(Unit u) {
-        if(!u.exists()) return false;
-        if(u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+        if (!u.exists()) return false;
+        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
         return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
                 || u instanceof Vulture || u instanceof Wraith;
     }
@@ -96,7 +95,7 @@ public class SimManager {
         time = System.currentTimeMillis();
         reset();
         createClusters();
-        if(!friendly.isEmpty()){
+        if (!friendly.isEmpty()) {
             getGs().sqManager.createSquads(friendly);
             createSimInfos();
             if (!noNeedForSim()) doSim();
@@ -172,8 +171,8 @@ public class SimManager {
      */
     private void doSim() {
         int energy = 0;
-        for (ComsatStation s : getGs().CSs){
-            if(s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() % 50;
+        for (ComsatStation s : getGs().CSs) {
+            if (s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() % 50;
         }
         for (SimInfo s : simulations) {
             simulator.clear();
@@ -206,7 +205,7 @@ public class SimManager {
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
             if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
-            else s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
+            else s.lose = !scoreCalc(s, 3.5) || s.stateAfter.first.isEmpty();
         }
     }
 
@@ -333,6 +332,6 @@ public class SimManager {
         if (!s.allies.contains(u)) return true;
         WeaponType weapon = Util.getWeapon(u.getInitialType());
         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
-        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getCentroid(s.enemies)) > range * 1.5;
+        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u,s.enemies)) > range * 1.5;
     }
 }

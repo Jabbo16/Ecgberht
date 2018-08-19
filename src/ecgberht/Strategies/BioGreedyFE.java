@@ -1,7 +1,6 @@
 package ecgberht.Strategies;
 
 import ecgberht.Strategy;
-import ecgberht.Util.Util;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
@@ -72,10 +71,5 @@ public class BioGreedyFE extends Strategy {
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Weapons);
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Armor);
         upgradesToResearch.add(UpgradeType.U_238_Shells);
-    }
-
-    @Override
-    public boolean requiredUnitsForAttack() {
-        return Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) >= 1;
     }
 }

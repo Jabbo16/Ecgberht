@@ -428,7 +428,6 @@ public class Ecgberht implements BWEventListener {
             gs.updateEnemyBuildingsMemory();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
-            gs.runAgents();
             buildingLotTree.run();
             repairTree.run();
             collectTree.run();
@@ -444,6 +443,7 @@ public class Ecgberht implements BWEventListener {
             if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia();
             defenseTree.run();
             attackTree.run();
+            gs.runAgents();
             gs.updateSquadOrderAndMicro();
             gs.checkMainEnemyBase();
             if (gs.frameCount > 0 && gs.frameCount % 5 == 0) gs.mineralLocking();
@@ -635,7 +635,7 @@ public class Ecgberht implements BWEventListener {
                             String name = gs.pickShipName();
                             gs.agents.put(arg0, new WraithAgent(arg0, name));
                         }
-                    } else if(!(arg0 instanceof ScannerSweep)) {
+                    } else if (!(arg0 instanceof ScannerSweep)) {
                         gs.myArmy.add(arg0);
                         if (!gs.strat.name.equals("ProxyBBS")) {
                             if (!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
@@ -700,7 +700,7 @@ public class Ecgberht implements BWEventListener {
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if(gs.strat.name.equals("ProxyBBS") && gs.myArmy.contains(arg0)) gs.myArmy.remove(arg0);
+                        if (gs.strat.name.equals("ProxyBBS") && gs.myArmy.contains(arg0)) gs.myArmy.remove(arg0);
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
                                 gs.workerIdle.add((Worker) arg0);
@@ -862,7 +862,7 @@ public class Ecgberht implements BWEventListener {
             // TODO VespeneGeyser morphs
             if (arg0 instanceof PlayerUnit && Util.isEnemy(((PlayerUnit) arg0).getPlayer())
                     && arg0 instanceof Building
-                    && !(arg0 instanceof GasMiningFacility) && !gs.enemyBuildingMemory.containsKey(arg0)){
+                    && !(arg0 instanceof GasMiningFacility) && !gs.enemyBuildingMemory.containsKey(arg0)) {
                 gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
             }
             if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {

@@ -1,7 +1,6 @@
 package ecgberht.BehaviourTrees.Bunker;
 
 import ecgberht.GameState;
-import ecgberht.Squad;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;

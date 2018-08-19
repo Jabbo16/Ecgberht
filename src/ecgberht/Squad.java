@@ -19,9 +19,9 @@ public class Squad implements Comparable<Squad> {
 
     private static boolean stimResearched;
     public Position attack;
-    private Position center;
     public Set<Unit> members = new TreeSet<>();
     public Status status;
+    private Position center;
     private Integer id;
 
     public Squad(int id) {
@@ -31,10 +31,10 @@ public class Squad implements Comparable<Squad> {
         attack = null;
     }
 
-    public Squad(int id, Set<Unit> members, Position center){
+    public Squad(int id, Set<Unit> members, Position center) {
         this.id = id;
-        for(Unit m : members){
-            if(isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add(m);
+        for (Unit m : members) {
+            if (isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add(m);
         }
         status = Status.IDLE;
         attack = null;
@@ -42,14 +42,14 @@ public class Squad implements Comparable<Squad> {
     }
 
     private boolean isArmyUnit(Unit u) {
-        if(!u.exists()) return false;
-        if(u instanceof Building) return false;
-        if(u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+        if (!u.exists()) return false;
+        if (u instanceof Building) return false;
+        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
         return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
                 || u instanceof Vulture || u instanceof Wraith;
     }
 
-    public Position getSquadCenter(){
+    public Position getSquadCenter() {
         return center;
     }
 
@@ -80,7 +80,7 @@ public class Squad implements Comparable<Squad> {
                 if (b.type.canAttack() || b.type == UnitType.Terran_Bunker) enemy.add(b.unit);
             }
             for (Unit u : members) {
-                PlayerUnit pU = (PlayerUnit)u;
+                PlayerUnit pU = (PlayerUnit) u;
                 if (pU.isLockedDown() || pU.isMaelstrommed() || ((MobileUnit) u).isStasised() || ((MobileUnit) u).getTransport() != null)
                     continue;
                 Position lastTarget = pU.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
@@ -113,7 +113,7 @@ public class Squad implements Comparable<Squad> {
                             t.siege();
                             continue;
                         }
-                    } else if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() * 10 <= 4) {
+                    } else if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() * 10 <= 6) {
                         t.unsiege();
                         continue;
                     }
@@ -315,7 +315,7 @@ public class Squad implements Comparable<Squad> {
     public void giveMoveOrder(Position retreat) {
         int frameCount = getGs().frameCount;
         for (Unit u : members) {
-            PlayerUnit pU = (PlayerUnit)u;
+            PlayerUnit pU = (PlayerUnit) u;
             if (u.getInitialType() == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) {
                 continue;
             }

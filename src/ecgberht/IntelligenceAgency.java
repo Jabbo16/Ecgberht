@@ -4,7 +4,6 @@ import bwem.unit.Mineral;
 import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
-import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;

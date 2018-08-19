@@ -13,8 +13,8 @@ public class SquadManager {
     public void createSquads(List<Cluster> friendly) {
         squads.clear();
         int counter = 0;
-        for(Cluster c : friendly){
-            Squad s = new Squad(counter, c.units, new Position((int)c.modeX, (int)c.modeY));
+        for (Cluster c : friendly) {
+            Squad s = new Squad(counter, c.units, new Position((int) c.modeX, (int) c.modeY));
             squads.put(counter, s);
             counter++;
         }

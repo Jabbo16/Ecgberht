@@ -19,7 +19,7 @@ import static ecgberht.Ecgberht.getGs;
 public class VesselAgent extends Agent implements Comparable<Unit> {
 
     public ScienceVessel unit;
-    public Squad follow;
+    public Squad follow = null;
     private Status status = Status.IDLE;
     private Set<Unit> airAttackers = new TreeSet<>();
     private Position center;
@@ -86,6 +86,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
 
     private void hover() {
         Position attack = follow.attack;
+        if (attack == null) return;
         if (!getGs().getGame().getBWMap().isValidPosition(attack)) return;
         Position target = unit.getOrderTargetPosition();
         if (target != null && !target.equals(attack)) unit.move(attack);
@@ -95,10 +96,10 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     private Squad chooseVesselSquad() {
         Squad chosen = null;
         double scoreMax = Double.MIN_VALUE;
-        for(Squad s : getGs().sqManager.squads.values()){
+        for (Squad s : getGs().sqManager.squads.values()) {
             double dist = s.getSquadCenter().getDistance(unit.getPosition());
-            double score = -Math.pow(s.members.size(),3) / dist;
-            if(chosen == null || score > scoreMax){
+            double score = -Math.pow(s.members.size(), 3) / dist;
+            if (chosen == null || score > scoreMax) {
                 chosen = s;
                 scoreMax = dist;
             }
@@ -207,12 +208,10 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             }
         }
         if (!airAttackers.isEmpty() && getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose) {
-            status = Status.KITE;
-            return;
-        }
-        if (getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).lose) status = Status.RETREAT;
-        else if (follow != null && follow.attack != null && Util.broodWarDistance(unit.getPosition(), follow.attack) >= Util.broodWarDistance(unit.getPosition(), center)) status = Status.HOVER;
-        else if (Util.broodWarDistance(unit.getPosition(), center) >= 80) status = Status.FOLLOW;
+            status = unit.isUnderAttack() ? Status.KITE : Status.FOLLOW;
+        } else if (getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).lose) status = Status.RETREAT;
+        else if (Util.broodWarDistance(unit.getPosition(), center) >= 300) status = Status.FOLLOW;
+        else status = Status.HOVER;
 
     }
 

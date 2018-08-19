@@ -499,7 +499,8 @@ public class GameState extends GameHandler {
             } else if (ag instanceof VesselAgent) {
                 VesselAgent vessel = (VesselAgent) ag;
                 bw.getMapDrawer().drawTextMap(vessel.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
-                if(vessel.follow != null) bw.getMapDrawer().drawLineMap(vessel.unit.getPosition(), vessel.follow.getSquadCenter(), Color.YELLOW);
+                if (vessel.follow != null)
+                    bw.getMapDrawer().drawLineMap(vessel.unit.getPosition(), vessel.follow.getSquadCenter(), Color.YELLOW);
             } else if (ag instanceof WraithAgent) {
                 WraithAgent wraith = (WraithAgent) ag;
                 bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
@@ -591,8 +592,9 @@ public class GameState extends GameHandler {
             }
         }
         sim.drawClusters();
-        for(Squad s : sqManager.squads.values()){
-            if(s.status == Squad.Status.ATTACK && s.attack != null) bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
+        for (Squad s : sqManager.squads.values()) {
+            if (s.status == Squad.Status.ATTACK && s.attack != null)
+                bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
         }
         /*for (Squad s : sqManager.squads.values()) {
             if (s.members.isEmpty()) continue;

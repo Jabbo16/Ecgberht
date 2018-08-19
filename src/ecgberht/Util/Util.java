@@ -3,7 +3,6 @@ package ecgberht.Util;
 import bwem.Base;
 import bwem.ChokePoint;
 import ecgberht.EnemyBuilding;
-import ecgberht.GameState;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -396,7 +395,7 @@ public class Util {
         } catch (Exception e) {
             //System.err.println("Ground Distance Exception");
             //e.printStackTrace();
-            return start != null && end != null ? start.getDistance(end): Integer.MAX_VALUE;
+            return start != null && end != null ? start.getDistance(end) : Integer.MAX_VALUE;
         }
     }
 
@@ -436,6 +435,42 @@ public class Util {
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
     }
 
+    public static Position chooseAttackPosition(Position p, boolean flying) {
+        Position chosen = null;
+        double maxScore = 0;
+        for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
+            double influence = getScoreAttackPosition(b.unit);
+            //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
+            double score = influence / (2.5 * (flying ? Util.getGroundDistance(p, b.pos.toPosition()) : b.pos.toPosition().getDistance(p)));
+            if (score > maxScore) {
+                chosen = b.pos.toPosition();
+                maxScore = score;
+            }
+        }
+        return chosen;
+    }
+
+    private static double getScoreAttackPosition(Building unit) {
+        if (unit instanceof ResourceDepot) return 8;
+        if (unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
+        if (unit.getInitialType().canAttack() || unit instanceof Bunker) return 6;
+        return 3;
+    }
+
+    public static Unit getClosestUnit(Unit unit, Set<Unit> enemies) {
+        Unit chosen = null;
+        double minDist = Double.MAX_VALUE;
+        for(Unit u : enemies){
+            if(!u.exists()) continue;
+            double dist = unit.getDistance(u);
+            if(chosen == null || dist < minDist){
+                minDist = dist;
+                chosen = u;
+            }
+        }
+        return chosen;
+    }
+
     //Credits to @PurpleWaveJadien / Dan
     public double broodWarDistanceBox(Position p0, Position p1, Position p2, Position p3) {
         return broodWarDistanceBox(p0.getX(), p0.getY(), p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
@@ -454,27 +489,5 @@ public class Util {
         } else if (y11 < y00) return y00 - y11;
         else if (y10 > y01) return y10 - y01;
         return 0;
-    }
-
-    public static Position chooseAttackPosition(Position p, boolean flying){
-        Position chosen = null;
-        double maxScore = 0;
-        for(EnemyBuilding b : getGs().enemyBuildingMemory.values()){
-            double influence = getScoreAttackPosition(b.unit);
-            //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * (flying ? Util.getGroundDistance(p, b.pos.toPosition()) : b.pos.toPosition().getDistance(p)));
-            if(score > maxScore){
-                chosen = b.pos.toPosition();
-                maxScore = score;
-            }
-        }
-        return chosen;
-    }
-
-    private static double getScoreAttackPosition(Building unit) {
-        if(unit instanceof ResourceDepot) return 8;
-        if(unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
-        if(unit.getInitialType().canAttack() || unit instanceof Bunker) return 6;
-        return 3;
     }
 }
