@@ -113,7 +113,7 @@ public class Squad implements Comparable<Squad> {
                             t.siege();
                             continue;
                         }
-                    } else if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() * 10 <= 2) {
+                    } else if (t.isSieged() && t.getOrder() != Order.Unsieging && Math.random() * 10 <= 4) {
                         t.unsiege();
                         continue;
                     }

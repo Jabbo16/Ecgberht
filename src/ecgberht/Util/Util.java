@@ -394,8 +394,8 @@ public class Util {
             getGs().bwem.getMap().getPath(start, end, dist);
             return dist.intValue();
         } catch (Exception e) {
-            System.err.println("Ground Distance Exception");
-            e.printStackTrace();
+            //System.err.println("Ground Distance Exception");
+            //e.printStackTrace();
             return start != null && end != null ? start.getDistance(end): Integer.MAX_VALUE;
         }
     }

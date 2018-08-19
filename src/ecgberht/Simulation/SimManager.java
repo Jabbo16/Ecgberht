@@ -71,7 +71,6 @@ public class SimManager {
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
             if (u.getInitialType() == UnitType.Zerg_Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
             enemyUnits.add(u);
         }
@@ -99,10 +98,8 @@ public class SimManager {
         createClusters();
         if(!friendly.isEmpty()){
             getGs().sqManager.createSquads(friendly);
-            if (!noNeedForSim()) {
-                createSimInfos();
-                doSim();
-            }
+            createSimInfos();
+            if (!noNeedForSim()) doSim();
         }
         time = System.currentTimeMillis() - time;
     }
@@ -112,23 +109,16 @@ public class SimManager {
      *
      * @return True if there is no need for running {@link #onFrameSim()}, else returns false
      */
-    private boolean noNeedForSim() {
-        boolean foundThreats = false;
+    private boolean noNeedForSim() { // TODO improve, only simulate required SimInfos
         int workerThreats = 0;
         if ((friendly.isEmpty() || enemies.isEmpty()) && getGs().agents.isEmpty()) return true;
         if (getGs().getArmySize() >= getGs().enemyCombatUnitMemory.size() * 6) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) {
-                foundThreats = true;
-                break;
-            }
+            if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) return false;
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
         }
-        if (foundThreats) return false;
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) {
-                return false;
-            }
+            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
         }
         return true;
 
@@ -193,6 +183,7 @@ public class SimManager {
                 s.stateBefore.first.add(jU);
             }
             for (Unit u : s.enemies) {
+                if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
                     else s.lose = true;

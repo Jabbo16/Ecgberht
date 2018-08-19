@@ -38,6 +38,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         if (status == Status.FOLLOW) return "Follow";
         if (status == Status.RETREAT) return "Retreat";
         if (status == Status.IDLE) return "Idle";
+        if (status == Status.HOVER) return "Hover";
         return "None";
     }
 
@@ -72,9 +73,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 case RETREAT:
                     retreat();
                     break;
-                case IDLE:
-                    idle();
-                    break;
+                case HOVER:
+                    hover();
             }
             return false;
         } catch (Exception e) {
@@ -84,12 +84,20 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         return false;
     }
 
+    private void hover() {
+        Position attack = follow.attack;
+        if (!getGs().getGame().getBWMap().isValidPosition(attack)) return;
+        Position target = unit.getOrderTargetPosition();
+        if (target != null && !target.equals(attack)) unit.move(attack);
+        else if (target == null) unit.move(attack);
+    }
+
     private Squad chooseVesselSquad() {
         Squad chosen = null;
         double scoreMax = Double.MIN_VALUE;
         for(Squad s : getGs().sqManager.squads.values()){
-            double dist = s.getSquadCenter().getDistance(this.unit.getPosition());
-            double score = s.members.size() / (2.5 * dist); // TODO adjust distance ponderation
+            double dist = s.getSquadCenter().getDistance(unit.getPosition());
+            double score = -Math.pow(s.members.size(),3) / dist;
             if(chosen == null || score > scoreMax){
                 chosen = s;
                 scoreMax = dist;
@@ -108,16 +116,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix)
             unit.defensiveMatrix((PlayerUnit) target);
         else target = null;
-    }
-
-    private void idle() {
-        if (follow.attack != null) {
-            Position attack = follow.attack;
-            if (!getGs().getGame().getBWMap().isValidPosition(attack)) return;
-            Position target = unit.getOrderTargetPosition();
-            if (target != null && !target.equals(attack)) unit.move(attack);
-            if (target == null) unit.move(attack);
-        }
     }
 
     private void kite() {
@@ -155,7 +153,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     if (u.equals(close) || !(close instanceof Organic)) continue;
                     if (close.getDistance(u) <= 64) closeUnits++;
                 }
-                if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 12 : 10;
+                if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 14 : 12;
                 else if (u instanceof Mutalisk) score = 7;
                 else if (u instanceof Zergling) score = 4;
                 score *= ((double) ((PlayerUnit) u).getHitPoints()) / (double) (((PlayerUnit) u).maxHitPoints()); //Prefer healthy units
@@ -213,8 +211,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             return;
         }
         if (getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).lose) status = Status.RETREAT;
+        else if (follow != null && follow.attack != null && Util.broodWarDistance(unit.getPosition(), follow.attack) >= Util.broodWarDistance(unit.getPosition(), center)) status = Status.HOVER;
         else if (Util.broodWarDistance(unit.getPosition(), center) >= 80) status = Status.FOLLOW;
-        else status = Status.IDLE;
 
     }
 
@@ -236,6 +234,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 
-    enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT, IRRADIATE}
+    enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT, IRRADIATE, HOVER}
 
 }
