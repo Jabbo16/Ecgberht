@@ -7,8 +7,6 @@ import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.VultureAgent;
 import ecgberht.Agents.WraithAgent;
 import ecgberht.BehaviourTrees.AddonBuild.*;
-import ecgberht.BehaviourTrees.Attack.CheckArmy;
-import ecgberht.BehaviourTrees.Attack.ChooseAttackPosition;
 import ecgberht.BehaviourTrees.Build.*;
 import ecgberht.BehaviourTrees.BuildingLot.CheckBuildingsLot;
 import ecgberht.BehaviourTrees.BuildingLot.ChooseBlotWorker;
@@ -33,7 +31,9 @@ import ecgberht.BehaviourTrees.Scanner.Scan;
 import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
+import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
+import ecgberht.Strategies.FullBioFE;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree;
@@ -66,7 +66,6 @@ public class Ecgberht implements BWEventListener {
     private static BehavioralTree buildTree;
     private static BehavioralTree trainTree;
     private static BehavioralTree upgradeTree;
-    private BehavioralTree attackTree;
     private BehavioralTree botherTree;
     private BehavioralTree buildingLotTree;
     private BehavioralTree bunkerTree;
@@ -281,7 +280,6 @@ public class Ecgberht implements BWEventListener {
             initTrainTree();
             initBuildTree();
             initScoutingTree();
-            initAttackTree();
             initDefenseTree();
             initUpgradeTree();
             initRepairTree();
@@ -310,14 +308,6 @@ public class Ecgberht implements BWEventListener {
         Selector<GameHandler> Scouting = new Selector<>("Select Scouting Plan", scoutFalse, scoutTrue);
         scoutingTree = new BehavioralTree("Movement Tree");
         scoutingTree.addChild(Scouting);
-    }
-
-    private void initAttackTree() {
-        CheckArmy cA = new CheckArmy("Check Army", gs);
-        ChooseAttackPosition cAP = new ChooseAttackPosition("Choose Attack Position", gs);
-        Sequence Attack = new Sequence("Attack", cA, cAP);
-        attackTree = new BehavioralTree("Attack Tree");
-        attackTree.addChild(Attack);
     }
 
     private void initDefenseTree() {
@@ -442,7 +432,7 @@ public class Ecgberht implements BWEventListener {
             scannerTree.run();
             if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia();
             defenseTree.run();
-            attackTree.run();
+            gs.updateAttack();
             gs.runAgents();
             gs.updateSquadOrderAndMicro();
             gs.checkMainEnemyBase();
@@ -520,7 +510,13 @@ public class Ecgberht implements BWEventListener {
                             gs.testMap = gs.map.clone();
                         }
                         if (arg0 instanceof Addon) return;
-                        if (arg0 instanceof CommandCenter && ih.getFrameCount() == 0) return;
+                        if (arg0 instanceof CommandCenter){
+                            if(ih.getFrameCount() == 0) return;
+                            if(gs.strat.name.equals("TwoPortWraith") && bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)){
+                                gs.strat = new FullBioFE();
+                                transition();
+                            }
+                        }
                         SCV worker = (SCV) ((Building) arg0).getBuildUnit();
                         if (worker != null) {
                             if (gs.workerBuild.containsKey(worker)) {

@@ -24,8 +24,9 @@ public class CollectGas extends Action {
             Worker chosen = ((GameState) this.handler).chosenWorker;
             if (!((GameState) this.handler).refineriesAssigned.isEmpty()) {
                 GasMiningFacility closestGeyser = null;
+                int workerGas = ((GameState)this.handler).strat.workerGas == 0 ? 3 : ((GameState)this.handler).strat.workerGas;
                 for (Entry<GasMiningFacility, Integer> g : ((GameState) this.handler).refineriesAssigned.entrySet()) {
-                    if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < 3 && ((GameState) this.handler).mining > 3) {
+                    if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && ((GameState) this.handler).mining > 3) {
                         closestGeyser = g.getKey();
                     }
                 }

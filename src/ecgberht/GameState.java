@@ -178,6 +178,8 @@ public class GameState extends GameHandler {
             BioGreedyFE bGFE = new BioGreedyFE();
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
+            TwoPortWraith tPW = new TwoPortWraith();
+            if(true) return tPW;
             String map = bw.getBWMap().mapFileName();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (enemyRace == Race.Zerg && EI.naughty) return b;
@@ -1277,6 +1279,46 @@ public class GameState extends GameHandler {
                 continue;
             }
             hardStuck = true;
+        }
+    }
+
+    public boolean needToAttack(){
+        if (strat.name.equals("ProxyBBS") && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack()) return true;
+        return getArmySize() >= strat.armyForAttack && !defense && requiredUnitsForAttack();
+    }
+
+    void updateAttack() {
+        try {
+            if (sqManager.squads.isEmpty()) {
+                return;
+            }
+            boolean needToAttack = needToAttack();
+            for (Squad u : sqManager.squads.values()) {
+                if (u.members.isEmpty()) continue;
+                if(!needToAttack && u.status != Squad.Status.ATTACK) continue;
+                Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
+                if (attackPos != null) {
+                    if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {
+                        firstProxyBBS = true;
+                        getIH().sendText("Get ready for a party in your house!");
+                    }
+                    if (getGame().getBWMap().isValidPosition(attackPos)) {
+                        u.giveAttackOrder(attackPos);
+                        u.status = Squad.Status.ATTACK;
+                    }
+                } else if (enemyMainBase != null) {
+                    if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {
+                        firstProxyBBS = true;
+                        getIH().sendText("Get ready for a party in your house!");
+                    }
+                    u.giveAttackOrder(enemyMainBase.getLocation().toPosition());
+                    u.status = Squad.Status.ATTACK;
+                } else u.status = Squad.Status.IDLE;
+            }
+
+        } catch (Exception e) {
+            System.err.println("Update Attack Exception");
+            e.printStackTrace();
         }
     }
 }

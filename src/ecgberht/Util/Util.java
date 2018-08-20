@@ -73,7 +73,7 @@ public class Util {
         int count = 0;
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
             if (!u.exists()) continue;
-            if (!type.isBuilding() && !((PlayerUnit) u).isCompleted()) continue;
+            if (!type.isBuilding() && type != UnitType.Terran_Science_Vessel && !((PlayerUnit) u).isCompleted()) continue;
             if (type == UnitType.Terran_Siege_Tank_Tank_Mode && u instanceof SiegeTank) count++;
             else if (u.getType() == type) count++;
         }
