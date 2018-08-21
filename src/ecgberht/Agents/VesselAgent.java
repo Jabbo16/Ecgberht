@@ -1,6 +1,5 @@
 package ecgberht.Agents;
 
-import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Squad;
 import ecgberht.Util.Util;
@@ -8,7 +7,6 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
@@ -141,15 +139,15 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         boolean chasenByScourge = false;
         double maxScore = 0;
         PlayerUnit chosen = null;
-        if(getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()){
-            for(Unit u : mySimAir.enemies){
-                if(u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)){
+        if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
+            for (Unit u : mySimAir.enemies) {
+                if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) {
                     chasenByScourge = true;
                     break;
                 }
             }
         }
-        if(!mySimMix.enemies.isEmpty()){
+        if (!mySimMix.enemies.isEmpty()) {
             // Irradiate
             Set<Unit> irradiateTargets = new TreeSet<>(mySimMix.enemies);
             for (Unit t : mySimMix.allies) {
@@ -157,7 +155,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             }
             if (follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && unit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE) {
                 for (Unit u : irradiateTargets) {
-                    if (u instanceof Building || u instanceof Egg || (!(u instanceof Organic) && !(u instanceof SiegeTank))) continue;
+                    if (u instanceof Building || u instanceof Egg || (!(u instanceof Organic) && !(u instanceof SiegeTank)))
+                        continue;
                     if (u instanceof MobileUnit && (((MobileUnit) u).isIrradiated() || ((MobileUnit) u).isStasised()))
                         continue;
                     double score = 1;
@@ -187,7 +186,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             chosen = null;
             maxScore = 0;
         }
-        if(!mySimMix.allies.isEmpty()){
+        if (!mySimMix.allies.isEmpty()) {
             // Defense Matrix
             Set<Unit> matrixTargets = new TreeSet<>(mySimMix.allies);
             if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
@@ -211,7 +210,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 }
             }
         }
-        if (!mySimAir.enemies.isEmpty() && (mySimAir.lose || unit.isUnderAttack() || chasenByScourge )) status = Status.KITE ;
+        if (!mySimAir.enemies.isEmpty() && (mySimAir.lose || unit.isUnderAttack() || chasenByScourge))
+            status = Status.KITE;
         else if (mySimMix.lose) status = Status.RETREAT;
         else if (Util.broodWarDistance(unit.getPosition(), center) >= 300) status = Status.FOLLOW;
         else status = Status.HOVER;

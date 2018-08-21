@@ -39,7 +39,8 @@ public class ChooseSituationalUnit extends Action {
             // Testing vessels
             boolean tower;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2) return State.FAILURE;
-            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !((GameState)this.handler).needToAttack()) return State.FAILURE;
+            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !((GameState) this.handler).needToAttack())
+                return State.FAILURE;
             String strat = ((GameState) this.handler).strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && ((GameState) this.handler).CCs.size() < 3)
                 return State.FAILURE;

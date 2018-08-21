@@ -31,7 +31,6 @@ import ecgberht.BehaviourTrees.Scanner.Scan;
 import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
-import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
 import ecgberht.Util.MutablePair;
@@ -510,9 +509,9 @@ public class Ecgberht implements BWEventListener {
                             gs.testMap = gs.map.clone();
                         }
                         if (arg0 instanceof Addon) return;
-                        if (arg0 instanceof CommandCenter){
-                            if(ih.getFrameCount() == 0) return;
-                            if(gs.strat.name.equals("TwoPortWraith") && bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)){
+                        if (arg0 instanceof CommandCenter) {
+                            if (ih.getFrameCount() == 0) return;
+                            if (gs.strat.name.equals("TwoPortWraith") && bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
                                 gs.strat = new FullBioFE();
                                 transition();
                             }
@@ -912,7 +911,7 @@ public class Ecgberht implements BWEventListener {
                     if (gs.enemyRace == Race.Zerg) initUpgradeTree();
                 }
 
-                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || (type.spaceProvided() > 0 && type != UnitType.Zerg_Overlord))) {
+                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster())) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {

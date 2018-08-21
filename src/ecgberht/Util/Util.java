@@ -73,7 +73,8 @@ public class Util {
         int count = 0;
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
             if (!u.exists()) continue;
-            if (!type.isBuilding() && type != UnitType.Terran_Science_Vessel && !((PlayerUnit) u).isCompleted()) continue;
+            if (!type.isBuilding() && type != UnitType.Terran_Science_Vessel && !((PlayerUnit) u).isCompleted())
+                continue;
             if (type == UnitType.Terran_Siege_Tank_Tank_Mode && u instanceof SiegeTank) count++;
             else if (u.getType() == type) count++;
         }
@@ -417,10 +418,10 @@ public class Util {
     public static Unit getClosestUnit(Unit unit, Set<Unit> enemies) {
         Unit chosen = null;
         double minDist = Double.MAX_VALUE;
-        for(Unit u : enemies){
-            if(!u.exists()) continue;
+        for (Unit u : enemies) {
+            if (!u.exists()) continue;
             double dist = unit.getDistance(u);
-            if(chosen == null || dist < minDist){
+            if (chosen == null || dist < minDist) {
                 minDist = dist;
                 chosen = u;
             }

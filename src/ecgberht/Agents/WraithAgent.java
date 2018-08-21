@@ -5,6 +5,7 @@ import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -47,7 +48,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             closeEnemies.clear();
-            closeWorkers.clear();
+            mainTargets.clear();
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
             Status old = status;
@@ -68,8 +69,8 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 case COMBAT:
                     combat();
                     break;
-                case RETREAT:
-                    retreat();
+                case KITE:
+                    kite();
                     break;
                 default:
                     break;
@@ -82,18 +83,33 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         return false;
     }
 
+    private void kite() {
+        Position kite = getGs().kiteAway(unit, airAttackers);
+        if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
+        Position target = unit.getOrderTargetPosition();
+        if (target != null && !target.equals(kite)) unit.move(kite);
+        if (target == null) unit.move(kite);
+    }
+
     private void combat() {
-        Unit toAttack = getUnitToAttack(unit, closeEnemies);
+        Unit toAttack = getUnitToAttack(unit, airAttackers);
         if (toAttack != null) {
             if (attackUnit != null && attackUnit.equals(toAttack)) return;
             unit.attack(toAttack);
             attackUnit = toAttack;
-        } else if (!closeWorkers.isEmpty()) {
-            toAttack = getUnitToAttack(unit, closeWorkers);
+        } else if (!mainTargets.isEmpty()) {
+            toAttack = getUnitToAttack(unit, mainTargets);
             if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
                 unit.attack(toAttack);
                 attackUnit = toAttack;
                 attackPos = null;
+            }
+        } else if (!closeEnemies.isEmpty()) {
+            toAttack = getUnitToAttack(unit, closeEnemies);
+            if (toAttack != null) {
+                if (attackUnit != null && attackUnit.equals(toAttack)) return;
+                unit.attack(toAttack);
+                attackUnit = toAttack;
             }
         }
     }
@@ -102,12 +118,21 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         Position myPos = unit.getPosition();
         SimInfo mySimAir = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR);
         SimInfo mySimMix = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX);
+        boolean chasenByScourge = false;
         if (mySimMix.enemies.isEmpty()) {
             status = Status.ATTACK;
             return;
         }
+        if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
+            for (Unit u : mySimAir.enemies) {
+                if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) {
+                    chasenByScourge = true;
+                    break;
+                }
+            }
+        }
         for (Unit u : mySimMix.enemies) {
-            if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
+            if (u instanceof Worker || u instanceof Overlord) mainTargets.add(u);
             double dist = Util.broodWarDistance(u.getPosition(), myPos);
             if (dist <= 700) closeEnemies.add(u);
             if (dist <= 700 && u instanceof AirAttacker) airAttackers.add(u);
@@ -121,23 +146,22 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
         }
         if (closeEnemies.isEmpty()) status = Status.ATTACK;
-        else if (!airAttackers.isEmpty() && mySimAir.lose) status = Status.RETREAT;
+        else if (!airAttackers.isEmpty()) {
+            Unit closestAirAttacker = Util.getClosestUnit(unit, airAttackers);
+            if (closestAirAttacker != null && closestAirAttacker.getType().airWeapon().maxRange() * 1.2 > closestAirAttacker.getDistance(unit))
+                status = Status.COMBAT;
+            else if (mySimAir.lose || chasenByScourge) status = Status.KITE;
+        } else status = Status.COMBAT;
     }
 
     private void attack() {
-        Position newAttackPos = selectNewAttack();
-        if (attackPos == null) {
-            attackPos = newAttackPos;
-            if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
-                attackUnit = null;
-                attackPos = null;
-                return;
-            }
-            if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
-                unit.attack(newAttackPos);
-                attackUnit = null;
-            }
-        }
+        Position newAttackPos;
+        if (getGs().enemyMainBase != null) newAttackPos = getGs().enemyMainBase.getLocation().toPosition();
+        else newAttackPos = selectNewAttack();
+        attackPos = newAttackPos;
+        if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) attackPos = null;
+        else if (getGs().bw.getBWMap().isValidPosition(attackPos)) unit.attack(newAttackPos);
+        attackUnit = null;
     }
 
     @Override

@@ -182,6 +182,7 @@ public class SimManager {
             }
             for (Unit u : s.enemies) {
                 if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
+                if (u instanceof Egg || u instanceof Overlord) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
                     else s.lose = true;
@@ -200,7 +201,7 @@ public class SimManager {
             int ourLosses = s.preSimScore.first - s.postSimScore.first;
             int enemyLosses = s.preSimScore.second - s.postSimScore.second;
             if (enemyLosses > ourLosses * 1.5) return;
-            if(s.stateAfter.first.isEmpty()){
+            if (s.stateAfter.first.isEmpty()) {
                 s.lose = true;
                 return;
             }
@@ -335,6 +336,6 @@ public class SimManager {
         if (!s.allies.contains(u)) return true;
         WeaponType weapon = Util.getWeapon(u.getType());
         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
-        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u,s.enemies)) > range * 1.5;
+        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u, s.enemies)) > range * 1.5;
     }
 }

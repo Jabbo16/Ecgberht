@@ -179,7 +179,7 @@ public class GameState extends GameHandler {
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             TwoPortWraith tPW = new TwoPortWraith();
-            if(true) return tPW;
+            if (true) return tPW;
             String map = bw.getBWMap().mapFileName();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (enemyRace == Race.Zerg && EI.naughty) return b;
@@ -867,10 +867,11 @@ public class GameState extends GameHandler {
     public int getArmySize(Set<Unit> units) {
         int count = 0;
         if (units.isEmpty()) return count;
-        else{
+        else {
             for (Unit u : units) {
                 count++;
-                if (u instanceof SiegeTank || u instanceof Vulture || u instanceof Wraith || u instanceof ScienceVessel) count++;
+                if (u instanceof SiegeTank || u instanceof Vulture || u instanceof Wraith || u instanceof ScienceVessel)
+                    count++;
             }
         }
         return count;
@@ -1294,8 +1295,9 @@ public class GameState extends GameHandler {
         }
     }
 
-    public boolean needToAttack(){
-        if (strat.name.equals("ProxyBBS") && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack()) return true;
+    public boolean needToAttack() {
+        if (strat.name.equals("ProxyBBS") && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
+            return true;
         return getArmySize() >= strat.armyForAttack && !defense && requiredUnitsForAttack();
     }
 
@@ -1307,7 +1309,7 @@ public class GameState extends GameHandler {
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                if(!needToAttack && u.status != Squad.Status.ATTACK) continue;
+                if (!needToAttack && u.status != Squad.Status.ATTACK) continue;
                 Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
                 if (attackPos != null) {
                     if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {

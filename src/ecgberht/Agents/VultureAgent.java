@@ -15,7 +15,8 @@ import static ecgberht.Ecgberht.getGs;
 public class VultureAgent extends Agent implements Comparable<Unit> {
 
     public Vulture unit;
-    int mines = 3;
+    private int mines = 3;
+    private UnitType type = UnitType.Terran_Vulture;
 
     public VultureAgent(Unit unit) {
         super();
@@ -40,7 +41,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             closeEnemies.clear();
-            closeWorkers.clear();
+            mainTargets.clear();
             if (frameLastOrder == actualFrame) return false;
             Status old = status;
             getNewStatus();
@@ -83,8 +84,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (attackUnit != null && attackUnit.equals(toAttack)) return;
             unit.attack(toAttack);
             attackUnit = toAttack;
-        } else if (!closeWorkers.isEmpty()) {
-            toAttack = getUnitToAttack(unit, closeWorkers);
+        } else if (!mainTargets.isEmpty()) {
+            toAttack = getUnitToAttack(unit, mainTargets);
             if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
                 unit.attack(toAttack);
                 attackUnit = toAttack;
@@ -100,7 +101,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             return;
         }
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
+            if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) mainTargets.add(u);
             if (Util.broodWarDistance(u.getPosition(), myPos) <= 600) closeEnemies.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {

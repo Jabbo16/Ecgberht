@@ -2,7 +2,6 @@ package ecgberht.Agents;
 
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
@@ -16,13 +15,12 @@ public abstract class Agent {
 
     public Unit myUnit;
     Status status = Status.IDLE;
-    UnitType type = UnitType.Terran_Vulture;
     Position attackPos = null;
     Unit attackUnit = null;
     int frameLastOrder = 0;
     int actualFrame = 0;
     Set<Unit> closeEnemies = new TreeSet<>();
-    Set<Unit> closeWorkers = new TreeSet<>();
+    Set<Unit> mainTargets = new TreeSet<>();
 
     public String statusToString() {
         if (status == Status.ATTACK) return "Attack";
