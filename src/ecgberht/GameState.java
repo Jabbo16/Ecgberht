@@ -864,6 +864,18 @@ public class GameState extends GameHandler {
         return count + agents.size() * 2;
     }
 
+    public int getArmySize(Set<Unit> units) {
+        int count = 0;
+        if (units.isEmpty()) return count;
+        else{
+            for (Unit u : units) {
+                count++;
+                if (u instanceof SiegeTank || u instanceof Vulture || u instanceof Wraith || u instanceof ScienceVessel) count++;
+            }
+        }
+        return count;
+    }
+
     public boolean checkSupply() {
         for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
             if (w.first == UnitType.Terran_Supply_Depot) return true;

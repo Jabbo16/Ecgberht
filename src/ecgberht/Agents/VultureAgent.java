@@ -186,8 +186,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 unit.attack(newAttackPos);
                 attackUnit = null;
             }
-            return;
-        } else if (attackPos.equals(newAttackPos)) return;
+        }
     }
 
     @Override

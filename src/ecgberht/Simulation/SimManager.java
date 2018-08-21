@@ -108,10 +108,9 @@ public class SimManager {
      *
      * @return True if there is no need for running {@link #onFrameSim()}, else returns false
      */
-    private boolean noNeedForSim() { // TODO improve, only simulate required SimInfos
+    private boolean noNeedForSim() {
         int workerThreats = 0;
         if ((friendly.isEmpty() || enemies.isEmpty()) && getGs().agents.isEmpty()) return true;
-        if (getGs().getArmySize() >= getGs().enemyCombatUnitMemory.size() * 6) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) return false;
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
@@ -193,13 +192,18 @@ public class SimManager {
                 s.stateBefore.second.add(jU);
             }
             if (s.lose) continue;
+            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 7) return;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             int ourLosses = s.preSimScore.first - s.postSimScore.first;
             int enemyLosses = s.preSimScore.second - s.postSimScore.second;
-            if (enemyLosses - ourLosses >= 0) return;
+            if (enemyLosses > ourLosses * 1.5) return;
+            if(s.stateAfter.first.isEmpty()){
+                s.lose = true;
+                return;
+            }
             simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
@@ -218,7 +222,6 @@ public class SimManager {
      */
     private boolean scoreCalc(SimInfo s, double rate) {
         return ((s.preSimScore.second - s.postSimScore.second) * rate <= (s.preSimScore.first - s.postSimScore.first));
-
     }
 
     /**

@@ -100,11 +100,13 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
 
     private void getNewStatus() {
         Position myPos = unit.getPosition();
-        if (getGs().enemyCombatUnitMemory.isEmpty()) {
+        SimInfo mySimAir = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR);
+        SimInfo mySimMix = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX);
+        if (mySimMix.enemies.isEmpty()) {
             status = Status.ATTACK;
             return;
         }
-        for (Unit u : getGs().enemyCombatUnitMemory) {
+        for (Unit u : mySimMix.enemies) {
             if (u instanceof Worker && !((PlayerUnit) u).isAttacking()) closeWorkers.add(u);
             double dist = Util.broodWarDistance(u.getPosition(), myPos);
             if (dist <= 700) closeEnemies.add(u);
@@ -119,8 +121,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
         }
         if (closeEnemies.isEmpty()) status = Status.ATTACK;
-        else if (!airAttackers.isEmpty() && getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose)
-            status = Status.RETREAT;
+        else if (!airAttackers.isEmpty() && mySimAir.lose) status = Status.RETREAT;
     }
 
     private void attack() {

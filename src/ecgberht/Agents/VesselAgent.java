@@ -6,6 +6,7 @@ import ecgberht.Squad;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -135,85 +136,85 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void getNewStatus() {
-        Position myPos = unit.getPosition();
+        SimInfo mySimAir = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR);
+        SimInfo mySimMix = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX);
+        boolean chasenByScourge = false;
         double maxScore = 0;
         PlayerUnit chosen = null;
-        // Irradiate
-        Set<Unit> irradiateTargets = new TreeSet<>(getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies);
-        for (Unit t : getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).allies) {
-            if (t instanceof SiegeTank) irradiateTargets.add(t);
-        }
-        if (follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && unit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE) {
-            for (Unit u : irradiateTargets) {
-                if (u instanceof Building || (!(u instanceof Organic) && !(u instanceof SiegeTank))) continue;
-                if (u instanceof MobileUnit && (((MobileUnit) u).isIrradiated() || ((MobileUnit) u).isStasised()))
-                    continue;
-                double score = 1;
-                int closeUnits = 0;
-                for (Unit close : irradiateTargets) {
-                    if (u.equals(close) || !(close instanceof Organic)) continue;
-                    if (close.getDistance(u) <= 64) closeUnits++;
-                }
-                if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 14 : 12;
-                else if (u instanceof Mutalisk) score = 8;
-                else if (u instanceof Hydralisk) score = 6;
-                else if (u instanceof Zergling) score = 3;
-                score *= ((double) ((PlayerUnit) u).getHitPoints()) / (double) (((PlayerUnit) u).maxHitPoints()); //Prefer healthy units
-                double multiplier = u instanceof SiegeTank ? 3.5 : u instanceof Lurker ? 1.5 : 0.75;
-                score += multiplier * closeUnits;
-                if (chosen == null || score > maxScore) {
-                    chosen = (PlayerUnit) u;
-                    maxScore = score;
+        if(getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()){
+            for(Unit u : mySimAir.enemies){
+                if(u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)){
+                    chasenByScourge = true;
+                    break;
                 }
             }
-            if (maxScore >= 5.5) {
-                status = Status.IRRADIATE;
-                target = chosen;
-                return;
-            }
         }
-        chosen = null;
-        maxScore = 0;
-        // Defense Matrix
-        Set<Unit> matrixTargets = new TreeSet<>(getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).allies);
-        if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
-            for (Unit u : matrixTargets) {
-                if (!(u instanceof MobileUnit)) continue;
-                int score = 1;
-                if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
-                if (u instanceof Mechanical) score = 6;
-                if (u instanceof Marine) score = 3;
-                if (u instanceof SCV || u instanceof Medic) score = 1;
-                score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints();
-                if (chosen == null || score > maxScore) {
-                    chosen = (PlayerUnit) u;
-                    maxScore = score;
+        if(!mySimMix.enemies.isEmpty()){
+            // Irradiate
+            Set<Unit> irradiateTargets = new TreeSet<>(mySimMix.enemies);
+            for (Unit t : mySimMix.allies) {
+                if (t instanceof SiegeTank) irradiateTargets.add(t);
+            }
+            if (follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && unit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE) {
+                for (Unit u : irradiateTargets) {
+                    if (u instanceof Building || u instanceof Egg || (!(u instanceof Organic) && !(u instanceof SiegeTank))) continue;
+                    if (u instanceof MobileUnit && (((MobileUnit) u).isIrradiated() || ((MobileUnit) u).isStasised()))
+                        continue;
+                    double score = 1;
+                    int closeUnits = 0;
+                    for (Unit close : irradiateTargets) {
+                        if (u.equals(close) || !(close instanceof Organic)) continue;
+                        if (close.getDistance(u) <= 64) closeUnits++;
+                    }
+                    if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 14 : 12;
+                    else if (u instanceof Mutalisk) score = 8;
+                    else if (u instanceof Hydralisk) score = 6;
+                    else if (u instanceof Zergling) score = 3;
+                    score *= ((double) ((PlayerUnit) u).getHitPoints()) / (double) (((PlayerUnit) u).maxHitPoints()); //Prefer healthy units
+                    double multiplier = u instanceof SiegeTank ? 3.5 : u instanceof Lurker ? 1.5 : 0.75;
+                    score += multiplier * closeUnits;
+                    if (chosen == null || score > maxScore) {
+                        chosen = (PlayerUnit) u;
+                        maxScore = score;
+                    }
+                }
+                if (maxScore >= 5.5) {
+                    status = Status.IRRADIATE;
+                    target = chosen;
+                    return;
                 }
             }
-            if (maxScore > 2) {
-                status = Status.DMATRIX;
-                target = chosen;
-                return;
+            chosen = null;
+            maxScore = 0;
+        }
+        if(!mySimMix.allies.isEmpty()){
+            // Defense Matrix
+            Set<Unit> matrixTargets = new TreeSet<>(mySimMix.allies);
+            if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
+                for (Unit u : matrixTargets) {
+                    if (!(u instanceof MobileUnit)) continue;
+                    int score = 1;
+                    if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
+                    if (u instanceof Mechanical) score = 6;
+                    if (u instanceof Marine) score = 3;
+                    if (u instanceof SCV || u instanceof Medic) score = 1;
+                    score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints();
+                    if (chosen == null || score > maxScore) {
+                        chosen = (PlayerUnit) u;
+                        maxScore = score;
+                    }
+                }
+                if (maxScore > 2) {
+                    status = Status.DMATRIX;
+                    target = chosen;
+                    return;
+                }
             }
         }
-
-        for (Unit u : getGs().enemyCombatUnitMemory) {
-            double dist = Util.broodWarDistance(u.getPosition(), myPos);
-            if (dist <= 700 && u instanceof AirAttacker) airAttackers.add(u);
-        }
-        for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (!getGs().getGame().getBWMap().isVisible(u.pos)) continue;
-            double dist = Util.broodWarDistance(u.pos.toPosition(), myPos);
-            if (dist <= 700 && (u.unit instanceof AirAttacker || u.type == UnitType.Terran_Bunker) && u.unit.isCompleted()) {
-                airAttackers.add(u.unit);
-            }
-        }
-        if (!airAttackers.isEmpty() && getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).lose) {
-            status = unit.isUnderAttack() ? Status.KITE : Status.FOLLOW;
-        } else if (getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).lose) status = Status.RETREAT;
+        if (!mySimAir.enemies.isEmpty() && (mySimAir.lose || unit.isUnderAttack() || chasenByScourge )) status = Status.KITE ;
+        else if (mySimMix.lose) status = Status.RETREAT;
         else if (Util.broodWarDistance(unit.getPosition(), center) >= 300) status = Status.FOLLOW;
         else status = Status.HOVER;
-
     }
 
     @Override
