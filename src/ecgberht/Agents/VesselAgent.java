@@ -163,7 +163,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     int closeUnits = 0;
                     for (Unit close : irradiateTargets) {
                         if (u.equals(close) || !(close instanceof Organic)) continue;
-                        if (close.getDistance(u) <= 64) closeUnits++;
+                        if (close.getDistance(u) <= 32) closeUnits++;
                     }
                     if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 14 : 12;
                     else if (u instanceof Mutalisk) score = 8;
