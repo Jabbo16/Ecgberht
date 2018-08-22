@@ -162,7 +162,7 @@ public class Util {
         return closestBase;
     }
 
-    private static WeaponType getWeapon(Unit attacker, Unit target) {
+    public static WeaponType getWeapon(Unit attacker, Unit target) {
         UnitType attackerType = attacker.getType();
         UnitType targetType = target.getType();
         if (attackerType == UnitType.Terran_Bunker) return getWeapon(UnitType.Terran_Marine, targetType);

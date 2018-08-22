@@ -137,14 +137,18 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         SimInfo mySimAir = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR);
         SimInfo mySimMix = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX);
         boolean chasenByScourge = false;
+        boolean sporeColony  = false;
         double maxScore = 0;
         PlayerUnit chosen = null;
         if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
                 if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) {
                     chasenByScourge = true;
-                    break;
                 }
+                else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony)u).getAirWeapon().maxRange() * 1.1) {
+                    sporeColony = true;
+                }
+                if(chasenByScourge && sporeColony) break;
             }
         }
         if (!mySimMix.enemies.isEmpty()) {
@@ -210,10 +214,10 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 }
             }
         }
-        if (!mySimAir.enemies.isEmpty() && mySimAir.lose){
-            if (unit.isUnderAttack() || chasenByScourge) status = Status.KITE;
+        if (!mySimAir.enemies.isEmpty()){
+            if (unit.isUnderAttack() || chasenByScourge || sporeColony) status = Status.KITE;
             else if(Util.broodWarDistance(unit.getPosition(), center) >= 100) status = Status.FOLLOW;
-            else status = Status.KITE;
+            else if(mySimAir.lose) status = Status.KITE;
         }
         else if (mySimMix.lose) status = Status.RETREAT;
         else if (Util.broodWarDistance(unit.getPosition(), center) >= 300) status = Status.FOLLOW;

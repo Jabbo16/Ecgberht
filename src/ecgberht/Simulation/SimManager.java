@@ -181,7 +181,7 @@ public class SimManager {
             }
             for (Unit u : s.enemies) {
                 if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
-                if (u instanceof Egg || u instanceof Overlord) continue;
+                if (!u.getType().canAttack()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
                     else s.lose = true;
