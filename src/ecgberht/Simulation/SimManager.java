@@ -70,7 +70,7 @@ public class SimManager {
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u.getInitialType() == UnitType.Zerg_Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
+            if (u instanceof Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
             enemyUnits.add(u);
         }
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
@@ -119,7 +119,6 @@ public class SimManager {
             if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
         }
         return true;
-
     }
 
     /**
@@ -200,11 +199,11 @@ public class SimManager {
             s.stateAfter = simulator.getState();
             int ourLosses = s.preSimScore.first - s.postSimScore.first;
             int enemyLosses = s.preSimScore.second - s.postSimScore.second;
-            if (enemyLosses > ourLosses * 1.5) return;
             if (s.stateAfter.first.isEmpty()) {
                 s.lose = true;
                 return;
             }
+            if (enemyLosses > ourLosses * 1.5) return;
             simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();

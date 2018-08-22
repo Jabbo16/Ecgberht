@@ -109,15 +109,19 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 if (Util.broodWarDistance(myPos, u.pos.toPosition()) <= 600) closeEnemies.add(u.unit);
             }
         }
-        if (closeEnemies.isEmpty()) {
-            status = Status.ATTACK;
-        } else {
+        if (closeEnemies.isEmpty()) status = Status.ATTACK;
+        else {
             boolean meleeOnly = checkOnlyMelees();
             if (!meleeOnly && getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).lose) {
                 status = Status.RETREAT;
                 return;
             }
             int cd = unit.getGroundWeapon().cooldown();
+            Unit closestAttacker = Util.getClosestUnit(unit, closeEnemies);
+            if(closestAttacker != null && cd != 0 && closestAttacker.getDistance(unit) < 4*32){
+                status = Status.KITE;
+                return;
+            }
             if (status == Status.COMBAT || status == Status.ATTACK) {
                 if (attackUnit != null) {
                     int weaponRange = attackUnit instanceof GroundAttacker ? ((GroundAttacker) attackUnit).getGroundWeaponMaxRange() : 0;

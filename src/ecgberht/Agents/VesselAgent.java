@@ -210,8 +210,11 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 }
             }
         }
-        if (!mySimAir.enemies.isEmpty() && (mySimAir.lose || unit.isUnderAttack() || chasenByScourge))
-            status = Status.KITE;
+        if (!mySimAir.enemies.isEmpty() && mySimAir.lose){
+            if (unit.isUnderAttack() || chasenByScourge) status = Status.KITE;
+            else if(Util.broodWarDistance(unit.getPosition(), center) >= 100) status = Status.FOLLOW;
+            else status = Status.KITE;
+        }
         else if (mySimMix.lose) status = Status.RETREAT;
         else if (Util.broodWarDistance(unit.getPosition(), center) >= 300) status = Status.FOLLOW;
         else status = Status.HOVER;

@@ -904,14 +904,14 @@ public class Ecgberht implements BWEventListener {
                     arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             UnitType type = arg0.getType();
             Player p = ((PlayerUnit) arg0).getPlayer();
-            if (p != null && Util.isEnemy(p)) {
+            if (p != null && p.isEnemy()) {
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) { // TODO Check
                     gs.enemyRace = type.getRace();
                     if (gs.enemyRace == Race.Zerg) initUpgradeTree();
                 }
 
-                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster())) {
+                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {

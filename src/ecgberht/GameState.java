@@ -63,7 +63,7 @@ public class GameState extends GameHandler {
     public int directionScoutMain;
     public int frameCount;
     public int mapSize = 2;
-    public int maxWraiths = 5;
+    public int maxWraiths = 1; // TODO change back to 5
     public int mining;
     public int startCount;
     public int vulturesTrained = 0;
