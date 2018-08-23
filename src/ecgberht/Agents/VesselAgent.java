@@ -266,7 +266,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             else if(mySimAir.lose) status = Status.KITE;
         }
         else if (mySimMix.lose) status = Status.RETREAT;
-        else if (Util.broodWarDistance(unit.getPosition(), center) >= 250) status = Status.FOLLOW;
+        else if (Util.broodWarDistance(unit.getPosition(), center) >= 200) status = Status.FOLLOW;
         else status = Status.HOVER;
     }
 

@@ -56,8 +56,10 @@ public class GameState extends GameHandler {
     public ChokePoint naturalChoke = null;
     public DropShipAgent chosenDropShip;
     public EnemyInfo EI = new EnemyInfo(ih.enemy().getName(), ih.enemy().getRace());
+    public EnemyHistory EH = new EnemyHistory();
     public ExtendibleByAddon chosenBuildingAddon = null;
     public Gson enemyInfoJSON = new Gson();
+    public Gson enemyHistoryJSON = new Gson();
     public int builtBuildings;
     public int builtRefinery;
     public int directionScoutMain;
@@ -117,7 +119,7 @@ public class GameState extends GameHandler {
     public Set<Worker> workerIdle = new TreeSet<>();
     public SimManager sim;
     public SquadManager sqManager = new SquadManager();
-    public Strategy strat;
+    public Strategy strat = null;
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
@@ -962,6 +964,27 @@ public class GameState extends GameHandler {
         }
     }
 
+    void readOpponentHistory() {
+        String name = ih.enemy().getName();
+        String path = "bwapi-data/read/" + name + "-History.json";
+        try {
+            if (Files.exists(Paths.get(path))) {
+                EH = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
+                return;
+            }
+            path = "bwapi-data/write/" + name + "-History.json";
+            if (Files.exists(Paths.get(path))) {
+                EH = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
+                return;
+            }
+            path = "bwapi-data/AI/" + name + "-History.json";
+            if (Files.exists(Paths.get(path))) EH = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
+        } catch (Exception e) {
+            System.err.println("readOpponentHistory");
+            e.printStackTrace();
+        }
+    }
+
     void writeOpponentInfo(String name) {
         String dir = "bwapi-data/write/";
         String path = dir + name + ".json";
@@ -975,6 +998,22 @@ public class GameState extends GameHandler {
             out.println(print);
         } catch (FileNotFoundException e) {
             System.err.println("writeOpponentInfo");
+            e.printStackTrace();
+        }
+    }
+
+    void writeOpponentHistory(String name) {
+        String dir = "bwapi-data/write/";
+        String path = dir + name + "-History.json";
+        ih.sendText("Writing history to: " + path);
+        Gson aux = new Gson();
+        String print = aux.toJson(EH);
+        File directory = new File(dir);
+        if (!directory.exists()) directory.mkdir();
+        try (PrintWriter out = new PrintWriter(path)) {
+            out.println(print);
+        } catch (FileNotFoundException e) {
+            System.err.println("writeOpponentHistory");
             e.printStackTrace();
         }
     }

@@ -260,10 +260,12 @@ public class Ecgberht implements BWEventListener {
             gs = new GameState(bw, bwem);
             gs.initEnemyRace();
             gs.readOpponentInfo();
+            gs.readOpponentHistory();
             if (gs.EI.race == null) gs.EI.race = Util.raceToString(bw.getInteractionHandler().enemy().getRace());
             gs.alwaysPools();
             if (gs.enemyRace == Race.Zerg && gs.EI.naughty) gs.playSound("rushed.mp3");
             gs.strat = gs.initStrat();
+            IntelligenceAgency.setStartStrat(gs.strat.name);
             gs.initStartLocations();
             for (Base b : bwem.getMap().getBases()) {
                 if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b);
@@ -451,6 +453,7 @@ public class Ecgberht implements BWEventListener {
             String oldStrat = IntelligenceAgency.getStartStrat();
             if (oldStrat != null && !oldStrat.equals(gs.strat.name)) gs.strat.name = oldStrat;
             gs.EI.updateStrategyOpponentHistory(gs.strat.name, gs.mapSize, arg0);
+            gs.EH.history.add(new EnemyHistory.EnemyGame(name, gs.enemyRace, arg0, gs.strat.name, bw.getBWMap().mapFileName().replace(".scx", "")));
             if (arg0) {
                 gs.EI.wins++;
                 ih.sendText("gg wp " + name);
@@ -459,6 +462,7 @@ public class Ecgberht implements BWEventListener {
                 ih.sendText("gg wp! " + name + ", next game I will not lose!");
             }
             gs.writeOpponentInfo(name);
+            gs.writeOpponentHistory(name);
             DataTraining.writeTravelData();
         } catch (Exception e) {
             System.err.println("onEnd Exception");

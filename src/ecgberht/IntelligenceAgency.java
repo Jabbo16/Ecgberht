@@ -36,6 +36,10 @@ public class IntelligenceAgency {
         return startStrat;
     }
 
+    static void setStartStrat(String strat) {
+        startStrat = strat;
+    }
+
     public static EnemyStrats getEnemyStrat() {
         return enemyStrat;
     }
@@ -222,7 +226,6 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -250,12 +253,10 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new FullBioFE();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -284,11 +285,9 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Nice Mech strat you got there");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new BioMechFE();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new BioMechFE();
                     Ecgberht.transition();
                 }
@@ -341,12 +340,10 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Cannon rusher T_T");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
-                    startStrat = getGs().strat.name;
                     getGs().strat = new FullBioFE();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
