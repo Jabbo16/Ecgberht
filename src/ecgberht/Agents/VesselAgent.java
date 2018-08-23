@@ -7,6 +7,7 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
@@ -38,6 +39,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         if (status == Status.RETREAT) return "Retreat";
         if (status == Status.IDLE) return "Idle";
         if (status == Status.HOVER) return "Hover";
+        if (status == Status.EMP) return "EMP";
         return "None";
     }
 
@@ -74,6 +76,10 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     break;
                 case HOVER:
                     hover();
+                    break;
+                case EMP:
+                    emp();
+                    break;
             }
             return false;
         } catch (Exception e) {
@@ -104,6 +110,12 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             }
         }
         return chosen;
+    }
+
+    private void emp() {
+        if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave)
+            unit.empShockWave(target.getPosition());
+        else target = null;
     }
 
     private void irradiate() {
@@ -189,6 +201,40 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             }
             chosen = null;
             maxScore = 0;
+
+            // EMP
+            Set<Unit> empTargets = new TreeSet<>(mySimMix.enemies);
+            if (follow != null && !empTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.EMP_Shockwave) && unit.getEnergy() >= TechType.EMP_Shockwave.energyCost() && follow.status != Squad.Status.IDLE) {
+                for (Unit u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
+                    if (u instanceof Building || u instanceof Worker || u instanceof MobileUnit && (((MobileUnit) u).isIrradiated() || ((MobileUnit) u).isStasised()))
+                        continue;
+                    double score = 1;
+                    double closeUnits = 0;
+                    for (Unit close : empTargets) {
+                        if (u.equals(close)) continue;
+                        //if (close.getDistance(u) <= 48) closeUnits++;
+                        //if (close.getPosition().getDistance(u.getPosition()) <= 48) closeUnits += ((PlayerUnit) close).getShields();
+                        if (close.getPosition().getDistance(u.getPosition()) <= WeaponType.EMP_Shockwave.innerSplashRadius()) closeUnits += ((PlayerUnit) close).getShields() * 0.6;
+                    }
+                    if (u instanceof HighTemplar) score = 10;
+                    else if (u instanceof Arbiter) score = 7;
+                    else if (u instanceof Archon || u instanceof DarkArchon) score = 5;
+                    score *= ((double) ((PlayerUnit) u).getShields()) / (double) (((PlayerUnit) u).maxShields()); //Prefer healthy units(shield)
+                    double multiplier = u instanceof HighTemplar ? 6 : 1;
+                    score += multiplier * closeUnits;
+                    if (chosen == null || score > maxScore) {
+                        chosen = (PlayerUnit) u;
+                        maxScore = score;
+                    }
+                }
+                if (maxScore >= 6) {
+                    status = Status.EMP;
+                    target = chosen;
+                    return;
+                }
+            }
+            chosen = null;
+            maxScore = 0;
         }
         if (!mySimMix.allies.isEmpty()) {
             // Defense Matrix
@@ -220,7 +266,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             else if(mySimAir.lose) status = Status.KITE;
         }
         else if (mySimMix.lose) status = Status.RETREAT;
-        else if (Util.broodWarDistance(unit.getPosition(), center) >= 300) status = Status.FOLLOW;
+        else if (Util.broodWarDistance(unit.getPosition(), center) >= 250) status = Status.FOLLOW;
         else status = Status.HOVER;
     }
 
@@ -242,6 +288,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 
-    enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT, IRRADIATE, HOVER}
+    enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT, IRRADIATE, HOVER, EMP}
 
 }

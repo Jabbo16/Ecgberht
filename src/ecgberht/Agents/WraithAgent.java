@@ -181,7 +181,11 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         else if (getGs().bw.getBWMap().isValidPosition(attackPos)){
             Position target = unit.getOrderTargetPosition();
             if (target != null && !target.equals(attackPos)) unit.attack(attackPos);
-            if (target == null) unit.attack(attackPos);
+            if (target == null){
+                target = unit.getTargetPosition();
+                if (target != null && !target.equals(attackPos)) unit.attack(attackPos);
+                if (target == null) unit.attack(attackPos);
+            }
         }
         attackUnit = null;
     }

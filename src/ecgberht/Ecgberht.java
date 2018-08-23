@@ -40,10 +40,7 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
 import java.io.FileNotFoundException;
@@ -164,6 +161,7 @@ public class Ecgberht implements BWEventListener {
     private static void initUpgradeTree() {
         CheckResourcesUpgrade cRU = new CheckResourcesUpgrade("Check Resources Upgrade", gs);
         ChooseIrradiate cI = new ChooseIrradiate("Choose Irradiate", gs);
+        ChooseEMP cEMP = new ChooseEMP("Choose EMP", gs);
         ChooseArmorMechUp cAMU = new ChooseArmorMechUp("Choose Armor mech upgrade", gs);
         ChooseWeaponMechUp cWMU = new ChooseWeaponMechUp("Choose weapon mech upgrade", gs);
         ChooseArmorInfUp cAIU = new ChooseArmorInfUp("Choose Armor inf upgrade", gs);
@@ -173,7 +171,8 @@ public class Ecgberht implements BWEventListener {
         ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
         ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
         Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
-        if (gs.enemyRace == Race.Zerg) ChooseUP.addChild(cI);
+        ChooseUP.addChild(cI);
+        ChooseUP.addChild(cEMP);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
         if (gs.strat.techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
@@ -292,7 +291,6 @@ public class Ecgberht implements BWEventListener {
             System.err.println("onStart Exception");
             e.printStackTrace();
         }
-
     }
 
     private void initScoutingTree() {
@@ -906,12 +904,7 @@ public class Ecgberht implements BWEventListener {
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) { // TODO Check
                     gs.enemyRace = type.getRace();
-                    if (gs.enemyRace == Race.Zerg){
-                        initUpgradeTree();
-                        if(gs.strat.trainUnits.contains(UnitType.Terran_Firebat)) initTrainTree();
-                    }
                 }
-
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }

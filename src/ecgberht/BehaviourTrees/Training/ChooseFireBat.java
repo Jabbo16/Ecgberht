@@ -5,6 +5,7 @@ import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -17,6 +18,7 @@ public class ChooseFireBat extends Action {
     @Override
     public State execute() {
         try {
+            if(((GameState)this.handler).enemyRace != Race.Zerg) return State.FAILURE;
             if (((GameState) this.handler).UBs.isEmpty()) {
                 return State.FAILURE;
             } else if(Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4){
