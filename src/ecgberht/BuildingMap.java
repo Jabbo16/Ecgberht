@@ -68,14 +68,15 @@ public class BuildingMap implements Cloneable {
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
                 TilePosition x = new TilePosition(ii, jj);
-                if (bw.getBWMap().isBuildable(x, false)) map[jj][ii] = "6";
+                //if (bw.getBWMap().isBuildable(x, false)) map[jj][ii] = "6";
+                if (bw.getBWMap().isBuildable(x, true)) map[jj][ii] = "6";
                 else map[jj][ii] = "0";
             }
         }
         // Finds minerals and geysers
         for (MineralPatch resource : bw.getMineralPatches()) {
             TilePosition resourceTile = resource.getTilePosition();
-            TilePosition resourceSize = resource.getInitialType().tileSize();
+            TilePosition resourceSize = resource.getType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
                 for (int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
                     if (i < 0 || i >= height || j < 0 || j >= width) continue;
@@ -85,7 +86,7 @@ public class BuildingMap implements Cloneable {
         }
         for (VespeneGeyser resource : bw.getVespeneGeysers()) {
             TilePosition resourceTile = resource.getTilePosition();
-            TilePosition resourceSize = resource.getInitialType().tileSize();
+            TilePosition resourceSize = resource.getType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
                 for (int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
                     if (i < 0 || i >= height || j < 0 || j >= width) continue;
