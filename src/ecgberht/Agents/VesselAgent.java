@@ -120,7 +120,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         Position kite = getGs().kiteAway(unit, airAttackers);
-        if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
+        if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) return;
         Position target = unit.getOrderTargetPosition();
         if (target != null && !target.equals(kite)) unit.move(kite);
         if (target == null) unit.move(kite);

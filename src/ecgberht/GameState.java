@@ -64,6 +64,7 @@ public class GameState extends GameHandler {
     public int frameCount;
     public int mapSize = 2;
     public int maxWraiths = 5;
+    public int maxBats = 3;
     public int mining;
     public int startCount;
     public int vulturesTrained = 0;

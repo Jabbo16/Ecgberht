@@ -105,6 +105,7 @@ public class Ecgberht implements BWEventListener {
         ChooseSituationalUnit cSU = new ChooseSituationalUnit("Choose situational unit", gs);
         ChooseNothingTrain cNT = new ChooseNothingTrain("Choose Nothing To Train", gs);
         ChooseSCV cSCV = new ChooseSCV("Choose SCV", gs);
+        ChooseFireBat cFir = new ChooseFireBat("Choose Firebat", gs);
         ChooseMarine cMar = new ChooseMarine("Choose Marine", gs);
         ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
         ChooseTank cTan = new ChooseTank("Choose Tank", gs);
@@ -117,6 +118,7 @@ public class Ecgberht implements BWEventListener {
         if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Firebat) && gs.enemyRace == Race.Zerg) chooseUnit.addChild(cFir);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
         Sequence train = new Sequence("Train", chooseUnit, cr, tr);
         trainTree = new BehavioralTree("Training Tree");
@@ -261,9 +263,7 @@ public class Ecgberht implements BWEventListener {
             gs.readOpponentInfo();
             if (gs.EI.race == null) gs.EI.race = Util.raceToString(bw.getInteractionHandler().enemy().getRace());
             gs.alwaysPools();
-            if (gs.enemyRace == Race.Zerg) {
-                if (gs.EI.naughty) gs.playSound("rushed.mp3");
-            }
+            if (gs.enemyRace == Race.Zerg && gs.EI.naughty) gs.playSound("rushed.mp3");
             gs.strat = gs.initStrat();
             gs.initStartLocations();
             for (Base b : bwem.getMap().getBases()) {
@@ -614,11 +614,9 @@ public class Ecgberht implements BWEventListener {
                         }
                     }
                 } else {
-                    if (type.isWorker()) {
-                        gs.workerIdle.add((Worker) arg0);
-                    } else if (type == UnitType.Terran_Vulture) {
-                        gs.agents.put(arg0, new VultureAgent(arg0));
-                    } else if (type == UnitType.Terran_Dropship) {
+                    if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
+                    else if (type == UnitType.Terran_Vulture) gs.agents.put(arg0, new VultureAgent(arg0));
+                    else if (type == UnitType.Terran_Dropship) {
                         DropShipAgent d = new DropShipAgent(arg0);
                         gs.agents.put(arg0, d);
                     } else if (type == UnitType.Terran_Science_Vessel) {
@@ -629,7 +627,7 @@ public class Ecgberht implements BWEventListener {
                             String name = gs.pickShipName();
                             gs.agents.put(arg0, new WraithAgent(arg0, name));
                         }
-                    } else if (!(arg0 instanceof ScannerSweep)) {
+                    } else {
                         gs.myArmy.add(arg0);
                         if (!gs.strat.name.equals("ProxyBBS")) {
                             if (!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
@@ -908,7 +906,10 @@ public class Ecgberht implements BWEventListener {
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) { // TODO Check
                     gs.enemyRace = type.getRace();
-                    if (gs.enemyRace == Race.Zerg) initUpgradeTree();
+                    if (gs.enemyRace == Race.Zerg){
+                        initUpgradeTree();
+                        if(gs.strat.trainUnits.contains(UnitType.Terran_Firebat)) initTrainTree();
+                    }
                 }
 
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
