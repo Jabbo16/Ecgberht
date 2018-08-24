@@ -67,8 +67,6 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 case RETREAT:
                     retreat();
                     break;
-                default:
-                    break;
             }
             return false;
         } catch (Exception e) {
@@ -118,7 +116,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             }
             int cd = unit.getGroundWeapon().cooldown();
             Unit closestAttacker = Util.getClosestUnit(unit, closeEnemies);
-            if(closestAttacker != null && cd != 0 && closestAttacker.getDistance(unit) < 4*32){
+            if (closestAttacker != null && cd != 0 && closestAttacker.getDistance(unit) < 4 * 32) {
                 status = Status.KITE;
                 return;
             }

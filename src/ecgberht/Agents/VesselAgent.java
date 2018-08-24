@@ -149,18 +149,17 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         SimInfo mySimAir = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR);
         SimInfo mySimMix = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX);
         boolean chasenByScourge = false;
-        boolean sporeColony  = false;
+        boolean sporeColony = false;
         double maxScore = 0;
         PlayerUnit chosen = null;
         if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
                 if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) {
                     chasenByScourge = true;
-                }
-                else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony)u).getAirWeapon().maxRange() * 1.1) {
+                } else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
                     sporeColony = true;
                 }
-                if(chasenByScourge && sporeColony) break;
+                if (chasenByScourge && sporeColony) break;
             }
         }
         if (!mySimMix.enemies.isEmpty()) {
@@ -214,7 +213,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                         if (u.equals(close)) continue;
                         //if (close.getDistance(u) <= 48) closeUnits++;
                         //if (close.getPosition().getDistance(u.getPosition()) <= 48) closeUnits += ((PlayerUnit) close).getShields();
-                        if (close.getPosition().getDistance(u.getPosition()) <= WeaponType.EMP_Shockwave.innerSplashRadius()) closeUnits += ((PlayerUnit) close).getShields() * 0.6;
+                        if (close.getPosition().getDistance(u.getPosition()) <= WeaponType.EMP_Shockwave.innerSplashRadius())
+                            closeUnits += ((PlayerUnit) close).getShields() * 0.6;
                     }
                     if (u instanceof HighTemplar) score = 10;
                     else if (u instanceof Arbiter) score = 7;
@@ -260,12 +260,11 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 }
             }
         }
-        if (!mySimAir.enemies.isEmpty()){
+        if (!mySimAir.enemies.isEmpty()) {
             if (unit.isUnderAttack() || chasenByScourge || sporeColony) status = Status.KITE;
-            else if(Util.broodWarDistance(unit.getPosition(), center) >= 100) status = Status.FOLLOW;
-            else if(mySimAir.lose) status = Status.KITE;
-        }
-        else if (mySimMix.lose) status = Status.RETREAT;
+            else if (Util.broodWarDistance(unit.getPosition(), center) >= 100) status = Status.FOLLOW;
+            else if (mySimAir.lose) status = Status.KITE;
+        } else if (mySimMix.lose) status = Status.RETREAT;
         else if (Util.broodWarDistance(unit.getPosition(), center) >= 200) status = Status.FOLLOW;
         else status = Status.HOVER;
     }

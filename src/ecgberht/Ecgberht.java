@@ -41,7 +41,10 @@ import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.*;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.TechType;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.io.FileNotFoundException;
@@ -75,7 +78,7 @@ public class Ecgberht implements BWEventListener {
     private boolean first = false;
     private Player self;
     private BWEM bwem = null;
-    private CameraModule camera = null;
+    private CameraModule skycladObserver = null;
 
     public static void main(String[] args) {
         new Ecgberht().run();
@@ -117,7 +120,8 @@ public class Ecgberht implements BWEventListener {
         if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
-        if (gs.strat.trainUnits.contains(UnitType.Terran_Firebat) && gs.enemyRace == Race.Zerg) chooseUnit.addChild(cFir);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Firebat) && gs.enemyRace == Race.Zerg)
+            chooseUnit.addChild(cFir);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
         Sequence train = new Sequence("Train", chooseUnit, cr, tr);
         trainTree = new BehavioralTree("Training Tree");
@@ -291,8 +295,8 @@ public class Ecgberht implements BWEventListener {
             initScanTree();
             initHarassTree();
             //initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
-            camera = new CameraModule(self.getStartLocation(), bw);
-            if(ConfigManager.getConfig().ecgConfig.enableObserver) camera.toggle();
+            skycladObserver = new CameraModule(self.getStartLocation(), bw);
+            if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
@@ -390,7 +394,7 @@ public class Ecgberht implements BWEventListener {
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
-            camera.onFrame();
+            skycladObserver.onFrame();
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
@@ -558,7 +562,7 @@ public class Ecgberht implements BWEventListener {
                     || arg0 instanceof Critter || arg0 instanceof ScannerSweep) {
                 return;
             }
-            camera.moveCameraUnitCompleted(arg0);
+            skycladObserver.moveCameraUnitCompleted(arg0);
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = arg0.getType();
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {

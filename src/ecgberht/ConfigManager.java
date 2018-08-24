@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class ConfigManager {
 
-    private static Config config;
+    private static Config config = new Config();
 
     static void readConfig() {
         Gson configJSON = new Gson();
@@ -45,21 +45,16 @@ public class ConfigManager {
         public EcgberhtConfig ecgConfig = new EcgberhtConfig();
         BwapiConfig bwapiConfig = new BwapiConfig();
 
-        Config() {
-        }
-
         public static class EcgberhtConfig {
+            public boolean sscait;
             boolean debugConsole;
             boolean debugScreen;
             boolean debugText;
             boolean sounds;
             boolean enableLatCom;
-            boolean enableObserver;
-            public boolean sscait;
+            boolean enableSkyCladObserver;
             String forceStrat = "";
 
-            EcgberhtConfig() {
-            }
         }
 
         static class BwapiConfig {
@@ -68,8 +63,6 @@ public class ConfigManager {
             boolean userInput = true;
             boolean completeMapInformation;
 
-            BwapiConfig() {
-            }
         }
     }
 }

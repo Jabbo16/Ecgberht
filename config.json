@@ -12,7 +12,7 @@
         "enableLatCom": true,
         "sounds": false,
         "sscait": false,
-		"enableObserver": false,
+		"enableSkyCladObserver": false,
         "forceStrat": ""
     }
 }

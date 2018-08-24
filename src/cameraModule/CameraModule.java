@@ -13,7 +13,7 @@ public class CameraModule {
 
     private Position myStartLocation;
     private int scrWidth = 640; //Default width ChaosLauncher with WMODE plugin
-    private int scrHeight = 410; //Default height ChaosLauncher with WMODE plugin, tweaked a bit to improve real center camera location
+    private int scrHeight = 480; //Default height ChaosLauncher with WMODE plugin
     private int cameraMoveTime = 150;
     private int cameraMoveTimeMin = 50;
     private int watchScoutWorkerUntil = 7500;
@@ -29,7 +29,7 @@ public class CameraModule {
 
     /*
      * Constructor for the CameraModule object
-     * Receives the player starting Position and the Game object
+     * Receives the player starting TilePosition and the BW object
      */
     public CameraModule(TilePosition startPos, BW game) {
         myStartLocation = startPos.toPosition();
@@ -68,9 +68,9 @@ public class CameraModule {
     }
 
     private boolean isArmyUnit(Unit unit) {
-        return !(unit.getType().isWorker() || unit.getType().isBuilding()
-                || unit.getType() == UnitType.Terran_Vulture_Spider_Mine || unit.getType() == UnitType.Zerg_Overlord
-                || unit.getType() == UnitType.Zerg_Larva);
+        UnitType type = unit.getType();
+        return !(type.isWorker() || type.isBuilding() || type == UnitType.Terran_Vulture_Spider_Mine
+                || type == UnitType.Zerg_Overlord || type == UnitType.Zerg_Larva);
     }
 
     private boolean shouldMoveCamera(int priority) {
@@ -107,7 +107,6 @@ public class CameraModule {
         for (PlayerUnit unit : game.getUnits(self)) {
             if (unit.isAttacking()) moveCamera(unit, prio);
         }
-
     }
 
     private void moveCameraIsUnderAttack() {
@@ -154,7 +153,6 @@ public class CameraModule {
                 moveCamera(unit, prio);
             }
         }
-
     }
 
     private void moveCameraArmy() {
@@ -194,8 +192,9 @@ public class CameraModule {
         if (followUnit && game.getBWMap().isValidPosition(cameraFocusUnit.getPosition())) {
             cameraFocusPosition = cameraFocusUnit.getPosition();
         }
-        currentCameraPosition = new Position(currentCameraPosition.getX() + (int) (moveFactor * (cameraFocusPosition.getX() - currentCameraPosition.getX())), currentCameraPosition.getY() + (int) (moveFactor * (cameraFocusPosition.getY() - currentCameraPosition.getY())));
-        Position currentMovedPosition = new Position(currentCameraPosition.getX() - scrWidth / 2, currentCameraPosition.getY() - scrHeight / 2 - 40); // -40 to account for HUD
+        currentCameraPosition = currentCameraPosition.add(new Position((int) (moveFactor * (cameraFocusPosition.getX() - currentCameraPosition.getX())), (int) (moveFactor * (cameraFocusPosition.getY() - currentCameraPosition.getY()))));
+        Position currentMovedPosition = currentCameraPosition.subtract(new Position(scrWidth/2, scrHeight/2 -40));
+        //Position currentMovedPosition = new Position(currentCameraPosition.getX() - scrWidth / 2, currentCameraPosition.getY() - scrHeight / 2 - 40); // -40 to account for HUD
         if (game.getBWMap().isValidPosition(currentCameraPosition))
             game.getInteractionHandler().setScreenPosition(currentMovedPosition);
     }
