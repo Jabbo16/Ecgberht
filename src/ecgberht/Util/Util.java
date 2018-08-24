@@ -245,7 +245,7 @@ public class Util {
         // Let's say that 1 priority step is worth 160 pixels (5 tiles).
         // We care about unit-target range and target-order position distance.
         int score = 5 * 32 * priority - range;
-        if (target.getInitialType() == UnitType.Zerg_Egg) return score;
+        if (target.getType() == UnitType.Zerg_Egg) return score;
         WeaponType targetWeapon = Util.getWeapon(attacker, target);
         UnitType targetType = target.getType();
         // Adjust for special features.

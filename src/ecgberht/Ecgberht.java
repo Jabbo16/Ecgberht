@@ -2,6 +2,7 @@ package ecgberht;
 
 import bwem.BWEM;
 import bwem.Base;
+import cameraModule.CameraModule;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.VultureAgent;
@@ -74,6 +75,7 @@ public class Ecgberht implements BWEventListener {
     private boolean first = false;
     private Player self;
     private BWEM bwem = null;
+    private CameraModule camera = null;
 
     public static void main(String[] args) {
         new Ecgberht().run();
@@ -288,7 +290,9 @@ public class Ecgberht implements BWEventListener {
             initBunkerTree();
             initScanTree();
             initHarassTree();
-            //initIslandTree(); // TODO uncomment when BWAPI island bug is fixed
+            //initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
+            camera = new CameraModule(self.getStartLocation(), bw);
+            if(ConfigManager.getConfig().ecgConfig.enableObserver) camera.toggle();
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
@@ -386,6 +390,7 @@ public class Ecgberht implements BWEventListener {
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
+            camera.onFrame();
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
@@ -403,10 +408,10 @@ public class Ecgberht implements BWEventListener {
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
                     !gs.strat.name.equals("PlasmaWraithHell")) { // Plasma special eggs
                 for (Unit u : bw.getAllUnits()) {
-                    if (u.getInitialType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
+                    if (u.getType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
                         continue;
                     if (!u.isVisible() && gs.enemyCombatUnitMemory.contains(u)) gs.enemyCombatUnitMemory.remove(u);
-                    else if (u.getInitialType() == UnitType.Zerg_Egg && u instanceof PlayerUnit &&
+                    else if (u.getType() == UnitType.Zerg_Egg && u instanceof PlayerUnit &&
                             !Util.isEnemy(((PlayerUnit) u).getPlayer())) {
                         gs.enemyCombatUnitMemory.add(u);
                     }
@@ -553,6 +558,7 @@ public class Ecgberht implements BWEventListener {
                     || arg0 instanceof Critter || arg0 instanceof ScannerSweep) {
                 return;
             }
+            camera.moveCameraUnitCompleted(arg0);
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = arg0.getType();
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {
@@ -780,7 +786,7 @@ public class Ecgberht implements BWEventListener {
                                     gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                                 }
                                 gs.CCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
-                                if (arg0.equals(gs.MainCC)) {
+                                if (arg0.equals(gs.MainCC.second)) {
                                     if (gs.CCs.size() > 0) {
                                         for (Unit c : gs.CCs.values()) {
                                             if (!c.equals(arg0)) {

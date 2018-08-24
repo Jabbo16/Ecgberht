@@ -8,10 +8,9 @@ import java.nio.file.Paths;
 
 public class ConfigManager {
 
-
     private static Config config;
 
-    public static void readConfig() {
+    static void readConfig() {
         Gson configJSON = new Gson();
         String path = "bwapi-data/AI/config.json";
         try {
@@ -30,12 +29,10 @@ public class ConfigManager {
                 return;
             }
             config = new Config();
-            return;
         } catch (Exception e) {
             System.err.println("readConfig Exception");
             e.printStackTrace();
             config = new Config();
-            return;
         }
     }
 
@@ -46,31 +43,32 @@ public class ConfigManager {
     public static class Config {
 
         public EcgberhtConfig ecgConfig = new EcgberhtConfig();
-        public BwapiConfig bwapiConfig = new BwapiConfig();
+        BwapiConfig bwapiConfig = new BwapiConfig();
 
-        public Config() {
+        Config() {
         }
 
         public static class EcgberhtConfig {
-            public boolean debugConsole;
-            public boolean debugScreen;
-            public boolean debugText;
-            public boolean sounds;
-            public boolean enableLatCom;
+            boolean debugConsole;
+            boolean debugScreen;
+            boolean debugText;
+            boolean sounds;
+            boolean enableLatCom;
+            boolean enableObserver;
             public boolean sscait;
-            public String forceStrat = "";
+            String forceStrat = "";
 
-            public EcgberhtConfig() {
+            EcgberhtConfig() {
             }
         }
 
-        public static class BwapiConfig {
-            public int localSpeed = 42;
-            public int frameSkip;
-            public boolean userInput = true;
-            public boolean completeMapInformation;
+        static class BwapiConfig {
+            int localSpeed = 42;
+            int frameSkip;
+            boolean userInput = true;
+            boolean completeMapInformation;
 
-            public BwapiConfig() {
+            BwapiConfig() {
             }
         }
     }
