@@ -17,6 +17,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     public Vulture unit;
     private int mines = 3;
     private UnitType type = UnitType.Terran_Vulture;
+    private int lastPatrolFrame = 0;
 
     public VultureAgent(Unit unit) {
         super();
@@ -43,9 +44,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             closeEnemies.clear();
             mainTargets.clear();
             if (frameLastOrder == actualFrame) return false;
-            Status old = status;
+            //Status old = status;
             getNewStatus();
-            if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
+            //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT) attackUnit = null;
             if (status == Status.ATTACK && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
@@ -67,6 +68,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 case RETREAT:
                     retreat();
                     break;
+                case PATROL:
+                    patrol();
+                    break;
             }
             return false;
         } catch (Exception e) {
@@ -74,6 +78,19 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void patrol() {
+        if (attackUnit != null && unit.getOrder() != Order.Patrol) {
+            Position pos = Util.ChoosePatrolPositionVulture(unit, attackUnit);
+            if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos)) {
+                unit.patrol(pos);
+                attackUnit = null;
+                lastPatrolFrame = actualFrame;
+                return;
+            }
+        }
+        attackUnit = null;
     }
 
     private void combat() {
@@ -114,9 +131,13 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 status = Status.RETREAT;
                 return;
             }
+            if (status == Status.PATROL && actualFrame - lastPatrolFrame >= 5) {
+                status = Status.COMBAT;
+                return;
+            }
             int cd = unit.getGroundWeapon().cooldown();
             Unit closestAttacker = Util.getClosestUnit(unit, closeEnemies);
-            if (closestAttacker != null && cd != 0 && closestAttacker.getDistance(unit) < 4 * 32) {
+            if (closestAttacker != null && (cd != 0 || closestAttacker.getDistance(unit) < unit.getGroundWeaponMaxRange() * 0.6)) {
                 status = Status.KITE;
                 return;
             }
@@ -136,14 +157,19 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 if (attackUnit == null) {
                     Unit closest = getUnitToAttack(unit, closeEnemies);
                     if (closest != null) {
-                        double dist = Util.broodWarDistance(unit.getPosition(), closest.getPosition());
+                        double dist = unit.getDistance(closest);
                         double speed = type.topSpeed();
                         double timeToEnter = 0.0;
                         if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
                         if (timeToEnter >= cd) {
-                            status = Status.COMBAT;
+                            //status = Status.COMBAT;
+                            status = Status.PATROL;
+                            attackUnit = closest;
                             return;
                         }
+                    } else {
+                        status = Status.ATTACK;
+                        return;
                     }
                 } else {
                     double dist = Util.broodWarDistance(unit.getPosition(), attackUnit.getPosition());

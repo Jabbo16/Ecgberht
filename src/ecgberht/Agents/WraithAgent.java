@@ -5,6 +5,7 @@ import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
@@ -105,11 +106,14 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     }
 
     private void combat() {
-        Unit toAttack = getUnitToAttack(unit, mainTargets);
-        if (toAttack != null) {
-            if (attackUnit != null && attackUnit.equals(toAttack)) return;
-            unit.attack(toAttack);
-            attackUnit = toAttack;
+        Unit toAttack;
+        if (!mainTargets.isEmpty()) {
+            toAttack = chooseHarassTarget();
+            if (toAttack != null) {
+                if (attackUnit != null && attackUnit.equals(toAttack)) return;
+                unit.attack(toAttack);
+                attackUnit = toAttack;
+            }
         } else if (!airAttackers.isEmpty()) {
             toAttack = getUnitToAttack(unit, airAttackers);
             if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
@@ -182,6 +186,25 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
         }
         attackUnit = null;
+    }
+
+    private Unit chooseHarassTarget() {
+        Unit chosen = null;
+        double maxScore = Double.MIN_VALUE;
+        for (Unit u : mainTargets) {
+            if (!u.exists()) continue;
+            double dist = myUnit.getDistance(u);
+            double score = u instanceof Worker ? 2 : (u instanceof Overlord ? 3 : 1);
+            WeaponType weapon = Util.getWeapon(unit, u);
+            score *= dist <= weapon.maxRange() ? 1.2 : 0.8;
+            score *= (double) unit.getType().maxHitPoints() / (double) unit.getHitPoints();
+            if (chosen == null || maxScore < score) {
+                chosen = u;
+                maxScore = score;
+            }
+        }
+        if (chosen != null) return chosen;
+        return null;
     }
 
     @Override

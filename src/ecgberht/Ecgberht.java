@@ -249,6 +249,7 @@ public class Ecgberht implements BWEventListener {
             DataTraining.copyOnStart();
             self = bw.getInteractionHandler().self();
             ih = bw.getInteractionHandler();
+            IntelligenceAgency.mainEnemy = ih.enemy();
             if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
             else ih.enableLatCom(true);
             if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();

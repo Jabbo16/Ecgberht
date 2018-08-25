@@ -5,6 +5,7 @@ import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
 import org.openbw.bwapi4j.Bullet;
+import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Drone;
@@ -22,6 +23,7 @@ public class IntelligenceAgency {
     private static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
     private static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
     private static Set<Unit> enemyWorkers = new TreeSet<>();
+    public static Player mainEnemy;
     private static List<Bullet> enemyBullets = new ArrayList<>();
     private static List<Bullet> allyBullets = new ArrayList<>();
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
@@ -68,15 +70,13 @@ public class IntelligenceAgency {
         }
     }
 
-    public static boolean enemyHasType(String player, UnitType type) {
-        if (enemyTypes.containsKey(player)) {
-            if (enemyTypes.get(player).contains(type)) return true;
-        }
-        return false;
+    public static boolean enemyHasType(UnitType type) {
+        return enemyTypes.get(mainEnemy.getName()).contains(type);
     }
 
-    public static boolean enemyHasType(UnitType type) {
-        if (enemyTypes.values().contains(type)) return true;
+    public static boolean playerHasType(Player player, UnitType type) {
+        Set<UnitType> types = enemyTypes.get(player.getName());
+        if (types != null && types.contains(type)) return true;
         return false;
     }
 
@@ -212,15 +212,15 @@ public class IntelligenceAgency {
      */
     private static boolean detectEarlyPool() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && !getGs().EI.naughty && exploredMinerals) {
-            boolean found_pool = false;
             int drones = IntelligenceAgency.getNumEnemyWorkers();
-            for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
+            /*for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
                 if (u.type == UnitType.Zerg_Spawning_Pool) {
-                    found_pool = true;
+                    foundPool = true;
                     break;
                 }
-            }
-            if (found_pool && drones <= 5) {
+            }*/
+            boolean foundPool = enemyHasType(UnitType.Zerg_Spawning_Pool); // TODO test
+            if (foundPool && drones <= 5) {
                 enemyStrat = EnemyStrats.EarlyPool;
                 getGs().EI.naughty = true;
                 getGs().ih.sendText("Bad zerg!, bad!");

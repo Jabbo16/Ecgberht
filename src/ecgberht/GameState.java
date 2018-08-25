@@ -1206,13 +1206,14 @@ public class GameState extends GameHandler {
             if (enemies.isEmpty()) return null;
             Position ownPosition = unit.getPosition();
             List<MutablePair<Double, Double>> vectors = new ArrayList<>();
-            double minDistance = Double.MAX_VALUE;
+            //double minDistance = Double.MAX_VALUE;
             for (Unit enemy : enemies) {
                 if (!enemy.exists() || !enemy.isVisible()) continue;
                 Position enemyPosition = enemy.getPosition();
                 MutablePair<Double, Double> unitV = new MutablePair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
-                double distance = Util.broodWarDistance(ownPosition, enemyPosition);
-                if (distance < minDistance) minDistance = distance;
+                unitV = Util.cropPosition(unitV);
+                //double distance = Util.broodWarDistance(ownPosition, enemyPosition);
+                //if (distance < minDistance) minDistance = distance;
                 //unitV.first = (1 / distance) * unitV.first;
                 //unitV.second = (1 / distance) * unitV.second;
                 vectors.add(new MutablePair<>(unitV.first, unitV.second));
@@ -1223,7 +1224,7 @@ public class GameState extends GameHandler {
                 vector.second *= minDistance;
             }*/
             MutablePair<Double, Double> sumAll = Util.sumPosition(vectors);
-            return Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size())));
+            return Util.cropPosition(Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size()))));
         } catch (Exception e) {
             System.err.println("KiteAway Exception");
             e.printStackTrace();

@@ -193,7 +193,7 @@ public class CameraModule {
             cameraFocusPosition = cameraFocusUnit.getPosition();
         }
         currentCameraPosition = currentCameraPosition.add(new Position((int) (moveFactor * (cameraFocusPosition.getX() - currentCameraPosition.getX())), (int) (moveFactor * (cameraFocusPosition.getY() - currentCameraPosition.getY()))));
-        Position currentMovedPosition = currentCameraPosition.subtract(new Position(scrWidth/2, scrHeight/2 -40));
+        Position currentMovedPosition = currentCameraPosition.subtract(new Position(scrWidth / 2, scrHeight / 2 - 40));
         //Position currentMovedPosition = new Position(currentCameraPosition.getX() - scrWidth / 2, currentCameraPosition.getY() - scrHeight / 2 - 40); // -40 to account for HUD
         if (game.getBWMap().isValidPosition(currentCameraPosition))
             game.getInteractionHandler().setScreenPosition(currentMovedPosition);

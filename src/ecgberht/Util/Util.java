@@ -429,6 +429,59 @@ public class Util {
         return chosen;
     }
 
+    public static MutablePair<Double, Double> cropPosition(MutablePair<Double, Double> unitV) {
+        MutablePair<Double, Double> cropped = new MutablePair<>(unitV.first, unitV.second);
+        double sizeX = getGs().getGame().getBWMap().mapWidth() * 32.0;
+        double sizeY = getGs().getGame().getBWMap().mapHeight() * 32.0;
+        if (cropped.first < 0.0) cropped.first = 0.0;
+        else if (cropped.first >= sizeX) cropped.first = sizeX - 1;
+        if (cropped.second < 0.0) cropped.second = 0.0;
+        else if (cropped.second >= sizeY) cropped.second = sizeY - 1;
+        return cropped;
+    }
+
+    public static Position cropPosition(Position pos) {
+        MutablePair<Integer, Integer> cropped = new MutablePair<>(pos.getX(), pos.getY());
+        int sizeX = getGs().getGame().getBWMap().mapWidth() * 32;
+        int sizeY = getGs().getGame().getBWMap().mapHeight() * 32;
+        if (cropped.first < 0.0) cropped.first = 0;
+        else if (cropped.first >= sizeX) cropped.first = sizeX - 1;
+        if (cropped.second < 0.0) cropped.second = 0;
+        else if (cropped.second >= sizeY) cropped.second = sizeY - 1;
+        return new Position(cropped.first, cropped.second);
+    }
+
+    public static Position ChoosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
+        try {
+            Position myUnitPos = myUnit.getPosition();
+            Position attackUnitPos = attackUnit.getPosition();
+            MutablePair<Double, Double> AT = new MutablePair<>((double) attackUnitPos.getX() - myUnitPos.getX(), (double) attackUnitPos.getY() - myUnitPos.getY());
+            MutablePair<Double, Double> patrolDir1 = rotatePosition(AT, Math.PI / 5.0);
+            MutablePair<Double, Double> patrolDir2 = rotatePosition(AT, -Math.PI / 5.0);
+            MutablePair<Double, Double> accel = new MutablePair<>(((MobileUnit) myUnit).getVelocityX(), ((MobileUnit) myUnit).getVelocityY());
+            MutablePair<Double, Double> multi = new MutablePair<>(patrolDir1.first * accel.first, patrolDir1.second * accel.second);
+            MutablePair<Double, Double> patrolDir = (multi.first >= 0 && multi.second >= 0) ? patrolDir1 : patrolDir2;
+            patrolDir = normalize(patrolDir);
+            Position prePatrol = new Position(patrolDir.first.intValue(), patrolDir.second.intValue()).multiply(new Position(myUnit.getGroundWeaponMaxRange() - 5, myUnit.getGroundWeaponMaxRange() - 5));
+            return cropPosition(myUnitPos.add(prePatrol));
+        } catch (Exception e) {
+            System.err.println("ChoosePatrolPositionVulture Exception");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static MutablePair<Double, Double> normalize(MutablePair<Double, Double> pos) {
+        double norm = Math.sqrt(pos.first * pos.first + pos.second * pos.second);
+        return new MutablePair<>(pos.first / norm, pos.second / norm);
+    }
+
+    private static MutablePair<Double, Double> rotatePosition(MutablePair<Double, Double> pos, double angle) {
+        final double cosAngle = Math.cos(angle);
+        final double sinAngle = Math.sin(angle);
+        return new MutablePair<>(pos.first * cosAngle - pos.second * sinAngle, pos.first * sinAngle + pos.second * cosAngle);
+    }
+
     //Credits to @PurpleWaveJadien / Dan
     public double broodWarDistanceBox(Position p0, Position p1, Position p2, Position p3) {
         return broodWarDistanceBox(p0.getX(), p0.getY(), p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
