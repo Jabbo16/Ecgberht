@@ -43,38 +43,38 @@ public class CheckPerimeter extends Conditional {
                         int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
                         if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).CCs.values()) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 500) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).DBs.keySet()) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).SBs) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (ResearchingFacility c : ((GameState) this.handler).UBs) {
                         if (Util.broodWarDistance(u.getPosition(), ((Unit) c).getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                         for (Unit c : ((GameState) this.handler).MBs) {
                             if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 ((GameState) this.handler).enemyInBase.add(u);
-                                continue;
+                                break;
                             }
                         }
                     }
@@ -102,12 +102,8 @@ public class CheckPerimeter extends Conditional {
                 }
                 closestDefense = ((GameState) this.handler).getNearestCC(u.getPosition());
                 if (closestDefense != null) {
-                    Area uArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
-                    Area closestCCArea = ((GameState) this.handler).bwem.getMap().getArea(closestDefense.toTilePosition());
-                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) {
-                        u.move(closestDefense);
-                        toDelete.add(u);
-                    }
+                    u.move(closestDefense);
+                    toDelete.add(u);
                 }
             }
             for (Worker u : toDelete) {
@@ -139,7 +135,6 @@ public class CheckPerimeter extends Conditional {
                     }
                     u.status = Status.IDLE;
                     u.attack = null;
-                    continue;
                 }
             }
             ((GameState) this.handler).defense = false;

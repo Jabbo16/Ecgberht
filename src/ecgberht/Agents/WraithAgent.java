@@ -17,14 +17,8 @@ import static ecgberht.Ecgberht.getGs;
 public class WraithAgent extends Agent implements Comparable<Unit> {
 
     public Wraith unit;
-    public String name = "Pepe";
+    public String name;
     private Set<Unit> airAttackers = new TreeSet<>();
-
-    public WraithAgent(Unit unit) {
-        super();
-        this.unit = (Wraith) unit;
-        this.myUnit = unit;
-    }
 
     public WraithAgent(Unit unit, String name) {
         super();
@@ -55,9 +49,10 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             //if (status != Status.COMBAT) attackUnit = null;
             attackUnit = null;
-            if (status == Status.ATTACK && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
+            if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isAttacking()) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), true);
-                if (pos != null && getGs().bw.getBWMap().isValidPosition(pos)) {
+                Position target = unit.getOrderTargetPosition();
+                if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
                     unit.attack(pos);
                     return false;
                 }
@@ -84,6 +79,10 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     private void kite() {
         Position kite = getGs().kiteAway(unit, airAttackers);
         if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
+        if (kite.equals(unit.getPosition())) {
+            retreat();
+            return;
+        }
         Position target = unit.getOrderTargetPosition();
         if (target != null && !target.equals(kite)) unit.move(kite);
         if (target == null) unit.move(kite);
@@ -113,10 +112,11 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 if (attackUnit != null && attackUnit.equals(toAttack)) return;
                 unit.attack(toAttack);
                 attackUnit = toAttack;
+                attackPos = null;
             }
         } else if (!airAttackers.isEmpty()) {
             toAttack = getUnitToAttack(unit, airAttackers);
-            if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
+            if (toAttack != null && (attackUnit == null || !attackUnit.equals(toAttack))) {
                 unit.attack(toAttack);
                 attackUnit = toAttack;
                 attackPos = null;
@@ -127,6 +127,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 if (attackUnit != null && attackUnit.equals(toAttack)) return;
                 unit.attack(toAttack);
                 attackUnit = toAttack;
+                attackPos = null;
             }
         }
     }
@@ -135,19 +136,26 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         SimInfo mySimAir = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR);
         SimInfo mySimMix = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX);
         boolean chasenByScourge = false;
-        boolean sporeColony = false;
+        boolean staticAirDefense = false;
         if (mySimMix.enemies.isEmpty()) {
             status = Status.ATTACK;
             return;
         }
         if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
-                if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) {
-                    chasenByScourge = true;
-                } else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
-                    sporeColony = true;
+                if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) chasenByScourge = true;
+                else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
+                    staticAirDefense = true;
                 }
-                if (chasenByScourge && sporeColony) break;
+                if (chasenByScourge && staticAirDefense) break;
+            }
+        }
+        if (getGs().enemyRace == Race.Protoss && !mySimAir.enemies.isEmpty()) {
+            for (Unit u : mySimAir.enemies) {
+                if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
+                    staticAirDefense = true;
+                    break;
+                }
             }
         }
         for (Unit u : mySimMix.enemies) {
@@ -158,12 +166,14 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         if (closeEnemies.isEmpty()) status = Status.ATTACK;
         else if (!airAttackers.isEmpty()) {
             Unit closestAirAttacker = Util.getClosestUnit(unit, airAttackers);
-            if (chasenByScourge || sporeColony) status = Status.KITE;
+            if (chasenByScourge || staticAirDefense) status = Status.KITE;
             else if (closestAirAttacker != null) {
                 double dist = closestAirAttacker.getDistance(unit);
-                int cd = closestAirAttacker.getType().isFlyer() ? unit.getAirWeaponCooldown() : unit.getGroundWeaponCooldown();
-                if (dist < closestAirAttacker.getType().airWeapon().maxRange() * 1.5) status = Status.KITE;
-                else if (cd == 0) status = Status.COMBAT;
+                Weapon weapon = closestAirAttacker.getType().isFlyer() ? unit.getAirWeapon() : unit.getGroundWeapon();
+                double enemyRange = ((AirAttacker) closestAirAttacker).getAirWeaponMaxRange(); // TODO auxiliar method that includes upgrades
+                if (weapon.cooldown() == 0 && enemyRange < weapon.maxRange() && dist > enemyRange * 1.05)
+                    status = Status.COMBAT;
+                else if (dist < enemyRange * 1.5) status = Status.KITE;
             } else if (mySimAir.lose) status = Status.KITE;
             else status = Status.ATTACK;
         } else if (!mainTargets.isEmpty()) status = Status.COMBAT;
@@ -171,18 +181,18 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     }
 
     private void attack() {
+        if (unit.isAttacking()) return;
         Position newAttackPos;
         if (getGs().enemyMainBase != null) newAttackPos = getGs().enemyMainBase.getLocation().toPosition();
-        else newAttackPos = selectNewAttack();
+        else newAttackPos = Util.chooseAttackPosition(unit.getPosition(), true);
+        if (attackPos != null && attackPos.equals(newAttackPos)) return;
         attackPos = newAttackPos;
-        if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) attackPos = null;
-        else if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
+        if (attackPos != null && getGs().bw.getBWMap().isValidPosition(attackPos)) {
             Position target = unit.getOrderTargetPosition();
-            if (target != null && !target.equals(attackPos)) unit.attack(attackPos);
-            if (target == null) {
-                target = unit.getTargetPosition();
-                if (target != null && !target.equals(attackPos)) unit.attack(attackPos);
-                if (target == null) unit.attack(attackPos);
+            if (target == null || (getGs().getGame().getBWMap().isValidPosition(target) && !target.equals(attackPos))) {
+                if (Util.broodWarDistance(attackPos, unit.getPosition()) <= unit.getGroundWeaponMaxRange())
+                    unit.attack(attackPos);
+                else unit.move(attackPos);
             }
         }
         attackUnit = null;

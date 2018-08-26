@@ -1,7 +1,9 @@
 package ecgberht.Agents;
 
+import bwem.Base;
 import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
@@ -33,9 +35,16 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     public boolean runAgent() {
         try {
             if (unit.getHitPoints() <= 15) {
-                Position cc = getGs().MainCC.second.getPosition();
-                if (cc != null) unit.move(cc);
-                else unit.move(getGs().getPlayer().getStartLocation().toPosition());
+                MutablePair<Base, Unit> cc = getGs().MainCC;
+                if (cc != null && cc.second != null) {
+                    Position ccPos = cc.second.getPosition();
+                    if (getGs().getGame().getBWMap().isValidPosition(ccPos)) {
+                        unit.move(ccPos);
+                        getGs().myArmy.add(unit);
+                        return true;
+                    }
+                }
+                unit.move(getGs().getPlayer().getStartLocation().toPosition());
                 getGs().myArmy.add(unit);
                 return true;
             }
@@ -47,10 +56,11 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             //Status old = status;
             getNewStatus();
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
-            if (status != Status.COMBAT) attackUnit = null;
+            if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
             if (status == Status.ATTACK && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
-                Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
-                if (pos != null && getGs().bw.getBWMap().isValidPosition(pos)) {
+                Position pos = Util.chooseAttackPosition(unit.getPosition(), true);
+                Position target = unit.getOrderTargetPosition();
+                if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
                     unit.attack(pos);
                     return false;
                 }
@@ -131,7 +141,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 status = Status.RETREAT;
                 return;
             }
-            if (status == Status.PATROL && actualFrame - lastPatrolFrame >= 5) {
+            if (status == Status.PATROL && actualFrame - lastPatrolFrame > 5) {
                 status = Status.COMBAT;
                 return;
             }
@@ -154,32 +164,21 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 }
             }
             if (status == Status.KITE) {
-                if (attackUnit == null) {
-                    Unit closest = getUnitToAttack(unit, closeEnemies);
-                    if (closest != null) {
-                        double dist = unit.getDistance(closest);
-                        double speed = type.topSpeed();
-                        double timeToEnter = 0.0;
-                        if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
-                        if (timeToEnter >= cd) {
-                            //status = Status.COMBAT;
-                            status = Status.PATROL;
-                            attackUnit = closest;
-                            return;
-                        }
-                    } else {
-                        status = Status.ATTACK;
-                        return;
-                    }
-                } else {
-                    double dist = Util.broodWarDistance(unit.getPosition(), attackUnit.getPosition());
+                Unit closest = getUnitToAttack(unit, closeEnemies);
+                if (closest != null) {
+                    double dist = unit.getDistance(closest);
                     double speed = type.topSpeed();
                     double timeToEnter = 0.0;
                     if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
                     if (timeToEnter >= cd) {
-                        status = Status.COMBAT;
+                        //status = Status.COMBAT;
+                        status = Status.PATROL;
+                        attackUnit = closest;
                         return;
                     }
+                } else {
+                    status = Status.ATTACK;
+                    return;
                 }
                 if (cd == 0) status = Status.COMBAT;
             }
@@ -197,22 +196,26 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private void kite() {
         Position kite = getGs().kiteAway(unit, closeEnemies);
         if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
+        if (kite.equals(unit.getPosition())) {
+            retreat();
+            return;
+        }
         Position target = unit.getOrderTargetPosition();
         if (target != null && !target.equals(kite)) unit.move(kite);
         if (target == null) unit.move(kite);
     }
 
     private void attack() {
-        Position newAttackPos = selectNewAttack();
-        if (attackPos == null) {
-            attackPos = newAttackPos;
-            if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
-                attackUnit = null;
-                attackPos = null;
-                return;
-            }
-            if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
-                unit.attack(newAttackPos);
+        attackPos = selectNewAttack();
+        if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
+            attackUnit = null;
+            attackPos = null;
+            return;
+        }
+        if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
+            Position target = unit.getOrderTargetPosition();
+            if (!attackPos.equals(target)) {
+                unit.attack(attackPos);
                 attackUnit = null;
             }
         }

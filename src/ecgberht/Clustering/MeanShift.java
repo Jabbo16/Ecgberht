@@ -20,7 +20,7 @@ public class MeanShift {
 
     public MeanShift(Collection<Unit> units) {
         for (Unit u : units) {
-            if (!u.isVisible()) continue;
+            //if (!u.isVisible()) continue;
             Position p = u.getPosition();
             this.points.add(new UnitPos(u, p.getX(), p.getY()));
         }

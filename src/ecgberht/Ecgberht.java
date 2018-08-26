@@ -600,9 +600,7 @@ public class Ecgberht implements BWEventListener {
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
-                            if (gs.frameCount == 0) {
-                                gs.MainCC = new MutablePair<>(Util.getClosestBaseLocation(arg0.getPosition()), arg0);
-                            }
+                            if (gs.frameCount == 0) gs.MainCC = new MutablePair<>(ccBase, arg0);
                         }
                         if (type == UnitType.Terran_Comsat_Station) gs.CSs.add((ComsatStation) arg0);
                         if (type == UnitType.Terran_Bunker) gs.DBs.put((Bunker) arg0, new TreeSet<>());

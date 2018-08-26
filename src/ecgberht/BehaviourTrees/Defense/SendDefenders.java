@@ -119,16 +119,14 @@ public class SendDefenders extends Action {
                         }
                     }
                 }
-            } else {
-                if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
-                    for (Entry<Integer, Squad> u : ((GameState) this.handler).sqManager.squads.entrySet()) {
-                        if (((GameState) this.handler).attackPosition != null) {
-                            u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
-                            u.getValue().status = Status.DEFENSE;
-                        } else {
-                            u.getValue().status = Status.IDLE;
-                            u.getValue().attack = null;
-                        }
+            } else if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
+                for (Entry<Integer, Squad> u : ((GameState) this.handler).sqManager.squads.entrySet()) {
+                    if (((GameState) this.handler).attackPosition != null) {
+                        u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
+                        u.getValue().status = Status.DEFENSE;
+                    } else {
+                        u.getValue().status = Status.IDLE;
+                        u.getValue().attack = null;
                     }
                 }
             }

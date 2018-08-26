@@ -166,7 +166,11 @@ public class GameState extends GameHandler {
                 players.put(p, 0);
                 neutral = p;
             } else if (ih.allies().contains(p) || p.equals(self)) players.put(p, 1);
-            else if (ih.enemies().contains(p)) players.put(p, -1);
+            else if (ih.enemies().contains(p)) {
+                players.put(p, -1);
+                IntelligenceAgency.enemyBases.put(p.getName(), new TreeSet<>());
+                IntelligenceAgency.enemyTypes.put(p.getName(), new HashSet<>());
+            }
         }
     }
 
@@ -596,17 +600,17 @@ public class GameState extends GameHandler {
                 bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText(Integer.toString(gas), ColorUtil.White));
             }
         }
-        sim.drawClusters();
+        //sim.drawClusters();
         for (Squad s : sqManager.squads.values()) {
             if (s.status == Squad.Status.ATTACK && s.attack != null)
                 bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
         }
-        /*for (Squad s : sqManager.squads.values()) {
+        for (Squad s : sqManager.squads.values()) {
             if (s.members.isEmpty()) continue;
             Position center = s.getSquadCenter();
             bw.getMapDrawer().drawCircleMap(center, 90, Color.GREEN);
             bw.getMapDrawer().drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
-        }*/
+        }
         for (Entry<MineralPatch, Integer> m : mineralsAssigned.entrySet()) {
             print(m.getKey(), Color.CYAN);
             if (m.getValue() == 0) continue;
@@ -1344,9 +1348,7 @@ public class GameState extends GameHandler {
 
     void updateAttack() {
         try {
-            if (sqManager.squads.isEmpty()) {
-                return;
-            }
+            if (sqManager.squads.isEmpty() || defense) return;
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
