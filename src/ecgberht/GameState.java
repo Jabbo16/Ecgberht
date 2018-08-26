@@ -49,7 +49,7 @@ public class GameState extends GameHandler {
     public boolean movingToExpand = false;
     public boolean siegeResearched = false;
     public Building chosenBuildingLot = null;
-    public Building chosenBuildingRepair = null;
+    public Mechanical chosenUnitRepair = null;
     public BuildingMap map;
     public BuildingMap testMap;
     public ChokePoint mainChoke = null;
@@ -84,7 +84,7 @@ public class GameState extends GameHandler {
     public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
     public Map<Position, MineralPatch> blockingMinerals = new HashMap<>();
-    public Map<SCV, Building> repairerTask = new TreeMap<>();
+    public Map<SCV, Mechanical> repairerTask = new TreeMap<>();
     public Map<SCV, Building> workerTask = new TreeMap<>();
     public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
     public Map<Unit, Agent> agents = new TreeMap<>();
@@ -186,13 +186,16 @@ public class GameState extends GameHandler {
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             TwoPortWraith tPW = new TwoPortWraith();
-            if (true) return tPW;
             String map = bw.getBWMap().mapFileName();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (enemyRace == Race.Zerg && EI.naughty) return b;
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
+            }
+            String enemyName = EI.opponent.toLowerCase().replace(" ", "");
+            if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus")) {
+                return tPW; // TODO properly ponderate strats vs race/opponent
             }
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
@@ -205,6 +208,11 @@ public class GameState extends GameHandler {
 
             strategies.put(bGFE.name, new MutablePair<>(0, 0));
             nameStrat.put(bGFE.name, bGFE);
+
+            if (enemyRace == Race.Zerg) {
+                strategies.put(tPW.name, new MutablePair<>(0, 0));
+                nameStrat.put(tPW.name, tPW);
+            }
 
             strategies.put(bMGFE.name, new MutablePair<>(0, 0));
             nameStrat.put(bMGFE.name, bGFE);
@@ -244,7 +252,7 @@ public class GameState extends GameHandler {
             String bestStrat = null;
             for (Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
                 double winRate = (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0;
-                if (winRate > 0.74 && winRate > maxWinRate) {
+                if (winRate >= 0.75 && winRate > maxWinRate) {
                     maxWinRate = winRate;
                     bestStrat = s.getKey();
                 }
@@ -600,17 +608,17 @@ public class GameState extends GameHandler {
                 bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText(Integer.toString(gas), ColorUtil.White));
             }
         }
-        //sim.drawClusters();
+        sim.drawClusters();
         for (Squad s : sqManager.squads.values()) {
             if (s.status == Squad.Status.ATTACK && s.attack != null)
                 bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
         }
-        for (Squad s : sqManager.squads.values()) {
+        /*for (Squad s : sqManager.squads.values()) {
             if (s.members.isEmpty()) continue;
             Position center = s.getSquadCenter();
             bw.getMapDrawer().drawCircleMap(center, 90, Color.GREEN);
             bw.getMapDrawer().drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
-        }
+        }*/
         for (Entry<MineralPatch, Integer> m : mineralsAssigned.entrySet()) {
             print(m.getKey(), Color.CYAN);
             if (m.getValue() == 0) continue;

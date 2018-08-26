@@ -482,23 +482,41 @@ public class Util {
         return new MutablePair<>(pos.first * cosAngle - pos.second * sinAngle, pos.first * sinAngle + pos.second * cosAngle);
     }
 
-    //Credits to @PurpleWaveJadien / Dan
-    public double broodWarDistanceBox(Position p0, Position p1, Position p2, Position p3) {
-        return broodWarDistanceBox(p0.getX(), p0.getY(), p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
+    public static boolean isPositionMapEdge(Position pos) {
+        return pos.getX() <= 0 || pos.getY() <= 0 || pos.getX() >= getGs().getGame().getBWMap().mapWidth() * 32
+                || pos.getY() >= getGs().getGame().getBWMap().mapHeight() * 32;
     }
 
-    //Credits to @PurpleWaveJadien / Dan
-    public double broodWarDistanceBox(int x00, int y00, int x01, int y01, int x10, int y10, int x11, int y11) {
-        if (x11 < x00) {
-            if (y11 < y00) return broodWarDistance(x11, y11, x00, y00);
-            else if (y10 > y01) return broodWarDistance(x11, y10, x00, y01);
-            else return x00 - x11;
-        } else if (x10 > x01) {
-            if (y11 < y00) return broodWarDistance(x10, y11, x01, y00);
-            else if (y10 > y01) return broodWarDistance(x10, y10, x01, y01);
-            else return x10 - x01;
-        } else if (y11 < y00) return y00 - y11;
-        else if (y10 > y01) return y10 - y01;
-        return 0;
+    public static Position improveMapEdgePosition(Position pos) {
+        MutablePair<Integer, Integer> improved = new MutablePair<>(pos.getX(), pos.getY());
+        int mapHeight = getGs().getGame().getBWMap().mapHeight() * 32;
+        int mapWidth = getGs().getGame().getBWMap().mapWidth() * 32;
+        if (improved.first <= 0 && improved.second <= 0) {
+            if (Math.random() < 0.5) improved.first = 5 * 32;
+            else improved.second = 5 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.first >= mapWidth && improved.second >= mapWidth) {
+            if (Math.random() < 0.5) improved.first = mapWidth - 2 * 32;
+            else improved.second = mapHeight - 2 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.first <= 0) {
+            improved.first = 5 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.second <= 0) {
+            improved.second = 5 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.first >= mapWidth) {
+            improved.first = mapWidth - 2 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.second >= mapHeight) {
+            improved.second = mapHeight - 2 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        return null;
     }
 }

@@ -24,19 +24,12 @@ public class Squad implements Comparable<Squad> {
     private Position center;
     private Integer id;
 
-    public Squad(int id) {
-        this.id = id;
-        members = new TreeSet<>();
-        status = Status.IDLE;
-        attack = null;
-    }
-
-    public Squad(int id, Set<Unit> members, Position center) {
+    Squad(int id, Set<Unit> members, Position center) {
         this.id = id;
         for (Unit m : members) {
             if (isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add(m);
         }
-        status = Status.IDLE;
+        status = getGs().defense ? Status.DEFENSE : Status.IDLE;
         attack = null;
         this.center = center;
     }
@@ -81,6 +74,13 @@ public class Squad implements Comparable<Squad> {
             }
             for (Unit u : members) {
                 PlayerUnit pU = (PlayerUnit) u;
+                SimInfo s = getGs().sim.getSimulation(u, SimInfo.SimType.MIX);
+                boolean retreat = s.lose;
+                if (!retreat || status == Status.DEFENSE || ((MobileUnit) u).isDefenseMatrixed() || getGs().sim.farFromFight(u, s)) {
+                    retreat = false;
+                }
+                String retreating = ColorUtil.formatText(retreat ? "Retreating" : "Fighting", ColorUtil.White);
+                getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getType().tileHeight())), retreating);
                 if (pU.isLockedDown() || pU.isMaelstrommed() || ((MobileUnit) u).isStasised() || ((MobileUnit) u).getTransport() != null)
                     continue;
                 Position lastTarget = pU.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
@@ -150,13 +150,6 @@ public class Squad implements Comparable<Squad> {
                         }
                     }
                 }
-                SimInfo s = getGs().sim.getSimulation(u, SimInfo.SimType.MIX);
-                boolean retreat = s.lose;
-                if (!retreat || status == Status.DEFENSE || ((MobileUnit) u).isDefenseMatrixed() || getGs().sim.farFromFight(u, s)) {
-                    retreat = false;
-                }
-                String retreating = ColorUtil.formatText(retreat ? "Retreating" : "Fighting", ColorUtil.White);
-                getGs().getGame().getMapDrawer().drawTextMap(u.getPosition().add(new Position(0, u.getType().tileHeight())), retreating);
                 if (retreat) {
                     Position pos = getGs().getNearestCC(u.getPosition());
                     if (Util.broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||

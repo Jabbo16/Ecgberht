@@ -4,6 +4,7 @@ import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
+import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
@@ -209,7 +210,7 @@ public class SimManager {
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
             if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
-            else s.lose = !scoreCalc(s, 3.5) || s.stateAfter.first.isEmpty();
+            else s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
         }
     }
 
@@ -236,7 +237,7 @@ public class SimManager {
         if (ally) color = Color.GREEN;
         Position centroid = new Position((int) c.modeX, (int) c.modeY);
         getGs().getGame().getMapDrawer().drawCircleMap(centroid, 5, color, true);
-        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), Integer.toString(id));
+        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), ColorUtil.formatText(Integer.toString(id), ColorUtil.White));
         for (Unit u : c.units) getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
     }
 

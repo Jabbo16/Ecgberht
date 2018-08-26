@@ -78,14 +78,21 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         Position kite = getGs().kiteAway(unit, airAttackers);
+        Position improvedKite = Util.isPositionMapEdge(kite) ? Util.improveMapEdgePosition(kite) : null;
+        Position target = unit.getOrderTargetPosition();
+        if (improvedKite != null && getGs().getGame().getBWMap().isValidPosition(improvedKite)) {
+            if (target != null && !target.equals(improvedKite)) unit.move(improvedKite);
+            if (target == null) unit.move(improvedKite);
+            return;
+        }
         if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
         if (kite.equals(unit.getPosition())) {
             retreat();
             return;
         }
-        Position target = unit.getOrderTargetPosition();
         if (target != null && !target.equals(kite)) unit.move(kite);
         if (target == null) unit.move(kite);
+
     }
 
     @Override
@@ -170,8 +177,8 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             else if (closestAirAttacker != null) {
                 double dist = closestAirAttacker.getDistance(unit);
                 Weapon weapon = closestAirAttacker.getType().isFlyer() ? unit.getAirWeapon() : unit.getGroundWeapon();
-                double enemyRange = ((AirAttacker) closestAirAttacker).getAirWeaponMaxRange(); // TODO auxiliar method that includes upgrades
-                if (weapon.cooldown() == 0 && enemyRange < weapon.maxRange() && dist > enemyRange * 1.05)
+                double enemyRange = ((AirAttacker) closestAirAttacker).getAirWeaponMaxRange(); // TODO helper method that includes upgrades
+                if (weapon.cooldown() == 0 && enemyRange < weapon.maxRange() && dist > enemyRange * 1.15)
                     status = Status.COMBAT;
                 else if (dist < enemyRange * 1.5) status = Status.KITE;
             } else if (mySimAir.lose) status = Status.KITE;

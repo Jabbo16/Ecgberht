@@ -759,7 +759,7 @@ public class Ecgberht implements BWEventListener {
                         if (type != UnitType.Terran_Command_Center) {
                             gs.map.updateMap(arg0.getTilePosition(), type, true);
                         }
-                        for (Entry<SCV, Building> r : gs.repairerTask.entrySet()) {
+                        for (Entry<SCV, Mechanical> r : gs.repairerTask.entrySet()) {
                             if (r.getValue().equals(arg0)) {
                                 gs.workerIdle.add(r.getKey());
                                 gs.repairerTask.remove(r.getKey());

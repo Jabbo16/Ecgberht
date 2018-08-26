@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Defense;
 
+import bwem.Base;
 import bwem.area.Area;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
@@ -39,6 +40,13 @@ public class CheckPerimeter extends Conditional {
                 if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || (u instanceof Loadable &&
                         !(u instanceof Overlord))) && uType != UnitType.Zerg_Scourge &&
                         uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {
+                    for (Base b : ((GameState) this.handler).CCs.keySet()) {
+                        Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
+                        if (enemyArea != null && enemyArea.equals(b.getArea())) {
+                            ((GameState) this.handler).enemyInBase.add(u);
+                            break;
+                        }
+                    }
                     for (Map.Entry<SCV, Building> c : ((GameState) this.handler).workerTask.entrySet()) {
                         int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
                         if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
@@ -65,7 +73,7 @@ public class CheckPerimeter extends Conditional {
                         }
                     }
                     for (ResearchingFacility c : ((GameState) this.handler).UBs) {
-                        if (Util.broodWarDistance(u.getPosition(), ((Unit) c).getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
                             break;
                         }
