@@ -83,7 +83,7 @@ public class GameState extends GameHandler {
     public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
     public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
-    public Map<Position, MineralPatch> blockingMinerals = new HashMap<>();
+    public Map<Position, MineralPatch> blockingMinerals = new LinkedHashMap<>();
     public Map<SCV, Mechanical> repairerTask = new TreeMap<>();
     public Map<SCV, Building> workerTask = new TreeMap<>();
     public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
@@ -476,7 +476,8 @@ public class GameState extends GameHandler {
             } else {
                 bw.getMapDrawer().drawTextScreen(10, 35, ColorUtil.formatText("Enemy Base Found: ", ColorUtil.White) + ColorUtil.formatText("No", ColorUtil.Red));
             }
-            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("APM: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(ih.getAPM()), ColorUtil.Yellow));
+            bw.getMapDrawer().drawTextScreen(10, 50, ColorUtil.formatText("FPS: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(ih.getFPS()), ColorUtil.Yellow));
+            bw.getMapDrawer().drawTextScreen(65, 50, ColorUtil.formatText("APM: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(ih.getAPM()), ColorUtil.Yellow));
             bw.getMapDrawer().drawTextScreen(10, 65, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(strat.name, ColorUtil.Yellow));
             bw.getMapDrawer().drawTextScreen(10, 80, ColorUtil.formatText("EnemyStrategy: ", ColorUtil.White) + ColorUtil.formatText(IntelligenceAgency.getEnemyStrat().toString(), ColorUtil.Yellow));
             bw.getMapDrawer().drawTextScreen(10, 95, ColorUtil.formatText("SimTime(ms): ", ColorUtil.White) + ColorUtil.formatText(String.valueOf(sim.time), ColorUtil.Teal));

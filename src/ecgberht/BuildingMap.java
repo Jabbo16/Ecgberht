@@ -14,12 +14,13 @@ import org.openbw.bwapi4j.unit.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 import static ecgberht.Ecgberht.getGs;
 
 public class BuildingMap implements Cloneable {
 
+    private static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
     private Player self;
     private int height;
     private int width;
@@ -34,6 +35,7 @@ public class BuildingMap implements Cloneable {
         this.width = bw.getBWMap().mapWidth();
         this.map = new String[this.height][this.width];
         this.bwem = bwem;
+        if (tilesArea.isEmpty()) initTilesArea();
     }
 
     public BuildingMap(BW bw, Player self, int height, int width, String[][] map, BWEM bwem) {
@@ -43,6 +45,19 @@ public class BuildingMap implements Cloneable {
         this.width = width;
         this.map = copyMap(map);
         this.bwem = bwem;
+        if (tilesArea.isEmpty()) initTilesArea();
+    }
+
+    private void initTilesArea() {
+        for (Area a : bwem.getMap().getAreas())
+            tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
+        for (int jj = 0; jj < height; jj++) {
+            for (int ii = 0; ii < width; ii++) {
+                TilePosition x = new TilePosition(ii, jj);
+                Area a = bwem.getMap().getArea(x);
+                if (a != null) tilesArea.get(a).add(x);
+            }
+        }
     }
 
     private String[][] copyMap(String[][] map) {
@@ -274,14 +289,43 @@ public class BuildingMap implements Cloneable {
         }
     }
 
+    private TilePosition findPositionArea(UnitType buildingType, Area a) {
+        TilePosition buildingSize = buildingType.tileSize();
+        int size = Math.max(buildingSize.getY(), buildingSize.getX());
+        if (buildingType.canBuildAddon()) size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
+        Set<TilePosition> tilesToCheck = tilesArea.get(a);
+        for (TilePosition t : tilesToCheck) {
+            int ii = t.getY();
+            int jj = t.getX();
+            if (!map[ii][jj].equals("M") && !map[ii][jj].equals("V") && !map[ii][jj].equals("E") && !map[ii][jj].equals("B")
+                    && Integer.parseInt(map[ii][jj]) >= size && checkUnitsChosenBuildingGrid(t, buildingType)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    // Finds a valid position in the map for a specific building type starting with a given tileposition, searches owned areas
+    public TilePosition findPositionNew(UnitType buildingType, TilePosition starting) { // TODO test
+        if (buildingType == UnitType.Terran_Bunker || buildingType == UnitType.Terran_Missile_Turret)
+            return findPosition(buildingType, starting);
+        Area find = bwem.getMap().getArea(starting);
+        if (find == null) return findPosition(buildingType, starting);
+        TilePosition tile = findPositionArea(buildingType, find);
+        if (tile != null) return tile;
+        for (Base b : getGs().CCs.keySet()) {
+            if (find.equals(b.getArea())) continue;
+            tile = findPositionArea(buildingType, b.getArea());
+            if (tile != null) return tile;
+        }
+        return findPosition(buildingType, starting);
+    }
 
     // Finds a valid position in the map for a specific building type starting with a given tileposition
     public TilePosition findPosition(UnitType buildingType, TilePosition starting) {
         TilePosition buildingSize = buildingType.tileSize();
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
-        if (buildingType.canBuildAddon()) {
-            size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
-        }
+        if (buildingType.canBuildAddon()) size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
         if (starting == null) starting = getGs().getPlayer().getStartLocation();
         int x = starting.getY();
         int y = starting.getX();
@@ -293,27 +337,22 @@ public class BuildingMap implements Cloneable {
         while (!control) {
             for (int ii = (x - i); ii <= (x + i); ii++) {
                 for (int jj = (y - j); jj <= (y + j); jj++) {
-                    if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width)) {
-                        if ((!map[ii][jj].equals("M") && !map[ii][jj].equals("V") && !map[ii][jj].equals("E")
-                                && !map[ii][jj].equals("B")) && Integer.parseInt(map[ii][jj]) >= size) {
-                            if (buildingType == UnitType.Terran_Bunker) {
-                                Area bunk = bwem.getMap().getArea(new TilePosition(jj, ii));
-                                if (bunk != null && !bunk.equals(bwem.getMap().getArea(self.getStartLocation()))) {
-                                    continue;
-                                }
-                            }
-                            if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), buildingType)) {
-                                coord[0] = ii;
-                                coord[1] = jj;
-                                control = true;
-                                break;
-                            }
+                    if ((ii >= 0 && ii < height) && (jj >= 0 && jj < width) && (!map[ii][jj].equals("M")
+                            && !map[ii][jj].equals("V") && !map[ii][jj].equals("E") && !map[ii][jj].equals("B"))
+                            && Integer.parseInt(map[ii][jj]) >= size) {
+                        if (buildingType == UnitType.Terran_Bunker) {
+                            Area bunk = bwem.getMap().getArea(new TilePosition(jj, ii));
+                            if (bunk != null && !bunk.equals(bwem.getMap().getArea(self.getStartLocation()))) continue;
+                        }
+                        if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), buildingType)) {
+                            coord[0] = ii;
+                            coord[1] = jj;
+                            control = true;
+                            break;
                         }
                     }
                 }
-                if (control) {
-                    break;
-                }
+                if (control) break;
             }
             i++;
             j++;
@@ -432,6 +471,23 @@ public class BuildingMap implements Cloneable {
             sw.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static class tilesAreaComparator implements Comparator<TilePosition> {
+
+        private TilePosition center;
+
+        private tilesAreaComparator(TilePosition center) {
+            this.center = center;
+        }
+
+        @Override
+        public int compare(TilePosition o1, TilePosition o2) {
+            if (o1.equals(o2)) return 0;
+            double dist1 = o1.getDistance(center);
+            double dist2 = o2.getDistance(center);
+            return dist1 < dist2 ? -1 : 1;
         }
     }
 }

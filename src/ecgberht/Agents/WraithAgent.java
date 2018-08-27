@@ -49,7 +49,8 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             //if (status != Status.COMBAT) attackUnit = null;
             attackUnit = null;
-            if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isAttacking()) {
+            //if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isAttacking()) {
+            if ((unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isAttacking() && !unit.isMoving() && !unit.isLockedDown() && !unit.isStasised()) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), true);
                 Position target = unit.getOrderTargetPosition();
                 if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
