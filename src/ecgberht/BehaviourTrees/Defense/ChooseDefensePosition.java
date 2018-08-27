@@ -14,13 +14,22 @@ public class ChooseDefensePosition extends Conditional {
         super(name, gh);
     }
 
+    private Position getDefensePosition() {
+        if (((GameState) this.handler).defendPosition != null) return ((GameState) this.handler).defendPosition;
+        if (((GameState) this.handler).initDefensePosition != null)
+            return ((GameState) this.handler).initDefensePosition.toPosition();
+        if (((GameState) this.handler).mainChoke != null)
+            return ((GameState) this.handler).mainChoke.getCenter().toPosition();
+        return ((GameState) this.handler).getPlayer().getStartLocation().toPosition();
+    }
+
     private Position chooseDefensePosition() {
         Position chosen = null;
         double maxScore = 0;
         for (Unit b : ((GameState) this.handler).enemyInBase) {
             double influence = getScore(b);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * Util.getGroundDistance(((GameState) this.handler).initDefensePosition.toPosition(), b.getPosition()));
+            double score = influence / (2.5 * Util.getGroundDistance(getDefensePosition(), b.getPosition()));
             if (score > maxScore) {
                 chosen = b.getPosition();
                 maxScore = score;

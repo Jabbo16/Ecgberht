@@ -53,7 +53,8 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), true);
                 Position target = unit.getOrderTargetPosition();
                 if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
-                    unit.attack(pos);
+                    unit.move(pos);
+                    status = Status.ATTACK;
                     return false;
                 }
             }
@@ -151,7 +152,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
                 if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) chasenByScourge = true;
-                else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
+                else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.15) {
                     staticAirDefense = true;
                 }
                 if (chasenByScourge && staticAirDefense) break;
@@ -159,7 +160,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         }
         if (getGs().enemyRace == Race.Protoss && !mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
-                if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
+                if (u instanceof PhotonCannon && u.getDistance(unit) < ((PhotonCannon) u).getAirWeapon().maxRange() * 1.15) {
                     staticAirDefense = true;
                     break;
                 }
@@ -178,7 +179,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 double dist = closestAirAttacker.getDistance(unit);
                 Weapon weapon = closestAirAttacker.getType().isFlyer() ? unit.getAirWeapon() : unit.getGroundWeapon();
                 double enemyRange = ((AirAttacker) closestAirAttacker).getAirWeaponMaxRange(); // TODO helper method that includes upgrades
-                if (weapon.cooldown() == 0 && enemyRange < weapon.maxRange() && dist > enemyRange * 1.15)
+                if (weapon.cooldown() == 0 && enemyRange < weapon.maxRange() && dist > enemyRange * 1.2)
                     status = Status.COMBAT;
                 else if (dist < enemyRange * 1.5) status = Status.KITE;
             } else if (mySimAir.lose) status = Status.KITE;

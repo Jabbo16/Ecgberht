@@ -1184,7 +1184,7 @@ public class GameState extends GameHandler {
         Unit worker = null;
         for (Unit u : closeSim) {
             if (u instanceof Worker) workers.add(u);
-            if (!(u instanceof Worker) && (u instanceof Attacker)) combatUnits.add(u);
+            else combatUnits.add(u);
         }
         if (combatUnits.isEmpty() && workers.isEmpty()) return null;
         if (!workers.isEmpty()) {
@@ -1351,7 +1351,7 @@ public class GameState extends GameHandler {
     public boolean needToAttack() {
         if (strat.name.equals("ProxyBBS") && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
             return true;
-        return getArmySize() >= strat.armyForAttack && !defense && requiredUnitsForAttack();
+        return getArmySize() >= strat.armyForAttack && requiredUnitsForAttack();
     }
 
     void updateAttack() {

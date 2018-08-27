@@ -34,7 +34,7 @@ public class CheckBuildingFlames extends Action {
                     }
                 } else if (((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) < 2 && u.getValue() instanceof Bunker &&
                         IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush) {
-                    continue;
+                    if (u.getKey().getDistance(u.getValue()) > 3 * 32) u.getKey().move(u.getValue().getPosition());
                 } else {
                     u.getKey().stop(false);
                     ((GameState) this.handler).workerIdle.add(u.getKey());

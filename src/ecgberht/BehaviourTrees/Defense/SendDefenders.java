@@ -105,7 +105,7 @@ public class SendDefenders extends Action {
                                     closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();
                                 if (closestDefense == null)
                                     closestDefense = ((GameState) this.handler).getNearestCC(u.getKey().getPosition());
-                                if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange()) {
+                                if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange() * 0.95) {
                                     u.getKey().move(closestDefense);
                                     continue;
                                 }
@@ -115,7 +115,12 @@ public class SendDefenders extends Action {
                                 Unit lastTarget = u.getKey().getOrderTarget();
                                 if (lastTarget != null && lastTarget.equals(toAttack)) continue;
                                 u.getKey().attack(toAttack);
-                            } else u.getKey().attack(((GameState) this.handler).attackPosition);
+                            } else {
+                                Position lastTargetPosition = u.getKey().getOrderTargetPosition();
+                                if (lastTargetPosition != null && lastTargetPosition.equals(((GameState) this.handler).attackPosition))
+                                    continue;
+                                u.getKey().attack(((GameState) this.handler).attackPosition);
+                            }
                         }
                     }
                 }

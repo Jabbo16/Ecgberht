@@ -30,8 +30,7 @@ public class CheckPerimeter extends Conditional {
             ((GameState) this.handler).defense = false;
             Set<Unit> enemyInvaders = new TreeSet<>(((GameState) this.handler).enemyCombatUnitMemory);
             for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce()
-                        || u.type.isRefinery() || u.type == UnitType.Terran_Barracks) {
+                if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
                     enemyInvaders.add(u.unit);
                 }
             }

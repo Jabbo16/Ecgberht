@@ -57,11 +57,12 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             getNewStatus();
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
-            if (status == Status.ATTACK && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
-                Position pos = Util.chooseAttackPosition(unit.getPosition(), true);
+            if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
+                Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
                 Position target = unit.getOrderTargetPosition();
                 if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
-                    unit.attack(pos);
+                    unit.move(pos);
+                    status = Status.ATTACK;
                     return false;
                 }
             }
@@ -195,8 +196,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         Position kite = getGs().kiteAway(unit, closeEnemies);
-        if (!getGs().getGame().getBWMap().isValidPosition(kite)) return;
-        if (kite.equals(unit.getPosition())) {
+        if (!getGs().getGame().getBWMap().isValidPosition(kite) || kite.equals(unit.getPosition())) {
             retreat();
             return;
         }
