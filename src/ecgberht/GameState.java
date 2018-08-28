@@ -8,6 +8,7 @@ import bwem.unit.Geyser;
 import bwem.unit.Mineral;
 import bwem.unit.Neutral;
 import bwem.unit.NeutralImpl;
+import cameraModule.CameraModule;
 import com.google.gson.Gson;
 import ecgberht.Agents.*;
 import ecgberht.Simulation.SimManager;
@@ -122,6 +123,7 @@ public class GameState extends GameHandler {
     public SpellsManager wizard = new SpellsManager();
     public Strategy strat = null;
     public SupplyMan supplyMan;
+    CameraModule skycladObserver = null;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
     public TilePosition chosenBaseLocation = null;
@@ -133,8 +135,8 @@ public class GameState extends GameHandler {
     public Unit chosenScout = null;
     public Unit chosenUnitToHarass = null;
     public UnitType chosenAddon = null;
-    public UnitType chosenToBuild = null;
-    public UnitType chosenUnit = null;
+    public UnitType chosenToBuild = UnitType.None;
+    public UnitType chosenUnit = UnitType.None;
     public UpgradeType chosenUpgrade = null;
     public Worker chosenBuilderBL = null;
     public Worker chosenHarasser = null;
@@ -461,6 +463,7 @@ public class GameState extends GameHandler {
             String defending = defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
             bw.getMapDrawer().drawTextScreen(320, 35, defending);
             bw.getMapDrawer().drawTextScreen(320, 50, ColorUtil.formatText(chosenUnit.toString(), ColorUtil.White));
+            bw.getMapDrawer().drawTextScreen(320, 65, ColorUtil.formatText(chosenToBuild.toString(), ColorUtil.White));
             if (ih.allies().size() + ih.enemies().size() == 1) {
                 bw.getMapDrawer().drawTextScreen(10, 5,
                         ColorUtil.formatText(ih.self().getName(), ColorUtil.getColor(ih.self().getColor())) +
@@ -1113,7 +1116,7 @@ public class GameState extends GameHandler {
         for (Unit u : aux) enemyBuildingMemory.remove(u);
     }
 
-    public int countUnit(UnitType type) {
+    public int countBuildingAll(UnitType type) {
         int count = 0;
         for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
             if (w.first == type) count++;
@@ -1146,7 +1149,7 @@ public class GameState extends GameHandler {
     }
 
     void checkWorkerMilitia() {
-        if (countUnit(UnitType.Terran_Barracks) == 2) {
+        if (countBuildingAll(UnitType.Terran_Barracks) == 2) {
             List<Unit> aux = new ArrayList<>();
             int count = workerMining.size();
             for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
@@ -1300,7 +1303,7 @@ public class GameState extends GameHandler {
         EI.naughty = false;
     }
 
-    public boolean requiredUnitsForAttack() {
+    private boolean requiredUnitsForAttack() {
         return strat.requiredUnitsForAttack();
     }
 
@@ -1382,5 +1385,37 @@ public class GameState extends GameHandler {
             if (b.getArea().equals(uArea)) return false;
         }
         return !naturalArea.equals(uArea) && getArmySize() * 0.85 >= strat.armyForAttack && (naturalChoke != null && naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
+    }
+
+    void keyboardInteraction(String text) {
+        boolean setting;
+        switch (text) {
+            case "dt":
+                setting = ConfigManager.getConfig().ecgConfig.debugText;
+                ih.sendText(!setting ? "debugText enabled" : "debugText disabled");
+                ConfigManager.getConfig().ecgConfig.debugText = !setting;
+                break;
+            case "dc":
+                setting = ConfigManager.getConfig().ecgConfig.debugConsole;
+                ih.sendText(!setting ? "debugConsole enabled" : "debugConsole disabled");
+                ConfigManager.getConfig().ecgConfig.debugConsole = !setting;
+                break;
+            case "ds":
+                setting = ConfigManager.getConfig().ecgConfig.debugScreen;
+                ih.sendText(!setting ? "debugScreen enabled" : "debugScreen disabled");
+                ConfigManager.getConfig().ecgConfig.debugScreen = !setting;
+                break;
+            case "obs":
+                setting = ConfigManager.getConfig().ecgConfig.enableSkyCladObserver;
+                ih.sendText(!setting ? "Observer enabled" : "Observer disabled");
+                ConfigManager.getConfig().ecgConfig.enableSkyCladObserver = !setting;
+                skycladObserver.toggle();
+                break;
+            case "sounds":
+                setting = ConfigManager.getConfig().ecgConfig.sounds;
+                ih.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
+                ConfigManager.getConfig().ecgConfig.sounds = !setting;
+                break;
+        }
     }
 }

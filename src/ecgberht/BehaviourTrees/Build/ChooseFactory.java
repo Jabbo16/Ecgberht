@@ -20,19 +20,19 @@ public class ChooseFactory extends Action {
             String strat = ((GameState) this.handler).strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
                 Player self = ((GameState) this.handler).getPlayer();
-                if (((GameState) this.handler).countUnit(UnitType.Terran_Factory) > 1 &&
+                if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Factory) > 1 &&
                         !self.isResearching(TechType.Tank_Siege_Mode) && !self.hasResearched(TechType.Tank_Siege_Mode)) {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).strat.numRaxForFac > ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) ||
-                    (((GameState) this.handler).countUnit(UnitType.Terran_Factory) > 0 && ((GameState) this.handler).strat.facPerCC == 0)) {
+            if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).strat.numRaxForFac > ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) ||
+                    (((GameState) this.handler).countBuildingAll(UnitType.Terran_Factory) > 0 && ((GameState) this.handler).strat.facPerCC == 0)) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Factory) == 0 && ((GameState) this.handler).strat.facPerCC == 0) {
+            if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Factory) == 0 && ((GameState) this.handler).strat.facPerCC == 0) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Factory;
                 return State.SUCCESS;
-            } else if (((GameState) this.handler).countUnit(UnitType.Terran_Factory) < ((GameState) this.handler).strat.facPerCC * ((GameState) this.handler).CCs.size()) {
+            } else if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Factory) < ((GameState) this.handler).strat.facPerCC * ((GameState) this.handler).CCs.size()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Factory;
                 return State.SUCCESS;
             }

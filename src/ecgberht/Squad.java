@@ -140,12 +140,16 @@ public class Squad implements Comparable<Squad> {
                         WeaponType weapon = Util.getWeapon(u.getType());
                         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
                         if (pU.getOrder() == Order.AttackMove || pU.getOrder() == Order.HealMove) {
-                            if (u.getDistance(move) <= range * ((double) (new Random().nextInt((10 + 1) - 6) + 6)) / 10.0)
+                            if (u.getDistance(move) <= range * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.getPosition())) {
                                 if (u instanceof SiegeTank && !((SiegeTank) u).isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
                                     ((SiegeTank) u).siege();
                                 } else ((MobileUnit) u).stop(false);
+                                continue;
+                            }
                         } else if (u.getDistance(move) > range && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
-                            ((MobileUnit) u).attack(move);
+                            if(u instanceof SiegeTank && ((SiegeTank)u).isSieged() || !getGs().defense){
+                                ((SiegeTank)u).unsiege();
+                            } else ((MobileUnit) u).attack(move);
                             continue;
                         }
                     }
@@ -162,11 +166,9 @@ public class Squad implements Comparable<Squad> {
                 if (status == Status.ATTACK && getGs().getGame().getBWMap().isWalkable(sCenter.toWalkPosition()) && getGs().supplyMan.getSupplyUsed() < 240) {
                     if (members.size() == 1) continue;
                     double dist = Util.broodWarDistance(u.getPosition(), sCenter);
-                    if (dist >= 300 && pU.getOrderTargetPosition() != null) {
-                        if (!pU.getOrderTargetPosition().equals(sCenter)) {
-                            ((MobileUnit) u).attack(sCenter);
-                            continue;
-                        }
+                    if (dist >= 300 && pU.getOrderTargetPosition() != null && !pU.getOrderTargetPosition().equals(sCenter)) {
+                        ((MobileUnit) u).attack(sCenter);
+                        continue;
                     }
                 }
                 if (u instanceof Medic && pU.getOrder() != Order.MedicHeal) {
@@ -212,11 +214,9 @@ public class Squad implements Comparable<Squad> {
                     if (pU.isIdle() && attack != null && status != Status.IDLE) {
                         lastTarget = (((MobileUnit) u).getTargetPosition() == null ? pU.getOrderTargetPosition() :
                                 ((MobileUnit) u).getTargetPosition());
-                        if (lastTarget != null) {
-                            if (!lastTarget.equals(attack)) {
-                                ((MobileUnit) u).attack(attack);
-                                continue;
-                            }
+                        if (lastTarget != null && !lastTarget.equals(attack)) {
+                            ((MobileUnit) u).attack(attack);
+                            continue;
                         }
                     }
                     //Experimental storm dodging?
@@ -231,11 +231,9 @@ public class Squad implements Comparable<Squad> {
                         if (eType == UnitType.Zerg_Larva || eType == UnitType.Zerg_Overlord) continue;
                         enemyToAttack.add(e);
                         if (!(e instanceof Building) && !e.getType().isFlyer() && e.getType().groundWeapon().maxRange() <= 32
-                                && e.getType() != UnitType.Terran_Medic) {
-                            if (Util.broodWarDistance(u.getPosition(), e.getPosition()) <=
-                                    u.getType().groundWeapon().maxRange()) {
-                                enemyToKite.add(e);
-                            }
+                                && e.getType() != UnitType.Terran_Medic && Util.broodWarDistance(u.getPosition(), e.getPosition()) <=
+                                u.getType().groundWeapon().maxRange()) {
+                            enemyToKite.add(e);
                         }
                     }
                     if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeaponCooldown() > 0) {

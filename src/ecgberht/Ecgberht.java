@@ -78,7 +78,6 @@ public class Ecgberht implements BWEventListener {
     private boolean first = false;
     private Player self;
     private BWEM bwem = null;
-    private CameraModule skycladObserver = null;
 
     public static void main(String[] args) {
         new Ecgberht().run();
@@ -130,7 +129,6 @@ public class Ecgberht implements BWEventListener {
 
     private static void initBuildTree() {
         Build b = new Build("Build", gs);
-        ChooseSituationalBuilding cSB = new ChooseSituationalBuilding("Choose situational building", gs);
         ChooseNothingBuilding cNB = new ChooseNothingBuilding("Choose Nothing", gs);
         ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
@@ -148,7 +146,7 @@ public class Ecgberht implements BWEventListener {
         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cNB, cSB, cE, cSup);
+        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cNB, cE, cSup);
         if (gs.strat.bunker) chooseBuildingBuild.addChild(cBun);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
@@ -249,7 +247,7 @@ public class Ecgberht implements BWEventListener {
             DataTraining.copyOnStart();
             self = bw.getInteractionHandler().self();
             ih = bw.getInteractionHandler();
-            IntelligenceAgency.mainEnemy = ih.enemy();
+            IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
             if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
             else ih.enableLatCom(true);
             if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
@@ -296,8 +294,8 @@ public class Ecgberht implements BWEventListener {
             initScanTree();
             initHarassTree();
             //initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
-            skycladObserver = new CameraModule(self.getStartLocation(), bw);
-            if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
+            gs.skycladObserver = new CameraModule(self.getStartLocation(), bw);
+            if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) gs.skycladObserver.toggle();
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
@@ -395,7 +393,7 @@ public class Ecgberht implements BWEventListener {
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
-            skycladObserver.onFrame();
+            gs.skycladObserver.onFrame();
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
@@ -503,7 +501,7 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onSendText(String arg0) {
-
+        gs.keyboardInteraction(arg0);
     }
 
     @Override
@@ -564,7 +562,7 @@ public class Ecgberht implements BWEventListener {
                     || arg0 instanceof Critter || arg0 instanceof ScannerSweep) {
                 return;
             }
-            skycladObserver.moveCameraUnitCompleted(arg0);
+            gs.skycladObserver.moveCameraUnitCompleted(arg0);
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = arg0.getType();
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {

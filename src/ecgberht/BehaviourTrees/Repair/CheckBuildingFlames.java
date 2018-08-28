@@ -32,7 +32,7 @@ public class CheckBuildingFlames extends Action {
                     if (u.getKey().getOrder() != Order.Follow && u.getKey().getOrder() != Order.Repair) {
                         u.getKey().rightClick(u.getValue(), false);
                     }
-                } else if (((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) < 2 && u.getValue() instanceof Bunker &&
+                } else if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Command_Center) < 2 && u.getValue() instanceof Bunker &&
                         IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush) {
                     if (u.getKey().getDistance(u.getValue()) > 3 * 32) u.getKey().move(u.getValue().getPosition());
                 } else {
@@ -47,7 +47,7 @@ public class CheckBuildingFlames extends Action {
             for (Bunker w : ((GameState) this.handler).DBs.keySet()) {
                 int count = 0;
                 if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints() ||
-                        (cheesed && ((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) < 2)) {
+                        (cheesed && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Command_Center) < 2)) {
                     for (Mechanical r : ((GameState) this.handler).repairerTask.values()) {
                         if (w.equals(r)) count++;
                     }

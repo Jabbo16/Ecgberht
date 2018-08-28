@@ -20,19 +20,19 @@ public class ChoosePort extends Action {
             String strat = ((GameState) this.handler).strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
                 Player self = ((GameState) this.handler).getPlayer();
-                if (((GameState) this.handler).countUnit(UnitType.Terran_Starport) >= 1 &&
+                if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Starport) >= 1 &&
                         !self.isResearching(TechType.Tank_Siege_Mode) && !self.hasResearched(TechType.Tank_Siege_Mode)) {
                     return State.FAILURE;
                 }
             }
             if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).strat.numCCForPort > ((GameState) this.handler).CCs.size() ||
-                    (((GameState) this.handler).countUnit(UnitType.Terran_Starport) > 0 && ((GameState) this.handler).strat.portPerCC == 0)) {
+                    (((GameState) this.handler).countBuildingAll(UnitType.Terran_Starport) > 0 && ((GameState) this.handler).strat.portPerCC == 0)) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Starport) == 0 && ((GameState) this.handler).strat.portPerCC == 0) {
+            if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Starport) == 0 && ((GameState) this.handler).strat.portPerCC == 0) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
-            } else if (((GameState) this.handler).countUnit(UnitType.Terran_Starport) < ((GameState) this.handler).strat.portPerCC * ((GameState) this.handler).CCs.size()) {
+            } else if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Starport) < ((GameState) this.handler).strat.portPerCC * ((GameState) this.handler).CCs.size()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
             }

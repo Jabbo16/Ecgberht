@@ -19,7 +19,7 @@ public class IntelligenceAgency {
 
     static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
     static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
-    static Player mainEnemy;
+    private static Player mainEnemy;
     private static Set<Unit> enemyWorkers = new TreeSet<>();
     private static List<Bullet> enemyBullets = new ArrayList<>();
     private static List<Bullet> allyBullets = new ArrayList<>();
@@ -39,6 +39,17 @@ public class IntelligenceAgency {
         startStrat = strat;
     }
 
+    public static void onStartIntelligenceAgency(Player enemy){
+        enemyBases = new TreeMap<>();
+        enemyTypes = new TreeMap<>();
+        mainEnemy = enemy;
+        enemyWorkers = new TreeSet<>();
+        enemyBullets = new ArrayList<>();
+        allyBullets = new ArrayList<>();
+        enemyStrat = EnemyStrats.Unknown;
+        startStrat = null;
+        exploredMinerals = false;
+    }
     public static EnemyStrats getEnemyStrat() {
         return enemyStrat;
     }
