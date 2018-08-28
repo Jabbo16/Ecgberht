@@ -483,29 +483,29 @@ public class Util {
     }
 
     public static boolean isPositionMapEdge(Position pos) {
-        return pos.getX() <= 0 || pos.getY() <= 0 || pos.getX() >= getGs().getGame().getBWMap().mapWidth() * 32
-                || pos.getY() >= getGs().getGame().getBWMap().mapHeight() * 32;
+        return pos.getX() <= 1 || pos.getY() <= 1 || pos.getX() >= (getGs().getGame().getBWMap().mapWidth() - 1) * 32
+                || pos.getY() >= (getGs().getGame().getBWMap().mapHeight() - 1) * 32;
     }
 
     public static Position improveMapEdgePosition(Position pos) {
         MutablePair<Integer, Integer> improved = new MutablePair<>(pos.getX(), pos.getY());
-        int mapHeight = getGs().getGame().getBWMap().mapHeight() * 32;
-        int mapWidth = getGs().getGame().getBWMap().mapWidth() * 32;
-        if (improved.first <= 0 && improved.second <= 0) {
+        int mapHeight = (getGs().getGame().getBWMap().mapHeight() - 1) * 32;
+        int mapWidth = (getGs().getGame().getBWMap().mapWidth() - 1) * 32;
+        if (improved.first <= 1 && improved.second <= 1) {
             if (Math.random() < 0.5) improved.first = 5 * 32;
             else improved.second = 5 * 32;
             return new Position(improved.first, improved.second);
         }
         if (improved.first >= mapWidth && improved.second >= mapWidth) {
-            if (Math.random() < 0.5) improved.first = mapWidth - 2 * 32;
-            else improved.second = mapHeight - 2 * 32;
+            if (Math.random() < 0.5) improved.first = mapWidth - 3 * 32;
+            else improved.second = mapHeight - 3 * 32;
             return new Position(improved.first, improved.second);
         }
-        if (improved.first <= 0) {
+        if (improved.first <= 1) {
             improved.first = 5 * 32;
             return new Position(improved.first, improved.second);
         }
-        if (improved.second <= 0) {
+        if (improved.second <= 1) {
             improved.second = 5 * 32;
             return new Position(improved.first, improved.second);
         }

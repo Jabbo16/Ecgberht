@@ -89,7 +89,6 @@ public class ChoosePosition extends Action {
                         }
                         for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
                             if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
-
                             if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
                                 remove.add(b);
                                 break;
@@ -114,7 +113,9 @@ public class ChoosePosition extends Action {
                         origin = self.getStartLocation();
                     }
                 } else if (((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (((GameState) this.handler).DBs.isEmpty()) {
+                    if (((GameState) this.handler).defendPosition != null) {
+                        origin = ((GameState) this.handler).defendPosition.toTilePosition();
+                    } else if (((GameState) this.handler).DBs.isEmpty()) {
                         origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
                         origin = ((GameState) this.handler).DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
@@ -147,28 +148,21 @@ public class ChoosePosition extends Action {
                             ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                             ((GameState) this.handler).chosenPosition = origin;
                             return State.SUCCESS;
-                        } else {
-                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                        }
-
+                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
                     } else if (((GameState) this.handler).naturalChoke != null) {
                         origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).naturalChoke);
                         if (origin != null) {
                             ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                             ((GameState) this.handler).chosenPosition = origin;
                             return State.SUCCESS;
-                        } else {
-                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                        }
+                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
                     } else {
                         origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
                         if (origin != null) {
                             ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                             ((GameState) this.handler).chosenPosition = origin;
                             return State.SUCCESS;
-                        } else {
-                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                        }
+                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
                     }
                 } else {
                     origin = ((GameState) this.handler).Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
