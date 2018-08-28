@@ -67,7 +67,7 @@ public class IntelligenceAgency {
         }
     }
 
-    public static boolean enemyHasType(UnitType type) {
+    private static boolean enemyHasType(UnitType type) {
         return enemyTypes.get(mainEnemy.getName()).contains(type);
     }
 

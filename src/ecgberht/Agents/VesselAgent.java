@@ -113,21 +113,24 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void emp() {
-        if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave)
+        if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave) {
             unit.empShockWave(target.getPosition());
-        else target = null;
+            getGs().wizard.addEMPed(unit, (PlayerUnit) target);
+        } else target = null;
     }
 
     private void irradiate() {
-        if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate)
+        if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate) {
             unit.irradiate((PlayerUnit) target);
-        else target = null;
+            getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
+        } else target = null;
     }
 
     private void dMatrix() {
-        if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix)
+        if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix) {
             unit.defensiveMatrix((PlayerUnit) target);
-        else target = null;
+            getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
+        } else target = null;
     }
 
     private void kite() {
@@ -174,6 +177,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                         continue;
                     if (u instanceof MobileUnit && (((MobileUnit) u).isIrradiated() || ((MobileUnit) u).isStasised()))
                         continue;
+                    if (getGs().wizard.isUnitIrradiated(u)) continue;
                     double score = 1;
                     int closeUnits = 0;
                     for (Unit close : irradiateTargets) {
@@ -207,12 +211,11 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 for (Unit u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
                     if (u instanceof Building || u instanceof Worker || u instanceof MobileUnit && (((MobileUnit) u).isIrradiated() || ((MobileUnit) u).isStasised()))
                         continue;
+                    if (getGs().wizard.isUnitEMPed(u)) continue;
                     double score = 1;
                     double closeUnits = 0;
                     for (Unit close : empTargets) {
                         if (u.equals(close)) continue;
-                        //if (close.getDistance(u) <= 48) closeUnits++;
-                        //if (close.getPosition().getDistance(u.getPosition()) <= 48) closeUnits += ((PlayerUnit) close).getShields();
                         if (close.getPosition().getDistance(u.getPosition()) <= WeaponType.EMP_Shockwave.innerSplashRadius())
                             closeUnits += ((PlayerUnit) close).getShields() * 0.6;
                     }
@@ -242,6 +245,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
                 for (Unit u : matrixTargets) {
                     if (!(u instanceof MobileUnit)) continue;
+                    if (getGs().wizard.isDefenseMatrixed(u)) continue;
                     int score = 1;
                     if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
                     if (u instanceof Mechanical) score = 6;

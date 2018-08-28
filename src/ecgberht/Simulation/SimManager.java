@@ -39,9 +39,9 @@ public class SimManager {
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
         if (ConfigManager.getConfig().ecgConfig.sscait) {
-            shortSimFrames = 50;
-            longSimFrames = 180;
-            iterations = 5;
+            shortSimFrames = 45;
+            longSimFrames = 170;
+            iterations = 0;
         }
     }
 
@@ -193,7 +193,7 @@ public class SimManager {
                 s.stateBefore.second.add(jU);
             }
             if (s.lose) continue;
-            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 7) return;
+            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 6) return;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();
@@ -202,9 +202,9 @@ public class SimManager {
             int enemyLosses = s.preSimScore.second - s.postSimScore.second;
             if (s.stateAfter.first.isEmpty()) {
                 s.lose = true;
-                return;
+                continue;
             }
-            if (enemyLosses > ourLosses * 1.5) return;
+            if (enemyLosses > ourLosses * 1.5) continue;
             simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();

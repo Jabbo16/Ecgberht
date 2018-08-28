@@ -50,7 +50,7 @@ public class Squad implements Comparable<Squad> {
         if (!pos.equals(attack)) attack = pos;
     }
 
-    int getArmyCount() {
+    int getSquadMembersCount() {
         int count = 0;
         for (Unit u : members) {
             count++;

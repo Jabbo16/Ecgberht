@@ -423,6 +423,7 @@ public class Ecgberht implements BWEventListener {
                 }
             }
             IntelligenceAgency.updateBullets();
+            gs.wizard.onFrameSpellManager();
             gs.fix();
             gs.updateEnemyBuildingsMemory();
             IntelligenceAgency.onFrame();

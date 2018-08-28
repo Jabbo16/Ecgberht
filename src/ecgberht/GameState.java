@@ -119,6 +119,7 @@ public class GameState extends GameHandler {
     public Set<Worker> workerIdle = new TreeSet<>();
     public SimManager sim;
     public SquadManager sqManager = new SquadManager();
+    public SpellsManager wizard = new SpellsManager();
     public Strategy strat = null;
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
@@ -508,7 +509,7 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextMap(getCenterFromBuilding(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
             counter++;
         }
-        for(Unit u : enemyInBase) print(u, Color.RED);
+        for (Unit u : enemyInBase) print(u, Color.RED);
         for (Base b : islandBases)
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
         for (Agent ag : agents.values()) {
@@ -877,7 +878,7 @@ public class GameState extends GameHandler {
     public int getArmySize() {
         int count = 0;
         if (sqManager.squads.isEmpty()) return count;
-        else for (Squad s : sqManager.squads.values()) count += s.getArmyCount();
+        else for (Squad s : sqManager.squads.values()) count += s.getSquadMembersCount();
         return count + agents.size() * 2;
     }
 
@@ -1383,8 +1384,8 @@ public class GameState extends GameHandler {
 
     private boolean checkItWasAttacking(Squad u) { // TODO check, not sure if its good enough
         Area uArea = bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
-        for(Base b : CCs.keySet()){
-            if(b.getArea().equals(uArea)) return false;
+        for (Base b : CCs.keySet()) {
+            if (b.getArea().equals(uArea)) return false;
         }
         return !naturalArea.equals(uArea) && (naturalChoke != null && naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
     }
