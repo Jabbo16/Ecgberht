@@ -171,7 +171,7 @@ public class SimManager {
     private void doSim() {
         int energy = 0;
         for (ComsatStation s : getGs().CSs) {
-            if (s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() % 50;
+            if (s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() / 50;
         }
         for (SimInfo s : simulations) {
             simulator.clear();
@@ -185,8 +185,10 @@ public class SimManager {
                 if (!u.getType().canAttack()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
-                    else s.lose = true;
-                    break;
+                    else{
+                        s.lose = true;
+                        break;
+                    }
                 }
                 JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer2(jU);

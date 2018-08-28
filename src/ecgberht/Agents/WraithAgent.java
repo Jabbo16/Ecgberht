@@ -80,7 +80,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         Position kite = getGs().kiteAway(unit, airAttackers);
-        Position improvedKite = Util.isPositionMapEdge(kite) ? Util.improveMapEdgePosition(kite) : null;
+        Position improvedKite = Util.isPositionMapEdge(kite) ? Util.improveMapEdgePosition(Util.getUnitCenterPosition(unit.getPosition(), unit.getType()), kite) : null;
         Position target = unit.getOrderTargetPosition();
         if (improvedKite != null && getGs().getGame().getBWMap().isValidPosition(improvedKite)) {
             if (target != null && !target.equals(improvedKite)) unit.move(improvedKite);

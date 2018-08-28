@@ -382,7 +382,7 @@ public class BuildingMap implements Cloneable {
                         if (area != null && !area.equals(getGs().naturalArea) && expandBunker) continue;
                         if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
-                            double newDist = Util.broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
+                            double newDist = Util.broodWarDistance(Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
                             if (position == null || newDist < dist) {
                                 position = newPosition;
                                 dist = newDist;
@@ -434,7 +434,7 @@ public class BuildingMap implements Cloneable {
                         if (bwem.getMap().getArea(new TilePosition(jj, ii)).equals(getGs().naturalArea)) continue;
                         if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
-                            double newDist = Util.broodWarDistance(getGs().getCenterFromBuilding(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter().toPosition());
+                            double newDist = Util.broodWarDistance(Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker), choke.getCenter().toPosition());
                             if (bunkerPlace == null || newDist < dist) {
                                 bunkerPlace = newPosition;
                                 dist = newDist;

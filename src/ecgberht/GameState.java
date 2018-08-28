@@ -506,7 +506,7 @@ public class GameState extends GameHandler {
         for (MineralPatch d : blockingMinerals.values()) print(d, Color.RED);
         int counter = 0;
         for (Base b : BLs) {
-            bw.getMapDrawer().drawTextMap(getCenterFromBuilding(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
+            bw.getMapDrawer().drawTextMap(Util.getUnitCenterPosition(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
             counter++;
         }
         for (Unit u : enemyInBase) print(u, Color.RED);
@@ -554,7 +554,7 @@ public class GameState extends GameHandler {
             print(u.getKey(), Color.TEAL);
             bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Building " + u.getValue().first.toString(), ColorUtil.White));
             print(u.getValue().second, u.getValue().first, Color.TEAL);
-            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), getCenterFromBuilding(u.getValue().second.toPosition(), u.getValue().first), Color.RED);
+            bw.getMapDrawer().drawLineMap(u.getKey().getPosition(), Util.getUnitCenterPosition(u.getValue().second.toPosition(), u.getValue().first), Color.RED);
         }
         if (chosenUnitToHarass != null) {
             print(chosenUnitToHarass, Color.RED);
@@ -914,12 +914,6 @@ public class GameState extends GameHandler {
         double rate = 0.0;
         if (frameCount > 0) rate = ((double) self.gatheredMinerals() - 50) / frameCount;
         return rate;
-    }
-
-    public Position getCenterFromBuilding(Position leftTop, UnitType type) {
-        Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
-        return new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
-
     }
 
     //TODO Real maths
@@ -1387,6 +1381,6 @@ public class GameState extends GameHandler {
         for (Base b : CCs.keySet()) {
             if (b.getArea().equals(uArea)) return false;
         }
-        return !naturalArea.equals(uArea) && (naturalChoke != null && naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
+        return !naturalArea.equals(uArea) && getArmySize() * 0.85 >= strat.armyForAttack && (naturalChoke != null && naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
     }
 }

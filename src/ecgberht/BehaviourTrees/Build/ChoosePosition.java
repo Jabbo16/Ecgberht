@@ -132,11 +132,9 @@ public class ChoosePosition extends Action {
                             ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                             ((GameState) this.handler).chosenPosition = origin;
                             return State.SUCCESS;
-                        } else {
-                            if (((GameState) this.handler).MainCC != null) {
-                                origin = ((GameState) this.handler).MainCC.second.getTilePosition();
-                            } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
-                        }
+                        } else if (((GameState) this.handler).MainCC != null) {
+                            origin = ((GameState) this.handler).MainCC.second.getTilePosition();
+                        } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
                     }
                 } else if (((GameState) this.handler).Ts.isEmpty()) {
                     if (((GameState) this.handler).mainChoke != null &&
