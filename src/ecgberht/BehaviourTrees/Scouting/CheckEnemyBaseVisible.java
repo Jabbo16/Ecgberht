@@ -33,7 +33,7 @@ public class CheckEnemyBaseVisible extends Action {
                         }
                         ((GameState) this.handler).chosenScout = null;
                         ((GameState) this.handler).getIH().sendText("!");
-                        ((GameState) this.handler).playSound("gear.mp3");
+                        ((GameState) this.handler).playSound("gearthere.mp3");
                         ((GameState) this.handler).EnemyBLs.clear();
                         ((GameState) this.handler).EnemyBLs.addAll(((GameState) this.handler).BLs);
                         ((GameState) this.handler).EnemyBLs.sort(new BaseLocationComparator(((GameState) this.handler).enemyMainBase));

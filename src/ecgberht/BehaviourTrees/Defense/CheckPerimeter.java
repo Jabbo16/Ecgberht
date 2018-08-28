@@ -36,9 +36,9 @@ public class CheckPerimeter extends Conditional {
             }
             for (Unit u : enemyInvaders) {
                 UnitType uType = u.getType();
-                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || (u instanceof Loadable &&
-                        !(u instanceof Overlord))) && uType != UnitType.Zerg_Scourge &&
-                        uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {
+                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || u instanceof Loadable)
+                         && uType != UnitType.Zerg_Scourge && uType != UnitType.Terran_Valkyrie
+                        && uType != UnitType.Protoss_Corsair && !(u instanceof Overlord))) {
                     for (Base b : ((GameState) this.handler).CCs.keySet()) {
                         Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
                         if (enemyArea != null && enemyArea.equals(b.getArea())) {

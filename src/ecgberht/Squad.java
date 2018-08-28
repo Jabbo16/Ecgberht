@@ -29,7 +29,7 @@ public class Squad implements Comparable<Squad> {
         for (Unit m : members) {
             if (isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add(m);
         }
-        status = Status.IDLE;
+        status = getGs().defense ? Status.DEFENSE : Status.IDLE;
         attack = null;
         this.center = center;
     }

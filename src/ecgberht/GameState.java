@@ -375,7 +375,7 @@ public class GameState extends GameHandler {
 
         } catch (Exception e) {
             System.err.println("playSound");
-            System.err.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -508,6 +508,7 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextMap(getCenterFromBuilding(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
             counter++;
         }
+        for(Unit u : enemyInBase) print(u, Color.RED);
         for (Base b : islandBases)
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
         for (Agent ag : agents.values()) {
@@ -1117,13 +1118,6 @@ public class GameState extends GameHandler {
         for (Unit u : aux) enemyBuildingMemory.remove(u);
     }
 
-    void updateSquadOrderAndMicro() {
-        for (Squad u : sqManager.squads.values()) {
-            if (u.members.isEmpty()) continue;
-            u.microUpdateOrder();
-        }
-    }
-
     public int countUnit(UnitType type) {
         int count = 0;
         for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
@@ -1361,12 +1355,12 @@ public class GameState extends GameHandler {
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                if (!needToAttack && u.status != Squad.Status.ATTACK) continue;
+                if (!needToAttack && u.status != Squad.Status.ATTACK && !checkItWasAttacking(u)) continue;
                 Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
                 if (attackPos != null) {
                     if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {
                         firstProxyBBS = true;
-                        getIH().sendText("Get ready for a party in your house!");
+                        getIH().sendText("Get ready for the show!");
                     }
                     if (getGame().getBWMap().isValidPosition(attackPos)) {
                         u.giveAttackOrder(attackPos);
@@ -1375,16 +1369,23 @@ public class GameState extends GameHandler {
                 } else if (enemyMainBase != null) {
                     if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {
                         firstProxyBBS = true;
-                        getIH().sendText("Get ready for a party in your house!");
+                        getIH().sendText("Get ready for the show!");
                     }
                     u.giveAttackOrder(enemyMainBase.getLocation().toPosition());
                     u.status = Squad.Status.ATTACK;
                 } else u.status = Squad.Status.IDLE;
             }
-
         } catch (Exception e) {
             System.err.println("Update Attack Exception");
             e.printStackTrace();
         }
+    }
+
+    private boolean checkItWasAttacking(Squad u) { // TODO check, not sure if its good enough
+        Area uArea = bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
+        for(Base b : CCs.keySet()){
+            if(b.getArea().equals(uArea)) return false;
+        }
+        return !naturalArea.equals(uArea) && (naturalChoke != null && naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
     }
 }

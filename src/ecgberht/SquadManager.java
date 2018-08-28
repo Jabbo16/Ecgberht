@@ -19,4 +19,11 @@ public class SquadManager {
             counter++;
         }
     }
+
+    void updateSquadOrderAndMicro() {
+        for (Squad u : squads.values()) {
+            if (u.members.isEmpty()) continue;
+            u.microUpdateOrder();
+        }
+    }
 }

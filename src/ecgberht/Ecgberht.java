@@ -443,7 +443,7 @@ public class Ecgberht implements BWEventListener {
             defenseTree.run();
             gs.updateAttack();
             gs.runAgents();
-            gs.updateSquadOrderAndMicro();
+            gs.sqManager.updateSquadOrderAndMicro();
             gs.checkMainEnemyBase();
             if (gs.frameCount > 0 && gs.frameCount % 5 == 0) gs.mineralLocking();
             gs.debugScreen();
