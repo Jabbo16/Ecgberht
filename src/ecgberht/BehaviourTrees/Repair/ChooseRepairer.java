@@ -19,7 +19,7 @@ public class ChooseRepairer extends Action {
     public State execute() {
         try {
             SCV closestWorker = null;
-            Position chosen = ((GameState) this.handler).chosenBuildingRepair.getPosition();
+            Position chosen = ((GameState) this.handler).chosenUnitRepair.getPosition();
             int frame = ((GameState) this.handler).frameCount;
             for (Worker u : ((GameState) this.handler).workerIdle) {
                 if (u.getLastCommandFrame() == frame) continue;

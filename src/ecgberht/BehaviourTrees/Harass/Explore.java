@@ -55,16 +55,13 @@ public class Explore extends Conditional {
         if (((GameState) this.handler).directionScoutMain == 1) {
             Xlocation = enemyBase.getLocation().toPosition().getX() + BaseSize;
             Ylocation = enemyBase.getLocation().toPosition().getY() + BaseSize;
-        }
-        else if (((GameState) this.handler).directionScoutMain == 2) {
+        } else if (((GameState) this.handler).directionScoutMain == 2) {
             Xlocation = enemyBase.getLocation().toPosition().getX() - BaseSize;
             Ylocation = enemyBase.getLocation().toPosition().getY() + BaseSize;
-        }
-        else if (((GameState) this.handler).directionScoutMain == 3) {
+        } else if (((GameState) this.handler).directionScoutMain == 3) {
             Xlocation = enemyBase.getLocation().toPosition().getX() - BaseSize;
             Ylocation = enemyBase.getLocation().toPosition().getY() - BaseSize;
-        }
-        else if (((GameState) this.handler).directionScoutMain == 4) {
+        } else if (((GameState) this.handler).directionScoutMain == 4) {
             Xlocation = enemyBase.getLocation().toPosition().getX() + BaseSize;
             Ylocation = enemyBase.getLocation().toPosition().getY() - BaseSize;
         }

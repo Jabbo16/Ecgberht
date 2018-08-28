@@ -41,6 +41,7 @@ public class FullBio extends Strategy {
     @Override
     public void initTrainUnits() {
         trainUnits.add(UnitType.Terran_Marine);
+        trainUnits.add(UnitType.Terran_Firebat);
         trainUnits.add(UnitType.Terran_Medic);
     }
 

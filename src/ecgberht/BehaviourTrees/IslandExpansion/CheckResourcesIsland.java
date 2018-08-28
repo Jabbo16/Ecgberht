@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -24,7 +25,7 @@ public class CheckResourcesIsland extends Conditional {
             UnitType chosenType = UnitType.Terran_Command_Center;
             TilePosition start = chosen.getTilePosition();
             TilePosition end = ((GameState) this.handler).chosenIsland.getLocation();
-            Position realEnd = ((GameState) this.handler).getCenterFromBuilding(end.toPosition(), chosenType);
+            Position realEnd = Util.getUnitCenterPosition(end.toPosition(), chosenType);
             if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + ((GameState) this.handler).deltaCash.first) {
                 return State.SUCCESS;
             }

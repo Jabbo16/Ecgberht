@@ -28,14 +28,12 @@ public class CheckEnemyBaseVisible extends Action {
                     if (Util.broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
                         ((GameState) this.handler).enemyMainBase = Util.getClosestBaseLocation(u.pos.toPosition());
                         ((GameState) this.handler).ScoutSLs = new HashSet<>();
-                        if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                            ((GameState) this.handler).addToSquad(((GameState) this.handler).chosenScout);
-                        } else {
+                        if (!((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
                             ((GameState) this.handler).chosenHarasser = (Worker) ((GameState) this.handler).chosenScout;
                         }
                         ((GameState) this.handler).chosenScout = null;
                         ((GameState) this.handler).getIH().sendText("!");
-                        ((GameState) this.handler).playSound("gear.mp3");
+                        ((GameState) this.handler).playSound("gearthere.mp3");
                         ((GameState) this.handler).EnemyBLs.clear();
                         ((GameState) this.handler).EnemyBLs.addAll(((GameState) this.handler).BLs);
                         ((GameState) this.handler).EnemyBLs.sort(new BaseLocationComparator(((GameState) this.handler).enemyMainBase));

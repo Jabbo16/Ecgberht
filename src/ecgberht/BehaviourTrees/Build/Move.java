@@ -23,7 +23,7 @@ public class Move extends Action {
     public State execute() {
         try {
             Worker chosen = ((GameState) this.handler).chosenWorker;
-            Position realEnd = ((GameState) this.handler).getCenterFromBuilding(((GameState) this.handler).chosenPosition.toPosition(), ((GameState) this.handler).chosenToBuild);
+            Position realEnd = Util.getUnitCenterPosition(((GameState) this.handler).chosenPosition.toPosition(), ((GameState) this.handler).chosenToBuild);
             if (chosen.move(realEnd)) {
                 if (((GameState) this.handler).workerIdle.contains(chosen)) {
                     ((GameState) this.handler).workerIdle.remove(chosen);

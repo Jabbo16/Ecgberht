@@ -45,7 +45,7 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
         x = u.getX();
         y = u.getY();
         id = u.getId();
-        UnitType auxType = Util.getType(pU);
+        UnitType auxType = u.getType();
         Player auxPlayer = pU.getPlayer();
         health = pU.getHitPoints();
         unitSize = auxType.size();
@@ -85,19 +85,14 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
             groundDamage = UnitType.Protoss_Interceptor.groundWeapon().damageAmount();
             if (u != null && u.isVisible()) {
                 final int interceptorCount = carrier.getInterceptorCount();
-                if (interceptorCount > 0) {
-                    groundCooldown = (int) (Math.round(37.0f / interceptorCount));
-                } else {
+                if (interceptorCount > 0) groundCooldown = Math.round(37.0f / interceptorCount);
+                else {
                     groundDamage = 0;
                     groundCooldown = 5;
                 }
-            } else {
-                if (player != null) {
-                    groundCooldown = (int) (Math.round(37.0f / (player.getUpgradeLevel(UpgradeType.Carrier_Capacity) == 1 ? 8 : 4)));
-                } else {
-                    groundCooldown = (int) (Math.round(37.0f / 8));
-                }
-            }
+            } else if (player != null) {
+                groundCooldown = Math.round(37.0f / (player.getUpgradeLevel(UpgradeType.Carrier_Capacity) == 1 ? 8 : 4));
+            } else groundCooldown = Math.round(37.0f / 8);
             groundDamageType = UnitType.Protoss_Interceptor.groundWeapon().damageType();
             groundMaxRange = 32 * 8;
             airDamage = groundDamage;
@@ -111,16 +106,14 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
             airDamage = groundDamage;
             airCooldown = groundCooldown;
             airMaxRange = groundMaxRange;
-        } else if (unitType == UnitType.Protoss_Reaver) {
-            groundDamage = WeaponType.Scarab.damageAmount();
-        }
+        } else if (unitType == UnitType.Protoss_Reaver) groundDamage = WeaponType.Scarab.damageAmount();
         if (u != null) {
-            if (unitType == UnitType.Terran_Marine) {
+            if (u instanceof Marine) {
                 if (((Marine) u).isStimmed()) {
                     groundCooldown /= 2;
                     airCooldown /= 2;
                 }
-            } else if (unitType == UnitType.Terran_Firebat) {
+            } else if (u instanceof Firebat) {
                 if (((Firebat) u).isStimmed()) {
                     groundCooldown /= 2;
                     airCooldown /= 2;
@@ -142,11 +135,8 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
 
     @Override
     public boolean equals(Object o) {
-
         if (o == this) return true;
-        if (!(o instanceof JFAPUnit)) {
-            return false;
-        }
+        if (!(o instanceof JFAPUnit)) return false;
         JFAPUnit jfap = (JFAPUnit) o;
         return unit.equals(jfap.unit);
     }

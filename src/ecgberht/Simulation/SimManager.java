@@ -4,7 +4,7 @@ import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
-import ecgberht.Squad;
+import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
@@ -39,9 +39,9 @@ public class SimManager {
     public SimManager(BW bw) {
         simulator = new JFAP(bw);
         if (ConfigManager.getConfig().ecgConfig.sscait) {
-            shortSimFrames = 50;
-            longSimFrames = 180;
-            iterations = 5;
+            shortSimFrames = 45;
+            longSimFrames = 170;
+            iterations = 0;
         }
     }
 
@@ -61,7 +61,9 @@ public class SimManager {
     private void createClusters() {
         // Friendly Clusters
         List<Unit> myUnits = new ArrayList<>();
-        for (Squad s : getGs().squads.values()) myUnits.addAll(s.members); // Squads
+        for (Unit u : getGs().myArmy) {
+            if (isArmyUnit(u)) myUnits.add(u);
+        }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
         MeanShift clustering = new MeanShift(myUnits);
@@ -69,8 +71,7 @@ public class SimManager {
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
-            if (u.getInitialType() == UnitType.Zerg_Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
+            if (u instanceof Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
             enemyUnits.add(u);
         }
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
@@ -80,6 +81,13 @@ public class SimManager {
         enemies = clustering.run(iterations);
     }
 
+    private boolean isArmyUnit(Unit u) {
+        if (!u.exists()) return false;
+        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+        return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
+                || u instanceof Vulture || u instanceof Wraith;
+    }
+
     /**
      * Main method that runs every frame
      * If needed creates the clusters and SimInfos and run the simulations on them
@@ -87,10 +95,11 @@ public class SimManager {
     public void onFrameSim() {
         time = System.currentTimeMillis();
         reset();
-        if (!noNeedForSim()) {
-            createClusters();
+        createClusters();
+        if (!friendly.isEmpty()) {
+            getGs().sqManager.createSquads(friendly);
             createSimInfos();
-            doSim();
+            if (!noNeedForSim()) doSim();
         }
         time = System.currentTimeMillis() - time;
     }
@@ -101,25 +110,16 @@ public class SimManager {
      * @return True if there is no need for running {@link #onFrameSim()}, else returns false
      */
     private boolean noNeedForSim() {
-        boolean foundThreats = false;
         int workerThreats = 0;
-        if (getGs().squads.isEmpty() && getGs().agents.isEmpty()) return true;
-        if (getGs().getArmySize() >= getGs().enemyCombatUnitMemory.size() * 6) return true;
+        if ((friendly.isEmpty() || enemies.isEmpty()) && getGs().agents.isEmpty()) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) {
-                foundThreats = true;
-                break;
-            }
+            if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) return false;
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
         }
-        if (foundThreats) return false;
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) {
-                return false;
-            }
+            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
         }
         return true;
-
     }
 
     /**
@@ -170,8 +170,8 @@ public class SimManager {
      */
     private void doSim() {
         int energy = 0;
-        for (ComsatStation s : getGs().CSs){
-            if(s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() % 50;
+        for (ComsatStation s : getGs().CSs) {
+            if (s.getOrder() != Order.CastScannerSweep) energy += s.getEnergy() / 50;
         }
         for (SimInfo s : simulations) {
             simulator.clear();
@@ -181,23 +181,32 @@ public class SimManager {
                 s.stateBefore.first.add(jU);
             }
             for (Unit u : s.enemies) {
+                if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
+                if (!u.getType().canAttack()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
-                    else s.lose = true;
-                    break;
+                    else{
+                        s.lose = true;
+                        break;
+                    }
                 }
                 JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer2(jU);
                 s.stateBefore.second.add(jU);
             }
             if (s.lose) continue;
+            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 6) return;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             int ourLosses = s.preSimScore.first - s.postSimScore.first;
             int enemyLosses = s.preSimScore.second - s.postSimScore.second;
-            if (enemyLosses - ourLosses >= 0) return;
+            if (s.stateAfter.first.isEmpty()) {
+                s.lose = true;
+                continue;
+            }
+            if (enemyLosses > ourLosses * 1.5) continue;
             simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
@@ -216,7 +225,6 @@ public class SimManager {
      */
     private boolean scoreCalc(SimInfo s, double rate) {
         return ((s.preSimScore.second - s.postSimScore.second) * rate <= (s.preSimScore.first - s.postSimScore.first));
-
     }
 
     /**
@@ -231,7 +239,7 @@ public class SimManager {
         if (ally) color = Color.GREEN;
         Position centroid = new Position((int) c.modeX, (int) c.modeY);
         getGs().getGame().getMapDrawer().drawCircleMap(centroid, 5, color, true);
-        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), Integer.toString(id));
+        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), ColorUtil.formatText(Integer.toString(id), ColorUtil.White));
         for (Unit u : c.units) getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
     }
 
@@ -257,9 +265,9 @@ public class SimManager {
         MutablePair<Boolean, Boolean> result = new MutablePair<>(true, false);
         for (Unit u : friends) simulator.addUnitPlayer1(new JFAPUnit(u));
         for (Unit u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u));
-        jfap.Pair<Integer, Integer> presim_scores = simulator.playerScores();
+        jfap.MutablePair<Integer, Integer> presim_scores = simulator.playerScores();
         simulator.simulate(frames);
-        jfap.Pair<Integer, Integer> postsim_scores = simulator.playerScores();
+        jfap.MutablePair<Integer, Integer> postsim_scores = simulator.playerScores();
         int my_score_diff = presim_scores.first - postsim_scores.first;
         int enemy_score_diff = presim_scores.second - postsim_scores.second;
         if (enemy_score_diff * 2 < my_score_diff) result.first = false;
@@ -267,7 +275,7 @@ public class SimManager {
             boolean bunkerDead = true;
             for (JFAPUnit unit : simulator.getState().first) {
                 if (unit.unit == null) continue;
-                if (unit.unit.getInitialType() == UnitType.Terran_Bunker) {
+                if (unit.unit.getType() == UnitType.Terran_Bunker) {
                     bunkerDead = false;
                     break;
                 }
@@ -328,8 +336,8 @@ public class SimManager {
      */
     public boolean farFromFight(Unit u, SimInfo s) { // TODO test
         if (!s.allies.contains(u)) return true;
-        WeaponType weapon = Util.getWeapon(u.getInitialType());
+        WeaponType weapon = Util.getWeapon(u.getType());
         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
-        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getCentroid(s.enemies)) > range * 1.5;
+        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u, s.enemies)) > range * 1.5;
     }
 }

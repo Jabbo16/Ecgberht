@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -23,7 +24,7 @@ public class MoveIsland extends Action {
             Worker chosen = ((GameState) this.handler).chosenWorkerDrop;
             UnitType chosenType = UnitType.Terran_Command_Center;
             TilePosition chosenTile = ((GameState) this.handler).chosenIsland.getLocation();
-            Position realEnd = ((GameState) this.handler).getCenterFromBuilding(chosenTile.toPosition(), chosenType);
+            Position realEnd = Util.getUnitCenterPosition(chosenTile.toPosition(), chosenType);
             if (chosen.move(realEnd)) {
                 ((GameState) this.handler).workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
                 ((GameState) this.handler).deltaCash.first += chosenType.mineralPrice();

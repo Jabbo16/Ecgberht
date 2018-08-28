@@ -50,28 +50,28 @@ public abstract class AJFAP {
      *
      * @return Returns the score for alive units, for each player
      */
-    abstract Pair<Integer, Integer> playerScores();
+    abstract MutablePair<Integer, Integer> playerScores();
 
     /**
      * Default score calculation, only counts non-buildings.
      *
      * @return Returns the score for alive non-buildings, for each player
      */
-    abstract Pair<Integer, Integer> playerScoresUnits();
+    abstract MutablePair<Integer, Integer> playerScoresUnits();
 
     /**
      * Default score calculation, only counts buildings.
      *
      * @return Returns the score for alive buildings, for each player
      */
-    abstract Pair<Integer, Integer> playerScoresBuildings();
+    abstract MutablePair<Integer, Integer> playerScoresBuildings();
 
     /**
      * Gets the internal state of the simulator. You can use this to get any info about the unit participating in the simulation or edit the state.
      *
      * @return Returns a pair of pointers, where each pointer points to a vector containing that player's units.
      */
-    abstract Pair<Set<JFAPUnit>, Set<JFAPUnit>> getState();
+    abstract MutablePair<Set<JFAPUnit>, Set<JFAPUnit>> getState();
 
     /**
      * Clears the simulation. All units are removed for both players. Equivalent to reconstructing.

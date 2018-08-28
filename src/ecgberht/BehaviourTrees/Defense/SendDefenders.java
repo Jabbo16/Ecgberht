@@ -28,15 +28,11 @@ public class SendDefenders extends Action {
             boolean cannon_rush = false;
             for (Unit u : ((GameState) this.handler).enemyInBase) {
                 if (u.isFlying() || ((PlayerUnit) u).isCloaked()) continue;
-                if (!cannon_rush) {
-                    if (u instanceof Pylon || u instanceof PhotonCannon) cannon_rush = true;
-                }
+                if (!cannon_rush && (u instanceof Pylon || u instanceof PhotonCannon)) cannon_rush = true;
                 air_only = false;
             }
             Set<Unit> friends = new TreeSet<>();
-            for (Squad s : ((GameState) this.handler).squads.values()) {
-                friends.addAll(s.members);
-            }
+            for (Squad s : ((GameState) this.handler).sqManager.squads.values()) friends.addAll(s.members);
             boolean bunker = false;
             if (!((GameState) this.handler).DBs.isEmpty()) {
                 friends.addAll(((GameState) this.handler).DBs.keySet());
@@ -109,7 +105,7 @@ public class SendDefenders extends Action {
                                     closestDefense = ((GameState) this.handler).DBs.keySet().iterator().next().getPosition();
                                 if (closestDefense == null)
                                     closestDefense = ((GameState) this.handler).getNearestCC(u.getKey().getPosition());
-                                if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange()) {
+                                if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange() * 0.95) {
                                     u.getKey().move(closestDefense);
                                     continue;
                                 }
@@ -119,20 +115,23 @@ public class SendDefenders extends Action {
                                 Unit lastTarget = u.getKey().getOrderTarget();
                                 if (lastTarget != null && lastTarget.equals(toAttack)) continue;
                                 u.getKey().attack(toAttack);
-                            } else u.getKey().attack(((GameState) this.handler).attackPosition);
+                            } else {
+                                Position lastTargetPosition = u.getKey().getOrderTargetPosition();
+                                if (lastTargetPosition != null && lastTargetPosition.equals(((GameState) this.handler).attackPosition))
+                                    continue;
+                                u.getKey().attack(((GameState) this.handler).attackPosition);
+                            }
                         }
                     }
                 }
-            } else {
-                if (((GameState) this.handler).strat.name != "ProxyBBS") {
-                    for (Entry<String, Squad> u : ((GameState) this.handler).squads.entrySet()) {
-                        if (((GameState) this.handler).attackPosition != null) {
-                            u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
-                            u.getValue().status = Status.DEFENSE;
-                        } else {
-                            u.getValue().status = Status.IDLE;
-                            u.getValue().attack = null;
-                        }
+            } else if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
+                for (Entry<Integer, Squad> u : ((GameState) this.handler).sqManager.squads.entrySet()) {
+                    if (((GameState) this.handler).attackPosition != null) {
+                        u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);
+                        u.getValue().status = Status.DEFENSE;
+                    } else {
+                        u.getValue().status = Status.IDLE;
+                        u.getValue().attack = null;
                     }
                 }
             }

@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -19,7 +20,7 @@ public class CheckResourcesBuilding extends Conditional {
     @Override
     public State execute() {
         try {
-            if(((GameState) this.handler).chosenPosition == null){
+            if (((GameState) this.handler).chosenPosition == null) {
                 ((GameState) this.handler).chosenWorker = null;
                 ((GameState) this.handler).chosenToBuild = null;
                 return State.FAILURE;
@@ -28,7 +29,7 @@ public class CheckResourcesBuilding extends Conditional {
             Worker chosen = ((GameState) this.handler).chosenWorker;
             TilePosition start = chosen.getTilePosition();
             TilePosition end = ((GameState) this.handler).chosenPosition;
-            Position realEnd = ((GameState) this.handler).getCenterFromBuilding(end.toPosition(), ((GameState) this.handler).chosenToBuild);
+            Position realEnd = Util.getUnitCenterPosition(end.toPosition(), ((GameState) this.handler).chosenToBuild);
 
             if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks) {
                 if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 1) {

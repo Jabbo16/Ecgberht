@@ -2,6 +2,7 @@ package ecgberht.Util;
 
 import bwem.Base;
 import bwem.ChokePoint;
+import ecgberht.EnemyBuilding;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -72,9 +73,10 @@ public class Util {
         int count = 0;
         for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
             if (!u.exists()) continue;
-            if (!type.isBuilding() && !((PlayerUnit) u).isCompleted()) continue;
+            if (!type.isBuilding() && type != UnitType.Terran_Science_Vessel && !((PlayerUnit) u).isCompleted())
+                continue;
             if (type == UnitType.Terran_Siege_Tank_Tank_Mode && u instanceof SiegeTank) count++;
-            else if (getType(((PlayerUnit) u)) == type) count++;
+            else if (u.getType() == type) count++;
         }
         return count;
     }
@@ -160,52 +162,9 @@ public class Util {
         return closestBase;
     }
 
-    private static UnitType getZergType(PlayerUnit unit) {
-        if (unit instanceof Zergling) return UnitType.Zerg_Zergling;
-        if (unit instanceof Extractor) return UnitType.Zerg_Extractor;
-        if (unit instanceof Hydralisk) return UnitType.Zerg_Hydralisk;
-        if (unit instanceof SporeColony) return UnitType.Zerg_Spore_Colony;
-        if (unit instanceof SunkenColony) return UnitType.Zerg_Sunken_Colony;
-        if (unit instanceof Mutalisk) return UnitType.Zerg_Mutalisk;
-        if (unit instanceof Lurker) return UnitType.Zerg_Lurker;
-        if (unit instanceof Queen) return UnitType.Zerg_Queen;
-        if (unit instanceof Ultralisk) return UnitType.Zerg_Ultralisk;
-        if (unit instanceof Guardian) return UnitType.Zerg_Guardian;
-        if (unit instanceof Defiler) return UnitType.Zerg_Defiler;
-        if (unit instanceof GreaterSpire) return UnitType.Zerg_Greater_Spire;
-        return unit.getInitialType();
-    }
-
-    private static UnitType getTerranType(PlayerUnit unit) {
-        if (unit instanceof SiegeTank) {
-            SiegeTank t = (SiegeTank) unit;
-            return t.isSieged() ? UnitType.Terran_Siege_Tank_Siege_Mode : UnitType.Terran_Siege_Tank_Tank_Mode;
-        }
-        return unit.getInitialType();
-    }
-
-    private static UnitType getProtossType(PlayerUnit unit) {
-        if (unit instanceof Archon) return UnitType.Protoss_Archon;
-        return unit.getInitialType();
-    }
-
-    public static UnitType getType(PlayerUnit unit) {
-        Race race = unit.getPlayer().getRace();
-        UnitType type = UnitType.Unknown;
-        if (race == Race.Terran) type = getTerranType(unit);
-        if (type != UnitType.Unknown) return type;
-        if (race == Race.Zerg) type = getZergType(unit);
-        if (type != UnitType.Unknown) return type;
-        if (race == Race.Protoss) {
-            type = getProtossType(unit);
-            if (type.getRace() != race) return type.getRace() == Race.Zerg ? getZergType(unit) : getTerranType(unit);
-        }
-        return unit.getInitialType();
-    }
-
-    private static WeaponType getWeapon(Unit attacker, Unit target) {
-        UnitType attackerType = getType((PlayerUnit) attacker);
-        UnitType targetType = getType(((PlayerUnit) target));
+    public static WeaponType getWeapon(Unit attacker, Unit target) {
+        UnitType attackerType = attacker.getType();
+        UnitType targetType = target.getType();
         if (attackerType == UnitType.Terran_Bunker) return getWeapon(UnitType.Terran_Marine, targetType);
         if (attackerType == UnitType.Protoss_Carrier) return getWeapon(UnitType.Protoss_Interceptor, targetType);
         if (attackerType == UnitType.Protoss_Reaver) return getWeapon(UnitType.Protoss_Scarab, targetType);
@@ -286,9 +245,9 @@ public class Util {
         // Let's say that 1 priority step is worth 160 pixels (5 tiles).
         // We care about unit-target range and target-order position distance.
         int score = 5 * 32 * priority - range;
-        if (target.getInitialType() == UnitType.Zerg_Egg) return score;
+        if (target.getType() == UnitType.Zerg_Egg) return score;
         WeaponType targetWeapon = Util.getWeapon(attacker, target);
-        UnitType targetType = getType(target);
+        UnitType targetType = target.getType();
         // Adjust for special features.
         // This could adjust for relative speed and direction, so that we don't chase what we can't catch.
         if (range <= targetWeapon.maxRange()) {
@@ -304,7 +263,7 @@ public class Util {
 
         } else if (target instanceof MobileUnit && ((MobileUnit) target).isBraking()) {
             score += 16;
-        } else if (targetType.topSpeed() >= getType(attacker).topSpeed()) {
+        } else if (targetType.topSpeed() >= attacker.getType().topSpeed()) {
             score -= 5 * 32;
         }
 
@@ -331,7 +290,7 @@ public class Util {
 
     // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
     private static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
-        final UnitType targetType = getType(target);
+        final UnitType targetType = target.getType();
         // Exceptions if we're a ground unit.
         if (target instanceof Burrowable) {
             if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !((Burrowable) target).isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
@@ -350,7 +309,7 @@ public class Util {
         }
         // Next are workers.
         if (targetType.isWorker()) {
-            if (getType(rangedUnit) == UnitType.Terran_Vulture) return 11;
+            if (rangedUnit.getType() == UnitType.Terran_Vulture) return 11;
             if (target instanceof SCV) {
                 // Repairing or blocking a choke makes you critical.
                 if (((SCV) target).isRepairing()) return 11;
@@ -392,9 +351,9 @@ public class Util {
             getGs().bwem.getMap().getPath(start, end, dist);
             return dist.intValue();
         } catch (Exception e) {
-            System.err.println("Ground Distance Exception");
-            e.printStackTrace();
-            return Integer.MAX_VALUE;
+            //System.err.println("Ground Distance Exception");
+            //e.printStackTrace();
+            return start != null && end != null ? start.getDistance(end) : Integer.MAX_VALUE;
         }
     }
 
@@ -434,23 +393,137 @@ public class Util {
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
     }
 
-    //Credits to @PurpleWaveJadien / Dan
-    public double broodWarDistanceBox(Position p0, Position p1, Position p2, Position p3) {
-        return broodWarDistanceBox(p0.getX(), p0.getY(), p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
+    public static Position chooseAttackPosition(Position p, boolean flying) {
+        Position chosen = null;
+        double maxScore = 0;
+        for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
+            double influence = getScoreAttackPosition(b.unit);
+            //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
+            double score = influence / (2.5 * (flying ? Util.getGroundDistance(p, b.pos.toPosition()) : b.pos.toPosition().getDistance(p)));
+            if (score > maxScore) {
+                chosen = b.pos.toPosition();
+                maxScore = score;
+            }
+        }
+        return chosen;
     }
 
-    //Credits to @PurpleWaveJadien / Dan
-    public double broodWarDistanceBox(int x00, int y00, int x01, int y01, int x10, int y10, int x11, int y11) {
-        if (x11 < x00) {
-            if (y11 < y00) return broodWarDistance(x11, y11, x00, y00);
-            else if (y10 > y01) return broodWarDistance(x11, y10, x00, y01);
-            else return x00 - x11;
-        } else if (x10 > x01) {
-            if (y11 < y00) return broodWarDistance(x10, y11, x01, y00);
-            else if (y10 > y01) return broodWarDistance(x10, y10, x01, y01);
-            else return x10 - x01;
-        } else if (y11 < y00) return y00 - y11;
-        else if (y10 > y01) return y10 - y01;
-        return 0;
+    private static double getScoreAttackPosition(Building unit) {
+        if (unit instanceof ResourceDepot) return 8;
+        if (unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
+        if (unit.getType().canAttack() || unit instanceof Bunker) return 6;
+        return 3;
+    }
+
+    public static Unit getClosestUnit(Unit unit, Set<Unit> enemies) {
+        Unit chosen = null;
+        double minDist = Double.MAX_VALUE;
+        for (Unit u : enemies) {
+            if (!u.exists()) continue;
+            double dist = unit.getDistance(u);
+            if (chosen == null || dist < minDist) {
+                minDist = dist;
+                chosen = u;
+            }
+        }
+        return chosen;
+    }
+
+    public static MutablePair<Double, Double> cropPosition(MutablePair<Double, Double> unitV) {
+        MutablePair<Double, Double> cropped = new MutablePair<>(unitV.first, unitV.second);
+        double sizeX = getGs().getGame().getBWMap().mapWidth() * 32.0;
+        double sizeY = getGs().getGame().getBWMap().mapHeight() * 32.0;
+        if (cropped.first < 0.0) cropped.first = 0.0;
+        else if (cropped.first >= sizeX) cropped.first = sizeX - 1;
+        if (cropped.second < 0.0) cropped.second = 0.0;
+        else if (cropped.second >= sizeY) cropped.second = sizeY - 1;
+        return cropped;
+    }
+
+    public static Position cropPosition(Position pos) {
+        MutablePair<Integer, Integer> cropped = new MutablePair<>(pos.getX(), pos.getY());
+        int sizeX = getGs().getGame().getBWMap().mapWidth() * 32;
+        int sizeY = getGs().getGame().getBWMap().mapHeight() * 32;
+        if (cropped.first < 0.0) cropped.first = 0;
+        else if (cropped.first >= sizeX) cropped.first = sizeX - 1;
+        if (cropped.second < 0.0) cropped.second = 0;
+        else if (cropped.second >= sizeY) cropped.second = sizeY - 1;
+        return new Position(cropped.first, cropped.second);
+    }
+
+    public static Position ChoosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
+        try {
+            Position myUnitPos = myUnit.getPosition();
+            Position attackUnitPos = attackUnit.getPosition();
+            MutablePair<Double, Double> AT = new MutablePair<>((double) attackUnitPos.getX() - myUnitPos.getX(), (double) attackUnitPos.getY() - myUnitPos.getY());
+            MutablePair<Double, Double> patrolDir1 = rotatePosition(AT, Math.PI / 5.0);
+            MutablePair<Double, Double> patrolDir2 = rotatePosition(AT, -Math.PI / 5.0);
+            MutablePair<Double, Double> accel = new MutablePair<>(((MobileUnit) myUnit).getVelocityX(), ((MobileUnit) myUnit).getVelocityY());
+            MutablePair<Double, Double> multi = new MutablePair<>(patrolDir1.first * accel.first, patrolDir1.second * accel.second);
+            MutablePair<Double, Double> patrolDir = (multi.first >= 0 && multi.second >= 0) ? patrolDir1 : patrolDir2;
+            patrolDir = normalize(patrolDir);
+            Position prePatrol = new Position(patrolDir.first.intValue(), patrolDir.second.intValue()).multiply(new Position(myUnit.getGroundWeaponMaxRange() - 5, myUnit.getGroundWeaponMaxRange() - 5));
+            return cropPosition(myUnitPos.add(prePatrol));
+        } catch (Exception e) {
+            System.err.println("ChoosePatrolPositionVulture Exception");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static MutablePair<Double, Double> normalize(MutablePair<Double, Double> pos) {
+        double norm = Math.sqrt(pos.first * pos.first + pos.second * pos.second);
+        return new MutablePair<>(pos.first / norm, pos.second / norm);
+    }
+
+    private static MutablePair<Double, Double> rotatePosition(MutablePair<Double, Double> pos, double angle) {
+        final double cosAngle = Math.cos(angle);
+        final double sinAngle = Math.sin(angle);
+        return new MutablePair<>(pos.first * cosAngle - pos.second * sinAngle, pos.first * sinAngle + pos.second * cosAngle);
+    }
+
+    public static boolean isPositionMapEdge(Position pos) {
+        return pos.getX() <= 0 || pos.getY() <= 0 || pos.getX() >= getGs().getGame().getBWMap().mapWidth() * 32
+                || pos.getY() >= getGs().getGame().getBWMap().mapHeight() * 32;
+    }
+
+    public static Position improveMapEdgePosition(Position unitPos, Position pos) {
+        double angle = Math.atan2(unitPos.getY(), unitPos.getX()) - Math.atan2(pos.getY(), pos.getX());
+        MutablePair<Integer, Integer> improved = new MutablePair<>(pos.getX(), pos.getY());
+        int mapHeight = getGs().getGame().getBWMap().mapHeight() * 32;
+        int mapWidth = getGs().getGame().getBWMap().mapWidth() * 32;
+        if (improved.first <= 0 && improved.second <= 0) {
+            if (Math.random() < 0.5) improved.first = 5 * 32;
+            else improved.second = 5 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.first >= mapWidth && improved.second >= mapWidth) {
+            if (Math.random() < 0.5) improved.first = mapWidth - 3 * 32;
+            else improved.second = mapHeight - 3 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.first <= 0) {
+            improved.first = 5 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.second <= 0) {
+            improved.second = 5 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.first >= mapWidth) {
+            improved.first = mapWidth - 2 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        if (improved.second >= mapHeight) {
+            improved.second = mapHeight - 2 * 32;
+            return new Position(improved.first, improved.second);
+        }
+        return null;
+    }
+
+    public static Position getUnitCenterPosition(Position leftTop, UnitType type) {
+        Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
+        return new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
+
     }
 }

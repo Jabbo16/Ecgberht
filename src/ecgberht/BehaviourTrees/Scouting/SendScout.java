@@ -40,7 +40,6 @@ public class SendScout extends Action {
                 }
             }
             if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                ((GameState) this.handler).addToSquad(((GameState) this.handler).chosenScout);
                 ((MobileUnit) ((GameState) this.handler).chosenScout).stop(false);
                 ((GameState) this.handler).chosenScout = null;
                 return State.FAILURE;

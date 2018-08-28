@@ -1,10 +1,7 @@
 package ecgberht.Agents;
 
-import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
@@ -18,13 +15,12 @@ public abstract class Agent {
 
     public Unit myUnit;
     Status status = Status.IDLE;
-    UnitType type = UnitType.Terran_Vulture;
     Position attackPos = null;
     Unit attackUnit = null;
     int frameLastOrder = 0;
     int actualFrame = 0;
     Set<Unit> closeEnemies = new TreeSet<>();
-    Set<Unit> closeWorkers = new TreeSet<>();
+    Set<Unit> mainTargets = new TreeSet<>();
 
     public String statusToString() {
         if (status == Status.ATTACK) return "Attack";
@@ -32,15 +28,13 @@ public abstract class Agent {
         if (status == Status.COMBAT) return "Combat";
         if (status == Status.RETREAT) return "Retreat";
         if (status == Status.IDLE) return "Idle";
+        if (status == Status.PATROL) return "Patrol";
         return "None";
     }
 
     Position selectNewAttack() {
-        MutablePair<Integer, Integer> p = getGs().inMap.getPosition(myUnit.getTilePosition(), true);
-        if (p.first != -1 && p.second != -1) {
-            Position attackPos = new TilePosition(p.second, p.first).toPosition();
-            if (getGs().getGame().getBWMap().isValidPosition(attackPos)) return attackPos;
-        }
+        Position p = Util.chooseAttackPosition(myUnit.getPosition(), false);
+        if (p != null && getGs().getGame().getBWMap().isValidPosition(p)) return p;
         if (getGs().enemyMainBase != null) return getGs().enemyMainBase.getLocation().toPosition();
         return null;
     }
@@ -49,7 +43,7 @@ public abstract class Agent {
         Unit chosen = null;
         double distB = Double.MAX_VALUE;
         for (Unit u : enemies) {
-            if (Util.getType((PlayerUnit) u).isFlyer() || ((PlayerUnit) u).isCloaked()) continue;
+            if (u.getType().isFlyer() || ((PlayerUnit) u).isCloaked()) continue;
             double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
             if (chosen == null || distA < distB) {
                 chosen = u;
@@ -70,5 +64,5 @@ public abstract class Agent {
 
     public abstract boolean runAgent();
 
-    enum Status {ATTACK, KITE, COMBAT, IDLE, RETREAT}
+    enum Status {ATTACK, KITE, COMBAT, IDLE, RETREAT, PATROL}
 }

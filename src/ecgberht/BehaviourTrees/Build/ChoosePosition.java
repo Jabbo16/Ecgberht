@@ -29,7 +29,7 @@ public class ChoosePosition extends Action {
         try {
             if (((GameState) this.handler).chosenToBuild == UnitType.None) return State.FAILURE;
             Player self = ((GameState) this.handler).getPlayer();
-            TilePosition origin = null;
+            TilePosition origin;
             if (((GameState) this.handler).chosenToBuild.isRefinery()) {
                 if (!((GameState) this.handler).vespeneGeysers.isEmpty()) {
                     for (Entry<VespeneGeyser, Boolean> g : ((GameState) this.handler).vespeneGeysers.entrySet()) {
@@ -71,11 +71,10 @@ public class ChoosePosition extends Action {
                 }
                 List<Base> remove = new ArrayList<>();
                 for (Base b : valid) {
-                    if (((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation())) {
-                        if (!((GameState) this.handler).getGame().getBWMap().isBuildable(b.getLocation(), true)) {
-                            remove.add(b);
-                            continue;
-                        }
+                    if (((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation())
+                            && !((GameState) this.handler).getGame().getBWMap().isBuildable(b.getLocation(), true)) {
+                        remove.add(b);
+                        continue;
                     }
                     if (b.getArea() != ((GameState) this.handler).naturalArea) {
                         for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
@@ -90,7 +89,6 @@ public class ChoosePosition extends Action {
                         }
                         for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
                             if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
-
                             if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
                                 remove.add(b);
                                 break;
@@ -114,83 +112,61 @@ public class ChoosePosition extends Action {
                     } else {
                         origin = self.getStartLocation();
                     }
-                } else {
-                    if (((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                        if (((GameState) this.handler).DBs.isEmpty()) {
-                            origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
-                        } else {
-                            for (Bunker b : ((GameState) this.handler).DBs.keySet()) {
-                                origin = b.getTilePosition();
-                                break;
-                            }
-                        }
+                } else if (((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
+                    if (((GameState) this.handler).defendPosition != null) {
+                        origin = ((GameState) this.handler).defendPosition.toTilePosition();
+                    } else if (((GameState) this.handler).DBs.isEmpty()) {
+                        origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
-                        if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg) {
-                            origin = ((GameState) this.handler).getBunkerPositionAntiPool();
-                            if (origin != null) {
-                                ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                                ((GameState) this.handler).chosenPosition = origin;
-                                return State.SUCCESS;
-                            } else {
-                                origin = ((GameState) this.handler).testMap.findBunkerPositionAntiPool();
-                                if (origin != null) {
-                                    ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                                    ((GameState) this.handler).chosenPosition = origin;
-                                    return State.SUCCESS;
-                                } else {
-                                    if (((GameState) this.handler).MainCC != null) {
-                                        origin = ((GameState) this.handler).MainCC.second.getTilePosition();
-                                    } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
-                                }
-                            }
-                        } else {
-                            if (((GameState) this.handler).Ts.isEmpty()) {
-                                if (((GameState) this.handler).mainChoke != null &&
-                                        !((GameState) this.handler).strat.name.equals("MechGreedyFE") &&
-                                        !((GameState) this.handler).strat.name.equals("BioGreedyFE") &&
-                                        !((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
-                                    origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
-                                    if (origin != null) {
-                                        ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                                        ((GameState) this.handler).chosenPosition = origin;
-                                        return State.SUCCESS;
-                                    } else {
-                                        origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                                    }
-
-                                } else {
-                                    if (((GameState) this.handler).naturalChoke != null) {
-                                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).naturalChoke);
-                                        if (origin != null) {
-                                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                                            ((GameState) this.handler).chosenPosition = origin;
-                                            return State.SUCCESS;
-                                        } else {
-                                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                                        }
-                                    } else {
-                                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
-                                        if (origin != null) {
-                                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                                            ((GameState) this.handler).chosenPosition = origin;
-                                            return State.SUCCESS;
-                                        } else {
-                                            origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                                        }
-                                    }
-                                }
-                            } else {
-                                for (MissileTurret b : ((GameState) this.handler).Ts) {
-                                    origin = b.getTilePosition();
-                                    break;
-                                }
-                            }
-                        }
-
+                        origin = ((GameState) this.handler).DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                     }
-
+                } else if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg) {
+                    origin = ((GameState) this.handler).getBunkerPositionAntiPool();
+                    if (origin != null) {
+                        ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                        ((GameState) this.handler).chosenPosition = origin;
+                        return State.SUCCESS;
+                    } else {
+                        origin = ((GameState) this.handler).testMap.findBunkerPositionAntiPool();
+                        if (origin != null) {
+                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                            ((GameState) this.handler).chosenPosition = origin;
+                            return State.SUCCESS;
+                        } else if (((GameState) this.handler).MainCC != null) {
+                            origin = ((GameState) this.handler).MainCC.second.getTilePosition();
+                        } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
+                    }
+                } else if (((GameState) this.handler).Ts.isEmpty()) {
+                    if (((GameState) this.handler).mainChoke != null &&
+                            !((GameState) this.handler).strat.name.equals("MechGreedyFE") &&
+                            !((GameState) this.handler).strat.name.equals("BioGreedyFE") &&
+                            !((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
+                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
+                        if (origin != null) {
+                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                            ((GameState) this.handler).chosenPosition = origin;
+                            return State.SUCCESS;
+                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                    } else if (((GameState) this.handler).naturalChoke != null) {
+                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).naturalChoke);
+                        if (origin != null) {
+                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                            ((GameState) this.handler).chosenPosition = origin;
+                            return State.SUCCESS;
+                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                    } else {
+                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
+                        if (origin != null) {
+                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                            ((GameState) this.handler).chosenPosition = origin;
+                            return State.SUCCESS;
+                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                    }
+                } else {
+                    origin = ((GameState) this.handler).Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                 }
-                TilePosition position = ((GameState) this.handler).testMap.findPosition(((GameState) this.handler).chosenToBuild, origin);
+                //TilePosition position = ((GameState) this.handler).testMap.findPosition(((GameState) this.handler).chosenToBuild, origin);
+                TilePosition position = ((GameState) this.handler).testMap.findPositionNew(((GameState) this.handler).chosenToBuild, origin);
                 ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                 if (position != null) {
                     ((GameState) this.handler).chosenPosition = position;

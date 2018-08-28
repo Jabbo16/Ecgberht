@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Defense;
 
+import bwem.Base;
 import bwem.area.Area;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
@@ -29,52 +30,58 @@ public class CheckPerimeter extends Conditional {
             ((GameState) this.handler).defense = false;
             Set<Unit> enemyInvaders = new TreeSet<>(((GameState) this.handler).enemyCombatUnitMemory);
             for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce()
-                        || u.type.isRefinery() || u.type == UnitType.Terran_Barracks) {
+                if (u.type.canAttack() || u.type == UnitType.Protoss_Pylon || u.type.canProduce() || u.type.isRefinery()) {
                     enemyInvaders.add(u.unit);
                 }
             }
             for (Unit u : enemyInvaders) {
-                UnitType uType = Util.getType((PlayerUnit) u);
-                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || (u instanceof Loadable &&
-                        !(u instanceof Overlord))) && uType != UnitType.Zerg_Scourge &&
-                        uType != UnitType.Terran_Valkyrie && uType != UnitType.Protoss_Corsair)) {
+                UnitType uType = u.getType();
+                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || u instanceof Loadable)
+                        && uType != UnitType.Zerg_Scourge && uType != UnitType.Terran_Valkyrie
+                        && uType != UnitType.Protoss_Corsair && !(u instanceof Overlord))) {
+                    for (Base b : ((GameState) this.handler).CCs.keySet()) {
+                        Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
+                        if (enemyArea != null && enemyArea.equals(b.getArea())) {
+                            ((GameState) this.handler).enemyInBase.add(u);
+                            break;
+                        }
+                    }
                     for (Map.Entry<SCV, Building> c : ((GameState) this.handler).workerTask.entrySet()) {
                         int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
                         if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).CCs.values()) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 500) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).DBs.keySet()) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (Unit c : ((GameState) this.handler).SBs) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     for (ResearchingFacility c : ((GameState) this.handler).UBs) {
-                        if (Util.broodWarDistance(u.getPosition(), ((Unit) c).getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             ((GameState) this.handler).enemyInBase.add(u);
-                            continue;
+                            break;
                         }
                     }
                     if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                         for (Unit c : ((GameState) this.handler).MBs) {
                             if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 ((GameState) this.handler).enemyInBase.add(u);
-                                continue;
+                                break;
                             }
                         }
                     }
@@ -102,12 +109,8 @@ public class CheckPerimeter extends Conditional {
                 }
                 closestDefense = ((GameState) this.handler).getNearestCC(u.getPosition());
                 if (closestDefense != null) {
-                    Area uArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
-                    Area closestCCArea = ((GameState) this.handler).bwem.getMap().getArea(closestDefense.toTilePosition());
-                    if (uArea != null && closestCCArea != null && !uArea.equals(closestCCArea)) {
-                        u.move(closestDefense);
-                        toDelete.add(u);
-                    }
+                    u.move(closestDefense);
+                    toDelete.add(u);
                 }
             }
             for (Worker u : toDelete) {
@@ -115,18 +118,18 @@ public class CheckPerimeter extends Conditional {
                 ((GameState) this.handler).workerDefenders.remove(u);
                 ((GameState) this.handler).workerIdle.add(u);
             }
-            for (Squad u : ((GameState) this.handler).squads.values()) {
+            for (Squad u : ((GameState) this.handler).sqManager.squads.values()) {
                 if (u.status == Status.DEFENSE) {
-                    Position closestCC = ((GameState) this.handler).getNearestCC(((GameState) this.handler).getSquadCenter(u));
+                    Position closestCC = ((GameState) this.handler).getNearestCC(u.getSquadCenter());
                     if (closestCC != null) {
-                        Area squad = ((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).getSquadCenter(u).toTilePosition());
+                        Area squad = ((GameState) this.handler).bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
                         Area regCC = ((GameState) this.handler).bwem.getMap().getArea(closestCC.toTilePosition());
                         if (squad != null && regCC != null) {
                             if (!squad.equals(regCC)) {
                                 if (!((GameState) this.handler).DBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
                                     u.giveMoveOrder(((GameState) this.handler).DBs.keySet().iterator().next().getPosition());
                                 } else {
-                                    u.giveMoveOrder(Util.getClosestChokepoint(((GameState) this.handler).getSquadCenter(u)).getCenter().toPosition());
+                                    u.giveMoveOrder(Util.getClosestChokepoint(u.getSquadCenter()).getCenter().toPosition());
                                 }
                                 u.status = Status.IDLE;
                                 u.attack = null;
@@ -139,7 +142,6 @@ public class CheckPerimeter extends Conditional {
                     }
                     u.status = Status.IDLE;
                     u.attack = null;
-                    continue;
                 }
             }
             ((GameState) this.handler).defense = false;

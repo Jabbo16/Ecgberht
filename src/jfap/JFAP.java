@@ -39,9 +39,7 @@ public class JFAP extends AJFAP {
 
     @Override
     public void addIfCombatUnitPlayer2(JFAPUnit fu) {
-        if (fu.groundDamage > 0 || fu.airDamage > 0 || fu.unitType == UnitType.Terran_Medic) {
-            addUnitPlayer2(fu);
-        }
+        if (fu.groundDamage > 0 || fu.airDamage > 0 || fu.unitType == UnitType.Terran_Medic) addUnitPlayer2(fu);
     }
 
     @Override
@@ -78,16 +76,16 @@ public class JFAP extends AJFAP {
     }
 
     @Override
-    public Pair<Integer, Integer> playerScores() {
-        Pair<Integer, Integer> res = new Pair<>(0, 0);
+    public MutablePair<Integer, Integer> playerScores() {
+        MutablePair<Integer, Integer> res = new MutablePair<>(0, 0);
         for (final JFAPUnit u : player1) res.first += score(u);
         for (final JFAPUnit u : player2) res.second += score(u);
         return res;
     }
 
     @Override
-    public Pair<Integer, Integer> playerScoresUnits() {
-        Pair<Integer, Integer> res = new Pair<>(0, 0);
+    public MutablePair<Integer, Integer> playerScoresUnits() {
+        MutablePair<Integer, Integer> res = new MutablePair<>(0, 0);
         for (final JFAPUnit u : player1) {
             if (!u.unitType.isBuilding()) res.first += score(u);
         }
@@ -98,8 +96,8 @@ public class JFAP extends AJFAP {
     }
 
     @Override
-    public Pair<Integer, Integer> playerScoresBuildings() {
-        Pair<Integer, Integer> res = new Pair<>(0, 0);
+    public MutablePair<Integer, Integer> playerScoresBuildings() {
+        MutablePair<Integer, Integer> res = new MutablePair<>(0, 0);
         for (final JFAPUnit u : player1) {
             if (u.unitType.isBuilding()) res.first += score(u);
         }
@@ -110,8 +108,8 @@ public class JFAP extends AJFAP {
     }
 
     @Override
-    public Pair<Set<JFAPUnit>, Set<JFAPUnit>> getState() {
-        return new Pair<>(player1, player2);
+    public MutablePair<Set<JFAPUnit>, Set<JFAPUnit>> getState() {
+        return new MutablePair<>(player1, player2);
     }
 
     @Override
@@ -195,9 +193,8 @@ public class JFAP extends AJFAP {
                 }
             }
             if (closestEnemy.health < 1) {
-                final JFAPUnit temp = closestEnemy;
                 enemyUnits.remove(closestEnemy);
-                unitDeath(temp, enemyUnits);
+                unitDeath(closestEnemy, enemyUnits);
             }
             didSomething = true;
         } else if (closestEnemy != null && Math.sqrt(closestDist) > fu.speed) {
@@ -225,9 +222,7 @@ public class JFAP extends AJFAP {
             fu.x = closestHealable.x;
             fu.y = closestHealable.y;
             closestHealable.health += 150;
-            if (closestHealable.health > closestHealable.maxHealth) {
-                closestHealable.health = closestHealable.maxHealth;
-            }
+            if (closestHealable.health > closestHealable.maxHealth) closestHealable.health = closestHealable.maxHealth;
             closestHealable.didHealThisFrame = true;
         }
     }
@@ -256,20 +251,17 @@ public class JFAP extends AJFAP {
             if (closestEnemy.flying) dealDamage(closestEnemy, fu.airDamage, fu.airDamageType);
             else dealDamage(closestEnemy, fu.groundDamage, fu.groundDamageType);
             if (closestEnemy.health < 1) {
-                final JFAPUnit temp = closestEnemy;
                 player.remove(closestEnemy);
-                unitDeath(temp, player);
+                unitDeath(closestEnemy, player);
             }
             didSomething = true;
             return true;
-        } else {
-            if (closestEnemy != null && Math.sqrt(closestDist) > fu.speed) {
-                final int dx = closestEnemy.x - fu.x;
-                final int dy = closestEnemy.y - fu.y;
-                fu.x += (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
-                fu.y += (int) (dy * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
-                didSomething = true;
-            }
+        } else if (closestEnemy != null && Math.sqrt(closestDist) > fu.speed) {
+            final int dx = closestEnemy.x - fu.x;
+            final int dy = closestEnemy.y - fu.y;
+            fu.x += (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
+            fu.y += (int) (dy * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
+            didSomething = true;
         }
         return false;
     }

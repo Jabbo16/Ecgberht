@@ -1,14 +1,12 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
 import ecgberht.GameState;
-import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.MissileTurret;
-import org.openbw.bwapi4j.unit.PlayerUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +33,7 @@ public class ChooseBuildingLot extends Action {
                     }
                     ((GameState) this.handler).chosenBuildingLot = b;
                 } else {
-                    if ((double) b.getHitPoints() / (double) Util.getType((PlayerUnit) b).maxHitPoints() <= 0.1) {
+                    if ((double) b.getHitPoints() / (double) b.getType().maxHitPoints() <= 0.1) {
                         b.cancelConstruction();
                         aux.add(b);
                     }

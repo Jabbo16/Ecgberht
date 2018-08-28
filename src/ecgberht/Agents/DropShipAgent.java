@@ -73,8 +73,10 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     private void checkUnloaded() {
         for (Unit u : cargoLoaded) {
             Unit transport = ((MobileUnit) u).getTransport();
-            if (transport == null) cargoLoaded.remove(u);
-            break;
+            if (transport == null) {
+                cargoLoaded.remove(u);
+                break;
+            }
         }
     }
 
