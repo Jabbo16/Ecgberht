@@ -8,9 +8,7 @@ import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.SupplyDepot;
 
 public class ChooseSupply extends Action {
@@ -25,11 +23,22 @@ public class ChooseSupply extends Action {
             if (((GameState) this.handler).getPlayer().supplyTotal() >= 400) {
                 return State.FAILURE;
             }
-            //if(((GameState)this.handler).countUnit2(UnitType.Terran_Barracks) < 2 && ((GameState)this.handler).strat.name == "ProxyBBS") {
-            if (((GameState) this.handler).strat.name == "ProxyBBS" && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) < 2) {
+            if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).enemyRace == Race.Zerg) {
+
+            if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
+                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) < 1) {
+                return State.FAILURE;
+            }
+
+            if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
+                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) == 1
+                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Supply_Depot) > 0
+                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Bunker) < 1) {
+                return State.FAILURE;
+            }
+            /*if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).enemyRace == Race.Zerg) {
                 if (!((GameState) this.handler).SBs.isEmpty() && !((GameState) this.handler).DBs.isEmpty()) {
                     boolean found_bunker = false;
                     for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
@@ -62,7 +71,7 @@ public class ChooseSupply extends Action {
                     }
                 }
                 if (!found_rax) return State.FAILURE;
-            }
+            }*/
             if (((GameState) this.handler).getSupply() <= 4 * ((GameState) this.handler).getCombatUnitsBuildings()) {
                 for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Supply_Depot) {

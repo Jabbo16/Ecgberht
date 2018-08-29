@@ -500,7 +500,7 @@ public class GameState extends GameHandler {
             print(naturalArea.getTop().toTilePosition(), Color.RED);
             for (ChokePoint c : naturalArea.getChokePoints()) {
                 if (c.getGeometry().size() > 2)
-                    bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size() - 1).toPosition(), Color.GREEN);
+                    bw.getMapDrawer().drawLineMap(c.getGeometry().get(0).toPosition(), c.getGeometry().get(c.getGeometry().size() - 1).toPosition(), Color.GREY);
             }
         }
        /* for(ChokePoint c : bwem.getMap().getChokePoints()){
@@ -512,6 +512,7 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextMap(Util.getUnitCenterPosition(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
             counter++;
         }
+        for (Building b : buildingLot) print(b, Color.PURPLE);
         for (Unit u : enemyInBase) print(u, Color.RED);
         for (Base b : islandBases)
             bw.getMapDrawer().drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
@@ -720,9 +721,17 @@ public class GameState extends GameHandler {
                 mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
         }
 
+        for (PlayerUnit u : bw.getUnits(self)) { // TODO check and fix buildingLot refinery
+            if (!u.exists() || !(u instanceof Building) || u instanceof Addon) continue;
+            if (!u.isCompleted() && !workerTask.values().contains(u) && !buildingLot.contains(u)) {
+                buildingLot.add((Building) u);
+            }
+        }
+
         List<Worker> removeTask = new ArrayList<>();
         for (Entry<SCV, Building> w : workerTask.entrySet()) {
-            if (!w.getKey().isConstructing() || w.getValue().isCompleted()) removeTask.add(w.getKey());
+            if (!w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
+                removeTask.add(w.getKey());
         }
         for (Worker u : removeTask) {
             workerTask.remove(u);
@@ -1035,32 +1044,43 @@ public class GameState extends GameHandler {
             if (MBs.isEmpty() || CCs.isEmpty()) return null;
             TilePosition startTile = MBs.iterator().next().getTilePosition();
             TilePosition searchTile = CCs.values().iterator().next().getTilePosition();
-            UnitType type = UnitType.Terran_Bunker;
-            int dist = 0;
+            UnitType type = UnitType.Terran_Barracks;
+            UnitType bType = UnitType.Terran_Bunker;
+            int dist = -1;
             TilePosition chosen = null;
-            while (chosen == null || dist < 5) {
-                List<TilePosition> sides = new ArrayList<>();
-                if (startTile.getY() - type.tileHeight() - dist >= 0) {
-                    TilePosition up = new TilePosition(startTile.getX(), startTile.getY() - type.tileHeight() - dist);
-                    sides.add(up);
-                }
-                if (startTile.getY() + UnitType.Terran_Barracks.tileHeight() + dist < bw.getBWMap().mapHeight()) {
-                    TilePosition down = new TilePosition(startTile.getX(), startTile.getY() + UnitType.Terran_Barracks.tileHeight() + dist);
-                    sides.add(down);
-                }
-                if (startTile.getX() - type.tileWidth() - dist >= 0) {
-                    TilePosition left = new TilePosition(startTile.getX() - type.tileWidth() - dist, startTile.getY());
-                    sides.add(left);
-                }
-                if (startTile.getX() + UnitType.Terran_Barracks.tileWidth() + dist < bw.getBWMap().mapWidth()) {
-                    TilePosition right = new TilePosition(startTile.getX() + UnitType.Terran_Barracks.tileWidth() + dist, startTile.getY());
-                    sides.add(right);
-                }
-                for (TilePosition tile : sides) {
-                    if (tile == null) continue;
-                    if (((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen)))
-                            && bw.canBuildHere(tile, type)) {
-                        chosen = tile;
+            while (dist <= 1) {
+                int ii = 0, jj = 0;
+                while (type.tileWidth() > type.tileHeight() ? ii <= type.tileWidth() : jj <= type.tileHeight()) {
+                    List<TilePosition> sides = new ArrayList<>();
+                    if (startTile.getY() - bType.tileHeight() - dist >= 0) {
+                        TilePosition up = new TilePosition(startTile.getX() + ii, startTile.getY() - bType.tileHeight() - dist);
+                        sides.add(up);
+                    }
+                    if (startTile.getY() + type.tileHeight() + dist < bw.getBWMap().mapHeight()) {
+                        TilePosition down = new TilePosition(startTile.getX() + ii, startTile.getY() + type.tileHeight() + dist);
+                        sides.add(down);
+                    }
+                    if (startTile.getX() - bType.tileWidth() - dist >= 0) {
+                        TilePosition left = new TilePosition(startTile.getX() - type.tileWidth() - dist, startTile.getY() + jj);
+                        sides.add(left);
+                    }
+                    if (startTile.getX() + type.tileWidth() + dist < bw.getBWMap().mapWidth()) {
+                        TilePosition right = new TilePosition(startTile.getX() + type.tileWidth() + dist, startTile.getY() + jj);
+                        sides.add(right);
+                    }
+                    for (TilePosition tile : sides) {
+                        if (tile == null) continue;
+                        if (((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen)))
+                                && bw.canBuildHere(tile, UnitType.Terran_Bunker)) {
+                            chosen = tile;
+                        }
+                    }
+                    if (type.tileWidth() > type.tileHeight()) {
+                        if (ii <= type.tileWidth()) ii++;
+                        if (jj < type.tileHeight()) jj++;
+                    } else {
+                        if (ii < type.tileWidth()) ii++;
+                        if (jj <= type.tileHeight()) jj++;
                     }
                 }
                 dist++;
@@ -1068,29 +1088,38 @@ public class GameState extends GameHandler {
             startTile = CCs.values().iterator().next().getTilePosition();
             UnitType ccType = UnitType.Terran_Command_Center;
             searchTile = mainChoke.getCenter().toTilePosition();
-            dist = 0;
-            while (dist < 2) {
-                List<TilePosition> sides = new ArrayList<>();
-                if (startTile.getY() - type.tileHeight() - dist >= 0) {
-                    TilePosition up = new TilePosition(startTile.getX(), startTile.getY() - type.tileHeight() - dist);
-                    sides.add(up);
-                }
-                if (startTile.getY() + ccType.tileHeight() + dist < bw.getBWMap().mapHeight()) {
-                    TilePosition down = new TilePosition(startTile.getX(), startTile.getY() + ccType.tileHeight() + dist);
-                    sides.add(down);
-                }
-                if (startTile.getX() - type.tileWidth() - dist >= 0) {
-                    TilePosition left = new TilePosition(startTile.getX() - type.tileWidth() - dist, startTile.getY());
-                    sides.add(left);
-                }
-                if (startTile.getX() + ccType.tileWidth() + dist < bw.getBWMap().mapWidth()) {
-                    TilePosition right = new TilePosition(startTile.getX() + ccType.tileWidth() + dist, startTile.getY());
-                    sides.add(right);
-                }
-                for (TilePosition tile : sides) {
-                    if (tile == null) continue;
-                    if ((chosen == null) || (searchTile.getDistance(tile) < searchTile.getDistance(chosen))) {
-                        if (bw.canBuildHere(tile, type)) chosen = tile;
+            dist = -1;
+            while (dist <= -1) {
+                int ii = 0, jj = 0;
+                while (ccType.tileWidth() > ccType.tileHeight() ? ii <= ccType.tileWidth() : jj <= ccType.tileHeight()) {
+                    List<TilePosition> sides = new ArrayList<>();
+                    if (startTile.getY() - bType.tileHeight() - dist >= 0) {
+                        TilePosition up = new TilePosition(startTile.getX() + ii, startTile.getY() - ccType.tileHeight() - dist);
+                        sides.add(up);
+                    }
+                    if (startTile.getY() + ccType.tileHeight() + dist < bw.getBWMap().mapHeight()) {
+                        TilePosition down = new TilePosition(startTile.getX() + ii, startTile.getY() + ccType.tileHeight() + dist);
+                        sides.add(down);
+                    }
+                    if (startTile.getX() - bType.tileWidth() - dist >= 0) {
+                        TilePosition left = new TilePosition(startTile.getX() - ccType.tileWidth() - dist, startTile.getY() + jj);
+                        sides.add(left);
+                    }
+                    if (startTile.getX() + ccType.tileWidth() + dist < bw.getBWMap().mapWidth()) {
+                        TilePosition right = new TilePosition(startTile.getX() + ccType.tileWidth() + dist, startTile.getY() + jj);
+                        sides.add(right);
+                    }
+                    for (TilePosition tile : sides) {
+                        if (tile == null) continue;
+                        if (chosen == null || searchTile.getDistance(tile) < searchTile.getDistance(chosen) && bw.canBuildHere(tile, UnitType.Terran_Bunker))
+                            chosen = tile;
+                    }
+                    if (ccType.tileWidth() > ccType.tileHeight()) {
+                        if (ii <= ccType.tileWidth()) ii++;
+                        if (jj < ccType.tileHeight()) jj++;
+                    } else {
+                        if (ii < ccType.tileWidth()) ii++;
+                        if (jj <= ccType.tileHeight()) jj++;
                     }
                 }
                 dist++;
@@ -1380,11 +1409,19 @@ public class GameState extends GameHandler {
     }
 
     private boolean checkItWasAttacking(Squad u) { // TODO check, not sure if its good enough
-        Area uArea = bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
-        for (Base b : CCs.keySet()) {
-            if (b.getArea().equals(uArea)) return false;
+        try {
+            Area uArea = bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
+            for (Base b : CCs.keySet()) {
+                if (b.getArea() == null) continue;
+                if (b.getArea().equals(uArea)) return false;
+            }
+            return !naturalArea.equals(uArea) && getArmySize() * 0.85 >= strat.armyForAttack && (naturalChoke == null || naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
+        } catch (Exception e) {
+            System.err.println("checkItWasAttacking Exception");
+            e.printStackTrace();
+            return true;
         }
-        return !naturalArea.equals(uArea) && getArmySize() * 0.85 >= strat.armyForAttack && (naturalChoke != null && naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
+
     }
 
     void keyboardInteraction(String text) {

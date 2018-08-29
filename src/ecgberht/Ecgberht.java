@@ -527,6 +527,9 @@ public class Ecgberht implements BWEventListener {
                                 transition();
                             }
                         }
+                        if (arg0 instanceof Bunker && gs.EI.naughty && gs.enemyRace == Race.Zerg) {
+                            gs.defendPosition = arg0.getPosition();
+                        }
                         SCV worker = (SCV) ((Building) arg0).getBuildUnit();
                         if (worker != null) {
                             if (gs.workerBuild.containsKey(worker)) {

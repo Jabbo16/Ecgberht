@@ -6,6 +6,7 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
@@ -28,7 +29,11 @@ public class ChooseBarracks extends Action {
                     ((GameState) this.handler).frameCount <= 24 * 240) {
                 return State.FAILURE;
             }
-
+            if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
+                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) == 1
+                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Bunker) < 1) {
+                return State.FAILURE;
+            }
             if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;

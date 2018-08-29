@@ -49,8 +49,14 @@ public class BuildingMap implements Cloneable {
     }
 
     private void initTilesArea() {
-        for (Area a : bwem.getMap().getAreas())
-            tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
+        boolean startOrdered = false;
+        TilePosition startTile = self.getStartLocation();
+        for (Area a : bwem.getMap().getAreas()) {
+            if (!startOrdered && bwem.getMap().getArea(startTile).equals(a)) {
+                tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(startTile)));
+                startOrdered = true;
+            } else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
+        }
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
                 TilePosition x = new TilePosition(ii, jj);
