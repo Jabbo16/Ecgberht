@@ -77,7 +77,7 @@ public class GameState extends GameHandler {
     public List<Base> BLs = new ArrayList<>();
     public List<Base> EnemyBLs = new ArrayList<>();
     public List<Base> specialBLs = new ArrayList<>();
-    public Map<Base, CommandCenter> CCs = new HashMap<>();
+    public Map<Base, CommandCenter> CCs = new LinkedHashMap<>();
     public Map<Base, CommandCenter> islandCCs = new HashMap<>();
     public Map<Base, Neutral> blockedBases = new HashMap<>();
     public Map<Bunker, Set<Unit>> DBs = new TreeMap<>();
@@ -1415,7 +1415,7 @@ public class GameState extends GameHandler {
                 if (b.getArea() == null) continue;
                 if (b.getArea().equals(uArea)) return false;
             }
-            return !naturalArea.equals(uArea) && getArmySize() * 0.85 >= strat.armyForAttack && (naturalChoke == null || naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
+            return !naturalArea.equals(uArea) && strat.armyForAttack * 0.85 >= getArmySize() && (naturalChoke == null || naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
         } catch (Exception e) {
             System.err.println("checkItWasAttacking Exception");
             e.printStackTrace();
