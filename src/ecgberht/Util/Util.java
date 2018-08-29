@@ -10,7 +10,10 @@ import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -519,9 +522,10 @@ public class Util {
         return null;
     }
 
-    public static boolean shouldIStop(Position pos){
-        for(Base b : getGs().BLs){
-            if(Util.getSquareTiles(b.getLocation(), UnitType.Terran_Command_Center).contains(pos.toTilePosition())) return false;
+    public static boolean shouldIStop(Position pos) {
+        for (Base b : getGs().BLs) {
+            if (Util.getSquareTiles(b.getLocation(), UnitType.Terran_Command_Center).contains(pos.toTilePosition()))
+                return false;
         }
         return getGs().mainChoke != null && getGs().mainChoke.getCenter().toPosition().getDistance(pos) > 32 * 2;
     }
@@ -531,8 +535,8 @@ public class Util {
         tiles.add(pos);
         int height = type.tileHeight();
         int width = type.tileHeight();
-        for(int ii = 1; ii <= height; ii++) tiles.add(pos.add(new TilePosition(0, ii)));
-        for(int ii = 1; ii <= width; ii++) tiles.add(pos.add(new TilePosition(ii, 0)));
+        for (int ii = 1; ii <= height; ii++) tiles.add(pos.add(new TilePosition(0, ii)));
+        for (int ii = 1; ii <= width; ii++) tiles.add(pos.add(new TilePosition(ii, 0)));
         return tiles;
     }
 

@@ -4,6 +4,7 @@ import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -11,10 +12,7 @@ import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.Color;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
@@ -43,6 +41,46 @@ public class SimManager {
             longSimFrames = 170;
             iterations = 0;
         }
+        switch (bw.getInteractionHandler().enemy().getRace()) {
+            case Zerg:
+                radius = UnitType.Zerg_Sunken_Colony.groundWeapon().maxRange();
+            case Terran:
+                radius = UnitType.Terran_Missile_Turret.airWeapon().maxRange();
+            case Protoss:
+                radius = UnitType.Protoss_Photon_Cannon.groundWeapon().maxRange();
+            case Unknown:
+                radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                break;
+        }
+    }
+
+    private void updateRadius() {
+        if (radius == UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) return;
+        if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) > 0) {
+            if (getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
+                radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                return;
+            }
+        }
+        switch (getGs().enemyRace) {
+            case Zerg:
+                if (getGs().getPlayer().hasResearched(TechType.Irradiate)) {
+                    radius = WeaponType.Irradiate.maxRange();
+                    return;
+                }
+                break;
+            case Terran:
+                if (IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+                    radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                }
+                break;
+            case Protoss:
+                if (getGs().getPlayer().hasResearched(TechType.EMP_Shockwave)) {
+                    radius = WeaponType.EMP_Shockwave.maxRange();
+                    return;
+                }
+                break;
+        }
     }
 
     /**
@@ -66,7 +104,7 @@ public class SimManager {
         }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
-        MeanShift clustering = new MeanShift(myUnits);
+        MeanShift clustering = new MeanShift(myUnits, radius);
         friendly = clustering.run(iterations);
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
@@ -77,7 +115,7 @@ public class SimManager {
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
             if (u instanceof Attacker || u instanceof Bunker) enemyUnits.add(u);
         }
-        clustering = new MeanShift(enemyUnits);
+        clustering = new MeanShift(enemyUnits, radius);
         enemies = clustering.run(iterations);
     }
 
@@ -94,6 +132,7 @@ public class SimManager {
      */
     public void onFrameSim() {
         time = System.currentTimeMillis();
+        updateRadius();
         reset();
         createClusters();
         if (!friendly.isEmpty()) {
@@ -185,7 +224,7 @@ public class SimManager {
                 if (!u.getType().canAttack()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
-                    else{
+                    else {
                         s.lose = true;
                         break;
                     }
@@ -195,7 +234,7 @@ public class SimManager {
                 s.stateBefore.second.add(jU);
             }
             if (s.lose) continue;
-            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 6) return;
+            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 5) return;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();
@@ -206,12 +245,12 @@ public class SimManager {
                 s.lose = true;
                 continue;
             }
-            if (enemyLosses > ourLosses * 1.5) continue;
+            if (enemyLosses > ourLosses * 1.3) continue;
             simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
-            if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
+            if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 1.75) || s.stateAfter.first.isEmpty();
             else s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
         }
     }

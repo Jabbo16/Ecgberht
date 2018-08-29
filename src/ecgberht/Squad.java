@@ -147,8 +147,8 @@ public class Squad implements Comparable<Squad> {
                                 continue;
                             }
                         } else if (u.getDistance(move) > range && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
-                            if(u instanceof SiegeTank && ((SiegeTank)u).isSieged() || !getGs().defense){
-                                ((SiegeTank)u).unsiege();
+                            if (u instanceof SiegeTank && ((SiegeTank) u).isSieged() && !getGs().defense) {
+                                ((SiegeTank) u).unsiege();
                             } else ((MobileUnit) u).attack(move);
                             continue;
                         }

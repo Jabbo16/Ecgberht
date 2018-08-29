@@ -151,10 +151,16 @@ public class JFAP extends AJFAP {
                 ut == UnitType.Protoss_Scarab);
     }
 
+    // Thanks and credits to @bmnielsen for kiting code sim
     private void unitSim(JFAPUnit fu, Set<JFAPUnit> enemyUnits) {
+        boolean kite = false;
         if (fu.attackCooldownRemaining > 0) {
-            didSomething = true;
-            return;
+            if (fu.unitType == UnitType.Terran_Marine && fu.attackCooldownRemaining <= UnitType.Terran_Marine.groundWeapon().damageCooldown() - 9)
+                kite = true;
+            if (!kite) {
+                didSomething = true;
+                return;
+            }
         }
         JFAPUnit closestEnemy = null;
         int closestDist = 0;
@@ -173,6 +179,16 @@ public class JFAP extends AJFAP {
                     closestDist = d;
                     closestEnemy = enemy;
                 }
+            }
+        }
+        if (kite) {
+            if (closestEnemy != null && closestEnemy.groundMaxRange < fu.groundMaxRange && closestDist <= (fu.groundMaxRange + fu.speed) && closestEnemy.groundMaxRange <= 32) {
+                int dx = closestEnemy.x - fu.x;
+                int dy = closestEnemy.y - fu.y;
+                fu.x -= (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
+                fu.y -= (int) (dy * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
+                didSomething = true;
+                return;
             }
         }
         if (closestEnemy != null && Math.sqrt(closestDist) <= fu.speed && !(fu.x == closestEnemy.x && fu.y == closestEnemy.y)) {

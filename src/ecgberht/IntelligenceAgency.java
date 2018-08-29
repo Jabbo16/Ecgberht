@@ -39,7 +39,7 @@ public class IntelligenceAgency {
         startStrat = strat;
     }
 
-    public static void onStartIntelligenceAgency(Player enemy){
+    public static void onStartIntelligenceAgency(Player enemy) {
         enemyBases = new TreeMap<>();
         enemyTypes = new TreeMap<>();
         mainEnemy = enemy;
@@ -50,6 +50,7 @@ public class IntelligenceAgency {
         startStrat = null;
         exploredMinerals = false;
     }
+
     public static EnemyStrats getEnemyStrat() {
         return enemyStrat;
     }

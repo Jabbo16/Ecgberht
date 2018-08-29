@@ -123,7 +123,6 @@ public class GameState extends GameHandler {
     public SpellsManager wizard = new SpellsManager();
     public Strategy strat = null;
     public SupplyMan supplyMan;
-    CameraModule skycladObserver = null;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
     public TilePosition chosenBaseLocation = null;
@@ -143,6 +142,7 @@ public class GameState extends GameHandler {
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
     public boolean firstExpand = true;
+    CameraModule skycladObserver = null;
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
             "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",
