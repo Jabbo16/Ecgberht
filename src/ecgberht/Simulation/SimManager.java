@@ -245,12 +245,12 @@ public class SimManager {
                 s.lose = true;
                 continue;
             }
-            if (enemyLosses > ourLosses * 1.3) continue;
+            if (enemyLosses > ourLosses * 1.5) continue;
             simulator.simulate(longSimFrames);
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
-            if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 1.75) || s.stateAfter.first.isEmpty();
+            if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
             else s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
         }
     }

@@ -203,38 +203,124 @@ public class GameState extends GameHandler {
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
-            strategies.put(b.name, new MutablePair<>(0, 0));
-            nameStrat.put(b.name, b);
+            switch(enemyRace){
+                case Zerg:
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
 
-            strategies.put(bM.name, new MutablePair<>(0, 0));
-            nameStrat.put(bM.name, bM);
+                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bGFE.name, bGFE);
 
-            strategies.put(bGFE.name, new MutablePair<>(0, 0));
-            nameStrat.put(bGFE.name, bGFE);
+                    strategies.put(tPW.name, new MutablePair<>(0, 0));
+                    nameStrat.put(tPW.name, tPW);
 
-            if (enemyRace == Race.Zerg) {
-                strategies.put(tPW.name, new MutablePair<>(0, 0));
-                nameStrat.put(tPW.name, tPW);
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
+
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
+
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bGFE);
+
+                    strategies.put(FM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(FM.name, FM);
+
+                    strategies.put(mGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(mGFE.name, bGFE);
+
+                    strategies.put(bMFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMFE.name, bMFE);
+
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
+
+                    break;
+                case Terran:
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
+
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
+
+                    strategies.put(FM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(FM.name, FM);
+
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bGFE);
+
+                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bGFE.name, bGFE);
+
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
+
+                    strategies.put(bMFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMFE.name, bMFE);
+
+                    strategies.put(mGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(mGFE.name, bGFE);
+
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
+                    break;
+                case Protoss:
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
+
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
+
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bGFE);
+
+                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bGFE.name, bGFE);
+
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
+
+                    strategies.put(FM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(FM.name, FM);
+
+                    strategies.put(bMFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMFE.name, bMFE);
+
+                    strategies.put(mGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(mGFE.name, bGFE);
+
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
+                    break;
+                case Unknown:
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
+
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
+
+                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bGFE.name, bGFE);
+
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bGFE);
+
+                    strategies.put(FM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(FM.name, FM);
+
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
+
+                    strategies.put(mGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(mGFE.name, bGFE);
+
+                    strategies.put(bMFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMFE.name, bMFE);
+
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
+                    break;
             }
-
-            strategies.put(bMGFE.name, new MutablePair<>(0, 0));
-            nameStrat.put(bMGFE.name, bGFE);
-
-            strategies.put(FM.name, new MutablePair<>(0, 0));
-            nameStrat.put(FM.name, FM);
-
-            strategies.put(bbs.name, new MutablePair<>(0, 0));
-            nameStrat.put(bbs.name, bbs);
-
-            strategies.put(mGFE.name, new MutablePair<>(0, 0));
-            nameStrat.put(mGFE.name, bGFE);
-
-            strategies.put(bMFE.name, new MutablePair<>(0, 0));
-            nameStrat.put(bMFE.name, bMFE);
-
-            strategies.put(bFE.name, new MutablePair<>(0, 0));
-            nameStrat.put(bFE.name, bFE);
-
             if (!forcedStrat.equals("") && nameStrat.containsKey(forcedStrat)) {
                 ih.sendText("Picked forced strategy " + forcedStrat);
                 return nameStrat.get(forcedStrat);
