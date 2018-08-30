@@ -27,20 +27,20 @@ public class CheckEnemyBaseVisible extends Action {
                 for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
                     if (Util.broodWarDistance(((GameState) this.handler).chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
                         ((GameState) this.handler).enemyMainBase = Util.getClosestBaseLocation(u.pos.toPosition());
-                        ((GameState) this.handler).ScoutSLs = new HashSet<>();
+                        ((GameState) this.handler).scoutSLs = new HashSet<>();
                         if (!((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
                             ((GameState) this.handler).chosenHarasser = (Worker) ((GameState) this.handler).chosenScout;
                         }
                         ((GameState) this.handler).chosenScout = null;
                         ((GameState) this.handler).getIH().sendText("!");
                         ((GameState) this.handler).playSound("gearthere.mp3");
-                        ((GameState) this.handler).EnemyBLs.clear();
-                        ((GameState) this.handler).EnemyBLs.addAll(((GameState) this.handler).BLs);
-                        ((GameState) this.handler).EnemyBLs.sort(new BaseLocationComparator(((GameState) this.handler).enemyMainBase));
+                        ((GameState) this.handler).enemyBLs.clear();
+                        ((GameState) this.handler).enemyBLs.addAll(((GameState) this.handler).BLs);
+                        ((GameState) this.handler).enemyBLs.sort(new BaseLocationComparator(((GameState) this.handler).enemyMainBase));
                         if (((GameState) this.handler).firstScout) {
                             ((GameState) this.handler).enemyStartBase = ((GameState) this.handler).enemyMainBase;
                             ((GameState) this.handler).enemyMainArea = ((GameState) this.handler).enemyStartBase.getArea();
-                            ((GameState) this.handler).enemyNaturalBase = ((GameState) this.handler).EnemyBLs.get(1);
+                            ((GameState) this.handler).enemyNaturalBase = ((GameState) this.handler).enemyBLs.get(1);
                             ((GameState) this.handler).enemyNaturalArea = ((GameState) this.handler).enemyNaturalBase.getArea();
                         }
                         return State.SUCCESS;

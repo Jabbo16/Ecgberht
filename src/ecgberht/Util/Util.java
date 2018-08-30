@@ -43,8 +43,7 @@ public class Util {
         double rectArea = areaOfRect(p1, p2, p3);
         double triangleAreaSum = (triangle1Area + triangle2Area + triangle3Area + triangle4Area);
         if (triangleAreaSum % (Math.pow(10, 14)) >= 0.999999999999999) triangleAreaSum = Math.ceil(triangleAreaSum);
-        if (triangleAreaSum == rectArea) return true;
-        else return false;
+        return Double.compare(triangleAreaSum, rectArea) == 0;
     }
 
     public static List<Unit> getUnitsInRectangle(Position topLeft, Position bottomRight) { //TODO test
@@ -453,7 +452,7 @@ public class Util {
         return new Position(cropped.first, cropped.second);
     }
 
-    public static Position ChoosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
+    public static Position choosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
         try {
             Position myUnitPos = myUnit.getPosition();
             Position attackUnitPos = attackUnit.getPosition();
@@ -467,7 +466,7 @@ public class Util {
             Position prePatrol = new Position(patrolDir.first.intValue(), patrolDir.second.intValue()).multiply(new Position(myUnit.getGroundWeaponMaxRange() - 5, myUnit.getGroundWeaponMaxRange() - 5));
             return cropPosition(myUnitPos.add(prePatrol));
         } catch (Exception e) {
-            System.err.println("ChoosePatrolPositionVulture Exception");
+            System.err.println("choosePatrolPositionVulture Exception");
             e.printStackTrace();
             return null;
         }
@@ -490,7 +489,7 @@ public class Util {
     }
 
     public static Position improveMapEdgePosition(Position unitPos, Position pos) {
-        double angle = Math.atan2(unitPos.getY(), unitPos.getX()) - Math.atan2(pos.getY(), pos.getX());
+        //double angle = Math.atan2(unitPos.getY(), unitPos.getX()) - Math.atan2(pos.getY(), pos.getX());
         MutablePair<Integer, Integer> improved = new MutablePair<>(pos.getX(), pos.getY());
         int mapHeight = getGs().getGame().getBWMap().mapHeight() * 32;
         int mapWidth = getGs().getGame().getBWMap().mapWidth() * 32;

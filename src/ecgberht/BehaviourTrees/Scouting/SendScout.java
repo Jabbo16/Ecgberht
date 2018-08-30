@@ -23,9 +23,9 @@ public class SendScout extends Action {
     public State execute() {
         try {
             if (((GameState) this.handler).enemyMainBase == null) {
-                if (!((GameState) this.handler).ScoutSLs.isEmpty()) {
+                if (!((GameState) this.handler).scoutSLs.isEmpty()) {
                     List<Base> aux = new ArrayList<>();
-                    for (Base b : ((GameState) this.handler).ScoutSLs) {
+                    for (Base b : ((GameState) this.handler).scoutSLs) {
                         if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
                             if (((MobileUnit) ((GameState) this.handler).chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
@@ -36,7 +36,7 @@ public class SendScout extends Action {
                             }
                         } else aux.add(b);
                     }
-                    ((GameState) this.handler).ScoutSLs.removeAll(aux);
+                    ((GameState) this.handler).scoutSLs.removeAll(aux);
                 }
             }
             if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {

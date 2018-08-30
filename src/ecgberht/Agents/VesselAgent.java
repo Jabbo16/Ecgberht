@@ -63,6 +63,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             switch (status) {
                 case IRRADIATE:
                     irradiate();
+                    break;
                 case DMATRIX:
                     dMatrix();
                     break;

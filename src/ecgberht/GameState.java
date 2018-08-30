@@ -47,8 +47,6 @@ public class GameState extends GameHandler {
     public boolean firstScout = true;
     public boolean iReallyWantToExpand = false;
     public boolean islandExpand;
-    public boolean movingToExpand = false;
-    public boolean siegeResearched = false;
     public Building chosenBuildingLot = null;
     public Mechanical chosenUnitRepair = null;
     public BuildingMap map;
@@ -72,10 +70,9 @@ public class GameState extends GameHandler {
     public int startCount;
     public int vulturesTrained = 0;
     public int workerCountToSustain = 0;
-    public JFAP simulator;
     public List<Base> blockedBLs = new ArrayList<>();
     public List<Base> BLs = new ArrayList<>();
-    public List<Base> EnemyBLs = new ArrayList<>();
+    public List<Base> enemyBLs = new ArrayList<>();
     public List<Base> specialBLs = new ArrayList<>();
     public Map<Base, CommandCenter> CCs = new LinkedHashMap<>();
     public Map<Base, CommandCenter> islandCCs = new HashMap<>();
@@ -94,7 +91,7 @@ public class GameState extends GameHandler {
     public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
     public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
     public Map<Worker, Position> workerDefenders = new TreeMap<>();
-    public MutablePair<Base, Unit> MainCC = null;
+    public MutablePair<Base, Unit> mainCC = null;
     public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
     public MutablePair<Integer, Unit> chosenMarine = null;
     public Player neutral = null;
@@ -105,7 +102,7 @@ public class GameState extends GameHandler {
     public SCV chosenRepairer = null;
     public Set<Barracks> MBs = new TreeSet<>();
     public Set<Base> islandBases = new HashSet<>();
-    public Set<Base> ScoutSLs = new HashSet<>();
+    public Set<Base> scoutSLs = new HashSet<>();
     public Set<Base> SLs = new HashSet<>();
     public Set<Building> buildingLot = new TreeSet<>();
     public Set<ComsatStation> CSs = new TreeSet<>();
@@ -125,9 +122,7 @@ public class GameState extends GameHandler {
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
-    public TilePosition chosenBaseLocation = null;
     public TilePosition chosenPosition = null;
-    public TilePosition initAttackPosition = null;
     public TilePosition initDefensePosition = null;
     public TrainingFacility chosenBuilding = null;
     public Unit chosenBunker = null;
@@ -137,7 +132,6 @@ public class GameState extends GameHandler {
     public UnitType chosenToBuild = UnitType.None;
     public UnitType chosenUnit = UnitType.None;
     public UpgradeType chosenUpgrade = null;
-    public Worker chosenBuilderBL = null;
     public Worker chosenHarasser = null;
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
@@ -157,7 +151,6 @@ public class GameState extends GameHandler {
         map.initMap();
         testMap = map.clone();
         mapSize = bw.getBWMap().getStartPositions().size();
-        simulator = new JFAP(bw);
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimManager(bw);
     }
@@ -352,13 +345,13 @@ public class GameState extends GameHandler {
             double C = 0.5;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
-            for (String strat : strategies.keySet()) {
-                int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
-                double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.5 : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
+            for (Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
+                int sGamesPlayed = strat.getValue().first + strat.getValue().second;
+                double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
+                double ucbVal = sGamesPlayed == 0 ? 0.5 : C * Math.sqrt(Math.log( ((double)totalGamesPlayed / (double)sGamesPlayed)));
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
-                    bestUCBStrategy = strat;
+                    bestUCBStrategy = strat.getKey();
                     bestUCBStrategyVal = val;
                 }
             }
@@ -627,17 +620,12 @@ public class GameState extends GameHandler {
 
         if (naturalChoke != null)
             bw.getMapDrawer().drawTextMap(naturalChoke.getCenter().toPosition(), ColorUtil.formatText("NatChoke", ColorUtil.White));
-        if (chosenBuilderBL != null) {
-            bw.getMapDrawer().drawTextMap(chosenBuilderBL.getPosition(), ColorUtil.formatText("BuilderBL", ColorUtil.White));
-            print(chosenBuilderBL, Color.BLUE);
-        }
+
         if (chosenHarasser != null) {
             bw.getMapDrawer().drawTextMap(chosenHarasser.getPosition(), ColorUtil.formatText("Harasser", ColorUtil.White));
             print(chosenHarasser, Color.BLUE);
         }
-        if (chosenBaseLocation != null) {
-            print(chosenBaseLocation, UnitType.Terran_Command_Center, Color.CYAN);
-        }
+
         for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             print(u.getKey(), Color.TEAL);
             bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Building " + u.getValue().first.toString(), ColorUtil.White));
@@ -738,7 +726,7 @@ public class GameState extends GameHandler {
         for (bwem.Base b : bwem.getMap().getBases()) {
             if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) {
                 SLs.add(b);
-                ScoutSLs.add(b);
+                scoutSLs.add(b);
             }
         }
     }
@@ -829,14 +817,6 @@ public class GameState extends GameHandler {
                 chosenScout = null;
             }
         }
-        if (chosenBuilderBL != null && (chosenBuilderBL.isIdle() || chosenBuilderBL.isGatheringGas() || chosenBuilderBL.isGatheringMinerals())) {
-            workerIdle.add(chosenBuilderBL);
-            chosenBuilderBL = null;
-            movingToExpand = false;
-            expanding = false;
-            chosenBaseLocation = null;
-        }
-        if (chosenBuilderBL != null && workerIdle.contains(chosenBuilderBL)) workerIdle.remove(chosenBuilderBL);
 
         List<Unit> aux3 = new ArrayList<>();
         for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
@@ -862,7 +842,7 @@ public class GameState extends GameHandler {
     }
 
     void checkMainEnemyBase() {
-        if (enemyBuildingMemory.isEmpty() && ScoutSLs.isEmpty()) {
+        if (enemyBuildingMemory.isEmpty() && scoutSLs.isEmpty()) {
             enemyMainBase = null;
             chosenScout = null;
             for (Base b : BLs) {
@@ -870,7 +850,7 @@ public class GameState extends GameHandler {
                 if (!strat.name.equals("PlasmaWraithHell") && b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
-                ScoutSLs.add(b);
+                scoutSLs.add(b);
             }
         }
     }
@@ -889,13 +869,8 @@ public class GameState extends GameHandler {
                     distBest = dist;
                 }
             }
-            if (mainChoke != null) {
-                initAttackPosition = mainChoke.getCenter().toTilePosition();
-                initDefensePosition = mainChoke.getCenter().toTilePosition();
-            } else {
-                initAttackPosition = self.getStartLocation();
-                initDefensePosition = self.getStartLocation();
-            }
+            if (mainChoke != null) initDefensePosition = mainChoke.getCenter().toTilePosition();
+            else initDefensePosition = self.getStartLocation();
             // Natural choke
             // Exception for maps with a natural behind the main such as Crossing Fields
             if (Util.getGroundDistance(self.getStartLocation().toPosition(), bwem.getMap().getData().getMapData().getCenter()) < Util.getGroundDistance(BLs.get(1).getLocation().toPosition(), bwem.getMap().getData().getMapData().getCenter())) {

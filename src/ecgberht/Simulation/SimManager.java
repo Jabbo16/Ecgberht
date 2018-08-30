@@ -44,10 +44,13 @@ public class SimManager {
         switch (bw.getInteractionHandler().enemy().getRace()) {
             case Zerg:
                 radius = UnitType.Zerg_Sunken_Colony.groundWeapon().maxRange();
+                break;
             case Terran:
                 radius = UnitType.Terran_Missile_Turret.airWeapon().maxRange();
+                break;
             case Protoss:
                 radius = UnitType.Protoss_Photon_Cannon.groundWeapon().maxRange();
+                break;
             case Unknown:
                 radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
                 break;

@@ -37,9 +37,6 @@ public class ResearchUpgrade extends Action {
                 }
             } else if (((GameState) this.handler).chosenResearch != null) {
                 if (((GameState) this.handler).chosenUnitUpgrader.research(((GameState) this.handler).chosenResearch)) {
-                    if (((GameState) this.handler).chosenResearch == TechType.Tank_Siege_Mode) {
-                        ((GameState) this.handler).siegeResearched = true;
-                    }
                     ((GameState) this.handler).chosenResearch = null;
                     return State.SUCCESS;
                 }

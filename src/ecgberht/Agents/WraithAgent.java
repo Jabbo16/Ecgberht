@@ -32,7 +32,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         try {
             if (!unit.exists()) return true;
             if (unit.getHitPoints() <= 15) {
-                Position cc = getGs().MainCC.second.getPosition();
+                Position cc = getGs().mainCC.second.getPosition();
                 if (cc != null) unit.move(cc);
                 else unit.move(getGs().getPlayer().getStartLocation().toPosition());
                 getGs().myArmy.add(unit);

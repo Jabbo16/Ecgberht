@@ -602,7 +602,7 @@ public class Ecgberht implements BWEventListener {
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
-                            if (gs.frameCount == 0) gs.MainCC = new MutablePair<>(ccBase, arg0);
+                            if (gs.frameCount == 0) gs.mainCC = new MutablePair<>(ccBase, arg0);
                         }
                         if (type == UnitType.Terran_Comsat_Station) gs.CSs.add((ComsatStation) arg0);
                         if (type == UnitType.Terran_Bunker) gs.DBs.put((Bunker) arg0, new TreeSet<>());
@@ -695,13 +695,12 @@ public class Ecgberht implements BWEventListener {
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
                     if (type.isBuilding()) {
                         gs.enemyBuildingMemory.remove(arg0);
-                        gs.initAttackPosition = arg0.getTilePosition();
                         if (!type.isResourceDepot()) gs.map.updateMap(arg0.getTilePosition(), type, true);
                     } else gs.initDefensePosition = arg0.getTilePosition();
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if (gs.strat.name.equals("ProxyBBS") && gs.myArmy.contains(arg0)) gs.myArmy.remove(arg0);
+                        if (gs.strat.name.equals("ProxyBBS")) gs.myArmy.remove(arg0);
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
                                 gs.workerIdle.add((Worker) arg0);
@@ -709,7 +708,7 @@ public class Ecgberht implements BWEventListener {
                                 break;
                             }
                         }
-                        if (gs.workerIdle.contains(arg0)) gs.workerIdle.remove(arg0);
+                        gs.workerIdle.remove(arg0);
                         if (arg0.equals(gs.chosenScout)) gs.chosenScout = null;
                         if (arg0.equals(gs.chosenHarasser)) {
                             gs.chosenHarasser = null;
@@ -717,14 +716,6 @@ public class Ecgberht implements BWEventListener {
                         }
                         if (arg0.equals(gs.chosenWorker)) gs.chosenWorker = null;
                         if (arg0.equals(gs.chosenRepairer)) gs.chosenRepairer = null;
-                        if (arg0.equals(gs.chosenBuilderBL)) {
-                            gs.chosenBuilderBL = null;
-                            gs.expanding = false;
-                            gs.chosenBaseLocation = null;
-                            gs.movingToExpand = false;
-                            gs.deltaCash.first -= UnitType.Terran_Command_Center.mineralPrice();
-                            gs.deltaCash.second -= UnitType.Terran_Command_Center.gasPrice();
-                        }
                         for (Worker u : gs.workerDefenders.keySet()) {
                             if (arg0.equals(u)) {
                                 gs.workerDefenders.remove(u);
@@ -750,9 +741,13 @@ public class Ecgberht implements BWEventListener {
                             gs.workerTask.remove(arg0);
                         }
                         if (gs.workerBuild.containsKey(arg0)) {
-                            if (DataTraining.travelData.containsKey(arg0)) {
-                                DataTraining.travelData.remove(arg0);
+                            if (gs.workerBuild.get(arg0).first == UnitType.Terran_Command_Center
+                                    && bwem.getMap().getArea(gs.workerBuild.get(arg0).second).equals(gs.naturalArea)) {
+                                Bunker b = gs.DBs.keySet().iterator().next();
+                                if (b != null) gs.defendPosition = b.getPosition();
+                                else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                             }
+                            DataTraining.travelData.remove(arg0);
                             gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
                             gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
                             gs.workerBuild.remove(arg0);
@@ -770,6 +765,12 @@ public class Ecgberht implements BWEventListener {
                         }
                         for (Entry<SCV, Building> w : gs.workerTask.entrySet()) {
                             if (w.getValue().equals(arg0)) {
+                                if (w.getValue() instanceof CommandCenter
+                                        && bwem.getMap().getArea(w.getValue().getTilePosition()).equals(gs.naturalArea)) {
+                                    Bunker b = gs.DBs.keySet().iterator().next();
+                                    if (b != null) gs.defendPosition = b.getPosition();
+                                    else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                }
                                 gs.workerTask.remove(w.getKey());
                                 gs.workerIdle.add(w.getKey());
                                 break;
@@ -777,6 +778,12 @@ public class Ecgberht implements BWEventListener {
                         }
                         for (Unit w : gs.buildingLot) {
                             if (w.equals(arg0)) {
+                                if (w instanceof CommandCenter
+                                        && bwem.getMap().getArea(w.getTilePosition()).equals(gs.naturalArea)) {
+                                    Bunker b = gs.DBs.keySet().iterator().next();
+                                    if (b != null) gs.defendPosition = b.getPosition();
+                                    else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                }
                                 gs.buildingLot.remove(w);
                                 break;
                             }
@@ -784,36 +791,36 @@ public class Ecgberht implements BWEventListener {
                         for (CommandCenter u : gs.CCs.values()) {
                             if (u.equals(arg0)) {
                                 gs.removeResources(arg0);
-                                if (u.getAddon() != null && gs.CSs.contains(u.getAddon())) {
+                                if (u.getAddon() != null) {
                                     gs.CSs.remove(u.getAddon());
                                 }
                                 if (bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
                                     gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                                 }
                                 gs.CCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
-                                if (arg0.equals(gs.MainCC.second)) {
+                                if (arg0.equals(gs.mainCC.second)) {
                                     if (gs.CCs.size() > 0) {
                                         for (Unit c : gs.CCs.values()) {
                                             if (!c.equals(arg0)) {
-                                                gs.MainCC = new MutablePair<>(Util.getClosestBaseLocation(u.getPosition()), u);
+                                                gs.mainCC = new MutablePair<>(Util.getClosestBaseLocation(u.getPosition()), u);
                                                 break;
                                             }
                                         }
                                     } else {
-                                        gs.MainCC = null;
+                                        gs.mainCC = null;
                                         break;
                                     }
                                 }
                                 break;
                             }
                         }
-                        if (gs.CSs.contains(arg0)) gs.CSs.remove(arg0);
-                        if (gs.Fs.contains(arg0)) gs.Fs.remove(arg0);
-                        if (gs.MBs.contains(arg0)) gs.MBs.remove(arg0);
-                        if (arg0 instanceof ResearchingFacility && gs.UBs.contains(arg0)) gs.UBs.remove(arg0);
-                        if (gs.SBs.contains(arg0)) gs.SBs.remove(arg0);
-                        if (gs.Ts.contains(arg0)) gs.Ts.remove(arg0);
-                        if (gs.Ps.contains(arg0)) gs.Ps.remove(arg0);
+                        gs.CSs.remove(arg0);
+                        gs.Fs.remove(arg0);
+                        gs.MBs.remove(arg0);
+                        if (arg0 instanceof ResearchingFacility) gs.UBs.remove(arg0);
+                        gs.SBs.remove(arg0);
+                        gs.Ts.remove(arg0);
+                        gs.Ps.remove(arg0);
                         if (type == UnitType.Terran_Bunker && gs.DBs.containsKey(arg0)) {
                             gs.myArmy.addAll(gs.DBs.get(arg0));
                             gs.DBs.remove(arg0);
@@ -835,17 +842,17 @@ public class Ecgberht implements BWEventListener {
                         }
                         gs.testMap = gs.map.clone();
                     } else if (type == UnitType.Terran_Vulture) {
-                        if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
+                        gs.agents.remove(arg0);
                     } else if (type == UnitType.Terran_Dropship) {
-                        if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
+                        gs.agents.remove(arg0);
                     } else if (type == UnitType.Terran_Science_Vessel) {
-                        if (gs.agents.containsKey(arg0)) gs.agents.remove(arg0);
+                        gs.agents.remove(arg0);
                     } else if (type == UnitType.Terran_Wraith && !gs.strat.name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
                         String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
                         gs.shipNames.add(wraith);
                         gs.agents.remove(arg0);
                     }
-                    if (gs.myArmy.contains(arg0)) gs.myArmy.remove(arg0);
+                    gs.myArmy.remove(arg0);
                 }
             }
         } catch (Exception e) {
@@ -900,7 +907,7 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onUnitHide(Unit arg0) {
-        if (gs.enemyCombatUnitMemory.contains(arg0)) gs.enemyCombatUnitMemory.remove(arg0);
+        gs.enemyCombatUnitMemory.remove(arg0);
     }
 
     @Override

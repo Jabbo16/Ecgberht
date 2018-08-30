@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
@@ -21,10 +22,10 @@ public class ChooseTurret extends Action {
     @Override
     public State execute() {
         try {
-            /*if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForTurret &&
+            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForTurret &&
                     !IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar)) {
                 return State.FAILURE;
-            }*/
+            }
             boolean tech = false;
             for (ResearchingFacility ub : ((GameState) this.handler).UBs) {
                 if (ub instanceof EngineeringBay) {

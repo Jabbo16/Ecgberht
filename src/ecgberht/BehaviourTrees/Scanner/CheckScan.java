@@ -34,7 +34,7 @@ public class CheckScan extends Conditional {
                 }
             }
             List<Base> valid = new ArrayList<>();
-            for (Base b : ((GameState) this.handler).EnemyBLs) {
+            for (Base b : ((GameState) this.handler).enemyBLs) {
                 if (((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }

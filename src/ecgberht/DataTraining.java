@@ -31,7 +31,7 @@ public class DataTraining {
 
     }
 
-    public static void writeTravelData() {
+    static void writeTravelData() {
         try {
             for (TravelData t : travelData.values()) {
                 Files.write(Paths.get("bwapi-data/write/travelData.txt"), t.toString().getBytes(), StandardOpenOption.APPEND);

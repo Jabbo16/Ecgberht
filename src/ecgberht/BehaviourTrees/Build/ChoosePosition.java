@@ -52,8 +52,8 @@ public class ChoosePosition extends Action {
                     }
                 }*/
                 TilePosition main;
-                if (((GameState) this.handler).MainCC != null)
-                    main = ((GameState) this.handler).MainCC.second.getTilePosition();
+                if (((GameState) this.handler).mainCC != null)
+                    main = ((GameState) this.handler).mainCC.second.getTilePosition();
                 else main = ((GameState) this.handler).getPlayer().getStartLocation();
                 List<Base> valid = new ArrayList<>();
                 if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
@@ -132,8 +132,8 @@ public class ChoosePosition extends Action {
                             ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
                             ((GameState) this.handler).chosenPosition = origin;
                             return State.SUCCESS;
-                        } else if (((GameState) this.handler).MainCC != null) {
-                            origin = ((GameState) this.handler).MainCC.second.getTilePosition();
+                        } else if (((GameState) this.handler).mainCC != null) {
+                            origin = ((GameState) this.handler).mainCC.second.getTilePosition();
                         } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
                     }
                 } else if (((GameState) this.handler).Ts.isEmpty()) {

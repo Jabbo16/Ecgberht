@@ -10,7 +10,11 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
@@ -146,7 +150,7 @@ public class Squad implements Comparable<Squad> {
                                 } else ((MobileUnit) u).stop(false);
                                 continue;
                             }
-                        } else if (u.getDistance(move) > range && (lastTarget == null || (lastTarget != null && !lastTarget.equals(move)))) {
+                        } else if (u.getDistance(move) > range && (lastTarget == null || !lastTarget.equals(move))) {
                             if (u instanceof SiegeTank && ((SiegeTank) u).isSieged() && !getGs().defense) {
                                 ((SiegeTank) u).unsiege();
                             } else ((MobileUnit) u).attack(move);
@@ -156,8 +160,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (retreat) {
                     Position pos = getGs().getNearestCC(u.getPosition());
-                    if (Util.broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null ||
-                            (lastTarget != null && !lastTarget.equals(pos)))) {
+                    if (Util.broodWarDistance(pos, u.getPosition()) >= 400 && (lastTarget == null || !lastTarget.equals(pos))) {
                         ((MobileUnit) u).move(pos);
                         continue;
                     }
