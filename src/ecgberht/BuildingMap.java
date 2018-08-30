@@ -50,11 +50,15 @@ public class BuildingMap implements Cloneable {
 
     private void initTilesArea() {
         boolean startOrdered = false;
+        boolean naturalOrdered = false;
         TilePosition startTile = self.getStartLocation();
         for (Area a : bwem.getMap().getAreas()) {
             if (!startOrdered && bwem.getMap().getArea(startTile).equals(a)) {
                 tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(startTile)));
                 startOrdered = true;
+            /*} else if (!startOrdered && bwem.getMap().getArea(startTile).equals(a)) { // TODO move BuildingMap to order mainArea and naturalArea bases
+                tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(startTile)));
+                startOrdered = true;*/
             } else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
         }
         for (int jj = 0; jj < height; jj++) {
@@ -369,6 +373,7 @@ public class BuildingMap implements Cloneable {
     public TilePosition findBunkerPosition(ChokePoint choke) {
         TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
+        double chokeWidth = Util.getChokeWidth(choke);
         Position starting = choke.getCenter().toPosition();
         int x = starting.toTilePosition().getY();
         int y = starting.toTilePosition().getX();
@@ -388,7 +393,9 @@ public class BuildingMap implements Cloneable {
                         if (area != null && !area.equals(getGs().naturalArea) && expandBunker) continue;
                         if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
-                            double newDist = Util.broodWarDistance(Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
+                            Position centerBunker = Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker);
+                            if(chokeWidth <= 64.0 && Util.broodWarDistance(choke.getCenter().toPosition(), centerBunker) <= 64) continue;
+                            double newDist = Util.broodWarDistance(centerBunker, starting);
                             if (position == null || newDist < dist) {
                                 position = newPosition;
                                 dist = newDist;

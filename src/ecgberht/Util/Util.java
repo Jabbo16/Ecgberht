@@ -6,6 +6,7 @@ import ecgberht.EnemyBuilding;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.WalkPosition;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
@@ -543,6 +544,10 @@ public class Util {
     public static Position getUnitCenterPosition(Position leftTop, UnitType type) {
         Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
         return new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
+    }
 
+    public static double getChokeWidth(ChokePoint choke){
+        List<WalkPosition> walks = choke.getGeometry();
+        return walks.get(0).toPosition().getDistance(walks.get(walks.size() - 1).toPosition());
     }
 }

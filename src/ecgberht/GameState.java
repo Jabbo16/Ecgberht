@@ -189,7 +189,6 @@ public class GameState extends GameHandler {
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             TwoPortWraith tPW = new TwoPortWraith();
-            String map = bw.getBWMap().mapFileName();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (enemyRace == Race.Zerg && EI.naughty) return b;
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
@@ -197,8 +196,8 @@ public class GameState extends GameHandler {
                 return new PlasmaWraithHell();
             }
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
-            if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus")) {
-                return tPW; // TODO properly ponderate strats vs race/opponent
+            if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
+                return tPW;
             }
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
@@ -246,14 +245,14 @@ public class GameState extends GameHandler {
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
 
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
+
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMGFE.name, bGFE);
 
                     strategies.put(bGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bGFE.name, bGFE);
-
-                    strategies.put(bbs.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bbs.name, bbs);
 
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);
@@ -354,10 +353,6 @@ public class GameState extends GameHandler {
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (String strat : strategies.keySet()) {
-                if (map.contains("HeartbreakRidge") &&
-                        nameStrat.get(strat).trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
-                    continue;
-                }
                 int sGamesPlayed = strategies.get(strat).first + strategies.get(strat).second;
                 double sWinRate = sGamesPlayed > 0 ? (strategies.get(strat).first / (double) (sGamesPlayed)) : 0;
                 double ucbVal = sGamesPlayed == 0 ? 0.5 : C * Math.sqrt(Math.log((double) (totalGamesPlayed / sGamesPlayed)));
@@ -508,11 +503,11 @@ public class GameState extends GameHandler {
 
         }
         for (Geyser g : gas) {
-            VespeneGeyser geyser = (VespeneGeyser) g.getUnit(); // TODO improve
+            VespeneGeyser geyser = (VespeneGeyser) g.getUnit();
             if (vespeneGeysers.containsKey(geyser)) vespeneGeysers.remove(geyser);
         }
         List<Unit> auxGas = new ArrayList<>();
-        for (Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) { // TODO test
+        for (Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) {
             for (Geyser g : gas) {
                 if (pm.getKey().equals(g.getUnit())) {
                     List<Worker> aux = new ArrayList<>();
@@ -625,8 +620,11 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextMap(enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));
         if (enemyNaturalBase != null)
             bw.getMapDrawer().drawTextMap(enemyNaturalBase.getLocation().toPosition(), ColorUtil.formatText("EnemyNaturalBase", ColorUtil.White));
-        if (mainChoke != null)
+        if (mainChoke != null){
             bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), ColorUtil.formatText("MainChoke", ColorUtil.White));
+            //bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), ColorUtil.formatText(Double.toString(Util.getChokeWidth(mainChoke)), ColorUtil.White));
+        }
+
         if (naturalChoke != null)
             bw.getMapDrawer().drawTextMap(naturalChoke.getCenter().toPosition(), ColorUtil.formatText("NatChoke", ColorUtil.White));
         if (chosenBuilderBL != null) {

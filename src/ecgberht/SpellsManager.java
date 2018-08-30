@@ -25,28 +25,28 @@ public class SpellsManager {
         }
     }
 
-    private void updateEMPed() {
-        EMPedUnits.entrySet().removeIf(u -> u.getValue().getShields() <= 1 || !u.getValue().exists() || !u.getKey().exists());
+    private void updateIrradiated() {
+        irradiatedUnits.entrySet().removeIf(u -> u.getValue().isIrradiated() || !u.getValue().exists() || !u.getKey().exists());
     }
 
     private void updateDefenseMatrixed() {
         defenseMatrixedUnits.entrySet().removeIf(u -> u.getValue().isDefenseMatrixed() || !u.getValue().exists() || !u.getKey().exists());
     }
 
-    public boolean isUnitIrradiated(Unit u) {
-        return irradiatedUnits.values().contains(u);
+    private void updateEMPed() {
+        EMPedUnits.entrySet().removeIf(u -> u.getValue().getShields() <= 1 || !u.getValue().exists() || !u.getKey().exists());
     }
 
-    public boolean isUnitEMPed(Unit u) {
-        return EMPedUnits.values().contains(u);
+    public boolean isUnitIrradiated(Unit u) {
+        return irradiatedUnits.values().contains(u);
     }
 
     public boolean isDefenseMatrixed(Unit u) {
         return defenseMatrixedUnits.values().contains(u);
     }
 
-    private void updateIrradiated() {
-        irradiatedUnits.entrySet().removeIf(u -> u.getValue().isIrradiated() || !u.getValue().exists() || !u.getKey().exists());
+    public boolean isUnitEMPed(Unit u) {
+        return EMPedUnits.values().contains(u);
     }
 
     public void addIrradiated(ScienceVessel vessel, PlayerUnit unit) {

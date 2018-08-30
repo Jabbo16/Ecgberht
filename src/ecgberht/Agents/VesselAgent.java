@@ -24,6 +24,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     private Set<Unit> airAttackers = new TreeSet<>();
     private Position center;
     private Unit target;
+    private Unit oldTarget;
 
     public VesselAgent(Unit unit) {
         super();
@@ -113,24 +114,36 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void emp() {
+        if(oldTarget != null && !oldTarget.exists()) oldTarget = null;
+        if(target != null && !target.exists()) target = null;
+        if(oldTarget != null && oldTarget.equals(target)) return;
         if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave) {
             unit.empShockWave(target.getPosition());
             getGs().wizard.addEMPed(unit, (PlayerUnit) target);
-        } else target = null;
+            oldTarget = target;
+        } else target = oldTarget = null;
     }
 
     private void irradiate() {
+        if(oldTarget != null && !oldTarget.exists()) oldTarget = null;
+        if(target != null && !target.exists()) target = null;
+        if(oldTarget != null && oldTarget.equals(target)) return;
         if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate) {
             unit.irradiate((PlayerUnit) target);
             getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
-        } else target = null;
+            oldTarget = target;
+        } else target = oldTarget = null;
     }
 
     private void dMatrix() {
+        if(oldTarget != null && !oldTarget.exists()) oldTarget = null;
+        if(target != null && !target.exists()) target = null;
+        if(oldTarget != null && oldTarget.equals(target)) return;
         if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix) {
-            unit.defensiveMatrix((PlayerUnit) target);
+            unit.empShockWave(target.getPosition());
             getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
-        } else target = null;
+            oldTarget = target;
+        } else target = oldTarget = null;
     }
 
     private void kite() {
@@ -159,7 +172,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             for (Unit u : mySimAir.enemies) {
                 if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) {
                     chasenByScourge = true;
-                } else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.1) {
+                } else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.2) {
                     sporeColony = true;
                 }
                 if (chasenByScourge && sporeColony) break;
