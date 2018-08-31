@@ -1,5 +1,6 @@
 package ecgberht.Agents;
 
+import ecgberht.Squad;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
@@ -8,26 +9,49 @@ import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static ecgberht.Ecgberht.getGs;
 
 public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     public Dropship unit;
-    Status status = Status.IDLE;
+    private Status status = Status.IDLE;
     private Set<Unit> airAttackers = new TreeSet<>();
     private Set<Unit> cargoLoaded = new TreeSet<>();
     private Set<Unit> cargoWanted = new TreeSet<>();
     private Position target;
     private Unit pickingUp;
+    private boolean islandExpanding = false;
+    private static List<Position> waypoints = new ArrayList<>();
+    private Position currentWaypoint;
+    private Position lastWaypoint;
+    private Position finalWaypoint;
 
     public DropShipAgent(Unit unit) {
         super();
         this.unit = (Dropship) unit;
         this.myUnit = unit;
+        if(waypoints.isEmpty()) initWaypoints();
+    }
+
+    private void initWaypoints() {
+        // Tile coordinates.
+        int minX = 32;
+        int minY = 32;
+        int maxX = (getGs().getGame().getBWMap().mapWidth() - 1)*32;
+        int maxY = (getGs().getGame().getBWMap().mapHeight() - 1)*32;
+
+        waypoints.add(new Position(minX, minY));
+        waypoints.add(new Position(maxX, maxY));
+        waypoints.add(new Position(minX, 32));
+        waypoints.add(new Position(maxX, 32));
+
+        waypoints.add(new Position(32, maxY/2));
+        waypoints.add(new Position(maxX/2, 32));
+        waypoints.add(new Position(maxX, maxY/2));
+        waypoints.add(new Position(maxX/2, maxY));
+
     }
 
     public String statusToString() {
@@ -56,8 +80,9 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         }
     }
 
-    public void setTarget(Position target) {
+    public void setTarget(Position target, boolean islandExpanding) {
         this.target = target;
+        this.islandExpanding = islandExpanding;
     }
 
     private void checkLoaded() {
@@ -126,7 +151,22 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     private void moving() {
         if (target == null) return;
         if (unit.getTargetPosition() != null && unit.getTargetPosition().equals(target)) return;
-        unit.move(target);
+        if(islandExpanding) unit.move(target);
+        else{
+           if(lastWaypoint == null && currentWaypoint == null && finalWaypoint == null){
+               double distMax = Double.MAX_VALUE;
+               Position chosen = null;
+               for(Position w : waypoints){
+                   double dist = w.getDistance(target);
+                   if(finalWaypoint == null || dist < distMax){
+                       distMax = dist;
+                       chosen = w;
+                   }
+               }
+               finalWaypoint = chosen;
+                // TODO complete
+           }
+        }
     }
 
     private void picking() {
@@ -150,6 +190,11 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     }
 
     private void idle() {
+        Optional<Map.Entry<Integer, Squad>> closest = getGs().sqManager.squads.entrySet().stream().min(Comparator.comparing(u -> u.getValue().getSquadCenter().getDistance(unit.getPosition())));
+        if(closest.isPresent()){
+            setCargo(closest.get().getValue().members);
+            getGs().sqManager.squads.remove(closest.get().getKey());
+        }
     }
 
     @Override

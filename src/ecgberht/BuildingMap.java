@@ -316,7 +316,7 @@ public class BuildingMap implements Cloneable {
     }
 
     // Finds a valid position in the map for a specific building type starting with a given tileposition, searches owned areas
-    public TilePosition findPositionNew(UnitType buildingType, TilePosition starting) { // TODO test
+    public TilePosition findPositionNew(UnitType buildingType, TilePosition starting) {
         if (buildingType == UnitType.Terran_Bunker || buildingType == UnitType.Terran_Missile_Turret)
             return findPosition(buildingType, starting);
         Area find = bwem.getMap().getArea(starting);

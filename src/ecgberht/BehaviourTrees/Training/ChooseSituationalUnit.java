@@ -18,7 +18,7 @@ public class ChooseSituationalUnit extends Action {
     @Override
     public State execute() {
         try {
-            // Testing dropships
+            // Testing dropships islands
             /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
 
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
@@ -35,9 +35,27 @@ public class ChooseSituationalUnit extends Action {
                     return State.SUCCESS;
                 }
             }*/
+            boolean tower = false;
+            // Testing dropships offensive drops
+            if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
+
+            for (ResearchingFacility u : ((GameState) this.handler).UBs) {
+                if (u instanceof ControlTower) {
+                    tower = true;
+                    break;
+                }
+            }
+            if (!tower) return State.FAILURE;
+            for (Starport s : ((GameState) this.handler).Ps) {
+                if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
+                    ((GameState) this.handler).chosenUnit = UnitType.Terran_Dropship;
+                    ((GameState) this.handler).chosenBuilding = s;
+                    return State.SUCCESS;
+                }
+            }
 
             // Testing vessels
-            boolean tower;
+
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2) return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !((GameState) this.handler).needToAttack())
                 return State.FAILURE;

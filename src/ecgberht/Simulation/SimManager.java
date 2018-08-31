@@ -159,7 +159,7 @@ public class SimManager {
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
+            if (u.unit instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
         }
         return true;
     }

@@ -51,11 +51,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.TreeSet;
 
 public class Ecgberht implements BWEventListener {
 
@@ -631,6 +628,12 @@ public class Ecgberht implements BWEventListener {
                     else if (type == UnitType.Terran_Vulture) gs.agents.put(arg0, new VultureAgent(arg0));
                     else if (type == UnitType.Terran_Dropship) {
                         DropShipAgent d = new DropShipAgent(arg0);
+                        d.setTarget(gs.enemyMainBase.getLocation().toPosition(), false);
+                        Optional<Entry<Integer, Squad>> closest = gs.sqManager.squads.entrySet().stream().min(Comparator.comparing(u -> u.getValue().getSquadCenter().getDistance(d.unit.getPosition())));
+                        if(closest.isPresent()){
+                            d.setCargo(closest.get().getValue().members);
+                            gs.sqManager.squads.remove(closest.get().getKey());
+                        }
                         gs.agents.put(arg0, d);
                     } else if (type == UnitType.Terran_Science_Vessel) {
                         VesselAgent v = new VesselAgent(arg0);
