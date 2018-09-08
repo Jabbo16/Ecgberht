@@ -34,7 +34,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
-            if (unit.getHitPoints() <= 15) {
+            if (unit.getHitPoints() <= 20) {
                 MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
                     Position ccPos = cc.second.getPosition();

@@ -15,7 +15,7 @@ public class FullMech extends Strategy {
     @Override
     public void initStrategy() {
         name = "FullMech";
-        armyForBay = 20;
+        armyForBay = 15;
         armyForTurret = 10;
         numBays = 1;
         raxPerCC = 1;
@@ -45,6 +45,7 @@ public class FullMech extends Strategy {
         trainUnits.add(UnitType.Terran_Vulture); // TODO fix vultures
         trainUnits.add(UnitType.Terran_Siege_Tank_Tank_Mode);
         trainUnits.add(UnitType.Terran_Wraith);
+        trainUnits.add(UnitType.Terran_Goliath);
     }
 
     @Override

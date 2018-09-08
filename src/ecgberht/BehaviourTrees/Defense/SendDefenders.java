@@ -79,11 +79,11 @@ public class SendDefenders extends Action {
                     }
                     if (closestWorker != null) {
                         if (((GameState) this.handler).workerMining.containsKey(closestWorker)) {
-                            Unit mineral = ((GameState) this.handler).workerMining.get(closestWorker);
+                            MineralPatch mineral = ((GameState) this.handler).workerMining.get(closestWorker);
                             ((GameState) this.handler).workerDefenders.put(closestWorker, null);
                             if (((GameState) this.handler).mineralsAssigned.containsKey(mineral)) {
                                 ((GameState) this.handler).mining--;
-                                ((GameState) this.handler).mineralsAssigned.put((MineralPatch) mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
+                                ((GameState) this.handler).mineralsAssigned.put(mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
                             }
                             ((GameState) this.handler).workerMining.remove(closestWorker);
                         }

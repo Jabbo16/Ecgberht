@@ -3,16 +3,11 @@ package ecgberht;
 import bwem.BWEM;
 import bwem.Base;
 import cameraModule.CameraModule;
-import ecgberht.Agents.DropShipAgent;
-import ecgberht.Agents.VesselAgent;
-import ecgberht.Agents.VultureAgent;
+import ecgberht.Agents.*;
 import ecgberht.Agents.WraithAgent;
 import ecgberht.BehaviourTrees.AddonBuild.*;
 import ecgberht.BehaviourTrees.Build.*;
-import ecgberht.BehaviourTrees.BuildingLot.CheckBuildingsLot;
-import ecgberht.BehaviourTrees.BuildingLot.ChooseBlotWorker;
-import ecgberht.BehaviourTrees.BuildingLot.ChooseBuildingLot;
-import ecgberht.BehaviourTrees.BuildingLot.FinishBuilding;
+import ecgberht.BehaviourTrees.BuildingLot.*;
 import ecgberht.BehaviourTrees.Bunker.ChooseBunkerToLoad;
 import ecgberht.BehaviourTrees.Bunker.ChooseMarineToEnter;
 import ecgberht.BehaviourTrees.Bunker.EnterBunker;
@@ -34,6 +29,7 @@ import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
+import ecgberht.Strategies.FullMech;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree;
@@ -92,11 +88,12 @@ public class Ecgberht implements BWEventListener {
         return gs;
     }
 
-    public static void transition() {
+    static void transition() {
         initTrainTree();
         initBuildTree();
         initUpgradeTree();
         initAddonBuildTree();
+        gs.updateStrat();
     }
 
     private static void initTrainTree() {
@@ -108,10 +105,12 @@ public class Ecgberht implements BWEventListener {
         ChooseMedic cMed = new ChooseMedic("Choose Medic", gs);
         ChooseTank cTan = new ChooseTank("Choose Tank", gs);
         ChooseVulture cVul = new ChooseVulture("Choose vulture", gs);
+        ChooseGoliath cGol = new ChooseGoliath("Choose Goliath", gs);
         ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
         CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
-        TrainUnit tr = new TrainUnit("Train SCV", gs);
+        TrainUnit tr = new TrainUnit("Train Unit", gs);
         Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cNT, cSU, cSCV);
+        if (gs.strat.trainUnits.contains(UnitType.Terran_Goliath)) chooseUnit.addChild(cGol);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
@@ -267,6 +266,7 @@ public class Ecgberht implements BWEventListener {
             gs.alwaysPools();
             if (gs.enemyRace == Race.Zerg && gs.EI.naughty) gs.playSound("rushed.mp3");
             gs.strat = gs.initStrat();
+            gs.updateStrat();
             IntelligenceAgency.setStartStrat(gs.strat.name);
             gs.initStartLocations();
             for (Base b : bwem.getMap().getBases()) {
@@ -277,6 +277,9 @@ public class Ecgberht implements BWEventListener {
             gs.initBaseLocations();
             gs.checkBasesWithBLockingMinerals();
             gs.initChokes();
+            gs.map = new BuildingMap(bw, ih.self(), bwem);
+            gs.map.initMap();
+            gs.testMap = gs.map.clone();
             // Trees Initializations
             initCollectTree();
             initTrainTree();
@@ -396,6 +399,11 @@ public class Ecgberht implements BWEventListener {
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
                 gs.getIH().sendText("RIP"); // Hitchhiker
                 gs.getIH().leaveGame();
+            }
+            // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
+            if(gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs)){
+                gs.strat = new FullMech();
+                transition();
             }
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
                     gs.strat.name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
@@ -726,11 +734,11 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                         if (gs.workerMining.containsKey(arg0)) {
-                            Unit mineral = gs.workerMining.get(arg0);
+                            MineralPatch mineral = gs.workerMining.get(arg0);
                             gs.workerMining.remove(arg0);
                             if (gs.mineralsAssigned.containsKey(mineral)) {
                                 gs.mining--;
-                                gs.mineralsAssigned.put((MineralPatch) mineral, gs.mineralsAssigned.get(mineral) - 1);
+                                gs.mineralsAssigned.put(mineral, gs.mineralsAssigned.get(mineral) - 1);
                             }
                         }
                         if (gs.workerGas.containsKey(arg0)) { // TODO fix when destroyed
@@ -927,8 +935,9 @@ public class Ecgberht implements BWEventListener {
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && p.isEnemy()) {
                 IntelligenceAgency.onShow(arg0, type);
-                if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) { // TODO Check
+                if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) {
                     gs.enemyRace = type.getRace();
+                    if(gs.enemyRace == Race.Zerg && gs.strat.trainUnits.contains(UnitType.Terran_Firebat)) gs.maxBats = 3;
                 }
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);

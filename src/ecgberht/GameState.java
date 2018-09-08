@@ -17,7 +17,6 @@ import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import jfap.JFAP;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.type.*;
@@ -65,7 +64,7 @@ public class GameState extends GameHandler {
     public int frameCount;
     public int mapSize = 2;
     public int maxWraiths = 5;
-    public int maxBats = 3;
+    public int maxBats = 0;
     public int mining;
     public int startCount;
     public int vulturesTrained = 0;
@@ -136,6 +135,7 @@ public class GameState extends GameHandler {
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
     public boolean firstExpand = true;
+    public int maxGoliaths = 0;
     CameraModule skycladObserver = null;
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
@@ -147,9 +147,11 @@ public class GameState extends GameHandler {
     public GameState(BW bw, BWEM bwem) {
         super(bw, bwem);
         initPlayers();
+        /*
         map = new BuildingMap(bw, ih.self(), bwem);
         map.initMap();
         testMap = map.clone();
+        */
         mapSize = bw.getBWMap().getStartPositions().size();
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimManager(bw);
@@ -188,7 +190,7 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if(true) return tPW; // TODO TEST ONLY
+            if(true) return FM; // TODO TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
@@ -1514,5 +1516,11 @@ public class GameState extends GameHandler {
                 ConfigManager.getConfig().ecgConfig.sounds = !setting;
                 break;
         }
+    }
+
+    void updateStrat() {
+        if(strat.trainUnits.contains(UnitType.Terran_Firebat) && enemyRace == Race.Zerg) maxBats = 3;
+        else maxBats = 0;
+        if(strat.trainUnits.contains(UnitType.Terran_Goliath)) maxGoliaths = 0;
     }
 }

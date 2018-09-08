@@ -549,4 +549,9 @@ public class Util {
         List<WalkPosition> walks = choke.getGeometry();
         return walks.get(0).toPosition().getDistance(walks.get(walks.size() - 1).toPosition());
     }
+
+    public static boolean isStaticDefense(Unit u){
+        return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
+                || u instanceof SunkenColony || u instanceof PhotonCannon;
+    }
 }

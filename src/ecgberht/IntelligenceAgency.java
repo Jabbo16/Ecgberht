@@ -1,6 +1,5 @@
 package ecgberht;
 
-import bwem.Base;
 import bwem.unit.Mineral;
 import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
@@ -27,6 +26,7 @@ public class IntelligenceAgency {
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
     private static String startStrat = null;
     private static boolean exploredMinerals = false;
+    private static Map<UnitType, Integer> mainEnemyUnitTypeAmount = new HashMap<>();
 
     private static int getNumEnemyWorkers() {
         return enemyWorkers.size();
@@ -105,6 +105,10 @@ public class IntelligenceAgency {
     }
 
     static void onShow(Unit unit, UnitType type) {
+        Integer value = mainEnemyUnitTypeAmount.get(type);
+        if(value != null) mainEnemyUnitTypeAmount.put(type, value + 1);
+        else mainEnemyUnitTypeAmount.put(type, 0);
+
         Player player = ((PlayerUnit) unit).getPlayer();
         if (unit instanceof Worker) enemyWorkers.add(unit);
         // Bases
@@ -138,6 +142,10 @@ public class IntelligenceAgency {
     }
 
     static void onDestroy(Unit unit, UnitType type) {
+        Integer value = mainEnemyUnitTypeAmount.get(type);
+        if(value != null) mainEnemyUnitTypeAmount.put(type, value - 1);
+        else mainEnemyUnitTypeAmount.put(type, 0);
+
         Player player = ((PlayerUnit) unit).getPlayer();
         if (type.isResourceDepot() && enemyBases.containsKey(player))
             enemyBases.get(player).remove(new EnemyBuilding(unit));
@@ -229,8 +237,7 @@ public class IntelligenceAgency {
         return false;
     }
 
-    static void onFrame() {
-        if (getGs().enemyStartBase == null) return;
+    private static void detectEnemyStrategy(){
         if (enemyStrat != EnemyStrats.Unknown) return;
         if (!exploredMinerals) exploredMinerals = checkExploredEnemyMinerals();
         switch (getGs().enemyRace) {
@@ -244,6 +251,40 @@ public class IntelligenceAgency {
                 if (detectZealotRush()) return;
                 if (detectCannonRush()) return;
                 break;
+        }
+    }
+
+    static void onFrame() {
+        if (getGs().enemyStartBase == null) return;
+        detectEnemyStrategy();
+        updateMaxAmountTypes();
+    }
+
+    private static void updateMaxAmountTypes() {
+        if(getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)){
+            int goliaths = 0;
+
+            // Mutas
+            Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk); // TODO add if spire found
+            goliaths += amount != null ? amount : 0;
+
+            // Scouts!!
+            amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Scout);
+            goliaths += amount != null ? amount : 0;
+
+            // Carriers
+            amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
+            goliaths += amount != null ? amount * 3 : 0;
+
+            // Wraiths
+            amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
+            goliaths += amount != null ? (amount / 2 + 1) : 0;
+
+            // BattleCruisers
+            amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
+            goliaths += amount != null ? amount * 4 : 0;
+
+            getGs().maxGoliaths = goliaths;
         }
     }
 

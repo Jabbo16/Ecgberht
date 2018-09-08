@@ -1,5 +1,6 @@
 package ecgberht;
 
+import ecgberht.Agents.DropShipAgent;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.Util;
@@ -31,7 +32,7 @@ public class Squad implements Comparable<Squad> {
     Squad(int id, Set<Unit> members, Position center) {
         this.id = id;
         for (Unit m : members) {
-            if (isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add(m);
+            if (isArmyUnit(m) && !DropShipAgent.loadedUnitsGlobally.contains(m) && !getGs().agents.containsKey(m)) this.members.add(m);
         }
         status = getGs().defense ? Status.DEFENSE : Status.IDLE;
         attack = null;
@@ -43,7 +44,7 @@ public class Squad implements Comparable<Squad> {
         if (u instanceof Building) return false;
         if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
         return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
-                || u instanceof Vulture || u instanceof Wraith;
+                || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
     }
 
     public Position getSquadCenter() {
@@ -58,7 +59,7 @@ public class Squad implements Comparable<Squad> {
         int count = 0;
         for (Unit u : members) {
             count++;
-            if (u instanceof SiegeTank || u instanceof Vulture || u instanceof Wraith) count++;
+            if (u instanceof Goliath || u instanceof SiegeTank || u instanceof Vulture || u instanceof Wraith) count++;
         }
         return count;
     }

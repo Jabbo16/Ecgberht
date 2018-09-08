@@ -28,10 +28,10 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     }
 
     @Override
-    public boolean runAgent() {
+    public boolean runAgent() { // TODO revert wraith logic, worked better a few weeks ago :(
         try {
             if (!unit.exists()) return true;
-            if (unit.getHitPoints() <= 15) {
+            if (unit.getHitPoints() <= 20) {
                 Position cc = getGs().mainCC.second.getPosition();
                 if (cc != null) unit.move(cc);
                 else unit.move(getGs().getPlayer().getStartLocation().toPosition());
@@ -150,23 +150,18 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             status = Status.ATTACK;
             return;
         }
-        if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
+        if (!mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
-                if (u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) chasenByScourge = true;
-                else if (u instanceof SporeColony && u.getDistance(unit) < ((SporeColony) u).getAirWeapon().maxRange() * 1.2) {
+                if (getGs().enemyRace == Race.Zerg && u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) chasenByScourge = true;
+                else if (Util.isStaticDefense(u) && u.getDistance(unit) < ((AirAttacker) u).getAirWeapon().maxRange() * 1.25) {
                     staticAirDefense = true;
                 }
-                if (chasenByScourge && staticAirDefense) break;
+                if(getGs().enemyRace == Race.Zerg){
+                    if (chasenByScourge && staticAirDefense) break;
+                } else if (staticAirDefense) break;
             }
         }
-        if (getGs().enemyRace == Race.Protoss && !mySimAir.enemies.isEmpty()) {
-            for (Unit u : mySimAir.enemies) {
-                if (u instanceof PhotonCannon && u.getDistance(unit) < ((PhotonCannon) u).getAirWeapon().maxRange() * 1.2) {
-                    staticAirDefense = true;
-                    break;
-                }
-            }
-        }
+
         for (Unit u : mySimMix.enemies) {
             if (u instanceof Worker || u instanceof Overlord) mainTargets.add(u);
         }
