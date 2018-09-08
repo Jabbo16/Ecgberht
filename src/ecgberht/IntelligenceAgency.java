@@ -1,5 +1,6 @@
 package ecgberht;
 
+import bwem.Base;
 import bwem.unit.Mineral;
 import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
@@ -17,8 +18,8 @@ import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
 
-    static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
-    static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
+    static Map<Player, TreeSet<EnemyBuilding>> enemyBases = new HashMap<>();
+    static Map<Player, HashSet<UnitType>> enemyTypes = new HashMap<>();
     private static Player mainEnemy;
     private static Set<Unit> enemyWorkers = new TreeSet<>();
     private static List<Bullet> enemyBullets = new ArrayList<>();
@@ -39,9 +40,9 @@ public class IntelligenceAgency {
         startStrat = strat;
     }
 
-    public static void onStartIntelligenceAgency(Player enemy) {
-        enemyBases = new TreeMap<>();
-        enemyTypes = new TreeMap<>();
+    static void onStartIntelligenceAgency(Player enemy) {
+        enemyBases = new HashMap<>();
+        enemyTypes = new HashMap<>();
         mainEnemy = enemy;
         enemyWorkers = new TreeSet<>();
         enemyBullets = new ArrayList<>();
@@ -80,11 +81,11 @@ public class IntelligenceAgency {
     }
 
     private static boolean enemyHasType(UnitType type) {
-        return enemyTypes.get(mainEnemy.getName()).contains(type);
+        return enemyTypes.get(mainEnemy).contains(type);
     }
 
     public static boolean playerHasType(Player player, UnitType type) {
-        Set<UnitType> types = enemyTypes.get(player.getName());
+        Set<UnitType> types = enemyTypes.get(player);
         return types != null && types.contains(type);
     }
 
@@ -96,7 +97,7 @@ public class IntelligenceAgency {
     }
 
     public static void printEnemyTypes() {
-        for (Entry<String, HashSet<UnitType>> entry : enemyTypes.entrySet()) {
+        for (Entry<Player, HashSet<UnitType>> entry : enemyTypes.entrySet()) {
             for (UnitType type : entry.getValue()) {
                 System.out.println(entry.getKey() + ": " + type);
             }
@@ -104,12 +105,14 @@ public class IntelligenceAgency {
     }
 
     static void onShow(Unit unit, UnitType type) {
-        String player = ((PlayerUnit) unit).getPlayer().getName();
-        if (unit instanceof Worker && !enemyWorkers.contains(unit)) enemyWorkers.add(unit);
-        // If base and player known skip
-        if (enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;
+        Player player = ((PlayerUnit) unit).getPlayer();
+        if (unit instanceof Worker) enemyWorkers.add(unit);
         // Bases
-        if (type.isResourceDepot()) enemyBases.get(player).add(unit);
+        if (type.isResourceDepot()){
+            // If base and player known skip
+            if (enemyBases.containsKey(player) && enemyBases.get(player).contains(new EnemyBuilding(unit))) return;
+            enemyBases.get(player).add(new EnemyBuilding(unit));
+        }
         // If player and type known skip
         if (enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;
         // Normal units
@@ -125,7 +128,7 @@ public class IntelligenceAgency {
                 enemyTypes.get(player).add(UnitType.Protoss_High_Templar);
             } else if (type == UnitType.Protoss_Fleet_Beacon) enemyTypes.get(player).add(UnitType.Protoss_Carrier);
             else if (type == UnitType.Protoss_Robotics_Support_Bay) enemyTypes.get(player).add(UnitType.Protoss_Reaver);
-                // Zerg tech
+            // Zerg tech
             else if (type == UnitType.Zerg_Spawning_Pool) enemyTypes.get(player).add(UnitType.Zerg_Zergling);
             else if (type == UnitType.Zerg_Spire) enemyTypes.get(player).add(UnitType.Zerg_Mutalisk);
             else if (type == UnitType.Zerg_Hydralisk_Den) enemyTypes.get(player).add(UnitType.Zerg_Hydralisk);
@@ -135,12 +138,10 @@ public class IntelligenceAgency {
     }
 
     static void onDestroy(Unit unit, UnitType type) {
-        String player = ((PlayerUnit) unit).getPlayer().getName();
-        if (type.isResourceDepot() && enemyBases.containsKey(player) && enemyBases.get(player).contains(unit))
-            enemyBases.get(player).remove(unit);
-        if (getGs().enemyRace == Race.Zerg && unit instanceof Drone && enemyWorkers.contains(unit)) {
-            enemyWorkers.remove(unit);
-        }
+        Player player = ((PlayerUnit) unit).getPlayer();
+        if (type.isResourceDepot() && enemyBases.containsKey(player))
+            enemyBases.get(player).remove(new EnemyBuilding(unit));
+        if (getGs().enemyRace == Race.Zerg && unit instanceof Drone) enemyWorkers.remove(unit);
     }
 
     /**

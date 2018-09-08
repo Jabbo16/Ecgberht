@@ -164,8 +164,8 @@ public class GameState extends GameHandler {
             } else if (ih.allies().contains(p) || p.equals(self)) players.put(p, 1);
             else if (ih.enemies().contains(p)) {
                 players.put(p, -1);
-                IntelligenceAgency.enemyBases.put(p.getName(), new TreeSet<>());
-                IntelligenceAgency.enemyTypes.put(p.getName(), new HashSet<>());
+                IntelligenceAgency.enemyBases.put(p, new TreeSet<>());
+                IntelligenceAgency.enemyTypes.put(p, new HashSet<>());
             }
         }
     }
@@ -188,6 +188,7 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
+            if(true) return tPW; // TODO TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
