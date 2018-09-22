@@ -554,4 +554,13 @@ public class Util {
         return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
                 || u instanceof SunkenColony || u instanceof PhotonCannon;
     }
+
+    public static int countBuildingAll(UnitType type) {
+        int count = 0;
+        for (MutablePair<UnitType, TilePosition> w : getGs().workerBuild.values()) {
+            if (w.first == type) count++;
+        }
+        count += countUnitTypeSelf(type);
+        return count;
+    }
 }

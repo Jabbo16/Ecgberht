@@ -1207,15 +1207,6 @@ public class GameState extends GameHandler {
         for (Unit u : aux) enemyBuildingMemory.remove(u);
     }
 
-    public int countBuildingAll(UnitType type) {
-        int count = 0;
-        for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
-            if (w.first == type) count++;
-        }
-        count += Util.countUnitTypeSelf(type);
-        return count;
-    }
-
     /**
      * Credits and thanks to Yegers for the method
      * Number of workers needed to sustain a number of units.
@@ -1240,7 +1231,7 @@ public class GameState extends GameHandler {
     }
 
     void checkWorkerMilitia() {
-        if (countBuildingAll(UnitType.Terran_Barracks) == 2) {
+        if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2) {
             List<Unit> aux = new ArrayList<>();
             int count = workerMining.size();
             for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {

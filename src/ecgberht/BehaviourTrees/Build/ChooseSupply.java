@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -23,19 +24,19 @@ public class ChooseSupply extends Action {
             if (((GameState) this.handler).getPlayer().supplyTotal() >= 400) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) < 2) {
+            if (((GameState) this.handler).strat.name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
 
             if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
-                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) < 1) {
+                    && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
 
             if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
-                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) == 1
-                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Supply_Depot) > 0
-                    && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Bunker) < 1) {
+                    && Util.countBuildingAll(UnitType.Terran_Barracks) == 1
+                    && Util.countBuildingAll(UnitType.Terran_Supply_Depot) > 0
+                    && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
                 return State.FAILURE;
             }
             /*if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).enemyRace == Race.Zerg) {

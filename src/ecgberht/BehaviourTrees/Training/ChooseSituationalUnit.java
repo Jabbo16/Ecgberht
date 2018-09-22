@@ -35,9 +35,9 @@ public class ChooseSituationalUnit extends Action {
                     return State.SUCCESS;
                 }
             }*/
-            boolean tower = false;
+            boolean tower;
             // Testing dropships offensive drops
-            if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
+            /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
 
             for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                 if (u instanceof ControlTower) {
@@ -52,11 +52,10 @@ public class ChooseSituationalUnit extends Action {
                     ((GameState) this.handler).chosenBuilding = s;
                     return State.SUCCESS;
                 }
-            }
+            }*/
 
             // Testing vessels
-
-            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2) return State.FAILURE;
+            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || ((GameState)this.handler).workerMining.isEmpty()) return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !((GameState) this.handler).needToAttack())
                 return State.FAILURE;
             String strat = ((GameState) this.handler).strat.name;

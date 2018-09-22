@@ -62,7 +62,7 @@ public class IntelligenceAgency {
      * @param player Player to check
      * @return Number of bases
      */
-    public static int getNumEnemyBases(String player) {
+    public static int getNumEnemyBases(Player player) {
         if (enemyBases.containsKey(player)) return enemyBases.get(player).size();
         return 0;
     }
@@ -249,7 +249,7 @@ public class IntelligenceAgency {
                 break;
             case Protoss:
                 if (detectZealotRush()) return;
-                if (detectCannonRush()) return;
+                //if (detectCannonRush()) return;
                 break;
         }
     }
@@ -263,27 +263,38 @@ public class IntelligenceAgency {
     private static void updateMaxAmountTypes() {
         if(getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)){
             int goliaths = 0;
+            switch(getGs().enemyRace){
+                case Zerg:
+                    // Mutas
+                    Integer spireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Spire);
+                    Integer greaterSpireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Greater_Spire);
+                    if((spireAmount != null && spireAmount > 0) || (greaterSpireAmount != null && greaterSpireAmount > 0)) goliaths += 3;
+                    Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
+                    goliaths += (amount != null ? (Math.round(amount/2.0)) : 0);
+                    break;
+                case Terran:
+                    // Wraiths
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
+                    goliaths += amount != null ? (amount / 2 + 1) : 0;
 
-            // Mutas
-            Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk); // TODO add if spire found
-            goliaths += amount != null ? amount : 0;
+                    // BattleCruisers
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
+                    goliaths += amount != null ? (amount * 4): 0;
+                    break;
+                case Protoss:
+                    // Scouts!!
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Scout);
+                    goliaths += amount != null ? amount : 0;
 
-            // Scouts!!
-            amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Scout);
-            goliaths += amount != null ? amount : 0;
-
-            // Carriers
-            amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
-            goliaths += amount != null ? amount * 3 : 0;
-
-            // Wraiths
-            amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
-            goliaths += amount != null ? (amount / 2 + 1) : 0;
-
-            // BattleCruisers
-            amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
-            goliaths += amount != null ? amount * 4 : 0;
-
+                    // Carriers
+                    Integer stargateAmount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Stargate);
+                    if(stargateAmount != null && stargateAmount> 0 ) goliaths += 3;
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
+                    goliaths += amount != null ? (amount * 3) : 0;
+                    break;
+                case Unknown:
+                    break;
+            }
             getGs().maxGoliaths = goliaths;
         }
     }

@@ -53,6 +53,7 @@ public class MechGreedyFE extends Strategy {
         buildUnits.add(UnitType.Terran_Engineering_Bay);
         buildUnits.add(UnitType.Terran_Missile_Turret);
         buildUnits.add(UnitType.Terran_Factory);
+        buildUnits.add(UnitType.Terran_Academy);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
         if (bunker) buildUnits.add(UnitType.Terran_Bunker);
@@ -74,5 +75,6 @@ public class MechGreedyFE extends Strategy {
     public void initUpgradesToResearch() {
         upgradesToResearch.add(UpgradeType.Terran_Vehicle_Weapons);
         upgradesToResearch.add(UpgradeType.Terran_Vehicle_Plating);
+        upgradesToResearch.add(UpgradeType.Charon_Boosters);
     }
 }

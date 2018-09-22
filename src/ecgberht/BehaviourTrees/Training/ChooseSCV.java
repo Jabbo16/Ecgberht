@@ -30,7 +30,7 @@ public class ChooseSCV extends Action {
                 if (notTraining) return State.FAILURE;
             }
             if (((GameState) this.handler).enemyRace == Race.Zerg && ((GameState) this.handler).EI.naughty) {
-                if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) > 0 && ((GameState) this.handler).countBuildingAll(UnitType.Terran_Bunker) < 1 && ((GameState) this.handler).getCash().first < 150) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) > 0 && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && ((GameState) this.handler).getCash().first < 150) {
                     return State.FAILURE;
                 }
             }

@@ -169,6 +169,7 @@ public class Ecgberht implements BWEventListener {
         ChooseMarineRange cMR = new ChooseMarineRange("Choose Marine Range upgrade", gs);
         ChooseStimUpgrade cSU = new ChooseStimUpgrade("Choose Stimpack upgrade", gs);
         ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
+        ChooseCharonBoosters cCB = new ChooseCharonBoosters("Choose Charon Boosters", gs);
         ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
         Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
         ChooseUP.addChild(cI);
@@ -178,6 +179,7 @@ public class Ecgberht implements BWEventListener {
         if (gs.strat.techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.U_238_Shells)) ChooseUP.addChild(cMR);
         if (gs.strat.techToResearch.contains(TechType.Tank_Siege_Mode)) ChooseUP.addChild(cSM);
+        if (gs.strat.upgradesToResearch.contains(UpgradeType.Charon_Boosters)) ChooseUP.addChild(cCB);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Weapons)) ChooseUP.addChild(cWMU);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Plating)) ChooseUP.addChild(cAMU);
         Sequence Upgrader = new Sequence("Upgrader", ChooseUP, cRU, rU);

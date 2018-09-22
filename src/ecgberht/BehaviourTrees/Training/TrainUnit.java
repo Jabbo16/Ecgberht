@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -36,8 +37,8 @@ public class TrainUnit extends Action {
             }*/
             TrainingFacility chosen = ((GameState) this.handler).chosenBuilding;
             if (((GameState) this.handler).strat.name.equals("ProxyBBS")) {
-                if (((GameState) this.handler).countBuildingAll(UnitType.Terran_Barracks) == 2 &&
-                        ((GameState) this.handler).countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2 &&
+                        Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
                     ((GameState) this.handler).chosenBuilding = null;
                     ((GameState) this.handler).chosenToBuild = UnitType.None;
                     return State.FAILURE;
