@@ -67,12 +67,12 @@ public class JFAP extends AJFAP {
     }
 
     private int score(final JFAPUnit fu) {
+        int score = 0;
         if (fu.health > 0 && fu.maxHealth > 0) {
-            int bunker = 0;
-            if ((fu.unitType == UnitType.Terran_Bunker)) bunker = 1;
-            return ((fu.score * fu.health) / (fu.maxHealth * 2)) + bunker * UnitType.Terran_Marine.destroyScore() * 4;
+            score = ((fu.score * (fu.health * 3 + fu.shields) + fu.score) / (fu.maxHealth * 3 + fu.maxShields));
+            if (fu.unitType == UnitType.Terran_Bunker) score += UnitType.Terran_Marine.destroyScore() * 4;
         }
-        return 0;
+        return score;
     }
 
     @Override

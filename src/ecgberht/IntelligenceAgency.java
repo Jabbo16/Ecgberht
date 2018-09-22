@@ -190,7 +190,7 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
+                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE") || getGs().strat.name.equals("FullMech")) {
                     getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -208,7 +208,7 @@ public class IntelligenceAgency {
     }
 
     /**
-     * Detects if the enemy its doing a "Zealot Rush" strat
+     * Detects if the enemy its doing a "Mech Rush" strat
      */
     private static boolean detectMechRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null && exploredMinerals) {
@@ -299,6 +299,9 @@ public class IntelligenceAgency {
         }
     }
 
+	/**
+     * Detects if the enemy its doing a "Cannon Rush" strat
+     */
     private static boolean detectCannonRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
             boolean foundForge = false;

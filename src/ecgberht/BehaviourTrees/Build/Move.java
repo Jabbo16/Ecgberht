@@ -26,14 +26,12 @@ public class Move extends Action {
             if (chosen.move(realEnd)) {
                 if (((GameState) this.handler).workerIdle.contains(chosen)) {
                     ((GameState) this.handler).workerIdle.remove(chosen);
-                } else {
-                    if (((GameState) this.handler).workerMining.containsKey(chosen)) {
-                        MineralPatch mineral = ((GameState) this.handler).workerMining.get(chosen);
-                        ((GameState) this.handler).workerMining.remove(chosen);
-                        if (((GameState) this.handler).mineralsAssigned.containsKey(mineral)) {
-                            ((GameState) this.handler).mining--;
-                            ((GameState) this.handler).mineralsAssigned.put(mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
-                        }
+                } else if (((GameState) this.handler).workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = ((GameState) this.handler).workerMining.get(chosen);
+                    ((GameState) this.handler).workerMining.remove(chosen);
+                    if (((GameState) this.handler).mineralsAssigned.containsKey(mineral)) {
+                        ((GameState) this.handler).mining--;
+                        ((GameState) this.handler).mineralsAssigned.put(mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
                     }
                 }
                 if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center
