@@ -242,7 +242,6 @@ public class Ecgberht implements BWEventListener {
                 System.setErr(nullOut);
                 System.setOut(nullOut);
             }
-            DataTraining.copyOnStart();
             self = bw.getInteractionHandler().self();
             ih = bw.getInteractionHandler();
             IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
@@ -479,7 +478,6 @@ public class Ecgberht implements BWEventListener {
             }
             gs.writeOpponentInfo(name);
             gs.writeOpponentHistory(name);
-            DataTraining.writeTravelData();
         } catch (Exception e) {
             System.err.println("onEnd Exception");
             e.printStackTrace();
@@ -539,18 +537,11 @@ public class Ecgberht implements BWEventListener {
                         }
                         SCV worker = (SCV) ((Building) arg0).getBuildUnit();
                         if (worker != null) {
-                            if (gs.workerBuild.containsKey(worker)) {
-                                DataTraining.TravelData t = DataTraining.travelData.get(worker);
-                                if (t != null) {
-                                    t.frames = gs.frameCount - t.frames;
-                                    DataTraining.travelData.put(worker, t);
-                                }
-                                if (type.equals(gs.workerBuild.get(worker).first)) {
-                                    gs.workerTask.put(worker, (Building) arg0);
-                                    gs.deltaCash.first -= type.mineralPrice();
-                                    gs.deltaCash.second -= type.gasPrice();
-                                    gs.workerBuild.remove(worker);
-                                }
+                            if (gs.workerBuild.containsKey(worker) && type.equals(gs.workerBuild.get(worker).first)) {
+                                gs.workerTask.put(worker, (Building) arg0);
+                                gs.deltaCash.first -= type.mineralPrice();
+                                gs.deltaCash.second -= type.gasPrice();
+                                gs.workerBuild.remove(worker);
                             }
                         }
                     }
@@ -760,7 +751,6 @@ public class Ecgberht implements BWEventListener {
                                 if (b != null) gs.defendPosition = b.getPosition();
                                 else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                             }
-                            DataTraining.travelData.remove(arg0);
                             gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
                             gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
                             gs.workerBuild.remove(arg0);

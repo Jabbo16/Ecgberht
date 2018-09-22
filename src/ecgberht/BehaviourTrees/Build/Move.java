@@ -1,6 +1,5 @@
 package ecgberht.BehaviourTrees.Build;
 
-import ecgberht.DataTraining;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -37,19 +36,16 @@ public class Move extends Action {
                         }
                     }
                 }
-                if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                    if (((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenPosition).equals(((GameState) this.handler).naturalArea)) {
-                        if (((GameState) this.handler).naturalChoke != null) {
-                            ((GameState) this.handler).defendPosition = ((GameState) this.handler).naturalChoke.getCenter().toPosition();
-                        }
-                    }
+                if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center
+                        && ((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).chosenPosition).equals(((GameState) this.handler).naturalArea)
+                        && ((GameState) this.handler).naturalChoke != null) {
+                    ((GameState) this.handler).defendPosition = ((GameState) this.handler).naturalChoke.getCenter().toPosition();
                 }
                 ((GameState) this.handler).workerBuild.put((SCV) chosen, new MutablePair<>(((GameState) this.handler).chosenToBuild, ((GameState) this.handler).chosenPosition));
                 ((GameState) this.handler).deltaCash.first += ((GameState) this.handler).chosenToBuild.mineralPrice();
                 ((GameState) this.handler).deltaCash.second += ((GameState) this.handler).chosenToBuild.gasPrice();
                 ((GameState) this.handler).chosenWorker = null;
                 ((GameState) this.handler).chosenToBuild = UnitType.None;
-                DataTraining.travelData.put((SCV) chosen, new DataTraining.TravelData(chosen.getPosition(), ((GameState) this.handler).chosenPosition.toPosition(), chosen.getVelocityX(), chosen.getVelocityY(), Util.getGroundDistance(chosen.getPosition(), ((GameState) this.handler).chosenPosition.toPosition()), ((GameState) this.handler).frameCount));
                 return State.SUCCESS;
             }
             return State.FAILURE;
