@@ -101,7 +101,8 @@ public class Squad implements Comparable<Squad> {
                     SiegeTank t = (SiegeTank) u;
                     if (t.isSieged() && pU.getOrder() == Order.Unsieging) continue;
                     if (!t.isSieged() && pU.getOrder() == Order.Sieging) continue;
-                    if (status == Status.IDLE && t.isSieged()) continue;
+                    if (status == Status.IDLE && t.isSieged() && !getGs().defense && getGs().defendPosition != null
+                            && getGs().defendPosition.getDistance(u.getPosition()) < WeaponType.Arclite_Shock_Cannon.maxRange()) continue;
                     boolean found = false;
                     boolean close = false;
                     for (Unit e : enemy) {

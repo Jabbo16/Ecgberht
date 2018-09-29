@@ -20,7 +20,7 @@ import static ecgberht.Ecgberht.getGs;
 
 public class BuildingMap implements Cloneable {
 
-    private static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
+    public static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
     private Player self;
     private int height;
     private int width;

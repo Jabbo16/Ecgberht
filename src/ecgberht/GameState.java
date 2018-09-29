@@ -639,9 +639,12 @@ public class GameState extends GameHandler {
             print(chosenUnitToHarass, Color.RED);
             bw.getMapDrawer().drawTextMap(chosenUnitToHarass.getPosition(), ColorUtil.formatText("UnitToHarass", ColorUtil.White));
         }
-        for (SCV r : repairerTask.keySet()) {
-            print(r, Color.YELLOW);
-            bw.getMapDrawer().drawTextMap(r.getPosition(), ColorUtil.formatText("Repairer", ColorUtil.White));
+        for (Entry<SCV, Mechanical> r : repairerTask.entrySet()) {
+            print(r.getKey(), Color.YELLOW);
+            bw.getMapDrawer().drawTextMap(r.getKey().getPosition(), ColorUtil.formatText("Repairer", ColorUtil.White));
+            if(r.getValue() == null || !r.getValue().exists()) continue;
+            print(r.getValue(), Color.YELLOW);
+            bw.getMapDrawer().drawLineMap(r.getKey().getPosition(), r.getValue().getPosition(), Color.YELLOW);
         }
         for (EnemyBuilding b : enemyBuildingMemory.values()) print(b.pos, b.type, Color.RED);
         if (chosenScout != null) {
