@@ -294,7 +294,7 @@ public class Ecgberht implements BWEventListener {
             initBunkerTree();
             initScanTree();
             initHarassTree();
-            //initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
+            initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
             gs.skycladObserver = new CameraModule(self.getStartLocation(), bw);
             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) gs.skycladObserver.toggle();
         } catch (Exception e) {
@@ -436,7 +436,7 @@ public class Ecgberht implements BWEventListener {
             repairTree.run();
             collectTree.run();
             upgradeTree.run();
-            //islandTree.run(); // TODO uncomment when BWAPI island bug is fixed
+            islandTree.run(); // TODO uncomment when BWAPI island bug is fixed
             buildTree.run();
             addonBuildTree.run();
             trainTree.run();
@@ -589,7 +589,8 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         if (type == UnitType.Terran_Command_Center) {
                             Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
-                            gs.CCs.put(ccBase, (CommandCenter) arg0);
+                            if(!gs.islandBases.isEmpty() && gs.islandBases.contains(ccBase)) gs.islandCCs.put(ccBase, (CommandCenter) arg0);
+                            else gs.CCs.put(ccBase, (CommandCenter) arg0);
                             if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() > 2) gs.strat.raxPerCC = 3;
                             else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3)
                                 gs.strat.raxPerCC = 2;
@@ -629,12 +630,6 @@ public class Ecgberht implements BWEventListener {
                     else if (type == UnitType.Terran_Vulture) gs.agents.put(arg0, new VultureAgent(arg0));
                     else if (type == UnitType.Terran_Dropship) {
                         DropShipAgent d = new DropShipAgent(arg0);
-                        d.setTarget(gs.enemyMainBase.getLocation().toPosition(), false);
-                        Optional<Entry<Integer, Squad>> closest = gs.sqManager.squads.entrySet().stream().min(Comparator.comparing(u -> u.getValue().getSquadCenter().getDistance(d.unit.getPosition())));
-                        if(closest.isPresent()){
-                            d.setCargo(closest.get().getValue().members);
-                            gs.sqManager.squads.remove(closest.get().getKey());
-                        }
                         gs.agents.put(arg0, d);
                     } else if (type == UnitType.Terran_Science_Vessel) {
                         VesselAgent v = new VesselAgent(arg0);
@@ -792,6 +787,32 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                         for (CommandCenter u : gs.CCs.values()) {
+                            if (u.equals(arg0)) {
+                                gs.removeResources(arg0);
+                                if (u.getAddon() != null) {
+                                    gs.CSs.remove(u.getAddon());
+                                }
+                                if (bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
+                                    gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                }
+                                gs.CCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
+                                if (arg0.equals(gs.mainCC.second)) {
+                                    if (gs.CCs.size() > 0) {
+                                        for (Unit c : gs.CCs.values()) {
+                                            if (!c.equals(arg0)) {
+                                                gs.mainCC = new MutablePair<>(Util.getClosestBaseLocation(u.getPosition()), u);
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        gs.mainCC = null;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        for (CommandCenter u : gs.islandCCs.values()) {
                             if (u.equals(arg0)) {
                                 gs.removeResources(arg0);
                                 if (u.getAddon() != null) {

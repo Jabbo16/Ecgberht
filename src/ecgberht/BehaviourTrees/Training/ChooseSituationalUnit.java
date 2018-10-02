@@ -19,23 +19,31 @@ public class ChooseSituationalUnit extends Action {
     public State execute() {
         try {
             // Testing dropships islands
-            /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
-
-            for (ResearchingFacility u : ((GameState) this.handler).UBs) {
-                if (u instanceof ControlTower) {
-                    tower = true;
+            boolean dropship = true;
+            for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getPlayer())) {
+                if (!u.exists()) continue;
+                if (u instanceof Dropship){
+                    dropship = false;
                     break;
                 }
             }
-            if (!tower) return State.FAILURE;
-            for (Starport s : ((GameState) this.handler).Ps) {
-                if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
-                    ((GameState) this.handler).chosenUnit = UnitType.Terran_Dropship;
-                    ((GameState) this.handler).chosenBuilding = s;
-                    return State.SUCCESS;
+            boolean tower = false;
+            if(dropship){
+                for (ResearchingFacility u : ((GameState) this.handler).UBs) {
+                    if (u instanceof ControlTower) {
+                        tower = true;
+                        break;
+                    }
                 }
-            }*/
-            boolean tower;
+                if (!tower) return State.FAILURE;
+                for (Starport s : ((GameState) this.handler).Ps) {
+                    if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
+                        ((GameState) this.handler).chosenUnit = UnitType.Terran_Dropship;
+                        ((GameState) this.handler).chosenBuilding = s;
+                        return State.SUCCESS;
+                    }
+                }
+            }
             // Testing dropships offensive drops
             /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
 

@@ -35,7 +35,7 @@ public class SendToDrop extends Action {
                     }
                 }
                 ((GameState) this.handler).chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(((GameState) this.handler).chosenWorker)));
-                ((GameState) this.handler).chosenDropShip.setTarget(((GameState) this.handler).chosenIsland.getLocation().toPosition(), true);
+                ((GameState) this.handler).chosenDropShip.setTarget(((GameState) this.handler).chosenIsland.getLocation().toPosition());
                 ((GameState) this.handler).chosenWorkerDrop = ((GameState) this.handler).chosenWorker;
                 ((GameState) this.handler).chosenWorker = null;
                 return State.SUCCESS;

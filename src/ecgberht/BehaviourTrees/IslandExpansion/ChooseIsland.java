@@ -22,7 +22,7 @@ public class ChooseIsland extends Action {
             double distMax = Double.MAX_VALUE;
             Position drop = ((GameState) this.handler).chosenDropShip.unit.getPosition();
             for (Base b : ((GameState) this.handler).islandBases) {
-                if (((GameState) this.handler).CCs.containsKey(b)) continue;
+                if (((GameState) this.handler).islandCCs.containsKey(b)) continue;
                 double dist = Util.broodWarDistance(b.getLocation().toPosition(), drop);
                 if (dist < distMax) {
                     distMax = dist;

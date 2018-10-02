@@ -60,7 +60,6 @@ public class GameState extends GameHandler {
     public Gson enemyHistoryJSON = new Gson();
     public int builtBuildings;
     public int builtRefinery;
-    public int directionScoutMain;
     public int frameCount;
     public int mapSize = 2;
     public int maxWraiths = 5;
@@ -190,7 +189,7 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if(true) return FM; // TODO TEST ONLY
+            if(true) return tPW; // TODO TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;

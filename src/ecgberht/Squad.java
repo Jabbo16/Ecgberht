@@ -1,6 +1,5 @@
 package ecgberht;
 
-import ecgberht.Agents.DropShipAgent;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.Util;
@@ -11,11 +10,7 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static ecgberht.Ecgberht.getGame;
 import static ecgberht.Ecgberht.getGs;
@@ -32,7 +27,7 @@ public class Squad implements Comparable<Squad> {
     Squad(int id, Set<Unit> members, Position center) {
         this.id = id;
         for (Unit m : members) {
-            if (isArmyUnit(m) && !DropShipAgent.loadedUnitsGlobally.contains(m) && !getGs().agents.containsKey(m)) this.members.add(m);
+            if (isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add(m);
         }
         status = getGs().defense ? Status.DEFENSE : Status.IDLE;
         attack = null;

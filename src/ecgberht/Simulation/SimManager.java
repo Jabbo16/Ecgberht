@@ -123,10 +123,15 @@ public class SimManager {
     }
 
     private boolean isArmyUnit(Unit u) {
-        if (!u.exists()) return false;
-        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
-        return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
-                || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
+        try{
+            if (!u.exists()) return false;
+            if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+            return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
+                    || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

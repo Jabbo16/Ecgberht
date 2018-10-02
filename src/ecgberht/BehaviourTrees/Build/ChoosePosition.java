@@ -1,6 +1,8 @@
 package ecgberht.BehaviourTrees.Build;
 
 import bwem.Base;
+import ecgberht.Agents.Agent;
+import ecgberht.Agents.DropShipAgent;
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
@@ -40,8 +42,8 @@ public class ChoosePosition extends Action {
                     }
                 }
             } else if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                /*if (!((GameState) this.handler).islandBases.isEmpty()) { // TODO uncomment when BWAPI island bug is fixed
-                    if (((GameState) this.handler).islandCCs.isEmpty()) {
+                if (!((GameState) this.handler).islandBases.isEmpty()) { // TODO uncomment when BWAPI island bug is fixed
+                    if (((GameState) this.handler).islandCCs.size() < ((GameState) this.handler).islandBases.size()) {
                         if (((GameState) this.handler).islandExpand) return State.FAILURE;
                         for (Agent u : ((GameState) this.handler).agents.values()) {
                             if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
@@ -50,7 +52,7 @@ public class ChoosePosition extends Action {
                             }
                         }
                     }
-                }*/
+                }
                 TilePosition main;
                 if (((GameState) this.handler).mainCC != null)
                     main = ((GameState) this.handler).mainCC.second.getTilePosition();
