@@ -26,6 +26,7 @@ public class SendScout extends Action {
                 if (!((GameState) this.handler).scoutSLs.isEmpty()) {
                     List<Base> aux = new ArrayList<>();
                     for (Base b : ((GameState) this.handler).scoutSLs) {
+                        if (((GameState) this.handler).fortressSpecialBLs.containsKey(b)) continue;
                         if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
                             if (((MobileUnit) ((GameState) this.handler).chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;

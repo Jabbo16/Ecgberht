@@ -22,13 +22,13 @@ public class ChooseSituationalUnit extends Action {
             boolean dropship = true;
             for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getPlayer())) {
                 if (!u.exists()) continue;
-                if (u instanceof Dropship){
+                if (u instanceof Dropship) {
                     dropship = false;
                     break;
                 }
             }
             boolean tower = false;
-            if(dropship){
+            if (dropship) {
                 for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                     if (u instanceof ControlTower) {
                         tower = true;
@@ -63,7 +63,8 @@ public class ChooseSituationalUnit extends Action {
             }*/
 
             // Testing vessels
-            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || ((GameState)this.handler).workerMining.isEmpty()) return State.FAILURE;
+            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || ((GameState) this.handler).workerMining.isEmpty())
+                return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !((GameState) this.handler).needToAttack())
                 return State.FAILURE;
             String strat = ((GameState) this.handler).strat.name;

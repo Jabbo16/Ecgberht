@@ -56,7 +56,7 @@ public class BuildingMap implements Cloneable {
             if (!startOrdered && bwem.getMap().getArea(startTile).equals(a)) {
                 tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(startTile)));
                 startOrdered = true;
-            } else if (!naturalOrdered && getGs().naturalArea.equals(a)) { // TODO move BuildingMap to order mainArea and naturalArea bases
+            } else if (!naturalOrdered && getGs().naturalArea.equals(a)) {
                 tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(getGs().BLs.get(1).getLocation())));
                 naturalOrdered = true;
             } else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
@@ -324,7 +324,8 @@ public class BuildingMap implements Cloneable {
         TilePosition tile = findPositionArea(buildingType, find);
         if (tile != null) return tile;
         for (Base b : getGs().CCs.keySet()) {
-            if (find.equals(b.getArea())) continue;
+            if (find.equals(b.getArea()) || (getGs().fortressSpecialBLs.containsKey(b) && buildingType != UnitType.Terran_Starport))
+                continue;
             tile = findPositionArea(buildingType, b.getArea());
             if (tile != null) return tile;
         }
@@ -394,7 +395,8 @@ public class BuildingMap implements Cloneable {
                         if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
                             Position centerBunker = Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker);
-                            if(chokeWidth <= 64.0 && Util.broodWarDistance(choke.getCenter().toPosition(), centerBunker) <= 64) continue;
+                            if (chokeWidth <= 64.0 && Util.broodWarDistance(choke.getCenter().toPosition(), centerBunker) <= 64)
+                                continue;
                             double newDist = Util.broodWarDistance(centerBunker, starting);
                             if (position == null || newDist < dist) {
                                 position = newPosition;

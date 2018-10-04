@@ -20,7 +20,7 @@ public class ChoosePort extends Action {
         try {
             String strat = ((GameState) this.handler).strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
-                if(((GameState)this.handler).CCs.size() < 2) return State.FAILURE;
+                if (((GameState) this.handler).CCs.size() < 2) return State.FAILURE;
                 Player self = ((GameState) this.handler).getPlayer();
                 if (Util.countBuildingAll(UnitType.Terran_Starport) >= 1 &&
                         !self.isResearching(TechType.Tank_Siege_Mode) && !self.hasResearched(TechType.Tank_Siege_Mode)) {

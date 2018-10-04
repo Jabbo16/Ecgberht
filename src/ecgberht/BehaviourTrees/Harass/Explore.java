@@ -34,8 +34,7 @@ public class Explore extends Conditional {
                 return State.FAILURE;
             }
             return State.SUCCESS;
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
             return State.ERROR;

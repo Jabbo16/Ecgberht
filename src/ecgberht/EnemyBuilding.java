@@ -7,7 +7,7 @@ import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Objects;
 
-public class EnemyBuilding implements Comparable<EnemyBuilding>{
+public class EnemyBuilding implements Comparable<EnemyBuilding> {
     public TilePosition pos;
     public Building unit;
     public UnitType type;

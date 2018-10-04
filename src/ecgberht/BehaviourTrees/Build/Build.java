@@ -26,7 +26,7 @@ public class Build extends Action {
         try {
             List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
-                if (u.getKey().getOrder() != Order.PlaceBuilding && ((GameState) this.handler).canAfford(u.getValue().first)) {
+                if (u.getKey().getOrder() != Order.PlaceBuilding && ((GameState) this.handler).getGame().getBWMap().isVisible(u.getValue().second) && ((GameState) this.handler).canAfford(u.getValue().first)) {
                     SCV chosen = u.getKey();
                     if (u.getValue().first == UnitType.Terran_Bunker) {
                         if (!chosen.build(u.getValue().second, u.getValue().first)) {
@@ -36,7 +36,7 @@ public class Build extends Action {
                             chosen.stop(false);
                             ((GameState) this.handler).workerIdle.add(chosen);
                         }
-                    } else if (u.getKey().getOrder() == Order.PlayerGuard) { // TODO test
+                    } else if (u.getKey().getOrder() == Order.PlayerGuard) {
                         if (Math.random() < 0.8) chosen.build(u.getValue().second, u.getValue().first);
                         else chosen.move(u.getKey().getPosition().add(new Position(32, 0)));
                     } else chosen.build(u.getValue().second, u.getValue().first);

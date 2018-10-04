@@ -3,11 +3,16 @@ package ecgberht;
 import bwem.BWEM;
 import bwem.Base;
 import cameraModule.CameraModule;
-import ecgberht.Agents.*;
+import ecgberht.Agents.DropShipAgent;
+import ecgberht.Agents.VesselAgent;
+import ecgberht.Agents.VultureAgent;
 import ecgberht.Agents.WraithAgent;
 import ecgberht.BehaviourTrees.AddonBuild.*;
 import ecgberht.BehaviourTrees.Build.*;
-import ecgberht.BehaviourTrees.BuildingLot.*;
+import ecgberht.BehaviourTrees.BuildingLot.CheckBuildingsLot;
+import ecgberht.BehaviourTrees.BuildingLot.ChooseBlotWorker;
+import ecgberht.BehaviourTrees.BuildingLot.ChooseBuildingLot;
+import ecgberht.BehaviourTrees.BuildingLot.FinishBuilding;
 import ecgberht.BehaviourTrees.Bunker.ChooseBunkerToLoad;
 import ecgberht.BehaviourTrees.Bunker.ChooseMarineToEnter;
 import ecgberht.BehaviourTrees.Bunker.EnterBunker;
@@ -47,8 +52,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.TreeSet;
 
 public class Ecgberht implements BWEventListener {
 
@@ -125,6 +133,7 @@ public class Ecgberht implements BWEventListener {
 
     private static void initBuildTree() {
         Build b = new Build("Build", gs);
+        workerWalkBuild wwB = new workerWalkBuild("worker walk build", gs);
         ChooseNothingBuilding cNB = new ChooseNothingBuilding("Choose Nothing", gs);
         ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
@@ -153,7 +162,10 @@ public class Ecgberht implements BWEventListener {
         if (gs.strat.buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addChild(cPor);
         if (gs.strat.buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addChild(cSci);
         chooseBuildingBuild.addChild(cBar);
-        Sequence buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
+        Sequence buildMove;
+        if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"))
+            buildMove = new Sequence("BuildMove", wwB, b, chooseBuildingBuild, cp, cw, crb, m);
+        else buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
         buildTree = new BehavioralTree("Building Tree");
         buildTree.addChild(buildMove);
     }
@@ -270,8 +282,16 @@ public class Ecgberht implements BWEventListener {
             gs.updateStrat();
             IntelligenceAgency.setStartStrat(gs.strat.name);
             gs.initStartLocations();
+
+            boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
             for (Base b : bwem.getMap().getBases()) {
-                if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b);
+                if (fortress) {
+                    if (b.getMinerals().size() < 3) continue;
+                    if (gs.fortressSpecialBLsTiles.contains(b.getLocation()))
+                        gs.fortressSpecialBLs.put(b, gs.getMineralWalkPatchesFortress(b));
+                    gs.BLs.add(b);
+
+                } else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b);
                 else gs.BLs.add(b);
             }
             gs.initBlockingMinerals();
@@ -402,11 +422,11 @@ public class Ecgberht implements BWEventListener {
                 gs.getIH().leaveGame();
             }
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
-            if(gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs)){
+            if (gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs)) {
                 gs.strat = new FullMech();
                 transition();
             }
-            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma transition
                     gs.strat.name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
                 FullBio b = new FullBio();
                 b.buildUnits.remove(UnitType.Terran_Bunker);
@@ -414,8 +434,14 @@ public class Ecgberht implements BWEventListener {
                 gs.maxWraiths = 5;
                 transition();
             }
-            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") &&
-                    !gs.strat.name.equals("PlasmaWraithHell")) { // Plasma special eggs
+            if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && // Fortress wraiths
+                    !gs.strat.trainUnits.contains(UnitType.Terran_Wraith) && gs.frameCount == 24 * 900) {
+                gs.strat.trainUnits.add(UnitType.Terran_Wraith);
+                gs.maxWraiths = 999;
+                transition();
+            }
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma special eggs
+                    !gs.strat.name.equals("PlasmaWraithHell")) {
                 for (Unit u : bw.getAllUnits()) {
                     if (u.getType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
                         continue;
@@ -589,7 +615,8 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         if (type == UnitType.Terran_Command_Center) {
                             Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
-                            if(!gs.islandBases.isEmpty() && gs.islandBases.contains(ccBase)) gs.islandCCs.put(ccBase, (CommandCenter) arg0);
+                            if (!gs.islandBases.isEmpty() && gs.islandBases.contains(ccBase))
+                                gs.islandCCs.put(ccBase, (CommandCenter) arg0);
                             else gs.CCs.put(ccBase, (CommandCenter) arg0);
                             if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() > 2) gs.strat.raxPerCC = 3;
                             else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3)
@@ -729,7 +756,7 @@ public class Ecgberht implements BWEventListener {
                                 gs.mineralsAssigned.put(mineral, gs.mineralsAssigned.get(mineral) - 1);
                             }
                         }
-                        if (gs.workerGas.containsKey(arg0)) { // TODO fix when destroyed
+                        if (gs.workerGas.containsKey(arg0)) {
                             GasMiningFacility aux = gs.workerGas.get(arg0);
                             Integer auxInt = gs.refineriesAssigned.get(aux);
                             gs.refineriesAssigned.put(aux, auxInt - 1);
@@ -950,7 +977,8 @@ public class Ecgberht implements BWEventListener {
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) {
                     gs.enemyRace = type.getRace();
-                    if(gs.enemyRace == Race.Zerg && gs.strat.trainUnits.contains(UnitType.Terran_Firebat)) gs.maxBats = 3;
+                    if (gs.enemyRace == Race.Zerg && gs.strat.trainUnits.contains(UnitType.Terran_Firebat))
+                        gs.maxBats = 3;
                 }
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);

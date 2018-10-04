@@ -97,7 +97,8 @@ public class Squad implements Comparable<Squad> {
                     if (t.isSieged() && pU.getOrder() == Order.Unsieging) continue;
                     if (!t.isSieged() && pU.getOrder() == Order.Sieging) continue;
                     if (status == Status.IDLE && t.isSieged() && !getGs().defense && getGs().defendPosition != null
-                            && getGs().defendPosition.getDistance(u.getPosition()) < WeaponType.Arclite_Shock_Cannon.maxRange()) continue;
+                            && getGs().defendPosition.getDistance(u.getPosition()) < WeaponType.Arclite_Shock_Cannon.maxRange())
+                        continue;
                     boolean found = false;
                     boolean close = false;
                     for (Unit e : enemy) {
@@ -211,7 +212,7 @@ public class Squad implements Comparable<Squad> {
                 int framesToOrder = 18;
                 if (u.getType() == UnitType.Terran_Vulture) framesToOrder = 12;
                 if (frameCount - pU.getLastCommandFrame() >= framesToOrder) {
-                    if (pU.isIdle() && attack != null && status != Status.IDLE) {
+                    if (attack != null && status != Status.IDLE && (status == Status.DEFENSE || (status == Status.ATTACK && pU.isIdle()))) {
                         lastTarget = (((MobileUnit) u).getTargetPosition() == null ? pU.getOrderTargetPosition() :
                                 ((MobileUnit) u).getTargetPosition());
                         if (lastTarget != null && !lastTarget.equals(attack)) {

@@ -40,12 +40,12 @@ public class CheckPerimeter extends Conditional {
                         && uType != UnitType.Zerg_Scourge && uType != UnitType.Terran_Valkyrie
                         && uType != UnitType.Protoss_Corsair && !(u instanceof Overlord))) {
                     Area enemyArea = ((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition());
-                    if(enemyArea != null){
-                        Area myMainArea = ((GameState)this.handler).mainCC != null ? ((GameState)this.handler).mainCC.first.getArea() : null;
-                        Area myNatArea = ((GameState)this.handler).naturalArea;
+                    if (enemyArea != null) {
+                        Area myMainArea = ((GameState) this.handler).mainCC != null ? ((GameState) this.handler).mainCC.first.getArea() : null;
+                        Area myNatArea = ((GameState) this.handler).naturalArea;
                         for (Base b : ((GameState) this.handler).CCs.keySet()) {
-                            if(!b.getArea().equals(enemyArea)) continue;
-                            if((myMainArea != null && !b.getArea().equals(myMainArea)
+                            if (!b.getArea().equals(enemyArea)) continue;
+                            if ((myMainArea != null && !b.getArea().equals(myMainArea)
                                     && (myNatArea != null && !b.getArea().equals(myNatArea)))) continue;
                             ((GameState) this.handler).enemyInBase.add(u);
                             break;

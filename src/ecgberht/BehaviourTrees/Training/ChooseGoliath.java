@@ -19,8 +19,8 @@ public class ChooseGoliath extends Action {
     @Override
     public State execute() {
         try {
-            int armories = (int) ((GameState)this.handler).UBs.stream().filter(unit -> unit instanceof Armory).count();
-            if(armories < 1) return State.FAILURE;
+            int armories = (int) ((GameState) this.handler).UBs.stream().filter(unit -> unit instanceof Armory).count();
+            if (armories < 1) return State.FAILURE;
             int count = 0;
             for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getPlayer())) {
                 if (!u.exists()) continue;

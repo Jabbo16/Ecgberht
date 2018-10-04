@@ -115,9 +115,9 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void emp() {
-        if(oldTarget != null && !oldTarget.exists()) oldTarget = null;
-        if(target != null && !target.exists()) target = null;
-        if(oldTarget != null && oldTarget.equals(target)) return;
+        if (oldTarget != null && !oldTarget.exists()) oldTarget = null;
+        if (target != null && !target.exists()) target = null;
+        if (oldTarget != null && oldTarget.equals(target)) return;
         if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave) {
             unit.empShockWave(target.getPosition());
             getGs().wizard.addEMPed(unit, (PlayerUnit) target);
@@ -126,9 +126,9 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void irradiate() {
-        if(oldTarget != null && !oldTarget.exists()) oldTarget = null;
-        if(target != null && !target.exists()) target = null;
-        if(oldTarget != null && oldTarget.equals(target)) return;
+        if (oldTarget != null && !oldTarget.exists()) oldTarget = null;
+        if (target != null && !target.exists()) target = null;
+        if (oldTarget != null && oldTarget.equals(target)) return;
         if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate) {
             unit.irradiate((PlayerUnit) target);
             getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
@@ -137,9 +137,9 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void dMatrix() {
-        if(oldTarget != null && !oldTarget.exists()) oldTarget = null;
-        if(target != null && !target.exists()) target = null;
-        if(oldTarget != null && oldTarget.equals(target)) return;
+        if (oldTarget != null && !oldTarget.exists()) oldTarget = null;
+        if (target != null && !target.exists()) target = null;
+        if (oldTarget != null && oldTarget.equals(target)) return;
         if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix) {
             unit.empShockWave(target.getPosition());
             getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
@@ -198,12 +198,12 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                         if (u.equals(close) || !(close instanceof Organic)) continue;
                         if (close.getDistance(u) <= 32) closeUnits++;
                     }
-                    if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 14 : 12;
+                    if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 16 : 14;
                     else if (u instanceof Mutalisk) score = 8;
                     else if (u instanceof Hydralisk) score = 6;
                     else if (u instanceof Zergling) score = 3;
                     score *= ((double) ((PlayerUnit) u).getHitPoints()) / (double) (((PlayerUnit) u).maxHitPoints()); //Prefer healthy units
-                    double multiplier = u instanceof SiegeTank ? 3.5 : u instanceof Lurker ? 1.5 : 0.75;
+                    double multiplier = u instanceof SiegeTank ? 3.5 : u instanceof Lurker ? 2 : 0.75;
                     score += multiplier * closeUnits;
                     if (chosen == null || score > maxScore) {
                         chosen = (PlayerUnit) u;
@@ -262,7 +262,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     if (getGs().wizard.isDefenseMatrixed(u)) continue;
                     int score = 1;
                     if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
-                    if (u instanceof Mechanical) score = 6;
+                    if (u instanceof Mechanical) score = 8;
                     if (u instanceof Marine) score = 3;
                     if (u instanceof SCV || u instanceof Medic) score = 1;
                     score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints();

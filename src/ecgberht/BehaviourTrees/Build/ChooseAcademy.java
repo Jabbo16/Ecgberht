@@ -24,7 +24,7 @@ public class ChooseAcademy extends Action {
             if (Util.countBuildingAll(UnitType.Terran_Refinery) == 0 || Util.countBuildingAll(UnitType.Terran_Academy) > 0) {
                 return State.FAILURE;
             }
-            Strategy strat = ((GameState)this.handler).strat;
+            Strategy strat = ((GameState) this.handler).strat;
             if ((strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE"))
                     && Util.countBuildingAll(UnitType.Terran_Factory) >= strat.facPerCC) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Academy;

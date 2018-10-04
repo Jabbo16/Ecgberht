@@ -28,7 +28,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     }
 
     @Override
-    public boolean runAgent() { // TODO revert wraith logic, worked better a few weeks ago :(
+    public boolean runAgent() { // TODO improve
         try {
             if (!unit.exists()) return true;
             if (unit.getHitPoints() <= 20) {
@@ -50,7 +50,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             //if (status != Status.COMBAT) attackUnit = null;
             attackUnit = null;
             //if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isAttacking()) {
-            if ((unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isAttacking() && !unit.isMoving() && !unit.isLockedDown() && !unit.isStasised()) {
+            if ((unit.isIdle() || unit.getOrder() == Order.PlayerGuard) && !unit.isMoving() && !unit.isLockedDown() && !unit.isStasised()) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), true);
                 Position target = unit.getOrderTargetPosition();
                 if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
@@ -115,10 +115,11 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
 
     private void combat() {
         Unit toAttack;
+        if (unit.isAttackFrame()) return;
         if (!mainTargets.isEmpty()) {
             toAttack = chooseHarassTarget();
             if (toAttack != null) {
-                if (attackUnit != null && attackUnit.equals(toAttack)) return;
+                if ((attackUnit != null && attackUnit.equals(toAttack))) return;
                 unit.attack(toAttack);
                 attackUnit = toAttack;
                 attackPos = null;
@@ -152,11 +153,12 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         }
         if (!mySimAir.enemies.isEmpty()) {
             for (Unit u : mySimAir.enemies) {
-                if (getGs().enemyRace == Race.Zerg && u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit)) chasenByScourge = true;
+                if (getGs().enemyRace == Race.Zerg && u instanceof Scourge && ((Scourge) u).getOrderTarget().equals(unit))
+                    chasenByScourge = true;
                 else if (Util.isStaticDefense(u) && u.getDistance(unit) < ((AirAttacker) u).getAirWeapon().maxRange() * 1.25) {
                     staticAirDefense = true;
                 }
-                if(getGs().enemyRace == Race.Zerg){
+                if (getGs().enemyRace == Race.Zerg) {
                     if (chasenByScourge && staticAirDefense) break;
                 } else if (staticAirDefense) break;
             }
@@ -185,7 +187,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     }
 
     private void attack() {
-        if (unit.isAttacking()) return;
+        if (unit.isAttackFrame()) return;
         Position newAttackPos;
         if (getGs().enemyMainBase != null) newAttackPos = getGs().enemyMainBase.getLocation().toPosition();
         else newAttackPos = Util.chooseAttackPosition(unit.getPosition(), true);

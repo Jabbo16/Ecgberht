@@ -31,7 +31,7 @@ public class MoveIsland extends Action {
                 ((GameState) this.handler).deltaCash.second += chosenType.gasPrice();
                 ((GameState) this.handler).chosenWorkerDrop = null;
                 ((GameState) this.handler).chosenIsland = null;
-                ((GameState) this.handler).islandExpand = false; // TODO check
+                ((GameState) this.handler).islandExpand = false;
                 return State.SUCCESS;
             }
             return State.FAILURE;

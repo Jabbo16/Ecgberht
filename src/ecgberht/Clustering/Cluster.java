@@ -3,14 +3,13 @@ package ecgberht.Clustering;
 import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
 /*
 Thanks to @Yegers for improving performance
 */
-public class Cluster{
+public class Cluster {
     public Set<Unit> units = new TreeSet<>();
     public double modeX = 0;
     public double modeY = 0;

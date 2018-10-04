@@ -92,6 +92,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void patrol() {
+        if (unit.getOrder() == Order.Patrol) return;
         if (attackUnit != null && unit.getOrder() != Order.Patrol) {
             Position pos = Util.choosePatrolPositionVulture(unit, attackUnit);
             if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos)) {
@@ -206,6 +207,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void attack() {
+        if (unit.isAttackFrame()) return;
         attackPos = selectNewAttack();
         if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
             attackUnit = null;

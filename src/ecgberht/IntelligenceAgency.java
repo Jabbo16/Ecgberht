@@ -106,13 +106,13 @@ public class IntelligenceAgency {
 
     static void onShow(Unit unit, UnitType type) {
         Integer value = mainEnemyUnitTypeAmount.get(type);
-        if(value != null) mainEnemyUnitTypeAmount.put(type, value + 1);
+        if (value != null) mainEnemyUnitTypeAmount.put(type, value + 1);
         else mainEnemyUnitTypeAmount.put(type, 0);
 
         Player player = ((PlayerUnit) unit).getPlayer();
         if (unit instanceof Worker) enemyWorkers.add(unit);
         // Bases
-        if (type.isResourceDepot()){
+        if (type.isResourceDepot()) {
             // If base and player known skip
             if (enemyBases.containsKey(player) && enemyBases.get(player).contains(new EnemyBuilding(unit))) return;
             enemyBases.get(player).add(new EnemyBuilding(unit));
@@ -132,7 +132,7 @@ public class IntelligenceAgency {
                 enemyTypes.get(player).add(UnitType.Protoss_High_Templar);
             } else if (type == UnitType.Protoss_Fleet_Beacon) enemyTypes.get(player).add(UnitType.Protoss_Carrier);
             else if (type == UnitType.Protoss_Robotics_Support_Bay) enemyTypes.get(player).add(UnitType.Protoss_Reaver);
-            // Zerg tech
+                // Zerg tech
             else if (type == UnitType.Zerg_Spawning_Pool) enemyTypes.get(player).add(UnitType.Zerg_Zergling);
             else if (type == UnitType.Zerg_Spire) enemyTypes.get(player).add(UnitType.Zerg_Mutalisk);
             else if (type == UnitType.Zerg_Hydralisk_Den) enemyTypes.get(player).add(UnitType.Zerg_Hydralisk);
@@ -143,7 +143,7 @@ public class IntelligenceAgency {
 
     static void onDestroy(Unit unit, UnitType type) {
         Integer value = mainEnemyUnitTypeAmount.get(type);
-        if(value != null) mainEnemyUnitTypeAmount.put(type, value - 1);
+        if (value != null) mainEnemyUnitTypeAmount.put(type, value - 1);
         else mainEnemyUnitTypeAmount.put(type, 0);
 
         Player player = ((PlayerUnit) unit).getPlayer();
@@ -237,7 +237,7 @@ public class IntelligenceAgency {
         return false;
     }
 
-    private static void detectEnemyStrategy(){
+    private static void detectEnemyStrategy() {
         if (enemyStrat != EnemyStrats.Unknown) return;
         if (!exploredMinerals) exploredMinerals = checkExploredEnemyMinerals();
         switch (getGs().enemyRace) {
@@ -261,16 +261,17 @@ public class IntelligenceAgency {
     }
 
     private static void updateMaxAmountTypes() {
-        if(getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)){
+        if (getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)) {
             int goliaths = 0;
-            switch(getGs().enemyRace){
+            switch (getGs().enemyRace) {
                 case Zerg:
                     // Mutas
                     Integer spireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Spire);
                     Integer greaterSpireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Greater_Spire);
-                    if((spireAmount != null && spireAmount > 0) || (greaterSpireAmount != null && greaterSpireAmount > 0)) goliaths += 3;
+                    if ((spireAmount != null && spireAmount > 0) || (greaterSpireAmount != null && greaterSpireAmount > 0))
+                        goliaths += 3;
                     Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
-                    goliaths += (amount != null ? (Math.round(amount/2.0)) : 0);
+                    goliaths += (amount != null ? (Math.round(amount / 2.0)) : 0);
                     break;
                 case Terran:
                     // Wraiths
@@ -279,7 +280,7 @@ public class IntelligenceAgency {
 
                     // BattleCruisers
                     amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
-                    goliaths += amount != null ? (amount * 4): 0;
+                    goliaths += amount != null ? (amount * 4) : 0;
                     break;
                 case Protoss:
                     // Scouts!!
@@ -288,7 +289,7 @@ public class IntelligenceAgency {
 
                     // Carriers
                     Integer stargateAmount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Stargate);
-                    if(stargateAmount != null && stargateAmount> 0 ) goliaths += 3;
+                    if (stargateAmount != null && stargateAmount > 0) goliaths += 3;
                     amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
                     goliaths += amount != null ? (amount * 3) : 0;
                     break;
@@ -299,7 +300,7 @@ public class IntelligenceAgency {
         }
     }
 
-	/**
+    /**
      * Detects if the enemy its doing a "Cannon Rush" strat
      */
     private static boolean detectCannonRush() {
