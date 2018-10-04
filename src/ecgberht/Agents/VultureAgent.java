@@ -34,8 +34,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
-            if (unit.getHitPoints() <= 15) {
-                MutablePair<Base, Unit> cc = getGs().MainCC;
+            if (unit.getHitPoints() <= 20) {
+                MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
                     Position ccPos = cc.second.getPosition();
                     if (getGs().getGame().getBWMap().isValidPosition(ccPos)) {
@@ -92,8 +92,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void patrol() {
+        if (unit.getOrder() == Order.Patrol) return;
         if (attackUnit != null && unit.getOrder() != Order.Patrol) {
-            Position pos = Util.ChoosePatrolPositionVulture(unit, attackUnit);
+            Position pos = Util.choosePatrolPositionVulture(unit, attackUnit);
             if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos)) {
                 unit.patrol(pos);
                 attackUnit = null;
@@ -206,6 +207,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void attack() {
+        if (unit.isAttackFrame()) return;
         attackPos = selectNewAttack();
         if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
             attackUnit = null;

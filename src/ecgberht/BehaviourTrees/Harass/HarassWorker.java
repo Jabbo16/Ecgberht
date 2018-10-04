@@ -14,7 +14,7 @@ public class HarassWorker extends Conditional {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).chosenUnitToHarass == null) {
+            if (((GameState) this.handler).chosenUnitToHarass == null || ((GameState) this.handler).chosenHarasser == null) {
                 return State.FAILURE;
             }
             if (((GameState) this.handler).chosenHarasser.attack(((GameState) this.handler).chosenUnitToHarass)) {

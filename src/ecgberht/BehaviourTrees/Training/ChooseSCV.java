@@ -5,6 +5,7 @@ import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.CommandCenter;
@@ -27,6 +28,11 @@ public class ChooseSCV extends Action {
                     }
                 }
                 if (notTraining) return State.FAILURE;
+            }
+            if (((GameState) this.handler).enemyRace == Race.Zerg && ((GameState) this.handler).EI.naughty) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) > 0 && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && ((GameState) this.handler).getCash().first < 150) {
+                    return State.FAILURE;
+                }
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < ((GameState) this.handler).mineralsAssigned.size() * 2 + ((GameState) this.handler).refineriesAssigned.size() * 3 + 2 && !((GameState) this.handler).CCs.isEmpty()) {
                 for (CommandCenter b : ((GameState) this.handler).CCs.values()) {

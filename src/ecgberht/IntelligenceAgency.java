@@ -17,15 +17,16 @@ import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
 
-    static Map<String, TreeSet<Unit>> enemyBases = new TreeMap<>();
-    static Map<String, HashSet<UnitType>> enemyTypes = new TreeMap<>();
-    static Player mainEnemy;
+    static Map<Player, TreeSet<EnemyBuilding>> enemyBases = new HashMap<>();
+    static Map<Player, HashSet<UnitType>> enemyTypes = new HashMap<>();
+    private static Player mainEnemy;
     private static Set<Unit> enemyWorkers = new TreeSet<>();
     private static List<Bullet> enemyBullets = new ArrayList<>();
     private static List<Bullet> allyBullets = new ArrayList<>();
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
     private static String startStrat = null;
     private static boolean exploredMinerals = false;
+    private static Map<UnitType, Integer> mainEnemyUnitTypeAmount = new HashMap<>();
 
     private static int getNumEnemyWorkers() {
         return enemyWorkers.size();
@@ -39,6 +40,18 @@ public class IntelligenceAgency {
         startStrat = strat;
     }
 
+    static void onStartIntelligenceAgency(Player enemy) {
+        enemyBases = new HashMap<>();
+        enemyTypes = new HashMap<>();
+        mainEnemy = enemy;
+        enemyWorkers = new TreeSet<>();
+        enemyBullets = new ArrayList<>();
+        allyBullets = new ArrayList<>();
+        enemyStrat = EnemyStrats.Unknown;
+        startStrat = null;
+        exploredMinerals = false;
+    }
+
     public static EnemyStrats getEnemyStrat() {
         return enemyStrat;
     }
@@ -49,7 +62,7 @@ public class IntelligenceAgency {
      * @param player Player to check
      * @return Number of bases
      */
-    public static int getNumEnemyBases(String player) {
+    public static int getNumEnemyBases(Player player) {
         if (enemyBases.containsKey(player)) return enemyBases.get(player).size();
         return 0;
     }
@@ -68,11 +81,11 @@ public class IntelligenceAgency {
     }
 
     private static boolean enemyHasType(UnitType type) {
-        return enemyTypes.get(mainEnemy.getName()).contains(type);
+        return enemyTypes.get(mainEnemy).contains(type);
     }
 
     public static boolean playerHasType(Player player, UnitType type) {
-        Set<UnitType> types = enemyTypes.get(player.getName());
+        Set<UnitType> types = enemyTypes.get(player);
         return types != null && types.contains(type);
     }
 
@@ -84,7 +97,7 @@ public class IntelligenceAgency {
     }
 
     public static void printEnemyTypes() {
-        for (Entry<String, HashSet<UnitType>> entry : enemyTypes.entrySet()) {
+        for (Entry<Player, HashSet<UnitType>> entry : enemyTypes.entrySet()) {
             for (UnitType type : entry.getValue()) {
                 System.out.println(entry.getKey() + ": " + type);
             }
@@ -92,12 +105,18 @@ public class IntelligenceAgency {
     }
 
     static void onShow(Unit unit, UnitType type) {
-        String player = ((PlayerUnit) unit).getPlayer().getName();
-        if (unit instanceof Worker && !enemyWorkers.contains(unit)) enemyWorkers.add(unit);
-        // If base and player known skip
-        if (enemyBases.containsKey(player) && enemyBases.get(player).contains(unit)) return;
+        Integer value = mainEnemyUnitTypeAmount.get(type);
+        if (value != null) mainEnemyUnitTypeAmount.put(type, value + 1);
+        else mainEnemyUnitTypeAmount.put(type, 0);
+
+        Player player = ((PlayerUnit) unit).getPlayer();
+        if (unit instanceof Worker) enemyWorkers.add(unit);
         // Bases
-        if (type.isResourceDepot()) enemyBases.get(player).add(unit);
+        if (type.isResourceDepot()) {
+            // If base and player known skip
+            if (enemyBases.containsKey(player) && enemyBases.get(player).contains(new EnemyBuilding(unit))) return;
+            enemyBases.get(player).add(new EnemyBuilding(unit));
+        }
         // If player and type known skip
         if (enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;
         // Normal units
@@ -123,12 +142,14 @@ public class IntelligenceAgency {
     }
 
     static void onDestroy(Unit unit, UnitType type) {
-        String player = ((PlayerUnit) unit).getPlayer().getName();
-        if (type.isResourceDepot() && enemyBases.containsKey(player) && enemyBases.get(player).contains(unit))
-            enemyBases.get(player).remove(unit);
-        if (getGs().enemyRace == Race.Zerg && unit instanceof Drone && enemyWorkers.contains(unit)) {
-            enemyWorkers.remove(unit);
-        }
+        Integer value = mainEnemyUnitTypeAmount.get(type);
+        if (value != null) mainEnemyUnitTypeAmount.put(type, value - 1);
+        else mainEnemyUnitTypeAmount.put(type, 0);
+
+        Player player = ((PlayerUnit) unit).getPlayer();
+        if (type.isResourceDepot() && enemyBases.containsKey(player))
+            enemyBases.get(player).remove(new EnemyBuilding(unit));
+        if (getGs().enemyRace == Race.Zerg && unit instanceof Drone) enemyWorkers.remove(unit);
     }
 
     /**
@@ -169,7 +190,7 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
+                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE") || getGs().strat.name.equals("FullMech")) {
                     getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -187,7 +208,7 @@ public class IntelligenceAgency {
     }
 
     /**
-     * Detects if the enemy its doing a "Zealot Rush" strat
+     * Detects if the enemy its doing a "Mech Rush" strat
      */
     private static boolean detectMechRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null && exploredMinerals) {
@@ -216,8 +237,7 @@ public class IntelligenceAgency {
         return false;
     }
 
-    static void onFrame() {
-        if (getGs().enemyStartBase == null) return;
+    private static void detectEnemyStrategy() {
         if (enemyStrat != EnemyStrats.Unknown) return;
         if (!exploredMinerals) exploredMinerals = checkExploredEnemyMinerals();
         switch (getGs().enemyRace) {
@@ -229,11 +249,60 @@ public class IntelligenceAgency {
                 break;
             case Protoss:
                 if (detectZealotRush()) return;
-                if (detectCannonRush()) return;
+                //if (detectCannonRush()) return;
                 break;
         }
     }
 
+    static void onFrame() {
+        if (getGs().enemyStartBase == null) return;
+        detectEnemyStrategy();
+        updateMaxAmountTypes();
+    }
+
+    private static void updateMaxAmountTypes() {
+        if (getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)) {
+            int goliaths = 0;
+            switch (getGs().enemyRace) {
+                case Zerg:
+                    // Mutas
+                    Integer spireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Spire);
+                    Integer greaterSpireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Greater_Spire);
+                    if ((spireAmount != null && spireAmount > 0) || (greaterSpireAmount != null && greaterSpireAmount > 0))
+                        goliaths += 3;
+                    Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
+                    goliaths += (amount != null ? (Math.round(amount / 2.0)) : 0);
+                    break;
+                case Terran:
+                    // Wraiths
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
+                    goliaths += amount != null ? (amount / 2 + 1) : 0;
+
+                    // BattleCruisers
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
+                    goliaths += amount != null ? (amount * 4) : 0;
+                    break;
+                case Protoss:
+                    // Scouts!!
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Scout);
+                    goliaths += amount != null ? amount : 0;
+
+                    // Carriers
+                    Integer stargateAmount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Stargate);
+                    if (stargateAmount != null && stargateAmount > 0) goliaths += 3;
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
+                    goliaths += amount != null ? (amount * 3) : 0;
+                    break;
+                case Unknown:
+                    break;
+            }
+            getGs().maxGoliaths = goliaths;
+        }
+    }
+
+    /**
+     * Detects if the enemy its doing a "Cannon Rush" strat
+     */
     private static boolean detectCannonRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
             boolean foundForge = false;

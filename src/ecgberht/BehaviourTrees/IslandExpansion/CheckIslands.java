@@ -19,7 +19,7 @@ public class CheckIslands extends Conditional {
             if (((GameState) this.handler).islandBases.isEmpty() || !((GameState) this.handler).islandExpand)
                 return State.FAILURE;
             for (Base b : ((GameState) this.handler).islandBases) {
-                if (!((GameState) this.handler).CCs.containsKey(b)) return State.SUCCESS;
+                if (!((GameState) this.handler).islandCCs.containsKey(b)) return State.SUCCESS;
             }
             ((GameState) this.handler).chosenDropShip = null;
             ((GameState) this.handler).chosenWorker = null;

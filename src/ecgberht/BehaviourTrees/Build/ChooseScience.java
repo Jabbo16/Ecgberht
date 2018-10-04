@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -19,7 +20,7 @@ public class ChooseScience extends Action {
             if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).Ps.isEmpty() || ((GameState) this.handler).strat.numCCForScience > ((GameState) this.handler).CCs.size()) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Science_Facility) == 0) {
+            if (Util.countBuildingAll(UnitType.Terran_Science_Facility) == 0) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Science_Facility;
                 return State.SUCCESS;
             }

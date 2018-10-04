@@ -6,11 +6,13 @@ import ecgberht.EnemyBuilding;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.WalkPosition;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,8 +43,7 @@ public class Util {
         double rectArea = areaOfRect(p1, p2, p3);
         double triangleAreaSum = (triangle1Area + triangle2Area + triangle3Area + triangle4Area);
         if (triangleAreaSum % (Math.pow(10, 14)) >= 0.999999999999999) triangleAreaSum = Math.ceil(triangleAreaSum);
-        if (triangleAreaSum == rectArea) return true;
-        else return false;
+        return Double.compare(triangleAreaSum, rectArea) == 0;
     }
 
     public static List<Unit> getUnitsInRectangle(Position topLeft, Position bottomRight) { //TODO test
@@ -451,7 +452,7 @@ public class Util {
         return new Position(cropped.first, cropped.second);
     }
 
-    public static Position ChoosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
+    public static Position choosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
         try {
             Position myUnitPos = myUnit.getPosition();
             Position attackUnitPos = attackUnit.getPosition();
@@ -465,7 +466,7 @@ public class Util {
             Position prePatrol = new Position(patrolDir.first.intValue(), patrolDir.second.intValue()).multiply(new Position(myUnit.getGroundWeaponMaxRange() - 5, myUnit.getGroundWeaponMaxRange() - 5));
             return cropPosition(myUnitPos.add(prePatrol));
         } catch (Exception e) {
-            System.err.println("ChoosePatrolPositionVulture Exception");
+            System.err.println("choosePatrolPositionVulture Exception");
             e.printStackTrace();
             return null;
         }
@@ -488,7 +489,7 @@ public class Util {
     }
 
     public static Position improveMapEdgePosition(Position unitPos, Position pos) {
-        double angle = Math.atan2(unitPos.getY(), unitPos.getX()) - Math.atan2(pos.getY(), pos.getX());
+        //double angle = Math.atan2(unitPos.getY(), unitPos.getX()) - Math.atan2(pos.getY(), pos.getX());
         MutablePair<Integer, Integer> improved = new MutablePair<>(pos.getX(), pos.getY());
         int mapHeight = getGs().getGame().getBWMap().mapHeight() * 32;
         int mapWidth = getGs().getGame().getBWMap().mapWidth() * 32;
@@ -521,9 +522,45 @@ public class Util {
         return null;
     }
 
+    public static boolean shouldIStop(Position pos) {
+        for (Base b : getGs().BLs) {
+            if (Util.getSquareTiles(b.getLocation(), UnitType.Terran_Command_Center).contains(pos.toTilePosition()))
+                return false;
+        }
+        return getGs().mainChoke != null && getGs().mainChoke.getCenter().toPosition().getDistance(pos) > 32 * 2;
+    }
+
+    private static Set<TilePosition> getSquareTiles(TilePosition pos, UnitType type) {
+        Set<TilePosition> tiles = new HashSet<>();
+        tiles.add(pos);
+        int height = type.tileHeight();
+        int width = type.tileHeight();
+        for (int ii = 1; ii <= height; ii++) tiles.add(pos.add(new TilePosition(0, ii)));
+        for (int ii = 1; ii <= width; ii++) tiles.add(pos.add(new TilePosition(ii, 0)));
+        return tiles;
+    }
+
     public static Position getUnitCenterPosition(Position leftTop, UnitType type) {
         Position rightBottom = new Position(leftTop.getX() + type.tileWidth() * TilePosition.SIZE_IN_PIXELS, leftTop.getY() + type.tileHeight() * TilePosition.SIZE_IN_PIXELS);
         return new Position((leftTop.getX() + rightBottom.getX()) / 2, (leftTop.getY() + rightBottom.getY()) / 2);
+    }
 
+    public static double getChokeWidth(ChokePoint choke) {
+        List<WalkPosition> walks = choke.getGeometry();
+        return walks.get(0).toPosition().getDistance(walks.get(walks.size() - 1).toPosition());
+    }
+
+    public static boolean isStaticDefense(Unit u) {
+        return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
+                || u instanceof SunkenColony || u instanceof PhotonCannon;
+    }
+
+    public static int countBuildingAll(UnitType type) {
+        int count = 0;
+        for (MutablePair<UnitType, TilePosition> w : getGs().workerBuild.values()) {
+            if (w.first == type) count++;
+        }
+        count += countUnitTypeSelf(type);
+        return count;
     }
 }

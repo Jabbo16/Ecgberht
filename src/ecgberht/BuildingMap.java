@@ -20,7 +20,7 @@ import static ecgberht.Ecgberht.getGs;
 
 public class BuildingMap implements Cloneable {
 
-    private static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
+    public static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
     private Player self;
     private int height;
     private int width;
@@ -49,8 +49,18 @@ public class BuildingMap implements Cloneable {
     }
 
     private void initTilesArea() {
-        for (Area a : bwem.getMap().getAreas())
-            tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
+        boolean startOrdered = false;
+        boolean naturalOrdered = false;
+        TilePosition startTile = self.getStartLocation();
+        for (Area a : bwem.getMap().getAreas()) {
+            if (!startOrdered && bwem.getMap().getArea(startTile).equals(a)) {
+                tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(startTile)));
+                startOrdered = true;
+            } else if (!naturalOrdered && getGs().naturalArea.equals(a)) {
+                tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(getGs().BLs.get(1).getLocation())));
+                naturalOrdered = true;
+            } else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
+        }
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
                 TilePosition x = new TilePosition(ii, jj);
@@ -306,7 +316,7 @@ public class BuildingMap implements Cloneable {
     }
 
     // Finds a valid position in the map for a specific building type starting with a given tileposition, searches owned areas
-    public TilePosition findPositionNew(UnitType buildingType, TilePosition starting) { // TODO test
+    public TilePosition findPositionNew(UnitType buildingType, TilePosition starting) {
         if (buildingType == UnitType.Terran_Bunker || buildingType == UnitType.Terran_Missile_Turret)
             return findPosition(buildingType, starting);
         Area find = bwem.getMap().getArea(starting);
@@ -314,7 +324,8 @@ public class BuildingMap implements Cloneable {
         TilePosition tile = findPositionArea(buildingType, find);
         if (tile != null) return tile;
         for (Base b : getGs().CCs.keySet()) {
-            if (find.equals(b.getArea())) continue;
+            if (find.equals(b.getArea()) || (getGs().fortressSpecialBLs.containsKey(b) && buildingType != UnitType.Terran_Starport))
+                continue;
             tile = findPositionArea(buildingType, b.getArea());
             if (tile != null) return tile;
         }
@@ -363,6 +374,7 @@ public class BuildingMap implements Cloneable {
     public TilePosition findBunkerPosition(ChokePoint choke) {
         TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
+        double chokeWidth = Util.getChokeWidth(choke);
         Position starting = choke.getCenter().toPosition();
         int x = starting.toTilePosition().getY();
         int y = starting.toTilePosition().getX();
@@ -382,7 +394,10 @@ public class BuildingMap implements Cloneable {
                         if (area != null && !area.equals(getGs().naturalArea) && expandBunker) continue;
                         if (checkUnitsChosenBuildingGrid(new TilePosition(jj, ii), UnitType.Terran_Bunker)) {
                             TilePosition newPosition = new TilePosition(jj, ii);
-                            double newDist = Util.broodWarDistance(Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker), starting);
+                            Position centerBunker = Util.getUnitCenterPosition(newPosition.toPosition(), UnitType.Terran_Bunker);
+                            if (chokeWidth <= 64.0 && Util.broodWarDistance(choke.getCenter().toPosition(), centerBunker) <= 64)
+                                continue;
+                            double newDist = Util.broodWarDistance(centerBunker, starting);
                             if (position == null || newDist < dist) {
                                 position = newPosition;
                                 dist = newDist;

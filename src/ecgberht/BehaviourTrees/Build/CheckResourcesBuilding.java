@@ -22,7 +22,7 @@ public class CheckResourcesBuilding extends Conditional {
         try {
             if (((GameState) this.handler).chosenPosition == null) {
                 ((GameState) this.handler).chosenWorker = null;
-                ((GameState) this.handler).chosenToBuild = null;
+                //((GameState) this.handler).chosenToBuild = UnitType.None;
                 return State.FAILURE;
             }
             MutablePair<Integer, Integer> cash = ((GameState) this.handler).getCash();
@@ -30,21 +30,20 @@ public class CheckResourcesBuilding extends Conditional {
             TilePosition start = chosen.getTilePosition();
             TilePosition end = ((GameState) this.handler).chosenPosition;
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), ((GameState) this.handler).chosenToBuild);
-
             if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks) {
-                if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < 1) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                     if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() * 2 + 40 + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice() * 2) + ((GameState) this.handler).deltaCash.second) {
                         return State.SUCCESS;
                     }
-                } else if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 1) return State.SUCCESS;
-
+                } else if (Util.countBuildingAll(UnitType.Terran_Barracks) == 1)
+                    return State.SUCCESS;
                 return State.FAILURE;
             } else if (cash.first + ((GameState) this.handler).getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (((GameState) this.handler).chosenToBuild.mineralPrice() + ((GameState) this.handler).deltaCash.first) && cash.second >= (((GameState) this.handler).chosenToBuild.gasPrice()) + ((GameState) this.handler).deltaCash.second) {
                 return State.SUCCESS;
             }
             ((GameState) this.handler).chosenWorker = null;
             ((GameState) this.handler).chosenPosition = null;
-            ((GameState) this.handler).chosenToBuild = null;
+            //((GameState) this.handler).chosenToBuild = UnitType.None;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

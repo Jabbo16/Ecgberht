@@ -7,7 +7,7 @@ import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Objects;
 
-public class EnemyBuilding {
+public class EnemyBuilding implements Comparable<EnemyBuilding> {
     public TilePosition pos;
     public Building unit;
     public UnitType type;
@@ -32,5 +32,10 @@ public class EnemyBuilding {
     @Override
     public int hashCode() {
         return Objects.hash(unit);
+    }
+
+    @Override
+    public int compareTo(EnemyBuilding o) {
+        return this.unit.getId() - o.unit.getId();
     }
 }

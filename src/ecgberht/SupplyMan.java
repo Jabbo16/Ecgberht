@@ -9,7 +9,7 @@ public class SupplyMan {
     private int supplyUsed = 8;
     private int supplyTotal = 18;
 
-    public SupplyMan(Race race) {
+    SupplyMan(Race race) {
         if (race == Race.Terran) supplyTotal = 20;
     }
 
@@ -21,24 +21,24 @@ public class SupplyMan {
         return supplyUsed;
     }
 
-    public int getSupplyTotal() {
+    int getSupplyTotal() {
         return supplyTotal;
     }
 
-    public void onCreate(Unit unit) {
+    void onCreate(Unit unit) {
         if (unit instanceof Building) return;
         UnitType type = unit.getType();
         if (type.supplyRequired() > 0) supplyUsed += type.supplyRequired();
     }
 
-    public void onComplete(Unit unit) {
+    void onComplete(Unit unit) {
         if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
             UnitType type = unit.getType();
             if (type.supplyProvided() > 0) supplyTotal += type.supplyProvided();
         }
     }
 
-    public void onDestroy(Unit unit) {
+    void onDestroy(Unit unit) {
         UnitType type = unit.getType();
         if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
             if (type.supplyProvided() > 0) supplyTotal -= type.supplyProvided();

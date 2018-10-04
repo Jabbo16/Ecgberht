@@ -21,8 +21,6 @@ public class CheckDropped extends Conditional {
             Worker scv = ((GameState) this.handler).chosenWorkerDrop;
             DropShipAgent ship = ((GameState) this.handler).chosenDropShip;
             if (ship == null) return State.SUCCESS;
-
-
             if (scv != null) {
                 if (ship.statusToString().equals("RETREAT")) {
                     Unit transport = scv.getTransport();

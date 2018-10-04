@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -18,7 +19,7 @@ public class ChooseBunker extends Action {
             if (((GameState) this.handler).getGame().getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).MBs.size() >= 1 && ((GameState) this.handler).countUnit(UnitType.Terran_Bunker) == 0) {
+            if (((GameState) this.handler).MBs.size() >= 1 && Util.countBuildingAll(UnitType.Terran_Bunker) == 0) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Bunker;
                 return State.SUCCESS;
             }

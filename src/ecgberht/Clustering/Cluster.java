@@ -14,7 +14,7 @@ public class Cluster {
     public double modeX = 0;
     public double modeY = 0;
 
-    public void updateCentroid() {
+    void updateCentroid() {
         if (units.isEmpty()) return;
         int size = units.size();
         int x = 0;
@@ -31,8 +31,21 @@ public class Cluster {
         return new double[]{modeX, modeY};
     }
 
-    public boolean equals(Cluster cluster) {
+    /*public boolean equals(Cluster cluster) {
         if (cluster == null) return false;
         return Arrays.equals(this.mode(), cluster.mode());
+    }*/
+
+    @Override
+    public boolean equals(final Object object) {
+        if (this == object) {
+            return true;
+        } else if (!(object instanceof Cluster)) {
+            return false;
+        } else {
+            final Cluster cluster = (Cluster) object;
+            return (Arrays.equals(this.mode(), cluster.mode()));
+        }
     }
+
 }

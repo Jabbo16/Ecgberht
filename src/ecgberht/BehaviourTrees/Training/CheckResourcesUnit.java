@@ -5,6 +5,7 @@ import ecgberht.Util.MutablePair;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.type.UnitType;
 
 public class CheckResourcesUnit extends Conditional {
 
@@ -20,7 +21,7 @@ public class CheckResourcesUnit extends Conditional {
                 return State.SUCCESS;
             }
             ((GameState) this.handler).chosenBuilding = null;
-            ((GameState) this.handler).chosenToBuild = null;
+            ((GameState) this.handler).chosenToBuild = UnitType.None;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

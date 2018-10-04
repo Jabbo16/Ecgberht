@@ -4,6 +4,7 @@ import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -11,10 +12,7 @@ import jfap.JFAP;
 import jfap.JFAPUnit;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.Color;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
@@ -43,6 +41,49 @@ public class SimManager {
             longSimFrames = 170;
             iterations = 0;
         }
+        switch (bw.getInteractionHandler().enemy().getRace()) {
+            case Zerg:
+                radius = UnitType.Zerg_Sunken_Colony.groundWeapon().maxRange();
+                break;
+            case Terran:
+                radius = UnitType.Terran_Missile_Turret.airWeapon().maxRange();
+                break;
+            case Protoss:
+                radius = UnitType.Protoss_Photon_Cannon.groundWeapon().maxRange();
+                break;
+            case Unknown:
+                radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                break;
+        }
+    }
+
+    private void updateRadius() {
+        if (radius == UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) return;
+        if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) > 0) {
+            if (getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
+                radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                return;
+            }
+        }
+        switch (getGs().enemyRace) {
+            case Zerg:
+                if (getGs().getPlayer().hasResearched(TechType.Irradiate)) {
+                    radius = WeaponType.Irradiate.maxRange();
+                    return;
+                }
+                break;
+            case Terran:
+                if (IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+                    radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                }
+                break;
+            case Protoss:
+                if (getGs().getPlayer().hasResearched(TechType.EMP_Shockwave)) {
+                    radius = WeaponType.EMP_Shockwave.maxRange();
+                    return;
+                }
+                break;
+        }
     }
 
     /**
@@ -66,7 +107,7 @@ public class SimManager {
         }
         myUnits.addAll(getGs().DBs.keySet()); // Bunkers
         myUnits.addAll(getGs().agents.keySet()); // Agents
-        MeanShift clustering = new MeanShift(myUnits);
+        MeanShift clustering = new MeanShift(myUnits, radius);
         friendly = clustering.run(iterations);
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
@@ -77,15 +118,20 @@ public class SimManager {
         for (Unit u : getGs().enemyBuildingMemory.keySet()) {
             if (u instanceof Attacker || u instanceof Bunker) enemyUnits.add(u);
         }
-        clustering = new MeanShift(enemyUnits);
+        clustering = new MeanShift(enemyUnits, radius);
         enemies = clustering.run(iterations);
     }
 
     private boolean isArmyUnit(Unit u) {
-        if (!u.exists()) return false;
-        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
-        return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
-                || u instanceof Vulture || u instanceof Wraith;
+        try {
+            if (!u.exists()) return false;
+            if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+            return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
+                    || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -94,6 +140,7 @@ public class SimManager {
      */
     public void onFrameSim() {
         time = System.currentTimeMillis();
+        updateRadius();
         reset();
         createClusters();
         if (!friendly.isEmpty()) {
@@ -117,7 +164,7 @@ public class SimManager {
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (u instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
+            if (u.unit instanceof Attacker && getGs().getGame().getBWMap().isVisible(u.pos)) return false;
         }
         return true;
     }
@@ -185,7 +232,7 @@ public class SimManager {
                 if (!u.getType().canAttack()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
-                    else{
+                    else {
                         s.lose = true;
                         break;
                     }
@@ -195,7 +242,7 @@ public class SimManager {
                 s.stateBefore.second.add(jU);
             }
             if (s.lose) continue;
-            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 6) return;
+            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 5) return;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();

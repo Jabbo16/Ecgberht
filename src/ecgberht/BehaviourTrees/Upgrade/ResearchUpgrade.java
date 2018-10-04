@@ -6,7 +6,6 @@ import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 
 public class ResearchUpgrade extends Action {
@@ -37,9 +36,6 @@ public class ResearchUpgrade extends Action {
                 }
             } else if (((GameState) this.handler).chosenResearch != null) {
                 if (((GameState) this.handler).chosenUnitUpgrader.research(((GameState) this.handler).chosenResearch)) {
-                    if (((GameState) this.handler).chosenResearch == TechType.Tank_Siege_Mode) {
-                        ((GameState) this.handler).siegeResearched = true;
-                    }
                     ((GameState) this.handler).chosenResearch = null;
                     return State.SUCCESS;
                 }

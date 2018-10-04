@@ -2,6 +2,7 @@ package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -35,11 +36,11 @@ public class TrainUnit extends Action {
                 }
             }*/
             TrainingFacility chosen = ((GameState) this.handler).chosenBuilding;
-            if (((GameState) this.handler).strat.name == "ProxyBBS") {
-                if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == 2 &&
-                        ((GameState) this.handler).countUnit(UnitType.Terran_Supply_Depot) == 0) {
+            if (((GameState) this.handler).strat.name.equals("ProxyBBS")) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2 &&
+                        Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
                     ((GameState) this.handler).chosenBuilding = null;
-                    ((GameState) this.handler).chosenToBuild = null;
+                    ((GameState) this.handler).chosenToBuild = UnitType.None;
                     return State.FAILURE;
                 }
                 if (((GameState) this.handler).getSupply() > 0) {
@@ -50,27 +51,18 @@ public class TrainUnit extends Action {
 
             if (((GameState) this.handler).getSupply() > 4 || ((GameState) this.handler).checkSupply() ||
                     ((GameState) this.handler).getPlayer().supplyTotal() >= 400) {
-                /*if (((GameState) this.handler).EI.naughty) { // TODO test
-                    if (((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Bunker) == 0) {
-                        if (((GameState) this.handler).getPlayer().minerals() + ((GameState) this.handler).deltaCash.first < 100) {
-                            return State.FAILURE;
+                if (!((GameState) this.handler).defense && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
+                    boolean found = false;
+                    for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                        if (w.first == UnitType.Terran_Command_Center) {
+                            found = true;
+                            break;
                         }
                     }
-                }*/
-                if (!((GameState) this.handler).defense) {
-                    if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                        boolean found = false;
-                        for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
-                            if (w.first == UnitType.Terran_Command_Center) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            ((GameState) this.handler).chosenBuilding = null;
-                            ((GameState) this.handler).chosenToBuild = null;
-                            return State.FAILURE;
-                        }
+                    if (!found) {
+                        ((GameState) this.handler).chosenBuilding = null;
+                        ((GameState) this.handler).chosenToBuild = UnitType.None;
+                        return State.FAILURE;
                     }
                 }
                 chosen.train(((GameState) this.handler).chosenUnit);

@@ -2,7 +2,6 @@ package ecgberht.Clustering;
 
 
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.ArrayList;
@@ -15,10 +14,11 @@ Thanks to @Yegers for improving performance
 public class MeanShift {
 
     public long time = 0;
-    private double radius = Math.pow(UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange(), 2);
+    private double radius;
     private List<UnitPos> points = new ArrayList<>();
 
-    public MeanShift(Collection<Unit> units) {
+    public MeanShift(Collection<Unit> units, double radius) {
+        this.radius = Math.pow(radius, 2);
         for (Unit u : units) {
             //if (!u.isVisible()) continue;
             Position p = u.getPosition();

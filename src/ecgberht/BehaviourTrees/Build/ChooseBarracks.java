@@ -2,10 +2,12 @@ package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
@@ -23,17 +25,21 @@ public class ChooseBarracks extends Action {
             if ((((GameState) this.handler).strat.name.equals("BioGreedyFE") ||
                     ((GameState) this.handler).strat.name.equals("MechGreedyFE") ||
                     ((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) &&
-                    ((GameState) this.handler).countUnit(UnitType.Terran_Command_Center) == 1 &&
-                    ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) > 1 &&
+                    Util.countBuildingAll(UnitType.Terran_Command_Center) == 1 &&
+                    Util.countBuildingAll(UnitType.Terran_Barracks) > 1 &&
                     ((GameState) this.handler).frameCount <= 24 * 240) {
                 return State.FAILURE;
             }
-
+            if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
+                    && Util.countBuildingAll(UnitType.Terran_Barracks) == 1
+                    && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
+                return State.FAILURE;
+            }
             if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
-                if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && ((GameState) this.handler).countUnit(UnitType.Terran_Academy) == 0) {
+                if (!((GameState) this.handler).MBs.isEmpty() && Util.countBuildingAll(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;
                 }
-                if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && ((GameState) this.handler).countUnit(UnitType.Terran_Refinery) == 0) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) == ((GameState) this.handler).strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Refinery) == 0) {
                     return State.FAILURE;
                 }
             } else {
@@ -55,12 +61,12 @@ public class ChooseBarracks extends Action {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) == ((GameState) this.handler).MBs.size()
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) == ((GameState) this.handler).MBs.size()
                     && ((GameState) this.handler).getPlayer().minerals() >= 600) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Barracks;
                 return State.SUCCESS;
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) < ((GameState) this.handler).strat.raxPerCC * ((GameState) this.handler).CCs.size()) {
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) < ((GameState) this.handler).strat.raxPerCC * ((GameState) this.handler).CCs.size()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Barracks;
                 return State.SUCCESS;
             }

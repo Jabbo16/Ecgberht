@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.Strategy;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
@@ -20,10 +21,16 @@ public class ChooseAcademy extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Refinery) == 0) {
+            if (Util.countBuildingAll(UnitType.Terran_Refinery) == 0 || Util.countBuildingAll(UnitType.Terran_Academy) > 0) {
                 return State.FAILURE;
             }
-            if (((GameState) this.handler).countUnit(UnitType.Terran_Barracks) >= ((GameState) this.handler).strat.numRaxForAca && Util.countUnitTypeSelf(UnitType.Terran_Academy) == 0) {
+            Strategy strat = ((GameState) this.handler).strat;
+            if ((strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE"))
+                    && Util.countBuildingAll(UnitType.Terran_Factory) >= strat.facPerCC) {
+                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Academy;
+                return State.SUCCESS;
+            }
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) >= ((GameState) this.handler).strat.numRaxForAca) {
                 for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                     if (w.first == UnitType.Terran_Academy) {
                         return State.FAILURE;
