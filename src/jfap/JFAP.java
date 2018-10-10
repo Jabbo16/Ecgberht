@@ -140,7 +140,7 @@ public class JFAP extends AJFAP {
         fu.health -= Math.max(128, damage);
     }
 
-    private int distButNotReally(JFAPUnit u1, JFAPUnit u2) {
+    private int distSquared(JFAPUnit u1, JFAPUnit u2) {
         return (u1.x - u2.x) * (u1.x - u2.x) + (u1.y - u2.y) * (u1.y - u2.y);
     }
 
@@ -163,26 +163,26 @@ public class JFAP extends AJFAP {
             }
         }
         JFAPUnit closestEnemy = null;
-        int closestDist = 0;
+        int closestDist = Integer.MAX_VALUE;
         for (JFAPUnit enemy : enemyUnits) {
             if (enemy.flying) {
                 if (fu.airDamage > 0) {
-                    final int d = distButNotReally(fu, enemy);
-                    if ((closestEnemy == null || d < closestDist) && d >= fu.airMinRange) {
+                    final int d = distSquared(fu, enemy);
+                    if ((closestEnemy == null || d < closestDist) && d >= fu.airMinRangeSquared) {
                         closestDist = d;
                         closestEnemy = enemy;
                     }
                 }
             } else if (fu.groundDamage > 0) {
-                final int d = distButNotReally(fu, enemy);
-                if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRange) {
+                final int d = distSquared(fu, enemy);
+                if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRangeSquared) {
                     closestDist = d;
                     closestEnemy = enemy;
                 }
             }
         }
         if (kite) {
-            if (closestEnemy != null && closestEnemy.groundMaxRange < fu.groundMaxRange && closestDist <= (fu.groundMaxRange + fu.speed) && closestEnemy.groundMaxRange <= 32) {
+            if (closestEnemy != null && closestEnemy.groundMaxRangeSquared < fu.groundMaxRangeSquared && closestDist <= (fu.groundMaxRangeSquared + fu.speedSquared) && closestEnemy.groundMaxRangeSquared <= 32) {
                 int dx = closestEnemy.x - fu.x;
                 int dy = closestEnemy.y - fu.y;
                 fu.x -= (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
@@ -191,13 +191,13 @@ public class JFAP extends AJFAP {
                 return;
             }
         }
-        if (closestEnemy != null && Math.sqrt(closestDist) <= fu.speed && !(fu.x == closestEnemy.x && fu.y == closestEnemy.y)) {
+        if (closestEnemy != null && closestDist <= fu.speedSquared && !(fu.x == closestEnemy.x && fu.y == closestEnemy.y)) {
             fu.x = closestEnemy.x;
             fu.y = closestEnemy.y;
             closestDist = 0;
             didSomething = true;
         }
-        if (closestEnemy != null && closestDist <= (closestEnemy.flying ? fu.groundMaxRange : fu.airMinRange)) {
+        if (closestEnemy != null && closestDist <= (closestEnemy.flying ? fu.groundMaxRangeSquared : fu.airMinRangeSquared)) {
             if (closestEnemy.flying) {
                 dealDamage(closestEnemy, fu.airDamage, fu.airDamageType);
                 fu.attackCooldownRemaining = fu.airCooldown;
@@ -224,10 +224,10 @@ public class JFAP extends AJFAP {
 
     private void medicsim(JFAPUnit fu, Set<JFAPUnit> player12) {
         JFAPUnit closestHealable = null;
-        int closestDist = 0;
+        int closestDist = Integer.MAX_VALUE;
         for (JFAPUnit friendlyUnit : player12) {
             if (friendlyUnit.isOrganic && friendlyUnit.health < friendlyUnit.maxHealth && !friendlyUnit.didHealThisFrame) {
-                final int d = distButNotReally(fu, friendlyUnit);
+                final int d = distSquared(fu, friendlyUnit);
                 if (closestHealable == null || d < closestDist) {
                     closestHealable = friendlyUnit;
                     closestDist = d;
@@ -245,25 +245,25 @@ public class JFAP extends AJFAP {
 
     private boolean suicideSim(JFAPUnit fu, Set<JFAPUnit> player) {
         JFAPUnit closestEnemy = null;
-        int closestDist = 0;
+        int closestDist = Integer.MAX_VALUE;
         for (JFAPUnit enemy : player) {
             if (enemy.flying) {
                 if (fu.airDamage > 0) {
-                    final int d = distButNotReally(fu, enemy);
-                    if ((closestEnemy == null || d < closestDist) && d >= fu.airMinRange) {
+                    final int d = distSquared(fu, enemy);
+                    if ((closestEnemy == null || d < closestDist) && d >= fu.airMinRangeSquared) {
                         closestDist = d;
                         closestEnemy = enemy;
                     }
                 }
             } else if (fu.groundDamage > 0) {
-                int d = distButNotReally(fu, enemy);
-                if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRange) {
+                int d = distSquared(fu, enemy);
+                if ((closestEnemy == null || d < closestDist) && d >= fu.groundMinRangeSquared) {
                     closestDist = d;
                     closestEnemy = enemy;
                 }
             }
         }
-        if (closestEnemy != null && Math.sqrt(closestDist) <= fu.speed) {
+        if (closestEnemy != null && closestDist <= fu.speedSquared) {
             if (closestEnemy.flying) dealDamage(closestEnemy, fu.airDamage, fu.airDamageType);
             else dealDamage(closestEnemy, fu.groundDamage, fu.groundDamageType);
             if (closestEnemy.health < 1) {
@@ -272,7 +272,7 @@ public class JFAP extends AJFAP {
             }
             didSomething = true;
             return true;
-        } else if (closestEnemy != null && Math.sqrt(closestDist) > fu.speed) {
+        } else if (closestEnemy != null && closestDist > fu.speedSquared) {
             final int dx = closestEnemy.x - fu.x;
             final int dy = closestEnemy.y - fu.y;
             fu.x += (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
