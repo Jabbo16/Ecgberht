@@ -259,7 +259,7 @@ public class SimManager {
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
             if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
-            else s.lose = !scoreCalc(s, 3) || s.stateAfter.first.isEmpty();
+            else s.lose = !scoreCalc(s, 2.5) || s.stateAfter.first.isEmpty();
         }
     }
 

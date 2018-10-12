@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
+import ecgberht.Util.UtilMicro;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.iaie.btree.util.GameHandler;
@@ -9,8 +10,6 @@ import org.openbw.bwapi4j.unit.*;
 
 import java.util.Set;
 import java.util.TreeSet;
-
-import static ecgberht.Ecgberht.getGs;
 
 public class CheckHarasserAttacked extends Conditional {
     public CheckHarasserAttacked(String name, GameHandler gh) {
@@ -69,7 +68,7 @@ public class CheckHarasserAttacked extends Conditional {
                         ((GameState) this.handler).chosenHarasser = null;
                         ((GameState) this.handler).chosenUnitToHarass = null;
                     } else {
-                        Position kite = getGs().kiteAway(((GameState) this.handler).chosenHarasser, attackers);
+                        Position kite = UtilMicro.kiteAway(((GameState) this.handler).chosenHarasser, attackers);
                         if (((GameState) this.handler).bw.getBWMap().isValidPosition(kite)) {
                             ((GameState) this.handler).chosenHarasser.move(kite);
                             ((GameState) this.handler).chosenUnitToHarass = null;

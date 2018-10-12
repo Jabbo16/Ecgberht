@@ -3,6 +3,7 @@ package ecgberht.Agents;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Squad;
 import ecgberht.Util.Util;
+import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
@@ -93,11 +94,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
 
     private void hover() {
         Position attack = follow.attack;
-        if (attack == null) return;
-        if (!getGs().getGame().getBWMap().isValidPosition(attack)) return;
-        Position target = unit.getOrderTargetPosition();
-        if (target != null && !target.equals(attack)) unit.move(attack);
-        else if (target == null) unit.move(attack);
+        if (attack == null || !getGs().getGame().getBWMap().isValidPosition(attack)) return;
+        UtilMicro.move(unit, attack);
     }
 
     private Squad chooseVesselSquad() {
@@ -115,51 +113,63 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void emp() {
-        if (oldTarget != null && !oldTarget.exists()) oldTarget = null;
-        if (target != null && !target.exists()) target = null;
-        if (oldTarget != null && oldTarget.equals(target)) return;
-        if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave) {
-            unit.empShockWave(target.getPosition());
+        if (unit.getOrder() == Order.CastEMPShockwave) {
+            if (target != null && oldTarget != null && !target.equals(oldTarget)) {
+                UtilMicro.emp(unit, target.getPosition());
+                getGs().wizard.addEMPed(unit, (PlayerUnit) target);
+                oldTarget = target;
+            }
+        } else if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave) {
+            UtilMicro.emp(unit, target.getPosition());
             getGs().wizard.addEMPed(unit, (PlayerUnit) target);
             oldTarget = target;
-        } else target = oldTarget = null;
+        }
+        if (oldTarget != null && (!oldTarget.exists() || ((PlayerUnit) oldTarget).getShields() <= 1)) oldTarget = null;
+        if (target != null && (!target.exists() || ((PlayerUnit) target).getShields() <= 1)) target = null;
     }
 
     private void irradiate() {
-        if (oldTarget != null && !oldTarget.exists()) oldTarget = null;
-        if (target != null && !target.exists()) target = null;
-        if (oldTarget != null && oldTarget.equals(target)) return;
-        if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate) {
-            unit.irradiate((PlayerUnit) target);
+        if (unit.getOrder() == Order.CastIrradiate) {
+            if (target != null && oldTarget != null && !target.equals(oldTarget)) {
+                UtilMicro.irradiate(unit, (PlayerUnit) target);
+                getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
+                oldTarget = target;
+            }
+        } else if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate) {
+            UtilMicro.irradiate(unit, (PlayerUnit) target);
             getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
             oldTarget = target;
-        } else target = oldTarget = null;
+        }
+        if (oldTarget != null && (!oldTarget.exists() || ((PlayerUnit) oldTarget).isIrradiated())) oldTarget = null;
+        if (target != null && (!target.exists() || ((PlayerUnit) target).isIrradiated())) target = null;
     }
 
     private void dMatrix() {
-        if (oldTarget != null && !oldTarget.exists()) oldTarget = null;
-        if (target != null && !target.exists()) target = null;
-        if (oldTarget != null && oldTarget.equals(target)) return;
-        if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix) {
-            unit.empShockWave(target.getPosition());
+        if (unit.getOrder() == Order.CastDefensiveMatrix) {
+            if (target != null && oldTarget != null && !target.equals(oldTarget)) {
+                UtilMicro.defenseMatrix(unit, (MobileUnit) target);
+                getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
+                oldTarget = target;
+            }
+        } else if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix) {
+            UtilMicro.defenseMatrix(unit, (MobileUnit) target);
             getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
             oldTarget = target;
-        } else target = oldTarget = null;
+        }
+        if (oldTarget != null && (!oldTarget.exists() || ((MobileUnit) oldTarget).isDefenseMatrixed()))
+            oldTarget = null;
+        if (target != null && (!target.exists() || ((MobileUnit) target).isDefenseMatrixed())) target = null;
     }
 
     private void kite() {
-        Position kite = getGs().kiteAway(unit, airAttackers);
+        Position kite = UtilMicro.kiteAway(unit, airAttackers);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) return;
-        Position target = unit.getOrderTargetPosition();
-        if (target != null && !target.equals(kite)) unit.move(kite);
-        if (target == null) unit.move(kite);
+        UtilMicro.move(unit, kite);
     }
 
     private void followSquad() {
-        if (!getGs().getGame().getBWMap().isValidPosition(center)) return;
-        Position target = unit.getOrderTargetPosition();
-        if (target != null && !target.equals(center)) unit.move(center);
-        if (target == null) unit.move(center);
+        if (center == null || !getGs().getGame().getBWMap().isValidPosition(center)) return;
+        UtilMicro.move(unit, center);
     }
 
     private void getNewStatus() {
@@ -198,12 +208,12 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                         if (u.equals(close) || !(close instanceof Organic)) continue;
                         if (close.getDistance(u) <= 32) closeUnits++;
                     }
-                    if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 16 : 14;
+                    if (u instanceof Lurker) score = ((Lurker) u).isBurrowed() ? 20 : 18; // Kill it with fire!!
                     else if (u instanceof Mutalisk) score = 8;
                     else if (u instanceof Hydralisk) score = 6;
                     else if (u instanceof Zergling) score = 3;
                     score *= ((double) ((PlayerUnit) u).getHitPoints()) / (double) (((PlayerUnit) u).maxHitPoints()); //Prefer healthy units
-                    double multiplier = u instanceof SiegeTank ? 3.5 : u instanceof Lurker ? 2 : 0.75;
+                    double multiplier = u instanceof SiegeTank ? 3.75 : u instanceof Lurker ? 2.5 : u instanceof Mutalisk ? 2 : 1;
                     score += multiplier * closeUnits;
                     if (chosen == null || score > maxScore) {
                         chosen = (PlayerUnit) u;
@@ -263,7 +273,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     int score = 1;
                     if (!((PlayerUnit) u).isUnderAttack() || ((MobileUnit) u).isDefenseMatrixed()) continue;
                     if (u instanceof Mechanical) score = 8;
-                    if (u instanceof Marine) score = 3;
+                    if (u instanceof Marine || u instanceof Firebat) score = 3;
                     if (u instanceof SCV || u instanceof Medic) score = 1;
                     score *= ((PlayerUnit) u).maxHitPoints() / ((PlayerUnit) u).getHitPoints();
                     if (chosen == null || score > maxScore) {
@@ -271,13 +281,14 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                         maxScore = score;
                     }
                 }
-                if (maxScore > 2) {
+                if (maxScore >= 2) {
                     status = Status.DMATRIX;
                     target = chosen;
                     return;
                 }
             }
         }
+        if ((status == Status.IRRADIATE || status == Status.DMATRIX || status == Status.EMP) && target != null) return;
         if (!mySimAir.enemies.isEmpty()) {
             if (unit.isUnderAttack() || chasenByScourge || sporeColony) status = Status.KITE;
             else if (Util.broodWarDistance(unit.getPosition(), center) >= 100) status = Status.FOLLOW;

@@ -60,4 +60,5 @@ public class SpellsManager {
     public void addEMPed(ScienceVessel vessel, PlayerUnit unit) {
         EMPedUnits.put(vessel, unit);
     }
+
 }

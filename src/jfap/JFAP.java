@@ -182,7 +182,7 @@ public class JFAP extends AJFAP {
             }
         }
         if (kite) {
-            if (closestEnemy != null && closestEnemy.groundMaxRangeSquared < fu.groundMaxRangeSquared && closestDist <= (fu.groundMaxRangeSquared + fu.speedSquared) && closestEnemy.groundMaxRangeSquared <= 32) {
+            if (closestEnemy != null && closestEnemy.groundMaxRangeSquared < fu.groundMaxRangeSquared && closestDist <= (fu.groundMaxRangeSquared + fu.speedSquared) && closestEnemy.groundMaxRange <= 32) {
                 int dx = closestEnemy.x - fu.x;
                 int dy = closestEnemy.y - fu.y;
                 fu.x -= (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
@@ -213,7 +213,7 @@ public class JFAP extends AJFAP {
                 unitDeath(closestEnemy, enemyUnits);
             }
             didSomething = true;
-        } else if (closestEnemy != null && Math.sqrt(closestDist) > fu.speed) {
+        } else if (closestEnemy != null && closestDist > fu.speedSquared) {
             final int dx = closestEnemy.x - fu.x;
             final int dy = closestEnemy.y - fu.y;
             fu.x += (int) (dx * (fu.speed / Math.sqrt(dx * dx + dy * dy)));
@@ -314,19 +314,19 @@ public class JFAP extends AJFAP {
 
     private void unitDeath(JFAPUnit fu, Set<JFAPUnit> player) {
         if (fu.unitType == UnitType.Terran_Bunker) {
-            JFAPUnit m = convertToUnitType(fu, UnitType.Terran_Marine);
+            JFAPUnit m = convertToUnitType(fu);
             m.unitType = UnitType.Terran_Marine;
             for (int i = 0; i < 4; ++i) player.add(m);
         }
     }
 
-    private JFAPUnit convertToUnitType(JFAPUnit fu, UnitType ut) {
+    private JFAPUnit convertToUnitType(JFAPUnit fu) {
         JFAPUnit aux = new JFAPUnit();
         aux.id = fu.id;
         aux.x = fu.x;
         aux.y = fu.y;
         aux.player = fu.player;
-        aux.unitType = ut;
+        aux.unitType = UnitType.Terran_Marine;
         aux.attackCooldownRemaining = fu.attackCooldownRemaining;
         aux.elevation = fu.elevation;
         return aux;

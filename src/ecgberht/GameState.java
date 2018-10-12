@@ -192,7 +192,7 @@ public class GameState extends GameHandler {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            //if(true) return tPW; // TEST ONLY
+            if (true) return tPW; // TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
@@ -612,8 +612,7 @@ public class GameState extends GameHandler {
                     bw.getMapDrawer().drawLineMap(vessel.unit.getPosition(), vessel.follow.getSquadCenter(), Color.YELLOW);
             } else if (ag instanceof WraithAgent) {
                 WraithAgent wraith = (WraithAgent) ag;
-                bw.getMapDrawer().drawTextMap(wraith.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
-                bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(0,
+                bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(-16,
                         UnitType.Terran_Wraith.dimensionUp())), ColorUtil.formatText(wraith.name, ColorUtil.White));
             } else if (ag instanceof DropShipAgent) {
                 DropShipAgent dropShip = (DropShipAgent) ag;
@@ -702,10 +701,10 @@ public class GameState extends GameHandler {
             }
         }
         sim.drawClusters();
-        for (Squad s : sqManager.squads.values()) {
+        /*for (Squad s : sqManager.squads.values()) {
             if (s.status == Squad.Status.ATTACK && s.attack != null)
                 bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
-        }
+        }*/
         /*for (Squad s : sqManager.squads.values()) {
             if (s.members.isEmpty()) continue;
             Position center = s.getSquadCenter();
@@ -1296,38 +1295,6 @@ public class GameState extends GameHandler {
         }
         if (chosen != null) return chosen;
         return worker;
-    }
-
-    // Credits to @Yegers for a better kite method
-    public Position kiteAway(final Unit unit, final Set<Unit> enemies) {
-        try {
-            if (enemies.isEmpty()) return null;
-            Position ownPosition = unit.getPosition();
-            List<MutablePair<Double, Double>> vectors = new ArrayList<>();
-            //double minDistance = Double.MAX_VALUE;
-            for (Unit enemy : enemies) {
-                if (!enemy.exists() || !enemy.isVisible()) continue;
-                Position enemyPosition = enemy.getPosition();
-                MutablePair<Double, Double> unitV = new MutablePair<>((double) (ownPosition.getX() - enemyPosition.getX()), (double) (ownPosition.getY() - enemyPosition.getY()));
-                unitV = Util.cropPosition(unitV);
-                //double distance = Util.broodWarDistance(ownPosition, enemyPosition);
-                //if (distance < minDistance) minDistance = distance;
-                //unitV.first = (1 / distance) * unitV.first;
-                //unitV.second = (1 / distance) * unitV.second;
-                vectors.add(new MutablePair<>(unitV.first, unitV.second));
-            }
-           /* minDistance = 2 * (minDistance * minDistance);
-            for (Pair<Double, Double> vector : vectors) {
-                vector.first *= minDistance;
-                vector.second *= minDistance;
-            }*/
-            MutablePair<Double, Double> sumAll = Util.sumPosition(vectors);
-            return Util.cropPosition(Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size()))));
-        } catch (Exception e) {
-            System.err.println("KiteAway Exception");
-            e.printStackTrace();
-            return new Position(-1, -1);
-        }
     }
 
     void runAgents() {

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -441,7 +442,7 @@ public class Util {
         return cropped;
     }
 
-    public static Position cropPosition(Position pos) {
+    static Position cropPosition(Position pos) {
         MutablePair<Integer, Integer> cropped = new MutablePair<>(pos.getX(), pos.getY());
         int sizeX = getGs().getGame().getBWMap().mapWidth() * 32;
         int sizeY = getGs().getGame().getBWMap().mapHeight() * 32;
@@ -562,5 +563,28 @@ public class Util {
         }
         count += countUnitTypeSelf(type);
         return count;
+    }
+
+    public static double getEnemyAirWeaponRange(AirAttacker enemy) {
+        if (enemy instanceof Hydralisk && enemy.getPlayer().getUpgradeLevel(UpgradeType.Grooved_Spines) > 0) {
+            return 6 * 32;
+        }
+        if (enemy instanceof Marine && enemy.getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) > 0) {
+            return 5 * 32;
+        }
+        if (enemy instanceof Dragoon && enemy.getPlayer().getUpgradeLevel(UpgradeType.Singularity_Charge) > 0) {
+            return 6 * 32;
+        }
+        return enemy.getAirWeaponMaxRange();
+    }
+
+
+    public static boolean hasFreePatches(Base base) {
+        List<MineralPatch> minerals = base.getMinerals().stream().map(u -> (MineralPatch) u.getUnit()).collect(Collectors.toList());
+        int count = 0;
+        for (MineralPatch m : minerals) {
+            if (getGs().mineralsAssigned.containsKey(m)) count += getGs().mineralsAssigned.get(m);
+        }
+        return count < 2 * minerals.size();
     }
 }

@@ -5,6 +5,7 @@ import ecgberht.EnemyBuilding;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
+import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
@@ -59,12 +60,11 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
             if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
-                Position target = unit.getOrderTargetPosition();
-                if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos) && (target == null || !target.equals(pos))) {
-                    unit.move(pos);
-                    status = Status.ATTACK;
-                    return false;
-                }
+                if (pos == null || !getGs().getGame().getBWMap().isValidPosition(pos)) return false;
+                UtilMicro.move(unit, pos);
+                status = Status.ATTACK;
+                return false;
+
             }
             switch (status) {
                 case ATTACK:
@@ -109,12 +109,12 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         Unit toAttack = getUnitToAttack(unit, closeEnemies);
         if (toAttack != null) {
             if (attackUnit != null && attackUnit.equals(toAttack)) return;
-            unit.attack(toAttack);
+            UtilMicro.attack(unit, toAttack);
             attackUnit = toAttack;
         } else if (!mainTargets.isEmpty()) {
             toAttack = getUnitToAttack(unit, mainTargets);
             if (toAttack != null && attackUnit != null && !attackUnit.equals(toAttack)) {
-                unit.attack(toAttack);
+                UtilMicro.attack(unit, toAttack);
                 attackUnit = toAttack;
                 attackPos = null;
             }
@@ -196,14 +196,12 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void kite() {
-        Position kite = getGs().kiteAway(unit, closeEnemies);
-        if (!getGs().getGame().getBWMap().isValidPosition(kite) || kite.equals(unit.getPosition())) {
+        Position kite = UtilMicro.kiteAway(unit, closeEnemies);
+        if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
             retreat();
             return;
         }
-        Position target = unit.getOrderTargetPosition();
-        if (target != null && !target.equals(kite)) unit.move(kite);
-        if (target == null) unit.move(kite);
+        UtilMicro.move(unit, kite);
     }
 
     private void attack() {
@@ -214,13 +212,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             attackPos = null;
             return;
         }
-        if (getGs().bw.getBWMap().isValidPosition(attackPos)) {
-            Position target = unit.getOrderTargetPosition();
-            if (!attackPos.equals(target)) {
-                unit.attack(attackPos);
-                attackUnit = null;
-            }
-        }
+        UtilMicro.attack(unit, attackPos);
+        attackUnit = null;
     }
 
     @Override

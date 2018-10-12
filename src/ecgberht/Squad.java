@@ -3,6 +3,7 @@ package ecgberht;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.Util;
+import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.TechType;
@@ -239,7 +240,7 @@ public class Squad implements Comparable<Squad> {
                     }
                     if (u instanceof GroundAttacker && ((GroundAttacker) u).getGroundWeaponCooldown() > 0) {
                         if (!enemyToKite.isEmpty()) {
-                            Position run = getGs().kiteAway(u, enemyToKite);
+                            Position run = UtilMicro.kiteAway(u, enemyToKite);
                             if (getGs().getGame().getBWMap().isValidPosition(run)) {
                                 ((MobileUnit) u).move(run);
                             } else ((MobileUnit) u).move(getGs().getPlayer().getStartLocation().toPosition());

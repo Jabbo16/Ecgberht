@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
@@ -9,6 +10,8 @@ import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.CommandCenter;
+
+import java.util.Map;
 
 public class ChooseSCV extends Action {
 
@@ -35,10 +38,17 @@ public class ChooseSCV extends Action {
                 }
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < ((GameState) this.handler).mineralsAssigned.size() * 2 + ((GameState) this.handler).refineriesAssigned.size() * 3 + 2 && !((GameState) this.handler).CCs.isEmpty()) {
-                for (CommandCenter b : ((GameState) this.handler).CCs.values()) {
-                    if (!b.isTraining() && !b.isBuildingAddon()) {
+                for (Map.Entry<Base, CommandCenter> b : ((GameState) this.handler).islandCCs.entrySet()) {
+                    if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         ((GameState) this.handler).chosenUnit = UnitType.Terran_SCV;
-                        ((GameState) this.handler).chosenBuilding = b;
+                        ((GameState) this.handler).chosenBuilding = b.getValue();
+                        return State.SUCCESS;
+                    }
+                }
+                for (Map.Entry<Base, CommandCenter> b : ((GameState) this.handler).CCs.entrySet()) { // TODO train only island scvs from island CCs, test
+                    if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
+                        ((GameState) this.handler).chosenUnit = UnitType.Terran_SCV;
+                        ((GameState) this.handler).chosenBuilding = b.getValue();
                         return State.SUCCESS;
                     }
                 }

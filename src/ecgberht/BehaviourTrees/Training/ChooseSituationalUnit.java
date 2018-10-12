@@ -20,15 +20,18 @@ public class ChooseSituationalUnit extends Action {
         try {
             // Testing dropships islands
             boolean dropship = true;
-            for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getPlayer())) {
-                if (!u.exists()) continue;
-                if (u instanceof Dropship) {
-                    dropship = false;
-                    break;
+            if (!((GameState) this.handler).islandBases.isEmpty()) {
+                for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getPlayer())) {
+                    if (!u.exists()) continue;
+                    if (u instanceof Dropship) {
+                        dropship = false;
+                        break;
+                    }
                 }
-            }
+            } else dropship = false;
+
             boolean tower = false;
-            if (dropship) {
+            if (dropship && !((GameState) this.handler).strat.name.equals("2PortWraith")) {
                 for (ResearchingFacility u : ((GameState) this.handler).UBs) {
                     if (u instanceof ControlTower) {
                         tower = true;
