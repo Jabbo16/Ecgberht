@@ -20,21 +20,21 @@ public class ChoosePort extends Action {
         try {
             String strat = ((GameState) this.handler).strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
-                if (((GameState) this.handler).CCs.size() < 2) return State.FAILURE;
+                if (Util.getNumberCCs() < 2) return State.FAILURE;
                 Player self = ((GameState) this.handler).getPlayer();
                 if (Util.countBuildingAll(UnitType.Terran_Starport) >= 1 &&
                         !self.isResearching(TechType.Tank_Siege_Mode) && !self.hasResearched(TechType.Tank_Siege_Mode)) {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).strat.numCCForPort > ((GameState) this.handler).CCs.size() ||
+            if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).strat.numCCForPort > Util.getNumberCCs() ||
                     (Util.countBuildingAll(UnitType.Terran_Starport) > 0 && ((GameState) this.handler).strat.portPerCC == 0)) {
                 return State.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Starport) == 0 && ((GameState) this.handler).strat.portPerCC == 0) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
-            } else if (Util.countBuildingAll(UnitType.Terran_Starport) < ((GameState) this.handler).strat.portPerCC * ((GameState) this.handler).CCs.size()) {
+            } else if (Util.countBuildingAll(UnitType.Terran_Starport) < ((GameState) this.handler).strat.portPerCC * Util.getNumberCCs()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
             }

@@ -473,9 +473,9 @@ public class GameState extends GameHandler {
         return self;
     }
 
-    void addNewResources(Unit unit) {
-        List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
-        List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
+    void addNewResources(Base base) {
+        List<Mineral> minerals = base.getMinerals();
+        List<Geyser> gas = base.getGeysers();
         for (Mineral m : minerals) mineralsAssigned.put((MineralPatch) m.getUnit(), 0);
         for (Geyser g : gas) vespeneGeysers.put((VespeneGeyser) g.getUnit(), false);
         if (strat.name.equals("ProxyBBS")) {

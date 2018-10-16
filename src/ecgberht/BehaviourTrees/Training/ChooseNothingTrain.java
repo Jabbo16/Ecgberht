@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
+import ecgberht.Util.Util;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
@@ -29,7 +30,7 @@ public class ChooseNothingTrain extends Action {
             }
             // Mech builds and no siege
             boolean siege = ((GameState) this.handler).strat.techToResearch.contains(TechType.Tank_Siege_Mode);
-            if (siege && ((GameState) this.handler).CCs.size() >= 2 &&
+            if (siege && Util.getNumberCCs() >= 2 &&
                     !((GameState) this.handler).getPlayer().hasResearched(TechType.Tank_Siege_Mode) &&
                     !((GameState) this.handler).getPlayer().isResearching(TechType.Tank_Siege_Mode) &&
                     checkSiege()) {

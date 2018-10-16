@@ -64,7 +64,7 @@ public class ChooseRefinery extends Action {
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&
                     !((GameState) this.handler).refineriesAssigned.isEmpty()
-                    && ((GameState) this.handler).CCs.size() <= 2 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < 30) {
+                    && Util.getNumberCCs() <= 2 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < 30) {
                 return State.FAILURE;
             }
             ((GameState) this.handler).chosenToBuild = UnitType.Terran_Refinery;

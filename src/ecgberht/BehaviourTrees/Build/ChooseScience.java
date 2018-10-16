@@ -17,7 +17,7 @@ public class ChooseScience extends Action {
     public State execute() {
         try {
 
-            if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).Ps.isEmpty() || ((GameState) this.handler).strat.numCCForScience > ((GameState) this.handler).CCs.size()) {
+            if (((GameState) this.handler).MBs.isEmpty() || ((GameState) this.handler).Fs.isEmpty() || ((GameState) this.handler).Ps.isEmpty() || ((GameState) this.handler).strat.numCCForScience > Util.getNumberCCs()) {
                 return State.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Science_Facility) == 0) {

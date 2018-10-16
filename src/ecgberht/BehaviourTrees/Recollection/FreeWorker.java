@@ -16,6 +16,7 @@ public class FreeWorker extends Action {
     @Override
     public State execute() {
         try {
+            ((GameState) this.handler).chosenWorker = null;
             if (!((GameState) this.handler).workerIdle.isEmpty()) {
                 int frame = ((GameState) this.handler).frameCount;
                 for (Worker w : ((GameState) this.handler).workerIdle) {

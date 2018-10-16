@@ -33,7 +33,7 @@ public class ChooseFactory extends Action {
             if (Util.countBuildingAll(UnitType.Terran_Factory) == 0 && ((GameState) this.handler).strat.facPerCC == 0) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Factory;
                 return State.SUCCESS;
-            } else if (Util.countBuildingAll(UnitType.Terran_Factory) < ((GameState) this.handler).strat.facPerCC * ((GameState) this.handler).CCs.size()) {
+            } else if (Util.countBuildingAll(UnitType.Terran_Factory) < ((GameState) this.handler).strat.facPerCC * Util.getNumberCCs()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Factory;
                 return State.SUCCESS;
             }

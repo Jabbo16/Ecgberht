@@ -20,7 +20,6 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     public Wraith unit;
     public String name;
     private Set<Unit> airAttackers = new TreeSet<>();
-    private Set<Unit> enemyStaticDefense = new TreeSet<>();
 
     public WraithAgent(Unit unit, String name) {
         super();
@@ -37,22 +36,20 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             frameLastOrder = unit.getLastCommandFrame();
             mainTargets.clear();
             airAttackers.clear();
-            enemyStaticDefense.clear();
             if (frameLastOrder == actualFrame) return false;
             Position attack = getBestBaseToHarass();
             AirAttacker closestThreat = null;
             double bestDist = Double.MAX_VALUE;
             for (Unit u : getGs().enemyCombatUnitMemory) {
-                if (unit.getDistance(u) < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
-                    if (u instanceof AirAttacker) {
-                        double hisAirWeaponRange = Util.getEnemyAirWeaponRange((AirAttacker) u);
-                        double dist = unit.getDistance(u);
-                        if (dist < bestDist) {
-                            closestThreat = (AirAttacker) u;
-                            bestDist = dist;
-                        }
-                        if (dist <= hisAirWeaponRange) airAttackers.add(u);
+                if(!(u instanceof AirAttacker)) continue;
+                double dist = unit.getDistance(u);
+                if (dist < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
+                    double hisAirWeaponRange = ((AirAttacker) u).getAirWeaponMaxRange();
+                    if (dist < bestDist) {
+                        closestThreat = (AirAttacker) u;
+                        bestDist = dist;
                     }
+                    if (dist <= hisAirWeaponRange) airAttackers.add(u);
                     mainTargets.add(u);
                 }
             }
@@ -68,7 +65,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             if (airAttackers.isEmpty()) {
                 if (closestThreat != null) {
                     Weapon myWeapon = closestThreat.isFlying() ? unit.getAirWeapon() : unit.getGroundWeapon();
-                    double hisAirWeaponRange = Util.getEnemyAirWeaponRange(closestThreat);
+                    double hisAirWeaponRange = closestThreat.getAirWeaponMaxRange();
                     if (myWeapon.maxRange() > hisAirWeaponRange && bestDist >= hisAirWeaponRange * 1.1) {
                         if (myWeapon.cooldown() > 0) {
                             UtilMicro.attack(unit, closestThreat);

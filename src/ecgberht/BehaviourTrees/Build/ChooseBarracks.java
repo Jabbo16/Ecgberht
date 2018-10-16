@@ -66,7 +66,7 @@ public class ChooseBarracks extends Action {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Barracks;
                 return State.SUCCESS;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Barracks) < ((GameState) this.handler).strat.raxPerCC * ((GameState) this.handler).CCs.size()) {
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) < ((GameState) this.handler).strat.raxPerCC * Util.getNumberCCs()) {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Barracks;
                 return State.SUCCESS;
             }

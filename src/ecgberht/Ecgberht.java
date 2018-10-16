@@ -88,10 +88,6 @@ public class Ecgberht implements BWEventListener {
         return bw;
     }
 
-    public static InteractionHandler getIH() {
-        return ih;
-    }
-
     public static GameState getGs() {
         return gs;
     }
@@ -618,10 +614,10 @@ public class Ecgberht implements BWEventListener {
                             if (!gs.islandBases.isEmpty() && gs.islandBases.contains(ccBase))
                                 gs.islandCCs.put(ccBase, (CommandCenter) arg0);
                             else gs.CCs.put(ccBase, (CommandCenter) arg0);
-                            if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() > 2) gs.strat.raxPerCC = 3;
-                            else if (gs.strat.name.equals("BioMechGreedyFE") && gs.CCs.size() < 3)
+                            if (gs.strat.name.equals("BioMechGreedyFE") && Util.getNumberCCs() > 2) gs.strat.raxPerCC = 3;
+                            else if (gs.strat.name.equals("BioMechGreedyFE") && Util.getNumberCCs() < 3)
                                 gs.strat.raxPerCC = 2;
-                            gs.addNewResources(arg0);
+                            gs.addNewResources(ccBase);
                             if (gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense)
                                 gs.workerTransfer();
                             if (gs.frameCount != 0 && gs.firstExpand) gs.firstExpand = false;
@@ -842,26 +838,8 @@ public class Ecgberht implements BWEventListener {
                         for (CommandCenter u : gs.islandCCs.values()) {
                             if (u.equals(arg0)) {
                                 gs.removeResources(arg0);
-                                if (u.getAddon() != null) {
-                                    gs.CSs.remove(u.getAddon());
-                                }
-                                if (bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
-                                    gs.defendPosition = gs.mainChoke.getCenter().toPosition();
-                                }
-                                gs.CCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
-                                if (arg0.equals(gs.mainCC.second)) {
-                                    if (gs.CCs.size() > 0) {
-                                        for (Unit c : gs.CCs.values()) {
-                                            if (!c.equals(arg0)) {
-                                                gs.mainCC = new MutablePair<>(Util.getClosestBaseLocation(u.getPosition()), u);
-                                                break;
-                                            }
-                                        }
-                                    } else {
-                                        gs.mainCC = null;
-                                        break;
-                                    }
-                                }
+                                if (u.getAddon() != null) gs.CSs.remove(u.getAddon());
+                                gs.islandCCs.remove(Util.getClosestBaseLocation(arg0.getPosition()));
                                 break;
                             }
                         }

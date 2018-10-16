@@ -12,16 +12,17 @@ import static ecgberht.Ecgberht.getGs;
 
 public class UtilMicro {
 
-    public static void attack(MobileUnit u, Position pos) {
-        if (pos == null || u == null || !u.exists()) return;
-        Position targetPos = u.getTargetPosition();
+    public static void attack(MobileUnit attacker, Position pos) {
+        if (pos == null || attacker == null || !attacker.exists() || attacker.isAttackFrame()) return;
+        Position targetPos = attacker.getTargetPosition();
         if (pos.equals(targetPos)) return;
-        u.attack(pos);
+        if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
+        if (!attacker.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
+        attacker.attack(pos);
     }
 
     public static void attack(Attacker attacker, Unit target) {
-        if (attacker == null || target == null || !attacker.exists() || !target.exists()) return;
-        if (attacker.getLastCommandFrame() >= getGs().frameCount) return;
+        if (attacker == null || target == null || !attacker.exists() || !target.exists()  || attacker.isAttackFrame()) return;
         Unit targetUnit = attacker.getTargetUnit();
         if (target.equals(targetUnit)) return;
         attacker.attack(target);

@@ -401,7 +401,7 @@ public class Util {
         for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
             double influence = getScoreAttackPosition(b.unit);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * (flying ? Util.getGroundDistance(p, b.pos.toPosition()) : b.pos.toPosition().getDistance(p)));
+            double score = influence / (2.5 * (flying ? b.pos.toPosition().getDistance(p) : Util.getGroundDistance(p, b.pos.toPosition())));
             if (score > maxScore) {
                 chosen = b.pos.toPosition();
                 maxScore = score;
@@ -565,20 +565,6 @@ public class Util {
         return count;
     }
 
-    public static double getEnemyAirWeaponRange(AirAttacker enemy) {
-        if (enemy instanceof Hydralisk && enemy.getPlayer().getUpgradeLevel(UpgradeType.Grooved_Spines) > 0) {
-            return 6 * 32;
-        }
-        if (enemy instanceof Marine && enemy.getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) > 0) {
-            return 5 * 32;
-        }
-        if (enemy instanceof Dragoon && enemy.getPlayer().getUpgradeLevel(UpgradeType.Singularity_Charge) > 0) {
-            return 6 * 32;
-        }
-        return enemy.getAirWeaponMaxRange();
-    }
-
-
     public static boolean hasFreePatches(Base base) {
         List<MineralPatch> minerals = base.getMinerals().stream().map(u -> (MineralPatch) u.getUnit()).collect(Collectors.toList());
         int count = 0;
@@ -586,5 +572,9 @@ public class Util {
             if (getGs().mineralsAssigned.containsKey(m)) count += getGs().mineralsAssigned.get(m);
         }
         return count < 2 * minerals.size();
+    }
+
+    public static int getNumberCCs() {
+        return getGs().CCs.size() + getGs().islandCCs.size();
     }
 }
