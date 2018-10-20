@@ -32,25 +32,13 @@ public class CollectMineral extends Action {
                         closestMineral = m.getKey();
                     }
                 }
-                if(closestMineral == null){
-                    System.out.println("closestMineral its null");
-                    return State.FAILURE;
-                }
-                if (chosen.gather(closestMineral, false)) {
+                if (closestMineral != null && chosen.gather(closestMineral, false)) {
                     ((GameState) this.handler).mineralsAssigned.put(closestMineral, ((GameState) this.handler).mineralsAssigned.get(closestMineral) + 1);
                     ((GameState) this.handler).workerMining.put(chosen, closestMineral);
                     ((GameState) this.handler).workerIdle.remove(chosen);
                     ((GameState) this.handler).chosenWorker = null;
                     ((GameState) this.handler).mining++;
                     return State.SUCCESS;
-                } else{
-                    System.out.println("-----");
-                    System.out.println("game-seed: " + ((GameState)this.handler).getIH().getRandomSeed());
-                    System.out.println("chosenSCV its null?: " + (((GameState) this.handler).chosenWorker == null ? "yes" : "no"));
-                    System.out.println("chosenSCV exists: " + chosen.exists());
-                    System.out.println("closestMineral exists: " + closestMineral.exists());
-                    System.out.println("WTF gather");
-                    System.out.println("-----");
                 }
             }
             return State.FAILURE;
