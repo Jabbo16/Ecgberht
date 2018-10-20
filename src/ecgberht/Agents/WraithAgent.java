@@ -38,7 +38,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             double bestDist = Double.MAX_VALUE;
             airAttackers = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).enemies;
             Iterator<Unit> it = airAttackers.iterator();
-            while (it.hasNext()){
+            while (it.hasNext()) {
                 Unit u = it.next();
                 double dist = unit.getDistance(u);
                 double hisAirWeaponRange = ((AirAttacker) u).getAirWeaponMaxRange();

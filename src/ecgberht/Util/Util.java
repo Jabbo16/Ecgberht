@@ -396,9 +396,9 @@ public class Util {
     }
 
     //Credits to @PurpleWaveJadien / Dan
-    public static double broodWarDistance(Unit u , double[] b) {
+    public static double broodWarDistance(Unit u, double[] b) {
         Position pos = u.getPosition();
-        return broodWarDistance(pos.getX(), pos.getY(), (int)b[0], (int)b[1]);
+        return broodWarDistance(pos.getX(), pos.getY(), (int) b[0], (int) b[1]);
     }
 
     public static Position chooseAttackPosition(Position p, boolean flying) {

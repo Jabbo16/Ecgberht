@@ -30,7 +30,7 @@ public class Cluster {
     }
 
     void updateCMaxDistFromCenter() {
-        if(units.isEmpty() || units.size() == 1){
+        if (units.isEmpty() || units.size() == 1) {
             maxDistFromCenter = 0;
             return;
         }

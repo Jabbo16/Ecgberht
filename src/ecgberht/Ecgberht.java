@@ -614,7 +614,8 @@ public class Ecgberht implements BWEventListener {
                             if (!gs.islandBases.isEmpty() && gs.islandBases.contains(ccBase))
                                 gs.islandCCs.put(ccBase, (CommandCenter) arg0);
                             else gs.CCs.put(ccBase, (CommandCenter) arg0);
-                            if (gs.strat.name.equals("BioMechGreedyFE") && Util.getNumberCCs() > 2) gs.strat.raxPerCC = 3;
+                            if (gs.strat.name.equals("BioMechGreedyFE") && Util.getNumberCCs() > 2)
+                                gs.strat.raxPerCC = 3;
                             else if (gs.strat.name.equals("BioMechGreedyFE") && Util.getNumberCCs() < 3)
                                 gs.strat.raxPerCC = 2;
                             gs.addNewResources(ccBase);

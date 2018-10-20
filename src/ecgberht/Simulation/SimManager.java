@@ -169,7 +169,7 @@ public class SimManager {
         return true;
     }
 
-    private boolean closeClusters(Cluster c1, Cluster c2){
+    private boolean closeClusters(Cluster c1, Cluster c2) {
         return Util.broodWarDistance(c1.mode(), c2.mode()) <= radius + (Math.max(c1.maxDistFromCenter, c2.maxDistFromCenter));
     }
 

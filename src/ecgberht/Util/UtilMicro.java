@@ -22,7 +22,8 @@ public class UtilMicro {
     }
 
     public static void attack(Attacker attacker, Unit target) {
-        if (attacker == null || target == null || !attacker.exists() || !target.exists()  || attacker.isAttackFrame()) return;
+        if (attacker == null || target == null || !attacker.exists() || !target.exists() || attacker.isAttackFrame())
+            return;
         Unit targetUnit = attacker.getTargetUnit();
         if (target.equals(targetUnit)) return;
         attacker.attack(target);

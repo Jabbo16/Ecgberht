@@ -86,13 +86,12 @@ public class Squad implements Comparable<Squad> {
                     continue;
                 Position lastTarget = pU.getOrderTargetPosition() == null ? ((MobileUnit) u).getTargetPosition() :
                         pU.getOrderTargetPosition();
-                if (stimResearched && (u instanceof Marine || u instanceof Firebat)) {
-                    if (u instanceof Marine && !((Marine) u).isStimmed() && pU.isAttacking() && pU.getHitPoints() >= 25) {
-                        ((Marine) u).stimPack();
-                    } else if (u instanceof Firebat && !((Firebat) u).isStimmed() && pU.isAttacking() && pU.getHitPoints() >= 25) {
-                        ((Firebat) u).stimPack();
-                    }
+
+                if (stimResearched){
+                    if(u instanceof Marine && shouldStim((Marine)u)) ((Marine) u).stimPack();
+                    else if(u instanceof Firebat && shouldStim((Firebat)u)) ((Firebat) u).stimPack();
                 }
+
                 if (u instanceof SiegeTank) {
                     SiegeTank t = (SiegeTank) u;
                     if (t.isSieged() && pU.getOrder() == Order.Unsieging) continue;
@@ -262,6 +261,14 @@ public class Squad implements Comparable<Squad> {
             System.err.println("microUpdateOrder Error");
             e.printStackTrace();
         }
+    }
+
+    private boolean shouldStim(Marine u) {
+        return !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25;
+    }
+
+    private boolean shouldStim(Firebat u) {
+        return !u.isStimmed() && u.isAttacking() && u.getHitPoints() >= 25;
     }
 
     private PlayerUnit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
