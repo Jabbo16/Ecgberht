@@ -349,5 +349,10 @@ public class IntelligenceAgency {
         return true;
     }
 
+    public static boolean enemyIsRushing() {
+        return getGs().frameCount <= 24 * 500 && (enemyStrat == EnemyStrats.ZealotRush
+                || enemyStrat == EnemyStrats.EarlyPool || enemyStrat == EnemyStrats.CannonRush);
+    }
+
     public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, MechRush}
 }

@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Defense;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.Util.MutablePair;
@@ -42,8 +43,9 @@ public class SendDefenders extends Action {
             if (((GameState) this.handler).enemyInBase.size() == 1 && ((GameState) this.handler).enemyInBase.iterator().next() instanceof Worker) {
                 defenders = 1;
             }
+
             MutablePair<Boolean, Boolean> battleWin = new MutablePair<>(true, false);
-            if (defenders != 1) {
+            if (defenders != 1 && IntelligenceAgency.enemyIsRushing()) {
                 if (((GameState) this.handler).enemyInBase.size() + friends.size() < 40) {
                     battleWin = ((GameState) this.handler).sim.simulateDefenseBattle(friends, ((GameState) this.handler).enemyInBase, 150, bunker);
                 }
