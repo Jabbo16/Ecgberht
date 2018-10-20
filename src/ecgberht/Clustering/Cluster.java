@@ -46,14 +46,11 @@ public class Cluster {
 
     @Override
     public boolean equals(final Object object) {
-        if (this == object) {
-            return true;
-        } else if (!(object instanceof Cluster)) {
-            return false;
-        } else {
+        if (this == object) return true;
+        else if (!(object instanceof Cluster)) return false;
+        else {
             final Cluster cluster = (Cluster) object;
             return (Arrays.equals(this.mode(), cluster.mode()));
         }
     }
-
 }
