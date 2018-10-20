@@ -1,5 +1,6 @@
 package ecgberht.Clustering;
 
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ public class Cluster {
     public Set<Unit> units = new TreeSet<>();
     public double modeX = 0;
     public double modeY = 0;
+    public double maxDistFromCenter = 0;
 
     void updateCentroid() {
         if (units.isEmpty()) return;
@@ -27,14 +29,20 @@ public class Cluster {
         modeY = ((double) y) / size;
     }
 
+    void updateCMaxDistFromCenter() {
+        if(units.isEmpty() || units.size() == 1){
+            maxDistFromCenter = 0;
+            return;
+        }
+        for (Unit u : units) {
+            double dist = Util.broodWarDistance(u, mode());
+            if (dist > maxDistFromCenter) maxDistFromCenter = dist;
+        }
+    }
+
     public double[] mode() {
         return new double[]{modeX, modeY};
     }
-
-    /*public boolean equals(Cluster cluster) {
-        if (cluster == null) return false;
-        return Arrays.equals(this.mode(), cluster.mode());
-    }*/
 
     @Override
     public boolean equals(final Object object) {

@@ -1,17 +1,13 @@
 package ecgberht.Agents;
 
-import ecgberht.EnemyBuilding;
+import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -40,27 +36,19 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             Position attack = getBestBaseToHarass();
             AirAttacker closestThreat = null;
             double bestDist = Double.MAX_VALUE;
-            for (Unit u : getGs().enemyCombatUnitMemory) {
-                if(!(u instanceof AirAttacker)) continue;
+            airAttackers = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).enemies;
+            Iterator<Unit> it = airAttackers.iterator();
+            while (it.hasNext()){
+                Unit u = it.next();
                 double dist = unit.getDistance(u);
-                if (dist < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
-                    double hisAirWeaponRange = ((AirAttacker) u).getAirWeaponMaxRange();
-                    if (dist < bestDist) {
-                        closestThreat = (AirAttacker) u;
-                        bestDist = dist;
-                    }
-                    if (dist <= hisAirWeaponRange) airAttackers.add(u);
-                    mainTargets.add(u);
+                double hisAirWeaponRange = ((AirAttacker) u).getAirWeaponMaxRange();
+                if (dist < bestDist) {
+                    closestThreat = (AirAttacker) u;
+                    bestDist = dist;
                 }
+                if (dist > hisAirWeaponRange) it.remove();
             }
-            for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-                if (u.unit.isVisible()) {
-                    if (!(u.unit instanceof AirAttacker) && !(u.unit instanceof Bunker)) continue;
-                    if (u.unit.getDistance(unit) < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) {
-                        airAttackers.add(u.unit);
-                    }
-                }
-            }
+            mainTargets = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies;
             Unit harassed = chooseHarassTarget();
             if (airAttackers.isEmpty()) {
                 if (closestThreat != null) {

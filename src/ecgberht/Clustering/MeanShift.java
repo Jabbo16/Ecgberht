@@ -76,6 +76,7 @@ public class MeanShift {
                 clusters.get(c).updateCentroid();
             }
             time = System.currentTimeMillis() - time;
+            clusters.forEach(Cluster::updateCMaxDistFromCenter);
             return clusters;
         } catch (Exception e) {
             System.err.println("MeanShift run exception");

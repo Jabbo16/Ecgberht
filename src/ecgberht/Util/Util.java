@@ -395,6 +395,12 @@ public class Util {
         return D - D / 16 + d * 3 / 8 - D / 64 + d * 3 / 256;
     }
 
+    //Credits to @PurpleWaveJadien / Dan
+    public static double broodWarDistance(Unit u , double[] b) {
+        Position pos = u.getPosition();
+        return broodWarDistance(pos.getX(), pos.getY(), (int)b[0], (int)b[1]);
+    }
+
     public static Position chooseAttackPosition(Position p, boolean flying) {
         Position chosen = null;
         double maxScore = 0;
@@ -554,6 +560,14 @@ public class Util {
     public static boolean isStaticDefense(Unit u) {
         return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
                 || u instanceof SunkenColony || u instanceof PhotonCannon;
+    }
+
+    public static boolean isGroundStaticDefense(Unit u) {
+        return u instanceof Bunker || u instanceof SunkenColony || u instanceof PhotonCannon;
+    }
+
+    public static boolean isAirStaticDefense(Unit u) {
+        return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony || u instanceof PhotonCannon;
     }
 
     public static int countBuildingAll(UnitType type) {

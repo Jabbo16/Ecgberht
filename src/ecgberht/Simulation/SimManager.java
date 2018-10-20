@@ -169,6 +169,10 @@ public class SimManager {
         return true;
     }
 
+    private boolean closeClusters(Cluster c1, Cluster c2){
+        return Util.broodWarDistance(c1.mode(), c2.mode()) <= radius + (Math.max(c1.maxDistFromCenter, c2.maxDistFromCenter));
+    }
+
     /**
      * Using the clusters creates different SimInfos based on distance between them
      */
@@ -178,7 +182,7 @@ public class SimManager {
             SimInfo aux = new SimInfo();
             for (Cluster enemy : enemies) {
                 if (enemy.units.isEmpty()) continue;
-                if (Util.broodWarDistance(friend.mode(), enemy.mode()) <= radius) aux.enemies.addAll(enemy.units);
+                if (closeClusters(friend, enemy)) aux.enemies.addAll(enemy.units);
             }
             if (!aux.enemies.isEmpty()) {
                 aux.allies.addAll(friend.units);
