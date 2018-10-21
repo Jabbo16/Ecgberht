@@ -298,6 +298,15 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         else status = Status.HOVER;
     }
 
+    private void retreat() {
+        Position CC = getGs().getNearestCC(myUnit.getPosition());
+        if (CC != null) ((MobileUnit) myUnit).move(CC);
+        else ((MobileUnit) myUnit).move(getGs().getPlayer().getStartLocation().toPosition());
+        attackPos = null;
+        attackUnit = null;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (o == this.unit) return true;

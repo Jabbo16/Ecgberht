@@ -32,8 +32,8 @@ import ecgberht.BehaviourTrees.Scanner.Scan;
 import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
+import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
-import ecgberht.Strategies.FullBioFE;
 import ecgberht.Strategies.FullMech;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -235,90 +235,6 @@ public class Ecgberht implements BWEventListener {
         Ecgberht.bw.startGame();
     }
 
-    @Override
-    public void onStart() {
-        try {
-            ConfigManager.readConfig();
-            if (!ConfigManager.getConfig().ecgConfig.debugConsole) {
-                // Disables System.err and System.Out
-                OutputStream output = null;
-                try {
-                    output = new FileOutputStream("NUL:");
-                } catch (FileNotFoundException ignored) {
-                }
-                PrintStream nullOut = new PrintStream(Objects.requireNonNull(output));
-                System.setErr(nullOut);
-                System.setOut(nullOut);
-            }
-            self = bw.getInteractionHandler().self();
-            ih = bw.getInteractionHandler();
-            IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
-            if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
-            else ih.enableLatCom(true);
-            if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
-            if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
-                ih.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
-            if (ConfigManager.getConfig().bwapiConfig.localSpeed >= 0)
-                ih.setLocalSpeed(ConfigManager.getConfig().bwapiConfig.localSpeed);
-            if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
-            bwem = new BWEM(bw);
-            if (bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) { // Hitchhiker
-                ih.sendText("Hitchhiker :(");
-            }
-            bwem.initialize();
-            bwem.getMap().assignStartingLocationsToSuitableBases();
-            gs = new GameState(bw, bwem);
-            gs.initEnemyRace();
-            gs.readOpponentInfo();
-            gs.readOpponentHistory();
-            if (gs.EI.race == null) gs.EI.race = Util.raceToString(bw.getInteractionHandler().enemy().getRace());
-            gs.alwaysPools();
-            if (gs.enemyRace == Race.Zerg && gs.EI.naughty) gs.playSound("rushed.mp3");
-            gs.strat = gs.initStrat();
-            gs.updateStrat();
-            IntelligenceAgency.setStartStrat(gs.strat.name);
-            gs.initStartLocations();
-
-            boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
-            for (Base b : bwem.getMap().getBases()) {
-                if (fortress) {
-                    if (b.getMinerals().size() < 3) continue;
-                    if (gs.fortressSpecialBLsTiles.contains(b.getLocation()))
-                        gs.fortressSpecialBLs.put(b, gs.getMineralWalkPatchesFortress(b));
-                    gs.BLs.add(b);
-
-                } else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b);
-                else gs.BLs.add(b);
-            }
-            gs.initBlockingMinerals();
-            gs.initBaseLocations();
-            gs.checkBasesWithBLockingMinerals();
-            gs.initChokes();
-            gs.map = new BuildingMap(bw, ih.self(), bwem);
-            gs.map.initMap();
-            gs.testMap = gs.map.clone();
-            // Trees Initializations
-            initCollectTree();
-            initTrainTree();
-            initBuildTree();
-            initScoutingTree();
-            initDefenseTree();
-            initUpgradeTree();
-            initRepairTree();
-            initAddonBuildTree();
-            initBuildingLotTree();
-            initBunkerTree();
-            initScanTree();
-            initHarassTree();
-            initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
-            gs.skycladObserver = new CameraModule(self.getStartLocation(), bw);
-            if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) gs.skycladObserver.toggle();
-        } catch (Exception e) {
-            System.err.println("onStart Exception");
-            e.printStackTrace();
-        }
-    }
-
     private void initScoutingTree() {
         CheckScout cSc = new CheckScout("Check Scout", gs);
         ChooseScout chSc = new ChooseScout("Choose Scouter", gs);
@@ -407,6 +323,92 @@ public class Ecgberht implements BWEventListener {
     }
 
     @Override
+    public void onStart() {
+        try {
+            ConfigManager.readConfig();
+            if (!ConfigManager.getConfig().ecgConfig.debugConsole) {
+                // Disables System.err and System.Out
+                OutputStream output = null;
+                try {
+                    output = new FileOutputStream("NUL:");
+                } catch (FileNotFoundException ignored) {
+                }
+                PrintStream nullOut = new PrintStream(Objects.requireNonNull(output));
+                System.setErr(nullOut);
+                System.setOut(nullOut);
+            }
+            self = bw.getInteractionHandler().self();
+            ih = bw.getInteractionHandler();
+            IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
+            if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
+            else ih.enableLatCom(true);
+            if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) ih.enableCompleteMapInformation();
+            if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
+                ih.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
+            if (ConfigManager.getConfig().bwapiConfig.localSpeed >= 0)
+                ih.setLocalSpeed(ConfigManager.getConfig().bwapiConfig.localSpeed);
+            if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
+            bwem = new BWEM(bw);
+            if (bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) { // Hitchhiker
+                ih.sendText("Hitchhiker :(");
+            }
+            bwem.initialize();
+            bwem.getMap().assignStartingLocationsToSuitableBases();
+            gs = new GameState(bw, bwem);
+            gs.initEnemyRace();
+            gs.readOpponentInfo();
+            gs.readOpponentHistory();
+            if (gs.EI.race == null) gs.EI.race = Util.raceToString(bw.getInteractionHandler().enemy().getRace());
+            gs.alwaysPools();
+            if (gs.enemyRace == Race.Zerg && gs.EI.naughty) gs.playSound("rushed.mp3");
+            gs.strat = gs.initStrat();
+            gs.updateStrat();
+            IntelligenceAgency.setStartStrat(gs.strat.name);
+            gs.initStartLocations();
+
+            boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
+            for (Base b : bwem.getMap().getBases()) {
+                if (fortress) {
+                    if (b.getMinerals().size() < 3) continue;
+                    if (gs.fortressSpecialBLsTiles.contains(b.getLocation()))
+                        gs.fortressSpecialBLs.put(b, gs.getMineralWalkPatchesFortress(b));
+                    gs.BLs.add(b);
+
+                } else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b);
+                else gs.BLs.add(b);
+            }
+            gs.initBlockingMinerals();
+            gs.initBaseLocations();
+            gs.checkBasesWithBLockingMinerals();
+            gs.initChokes();
+            gs.map = new BuildingMap(bw, ih.self(), bwem);
+            gs.map.initMap();
+            gs.testMap = gs.map.clone();
+            // Trees Initializations
+            initCollectTree();
+            initTrainTree();
+            initBuildTree();
+            initScoutingTree();
+            initDefenseTree();
+            initUpgradeTree();
+            initRepairTree();
+            initAddonBuildTree();
+            initBuildingLotTree();
+            initBunkerTree();
+            initScanTree();
+            initHarassTree();
+            initIslandTree(); // TODO uncomment when BWAPI client island bug is fixed
+            gs.skycladObserver = new CameraModule(self.getStartLocation(), bw);
+            if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) gs.skycladObserver.toggle();
+        } catch (Exception e) {
+            System.err.println("onStart Exception");
+            e.printStackTrace();
+        }
+    }
+
+
+
+    @Override
     public void onFrame() {
         try {
             gs.frameCount = ih.getFrameCount();
@@ -454,6 +456,7 @@ public class Ecgberht implements BWEventListener {
             gs.updateEnemyBuildingsMemory();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
+            gs.checkDisrupter();
             buildingLotTree.run();
             repairTree.run();
             collectTree.run();
@@ -551,7 +554,7 @@ public class Ecgberht implements BWEventListener {
                         if (arg0 instanceof CommandCenter) {
                             if (ih.getFrameCount() == 0) return;
                             if (gs.strat.name.equals("TwoPortWraith") && bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
-                                gs.strat = new FullBioFE();
+                                gs.strat = new BioMechFE();
                                 transition();
                             }
                         }

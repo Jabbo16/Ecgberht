@@ -138,6 +138,8 @@ public class GameState extends GameHandler {
     public int maxGoliaths = 0;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),
             new TilePosition(117, 7), new TilePosition(7, 118), new TilePosition(117, 118)));
+    public WorkerScoutAgent scout = null;
+    public Building disrupterBuilding = null;
     CameraModule skycladObserver = null;
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
@@ -617,20 +619,25 @@ public class GameState extends GameHandler {
         for (Agent ag : agents.values()) {
             if (ag instanceof VultureAgent) {
                 VultureAgent vulture = (VultureAgent) ag;
-                bw.getMapDrawer().drawTextMap(vulture.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
+                bw.getMapDrawer().drawTextMap(vulture.myUnit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
             } else if (ag instanceof VesselAgent) {
                 VesselAgent vessel = (VesselAgent) ag;
-                bw.getMapDrawer().drawTextMap(vessel.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
+                bw.getMapDrawer().drawTextMap(vessel.myUnit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
                 if (vessel.follow != null)
-                    bw.getMapDrawer().drawLineMap(vessel.unit.getPosition(), vessel.follow.getSquadCenter(), Color.YELLOW);
+                    bw.getMapDrawer().drawLineMap(vessel.myUnit.getPosition(), vessel.follow.getSquadCenter(), Color.YELLOW);
             } else if (ag instanceof WraithAgent) {
                 WraithAgent wraith = (WraithAgent) ag;
-                bw.getMapDrawer().drawTextMap(wraith.unit.getPosition().add(new Position(-16,
+                bw.getMapDrawer().drawTextMap(wraith.myUnit.getPosition().add(new Position(-16,
                         UnitType.Terran_Wraith.dimensionUp())), ColorUtil.formatText(wraith.name, ColorUtil.White));
             } else if (ag instanceof DropShipAgent) {
                 DropShipAgent dropShip = (DropShipAgent) ag;
-                bw.getMapDrawer().drawTextMap(dropShip.unit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
+                bw.getMapDrawer().drawTextMap(dropShip.myUnit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
+            } else if (ag instanceof WorkerScoutAgent) {
+                WorkerScoutAgent worker = (WorkerScoutAgent) ag;
+                bw.getMapDrawer().drawTextMap(worker.myUnit.getPosition().add(new Position(-16,
+                        UnitType.Terran_SCV.dimensionUp())), ColorUtil.formatText(worker.statusToString(), ColorUtil.White));
             }
+
         }
         if (enemyStartBase != null)
             bw.getMapDrawer().drawTextMap(enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));
@@ -640,15 +647,12 @@ public class GameState extends GameHandler {
             bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), ColorUtil.formatText("MainChoke", ColorUtil.White));
             //bw.getMapDrawer().drawTextMap(mainChoke.getCenter().toPosition(), ColorUtil.formatText(Double.toString(Util.getChokeWidth(mainChoke)), ColorUtil.White));
         }
-
         if (naturalChoke != null)
             bw.getMapDrawer().drawTextMap(naturalChoke.getCenter().toPosition(), ColorUtil.formatText("NatChoke", ColorUtil.White));
-
         if (chosenHarasser != null) {
             bw.getMapDrawer().drawTextMap(chosenHarasser.getPosition(), ColorUtil.formatText("Harasser", ColorUtil.White));
             print(chosenHarasser, Color.BLUE);
         }
-
         for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
             print(u.getKey(), Color.TEAL);
             bw.getMapDrawer().drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Building " + u.getValue().first.toString(), ColorUtil.White));
@@ -819,8 +823,9 @@ public class GameState extends GameHandler {
                 mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
         }
 
-        for (PlayerUnit u : bw.getUnits(self)) { // TODO check and fix buildingLot refinery
+        for (PlayerUnit u : bw.getUnits(self)) {
             if (!u.exists() || !(u instanceof Building) || u instanceof Addon) continue;
+            if(u.getBuildUnit() != null || enemyNaturalBase == null || u.getTilePosition().equals(enemyNaturalBase.getLocation())) continue;
             if (!u.isCompleted() && !workerTask.values().contains(u) && !buildingLot.contains(u)) {
                 buildingLot.add((Building) u);
             }
@@ -1539,5 +1544,13 @@ public class GameState extends GameHandler {
             farther = (MineralPatch) centerMinerals.get(0).getUnit();
         }
         return new MutablePair<>(farther, closer);
+    }
+
+    void checkDisrupter(){
+        if(enemyRace != Race.Zerg || disrupterBuilding == null) return;
+        if(disrupterBuilding.getHitPoints() <= 20){
+            disrupterBuilding.cancelConstruction();
+            disrupterBuilding = null;
+        }
     }
 }

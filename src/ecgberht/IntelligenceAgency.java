@@ -1,5 +1,6 @@
 package ecgberht;
 
+import bwem.Base;
 import bwem.unit.Mineral;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
@@ -18,16 +19,16 @@ import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
 
-    static Map<Player, TreeSet<EnemyBuilding>> enemyBases = new HashMap<>();
-    static Map<Player, HashSet<UnitType>> enemyTypes = new HashMap<>();
+    static Map<Player, TreeSet<EnemyBuilding>> enemyBases;
+    static Map<Player, HashSet<UnitType>> enemyTypes;
     private static Player mainEnemy;
-    private static Set<Unit> enemyWorkers = new TreeSet<>();
-    private static List<Bullet> enemyBullets = new ArrayList<>();
-    private static List<Bullet> allyBullets = new ArrayList<>();
+    private static Set<Unit> enemyWorkers;
+    private static List<Bullet> enemyBullets;
+    private static List<Bullet> allyBullets;
     private static EnemyStrats enemyStrat = EnemyStrats.Unknown;
     private static String startStrat = null;
     private static boolean exploredMinerals = false;
-    private static Map<UnitType, Integer> mainEnemyUnitTypeAmount = new HashMap<>();
+    private static Map<UnitType, Integer> mainEnemyUnitTypeAmount;
 
     private static int getNumEnemyWorkers() {
         return enemyWorkers.size();
@@ -51,6 +52,7 @@ public class IntelligenceAgency {
         enemyStrat = EnemyStrats.Unknown;
         startStrat = null;
         exploredMinerals = false;
+        mainEnemyUnitTypeAmount = new HashMap<>();
     }
 
     public static EnemyStrats getEnemyStrat() {
@@ -116,7 +118,12 @@ public class IntelligenceAgency {
         if (type.isResourceDepot()) {
             // If base and player known skip
             if (enemyBases.containsKey(player) && enemyBases.get(player).contains(new EnemyBuilding(unit))) return;
-            enemyBases.get(player).add(new EnemyBuilding(unit));
+            for(Base b : getGs().BLs){
+                if(b.getLocation().equals(unit.getTilePosition())){
+                    enemyBases.get(player).add(new EnemyBuilding(unit));
+                    break;
+                }
+            }
         }
         // If player and type known skip
         if (enemyTypes.containsKey(player) && enemyTypes.get(player).contains(type)) return;

@@ -152,7 +152,6 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     private void idle() {
     }
 
-    @Override
     protected void retreat() {
         Position CC = getGs().getNearestCC(myUnit.getPosition());
         if (CC != null) target = CC;

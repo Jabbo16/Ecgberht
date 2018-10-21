@@ -12,6 +12,7 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -119,6 +120,36 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 attackPos = null;
             }
         }
+    }
+
+    private Position selectNewAttack() {
+        Position p = Util.chooseAttackPosition(myUnit.getPosition(), false);
+        if (p != null && getGs().getGame().getBWMap().isValidPosition(p)) return p;
+        if (getGs().enemyMainBase != null) return getGs().enemyMainBase.getLocation().toPosition();
+        return null;
+    }
+
+    private Unit getUnitToAttack(Unit myUnit, Set<Unit> enemies) {
+        Unit chosen = null;
+        double distB = Double.MAX_VALUE;
+        for (Unit u : enemies) {
+            if (u.getType().isFlyer() || ((PlayerUnit) u).isCloaked()) continue;
+            double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
+            if (chosen == null || distA < distB) {
+                chosen = u;
+                distB = distA;
+            }
+        }
+        if (chosen != null) return chosen;
+        return null;
+    }
+
+    private void retreat() {
+        Position CC = getGs().getNearestCC(myUnit.getPosition());
+        if (CC != null) ((MobileUnit) myUnit).move(CC);
+        else ((MobileUnit) myUnit).move(getGs().getPlayer().getStartLocation().toPosition());
+        attackPos = null;
+        attackUnit = null;
     }
 
     private void getNewStatus() {

@@ -4,10 +4,15 @@ import bwem.Base;
 import bwem.area.Area;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
+import ecgberht.Simulation.SimInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Unit;
 
@@ -17,32 +22,40 @@ import java.util.List;
 import static ecgberht.Ecgberht.getGs;
 
 // Based on SteamHammer worker scout management, props to @JayScott
-public class WorkerScoutAgent {
+public class WorkerScoutAgent extends Agent {
     private SCV unit;
     private int currentVertex;
     private List<Position> enemyBaseBorders = new ArrayList<>();
     private Base enemyBase;
     private Status status = Status.IDLE;
     private int enemyNaturalIndex = -1;
+    private Building disrupter = null;
+    private boolean stoppedDisrupting = false;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
         this.unit = (SCV) unit;
         this.enemyBase = enemyBase;
+        this.myUnit = unit;
     }
 
     public boolean runAgent() {
-        if (unit == null || !unit.exists()) return true;
+        if (unit == null || !unit.exists()){
+            if(disrupter != null) getGs().disrupterBuilding = disrupter;
+            return true;
+        }
         if (enemyBaseBorders.isEmpty()) updateBorders();
-        if (enemyNaturalIndex != -1 && IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool) {
+        if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool || getGs().EI.naughty)) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
         }
         status = chooseNewStatus();
+        cancelDisrupter();
         switch (status) {
             case EXPLORE:
                 followPerimeter();
                 break;
             case DISRUPTING:
+                disrupt();
                 break;
             case IDLE:
                 break;
@@ -50,7 +63,45 @@ public class WorkerScoutAgent {
         return false;
     }
 
+    private void cancelDisrupter() {
+        if(stoppedDisrupting && disrupter != null && disrupter.getHitPoints() <= 20){
+            disrupter.cancelConstruction();
+            disrupter = null;
+        }
+    }
+
+    private void disrupt() {
+        if(disrupter == null){
+            if(unit.getBuildUnit() != null){
+                disrupter = (Building) unit.getBuildUnit();
+                return;
+            }
+            if(unit.getOrder() != Order.PlaceBuilding){
+                unit.build(getGs().enemyNaturalBase.getLocation(), UnitType.Terran_Engineering_Bay);
+            }
+        }
+        else{
+            if (disrupter.getRemainingBuildTime() <= 25 || enemiesAreClose()) {
+                unit.haltConstruction();
+                stoppedDisrupting = true;
+            }
+        }
+    }
+
+    private boolean enemiesAreClose() {
+        if(unit.isUnderAttack()) return true;
+        for(Unit u : getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).enemies){
+            if(u.getDistance(unit) < 4 * 32) return true;
+        }
+        return false;
+    }
+
     private Status chooseNewStatus() {
+        if(getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
+        if(status == Status.DISRUPTING) return Status.DISRUPTING;
+        if(IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex){
+            return Status.DISRUPTING;
+        }
         return Status.EXPLORE;
     }
 
