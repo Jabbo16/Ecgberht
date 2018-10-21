@@ -25,6 +25,9 @@ public class ChooseSupply extends Action {
             if (((GameState) this.handler).strat.name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
+            if (((GameState) this.handler).strat.name.equals("EightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
+                return State.FAILURE;
+            }
             if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;

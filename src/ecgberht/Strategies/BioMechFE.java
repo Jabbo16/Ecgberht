@@ -26,7 +26,7 @@ public class BioMechFE extends Strategy {
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;
-        bunker = true;
+        bunker = false;
         supplyForFirstRefinery = 38;
         armyForAttack = 25;
         armyForExpand = 9;
@@ -43,7 +43,6 @@ public class BioMechFE extends Strategy {
     public void initTrainUnits() {
         trainUnits.add(UnitType.Terran_Marine);
         trainUnits.add(UnitType.Terran_Medic);
-        //trainUnits.add(UnitType.Terran_Vulture); // TODO fix vultures
         trainUnits.add(UnitType.Terran_Siege_Tank_Tank_Mode);
         trainUnits.add(UnitType.Terran_Wraith);
     }
@@ -57,7 +56,6 @@ public class BioMechFE extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

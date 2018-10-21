@@ -22,7 +22,7 @@ public class FullBio extends Strategy {
         facPerCC = 0;
         numRaxForAca = 2;
         numRaxForFac = 4;
-        bunker = true;
+        bunker = false;
         supplyForFirstRefinery = 36;
         armyForAttack = 32;
         armyForExpand = 15;
@@ -53,7 +53,6 @@ public class FullBio extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

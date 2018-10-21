@@ -56,7 +56,6 @@ public class MechGreedyFE extends Strategy {
         buildUnits.add(UnitType.Terran_Academy);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

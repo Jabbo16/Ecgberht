@@ -42,7 +42,7 @@ public class GameState extends GameHandler {
     public boolean defense = false;
     public boolean enemyIsRandom = true;
     public boolean expanding = false;
-    public boolean firstProxyBBS = false;
+    public boolean firstTerranCheese = false;
     public boolean firstScout = true;
     public boolean iReallyWantToExpand = false;
     public boolean islandExpand;
@@ -186,13 +186,14 @@ public class GameState extends GameHandler {
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             TwoPortWraith tPW = new TwoPortWraith();
+            EightRax eR = new EightRax();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (enemyRace == Race.Zerg && EI.naughty) return b;
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if (true) return tPW; // TEST ONLY
+            //if (true) return bbs; // TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
@@ -202,8 +203,8 @@ public class GameState extends GameHandler {
 
             switch (enemyRace) {
                 case Zerg:
-                    strategies.put(b.name, new MutablePair<>(0, 0));
-                    nameStrat.put(b.name, b);
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
 
                     strategies.put(bGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bGFE.name, bGFE);
@@ -220,22 +221,26 @@ public class GameState extends GameHandler {
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMGFE.name, bGFE);
 
+                    strategies.put(eR.name, new MutablePair<>(0, 0));
+                    nameStrat.put(eR.name, eR);
+
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(mGFE.name, bGFE);
 
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
+
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);
 
-                    strategies.put(bFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bFE.name, bFE);
-
                     break;
+
                 case Terran:
-                    strategies.put(b.name, new MutablePair<>(0, 0));
-                    nameStrat.put(b.name, b);
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
 
                     strategies.put(bM.name, new MutablePair<>(0, 0));
                     nameStrat.put(bM.name, bM);
@@ -246,39 +251,43 @@ public class GameState extends GameHandler {
                     strategies.put(bbs.name, new MutablePair<>(0, 0));
                     nameStrat.put(bbs.name, bbs);
 
-                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bMGFE.name, bGFE);
-
-                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bGFE.name, bGFE);
-
-                    strategies.put(bMFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bMFE.name, bMFE);
+                    strategies.put(eR.name, new MutablePair<>(0, 0));
+                    nameStrat.put(eR.name, eR);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(mGFE.name, bGFE);
 
-                    strategies.put(bFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bFE.name, bFE);
-                    break;
-                case Protoss:
-                    strategies.put(b.name, new MutablePair<>(0, 0));
-                    nameStrat.put(b.name, b);
-
-                    strategies.put(bM.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bM.name, bM);
-
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMGFE.name, bGFE);
 
                     strategies.put(bGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bGFE.name, bGFE);
 
-                    strategies.put(bbs.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bbs.name, bbs);
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
+
+                    strategies.put(bMFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMFE.name, bMFE);
+                    break;
+
+                case Protoss:
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
+
+                    strategies.put(b.name, new MutablePair<>(0, 0));
+                    nameStrat.put(b.name, b);
+
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bGFE);
 
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
+
+                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bGFE.name, bGFE);
+
+                    strategies.put(eR.name, new MutablePair<>(0, 0));
+                    nameStrat.put(eR.name, eR);
 
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);
@@ -480,6 +489,8 @@ public class GameState extends GameHandler {
         for (Geyser g : gas) vespeneGeysers.put((VespeneGeyser) g.getUnit(), false);
         if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
+        } else if (strat.name.equals("EightRax")) {
+            workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
 
@@ -523,6 +534,8 @@ public class GameState extends GameHandler {
         for (Unit u : auxGas) refineriesAssigned.remove(u);
         if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
+        } else if (strat.name.equals("EightRax")) {
+            workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
 
@@ -1240,15 +1253,35 @@ public class GameState extends GameHandler {
         return Math.ceil(workersRequired);
     }
 
-    void checkWorkerMilitia() {
-        if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2) {
+    void checkWorkerMilitia(int rax) {
+        if (strat.name.equals("ProxyBBS")) {
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) == rax) {
+                List<Unit> aux = new ArrayList<>();
+                int count = workerMining.size();
+                for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
+                    if (count <= workerCountToSustain) break;
+                    if (!scv.getKey().isCarryingMinerals()) {
+                        scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
+                        //addToSquad(scv.getKey());
+                        myArmy.add(scv.getKey());
+                        if (mineralsAssigned.containsKey(scv.getValue())) {
+                            mining--;
+                            mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
+                        }
+                        aux.add(scv.getKey());
+                        count--;
+                    }
+                }
+                for (Unit u : aux) workerMining.remove(u);
+            }
+        } else if (MBs.size() == rax && getArmySize() >= 4) {
             List<Unit> aux = new ArrayList<>();
             int count = workerMining.size();
             for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
                 if (count <= workerCountToSustain) break;
                 if (!scv.getKey().isCarryingMinerals()) {
-                    scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
                     //addToSquad(scv.getKey());
+                    scv.getKey().stop(false);
                     myArmy.add(scv.getKey());
                     if (mineralsAssigned.containsKey(scv.getValue())) {
                         mining--;
@@ -1402,7 +1435,7 @@ public class GameState extends GameHandler {
     }
 
     public boolean needToAttack() {
-        if (strat.name.equals("ProxyBBS") && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
+        if ((strat.name.equals("ProxyBBS") || strat.name.equals("EightRax")) && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
             return true;
         return getArmySize() >= strat.armyForAttack && requiredUnitsForAttack();
     }
@@ -1416,8 +1449,8 @@ public class GameState extends GameHandler {
                 if (!needToAttack && u.status != Squad.Status.ATTACK && !checkItWasAttacking(u)) continue;
                 Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
                 if (attackPos != null) {
-                    if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {
-                        firstProxyBBS = true;
+                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("EightRax"))) {
+                        firstTerranCheese = true;
                         getIH().sendText("Get ready for the show!");
                     }
                     if (getGame().getBWMap().isValidPosition(attackPos)) {
@@ -1425,8 +1458,8 @@ public class GameState extends GameHandler {
                         u.status = Squad.Status.ATTACK;
                     }
                 } else if (enemyMainBase != null) {
-                    if (!firstProxyBBS && strat.name.equals("ProxyBBS")) {
-                        firstProxyBBS = true;
+                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("EightRax"))) {
+                        firstTerranCheese = true;
                         getIH().sendText("Get ready for the show!");
                     }
                     u.giveAttackOrder(enemyMainBase.getLocation().toPosition());

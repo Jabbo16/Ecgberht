@@ -22,7 +22,8 @@ public class ChooseSCV extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).strat.name.equals("ProxyBBS")) {
+            String strat = ((GameState) this.handler).strat.name;
+            if (strat.equals("ProxyBBS") || strat.equals("EightRax")) {
                 boolean notTraining = false;
                 for (Barracks b : ((GameState) this.handler).MBs) {
                     if (!b.isTraining()) {

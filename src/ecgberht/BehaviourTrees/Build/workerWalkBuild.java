@@ -26,7 +26,9 @@ public class workerWalkBuild extends Action {
         try {
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
                 SCV chosen = u.getKey();
-                if (u.getValue().first != UnitType.Terran_Command_Center || ((GameState) this.handler).getGame().getBWMap().isVisible(u.getValue().second) || !((GameState) this.handler).fortressSpecialBLsTiles.contains(u.getValue().second))
+                if (u.getValue().first != UnitType.Terran_Command_Center
+                        || ((GameState) this.handler).getGame().getBWMap().isVisible(u.getValue().second)
+                        || !((GameState) this.handler).fortressSpecialBLsTiles.contains(u.getValue().second))
                     continue;
                 Base myBase = Util.getClosestBaseLocation(u.getValue().second.toPosition());
                 MutablePair<MineralPatch, MineralPatch> minerals = ((GameState) this.handler).fortressSpecialBLs.get(myBase);
@@ -60,10 +62,7 @@ public class workerWalkBuild extends Action {
                         }
                     }
                     chosen.gather(minerals.first);
-
                 }
-
-
             }
             return State.SUCCESS;
         } catch (Exception e) {

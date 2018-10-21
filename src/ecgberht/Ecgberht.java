@@ -147,8 +147,8 @@ public class Ecgberht implements BWEventListener {
         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cNB, cE, cSup);
-        if (gs.strat.bunker) chooseBuildingBuild.addChild(cBun);
+        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cNB, cE, cBun, cSup);
+        //chooseBuildingBuild.addChild(cBun);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
         if (gs.strat.buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
@@ -466,7 +466,8 @@ public class Ecgberht implements BWEventListener {
             botherTree.run();
             bunkerTree.run();
             scannerTree.run();
-            if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia();
+            if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
+            else if (gs.strat.name.equals("EightRax")) gs.checkWorkerMilitia(1);
             defenseTree.run();
             gs.updateAttack();
             gs.runAgents();
@@ -666,7 +667,7 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         gs.myArmy.add(arg0);
                         if (!gs.strat.name.equals("ProxyBBS")) {
-                            if (!gs.EI.naughty || gs.enemyRace != Race.Zerg) {
+                            if (!gs.strat.name.equals("EightRax") && (!gs.EI.naughty || gs.enemyRace != Race.Zerg)) {
                                 if (!gs.DBs.isEmpty()) {
                                     ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
                                 } else if (gs.mainChoke != null) {
@@ -723,7 +724,8 @@ public class Ecgberht implements BWEventListener {
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if (gs.strat.name.equals("ProxyBBS")) gs.myArmy.remove(arg0);
+                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("EightRax"))
+                            gs.myArmy.remove(arg0);
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
                                 gs.workerIdle.add((Worker) arg0);

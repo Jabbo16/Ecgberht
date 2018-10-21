@@ -43,7 +43,6 @@ public class SendDefenders extends Action {
             if (((GameState) this.handler).enemyInBase.size() == 1 && ((GameState) this.handler).enemyInBase.iterator().next() instanceof Worker) {
                 defenders = 1;
             }
-
             MutablePair<Boolean, Boolean> battleWin = new MutablePair<>(true, false);
             if (defenders != 1 && IntelligenceAgency.enemyIsRushing()) {
                 if (((GameState) this.handler).enemyInBase.size() + friends.size() < 40) {
@@ -126,7 +125,7 @@ public class SendDefenders extends Action {
                         }
                     }
                 }
-            } else if (!((GameState) this.handler).strat.name.equals("ProxyBBS")) {
+            } else if (!((GameState) this.handler).strat.name.equals("ProxyBBS") && !((GameState) this.handler).strat.name.equals("EightRax")) {
                 for (Entry<Integer, Squad> u : ((GameState) this.handler).sqManager.squads.entrySet()) {
                     if (((GameState) this.handler).attackPosition != null) {
                         u.getValue().giveAttackOrder(((GameState) this.handler).attackPosition);

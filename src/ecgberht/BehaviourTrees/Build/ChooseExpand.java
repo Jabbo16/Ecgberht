@@ -20,6 +20,8 @@ public class ChooseExpand extends Action {
     @Override
     public State execute() {
         try {
+            String strat = ((GameState) this.handler).strat.name;
+            if (strat.equals("ProxyBBS") || strat.equals("EightRax")) return State.FAILURE;
             for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
                 if (w.first == UnitType.Terran_Command_Center) {
                     return State.FAILURE;
@@ -30,7 +32,7 @@ public class ChooseExpand extends Action {
                     return State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
+            if (strat.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
                 return State.FAILURE;
             }
 
@@ -38,10 +40,8 @@ public class ChooseExpand extends Action {
                 ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
-            if (((GameState) this.handler).strat.name.equals("BioGreedyFE") ||
-                    ((GameState) this.handler).strat.name.equals("MechGreedyFE") ||
-                    ((GameState) this.handler).strat.name.equals("BioMechGreedyFE") ||
-                    ((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+            if (strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE") ||
+                    strat.equals("PlasmaWraithHell")) {
                 if (!((GameState) this.handler).MBs.isEmpty() && ((GameState) this.handler).CCs.size() == 1) {
                     ((GameState) this.handler).chosenToBuild = UnitType.Terran_Command_Center;
                     return State.SUCCESS;

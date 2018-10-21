@@ -17,11 +17,12 @@ public class CheckScout extends Conditional {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
+            String strat = ((GameState) this.handler).strat.name;
+            if (strat.equals("PlasmaWraithHell")) {
                 if (((GameState) this.handler).sqManager.squads.isEmpty()) return State.FAILURE;
                 return State.SUCCESS;
             }
-            if (((GameState) this.handler).strat.name.equals("ProxyBBS") && ((GameState) this.handler).mapSize == 2) {
+            if ((strat.equals("ProxyBBS") || strat.equals("EightRax")) && ((GameState) this.handler).mapSize == 2) {
                 for (Base b : ((GameState) this.handler).SLs) {
                     if (b.equals(((GameState) this.handler).mainCC.first)) continue;
                     ((GameState) this.handler).enemyMainBase = b;

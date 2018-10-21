@@ -52,7 +52,6 @@ public class PlasmaWraithHell extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

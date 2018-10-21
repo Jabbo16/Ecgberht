@@ -40,7 +40,7 @@ public class TwoPortWraith extends Strategy {
     @Override
     public void initTrainUnits() {
         trainUnits.add(UnitType.Terran_Marine);
-        trainUnits.add(UnitType.Terran_Vulture); // TODO enable again
+        trainUnits.add(UnitType.Terran_Vulture);
         trainUnits.add(UnitType.Terran_Wraith);
     }
 
@@ -48,7 +48,6 @@ public class TwoPortWraith extends Strategy {
     public void initBuildUnits() {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

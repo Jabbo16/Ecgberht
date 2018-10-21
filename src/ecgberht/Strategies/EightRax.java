@@ -4,26 +4,26 @@ import ecgberht.Strategy;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class ProxyBBS extends Strategy {
+public class EightRax extends Strategy {
 
-    public ProxyBBS() {
+    public EightRax() {
         super();
         initStrategy();
     }
 
     @Override
     public void initStrategy() {
-        name = "ProxyBBS";
+        name = "EightRax";
         armyForBay = 0;
         armyForTurret = 0;
         numBays = 0;
-        raxPerCC = 2;
+        raxPerCC = 1;
         facPerCC = 0;
         numRaxForFac = 0;
         bunker = false;
-        proxy = true;
+        proxy = false;
         supplyForFirstRefinery = 400;
-        armyForAttack = 8;
+        armyForAttack = 7;
         armyForExpand = 100;
         facForArmory = 0;
         numArmories = 0;

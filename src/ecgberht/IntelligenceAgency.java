@@ -1,9 +1,10 @@
 package ecgberht;
 
 import bwem.unit.Mineral;
-import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
+import ecgberht.Strategies.FullMech;
+import ecgberht.Strategies.MechGreedyFE;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.type.Race;
@@ -225,10 +226,10 @@ public class IntelligenceAgency {
                 getGs().ih.sendText("Nice Mech strat you got there");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE")) {
-                    getGs().strat = new BioMechFE();
+                    getGs().strat = new MechGreedyFE();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
-                    getGs().strat = new BioMechFE();
+                    getGs().strat = new FullMech();
                     Ecgberht.transition();
                 }
                 return true;
@@ -306,6 +307,7 @@ public class IntelligenceAgency {
     private static boolean detectCannonRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
             boolean foundForge = false;
+            boolean foundGas = enemyHasType(UnitType.Protoss_Assimilator);
             if (exploredMinerals) {
                 for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
                     if (u.type == UnitType.Protoss_Forge && getGs().bwem.getMap().getArea(u.pos).equals(getGs().enemyMainArea)) {
@@ -323,16 +325,16 @@ public class IntelligenceAgency {
                     break;
                 }
             }
-            if (foundForge || somethingInMyBase) {
+            if ((foundForge && !foundGas) || somethingInMyBase) {
                 enemyStrat = EnemyStrats.CannonRush;
                 getGs().ih.sendText("Cannon rusher T_T");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    getGs().strat = new FullBio();
+                    getGs().strat = new FullMech();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
-                    getGs().strat = new FullBioFE();
+                    getGs().strat = new FullMech();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }

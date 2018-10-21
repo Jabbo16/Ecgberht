@@ -48,6 +48,24 @@ public class TrainUnit extends Action {
                     return State.SUCCESS;
                 }
             }
+            if (((GameState) this.handler).strat.name.equals("EightRax")) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) == 0 &&
+                        ((GameState) this.handler).supplyMan.getSupplyUsed() >= 16) {
+                    ((GameState) this.handler).chosenBuilding = null;
+                    ((GameState) this.handler).chosenToBuild = UnitType.None;
+                    return State.FAILURE;
+                }
+                /*if (Util.countBuildingAll(UnitType.Terran_Barracks) == 1 &&
+                        Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
+                    ((GameState) this.handler).chosenBuilding = null;
+                    ((GameState) this.handler).chosenToBuild = UnitType.None;
+                    return State.FAILURE;
+                }*/
+                if (((GameState) this.handler).getSupply() > 0) {
+                    chosen.train(((GameState) this.handler).chosenUnit);
+                    return State.SUCCESS;
+                }
+            }
 
             if (((GameState) this.handler).getSupply() > 4 || ((GameState) this.handler).checkSupply() ||
                     ((GameState) this.handler).getPlayer().supplyTotal() >= 400) {

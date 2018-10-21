@@ -22,7 +22,7 @@ public class FullMech extends Strategy {
         facPerCC = 2;
         numRaxForAca = 1;
         numRaxForFac = 1;
-        bunker = true;
+        bunker = false;
         supplyForFirstRefinery = 28;
         armyForAttack = 30;
         armyForExpand = 8;
@@ -57,7 +57,6 @@ public class FullMech extends Strategy {
         buildUnits.add(UnitType.Terran_Academy);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

@@ -125,6 +125,8 @@ public class SimManager {
     private boolean isArmyUnit(Unit u) {
         try {
             if (!u.exists()) return false;
+            if (u instanceof SCV && (getGs().strat.name.equals("ProxyBBS") || getGs().strat.name.equals("EightRax")))
+                return true;
             if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
             return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
                     || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
@@ -262,8 +264,10 @@ public class SimManager {
             s.postSimScore = simulator.playerScores();
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
-            if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2) || s.stateAfter.first.isEmpty();
-            else s.lose = !scoreCalc(s, 2.5) || s.stateAfter.first.isEmpty();
+            if (s.stateAfter.first.isEmpty()) s.lose = true;
+            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2);
+            else if (getGs().strat.name.equals("EightRax")) s.lose = !scoreCalc(s, 1.5);
+            else s.lose = !scoreCalc(s, 2.5);
         }
     }
 
