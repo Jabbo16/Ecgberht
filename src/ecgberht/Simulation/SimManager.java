@@ -235,7 +235,8 @@ public class SimManager {
             }
             for (Unit u : s.enemies) {
                 if (u instanceof Worker && !((Worker) u).isAttacking()) continue;
-                if (!u.getType().canAttack()) continue;
+                if (u instanceof Building && !((Building) u).isCompleted()) continue;
+                if (!Util.isStaticDefense(u) && !u.getType().canAttack()) continue;
                 if (!((PlayerUnit) u).isDetected() && (u instanceof DarkTemplar || (u instanceof Lurker && ((Lurker) u).isBurrowed()))) {
                     if (energy >= 1) energy -= 1;
                     else {
@@ -265,7 +266,7 @@ public class SimManager {
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
             if (s.stateAfter.first.isEmpty()) s.lose = true;
-            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 2);
+            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 1.5);
             else if (getGs().strat.name.equals("EightRax")) s.lose = !scoreCalc(s, 1.5);
             else s.lose = !scoreCalc(s, 2.5);
         }

@@ -118,8 +118,8 @@ public class IntelligenceAgency {
         if (type.isResourceDepot()) {
             // If base and player known skip
             if (enemyBases.containsKey(player) && enemyBases.get(player).contains(new EnemyBuilding(unit))) return;
-            for(Base b : getGs().BLs){
-                if(b.getLocation().equals(unit.getTilePosition())){
+            for (Base b : getGs().BLs) {
+                if (b.getLocation().equals(unit.getTilePosition())) {
                     enemyBases.get(player).add(new EnemyBuilding(unit));
                     break;
                 }

@@ -12,9 +12,7 @@ import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.SCV;
-import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +29,8 @@ public class WorkerScoutAgent extends Agent {
     private int enemyNaturalIndex = -1;
     private Building disrupter = null;
     private boolean stoppedDisrupting = false;
+    private SimInfo mySim;
+    private boolean removedIndex = false;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
         this.unit = (SCV) unit;
@@ -39,15 +39,18 @@ public class WorkerScoutAgent extends Agent {
     }
 
     public boolean runAgent() {
-        if (unit == null || !unit.exists()){
-            if(disrupter != null) getGs().disrupterBuilding = disrupter;
+        if (unit == null || !unit.exists()) {
+            if (disrupter != null) getGs().disrupterBuilding = disrupter;
             return true;
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
-        if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool || getGs().EI.naughty)) {
+        if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
+                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().EI.naughty)) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
+            removedIndex = true;
         }
+        mySim = getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND);
         status = chooseNewStatus();
         cancelDisrupter();
         switch (status) {
@@ -64,42 +67,59 @@ public class WorkerScoutAgent extends Agent {
     }
 
     private void cancelDisrupter() {
-        if(stoppedDisrupting && disrupter != null && disrupter.getHitPoints() <= 20){
+        if (stoppedDisrupting && disrupter != null && disrupter.getHitPoints() <= 20) {
             disrupter.cancelConstruction();
             disrupter = null;
         }
     }
 
     private void disrupt() {
-        if(disrupter == null){
-            if(unit.getBuildUnit() != null){
+        if (disrupter == null) {
+            if (unit.getBuildUnit() != null) {
                 disrupter = (Building) unit.getBuildUnit();
                 return;
             }
-            if(unit.getOrder() != Order.PlaceBuilding){
+            if (unit.getOrder() != Order.PlaceBuilding) {
                 unit.build(getGs().enemyNaturalBase.getLocation(), UnitType.Terran_Engineering_Bay);
             }
-        }
-        else{
-            if (disrupter.getRemainingBuildTime() <= 25 || enemiesAreClose()) {
+        } else if (disrupter.getRemainingBuildTime() <= 25) {
+            unit.haltConstruction();
+            stoppedDisrupting = true;
+            removedIndex = true;
+        } else if (mySim.enemies.stream().anyMatch(u -> u.getDistance(unit) <= 4 * 32)) {
+            boolean zerglings = mySim.enemies.stream().anyMatch(u -> u instanceof Zergling);
+            if (zerglings) {
                 unit.haltConstruction();
                 stoppedDisrupting = true;
+                if (!removedIndex) {
+                    enemyBaseBorders.remove(enemyNaturalIndex);
+                    enemyNaturalIndex = -1;
+                    removedIndex = true;
+                }
+                return;
             }
-        }
-    }
-
-    private boolean enemiesAreClose() {
-        if(unit.isUnderAttack()) return true;
-        for(Unit u : getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).enemies){
-            if(u.getDistance(unit) < 4 * 32) return true;
-        }
-        return false;
+            if (mySim.enemies.size() == 1 && mySim.enemies.iterator().next() instanceof Drone) {
+                if (mySim.lose) {
+                    unit.haltConstruction();
+                    stoppedDisrupting = true;
+                    if (!removedIndex) {
+                        enemyBaseBorders.remove(enemyNaturalIndex);
+                        enemyNaturalIndex = -1;
+                        removedIndex = true;
+                    }
+                } else UtilMicro.attack(unit, mySim.enemies.iterator().next());
+            }
+        } else unit.resumeBuilding(disrupter);
     }
 
     private Status chooseNewStatus() {
-        if(getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
-        if(status == Status.DISRUPTING) return Status.DISRUPTING;
-        if(IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex){
+        String strat = getGs().strat.name;
+        if (getGs().luckyDraw <= 0.7 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
+                || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("EightRax") || getGs().EI.naughty)
+            return Status.EXPLORE;
+        if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
+        if (status == Status.DISRUPTING) return Status.DISRUPTING;
+        if (IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex) {
             return Status.DISRUPTING;
         }
         return Status.EXPLORE;
@@ -255,20 +275,25 @@ public class WorkerScoutAgent extends Agent {
                 currentVertex = i;
             }
         }
-        Base enemyNatural = getGs().enemyNaturalBase;
-        if (enemyNatural != null) {
-            Position enemyNaturalPos = enemyNatural.getLocation().toPosition();
-            int index = -1;
-            double distMax = Double.MAX_VALUE;
-            for (int ii = 0; ii < enemyBaseBorders.size(); ii++) {
-                double dist = Util.getGroundDistance(enemyBaseBorders.get(ii), enemyNaturalPos);
-                if (index == -1 || dist < distMax) {
-                    index = ii;
-                    distMax = dist;
+        if (!getGs().EI.naughty) {
+            Base enemyNatural = getGs().enemyNaturalBase;
+            if (enemyNatural != null) {
+                Position enemyNaturalPos = enemyNatural.getLocation().toPosition();
+                int index = -1;
+                double distMax = Double.MAX_VALUE;
+                for (int ii = 0; ii < enemyBaseBorders.size(); ii++) {
+                    double dist = Util.getGroundDistance(enemyBaseBorders.get(ii), enemyNaturalPos);
+                    if (index == -1 || dist < distMax) {
+                        index = ii;
+                        distMax = dist;
+                    }
                 }
+                enemyBaseBorders.add(index, enemyNaturalPos);
+                this.enemyNaturalIndex = index;
             }
-            enemyBaseBorders.add(index, enemyNaturalPos);
-            this.enemyNaturalIndex = index;
+        } else {
+            enemyNaturalIndex = -1;
+            removedIndex = true;
         }
     }
 

@@ -22,10 +22,7 @@ public class CollectMineral extends Action {
             if (!((GameState) this.handler).mineralsAssigned.isEmpty()) {
                 MineralPatch closestMineral = null;
                 int workerPerPatch = 2;
-                if (((GameState) this.handler).frameCount < 5 &&
-                        ((GameState) this.handler).supplyMan.getSupplyUsed() <= 10) {
-                    workerPerPatch = 1;
-                }
+                if (((GameState) this.handler).workerMining.size() < 7) workerPerPatch = 1;
                 for (Entry<MineralPatch, Integer> m : ((GameState) this.handler).mineralsAssigned.entrySet()) {
                     if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral))
                             && m.getValue() < workerPerPatch) {

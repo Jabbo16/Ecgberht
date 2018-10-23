@@ -136,6 +136,7 @@ public class GameState extends GameHandler {
     public Worker chosenWorkerDrop = null;
     public boolean firstExpand = true;
     public int maxGoliaths = 0;
+    public double luckyDraw;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),
             new TilePosition(117, 7), new TilePosition(7, 118), new TilePosition(117, 118)));
     public WorkerScoutAgent scout = null;
@@ -159,6 +160,7 @@ public class GameState extends GameHandler {
         mapSize = bw.getBWMap().getStartPositions().size();
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimManager(bw);
+        luckyDraw = Math.random();
     }
 
     private void initPlayers() {
@@ -335,6 +337,7 @@ public class GameState extends GameHandler {
             }
 
             int totalGamesPlayed = EI.wins + EI.losses;
+            if (enemyName.equals("saida") && totalGamesPlayed == 1) return bbs;
             if (totalGamesPlayed < 1) {
                 ih.sendText("I dont know you that well yet, lets pick the standard strategy");
                 return b;
@@ -358,13 +361,13 @@ public class GameState extends GameHandler {
                 ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "%");
                 return nameStrat.get(bestStrat);
             }
-            double C = 0.5;
+            double C = 0.55;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
                 int sGamesPlayed = strat.getValue().first + strat.getValue().second;
                 double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.5 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+                double ucbVal = sGamesPlayed == 0 ? 0.55 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat.getKey();
@@ -825,7 +828,8 @@ public class GameState extends GameHandler {
 
         for (PlayerUnit u : bw.getUnits(self)) {
             if (!u.exists() || !(u instanceof Building) || u instanceof Addon) continue;
-            if(u.getBuildUnit() != null || enemyNaturalBase == null || u.getTilePosition().equals(enemyNaturalBase.getLocation())) continue;
+            if (u.getBuildUnit() != null || enemyNaturalBase == null || u.getTilePosition().equals(enemyNaturalBase.getLocation()))
+                continue;
             if (!u.isCompleted() && !workerTask.values().contains(u) && !buildingLot.contains(u)) {
                 buildingLot.add((Building) u);
             }
@@ -1352,7 +1356,8 @@ public class GameState extends GameHandler {
 
     void sendCustomMessage() {
         String name = EI.opponent.toLowerCase();
-        if (name.equals("krasi0".toLowerCase())) ih.sendText("Please don't bully me too much!");
+        if (name.equals("saida") && EI.losses + EI.wins == 1) ih.sendText("Omae wa mou shindeiru");
+        else if (name.equals("krasi0".toLowerCase())) ih.sendText("Please don't bully me too much!");
         else if (name.equals("hannes bredberg".toLowerCase()) || name.equals("hannesbredberg".toLowerCase())) {
             ih.sendText("Don't you dare nuke me!");
         } else if (name.equals("zercgberht")) {
@@ -1447,7 +1452,8 @@ public class GameState extends GameHandler {
 
     void updateAttack() {
         try {
-            if (sqManager.squads.isEmpty() || defense) return;
+            if (sqManager.squads.isEmpty() || (defense && !strat.name.equals("ProxyBBS") && !strat.name.equals("EightRax")))
+                return;
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
@@ -1546,9 +1552,9 @@ public class GameState extends GameHandler {
         return new MutablePair<>(farther, closer);
     }
 
-    void checkDisrupter(){
-        if(enemyRace != Race.Zerg || disrupterBuilding == null) return;
-        if(disrupterBuilding.getHitPoints() <= 20){
+    void checkDisrupter() {
+        if (enemyRace != Race.Zerg || disrupterBuilding == null) return;
+        if (disrupterBuilding.getHitPoints() <= 20) {
             disrupterBuilding.cancelConstruction();
             disrupterBuilding = null;
         }

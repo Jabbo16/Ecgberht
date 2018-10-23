@@ -5,6 +5,7 @@ import ecgberht.Squad;
 import org.iaie.btree.state.State;
 import org.iaie.btree.task.leaf.Action;
 import org.iaie.btree.util.GameHandler;
+import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 import org.openbw.bwapi4j.unit.Wraith;
@@ -38,6 +39,11 @@ public class ChooseScout extends Action {
                 for (Worker u : ((GameState) this.handler).workerMining.keySet()) {
                     if (!u.isCarryingMinerals()) {
                         ((GameState) this.handler).chosenScout = u;
+                        MineralPatch mineral = ((GameState) this.handler).workerMining.get(u);
+                        if (((GameState) this.handler).mineralsAssigned.containsKey(mineral)) {
+                            ((GameState) this.handler).mining--;
+                            ((GameState) this.handler).mineralsAssigned.put(mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
+                        }
                         ((GameState) this.handler).workerMining.remove(u);
                         break;
                     }

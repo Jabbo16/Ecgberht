@@ -18,7 +18,7 @@ public class Explore extends Conditional {
     public State execute() {
         try {
             if (scout == null && ((GameState) this.handler).chosenHarasser != null) {
-                ((GameState)this.handler).agents.put(((GameState) this.handler).chosenHarasser, new WorkerScoutAgent(((GameState) this.handler).chosenHarasser, ((GameState) this.handler).enemyMainBase));
+                ((GameState) this.handler).agents.put(((GameState) this.handler).chosenHarasser, new WorkerScoutAgent(((GameState) this.handler).chosenHarasser, ((GameState) this.handler).enemyMainBase));
                 ((GameState) this.handler).chosenHarasser = null;
                 return State.SUCCESS;
             }

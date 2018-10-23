@@ -407,7 +407,6 @@ public class Ecgberht implements BWEventListener {
     }
 
 
-
     @Override
     public void onFrame() {
         try {
