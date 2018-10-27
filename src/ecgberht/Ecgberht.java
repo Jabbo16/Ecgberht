@@ -40,7 +40,6 @@ import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
@@ -113,7 +112,7 @@ public class Ecgberht implements BWEventListener {
         ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
         CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
         TrainUnit tr = new TrainUnit("Train Unit", gs);
-        Selector<GameHandler> chooseUnit = new Selector<>("Choose Recruit", cNT, cSU, cSCV);
+        Selector chooseUnit = new Selector("Choose Recruit", cNT, cSU, cSCV);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Goliath)) chooseUnit.addChild(cGol);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
         if (gs.strat.trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
@@ -147,7 +146,7 @@ public class Ecgberht implements BWEventListener {
         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
-        Selector<GameHandler> chooseBuildingBuild = new Selector<>("Choose Building to build", cNB, cE, cBun, cSup);
+        Selector chooseBuildingBuild = new Selector("Choose Building to build", cNB, cE, cBun, cSup);
         //chooseBuildingBuild.addChild(cBun);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
@@ -179,7 +178,7 @@ public class Ecgberht implements BWEventListener {
         ChooseSiegeMode cSM = new ChooseSiegeMode("Choose Siege Mode", gs);
         ChooseCharonBoosters cCB = new ChooseCharonBoosters("Choose Charon Boosters", gs);
         ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
-        Selector<GameHandler> ChooseUP = new Selector<>("Choose Upgrade");
+        Selector ChooseUP = new Selector("Choose Upgrade");
         ChooseUP.addChild(cI);
         ChooseUP.addChild(cEMP);
         if (gs.strat.upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
@@ -201,7 +200,7 @@ public class Ecgberht implements BWEventListener {
         ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station", gs);
         ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop", gs);
         ChooseTower cT = new ChooseTower("Choose Control Tower", gs);
-        Selector<GameHandler> ChooseAddon = new Selector<>("Choose Addon");
+        Selector ChooseAddon = new Selector("Choose Addon");
         if (gs.strat.buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addChild(cMS);
         if (gs.strat.buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addChild(cCS);
         if (gs.strat.buildAddons.contains(UnitType.Terran_Control_Tower)) ChooseAddon.addChild(cT);
@@ -242,9 +241,9 @@ public class Ecgberht implements BWEventListener {
         CheckVisibleBase cVB = new CheckVisibleBase("Check visible Base", gs);
         CheckEnemyBaseVisible cEBV = new CheckEnemyBaseVisible("Check Enemy Base Visible", gs);
         Sequence scoutFalse = new Sequence("Scout ", cSc, chSc, sSc);
-        Selector<GameHandler> EnemyFound = new Selector<>("Enemy found in base location", cEBV, sSc);
+        Selector EnemyFound = new Selector("Enemy found in base location", cEBV, sSc);
         Sequence scoutTrue = new Sequence("Scout True", cVB, EnemyFound);
-        Selector<GameHandler> Scouting = new Selector<>("Select Scouting Plan", scoutFalse, scoutTrue);
+        Selector Scouting = new Selector("Select Scouting Plan", scoutFalse, scoutTrue);
         scoutingTree = new BehavioralTree("Movement Tree");
         scoutingTree.addChild(Scouting);
     }
@@ -303,10 +302,10 @@ public class Ecgberht implements BWEventListener {
         ChooseBuildingToHarass cBTH = new ChooseBuildingToHarass("Check Building to Harass", gs);
         Explore E = new Explore("Explore", gs);
         HarassWorker hW = new HarassWorker("Bother SCV", gs);
-        Selector<GameHandler> bOw = new Selector<>("Choose Builder or Worker or Building", cWTH, cWTB, cBTH);
+        Selector bOw = new Selector("Choose Builder or Worker or Building", cWTH, cWTB, cBTH);
         Sequence harassAttack = new Sequence("Harass", cHA, bOw, hW);
         Sequence explorer = new Sequence("Explorer", cE, E);
-        Selector<GameHandler> eOh = new Selector<>("Explorer or harasser", explorer, harassAttack);
+        Selector eOh = new Selector("Explorer or harasser", explorer, harassAttack);
         Sequence harass = new Sequence("Harass", cH, eOh);
         botherTree = new BehavioralTree("Harass Tree");
         botherTree.addChild(harass);
@@ -316,7 +315,7 @@ public class Ecgberht implements BWEventListener {
         CollectGas cg = new CollectGas("Collect Gas", gs);
         CollectMineral cm = new CollectMineral("Collect Mineral", gs);
         FreeWorker fw = new FreeWorker("No Union", gs);
-        Selector<GameHandler> collectResources = new Selector<>("Collect Melted Cash", cg, cm);
+        Selector collectResources = new Selector("Collect Melted Cash", cg, cm);
         Sequence collect = new Sequence("Collect", fw, collectResources);
         collectTree = new BehavioralTree("Recollection Tree");
         collectTree.addChild(collect);

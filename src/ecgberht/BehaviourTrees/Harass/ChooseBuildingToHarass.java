@@ -2,43 +2,42 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 
 public class ChooseBuildingToHarass extends Action {
 
-    public ChooseBuildingToHarass(String name, GameHandler gh) {
+    public ChooseBuildingToHarass(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).chosenUnitToHarass != null) {
-                return State.FAILURE;
+            if (this.handler.chosenUnitToHarass != null) {
+                return BehavioralTree.State.FAILURE;
             }
-            for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                if (((GameState) this.handler).enemyMainBase != null) {
+            for (EnemyBuilding u : this.handler.enemyBuildingMemory.values()) {
+                if (this.handler.enemyMainBase != null) {
                     if (u.type.isBuilding()) {
-                        if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(((GameState) this.handler).bwem.getMap().getArea(((GameState) this.handler).enemyMainBase.getLocation()))) {
-                            ((GameState) this.handler).chosenUnitToHarass = u.unit;
-                            return State.SUCCESS;
+                        if (this.handler.bwem.getMap().getArea(u.pos).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
+                            this.handler.chosenUnitToHarass = u.unit;
+                            return BehavioralTree.State.SUCCESS;
                         }
                     }
                 }
             }
-            if (((GameState) this.handler).chosenHarasser.isIdle()) {
-                ((GameState) this.handler).workerIdle.add(((GameState) this.handler).chosenHarasser);
-                ((GameState) this.handler).chosenHarasser.stop(false);
-                ((GameState) this.handler).chosenHarasser = null;
-                ((GameState) this.handler).chosenUnitToHarass = null;
+            if (this.handler.chosenHarasser.isIdle()) {
+                this.handler.workerIdle.add(this.handler.chosenHarasser);
+                this.handler.chosenHarasser.stop(false);
+                this.handler.chosenHarasser = null;
+                this.handler.chosenUnitToHarass = null;
             }
-            return State.FAILURE;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

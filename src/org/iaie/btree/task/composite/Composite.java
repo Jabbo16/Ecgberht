@@ -32,8 +32,8 @@
  ************************************************************************/
 package org.iaie.btree.task.composite;
 
+import ecgberht.GameState;
 import org.iaie.btree.task.Task;
-import org.iaie.btree.util.GameHandler;
 
 import java.util.Arrays;
 
@@ -43,7 +43,7 @@ import java.util.Arrays;
  */
 public abstract class Composite extends Task {
 
-    public Composite(String name, GameHandler gh) {
+    public Composite(String name, GameState gh) {
         super(name, gh);
     }
 

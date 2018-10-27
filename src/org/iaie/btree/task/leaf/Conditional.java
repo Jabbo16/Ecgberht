@@ -33,15 +33,15 @@
 
 package org.iaie.btree.task.leaf;
 
-import org.iaie.btree.util.GameHandler;
+import ecgberht.GameState;
 
 /**
- * @param <GameHandler>
+ * @param <GameState>
  * @author momartin
  */
 public abstract class Conditional extends Leaf {
 
-    public Conditional(String name, GameHandler gh) {
+    public Conditional(String name, GameState gh) {
         super(name, gh);
     }
 }

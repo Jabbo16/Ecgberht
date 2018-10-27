@@ -3,43 +3,42 @@ package ecgberht.BehaviourTrees.Scouting;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Conditional;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 
 public class CheckScout extends Conditional {
 
-    public CheckScout(String name, GameHandler gh) {
+    public CheckScout(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            String strat = ((GameState) this.handler).strat.name;
+            String strat = this.handler.strat.name;
             if (strat.equals("PlasmaWraithHell")) {
-                if (((GameState) this.handler).sqManager.squads.isEmpty()) return State.FAILURE;
-                return State.SUCCESS;
+                if (this.handler.sqManager.squads.isEmpty()) return BehavioralTree.State.FAILURE;
+                return BehavioralTree.State.SUCCESS;
             }
-            if ((strat.equals("ProxyBBS") || strat.equals("EightRax")) && ((GameState) this.handler).mapSize == 2) {
-                for (Base b : ((GameState) this.handler).SLs) {
-                    if (b.equals(((GameState) this.handler).mainCC.first)) continue;
-                    ((GameState) this.handler).enemyMainBase = b;
-                    return State.FAILURE;
+            if ((strat.equals("ProxyBBS") || strat.equals("EightRax")) && this.handler.mapSize == 2) {
+                for (Base b : this.handler.SLs) {
+                    if (b.equals(this.handler.mainCC.first)) continue;
+                    this.handler.enemyMainBase = b;
+                    return BehavioralTree.State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).mapSize == 2 && Util.countUnitTypeSelf(UnitType.Terran_Supply_Depot) == 0) {
-                return State.FAILURE;
+            if (this.handler.chosenScout == null && this.handler.mapSize == 2 && Util.countUnitTypeSelf(UnitType.Terran_Supply_Depot) == 0) {
+                return BehavioralTree.State.FAILURE;
             }
-            if (((GameState) this.handler).chosenScout == null && ((GameState) this.handler).getPlayer().supplyUsed() >= 12 && ((GameState) this.handler).enemyMainBase == null) {
-                return State.SUCCESS;
+            if (this.handler.chosenScout == null && this.handler.getPlayer().supplyUsed() >= 12 && this.handler.enemyMainBase == null) {
+                return BehavioralTree.State.SUCCESS;
             }
-            return State.FAILURE;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

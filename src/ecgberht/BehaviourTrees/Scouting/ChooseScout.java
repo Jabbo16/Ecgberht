@@ -2,9 +2,8 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import ecgberht.GameState;
 import ecgberht.Squad;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
@@ -12,49 +11,49 @@ import org.openbw.bwapi4j.unit.Wraith;
 
 public class ChooseScout extends Action {
 
-    public ChooseScout(String name, GameHandler gh) {
+    public ChooseScout(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                for (Squad s : ((GameState) this.handler).sqManager.squads.values()) {
+            if (this.handler.strat.name.equals("PlasmaWraithHell")) {
+                for (Squad s : this.handler.sqManager.squads.values()) {
                     for (Unit u : s.members) {
                         if (u instanceof Wraith) {
-                            ((GameState) this.handler).chosenScout = u;
+                            this.handler.chosenScout = u;
                             s.members.remove(u);
-                            return State.SUCCESS;
+                            return BehavioralTree.State.SUCCESS;
                         }
                     }
                 }
             }
-            if (!((GameState) this.handler).workerIdle.isEmpty()) {
-                Worker chosen = ((GameState) this.handler).workerIdle.iterator().next();
-                ((GameState) this.handler).chosenScout = chosen;
-                ((GameState) this.handler).workerIdle.remove(chosen);
+            if (!this.handler.workerIdle.isEmpty()) {
+                Worker chosen = this.handler.workerIdle.iterator().next();
+                this.handler.chosenScout = chosen;
+                this.handler.workerIdle.remove(chosen);
             }
-            if (((GameState) this.handler).chosenScout == null) {
-                for (Worker u : ((GameState) this.handler).workerMining.keySet()) {
+            if (this.handler.chosenScout == null) {
+                for (Worker u : this.handler.workerMining.keySet()) {
                     if (!u.isCarryingMinerals()) {
-                        ((GameState) this.handler).chosenScout = u;
-                        MineralPatch mineral = ((GameState) this.handler).workerMining.get(u);
-                        if (((GameState) this.handler).mineralsAssigned.containsKey(mineral)) {
-                            ((GameState) this.handler).mining--;
-                            ((GameState) this.handler).mineralsAssigned.put(mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
+                        this.handler.chosenScout = u;
+                        MineralPatch mineral = this.handler.workerMining.get(u);
+                        if (this.handler.mineralsAssigned.containsKey(mineral)) {
+                            this.handler.mining--;
+                            this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
                         }
-                        ((GameState) this.handler).workerMining.remove(u);
+                        this.handler.workerMining.remove(u);
                         break;
                     }
                 }
             }
-            if (((GameState) this.handler).chosenScout != null) return State.SUCCESS;
-            return State.FAILURE;
+            if (this.handler.chosenScout != null) return BehavioralTree.State.SUCCESS;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

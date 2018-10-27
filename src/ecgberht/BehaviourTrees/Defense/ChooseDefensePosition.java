@@ -2,31 +2,30 @@ package ecgberht.BehaviourTrees.Defense;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Conditional;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.*;
 
 public class ChooseDefensePosition extends Conditional {
 
-    public ChooseDefensePosition(String name, GameHandler gh) {
+    public ChooseDefensePosition(String name, GameState gh) {
         super(name, gh);
     }
 
     private Position getDefensePosition() {
-        if (((GameState) this.handler).defendPosition != null) return ((GameState) this.handler).defendPosition;
-        if (((GameState) this.handler).initDefensePosition != null)
-            return ((GameState) this.handler).initDefensePosition.toPosition();
-        if (((GameState) this.handler).mainChoke != null)
-            return ((GameState) this.handler).mainChoke.getCenter().toPosition();
-        return ((GameState) this.handler).getPlayer().getStartLocation().toPosition();
+        if (this.handler.defendPosition != null) return this.handler.defendPosition;
+        if (this.handler.initDefensePosition != null)
+            return this.handler.initDefensePosition.toPosition();
+        if (this.handler.mainChoke != null)
+            return this.handler.mainChoke.getCenter().toPosition();
+        return this.handler.getPlayer().getStartLocation().toPosition();
     }
 
     private Position chooseDefensePosition() {
         Position chosen = null;
         double maxScore = 0;
-        for (Unit b : ((GameState) this.handler).enemyInBase) {
+        for (Unit b : this.handler.enemyInBase) {
             double influence = getScore(b);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
             double score = influence / (2.5 * Util.getGroundDistance(getDefensePosition(), b.getPosition()));
@@ -49,20 +48,20 @@ public class ChooseDefensePosition extends Conditional {
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).defense) {
+            if (this.handler.defense) {
                 Position chosenDefensePosition = chooseDefensePosition();
                 if (chosenDefensePosition != null) {
-                    ((GameState) this.handler).attackPosition = chosenDefensePosition;
-                    return State.SUCCESS;
+                    this.handler.attackPosition = chosenDefensePosition;
+                    return BehavioralTree.State.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

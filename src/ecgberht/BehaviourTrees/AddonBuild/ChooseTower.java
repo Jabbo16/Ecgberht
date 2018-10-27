@@ -1,35 +1,34 @@
 package ecgberht.BehaviourTrees.AddonBuild;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Starport;
 
 public class ChooseTower extends Action {
 
-    public ChooseTower(String name, GameHandler gh) {
+    public ChooseTower(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            for (Starport c : ((GameState) this.handler).Ps) {
+            for (Starport c : this.handler.Ps) {
                 if (!c.isTraining() && c.getAddon() == null) {
-                    ((GameState) this.handler).chosenBuildingAddon = c;
-                    ((GameState) this.handler).chosenAddon = UnitType.Terran_Control_Tower;
-                    return State.SUCCESS;
+                    this.handler.chosenBuildingAddon = c;
+                    this.handler.chosenAddon = UnitType.Terran_Control_Tower;
+                    return BehavioralTree.State.SUCCESS;
                 }
             }
-            ((GameState) this.handler).chosenBuildingAddon = null;
-            ((GameState) this.handler).chosenAddon = null;
-            return State.FAILURE;
+            this.handler.chosenBuildingAddon = null;
+            this.handler.chosenAddon = null;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

@@ -34,7 +34,6 @@
 package org.iaie.btree;
 
 
-import org.iaie.btree.state.State;
 import org.iaie.btree.task.Task;
 
 /**
@@ -65,10 +64,17 @@ public class BehavioralTree extends Task {
     @Override
     public State run() {
         try {
-            //System.out.println(this.children.get(0).getName());
             return this.children.get(0).run();
         } catch (Exception e) {
             return State.ERROR;
         }
+    }
+
+    public enum State {
+        READY,
+        SUCCESS,
+        FAILURE,
+        RUNNING,
+        ERROR
     }
 }

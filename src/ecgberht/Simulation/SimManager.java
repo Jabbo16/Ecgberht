@@ -266,7 +266,7 @@ public class SimManager {
             s.stateAfter = simulator.getState();
             //Bad lose sim logic, testing
             if (s.stateAfter.first.isEmpty()) s.lose = true;
-            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 1.5);
+            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalc(s, 1.3);
             else if (getGs().strat.name.equals("EightRax")) s.lose = !scoreCalc(s, 1.5);
             else s.lose = !scoreCalc(s, 2.5);
         }

@@ -2,42 +2,41 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 
 public class ChooseWorkerToHarass extends Action {
 
-    public ChooseWorkerToHarass(String name, GameHandler gh) {
+    public ChooseWorkerToHarass(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).chosenUnitToHarass != null && ((GameState) this.handler).chosenUnitToHarass instanceof Worker) {
-                return State.FAILURE;
+            if (this.handler.chosenUnitToHarass != null && this.handler.chosenUnitToHarass instanceof Worker) {
+                return BehavioralTree.State.FAILURE;
             }
-            for (Unit u : ((GameState) this.handler).getGame().getUnits(((GameState) this.handler).getIH().enemy())) {
-                if (((GameState) this.handler).enemyMainBase != null) {
+            for (Unit u : this.handler.getGame().getUnits(this.handler.getIH().enemy())) {
+                if (this.handler.enemyMainBase != null) {
                     if (u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
                         if (((Worker) u).getOrder() != Order.Move) continue;
-                        if (Util.broodWarDistance(((GameState) this.handler).enemyMainBase.getLocation().toPosition(), ((GameState) this.handler).chosenHarasser.getPosition()) <= 700) {
-                            ((GameState) this.handler).chosenUnitToHarass = u;
-                            return State.SUCCESS;
+                        if (Util.broodWarDistance(this.handler.enemyMainBase.getLocation().toPosition(), this.handler.chosenHarasser.getPosition()) <= 700) {
+                            this.handler.chosenUnitToHarass = u;
+                            return BehavioralTree.State.SUCCESS;
                         }
                     }
                 }
             }
-            ((GameState) this.handler).chosenUnitToHarass = null;
-            return State.FAILURE;
+            this.handler.chosenUnitToHarass = null;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

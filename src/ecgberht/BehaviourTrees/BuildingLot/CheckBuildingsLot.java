@@ -1,27 +1,26 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Conditional;
-import org.iaie.btree.util.GameHandler;
 
 public class CheckBuildingsLot extends Conditional {
 
-    public CheckBuildingsLot(String name, GameHandler gh) {
+    public CheckBuildingsLot(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).buildingLot.isEmpty()) {
-                return State.FAILURE;
+            if (this.handler.buildingLot.isEmpty()) {
+                return BehavioralTree.State.FAILURE;
             }
-            return State.SUCCESS;
+            return BehavioralTree.State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

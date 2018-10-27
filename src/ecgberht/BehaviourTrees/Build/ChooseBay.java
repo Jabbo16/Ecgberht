@@ -3,9 +3,8 @@ package ecgberht.BehaviourTrees.Build;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
@@ -13,35 +12,35 @@ import org.openbw.bwapi4j.unit.EngineeringBay;
 
 public class ChooseBay extends Action {
 
-    public ChooseBay(String name, GameHandler gh) {
+    public ChooseBay(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).getArmySize() < ((GameState) this.handler).strat.armyForBay) {
-                return State.FAILURE;
+            if (this.handler.getArmySize() < this.handler.strat.armyForBay) {
+                return BehavioralTree.State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < ((GameState) this.handler).strat.numBays) {
-                for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < this.handler.strat.numBays) {
+                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Engineering_Bay) {
-                        return State.FAILURE;
+                        return BehavioralTree.State.FAILURE;
                     }
                 }
-                for (Building w : ((GameState) this.handler).workerTask.values()) {
+                for (Building w : this.handler.workerTask.values()) {
                     if (w instanceof EngineeringBay) {
-                        return State.FAILURE;
+                        return BehavioralTree.State.FAILURE;
                     }
                 }
-                ((GameState) this.handler).chosenToBuild = UnitType.Terran_Engineering_Bay;
-                return State.SUCCESS;
+                this.handler.chosenToBuild = UnitType.Terran_Engineering_Bay;
+                return BehavioralTree.State.SUCCESS;
             }
-            return State.FAILURE;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

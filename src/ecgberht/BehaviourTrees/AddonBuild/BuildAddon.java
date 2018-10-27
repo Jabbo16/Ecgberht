@@ -2,47 +2,46 @@ package ecgberht.BehaviourTrees.AddonBuild;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 
 public class BuildAddon extends Action {
 
-    public BuildAddon(String name, GameHandler gh) {
+    public BuildAddon(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (!((GameState) this.handler).defense) {
-                if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
+            if (!this.handler.defense) {
+                if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
                     boolean found = false;
-                    for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
+                    for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
                         if (w.first == UnitType.Terran_Command_Center) {
                             found = true;
                             break;
                         }
                     }
-                    if (!found) return State.FAILURE;
+                    if (!found) return BehavioralTree.State.FAILURE;
                 }
             }
-            if (((GameState) this.handler).chosenBuildingAddon.getAddon() == null) {
-                if (((GameState) this.handler).chosenBuildingAddon.build(((GameState) this.handler).chosenAddon)) {
-                    ((GameState) this.handler).chosenBuildingAddon = null;
-                    ((GameState) this.handler).chosenAddon = null;
-                    return State.SUCCESS;
+            if (this.handler.chosenBuildingAddon.getAddon() == null) {
+                if (this.handler.chosenBuildingAddon.build(this.handler.chosenAddon)) {
+                    this.handler.chosenBuildingAddon = null;
+                    this.handler.chosenAddon = null;
+                    return BehavioralTree.State.SUCCESS;
                 }
             }
-            ((GameState) this.handler).chosenBuildingAddon = null;
-            ((GameState) this.handler).chosenAddon = null;
-            return State.FAILURE;
+            this.handler.chosenBuildingAddon = null;
+            this.handler.chosenAddon = null;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

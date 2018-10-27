@@ -1,29 +1,28 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Conditional;
-import org.iaie.btree.util.GameHandler;
 
 public class CheckExplorer extends Conditional {
 
-    public CheckExplorer(String name, GameHandler gh) {
+    public CheckExplorer(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (!((GameState) this.handler).EI.defendHarass) {
-                return State.FAILURE;
+            if (!this.handler.EI.defendHarass) {
+                return BehavioralTree.State.FAILURE;
             } else {
-                ((GameState) this.handler).chosenUnitToHarass = null;
-                return State.SUCCESS;
+                this.handler.chosenUnitToHarass = null;
+                return BehavioralTree.State.SUCCESS;
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

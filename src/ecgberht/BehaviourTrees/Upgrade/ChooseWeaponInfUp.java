@@ -1,38 +1,37 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.EngineeringBay;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 
 public class ChooseWeaponInfUp extends Action {
 
-    public ChooseWeaponInfUp(String name, GameHandler gh) {
+    public ChooseWeaponInfUp(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            if (((GameState) this.handler).UBs.isEmpty()) {
-                return State.FAILURE;
+            if (this.handler.UBs.isEmpty()) {
+                return BehavioralTree.State.FAILURE;
             }
-            for (ResearchingFacility u : ((GameState) this.handler).UBs) {
+            for (ResearchingFacility u : this.handler.UBs) {
                 if (!(u instanceof EngineeringBay)) continue;
-                if (u.canUpgrade(UpgradeType.Terran_Infantry_Weapons) && !u.isResearching() && !u.isUpgrading() && ((GameState) this.handler).getPlayer().getUpgradeLevel(UpgradeType.Terran_Infantry_Weapons) < 3) {
-                    ((GameState) this.handler).chosenUnitUpgrader = u;
-                    ((GameState) this.handler).chosenUpgrade = UpgradeType.Terran_Infantry_Weapons;
-                    return State.SUCCESS;
+                if (u.canUpgrade(UpgradeType.Terran_Infantry_Weapons) && !u.isResearching() && !u.isUpgrading() && this.handler.getPlayer().getUpgradeLevel(UpgradeType.Terran_Infantry_Weapons) < 3) {
+                    this.handler.chosenUnitUpgrader = u;
+                    this.handler.chosenUpgrade = UpgradeType.Terran_Infantry_Weapons;
+                    return BehavioralTree.State.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

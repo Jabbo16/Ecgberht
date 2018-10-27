@@ -3,34 +3,33 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 
 public class ChooseDropShip extends Action {
 
-    public ChooseDropShip(String name, GameHandler gh) {
+    public ChooseDropShip(String name, GameState gh) {
         super(name, gh);
 
     }
 
     @Override
-    public State execute() {
+    public BehavioralTree.State execute() {
         try {
-            for (Agent u : ((GameState) this.handler).agents.values()) {
+            for (Agent u : this.handler.agents.values()) {
                 if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
-                    ((GameState) this.handler).chosenDropShip = (DropShipAgent) u;
-                    return State.SUCCESS;
+                    this.handler.chosenDropShip = (DropShipAgent) u;
+                    return BehavioralTree.State.SUCCESS;
                 }
             }
-            ((GameState) this.handler).chosenDropShip = null;
-            ((GameState) this.handler).chosenWorker = null;
-            ((GameState) this.handler).chosenIsland = null;
-            return State.FAILURE;
+            this.handler.chosenDropShip = null;
+            this.handler.chosenWorker = null;
+            this.handler.chosenIsland = null;
+            return BehavioralTree.State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BehavioralTree.State.ERROR;
         }
     }
 }

@@ -114,7 +114,7 @@ public class WorkerScoutAgent extends Agent {
 
     private Status chooseNewStatus() {
         String strat = getGs().strat.name;
-        if (getGs().luckyDraw <= 0.7 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
+        if (getGs().luckyDraw > 1 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("EightRax") || getGs().EI.naughty)
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;

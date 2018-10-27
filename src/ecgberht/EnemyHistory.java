@@ -24,6 +24,4 @@ public class EnemyHistory {
             this.mapName = mapName;
         }
     }
-
-
 }

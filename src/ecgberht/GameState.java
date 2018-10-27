@@ -17,7 +17,6 @@ import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
@@ -30,7 +29,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class GameState extends GameHandler {
+public class GameState {
 
     public Area enemyMainArea = null;
     public Area enemyNaturalArea = null;
@@ -53,7 +52,7 @@ public class GameState extends GameHandler {
     public ChokePoint mainChoke = null;
     public ChokePoint naturalChoke = null;
     public DropShipAgent chosenDropShip;
-    public EnemyInfo EI = new EnemyInfo(ih.enemy().getName(), ih.enemy().getRace());
+    public EnemyInfo EI = null;
     public EnemyHistory EH = new EnemyHistory();
     public ExtendibleByAddon chosenBuildingAddon = null;
     public Gson enemyInfoJSON = new Gson();
@@ -139,9 +138,12 @@ public class GameState extends GameHandler {
     public double luckyDraw;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),
             new TilePosition(117, 7), new TilePosition(7, 118), new TilePosition(117, 118)));
-    public WorkerScoutAgent scout = null;
     public Building disrupterBuilding = null;
     CameraModule skycladObserver = null;
+    public BW bw;
+    public InteractionHandler ih;
+    public BWEM bwem;
+    protected Player self;
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
             "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",
@@ -150,13 +152,12 @@ public class GameState extends GameHandler {
             "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
 
     public GameState(BW bw, BWEM bwem) {
-        super(bw, bwem);
+        this.bw = bw;
+        this.ih = bw.getInteractionHandler();
+        this.self = bw.getInteractionHandler().self();
+        this.bwem = bwem;
+        EI = new EnemyInfo(ih.enemy().getName(), ih.enemy().getRace());
         initPlayers();
-        /*
-        map = new BuildingMap(bw, ih.self(), bwem);
-        map.initMap();
-        testMap = map.clone();
-        */
         mapSize = bw.getBWMap().getStartPositions().size();
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimManager(bw);
