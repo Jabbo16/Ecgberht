@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -21,7 +21,7 @@ public class Build extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : this.handler.workerBuild.entrySet()) {
@@ -42,11 +42,11 @@ public class Build extends Action {
                 }
             }
             for (SCV s : toRemove) this.handler.workerBuild.remove(s);
-            return BehavioralTree.State.SUCCESS;
+            return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

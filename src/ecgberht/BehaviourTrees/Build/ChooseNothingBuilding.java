@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
@@ -17,7 +17,7 @@ public class ChooseNothingBuilding extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             // Bio Builds and no Stim
             boolean stim = this.handler.strat.techToResearch.contains(TechType.Stim_Packs);
@@ -25,7 +25,7 @@ public class ChooseNothingBuilding extends Action {
                     !this.handler.getPlayer().isResearching(TechType.Stim_Packs)
                     && (int) this.handler.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
                 this.handler.chosenToBuild = UnitType.None;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             // Mech builds and no siege
             boolean siege = this.handler.strat.techToResearch.contains(TechType.Tank_Siege_Mode);
@@ -34,13 +34,13 @@ public class ChooseNothingBuilding extends Action {
                     !this.handler.getPlayer().isResearching(TechType.Tank_Siege_Mode) &&
                     checkSiege()) {
                 this.handler.chosenToBuild = UnitType.None;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 

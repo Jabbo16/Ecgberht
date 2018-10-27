@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 
 
@@ -12,18 +12,18 @@ public class CheckExpandingIsland extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.chosenWorkerDrop != null) {
                 if (this.handler.chosenDropShip == null || !this.handler.chosenDropShip.statusToString().equals("IDLE")) {
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

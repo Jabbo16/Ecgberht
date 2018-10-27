@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Build;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -21,15 +21,15 @@ public class ChooseRefinery extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             String strat = this.handler.strat.name;
             if (this.handler.getPlayer().supplyUsed() < this.handler.strat.supplyForFirstRefinery || this.handler.getCash().second >= 300) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("FullBio") || strat.equals("FullBioFE"))
                     && this.handler.getCash().second >= 150) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             if (this.handler.refineriesAssigned.size() == 1) {
                 boolean found = false;
@@ -45,7 +45,7 @@ public class ChooseRefinery extends Action {
                         break;
                     }
                 }
-                if (this.handler.MBs.isEmpty() && !found) return BehavioralTree.State.FAILURE;
+                if (this.handler.MBs.isEmpty() && !found) return State.FAILURE;
             }
             int count = 0;
             VespeneGeyser geyser = null;
@@ -54,24 +54,25 @@ public class ChooseRefinery extends Action {
                     count++;
                 } else geyser = r.getKey();
             }
-            if (count == this.handler.vespeneGeysers.size()) return BehavioralTree.State.FAILURE;
+            if (count == this.handler.vespeneGeysers.size()) return State.FAILURE;
             for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
-                if (w.first == UnitType.Terran_Refinery) return BehavioralTree.State.FAILURE;
+                if (w.first == UnitType.Terran_Refinery) return State.FAILURE;
             }
             for (Building w : this.handler.workerTask.values()) {
-                if (w instanceof Refinery && w.getTilePosition().equals(geyser.getTilePosition())) return BehavioralTree.State.FAILURE;
+                if (w instanceof Refinery && w.getTilePosition().equals(geyser.getTilePosition()))
+                    return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&
                     !this.handler.refineriesAssigned.isEmpty()
                     && Util.getNumberCCs() <= 2 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < 30) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             this.handler.chosenToBuild = UnitType.Terran_Refinery;
-            return BehavioralTree.State.SUCCESS;
+            return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

@@ -4,7 +4,7 @@ import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Worker;
@@ -19,7 +19,7 @@ public class CheckEnemyBaseVisible extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             List<PlayerUnit> enemies = this.handler.getGame().getUnits(this.handler.getIH().enemy());
             if (!enemies.isEmpty()) {
@@ -42,15 +42,15 @@ public class CheckEnemyBaseVisible extends Action {
                             this.handler.enemyNaturalBase = this.handler.enemyBLs.get(1);
                             this.handler.enemyNaturalArea = this.handler.enemyNaturalBase.getArea();
                         }
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

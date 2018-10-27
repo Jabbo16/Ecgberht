@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Defense;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.*;
@@ -48,20 +48,20 @@ public class ChooseDefensePosition extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.defense) {
                 Position chosenDefensePosition = chooseDefensePosition();
                 if (chosenDefensePosition != null) {
                     this.handler.attackPosition = chosenDefensePosition;
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

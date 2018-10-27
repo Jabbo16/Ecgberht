@@ -5,7 +5,7 @@ import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
@@ -22,7 +22,7 @@ public class SendDefenders extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             boolean air_only = true;
             boolean cannon_rush = false;
@@ -136,11 +136,11 @@ public class SendDefenders extends Action {
                 }
             }
             this.handler.attackPosition = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

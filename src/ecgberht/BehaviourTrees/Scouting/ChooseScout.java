@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import ecgberht.GameState;
 import ecgberht.Squad;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Unit;
@@ -16,7 +16,7 @@ public class ChooseScout extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.strat.name.equals("PlasmaWraithHell")) {
                 for (Squad s : this.handler.sqManager.squads.values()) {
@@ -24,7 +24,7 @@ public class ChooseScout extends Action {
                         if (u instanceof Wraith) {
                             this.handler.chosenScout = u;
                             s.members.remove(u);
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         }
                     }
                 }
@@ -48,12 +48,12 @@ public class ChooseScout extends Action {
                     }
                 }
             }
-            if (this.handler.chosenScout != null) return BehavioralTree.State.SUCCESS;
-            return BehavioralTree.State.FAILURE;
+            if (this.handler.chosenScout != null) return State.SUCCESS;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

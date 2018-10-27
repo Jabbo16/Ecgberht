@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Build;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
@@ -19,7 +19,7 @@ public class ChooseBarracks extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if ((this.handler.strat.name.equals("BioGreedyFE") ||
                     this.handler.strat.name.equals("MechGreedyFE") ||
@@ -27,22 +27,22 @@ public class ChooseBarracks extends Action {
                     Util.countBuildingAll(UnitType.Terran_Command_Center) == 1 &&
                     Util.countBuildingAll(UnitType.Terran_Barracks) > 1 &&
                     this.handler.frameCount <= 24 * 240) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             if (this.handler.EI.naughty && this.handler.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) == 1
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             if (!this.handler.strat.name.equals("ProxyBBS") && !this.handler.strat.name.equals("EightRax")) {
                 if (!this.handler.MBs.isEmpty() && Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Academy) == 0) {
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Refinery) == 0) {
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
             } else {
-                if (this.handler.getPlayer().supplyUsed() < 16) return BehavioralTree.State.FAILURE;
+                if (this.handler.getPlayer().supplyUsed() < 16) return State.FAILURE;
             }
             if (this.handler.strat.buildUnits.contains(UnitType.Terran_Factory)) {
                 int count = 0;
@@ -57,23 +57,23 @@ public class ChooseBarracks extends Action {
                 }
                 if (!this.handler.Fs.isEmpty()) found = true;
                 if (count + this.handler.MBs.size() > this.handler.strat.numRaxForFac && !found) {
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
             }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.MBs.size()
                     && this.handler.getPlayer().minerals() >= 600) {
                 this.handler.chosenToBuild = UnitType.Terran_Barracks;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) < this.handler.strat.raxPerCC * Util.getNumberCCs()) {
                 this.handler.chosenToBuild = UnitType.Terran_Barracks;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

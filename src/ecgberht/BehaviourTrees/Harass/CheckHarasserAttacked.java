@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
 import ecgberht.Util.UtilMicro;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.*;
@@ -16,12 +16,12 @@ public class CheckHarasserAttacked extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.enemyMainBase == null) {
                 this.handler.chosenUnitToHarass = null;
                 this.handler.chosenHarasser = null;
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             if (this.handler.chosenUnitToHarass != null) {
                 if (!this.handler.bw.getBWMap().isValidPosition(this.handler.chosenUnitToHarass.getPosition())) {
@@ -51,14 +51,14 @@ public class CheckHarasserAttacked extends Conditional {
                         this.handler.chosenUnitToHarass == null) {
                     this.handler.chosenHarasser.move(this.handler.enemyMainBase.getLocation().toPosition());
                 }
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             } else {
                 boolean winHarass = this.handler.sim.simulateHarass(this.handler.chosenHarasser, attackers, 70);
                 if (winHarass) {
                     if (workers == 1 && !attacker.equals(this.handler.chosenUnitToHarass)) {
                         this.handler.chosenHarasser.attack(attacker);
                         this.handler.chosenUnitToHarass = attacker;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 } else {
                     if (this.handler.chosenHarasser.getHitPoints() <= 15) {
@@ -73,14 +73,14 @@ public class CheckHarasserAttacked extends Conditional {
                             this.handler.chosenUnitToHarass = null;
                         }
                     }
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
             }
-            return BehavioralTree.State.SUCCESS;
+            return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 

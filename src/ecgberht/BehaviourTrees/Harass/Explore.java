@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.Agents.WorkerScoutAgent;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 
 public class Explore extends Conditional {
@@ -14,18 +14,18 @@ public class Explore extends Conditional {
     private WorkerScoutAgent scout = null;
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (scout == null && this.handler.chosenHarasser != null) {
                 this.handler.agents.put(this.handler.chosenHarasser, new WorkerScoutAgent(this.handler.chosenHarasser, this.handler.enemyMainBase));
                 this.handler.chosenHarasser = null;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

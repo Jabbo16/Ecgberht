@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Recollection;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.Worker;
 
@@ -13,7 +13,7 @@ public class FreeWorker extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             this.handler.chosenWorker = null;
             if (!this.handler.workerIdle.isEmpty()) {
@@ -21,15 +21,15 @@ public class FreeWorker extends Action {
                 for (Worker w : this.handler.workerIdle) {
                     if (w.getLastCommandFrame() != frame) {
                         this.handler.chosenWorker = w;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

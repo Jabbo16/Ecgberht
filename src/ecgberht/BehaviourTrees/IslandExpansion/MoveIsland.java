@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -18,7 +18,7 @@ public class MoveIsland extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Worker chosen = this.handler.chosenWorkerDrop;
             UnitType chosenType = UnitType.Terran_Command_Center;
@@ -31,13 +31,13 @@ public class MoveIsland extends Action {
                 this.handler.chosenWorkerDrop = null;
                 this.handler.chosenIsland = null;
                 this.handler.islandExpand = false;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

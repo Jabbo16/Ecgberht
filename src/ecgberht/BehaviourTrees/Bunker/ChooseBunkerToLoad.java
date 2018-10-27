@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Bunker;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.Unit;
@@ -16,19 +16,19 @@ public class ChooseBunkerToLoad extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             for (Entry<Bunker, Set<Unit>> b : this.handler.DBs.entrySet()) {
                 if (b.getValue().size() < 4) {
                     this.handler.chosenBunker = b.getKey();
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

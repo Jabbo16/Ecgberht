@@ -7,7 +7,7 @@ import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
@@ -22,7 +22,7 @@ public class CheckPerimeter extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
 
         try {
             this.handler.enemyInBase.clear();
@@ -96,7 +96,7 @@ public class CheckPerimeter extends Conditional {
                     return State.FAILURE;
                 }*/
                 this.handler.defense = true;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             int cFrame = this.handler.frameCount;
             List<Worker> toDelete = new ArrayList<>();
@@ -149,11 +149,11 @@ public class CheckPerimeter extends Conditional {
                 }
             }
             this.handler.defense = false;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

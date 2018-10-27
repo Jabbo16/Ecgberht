@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Worker;
@@ -14,7 +14,7 @@ public class ChooseWorker extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Worker closestWorker = null;
             int frame = this.handler.frameCount;
@@ -41,13 +41,13 @@ public class ChooseWorker extends Action {
             }
             if (closestWorker != null) {
                 this.handler.chosenWorker = closestWorker;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Recollection;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Worker;
@@ -15,7 +15,7 @@ public class CollectMineral extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Worker chosen = this.handler.chosenWorker;
             if (!this.handler.mineralsAssigned.isEmpty()) {
@@ -34,14 +34,14 @@ public class CollectMineral extends Action {
                     this.handler.workerIdle.remove(chosen);
                     this.handler.chosenWorker = null;
                     this.handler.mining++;
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

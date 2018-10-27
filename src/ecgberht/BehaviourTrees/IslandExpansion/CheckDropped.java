@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
@@ -15,25 +15,25 @@ public class CheckDropped extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Worker scv = this.handler.chosenWorkerDrop;
             DropShipAgent ship = this.handler.chosenDropShip;
-            if (ship == null) return BehavioralTree.State.SUCCESS;
+            if (ship == null) return State.SUCCESS;
             if (scv != null) {
                 if (ship.statusToString().equals("RETREAT")) {
                     Unit transport = scv.getTransport();
                     if (transport == null) {
                         this.handler.chosenDropShip = null;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

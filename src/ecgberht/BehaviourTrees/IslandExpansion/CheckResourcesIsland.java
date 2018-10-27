@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -17,7 +17,7 @@ public class CheckResourcesIsland extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             MutablePair<Integer, Integer> cash = this.handler.getCash();
             Worker chosen = this.handler.chosenWorkerDrop;
@@ -26,13 +26,13 @@ public class CheckResourcesIsland extends Conditional {
             TilePosition end = this.handler.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), chosenType);
             if (cash.first + this.handler.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + this.handler.deltaCash.first) {
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

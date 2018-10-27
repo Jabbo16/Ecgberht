@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Training;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
@@ -19,7 +19,7 @@ public class ChooseSCV extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             String strat = this.handler.strat.name;
             if (strat.equals("ProxyBBS") || strat.equals("EightRax")) {
@@ -30,11 +30,11 @@ public class ChooseSCV extends Action {
                         break;
                     }
                 }
-                if (notTraining) return BehavioralTree.State.FAILURE;
+                if (notTraining) return State.FAILURE;
             }
             if (this.handler.enemyRace == Race.Zerg && this.handler.EI.naughty) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) > 0 && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && this.handler.getCash().first < 150) {
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < this.handler.mineralsAssigned.size() * 2 + this.handler.refineriesAssigned.size() * 3 + 2 && !this.handler.CCs.isEmpty()) {
@@ -42,22 +42,22 @@ public class ChooseSCV extends Action {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         this.handler.chosenUnit = UnitType.Terran_SCV;
                         this.handler.chosenBuilding = b.getValue();
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
                 for (Map.Entry<Base, CommandCenter> b : this.handler.CCs.entrySet()) { // TODO train only island scvs from island CCs, test
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         this.handler.chosenUnit = UnitType.Terran_SCV;
                         this.handler.chosenBuilding = b.getValue();
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

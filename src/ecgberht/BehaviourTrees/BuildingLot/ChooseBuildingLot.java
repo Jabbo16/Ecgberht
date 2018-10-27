@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Bunker;
@@ -14,14 +14,14 @@ public class ChooseBuildingLot extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Building savedTurret = null;
             for (Building b : this.handler.buildingLot) {
                 if (!b.isUnderAttack()) {
                     if (b instanceof Bunker) {
                         this.handler.chosenBuildingLot = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                     if (b instanceof MissileTurret) savedTurret = b;
                     this.handler.chosenBuildingLot = b;
@@ -29,16 +29,16 @@ public class ChooseBuildingLot extends Action {
             }
             if (savedTurret != null) {
                 this.handler.chosenBuildingLot = savedTurret;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             if (this.handler.chosenBuildingLot != null) {
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

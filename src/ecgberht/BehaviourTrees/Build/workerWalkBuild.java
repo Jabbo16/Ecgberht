@@ -5,7 +5,7 @@ import bwem.area.Area;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -21,7 +21,7 @@ public class workerWalkBuild extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : this.handler.workerBuild.entrySet()) {
                 SCV chosen = u.getKey();
@@ -63,11 +63,11 @@ public class workerWalkBuild extends Action {
                     chosen.gather(minerals.first);
                 }
             }
-            return BehavioralTree.State.SUCCESS;
+            return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

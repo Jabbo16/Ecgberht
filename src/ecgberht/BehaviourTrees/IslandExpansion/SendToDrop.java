@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Worker;
@@ -17,7 +17,7 @@ public class SendToDrop extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.chosenDropShip != null && this.handler.chosenWorker != null) {
                 Worker chosen = this.handler.chosenWorker;
@@ -37,16 +37,16 @@ public class SendToDrop extends Action {
                 this.handler.chosenDropShip.setTarget(this.handler.chosenIsland.getLocation().toPosition());
                 this.handler.chosenWorkerDrop = this.handler.chosenWorker;
                 this.handler.chosenWorker = null;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             this.handler.chosenDropShip = null;
             this.handler.chosenWorker = null;
             this.handler.chosenIsland = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

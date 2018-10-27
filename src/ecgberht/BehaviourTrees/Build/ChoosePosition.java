@@ -7,7 +7,7 @@ import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
@@ -26,9 +26,9 @@ public class ChoosePosition extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
-            if (this.handler.chosenToBuild == UnitType.None) return BehavioralTree.State.FAILURE;
+            if (this.handler.chosenToBuild == UnitType.None) return State.FAILURE;
             Player self = this.handler.getPlayer();
             TilePosition origin;
             if (this.handler.chosenToBuild.isRefinery()) {
@@ -36,18 +36,18 @@ public class ChoosePosition extends Action {
                     for (Entry<VespeneGeyser, Boolean> g : this.handler.vespeneGeysers.entrySet()) {
                         if (!g.getValue()) {
                             this.handler.chosenPosition = g.getKey().getTilePosition();
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         }
                     }
                 }
             } else if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
                 if (!this.handler.islandBases.isEmpty()) { // TODO uncomment when BWAPI island bug is fixed
                     if (this.handler.islandCCs.size() < this.handler.islandBases.size()) {
-                        if (this.handler.islandExpand) return BehavioralTree.State.FAILURE;
+                        if (this.handler.islandExpand) return State.FAILURE;
                         for (Agent u : this.handler.agents.values()) {
                             if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
                                 this.handler.islandExpand = true;
-                                return BehavioralTree.State.FAILURE;
+                                return State.FAILURE;
                             }
                         }
                     }
@@ -61,7 +61,7 @@ public class ChoosePosition extends Action {
                     for (Base b : this.handler.specialBLs) {
                         if (!this.handler.CCs.containsKey(b)) {
                             this.handler.chosenPosition = b.getLocation();
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         }
                     }
                 }
@@ -98,9 +98,9 @@ public class ChoosePosition extends Action {
                     }
                 }
                 valid.removeAll(remove);
-                if (valid.isEmpty()) return BehavioralTree.State.FAILURE;
+                if (valid.isEmpty()) return State.FAILURE;
                 this.handler.chosenPosition = valid.get(0).getLocation();
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             } else {
                 if (!this.handler.workerBuild.isEmpty()) {
                     for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
@@ -126,13 +126,13 @@ public class ChoosePosition extends Action {
                     if (origin != null) {
                         this.handler.testMap = this.handler.map.clone();
                         this.handler.chosenPosition = origin;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     } else {
                         origin = this.handler.testMap.findBunkerPositionAntiPool();
                         if (origin != null) {
                             this.handler.testMap = this.handler.map.clone();
                             this.handler.chosenPosition = origin;
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         } else if (this.handler.mainCC != null) {
                             origin = this.handler.mainCC.second.getTilePosition();
                         } else origin = this.handler.getPlayer().getStartLocation();
@@ -146,21 +146,21 @@ public class ChoosePosition extends Action {
                         if (origin != null) {
                             this.handler.testMap = this.handler.map.clone();
                             this.handler.chosenPosition = origin;
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         } else origin = this.handler.mainChoke.getCenter().toTilePosition();
                     } else if (this.handler.naturalChoke != null) {
                         origin = this.handler.testMap.findBunkerPosition(this.handler.naturalChoke);
                         if (origin != null) {
                             this.handler.testMap = this.handler.map.clone();
                             this.handler.chosenPosition = origin;
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         } else origin = this.handler.mainChoke.getCenter().toTilePosition();
                     } else {
                         origin = this.handler.testMap.findBunkerPosition(this.handler.mainChoke);
                         if (origin != null) {
                             this.handler.testMap = this.handler.map.clone();
                             this.handler.chosenPosition = origin;
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         } else origin = this.handler.mainChoke.getCenter().toTilePosition();
                     }
                 } else {
@@ -171,14 +171,14 @@ public class ChoosePosition extends Action {
                 this.handler.testMap = this.handler.map.clone();
                 if (position != null) {
                     this.handler.chosenPosition = position;
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

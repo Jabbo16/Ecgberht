@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Recollection;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.Worker;
@@ -15,10 +15,10 @@ public class CollectGas extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.getPlayer().gas() >= 400) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             Worker chosen = this.handler.chosenWorker;
             if (!this.handler.refineriesAssigned.isEmpty()) {
@@ -37,15 +37,15 @@ public class CollectGas extends Action {
                         this.handler.workerIdle.remove(chosen);
                         this.handler.workerGas.put(chosen, closestGeyser);
                         this.handler.chosenWorker = null;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

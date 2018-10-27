@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Build;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -19,11 +19,11 @@ public class ChooseTurret extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.getArmySize() < this.handler.strat.armyForTurret &&
                     !IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar)) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             boolean tech = false;
             for (ResearchingFacility ub : this.handler.UBs) {
@@ -35,22 +35,22 @@ public class ChooseTurret extends Action {
             if (tech && this.handler.Ts.isEmpty()) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Missile_Turret) {
-                        return BehavioralTree.State.FAILURE;
+                        return State.FAILURE;
                     }
                 }
                 for (Building w : this.handler.workerTask.values()) {
                     if (w instanceof MissileTurret) {
-                        return BehavioralTree.State.FAILURE;
+                        return State.FAILURE;
                     }
                 }
                 this.handler.chosenToBuild = UnitType.Terran_Missile_Turret;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

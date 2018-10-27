@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.unit.SCV;
@@ -14,10 +14,10 @@ public class ChooseBuilderToHarass extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.enemyRace != Race.Terran) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             /*if (((GameState) this.handler).chosenUnitToHarass != null && ((GameState) this.handler).chosenUnitToHarass instanceof Worker) {
                 return State.FAILURE;
@@ -29,23 +29,23 @@ public class ChooseBuilderToHarass extends Action {
                         if (this.handler.bwem.getMap().getArea(u.getTilePosition()).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
                             if (((SCV) u).getBuildType().canProduce()) {
                                 this.handler.chosenUnitToHarass = u;
-                                return BehavioralTree.State.SUCCESS;
+                                return State.SUCCESS;
                             }
                             aux = u;
                         }
                         if (aux != null) {
                             this.handler.chosenUnitToHarass = aux;
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         }
                     }
                 }
             }
             this.handler.chosenUnitToHarass = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Bunker;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.MobileUnit;
@@ -18,7 +18,7 @@ public class EnterBunker extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             MutablePair<Integer, Unit> m = this.handler.chosenMarine;
             for (Entry<Bunker, Set<Unit>> b : this.handler.DBs.entrySet()) {
@@ -26,16 +26,16 @@ public class EnterBunker extends Action {
                     if (b.getKey().load((MobileUnit) m.second)) {
                         b.getValue().add(m.second);
                         this.handler.sqManager.squads.get(m.first).members.remove(m.second);
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

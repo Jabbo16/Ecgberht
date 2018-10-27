@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Repair;
 
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.SCV;
@@ -15,7 +15,7 @@ public class ChooseRepairer extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             SCV closestWorker = null;
             Position chosen = this.handler.chosenUnitRepair.getPosition();
@@ -34,13 +34,13 @@ public class ChooseRepairer extends Action {
             }
             if (closestWorker != null) {
                 this.handler.chosenRepairer = closestWorker;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Upgrade;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -14,7 +14,7 @@ public class ResearchUpgrade extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (!this.handler.defense) {
                 if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
@@ -25,28 +25,28 @@ public class ResearchUpgrade extends Action {
                             break;
                         }
                     }
-                    if (!found) return BehavioralTree.State.FAILURE;
+                    if (!found) return State.FAILURE;
                 }
             }
             if (this.handler.chosenUpgrade != null) {
                 if (this.handler.chosenUnitUpgrader.upgrade(this.handler.chosenUpgrade)) {
                     this.handler.chosenUpgrade = null;
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             } else if (this.handler.chosenResearch != null) {
                 if (this.handler.chosenUnitUpgrader.research(this.handler.chosenResearch)) {
                     this.handler.chosenResearch = null;
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
             this.handler.chosenUnitUpgrader = null;
             this.handler.chosenUpgrade = null;
             this.handler.chosenResearch = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

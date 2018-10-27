@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.unit.Unit;
@@ -15,10 +15,10 @@ public class ChooseWorkerToHarass extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.chosenUnitToHarass != null && this.handler.chosenUnitToHarass instanceof Worker) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             for (Unit u : this.handler.getGame().getUnits(this.handler.getIH().enemy())) {
                 if (this.handler.enemyMainBase != null) {
@@ -26,17 +26,17 @@ public class ChooseWorkerToHarass extends Action {
                         if (((Worker) u).getOrder() != Order.Move) continue;
                         if (Util.broodWarDistance(this.handler.enemyMainBase.getLocation().toPosition(), this.handler.chosenHarasser.getPosition()) <= 700) {
                             this.handler.chosenUnitToHarass = u;
-                            return BehavioralTree.State.SUCCESS;
+                            return State.SUCCESS;
                         }
                     }
                 }
             }
             this.handler.chosenUnitToHarass = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

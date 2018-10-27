@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 
 public class CheckExplorer extends Conditional {
@@ -11,18 +11,18 @@ public class CheckExplorer extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (!this.handler.EI.defendHarass) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             } else {
                 this.handler.chosenUnitToHarass = null;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

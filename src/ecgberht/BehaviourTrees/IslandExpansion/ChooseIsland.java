@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Position;
 
@@ -15,7 +15,7 @@ public class ChooseIsland extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Base chosen = null;
             double distMax = Double.MAX_VALUE;
@@ -30,16 +30,16 @@ public class ChooseIsland extends Action {
             }
             if (chosen != null) {
                 this.handler.chosenIsland = chosen;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             this.handler.chosenDropShip = null;
             this.handler.chosenWorker = null;
             this.handler.chosenIsland = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

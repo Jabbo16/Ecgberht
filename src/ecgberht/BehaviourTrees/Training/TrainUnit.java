@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Training;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -16,9 +16,9 @@ public class TrainUnit extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
-            if (this.handler.chosenUnit == UnitType.None) return BehavioralTree.State.FAILURE;
+            if (this.handler.chosenUnit == UnitType.None) return State.FAILURE;
            /* if (((GameState) this.handler).strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
                 boolean mShop = false;
                 for (ResearchingFacility u : ((GameState) this.handler).UBs) {
@@ -40,11 +40,11 @@ public class TrainUnit extends Action {
                         Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
                     this.handler.chosenBuilding = null;
                     this.handler.chosenToBuild = UnitType.None;
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
                 if (this.handler.getSupply() > 0) {
                     chosen.train(this.handler.chosenUnit);
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
             if (this.handler.strat.name.equals("EightRax")) {
@@ -52,7 +52,7 @@ public class TrainUnit extends Action {
                         this.handler.supplyMan.getSupplyUsed() >= 16) {
                     this.handler.chosenBuilding = null;
                     this.handler.chosenToBuild = UnitType.None;
-                    return BehavioralTree.State.FAILURE;
+                    return State.FAILURE;
                 }
                 /*if (Util.countBuildingAll(UnitType.Terran_Barracks) == 1 &&
                         Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
@@ -62,7 +62,7 @@ public class TrainUnit extends Action {
                 }*/
                 if (this.handler.getSupply() > 0) {
                     chosen.train(this.handler.chosenUnit);
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
 
@@ -79,17 +79,17 @@ public class TrainUnit extends Action {
                     if (!found) {
                         this.handler.chosenBuilding = null;
                         this.handler.chosenToBuild = UnitType.None;
-                        return BehavioralTree.State.FAILURE;
+                        return State.FAILURE;
                     }
                 }
                 chosen.train(this.handler.chosenUnit);
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

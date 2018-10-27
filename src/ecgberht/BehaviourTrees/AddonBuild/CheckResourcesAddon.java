@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.AddonBuild;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 
 public class CheckResourcesAddon extends Conditional {
@@ -12,19 +12,19 @@ public class CheckResourcesAddon extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             MutablePair<Integer, Integer> cash = this.handler.getCash();
             if (cash.first >= (this.handler.chosenAddon.mineralPrice() + this.handler.deltaCash.first) && cash.second >= (this.handler.chosenAddon.gasPrice()) + this.handler.deltaCash.second) {
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
             this.handler.chosenBuildingAddon = null;
             this.handler.chosenAddon = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

@@ -7,7 +7,7 @@ import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
@@ -24,7 +24,7 @@ public class CheckBuildingFlames extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, Mechanical> u : this.handler.repairerTask.entrySet()) {
@@ -53,11 +53,11 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (count < 2 && (this.handler.defense || cheesed)) {
                         this.handler.chosenUnitRepair = w;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                     if (count == 0) {
                         this.handler.chosenUnitRepair = w;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -71,7 +71,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -90,7 +90,7 @@ public class CheckBuildingFlames extends Action {
                                 }
                                 if (!isBeingRepaired) {
                                     this.handler.chosenUnitRepair = (Mechanical) u;
-                                    return BehavioralTree.State.SUCCESS;
+                                    return State.SUCCESS;
                                 }
                             }
                         }
@@ -107,7 +107,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -121,7 +121,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -135,7 +135,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = (Mechanical) b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -149,7 +149,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -163,7 +163,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -177,7 +177,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -191,15 +191,15 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         this.handler.chosenUnitRepair = b;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

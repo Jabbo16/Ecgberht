@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Scouting;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.Worker;
@@ -19,7 +19,7 @@ public class SendScout extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.enemyMainBase == null) {
                 if (!this.handler.scoutSLs.isEmpty()) {
@@ -28,11 +28,11 @@ public class SendScout extends Action {
                         if (this.handler.fortressSpecialBLs.containsKey(b)) continue;
                         if (this.handler.strat.name.equals("PlasmaWraithHell")) {
                             if (((MobileUnit) this.handler.chosenScout).move(b.getLocation().toPosition())) {
-                                return BehavioralTree.State.SUCCESS;
+                                return State.SUCCESS;
                             }
                         } else if (Util.isConnected(b.getLocation(), this.handler.chosenScout.getTilePosition())) {
                             if (((MobileUnit) this.handler.chosenScout).move(b.getLocation().toPosition())) {
-                                return BehavioralTree.State.SUCCESS;
+                                return State.SUCCESS;
                             }
                         } else aux.add(b);
                     }
@@ -42,16 +42,16 @@ public class SendScout extends Action {
             if (this.handler.strat.name.equals("PlasmaWraithHell")) {
                 ((MobileUnit) this.handler.chosenScout).stop(false);
                 this.handler.chosenScout = null;
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             this.handler.workerIdle.add((Worker) this.handler.chosenScout);
             ((MobileUnit) this.handler.chosenScout).stop(false);
             this.handler.chosenScout = null;
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

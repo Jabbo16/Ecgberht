@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -15,7 +15,7 @@ public class ChooseSituationalUnit extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             // Testing dropships islands
             boolean dropship = true;
@@ -37,12 +37,12 @@ public class ChooseSituationalUnit extends Action {
                         break;
                     }
                 }
-                if (!tower) return BehavioralTree.State.FAILURE;
+                if (!tower) return State.FAILURE;
                 for (Starport s : this.handler.Ps) {
                     if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                         this.handler.chosenUnit = UnitType.Terran_Dropship;
                         this.handler.chosenBuilding = s;
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -66,12 +66,12 @@ public class ChooseSituationalUnit extends Action {
 
             // Testing vessels
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || this.handler.workerMining.isEmpty())
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !this.handler.needToAttack())
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             String strat = this.handler.strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.getNumberCCs() < 3)
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             tower = false;
             boolean science = false;
             for (ResearchingFacility u : this.handler.UBs) {
@@ -79,7 +79,7 @@ public class ChooseSituationalUnit extends Action {
                 else if (u instanceof ScienceFacility) science = true;
                 if (science && tower) break;
             }
-            if (!tower || !science) return BehavioralTree.State.FAILURE;
+            if (!tower || !science) return State.FAILURE;
             for (Starport s : this.handler.Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                     if (this.handler.getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
@@ -88,21 +88,21 @@ public class ChooseSituationalUnit extends Action {
                             if (!b.isTraining()) {
                                 this.handler.chosenUnit = UnitType.Terran_Marine;
                                 this.handler.chosenBuilding = b;
-                                return BehavioralTree.State.SUCCESS;
+                                return State.SUCCESS;
                             }
                         }
                     }
 
                     this.handler.chosenUnit = UnitType.Terran_Science_Vessel;
                     this.handler.chosenBuilding = s;
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Scanner;
 
 import bwem.Base;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.unit.*;
 
@@ -17,10 +17,10 @@ public class CheckScan extends Conditional {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             if (this.handler.CSs.isEmpty()) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             if (this.handler.frameCount - this.handler.startCount > 40 + this.handler.getIH().getLatency()) {
                 for (Unit u : this.handler.enemyCombatUnitMemory) {
@@ -28,7 +28,7 @@ public class CheckScan extends Conditional {
                     if ((pU.isCloaked() || (pU instanceof Burrowable && ((Burrowable) pU).isBurrowed())) && !pU.isDetected() && u instanceof Attacker) {
                         if (this.handler.sim.getSimulation(u, true).allies.isEmpty()) continue;
                         this.handler.checkScan = u.getTilePosition();
-                        return BehavioralTree.State.SUCCESS;
+                        return State.SUCCESS;
                     }
                 }
             }
@@ -45,20 +45,20 @@ public class CheckScan extends Conditional {
                 valid.add(b);
             }
             if (valid.isEmpty()) {
-                return BehavioralTree.State.FAILURE;
+                return State.FAILURE;
             }
             for (ComsatStation u : this.handler.CSs) {
                 if (u.getEnergy() == 200) {
                     Random random = new Random();
                     this.handler.checkScan = valid.get(random.nextInt(valid.size())).getLocation();
-                    return BehavioralTree.State.SUCCESS;
+                    return State.SUCCESS;
                 }
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

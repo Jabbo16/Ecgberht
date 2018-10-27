@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.SCV;
@@ -14,7 +14,7 @@ public class FinishBuilding extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
             Worker chosen = this.handler.chosenWorker;
             if (chosen.rightClick(this.handler.chosenBuildingLot, false)) {
@@ -34,13 +34,13 @@ public class FinishBuilding extends Action {
                 this.handler.chosenWorker = null;
                 this.handler.buildingLot.remove(this.handler.chosenBuildingLot);
                 this.handler.chosenBuildingLot = null;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }

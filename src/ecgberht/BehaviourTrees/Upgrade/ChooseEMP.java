@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
@@ -15,9 +15,9 @@ public class ChooseEMP extends Action {
     }
 
     @Override
-    public BehavioralTree.State execute() {
+    public State execute() {
         try {
-            if (this.handler.enemyRace != Race.Protoss) return BehavioralTree.State.FAILURE;
+            if (this.handler.enemyRace != Race.Protoss) return State.FAILURE;
             boolean found = false;
             ScienceFacility chosen = null;
             for (ResearchingFacility r : this.handler.UBs) {
@@ -27,18 +27,18 @@ public class ChooseEMP extends Action {
                     break;
                 }
             }
-            if (!found) return BehavioralTree.State.FAILURE;
+            if (!found) return State.FAILURE;
             if (!this.handler.getPlayer().isResearching(TechType.EMP_Shockwave) &&
                     !this.handler.getPlayer().hasResearched(TechType.EMP_Shockwave)) {
                 this.handler.chosenUnitUpgrader = chosen;
                 this.handler.chosenResearch = TechType.EMP_Shockwave;
-                return BehavioralTree.State.SUCCESS;
+                return State.SUCCESS;
             }
-            return BehavioralTree.State.FAILURE;
+            return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return BehavioralTree.State.ERROR;
+            return State.ERROR;
         }
     }
 }
