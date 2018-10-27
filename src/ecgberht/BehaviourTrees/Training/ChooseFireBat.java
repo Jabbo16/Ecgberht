@@ -18,9 +18,8 @@ public class ChooseFireBat extends Action {
     public State execute() {
         try {
             if (this.handler.enemyRace != Race.Zerg) return State.FAILURE;
-            if (this.handler.UBs.isEmpty()) {
-                return State.FAILURE;
-            } else if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
+            if (this.handler.UBs.isEmpty()) return State.FAILURE;
+            else if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
                 for (ResearchingFacility r : this.handler.UBs) {
                     if (r instanceof Academy) {
                         int count = 0;

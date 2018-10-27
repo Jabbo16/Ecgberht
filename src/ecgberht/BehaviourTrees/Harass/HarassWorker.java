@@ -13,12 +13,8 @@ public class HarassWorker extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenUnitToHarass == null || this.handler.chosenHarasser == null) {
-                return State.FAILURE;
-            }
-            if (this.handler.chosenHarasser.attack(this.handler.chosenUnitToHarass)) {
-                return State.SUCCESS;
-            }
+            if (this.handler.chosenUnitToHarass == null || this.handler.chosenHarasser == null) return State.FAILURE;
+            if (this.handler.chosenHarasser.attack(this.handler.chosenUnitToHarass)) return State.SUCCESS;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

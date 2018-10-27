@@ -66,7 +66,7 @@ public class CheckBuildingFlames extends Action {
                 if (UnitType.Terran_Missile_Turret.maxHitPoints() != b.getHitPoints()) {
                     for (Mechanical r : this.handler.repairerTask.values()) {
                         if (b.equals(r)) {
-                            isBeingRepaired = true;
+                            isBeingRepaired = true; // TODO check to add break?
                         }
                     }
                     if (!isBeingRepaired) {

@@ -15,8 +15,7 @@ public class CheckIslands extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.islandBases.isEmpty() || !this.handler.islandExpand)
-                return State.FAILURE;
+            if (this.handler.islandBases.isEmpty() || !this.handler.islandExpand) return State.FAILURE;
             for (Base b : this.handler.islandBases) {
                 if (!this.handler.islandCCs.containsKey(b)) return State.SUCCESS;
             }

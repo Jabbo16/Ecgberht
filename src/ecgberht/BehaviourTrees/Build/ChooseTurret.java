@@ -34,14 +34,10 @@ public class ChooseTurret extends Action {
             }
             if (tech && this.handler.Ts.isEmpty()) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Missile_Turret) {
-                        return State.FAILURE;
-                    }
+                    if (w.first == UnitType.Terran_Missile_Turret) return State.FAILURE;
                 }
                 for (Building w : this.handler.workerTask.values()) {
-                    if (w instanceof MissileTurret) {
-                        return State.FAILURE;
-                    }
+                    if (w instanceof MissileTurret) return State.FAILURE;
                 }
                 this.handler.chosenToBuild = UnitType.Terran_Missile_Turret;
                 return State.SUCCESS;

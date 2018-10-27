@@ -41,9 +41,7 @@ public class ChooseBarracks extends Action {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Refinery) == 0) {
                     return State.FAILURE;
                 }
-            } else {
-                if (this.handler.getPlayer().supplyUsed() < 16) return State.FAILURE;
-            }
+            } else if (this.handler.getPlayer().supplyUsed() < 16) return State.FAILURE;
             if (this.handler.strat.buildUnits.contains(UnitType.Terran_Factory)) {
                 int count = 0;
                 boolean found = false;
@@ -56,9 +54,7 @@ public class ChooseBarracks extends Action {
                     if (w instanceof Factory) found = true;
                 }
                 if (!this.handler.Fs.isEmpty()) found = true;
-                if (count + this.handler.MBs.size() > this.handler.strat.numRaxForFac && !found) {
-                    return State.FAILURE;
-                }
+                if (count + this.handler.MBs.size() > this.handler.strat.numRaxForFac && !found) return State.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.MBs.size()
                     && this.handler.getPlayer().minerals() >= 600) {

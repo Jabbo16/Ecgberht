@@ -16,9 +16,7 @@ public class ChooseStimUpgrade extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) {
-                return State.FAILURE;
-            }
+            if (this.handler.UBs.isEmpty()) return State.FAILURE;
             for (ResearchingFacility u : this.handler.UBs) {
                 if (!(u instanceof Academy)) continue;
                 if (!this.handler.getPlayer().hasResearched(TechType.Stim_Packs) && u.canResearch(TechType.Stim_Packs) && !u.isResearching() && !u.isUpgrading()) {

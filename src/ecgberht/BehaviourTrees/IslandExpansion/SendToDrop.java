@@ -23,14 +23,12 @@ public class SendToDrop extends Action {
                 Worker chosen = this.handler.chosenWorker;
                 if (this.handler.workerIdle.contains(chosen)) {
                     this.handler.workerIdle.remove(chosen);
-                } else {
-                    if (this.handler.workerMining.containsKey(chosen)) {
-                        MineralPatch mineral = this.handler.workerMining.get(chosen);
-                        this.handler.workerMining.remove(chosen);
-                        if (this.handler.mineralsAssigned.containsKey(mineral)) {
-                            this.handler.mining--;
-                            this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
-                        }
+                } else if (this.handler.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = this.handler.workerMining.get(chosen);
+                    this.handler.workerMining.remove(chosen);
+                    if (this.handler.mineralsAssigned.containsKey(mineral)) {
+                        this.handler.mining--;
+                        this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
                     }
                 }
                 this.handler.chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(this.handler.chosenWorker)));

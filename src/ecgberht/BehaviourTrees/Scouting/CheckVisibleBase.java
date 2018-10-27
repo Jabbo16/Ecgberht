@@ -15,9 +15,7 @@ public class CheckVisibleBase extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenScout == null) {
-                return State.FAILURE;
-            }
+            if (this.handler.chosenScout == null) return State.FAILURE;
             if (!this.handler.scoutSLs.isEmpty()) {
                 for (Base b : this.handler.scoutSLs) {
                     if ((this.handler.getGame().getBWMap().isVisible(b.getLocation()))) {

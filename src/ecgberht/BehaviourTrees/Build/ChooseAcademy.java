@@ -31,9 +31,7 @@ public class ChooseAcademy extends Action {
             }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) >= this.handler.strat.numRaxForAca) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Academy) {
-                        return State.FAILURE;
-                    }
+                    if (w.first == UnitType.Terran_Academy) return State.FAILURE;
                 }
                 for (Building w : this.handler.workerTask.values()) {
                     if (w instanceof Academy) {

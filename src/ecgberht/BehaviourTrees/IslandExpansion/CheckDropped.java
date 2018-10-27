@@ -20,13 +20,11 @@ public class CheckDropped extends Conditional {
             Worker scv = this.handler.chosenWorkerDrop;
             DropShipAgent ship = this.handler.chosenDropShip;
             if (ship == null) return State.SUCCESS;
-            if (scv != null) {
-                if (ship.statusToString().equals("RETREAT")) {
-                    Unit transport = scv.getTransport();
-                    if (transport == null) {
-                        this.handler.chosenDropShip = null;
-                        return State.SUCCESS;
-                    }
+            if (scv != null && ship.statusToString().equals("RETREAT")) {
+                Unit transport = scv.getTransport();
+                if (transport == null) {
+                    this.handler.chosenDropShip = null;
+                    return State.SUCCESS;
                 }
             }
             return State.FAILURE;

@@ -31,9 +31,7 @@ public class ChooseBuildingLot extends Action {
                 this.handler.chosenBuildingLot = savedTurret;
                 return State.SUCCESS;
             }
-            if (this.handler.chosenBuildingLot != null) {
-                return State.SUCCESS;
-            }
+            if (this.handler.chosenBuildingLot != null) return State.SUCCESS;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

@@ -17,17 +17,13 @@ public class ChooseWorkerToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenUnitToHarass != null && this.handler.chosenUnitToHarass instanceof Worker) {
-                return State.FAILURE;
-            }
+            if (this.handler.chosenUnitToHarass instanceof Worker) return State.FAILURE;
             for (Unit u : this.handler.getGame().getUnits(this.handler.getIH().enemy())) {
-                if (this.handler.enemyMainBase != null) {
-                    if (u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
-                        if (((Worker) u).getOrder() != Order.Move) continue;
-                        if (Util.broodWarDistance(this.handler.enemyMainBase.getLocation().toPosition(), this.handler.chosenHarasser.getPosition()) <= 700) {
-                            this.handler.chosenUnitToHarass = u;
-                            return State.SUCCESS;
-                        }
+                if (this.handler.enemyMainBase != null && u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
+                    if (((Worker) u).getOrder() != Order.Move) continue;
+                    if (Util.broodWarDistance(this.handler.enemyMainBase.getLocation().toPosition(), this.handler.chosenHarasser.getPosition()) <= 700) {
+                        this.handler.chosenUnitToHarass = u;
+                        return State.SUCCESS;
                     }
                 }
             }

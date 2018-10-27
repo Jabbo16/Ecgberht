@@ -16,9 +16,7 @@ public class ChooseWeaponInfUp extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) {
-                return State.FAILURE;
-            }
+            if (this.handler.UBs.isEmpty()) return State.FAILURE;
             for (ResearchingFacility u : this.handler.UBs) {
                 if (!(u instanceof EngineeringBay)) continue;
                 if (u.canUpgrade(UpgradeType.Terran_Infantry_Weapons) && !u.isResearching() && !u.isUpgrading() && this.handler.getPlayer().getUpgradeLevel(UpgradeType.Terran_Infantry_Weapons) < 3) {

@@ -41,20 +41,18 @@ public class ChoosePosition extends Action {
                     }
                 }
             } else if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
-                if (!this.handler.islandBases.isEmpty()) { // TODO uncomment when BWAPI island bug is fixed
-                    if (this.handler.islandCCs.size() < this.handler.islandBases.size()) {
-                        if (this.handler.islandExpand) return State.FAILURE;
-                        for (Agent u : this.handler.agents.values()) {
-                            if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
-                                this.handler.islandExpand = true;
-                                return State.FAILURE;
-                            }
+                // TODO uncomment when BWAPI island bug is fixed
+                if (!this.handler.islandBases.isEmpty() && this.handler.islandCCs.size() < this.handler.islandBases.size()) {
+                    if (this.handler.islandExpand) return State.FAILURE;
+                    for (Agent u : this.handler.agents.values()) {
+                        if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
+                            this.handler.islandExpand = true;
+                            return State.FAILURE;
                         }
                     }
                 }
                 TilePosition main;
-                if (this.handler.mainCC != null)
-                    main = this.handler.mainCC.second.getTilePosition();
+                if (this.handler.mainCC != null) main = this.handler.mainCC.second.getTilePosition();
                 else main = this.handler.getPlayer().getStartLocation();
                 List<Base> valid = new ArrayList<>();
                 if (this.handler.strat.name.equals("PlasmaWraithHell")) {
@@ -66,9 +64,7 @@ public class ChoosePosition extends Action {
                     }
                 }
                 for (Base b : this.handler.BLs) {
-                    if (!this.handler.CCs.containsKey(b) && Util.isConnected(b.getLocation(), main)) {
-                        valid.add(b);
-                    }
+                    if (!this.handler.CCs.containsKey(b) && Util.isConnected(b.getLocation(), main)) valid.add(b);
                 }
                 List<Base> remove = new ArrayList<>();
                 for (Base b : valid) {
@@ -110,13 +106,10 @@ public class ChoosePosition extends Action {
                 if (!this.handler.chosenToBuild.equals(UnitType.Terran_Bunker) && !this.handler.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
                     if (this.handler.strat.proxy && this.handler.chosenToBuild == UnitType.Terran_Barracks) {
                         origin = new TilePosition(this.handler.getGame().getBWMap().mapWidth() / 2, this.handler.getGame().getBWMap().mapHeight() / 2);
-                    } else {
-                        origin = self.getStartLocation();
-                    }
+                    } else origin = self.getStartLocation();
                 } else if (this.handler.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (this.handler.defendPosition != null) {
-                        origin = this.handler.defendPosition.toTilePosition();
-                    } else if (this.handler.DBs.isEmpty()) {
+                    if (this.handler.defendPosition != null) origin = this.handler.defendPosition.toTilePosition();
+                    else if (this.handler.DBs.isEmpty()) {
                         origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
                         origin = this.handler.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
@@ -133,9 +126,8 @@ public class ChoosePosition extends Action {
                             this.handler.testMap = this.handler.map.clone();
                             this.handler.chosenPosition = origin;
                             return State.SUCCESS;
-                        } else if (this.handler.mainCC != null) {
-                            origin = this.handler.mainCC.second.getTilePosition();
-                        } else origin = this.handler.getPlayer().getStartLocation();
+                        } else if (this.handler.mainCC != null) origin = this.handler.mainCC.second.getTilePosition();
+                        else origin = this.handler.getPlayer().getStartLocation();
                     }
                 } else if (this.handler.Ts.isEmpty()) {
                     if (this.handler.mainChoke != null &&
@@ -163,10 +155,7 @@ public class ChoosePosition extends Action {
                             return State.SUCCESS;
                         } else origin = this.handler.mainChoke.getCenter().toTilePosition();
                     }
-                } else {
-                    origin = this.handler.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
-                }
-                //TilePosition position = ((GameState) this.handler).testMap.findPosition(((GameState) this.handler).chosenToBuild, origin);
+                } else origin = this.handler.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                 TilePosition position = this.handler.testMap.findPositionNew(this.handler.chosenToBuild, origin);
                 this.handler.testMap = this.handler.map.clone();
                 if (position != null) {

@@ -7,8 +7,6 @@ import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Academy;
-import org.openbw.bwapi4j.unit.Factory;
-import org.openbw.bwapi4j.unit.MachineShop;
 
 public class ChooseNothingTrain extends Action {
 
@@ -32,7 +30,7 @@ public class ChooseNothingTrain extends Action {
             if (siege && Util.getNumberCCs() >= 2 &&
                     !this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode) &&
                     !this.handler.getPlayer().isResearching(TechType.Tank_Siege_Mode) &&
-                    checkSiege()) {
+                    Util.checkSiege()) {
                 this.handler.chosenUnit = UnitType.None;
                 return State.SUCCESS;
             }
@@ -44,19 +42,4 @@ public class ChooseNothingTrain extends Action {
         }
     }
 
-    private boolean checkSiege() {
-        boolean machineShop = false;
-        if (this.handler.Fs.isEmpty()) return false;
-        int mS = (int) this.handler.UBs.stream().filter(u -> u instanceof MachineShop).count();
-        if (mS == 0) {
-            for (Factory f : this.handler.Fs) {
-                if (f.getMachineShop() != null) {
-                    machineShop = true;
-                    break;
-                }
-            }
-            return !machineShop;
-        }
-        return mS >= 1;
-    }
 }

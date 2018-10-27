@@ -28,9 +28,7 @@ public class ChooseTank extends Action {
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                     MutablePair<Integer, Integer> cash = this.handler.getCash();
-                    if (cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) {
-                        return State.FAILURE;
-                    }
+                    if (cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) return State.FAILURE;
                     for (Factory b : this.handler.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                             this.handler.chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;

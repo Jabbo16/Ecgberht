@@ -22,14 +22,12 @@ public class EnterBunker extends Action {
         try {
             MutablePair<Integer, Unit> m = this.handler.chosenMarine;
             for (Entry<Bunker, Set<Unit>> b : this.handler.DBs.entrySet()) {
-                if (b.getKey().equals(this.handler.chosenBunker)) {
-                    if (b.getKey().load((MobileUnit) m.second)) {
-                        b.getValue().add(m.second);
-                        this.handler.sqManager.squads.get(m.first).members.remove(m.second);
-                        return State.SUCCESS;
-                    }
+                if (b.getKey().equals(this.handler.chosenBunker) && b.getKey().load((MobileUnit) m.second)) {
+                    b.getValue().add(m.second);
+                    this.handler.sqManager.squads.get(m.first).members.remove(m.second);
+                    return State.SUCCESS;
                 }
-                return State.SUCCESS;
+                //return State.SUCCESS;
             }
             return State.FAILURE;
         } catch (Exception e) {

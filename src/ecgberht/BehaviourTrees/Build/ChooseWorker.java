@@ -21,19 +21,14 @@ public class ChooseWorker extends Action {
             Position chosen = this.handler.chosenPosition.toPosition();
             if (!this.handler.workerIdle.isEmpty()) {
                 for (Worker u : this.handler.workerIdle) {
-                    if (u.getLastCommandFrame() == frame) {
-                        continue;
-                    }
-                    if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
+                    if (u.getLastCommandFrame() == frame) continue;
+                    if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)))
                         closestWorker = u;
-                    }
                 }
             }
             if (!this.handler.workerMining.isEmpty()) {
                 for (Worker u : this.handler.workerMining.keySet()) {
-                    if (u.getLastCommandFrame() == frame) {
-                        continue;
-                    }
+                    if (u.getLastCommandFrame() == frame) continue;
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
                         closestWorker = u;
                     }

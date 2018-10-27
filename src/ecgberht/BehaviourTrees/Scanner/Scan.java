@@ -16,12 +16,10 @@ public class Scan extends Action {
     public State execute() {
         try {
             for (ComsatStation u : this.handler.CSs) {
-                if (u.getEnergy() >= 50 && u.getOrder() != Order.CastScannerSweep) {
-                    if (u.scannerSweep(this.handler.checkScan.toPosition())) {
-                        this.handler.startCount = this.handler.getIH().getFrameCount();
-                        this.handler.playSound("uav.mp3");
-                        return State.SUCCESS;
-                    }
+                if (u.getEnergy() >= 50 && u.getOrder() != Order.CastScannerSweep && u.scannerSweep(this.handler.checkScan.toPosition())) {
+                    this.handler.startCount = this.handler.getIH().getFrameCount();
+                    this.handler.playSound("uav.mp3");
+                    return State.SUCCESS;
                 }
             }
             return State.FAILURE;

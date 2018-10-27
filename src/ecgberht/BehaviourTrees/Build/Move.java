@@ -23,9 +23,8 @@ public class Move extends Action {
             Worker chosen = this.handler.chosenWorker;
             Position realEnd = Util.getUnitCenterPosition(this.handler.chosenPosition.toPosition(), this.handler.chosenToBuild);
             if (chosen.move(realEnd)) {
-                if (this.handler.workerIdle.contains(chosen)) {
-                    this.handler.workerIdle.remove(chosen);
-                } else if (this.handler.workerMining.containsKey(chosen)) {
+                if (this.handler.workerIdle.contains(chosen)) this.handler.workerIdle.remove(chosen);
+                else if (this.handler.workerMining.containsKey(chosen)) {
                     MineralPatch mineral = this.handler.workerMining.get(chosen);
                     this.handler.workerMining.remove(chosen);
                     if (this.handler.mineralsAssigned.containsKey(mineral)) {

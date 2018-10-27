@@ -591,4 +591,20 @@ public class Util {
     public static int getNumberCCs() {
         return getGs().CCs.size() + getGs().islandCCs.size();
     }
+
+    public static boolean checkSiege() {
+        boolean machineShop = false;
+        if (getGs().Fs.isEmpty()) return false;
+        int mS = (int) getGs().UBs.stream().filter(u -> u instanceof MachineShop).count();
+        if (mS == 0) {
+            for (Factory f : getGs().Fs) {
+                if (f.getMachineShop() != null) {
+                    machineShop = true;
+                    break;
+                }
+            }
+            return !machineShop;
+        }
+        return mS >= 1;
+    }
 }

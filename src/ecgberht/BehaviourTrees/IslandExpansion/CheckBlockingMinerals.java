@@ -26,8 +26,7 @@ public class CheckBlockingMinerals extends Conditional {
                 break;
             }
             if (chosen != null) {
-                if (scv.getOrderTarget() != null && scv.getOrderTarget().equals(chosen))
-                    return State.FAILURE;
+                if (scv.getOrderTarget() != null && scv.getOrderTarget().equals(chosen)) return State.FAILURE;
                 scv.gather(chosen);
                 return State.FAILURE;
             }

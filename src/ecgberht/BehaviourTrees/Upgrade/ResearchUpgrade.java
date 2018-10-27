@@ -16,17 +16,15 @@ public class ResearchUpgrade extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.defense) {
-                if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
-                    boolean found = false;
-                    for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
-                        if (w.first == UnitType.Terran_Command_Center) {
-                            found = true;
-                            break;
-                        }
+            if (!this.handler.defense && this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
+                boolean found = false;
+                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+                    if (w.first == UnitType.Terran_Command_Center) {
+                        found = true;
+                        break;
                     }
-                    if (!found) return State.FAILURE;
                 }
+                if (!found) return State.FAILURE;
             }
             if (this.handler.chosenUpgrade != null) {
                 if (this.handler.chosenUnitUpgrader.upgrade(this.handler.chosenUpgrade)) {

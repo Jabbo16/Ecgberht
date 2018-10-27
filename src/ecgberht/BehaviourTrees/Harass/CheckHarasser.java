@@ -15,8 +15,7 @@ public class CheckHarasser extends Conditional {
         try {
             if (this.handler.chosenHarasser == null) return State.FAILURE;
             else {
-                if (this.handler.chosenHarasser.isIdle() ||
-                        !this.handler.chosenHarasser.isMoving() ||
+                if (this.handler.chosenHarasser.isIdle() || !this.handler.chosenHarasser.isMoving() ||
                         !this.handler.chosenHarasser.isAttacking()) {
                     this.handler.chosenUnitToHarass = null;
                 }

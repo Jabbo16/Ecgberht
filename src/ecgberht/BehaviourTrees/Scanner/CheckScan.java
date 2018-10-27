@@ -19,9 +19,7 @@ public class CheckScan extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.CSs.isEmpty()) {
-                return State.FAILURE;
-            }
+            if (this.handler.CSs.isEmpty()) return State.FAILURE;
             if (this.handler.frameCount - this.handler.startCount > 40 + this.handler.getIH().getLatency()) {
                 for (Unit u : this.handler.enemyCombatUnitMemory) {
                     PlayerUnit pU = (PlayerUnit) u;
@@ -37,16 +35,12 @@ public class CheckScan extends Conditional {
                 if (this.handler.getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
-                if (this.handler.enemyMainBase != null) {
-                    if (this.handler.enemyMainBase.getLocation().equals(b.getLocation())) {
-                        continue;
-                    }
+                if (this.handler.enemyMainBase != null && this.handler.enemyMainBase.getLocation().equals(b.getLocation())) {
+                    continue;
                 }
                 valid.add(b);
             }
-            if (valid.isEmpty()) {
-                return State.FAILURE;
-            }
+            if (valid.isEmpty()) return State.FAILURE;
             for (ComsatStation u : this.handler.CSs) {
                 if (u.getEnergy() == 200) {
                     Random random = new Random();

@@ -28,7 +28,6 @@ public class ChooseSituationalUnit extends Action {
                     }
                 }
             } else dropship = false;
-
             boolean tower = false;
             if (dropship && !this.handler.strat.name.equals("2PortWraith")) {
                 for (ResearchingFacility u : this.handler.UBs) {
@@ -92,7 +91,6 @@ public class ChooseSituationalUnit extends Action {
                             }
                         }
                     }
-
                     this.handler.chosenUnit = UnitType.Terran_Science_Vessel;
                     this.handler.chosenBuilding = s;
                     return State.SUCCESS;

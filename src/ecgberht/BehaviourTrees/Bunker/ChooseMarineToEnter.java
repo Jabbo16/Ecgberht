@@ -21,9 +21,7 @@ public class ChooseMarineToEnter extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.sqManager.squads.isEmpty()) {
-                return State.FAILURE;
-            }
+            if (this.handler.sqManager.squads.isEmpty()) return State.FAILURE;
             for (Bunker b : this.handler.DBs.keySet()) {
                 if (b.getTilePosition().equals(this.handler.chosenBunker.getTilePosition())) {
                     MutablePair<Integer, Unit> closest = null;

@@ -14,17 +14,12 @@ public class ChooseBuildingToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenUnitToHarass != null) {
-                return State.FAILURE;
-            }
+            if (this.handler.chosenUnitToHarass != null) return State.FAILURE;
             for (EnemyBuilding u : this.handler.enemyBuildingMemory.values()) {
-                if (this.handler.enemyMainBase != null) {
-                    if (u.type.isBuilding()) {
-                        if (this.handler.bwem.getMap().getArea(u.pos).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
-                            this.handler.chosenUnitToHarass = u.unit;
-                            return State.SUCCESS;
-                        }
-                    }
+                if (this.handler.enemyMainBase != null && u.type.isBuilding()
+                        && this.handler.bwem.getMap().getArea(u.pos).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
+                    this.handler.chosenUnitToHarass = u.unit;
+                    return State.SUCCESS;
                 }
             }
             if (this.handler.chosenHarasser.isIdle()) {

@@ -17,9 +17,7 @@ public class CollectGas extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getPlayer().gas() >= 400) {
-                return State.FAILURE;
-            }
+            if (this.handler.getPlayer().gas() >= 400) return State.FAILURE;
             Worker chosen = this.handler.chosenWorker;
             if (!this.handler.refineriesAssigned.isEmpty()) {
                 GasMiningFacility closestGeyser = null;

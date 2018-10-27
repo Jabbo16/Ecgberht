@@ -22,9 +22,8 @@ public class ChooseMedic extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) {
-                return State.FAILURE;
-            } else {
+            if (this.handler.UBs.isEmpty()) return State.FAILURE;
+            else {
                 for (ResearchingFacility u : this.handler.UBs) {
                     if (u instanceof Academy) {
                         int marine_count = 0;

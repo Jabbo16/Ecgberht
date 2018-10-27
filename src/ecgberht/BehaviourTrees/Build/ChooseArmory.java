@@ -20,15 +20,10 @@ public class ChooseArmory extends Action {
     public State execute() {
         try {
             if (this.handler.Fs.isEmpty()) return State.FAILURE;
-
-            if (this.handler.getArmySize() < this.handler.strat.facForArmory) {
-                return State.FAILURE;
-            }
+            if (this.handler.getArmySize() < this.handler.strat.facForArmory) return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < this.handler.strat.numArmories) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Armory) {
-                        return State.FAILURE;
-                    }
+                    if (w.first == UnitType.Terran_Armory) return State.FAILURE;
                 }
                 for (Building w : this.handler.workerTask.values()) {
                     if (w instanceof Armory) return State.FAILURE;
