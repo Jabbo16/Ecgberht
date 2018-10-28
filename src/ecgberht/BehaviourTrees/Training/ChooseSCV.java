@@ -32,7 +32,7 @@ public class ChooseSCV extends Action {
                 }
                 if (notTraining) return State.FAILURE;
             }
-            if (this.handler.enemyRace == Race.Zerg && this.handler.EI.naughty
+            if (this.handler.enemyRace == Race.Zerg && this.handler.learningManager.isNaughty()
                     && Util.countBuildingAll(UnitType.Terran_Barracks) > 0
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && this.handler.getCash().first < 150) {
                 return State.FAILURE;
@@ -45,7 +45,7 @@ public class ChooseSCV extends Action {
                         return State.SUCCESS;
                     }
                 }
-                for (Map.Entry<Base, CommandCenter> b : this.handler.CCs.entrySet()) { // TODO train only island scvs from island CCs, test
+                for (Map.Entry<Base, CommandCenter> b : this.handler.CCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         this.handler.chosenUnit = UnitType.Terran_SCV;
                         this.handler.chosenBuilding = b.getValue();

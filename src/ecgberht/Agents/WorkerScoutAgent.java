@@ -45,7 +45,7 @@ public class WorkerScoutAgent extends Agent {
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
-                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().EI.naughty)) {
+                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().learningManager.isNaughty())) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
             removedIndex = true;
@@ -115,7 +115,7 @@ public class WorkerScoutAgent extends Agent {
     private Status chooseNewStatus() {
         String strat = getGs().strat.name;
         if (getGs().luckyDraw > 1 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
-                || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("EightRax") || getGs().EI.naughty)
+                || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("EightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
         if (status == Status.DISRUPTING) return Status.DISRUPTING;
@@ -275,7 +275,7 @@ public class WorkerScoutAgent extends Agent {
                 currentVertex = i;
             }
         }
-        if (!getGs().EI.naughty) {
+        if (!getGs().learningManager.isNaughty()) {
             Base enemyNatural = getGs().enemyNaturalBase;
             if (enemyNatural != null) {
                 Position enemyNaturalPos = enemyNatural.getLocation().toPosition();

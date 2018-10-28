@@ -132,7 +132,7 @@ public class Squad implements Comparable<Squad> {
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().strat.name.equals("ProxyBBS")) {
                             if (pU.getOrder() != Order.Move) move = bunker.getPosition();
                         }
-                    } else if (getGs().mainChoke != null && !getGs().EI.naughty && !getGs().strat.name.equals("ProxyBBS") && !getGs().strat.name.equals("EightRax")) {
+                    } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().strat.name.equals("ProxyBBS") && !getGs().strat.name.equals("EightRax")) {
                         if (Util.broodWarDistance(getGs().mainChoke.getCenter().toPosition(), sCenter) >= 200 &&
                                 getGs().getArmySize() < getGs().strat.armyForAttack && !getGs().expanding) {
                             if (pU.getOrder() != Order.Move) move = getGs().mainChoke.getCenter().toPosition();

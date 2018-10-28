@@ -23,7 +23,7 @@ public class CheckScout extends Conditional {
             }
             if ((strat.equals("ProxyBBS") || strat.equals("EightRax")) && this.handler.mapSize == 2) {
                 for (Base b : this.handler.SLs) {
-                    if (b.equals(this.handler.mainCC.first)) continue;
+                    if (this.handler.mainCC != null && b.equals(this.handler.mainCC.first)) continue;
                     this.handler.enemyMainBase = b;
                     return State.FAILURE;
                 }

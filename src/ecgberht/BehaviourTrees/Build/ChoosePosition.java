@@ -41,7 +41,6 @@ public class ChoosePosition extends Action {
                     }
                 }
             } else if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
-                // TODO uncomment when BWAPI island bug is fixed
                 if (!this.handler.islandBases.isEmpty() && this.handler.islandCCs.size() < this.handler.islandBases.size()) {
                     if (this.handler.islandExpand) return State.FAILURE;
                     for (Agent u : this.handler.agents.values()) {
@@ -114,7 +113,7 @@ public class ChoosePosition extends Action {
                     } else {
                         origin = this.handler.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                     }
-                } else if (this.handler.EI.naughty && this.handler.enemyRace == Race.Zerg) {
+                } else if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg) {
                     origin = this.handler.getBunkerPositionAntiPool();
                     if (origin != null) {
                         this.handler.testMap = this.handler.map.clone();

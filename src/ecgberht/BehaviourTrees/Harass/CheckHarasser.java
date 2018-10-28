@@ -19,7 +19,7 @@ public class CheckHarasser extends Conditional {
                         !this.handler.chosenHarasser.isAttacking()) {
                     this.handler.chosenUnitToHarass = null;
                 }
-                this.handler.EI.defendHarass = true;
+                this.handler.learningManager.setHarass(true);
                 return State.SUCCESS;
             }
         } catch (Exception e) {

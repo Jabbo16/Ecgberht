@@ -103,7 +103,7 @@ public class CheckPerimeter extends Conditional {
             for (Worker u : this.handler.workerDefenders.keySet()) {
                 if (u.getLastCommandFrame() == cFrame) continue;
                 Position closestDefense;
-                if (this.handler.EI.naughty) {
+                if (this.handler.learningManager.isNaughty()) {
                     if (!this.handler.DBs.isEmpty()) {
                         closestDefense = this.handler.DBs.keySet().iterator().next().getPosition();
                         u.move(closestDefense);

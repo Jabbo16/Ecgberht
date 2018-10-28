@@ -3,10 +3,7 @@ package ecgberht.Util;
 import bwem.Base;
 import bwem.ChokePoint;
 import ecgberht.EnemyBuilding;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.WalkPosition;
+import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
@@ -606,5 +603,9 @@ public class Util {
             return !machineShop;
         }
         return mS >= 1;
+    }
+
+    public static InteractionHandler getIH(){
+        return getGs().getIH();
     }
 }

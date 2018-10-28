@@ -164,12 +164,12 @@ public class IntelligenceAgency {
      * Detects if the enemy its doing a 4 or 5 Pool strat
      */
     private static boolean detectEarlyPool() {
-        if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && !getGs().EI.naughty && exploredMinerals) {
+        if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && !getGs().learningManager.isNaughty() && exploredMinerals) {
             int drones = IntelligenceAgency.getNumEnemyWorkers();
             boolean foundPool = enemyHasType(UnitType.Zerg_Spawning_Pool);
             if (foundPool && drones <= 5) {
                 enemyStrat = EnemyStrats.EarlyPool;
-                getGs().EI.naughty = true;
+                getGs().learningManager.setNaughty(true);
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
                 if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
@@ -359,8 +359,29 @@ public class IntelligenceAgency {
     }
 
     public static boolean enemyIsRushing() {
-        return getGs().frameCount <= 24 * 500 && (enemyStrat == EnemyStrats.ZealotRush
-                || enemyStrat == EnemyStrats.EarlyPool || enemyStrat == EnemyStrats.CannonRush);
+        boolean timeCheck = getGs().frameCount <= 24 * 500;
+        boolean rushStratDetected = enemyStrat == EnemyStrats.ZealotRush || enemyStrat == EnemyStrats.EarlyPool || enemyStrat == EnemyStrats.CannonRush;
+        boolean raceCheck = false;
+        if (timeCheck && rushStratDetected) return true;
+        switch (getGs().enemyRace) {
+            case Zerg:
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof Zergling).count() >= 4 && getGs().myArmy.size() < 3)
+                    raceCheck = true;
+                break;
+            case Terran:
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof SCV).count() >= 3 && getGs().myArmy.size() < 3)
+                    raceCheck = true;
+                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Marine).count() > getGs().myArmy.size())
+                    raceCheck = true;
+                break;
+            case Protoss:
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof Probe).count() >= 3 && getGs().myArmy.size() < 3)
+                    raceCheck = true;
+                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Zealot).count() >= 3 && getGs().myArmy.size() < 4)
+                    raceCheck = true;
+                break;
+        }
+        return timeCheck && raceCheck;
     }
 
     public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, MechRush}

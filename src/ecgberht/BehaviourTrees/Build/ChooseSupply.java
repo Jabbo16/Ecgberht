@@ -27,11 +27,11 @@ public class ChooseSupply extends Action {
             if (this.handler.strat.name.equals("EightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.EI.naughty && this.handler.enemyRace == Race.Zerg
+            if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.EI.naughty && this.handler.enemyRace == Race.Zerg
+            if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) == 1
                     && Util.countBuildingAll(UnitType.Terran_Supply_Depot) > 0
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {

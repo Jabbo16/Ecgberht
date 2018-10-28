@@ -47,7 +47,7 @@ public class SendDefenders extends Action {
                 if (this.handler.enemyInBase.size() + friends.size() < 40) {
                     battleWin = this.handler.sim.simulateDefenseBattle(friends, this.handler.enemyInBase, 150, bunker);
                 }
-                if (this.handler.enemyInBase.size() >= 3 * friends.size()) battleWin.first = false;
+                //if (this.handler.enemyInBase.size() >= 3 * friends.size()) battleWin.first = false;
             }
             if (cannon_rush) battleWin.first = false;
             int frame = this.handler.frameCount;
@@ -100,7 +100,7 @@ public class SendDefenders extends Action {
                             u.getKey().attack(scouter);
                         } else {
                             Position closestDefense = null;
-                            if (this.handler.EI.naughty) {
+                            if (this.handler.learningManager.isNaughty()) {
                                 if (!this.handler.DBs.isEmpty())
                                     closestDefense = this.handler.DBs.keySet().iterator().next().getPosition();
                                 if (closestDefense == null)

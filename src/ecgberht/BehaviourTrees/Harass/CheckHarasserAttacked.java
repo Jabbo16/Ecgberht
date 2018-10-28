@@ -45,7 +45,7 @@ public class CheckHarasserAttacked extends Conditional {
                     }
                 }
             }
-            if (workers > 1) this.handler.EI.defendHarass = true;
+            if (workers > 1) this.handler.learningManager.defendHarass();
             if (attackers.isEmpty()) {
                 if (!this.handler.getGame().getBWMap().isVisible(this.handler.enemyMainBase.getLocation()) &&
                         this.handler.chosenUnitToHarass == null) {

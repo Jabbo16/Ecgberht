@@ -19,7 +19,7 @@ public class ChooseBunker extends Action {
             if (this.handler.getGame().getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
                 return State.FAILURE;
             }
-            if ((this.handler.strat.bunker || IntelligenceAgency.enemyIsRushing() || this.handler.EI.naughty)
+            if ((this.handler.strat.bunker || IntelligenceAgency.enemyIsRushing() || this.handler.learningManager.isNaughty())
                     && this.handler.MBs.size() >= 1 && Util.countBuildingAll(UnitType.Terran_Bunker) == 0) {
                 this.handler.chosenToBuild = UnitType.Terran_Bunker;
                 return State.SUCCESS;
