@@ -334,9 +334,20 @@ public class GameState {
             }
 
             int totalGamesPlayed = EI.wins + EI.losses;
-            if (enemyName.equals("saida") && totalGamesPlayed == 1) return bbs;
             if (totalGamesPlayed < 1) {
                 ih.sendText("I dont know you that well yet, lets pick the standard strategy");
+                switch(enemyRace){
+                    case Zerg:
+                        return bFE;
+                    case Terran:
+                        return FM;
+                    case Protoss:
+                        return bM;
+                    case Random:
+                        return b;
+                    case Unknown:
+                        return b;
+                }
                 return b;
             }
             for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
@@ -1064,14 +1075,23 @@ public class GameState {
 
     void sendCustomMessage() {
         LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-        String name = EI.opponent.toLowerCase();
-        if (name.equals("saida") && EI.losses + EI.wins == 1) ih.sendText("Omae wa mou shindeiru");
-        else if (name.equals("krasi0".toLowerCase())) ih.sendText("Please don't bully me too much!");
-        else if (name.equals("hannes bredberg".toLowerCase()) || name.equals("hannesbredberg".toLowerCase())) {
-            ih.sendText("Don't you dare nuke me!");
-        } else if (name.equals("zercgberht")) {
-            ih.sendText("Hello there!, brother");
-        } else ih.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
+        String name = EI.opponent.toLowerCase().replace(" ", "");
+        switch (name) {
+            case "krasi0":
+                ih.sendText("Please don't bully me too much!");
+                break;
+            case "hannesbredberg":
+                ih.sendText("Don't you dare nuke me!");
+                break;
+            case "zercgberht":
+            case "assberht":
+            case "protecgberht":
+                ih.sendText("Hello there!, brother");
+                break;
+            default:
+                ih.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
+                break;
+        }
     }
 
     String pickShipName() {
