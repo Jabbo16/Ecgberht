@@ -186,10 +186,12 @@ public class SimManager {
                 if (enemy.units.isEmpty()) continue;
                 if (closeClusters(friend, enemy)) aux.enemies.addAll(enemy.units);
             }
-            if (!aux.enemies.isEmpty()) {
+            /*if (!aux.enemies.isEmpty()) {
                 aux.allies.addAll(friend.units);
                 simulations.add(aux);
-            }
+            }*/
+            aux.allies.addAll(friend.units);
+            simulations.add(aux);
         }
         List<SimInfo> newSims = new ArrayList<>();
         for (SimInfo s : simulations) {
@@ -206,14 +208,18 @@ public class SimManager {
                 if (u instanceof AirAttacker) air.enemies.add(u);
                 if (u instanceof GroundAttacker) ground.enemies.add(u);
             }
-            if (!emptyAir && !air.enemies.isEmpty()) {
+            /*if (!emptyAir && !air.enemies.isEmpty()) {
                 air.type = SimInfo.SimType.AIR;
                 newSims.add(air);
             }
             if (!emptyGround && !ground.enemies.isEmpty()) {
                 ground.type = SimInfo.SimType.GROUND;
                 newSims.add(ground);
-            }
+            }*/
+            air.type = SimInfo.SimType.AIR;
+            newSims.add(air);
+            ground.type = SimInfo.SimType.GROUND;
+            newSims.add(ground);
         }
         if (!newSims.isEmpty()) simulations.addAll(newSims);
     }
@@ -228,6 +234,7 @@ public class SimManager {
         }
         for (SimInfo s : simulations) {
             simulator.clear();
+            if(s.enemies.isEmpty()) continue;
             for (Unit u : s.allies) {
                 JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer1(jU);
@@ -391,7 +398,7 @@ public class SimManager {
      * @return True if the unit is not getting attacked and far from the fight
      */
     public boolean farFromFight(Unit u, SimInfo s) { // TODO test
-        if (!s.allies.contains(u)) return true;
+        if (!s.allies.contains(u) || s.enemies.isEmpty()) return true;
         WeaponType weapon = Util.getWeapon(u.getType());
         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
         return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u, s.enemies)) > range * 1.5;

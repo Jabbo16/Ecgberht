@@ -129,14 +129,14 @@ public class GameState {
     public Worker chosenHarasser = null;
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
-    public boolean firstExpand = true;
+    boolean firstExpand = true;
     public int maxGoliaths = 0;
     public double luckyDraw;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),
             new TilePosition(117, 7), new TilePosition(7, 118), new TilePosition(117, 118)));
     public Building disrupterBuilding = null;
     public BW bw;
-    public InteractionHandler ih;
+    InteractionHandler ih;
     public BWEM bwem;
     protected Player self;
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
@@ -990,7 +990,6 @@ public class GameState {
                     if (count <= workerCountToSustain) break;
                     if (!scv.getKey().isCarryingMinerals()) {
                         scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
-                        //addToSquad(scv.getKey());
                         myArmy.add(scv.getKey());
                         if (mineralsAssigned.containsKey(scv.getValue())) {
                             mining--;

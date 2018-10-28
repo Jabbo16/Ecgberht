@@ -265,14 +265,14 @@ public class Squad implements Comparable<Squad> {
     }
 
     private PlayerUnit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
-        Set<Unit> marines = getMarines();
+        Set<Unit> marines = getHealable();
         PlayerUnit chosen = null;
         double dist = Double.MAX_VALUE;
         for (Unit m : marines) {
             if (((PlayerUnit) m).getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) {
                 continue;
             }
-            double distA = Util.broodWarDistance(m.getPosition(), u.getPosition());
+            double distA = m.getDistance(u);
             if (chosen == null || distA < dist) {
                 chosen = (PlayerUnit) m;
                 dist = distA;
@@ -289,10 +289,10 @@ public class Squad implements Comparable<Squad> {
         return aux;
     }
 
-    public Set<Unit> getMarines() {
+    private Set<Unit> getHealable() {
         Set<Unit> aux = new TreeSet<>();
         for (Unit u : this.members) {
-            if (u instanceof Marine) aux.add(u);
+            if (u instanceof Marine || u instanceof Firebat) aux.add(u);
         }
         return aux;
     }

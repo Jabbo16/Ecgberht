@@ -13,9 +13,6 @@ import ecgberht.BehaviourTrees.BuildingLot.CheckBuildingsLot;
 import ecgberht.BehaviourTrees.BuildingLot.ChooseBlotWorker;
 import ecgberht.BehaviourTrees.BuildingLot.ChooseBuildingLot;
 import ecgberht.BehaviourTrees.BuildingLot.FinishBuilding;
-import ecgberht.BehaviourTrees.Bunker.ChooseBunkerToLoad;
-import ecgberht.BehaviourTrees.Bunker.ChooseMarineToEnter;
-import ecgberht.BehaviourTrees.Bunker.EnterBunker;
 import ecgberht.BehaviourTrees.Defense.CheckPerimeter;
 import ecgberht.BehaviourTrees.Defense.ChooseDefensePosition;
 import ecgberht.BehaviourTrees.Defense.SendDefenders;
@@ -68,7 +65,6 @@ public class Ecgberht implements BWEventListener {
     private static BehavioralTree upgradeTree;
     private BehavioralTree botherTree;
     private BehavioralTree buildingLotTree;
-    private BehavioralTree bunkerTree;
     private BehavioralTree collectTree;
     private BehavioralTree defenseTree;
     private BehavioralTree repairTree;
@@ -278,15 +274,6 @@ public class Ecgberht implements BWEventListener {
         buildingLotTree.addChild(BLot);
     }
 
-    private void initBunkerTree() {
-        ChooseBunkerToLoad cBu = new ChooseBunkerToLoad("Choose Bunker to Load", gs);
-        EnterBunker eB = new EnterBunker("Enter bunker", gs);
-        ChooseMarineToEnter cMTE = new ChooseMarineToEnter("Choose Marine To Enter", gs);
-        Sequence Bunker = new Sequence("Bunker", cBu, cMTE, eB);
-        bunkerTree = new BehavioralTree("Bunker Tree");
-        bunkerTree.addChild(Bunker);
-    }
-
     private void initScanTree() {
         CheckScan cScan = new CheckScan("Check scan", gs);
         Scan s = new Scan("Scan", gs);
@@ -394,7 +381,6 @@ public class Ecgberht implements BWEventListener {
             initRepairTree();
             initAddonBuildTree();
             initBuildingLotTree();
-            initBunkerTree();
             initScanTree();
             initHarassTree();
             initIslandTree();
@@ -455,6 +441,7 @@ public class Ecgberht implements BWEventListener {
             gs.updateEnemyBuildingsMemory();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
+            gs.sqManager.updateBunkers();
             gs.checkDisrupter();
             buildingLotTree.run();
             repairTree.run();
@@ -466,7 +453,6 @@ public class Ecgberht implements BWEventListener {
             trainTree.run();
             scoutingTree.run();
             botherTree.run();
-            bunkerTree.run();
             scannerTree.run();
             if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
             else if (gs.strat.name.equals("EightRax")) gs.checkWorkerMilitia(1);

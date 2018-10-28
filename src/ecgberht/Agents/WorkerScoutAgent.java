@@ -98,16 +98,20 @@ public class WorkerScoutAgent extends Agent {
                 }
                 return;
             }
-            if (mySim.enemies.size() == 1 && mySim.enemies.iterator().next() instanceof Drone) {
-                if (mySim.lose) {
-                    unit.haltConstruction();
-                    stoppedDisrupting = true;
-                    if (!removedIndex) {
-                        enemyBaseBorders.remove(enemyNaturalIndex);
-                        enemyNaturalIndex = -1;
-                        removedIndex = true;
-                    }
-                } else UtilMicro.attack(unit, mySim.enemies.iterator().next());
+            if(mySim.enemies.size() == 1){
+                Unit closest = mySim.enemies.iterator().next();
+                Area enemyArea = getGs().bwem.getMap().getArea(closest.getTilePosition());
+                if(closest instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)){
+                    if (mySim.lose) {
+                        unit.haltConstruction();
+                        stoppedDisrupting = true;
+                        if (!removedIndex) {
+                            enemyBaseBorders.remove(enemyNaturalIndex);
+                            enemyNaturalIndex = -1;
+                            removedIndex = true;
+                        }
+                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next()); // TODO add attack state
+                }
             }
         } else unit.resumeBuilding(disrupter);
     }
