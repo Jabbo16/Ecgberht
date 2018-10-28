@@ -435,6 +435,7 @@ public class Ecgberht implements BWEventListener {
                     }
                 }
             }
+            gs.cancelDyingThings();
             IntelligenceAgency.updateBullets();
             gs.wizard.onFrameSpellManager();
             gs.fix();

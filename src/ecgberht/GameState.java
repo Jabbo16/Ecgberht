@@ -617,7 +617,7 @@ public class GameState {
         }
         for (Worker u : removeGas) workerGas.remove(u);
 
-        if (frameCount % 500 == 0) {
+        if (frameCount % 350 == 0) {
             Map<MineralPatch, Long> mineralCount = workerMining.values().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
             for (Entry<MineralPatch, Long> p : mineralCount.entrySet())
                 mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
@@ -1254,6 +1254,26 @@ public class GameState {
         if (disrupterBuilding.getHitPoints() <= 20) {
             disrupterBuilding.cancelConstruction();
             disrupterBuilding = null;
+        }
+    }
+
+    void cancelDyingThings() { // TODO test
+        List<SCV> toRemove = new ArrayList<>();
+        for(Entry<SCV, Building> b : workerTask.entrySet()){
+            if (b.getValue().isCompleted()) continue; // Is this even needed??
+            if (b.getValue().isUnderAttack() && b.getValue().getHitPoints() <= 20){
+                b.getKey().haltConstruction();
+                buildingLot.add(b.getValue());
+                toRemove.add(b.getKey());
+            }
+        }
+        for(SCV s : toRemove){
+            workerIdle.add(s);
+            workerBuild.remove(s);
+        }
+        for(Building b : buildingLot) {
+            if (b.isCompleted()) continue; // Is this even needed??
+            if (b.isUnderAttack() && b.getHitPoints() <= 20) b.cancelConstruction();
         }
     }
 }
