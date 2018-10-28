@@ -61,7 +61,7 @@ public class DebugManager {
     }
 
     private void debugScreen(GameState gameState) {
-        try{
+        try {
             if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
             if (gameState.naturalArea != null) {
                 print(gameState.naturalArea.getTop().toTilePosition(), Color.RED);
@@ -206,7 +206,7 @@ public class DebugManager {
                 if (m.getValue() == 0) continue;
                 mapDrawer.drawTextMap(m.getKey().getPosition(), ColorUtil.formatText(m.getValue().toString(), ColorUtil.White));
             }
-        }  catch(Exception e){
+        } catch (Exception e) {
             System.err.println("debugScreen Exception");
             e.printStackTrace();
         }

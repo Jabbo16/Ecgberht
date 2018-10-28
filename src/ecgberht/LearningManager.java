@@ -18,7 +18,7 @@ public class LearningManager {
     private EnemyHistory enemyHistory = new EnemyHistory();
     private EnemyInfo enemyInfo;
 
-    LearningManager(String name, Race race){
+    LearningManager(String name, Race race) {
         enemyInfo = new EnemyInfo(name, race);
     }
 
@@ -36,7 +36,8 @@ public class LearningManager {
                 return;
             }
             path = "bwapi-data/AI/" + opponentName + "-History.json";
-            if (Files.exists(Paths.get(path))) enemyHistory = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
+            if (Files.exists(Paths.get(path)))
+                enemyHistory = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
         } catch (Exception e) {
             System.err.println("readOpponentHistory");
             e.printStackTrace();
@@ -105,7 +106,7 @@ public class LearningManager {
     }
 
     public void setRace(String raceToString) {
-        if(enemyInfo.race == null) enemyInfo.race = raceToString;
+        if (enemyInfo.race == null) enemyInfo.race = raceToString;
     }
 
     public boolean isNaughty() {

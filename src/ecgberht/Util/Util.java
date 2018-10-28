@@ -605,7 +605,7 @@ public class Util {
         return mS >= 1;
     }
 
-    public static InteractionHandler getIH(){
+    public static InteractionHandler getIH() {
         return getGs().getIH();
     }
 }

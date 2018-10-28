@@ -489,10 +489,11 @@ public class Ecgberht implements BWEventListener {
             String name = ih.enemy().getName();
             if (arg0) ih.sendText("gg wp " + name);
             else ih.sendText("gg wp! " + name + ", next game I will not lose!");
-            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) gs.strat.name = "PlasmaWraithHell";
+            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
+                gs.strat.name = "PlasmaWraithHell";
             String oldStrat = IntelligenceAgency.getStartStrat();
             if (oldStrat != null && !oldStrat.equals(gs.strat.name)) gs.strat.name = oldStrat;
-            gs.learningManager.onEnd(gs.strat.name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""),gs.enemyIsRandom);
+            gs.learningManager.onEnd(gs.strat.name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom);
         } catch (Exception e) {
             System.err.println("onEnd Exception");
             e.printStackTrace();
