@@ -33,7 +33,7 @@ public class ChooseBunker extends Action {
         }
     }
 
-    private boolean needBunker(){
+    private boolean needBunker() {
         return this.handler.enemyRace == Race.Zerg && !this.handler.strat.name.equals("ProxyBBS")
                 && !this.handler.strat.name.equals("EightRax");
     }

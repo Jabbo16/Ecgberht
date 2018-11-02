@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwem.area.Area;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
@@ -19,9 +20,15 @@ public class ChooseWorker extends Action {
             Worker closestWorker = null;
             int frame = this.handler.frameCount;
             Position chosen = this.handler.chosenPosition.toPosition();
+            Area posArea = this.handler.bwem.getMap().getArea(this.handler.chosenPosition);
             if (!this.handler.workerIdle.isEmpty()) {
                 for (Worker u : this.handler.workerIdle) {
                     if (u.getLastCommandFrame() == frame) continue;
+                    Area workerArea = this.handler.bwem.getMap().getArea(u.getTilePosition());
+                    if (workerArea == null) continue;
+                    if (posArea != null && !posArea.equals(workerArea) && !posArea.isAccessibleFrom(workerArea)) {
+                        continue;
+                    }
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)))
                         closestWorker = u;
                 }
@@ -29,6 +36,11 @@ public class ChooseWorker extends Action {
             if (!this.handler.workerMining.isEmpty()) {
                 for (Worker u : this.handler.workerMining.keySet()) {
                     if (u.getLastCommandFrame() == frame) continue;
+                    Area workerArea = this.handler.bwem.getMap().getArea(u.getTilePosition());
+                    if (workerArea == null) continue;
+                    if (posArea != null && !posArea.equals(workerArea) && !posArea.isAccessibleFrom(workerArea)) {
+                        continue;
+                    }
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
                         closestWorker = u;
                     }

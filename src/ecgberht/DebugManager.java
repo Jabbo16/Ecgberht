@@ -143,7 +143,10 @@ public class DebugManager {
                 print(r.getValue(), Color.YELLOW);
                 mapDrawer.drawLineMap(r.getKey().getPosition(), r.getValue().getPosition(), Color.YELLOW);
             }
-            for (EnemyBuilding b : gameState.enemyBuildingMemory.values()) print(b.pos, b.type, Color.RED);
+            for (EnemyBuilding b : gameState.enemyBuildingMemory.values()) {
+                mapDrawer.drawTextMap(b.pos.toPosition().add(new Position(0, 16)), ColorUtil.formatText(b.type.toString(), ColorUtil.White));
+                print(b.pos, b.type, Color.RED);
+            }
             if (gameState.chosenScout != null) {
                 mapDrawer.drawTextMap(gameState.chosenScout.getPosition(), ColorUtil.formatText("Scouter", ColorUtil.White));
                 print(gameState.chosenScout, Color.PURPLE);
@@ -191,15 +194,15 @@ public class DebugManager {
                 }
             }
             gameState.sim.drawClusters();
-            /*for (Squad s : sqManager.squads.values()) {
+            /*for (Squad s : gameState.sqManager.squads.values()) {
                 if (s.status == Squad.Status.ATTACK && s.attack != null)
-                    bw.getMapDrawer().drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
-            }*/
-            /*for (Squad s : sqManager.squads.values()) {
+                    mapDrawer.drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
+            }
+            for (Squad s : gameState.sqManager.squads.values()) {
                 if (s.members.isEmpty()) continue;
                 Position center = s.getSquadCenter();
-                bw.getMapDrawer().drawCircleMap(center, 90, Color.GREEN);
-                bw.getMapDrawer().drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
+                mapDrawer.drawCircleMap(center, 90, Color.GREEN);
+                mapDrawer.drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
             }*/
             for (Map.Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
                 print(m.getKey(), Color.CYAN);

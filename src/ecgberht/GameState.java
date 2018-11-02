@@ -39,7 +39,6 @@ public class GameState {
     public Base enemyStartBase = null;
     public boolean defense = false;
     public boolean enemyIsRandom = true;
-    public boolean expanding = false;
     public boolean firstTerranCheese = false;
     public boolean firstScout = true;
     public boolean iReallyWantToExpand = false;
@@ -119,7 +118,6 @@ public class GameState {
     public TilePosition chosenPosition = null;
     public TilePosition initDefensePosition = null;
     public TrainingFacility chosenBuilding = null;
-    public Unit chosenBunker = null;
     public Unit chosenScout = null;
     public Unit chosenUnitToHarass = null;
     public UnitType chosenAddon = null;
@@ -194,7 +192,7 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            //if (true) return bbs; // TEST ONLY
+            //if (true) return tPW; // TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
@@ -336,7 +334,7 @@ public class GameState {
             int totalGamesPlayed = EI.wins + EI.losses;
             if (totalGamesPlayed < 1) {
                 ih.sendText("I dont know you that well yet, lets pick the standard strategy");
-                switch(enemyRace){
+                switch (enemyRace) {
                     case Zerg:
                         return bFE;
                     case Terran:
@@ -829,6 +827,7 @@ public class GameState {
 
     void mineralLocking() {
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
+            if (u.getKey().getLastCommandFrame() == frameCount) continue;
             if (u.getKey().isIdle() || (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())))
                 u.getKey().gather(u.getValue());
             else if (u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
@@ -1176,7 +1175,7 @@ public class GameState {
     public boolean needToAttack() {
         if ((strat.name.equals("ProxyBBS") || strat.name.equals("EightRax")) && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
             return true;
-        return getArmySize() >= strat.armyForAttack && requiredUnitsForAttack();
+        return getArmySize() >= strat.armyForAttack * 0.85 && requiredUnitsForAttack();
     }
 
     void updateAttack() {
@@ -1186,7 +1185,8 @@ public class GameState {
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                if (!needToAttack && u.status != Squad.Status.ATTACK && !checkItWasAttacking(u)) continue;
+                if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && !checkItWasAttacking(u))
+                    continue;
                 Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
                 if (attackPos != null) {
                     if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("EightRax"))) {
@@ -1219,7 +1219,8 @@ public class GameState {
                 if (b.getArea() == null) continue;
                 if (b.getArea().equals(uArea)) return false;
             }
-            return !naturalArea.equals(uArea) && strat.armyForAttack * 0.85 >= getArmySize() && (naturalChoke == null || naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
+            return (mainChoke == null || mainChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500) &&
+                    !naturalArea.equals(uArea) && (naturalChoke == null || naturalChoke.getCenter().toPosition().getDistance(u.getSquadCenter()) >= 500);
         } catch (Exception e) {
             System.err.println("checkItWasAttacking Exception");
             e.printStackTrace();
@@ -1251,7 +1252,7 @@ public class GameState {
 
     void checkDisrupter() {
         if (enemyRace != Race.Zerg || disrupterBuilding == null) return;
-        if (disrupterBuilding.getHitPoints() <= 20) {
+        if (disrupterBuilding.getHitPoints() <= 30) {
             disrupterBuilding.cancelConstruction();
             disrupterBuilding = null;
         }
@@ -1259,21 +1260,21 @@ public class GameState {
 
     void cancelDyingThings() { // TODO test
         List<SCV> toRemove = new ArrayList<>();
-        for(Entry<SCV, Building> b : workerTask.entrySet()){
+        for (Entry<SCV, Building> b : workerTask.entrySet()) {
             if (b.getValue().isCompleted()) continue; // Is this even needed??
-            if (b.getValue().isUnderAttack() && b.getValue().getHitPoints() <= 20){
+            if (b.getValue().isUnderAttack() && b.getValue().getHitPoints() <= 30) {
                 b.getKey().haltConstruction();
                 buildingLot.add(b.getValue());
                 toRemove.add(b.getKey());
             }
         }
-        for(SCV s : toRemove){
+        for (SCV s : toRemove) {
             workerIdle.add(s);
             workerBuild.remove(s);
         }
-        for(Building b : buildingLot) {
+        for (Building b : buildingLot) {
             if (b.isCompleted()) continue; // Is this even needed??
-            if (b.isUnderAttack() && b.getHitPoints() <= 20) b.cancelConstruction();
+            if (b.isUnderAttack() && b.getHitPoints() <= 30) b.cancelConstruction();
         }
     }
 }

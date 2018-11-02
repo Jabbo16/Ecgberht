@@ -71,14 +71,12 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                     return false;
                 }
             }
-
             Position kitePos = UtilMicro.kiteAway(unit, airAttackers);
             if (kitePos != null) {
                 UtilMicro.move(unit, kitePos);
                 return false;
             }
-
-            Unit target = Util.getTarget(unit, closeEnemies);
+            Unit target = Util.getRangedTarget(unit, closeEnemies);
             if (target != null) {
                 UtilMicro.attack(unit, target);
                 return false;
@@ -99,7 +97,6 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     private Position getBestBaseToHarass() {
         return Util.chooseAttackPosition(unit.getPosition(), true);
     }
-
 
     private Unit chooseHarassTarget() {
         Unit chosen = null;

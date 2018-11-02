@@ -184,41 +184,10 @@ public class Util {
         return attacker.groundWeapon() != WeaponType.None ? attacker.groundWeapon() : attacker.airWeapon();
     }
 
-    private static boolean canAttack(PlayerUnit attacker, PlayerUnit target) {
+    public static boolean canAttack(PlayerUnit attacker, PlayerUnit target) {
         if (attacker.isLockedDown() || !(attacker instanceof Attacker)) return false;
         WeaponType weapon = getWeapon(attacker, target);
         return !(weapon == null);
-    }
-
-    private static boolean isInWeaponRange(PlayerUnit attacker, PlayerUnit target, int dist) {
-        if (!(attacker instanceof Attacker)) return false;
-        WeaponType weapon = getWeapon(attacker, target);
-        if (weapon == null) return false;
-        return weapon.maxRange() <= dist;
-    }
-
-    public static List<Unit> getFriendlyUnitsInRadius(Position sCenter, int radius) {
-        List<Unit> units = new ArrayList<>();
-        for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
-            if (broodWarDistance(u.getPosition(), sCenter) <= radius) units.add(u);
-        }
-        return units;
-    }
-
-    // get a target for the ranged unit to attack
-    public static Unit getTarget(final Unit rangedUnit, final Set<Unit> targets) {
-        double highestPriority = 0.f;
-        Unit bestTarget = null;
-        // for each target possibility
-        for (Unit targetUnit : targets) {
-            double priority = getScore((PlayerUnit) rangedUnit, (PlayerUnit) targetUnit);
-            // if it's a higher priority, set it
-            if (bestTarget == null || priority > highestPriority) {
-                highestPriority = priority;
-                bestTarget = targetUnit;
-            }
-        }
-        return bestTarget;
     }
 
     public static String raceToString(Race race) {
@@ -237,121 +206,12 @@ public class Util {
         return "Unknown";
     }
 
-    // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
-    private static int getScore(final PlayerUnit attacker, final PlayerUnit target) {
-        int priority = getAttackPriority(attacker, target);     // 0..12
-        int range = attacker.getDistance(target);           // 0..map size in pixels
-        // Let's say that 1 priority step is worth 160 pixels (5 tiles).
-        // We care about unit-target range and target-order position distance.
-        int score = 5 * 32 * priority - range;
-        if (target.getType() == UnitType.Zerg_Egg) return score;
-        WeaponType targetWeapon = Util.getWeapon(attacker, target);
-        UnitType targetType = target.getType();
-        // Adjust for special features.
-        // This could adjust for relative speed and direction, so that we don't chase what we can't catch.
-        if (range <= targetWeapon.maxRange()) {
-            score += 5 * 32;
-        } else if (target instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
-            if (target instanceof SiegeTank) {
-                if (((SiegeTank) target).isSieged() || target.getOrder() == Order.Sieging || target.getOrder() == Order.Unsieging) {
-                    score += 48;
-                } else {
-                    score += 24;
-                }
-            }
-
-        } else if (target instanceof MobileUnit && ((MobileUnit) target).isBraking()) {
-            score += 16;
-        } else if (targetType.topSpeed() >= attacker.getType().topSpeed()) {
-            score -= 5 * 32;
-        }
-
-        // Prefer targets that are already hurt.
-        if (targetType.getRace() == Race.Protoss && target.getShields() <= 5) {
-            score += 32;
-        }
-        if (target.getHitPoints() < targetType.maxHitPoints()) {
-            score += 24;
-        }
-
-        DamageType damage = targetWeapon.damageType();
-        if (damage == DamageType.Explosive) {
-            if (targetType.size() == UnitSizeType.Large) {
-                score += 32;
-            }
-        } else if (damage == DamageType.Concussive) {
-            if (targetType.size() == UnitSizeType.Small) {
-                score += 32;
-            }
-        }
-        return score;
-    }
-
-    // Credits to Steamhammer (Jay Scott), emergency targeting for Proxy BBS and Plasma
-    private static int getAttackPriority(PlayerUnit rangedUnit, PlayerUnit target) {
-        final UnitType targetType = target.getType();
-        // Exceptions if we're a ground unit.
-        if (target instanceof Burrowable) {
-            if ((targetType == UnitType.Terran_Vulture_Spider_Mine && !((Burrowable) target).isBurrowed()) || targetType == UnitType.Zerg_Infested_Terran) {
-                return 12;
-            }
-        }
-        if (targetType == UnitType.Zerg_Lurker) return 12;
-        if (targetType == UnitType.Zerg_Egg) return 5;
-        if (targetType == UnitType.Protoss_High_Templar) return 12;
-        if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
-        // Droppers are as bad as threats. They may be loaded and are often isolated and safer to attack.
-        if (targetType == UnitType.Terran_Dropship || targetType == UnitType.Protoss_Shuttle) return 10;
-        // Also as bad are other dangerous things.
-        if (targetType == UnitType.Terran_Science_Vessel || targetType == UnitType.Zerg_Scourge || targetType == UnitType.Protoss_Observer) {
-            return 10;
-        }
-        // Next are workers.
-        if (targetType.isWorker()) {
-            if (rangedUnit.getType() == UnitType.Terran_Vulture) return 11;
-            if (target instanceof SCV) {
-                // Repairing or blocking a choke makes you critical.
-                if (((SCV) target).isRepairing()) return 11;
-                // SCVs constructing are also important.
-                if (((SCV) target).isConstructing()) return 10;
-            }
-            return 6;
-        }
-        // Important combat units that we may not have targeted above (esp. if we're a flyer).
-        if (targetType == UnitType.Protoss_Carrier || targetType == UnitType.Terran_Siege_Tank_Tank_Mode || targetType == UnitType.Terran_Siege_Tank_Siege_Mode) {
-            return 8;
-        }
-        // Short circuit: Give bunkers a lower priority to reduce bunker obsession.
-        if (targetType == UnitType.Terran_Bunker || targetType == UnitType.Zerg_Sunken_Colony || targetType == UnitType.Protoss_Photon_Cannon) {
-            return 6;
-        }
-        // Spellcasters are as important as key buildings.
-        // Also remember to target other non-threat combat units.
-        if (targetType.isSpellcaster() || targetType.groundWeapon() != WeaponType.None || targetType.airWeapon() != WeaponType.None) {
-            return 7;
-        }
-        // Templar tech and spawning pool are more important.
-        if (targetType == UnitType.Protoss_Templar_Archives) return 7;
-
-        if (targetType.gasPrice() > 0) return 4;
-        if (targetType.mineralPrice() > 0) return 3;
-        // Finally everything else.
-        return 1;
-    }
-
-    public static int getWeight(Unit u) {
-        if (u instanceof SiegeTank) return 6;
-        return 1;
-    }
-
     public static int getGroundDistance(Position start, Position end) {
         try {
             MutableInt dist = new MutableInt();
             getGs().bwem.getMap().getPath(start, end, dist);
             return dist.intValue();
         } catch (Exception e) {
-            //System.err.println("Ground Distance Exception");
-            //e.printStackTrace();
             return start != null && end != null ? start.getDistance(end) : Integer.MAX_VALUE;
         }
     }
@@ -607,5 +467,188 @@ public class Util {
 
     public static InteractionHandler getIH() {
         return getGs().getIH();
+    }
+
+    public static Unit getTankTarget(SiegeTank t, Set<Unit> tankTargets) {
+        Unit chosenTarget = null;
+        int highPriority = 0;
+        int closestDist = Integer.MAX_VALUE;
+        for (Unit target : tankTargets) {
+            int distance = t.getDistance(target);
+            int priority = getRangedAttackPriority(t, (PlayerUnit) target);
+            if (chosenTarget == null || (priority > highPriority) || (priority == highPriority && distance < closestDist)) {
+                closestDist = distance;
+                highPriority = priority;
+                chosenTarget = target;
+            }
+        }
+        return chosenTarget;
+    }
+
+    // Credits to SH
+    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies, Position pos) {
+        int bestScore = -999999;
+        Unit bestTarget = null;
+        for (Unit enemy : enemies) {
+            PlayerUnit target = (PlayerUnit) enemy;
+            int priority = getRangedAttackPriority(rangedUnit, target);
+            int range = rangedUnit.getDistance(target);
+            double closerToGoal = rangedUnit.getDistance(pos) - target.getDistance(pos);
+            if (range >= 13 * 32) continue;
+            int score = 5 * 32 * priority - range;
+            if (closerToGoal > 0) score += 2 * 32;
+            boolean isThreat = canAttack(target, rangedUnit);
+            boolean canShootBack = isThreat && range <= 32 + getAttackRange((Attacker) target, rangedUnit);
+            if (isThreat) {
+                if (canShootBack) score += 7 * 32;
+                else {
+                    double weaponDist = getWeapon(target, rangedUnit).maxRange();
+                    if (range < weaponDist) score += 6 * 32;
+                    else score += 5 * 32;
+                }
+            } else if (enemy instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
+                if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
+                        target.getOrder() == Order.Unsieging ||
+                        (target instanceof Burrowable && ((Burrowable) target).isBurrowed())) {
+                    score += 48;
+                } else score += 24;
+            } else if (enemy instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
+            else if (target.getPlayer().getUnitStatCalculator().topSpeed(target.getType()) >= rangedUnit.getPlayer().getUnitStatCalculator().topSpeed(rangedUnit.getType())) {
+                score -= 4 * 32;
+            }
+            if (target.getType().getRace() == Race.Protoss && target.getShields() <= 5) score += 32;
+            if (target.getHitPoints() < target.getType().maxHitPoints()) score += 24;
+            DamageType damage = getWeapon(rangedUnit, target).damageType();
+            if (damage == DamageType.Explosive) {
+                if (target.getType().size() == UnitSizeType.Large) score += 32;
+
+            } else if (damage == DamageType.Concussive) {
+                if (target.getType().size() == UnitSizeType.Small) score += 32;
+                else if (target.getType().size() == UnitSizeType.Large) score -= 32;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestTarget = target;
+            }
+        }
+        return bestScore > 0 ? bestTarget : null;
+    }
+
+    // Credits to SH
+    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies) {
+        int bestScore = -999999;
+        Unit bestTarget = null;
+        for (Unit enemy : enemies) {
+            PlayerUnit target = (PlayerUnit) enemy;
+            int priority = getRangedAttackPriority(rangedUnit, target);
+            int range = rangedUnit.getDistance(target);
+            if (range >= 13 * 32) continue;
+            int score = 5 * 32 * priority - range;
+            boolean isThreat = canAttack(target, rangedUnit);
+            boolean canShootBack = isThreat && range <= 32 + getAttackRange((Attacker) target, rangedUnit);
+            if (isThreat) {
+                if (canShootBack) score += 7 * 32;
+                else {
+                    double weaponDist = getWeapon(target, rangedUnit).maxRange();
+                    if (range < weaponDist) score += 6 * 32;
+                    else score += 5 * 32;
+                }
+            } else if (enemy instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
+                if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
+                        target.getOrder() == Order.Unsieging ||
+                        (target instanceof Burrowable && ((Burrowable) target).isBurrowed())) {
+                    score += 48;
+                } else score += 24;
+            } else if (enemy instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
+            else if (target.getPlayer().getUnitStatCalculator().topSpeed(target.getType()) >= rangedUnit.getPlayer().getUnitStatCalculator().topSpeed(rangedUnit.getType())) {
+                score -= 4 * 32;
+            }
+            if (target.getType().getRace() == Race.Protoss && target.getShields() <= 5) score += 32;
+            if (target.getHitPoints() < target.getType().maxHitPoints()) score += 24;
+            DamageType damage = getWeapon(rangedUnit, target).damageType();
+            if (damage == DamageType.Explosive) {
+                if (target.getType().size() == UnitSizeType.Large) score += 32;
+
+            } else if (damage == DamageType.Concussive) {
+                if (target.getType().size() == UnitSizeType.Small) score += 32;
+                else if (target.getType().size() == UnitSizeType.Large) score -= 32;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestTarget = target;
+            }
+        }
+        return bestScore > 0 ? bestTarget : null;
+    }
+
+    // Credits to SH
+    private static int getRangedAttackPriority(MobileUnit rangedUnit, PlayerUnit target) {
+        UnitType rangedType = rangedUnit.getType();
+        UnitType targetType = target.getType();
+        if (targetType == UnitType.Terran_Ghost && target.getOrder() == Order.NukePaint || target.getOrder() == Order.NukeTrack) {
+            return 15;
+        }
+        if (rangedType.isFlyer()) {
+            if (targetType == UnitType.Zerg_Scourge) return 12;
+        } else if (targetType == UnitType.Terran_Vulture_Spider_Mine && !((SpiderMine) target).isBurrowed() ||
+                targetType == UnitType.Zerg_Infested_Terran) {
+            return 12;
+        }
+        if (rangedType == UnitType.Terran_Wraith) {
+            if (targetType.isFlyer()) return 11;
+        } else if (rangedType == UnitType.Terran_Goliath && targetType.isFlyer()) return 10;
+        if (rangedType.isFlyer() && target instanceof SiegeTank) return 10;
+        if (targetType == UnitType.Protoss_High_Templar || targetType == UnitType.Zerg_Defiler) return 12;
+        if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
+        if (targetType == UnitType.Terran_Bunker) return 9;
+        if (canAttack(target, rangedUnit) && !targetType.isWorker()) {
+            if (rangedUnit.getDistance(target) > 48 + getAttackRange((Attacker) target, rangedUnit)) return 8;
+            return 10;
+        }
+        if (targetType == UnitType.Terran_Dropship || targetType == UnitType.Protoss_Shuttle) return 10;
+        if (targetType == UnitType.Terran_Science_Vessel || targetType == UnitType.Zerg_Scourge || targetType == UnitType.Protoss_Observer) {
+            return 10;
+        }
+        if (targetType.isWorker()) {
+            if (rangedType == UnitType.Terran_Vulture) return 11;
+            // Repairing or blocking a choke makes you critical.
+            if (target instanceof SCV) {
+                if (((SCV) target).isRepairing()) return 11;
+                if (((SCV) target).isConstructing()) return 10;
+            }
+            return 9;
+        }
+        if (targetType == UnitType.Protoss_Carrier || targetType == UnitType.Terran_Siege_Tank_Tank_Mode ||
+                targetType == UnitType.Terran_Siege_Tank_Siege_Mode) {
+            return 8;
+        }
+        if (targetType.isSpellcaster() || targetType.groundWeapon() != WeaponType.None || targetType.airWeapon() != WeaponType.None) {
+            return 7;
+        }
+        if (targetType == UnitType.Protoss_Templar_Archives) return 7;
+        if (targetType == UnitType.Zerg_Spawning_Pool) return 7;
+        if (targetType.isResourceDepot()) return 6;
+        if (targetType == UnitType.Protoss_Pylon) return 5;
+        if (targetType == UnitType.Terran_Factory || targetType == UnitType.Terran_Armory) return 5;
+        if (targetType.isBuilding() && (!target.isCompleted() || !target.isPowered()) && !(targetType.isResourceDepot()
+                || targetType.groundWeapon() != WeaponType.None || targetType.airWeapon() != WeaponType.None)) {
+            return 2;
+        }
+        if (targetType.gasPrice() > 0) return 4;
+        if (targetType.mineralPrice() > 0) return 3;
+        return 1;
+    }
+
+    // Credits to SH
+    private static int getAttackRange(Attacker attacker, MobileUnit target) {
+        UnitType attackerType = attacker.getType();
+        if (attackerType == UnitType.Protoss_Reaver && !target.isFlying()) return 8 * 32;
+        if (attackerType == UnitType.Protoss_Carrier) return 8 * 32;
+        if (attackerType == UnitType.Terran_Bunker) {
+            return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(WeaponType.Gauss_Rifle);
+        }
+        WeaponType weapon = getWeapon(attacker, target);
+        if (weapon == WeaponType.None) return 0;
+        return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(weapon);
     }
 }

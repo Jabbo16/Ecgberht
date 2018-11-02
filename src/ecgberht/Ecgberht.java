@@ -694,7 +694,7 @@ public class Ecgberht implements BWEventListener {
                 first = true;
             }
             if (!type.isNeutral() && (!type.isSpecialBuilding() || type.isRefinery())) {
-                if (arg0 instanceof PlayerUnit && Util.isEnemy(((PlayerUnit) arg0).getPlayer())) {
+                if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
                     if (type.isBuilding()) {
@@ -876,12 +876,15 @@ public class Ecgberht implements BWEventListener {
     public void onUnitMorph(Unit arg0) {
         try {
             UnitType type = arg0.getType();
-            if (arg0 instanceof PlayerUnit && Util.isEnemy(((PlayerUnit) arg0).getPlayer())
-                    && arg0 instanceof Building
-                    && !(arg0 instanceof GasMiningFacility) && !gs.enemyBuildingMemory.containsKey(arg0)) {
-                gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
+            if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
+                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
+                    gs.enemyCombatUnitMemory.add(arg0);
+                } else if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility) && !gs.enemyBuildingMemory.containsKey(arg0)) {
+                    gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
+                }
             }
-            if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
+
+            if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().equals(self)) {
                 for (Entry<GasMiningFacility, Integer> r : gs.refineriesAssigned.entrySet()) {
                     if (r.getKey().getTilePosition().equals(arg0.getTilePosition())) {
                         gs.map.updateMap(arg0.getTilePosition(), type, false);

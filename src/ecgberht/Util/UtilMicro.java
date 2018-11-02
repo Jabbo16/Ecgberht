@@ -13,7 +13,9 @@ import static ecgberht.Ecgberht.getGs;
 public class UtilMicro {
 
     public static void attack(MobileUnit attacker, Position pos) {
-        if (pos == null || attacker == null || !attacker.exists() || attacker.isAttackFrame()) return;
+        if (pos == null || attacker == null || !attacker.exists() || attacker.isAttackFrame() || attacker.isStartingAttack())
+            return;
+        if (getGs().frameCount == attacker.getLastCommandFrame()) return;
         Position targetPos = attacker.getTargetPosition();
         if (pos.equals(targetPos)) return;
         if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
@@ -24,6 +26,7 @@ public class UtilMicro {
     public static void attack(Attacker attacker, Unit target) {
         if (attacker == null || target == null || !attacker.exists() || !target.exists() || attacker.isAttackFrame())
             return;
+        if (getGs().frameCount == attacker.getLastCommandFrame()) return;
         Unit targetUnit = attacker.getTargetUnit();
         if (target.equals(targetUnit)) return;
         attacker.attack(target);
@@ -68,9 +71,7 @@ public class UtilMicro {
     // Credits to @Yegers for a better kite method
     public static Position kiteAway(final Unit unit, final Set<Unit> enemies) {
         try {
-            if (enemies.isEmpty()) {
-                return null;
-            }
+            if (enemies.isEmpty()) return null;
             Position ownPosition = unit.getPosition();
             List<MutablePair<Double, Double>> vectors = new ArrayList<>();
 
@@ -100,5 +101,32 @@ public class UtilMicro {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static void heal(Medic u, PlayerUnit heal) {
+        if (u == null || heal == null || u.getLastCommandFrame() == getGs().frameCount) return;
+        Unit targetUnit = u.getTargetUnit();
+        if (heal.equals(targetUnit)) return;
+        u.heal(heal);
+    }
+
+    public static void heal(Medic u, Position heal) {
+        if (u == null || heal == null || !getGs().bw.getBWMap().isValidPosition(heal)) return;
+        if (u.getLastCommandFrame() == getGs().frameCount) return;
+        Position targetPos = u.getTargetPosition();
+        if (heal.equals(targetPos)) return;
+        u.heal(heal);
+    }
+
+    public static void stop(MobileUnit u) {
+        if (getGs().frameCount == u.getLastCommandFrame()) return;
+        if (u.getOrder() == Order.Stop) return;
+        u.stop(false);
+    }
+
+    public static Position predictUnitPosition(Unit unit, int frames) {
+        if (unit == null || !unit.exists() || !unit.isVisible()) return null;
+        if (!(unit instanceof MobileUnit)) return unit.getPosition();
+        return unit.getPosition().add(new Position((int) (frames * ((MobileUnit) unit).getVelocityX()), (int) (frames * ((MobileUnit) unit).getVelocityY())));
     }
 }

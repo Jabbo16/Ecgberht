@@ -98,10 +98,10 @@ public class WorkerScoutAgent extends Agent {
                 }
                 return;
             }
-            if(mySim.enemies.size() == 1){
+            if (mySim.enemies.size() == 1) {
                 Unit closest = mySim.enemies.iterator().next();
                 Area enemyArea = getGs().bwem.getMap().getArea(closest.getTilePosition());
-                if(closest instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)){
+                if (closest instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
                     if (mySim.lose) {
                         unit.haltConstruction();
                         stoppedDisrupting = true;

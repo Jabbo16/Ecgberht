@@ -301,8 +301,6 @@ public class IntelligenceAgency {
                     amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
                     goliaths += amount != null ? (amount * 3) : 0;
                     break;
-                case Unknown:
-                    break;
             }
             getGs().maxGoliaths = goliaths;
         }
