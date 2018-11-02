@@ -81,7 +81,7 @@ public class CheckPerimeter extends Conditional {
                             break;
                         }
                     }
-                    if (!this.handler.strat.name.equals("ProxyBBS") && !this.handler.strat.name.equals("EightRax")) {
+                    if (!this.handler.strat.name.equals("ProxyBBS") && !this.handler.strat.name.equals("ProxyEightRax")) {
                         for (Unit c : this.handler.MBs) {
                             if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 this.handler.enemyInBase.add(u);

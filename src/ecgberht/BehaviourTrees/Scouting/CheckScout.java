@@ -21,7 +21,7 @@ public class CheckScout extends Conditional {
                 if (this.handler.sqManager.squads.isEmpty()) return State.FAILURE;
                 return State.SUCCESS;
             }
-            if ((strat.equals("ProxyBBS") || strat.equals("EightRax")) && this.handler.mapSize == 2) {
+            if ((strat.equals("ProxyBBS") || strat.equals("ProxyEightRax")) && this.handler.mapSize == 2) {
                 for (Base b : this.handler.SLs) {
                     if (this.handler.mainCC != null && b.equals(this.handler.mainCC.first)) continue;
                     this.handler.enemyMainBase = b;

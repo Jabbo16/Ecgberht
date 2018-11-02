@@ -32,7 +32,7 @@ public class TrainUnit extends Action {
                     return State.SUCCESS;
                 }
             }
-            if (this.handler.strat.name.equals("EightRax")) {
+            if (this.handler.strat.name.equals("ProxyEightRax")) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == 0 &&
                         this.handler.supplyMan.getSupplyUsed() >= 16) {
                     this.handler.chosenBuilding = null;

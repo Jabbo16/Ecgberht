@@ -34,7 +34,7 @@ public class ChooseBarracks extends Action {
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
                 return State.FAILURE;
             }
-            if (!this.handler.strat.name.equals("ProxyBBS") && !this.handler.strat.name.equals("EightRax")) {
+            if (!this.handler.strat.name.equals("ProxyBBS") && !this.handler.strat.name.equals("ProxyEightRax")) {
                 if (!this.handler.MBs.isEmpty() && Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;
                 }

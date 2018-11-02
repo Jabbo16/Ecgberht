@@ -20,7 +20,7 @@ public class ChooseExpand extends Action {
     public State execute() {
         try {
             String strat = this.handler.strat.name;
-            if (strat.equals("ProxyBBS") || strat.equals("EightRax")) return State.FAILURE;
+            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax")) return State.FAILURE;
             for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
                 if (w.first == UnitType.Terran_Command_Center) return State.FAILURE;
             }

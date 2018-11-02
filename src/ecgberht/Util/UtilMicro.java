@@ -80,7 +80,7 @@ public class UtilMicro {
                 final Position enemyPosition = enemy.getPosition();
                 Position sub = ownPosition.subtract(enemyPosition);
                 MutablePair<Double, Double> unitV = new MutablePair<>((double) sub.getX(), (double) sub.getY());
-                final double distance = enemy.getDistance(unit);
+                //final double distance = enemy.getDistance(unit);
                 /*if (distance < minDistance) {
                     minDistance = distance;
                 }*/

@@ -22,7 +22,7 @@ public class ChooseSCV extends Action {
     public State execute() {
         try {
             String strat = this.handler.strat.name;
-            if (strat.equals("ProxyBBS") || strat.equals("EightRax")) {
+            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax")) {
                 boolean notTraining = false;
                 for (Barracks b : this.handler.MBs) {
                     if (!b.isTraining()) {

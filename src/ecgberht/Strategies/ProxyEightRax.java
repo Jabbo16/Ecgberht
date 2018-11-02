@@ -4,16 +4,16 @@ import ecgberht.Strategy;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class EightRax extends Strategy {
+public class ProxyEightRax extends Strategy {
 
-    public EightRax() {
+    public ProxyEightRax() {
         super();
         initStrategy();
     }
 
     @Override
     public void initStrategy() {
-        name = "EightRax";
+        name = "ProxyEightRax";
         armyForBay = 0;
         armyForTurret = 0;
         numBays = 0;
@@ -21,7 +21,7 @@ public class EightRax extends Strategy {
         facPerCC = 0;
         numRaxForFac = 0;
         bunker = false;
-        proxy = false;
+        proxy = true;
         supplyForFirstRefinery = 400;
         armyForAttack = 7;
         armyForExpand = 100;
@@ -60,6 +60,6 @@ public class EightRax extends Strategy {
 
     @Override
     public boolean requiredUnitsForAttack() {
-        return Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4;
+        return Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 3;
     }
 }

@@ -184,7 +184,7 @@ public class GameState {
             MechGreedyFE mGFE = new MechGreedyFE();
             BioMechGreedyFE bMGFE = new BioMechGreedyFE();
             TwoPortWraith tPW = new TwoPortWraith();
-            EightRax eR = new EightRax();
+            ProxyEightRax pER = new ProxyEightRax();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
@@ -192,7 +192,7 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            //if (true) return tPW; // TEST ONLY
+            //if (true) return pER; // TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
@@ -220,8 +220,8 @@ public class GameState {
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMGFE.name, bGFE);
 
-                    strategies.put(eR.name, new MutablePair<>(0, 0));
-                    nameStrat.put(eR.name, eR);
+                    strategies.put(pER.name, new MutablePair<>(0, 0));
+                    nameStrat.put(pER.name, pER);
 
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
@@ -250,8 +250,8 @@ public class GameState {
                     strategies.put(bbs.name, new MutablePair<>(0, 0));
                     nameStrat.put(bbs.name, bbs);
 
-                    strategies.put(eR.name, new MutablePair<>(0, 0));
-                    nameStrat.put(eR.name, eR);
+                    strategies.put(pER.name, new MutablePair<>(0, 0));
+                    nameStrat.put(pER.name, pER);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(mGFE.name, bGFE);
@@ -285,8 +285,8 @@ public class GameState {
                     strategies.put(bGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bGFE.name, bGFE);
 
-                    strategies.put(eR.name, new MutablePair<>(0, 0));
-                    nameStrat.put(eR.name, eR);
+                    strategies.put(pER.name, new MutablePair<>(0, 0));
+                    nameStrat.put(pER.name, pER);
 
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);
@@ -500,7 +500,7 @@ public class GameState {
         for (Geyser g : gas) vespeneGeysers.put((VespeneGeyser) g.getUnit(), false);
         if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
-        } else if (strat.name.equals("EightRax")) {
+        } else if (strat.name.equals("ProxyEightRax")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
@@ -545,7 +545,7 @@ public class GameState {
         for (Unit u : auxGas) refineriesAssigned.remove(u);
         if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
-        } else if (strat.name.equals("EightRax")) {
+        } else if (strat.name.equals("ProxyEightRax")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
@@ -1000,7 +1000,7 @@ public class GameState {
                 }
                 for (Unit u : aux) workerMining.remove(u);
             }
-        } else if (MBs.size() == rax && getArmySize() >= 4) {
+        } else if (MBs.size() == rax) {
             List<Unit> aux = new ArrayList<>();
             int count = workerMining.size();
             for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
@@ -1123,13 +1123,11 @@ public class GameState {
     }
 
     void alwaysPools() {
-        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll"));
+        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish"));
         LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-        if (enemyRace == Race.Zerg) {
-            if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
-                EI.naughty = true;
-                return;
-            }
+        if (enemyRace == Race.Zerg && poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
+            EI.naughty = true;
+            return;
         }
         EI.naughty = false;
     }
@@ -1173,23 +1171,23 @@ public class GameState {
     }
 
     public boolean needToAttack() {
-        if ((strat.name.equals("ProxyBBS") || strat.name.equals("EightRax")) && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
+        if ((strat.name.equals("ProxyBBS") || strat.name.equals("ProxyEightRax")) && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
             return true;
         return getArmySize() >= strat.armyForAttack * 0.85 && requiredUnitsForAttack();
     }
 
     void updateAttack() {
         try {
-            if (sqManager.squads.isEmpty() || (defense && !strat.name.equals("ProxyBBS") && !strat.name.equals("EightRax")))
+            if (sqManager.squads.isEmpty() || (defense && !strat.name.equals("ProxyBBS") && !strat.name.equals("ProxyEightRax")))
                 return;
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && !checkItWasAttacking(u))
+                if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && (strat.proxy || !checkItWasAttacking(u)))
                     continue;
                 Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
                 if (attackPos != null) {
-                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("EightRax"))) {
+                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
                         getIH().sendText("Get ready for the show!");
                     }
@@ -1198,7 +1196,7 @@ public class GameState {
                         u.status = Squad.Status.ATTACK;
                     }
                 } else if (enemyMainBase != null) {
-                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("EightRax"))) {
+                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
                         getIH().sendText("Get ready for the show!");
                     }

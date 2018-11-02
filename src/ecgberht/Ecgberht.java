@@ -456,7 +456,7 @@ public class Ecgberht implements BWEventListener {
             botherTree.run();
             scannerTree.run();
             if (gs.strat.name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
-            else if (gs.strat.name.equals("EightRax")) gs.checkWorkerMilitia(1);
+            else if (gs.strat.name.equals("ProxyEightRax")) gs.checkWorkerMilitia(1);
             defenseTree.run();
             gs.updateAttack();
             gs.runAgents();
@@ -647,7 +647,7 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         gs.myArmy.add(arg0);
                         if (!gs.strat.name.equals("ProxyBBS")) {
-                            if (!gs.strat.name.equals("EightRax") && (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg)) {
+                            if (!gs.strat.name.equals("ProxyEightRax") && (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg)) {
                                 if (!gs.DBs.isEmpty()) {
                                     ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
                                 } else if (gs.mainChoke != null) {
@@ -704,7 +704,7 @@ public class Ecgberht implements BWEventListener {
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("EightRax"))
+                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("ProxyEightRax"))
                             gs.myArmy.remove(arg0);
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
