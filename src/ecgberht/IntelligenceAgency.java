@@ -2,10 +2,7 @@ package ecgberht;
 
 import bwem.Base;
 import bwem.unit.Mineral;
-import ecgberht.Strategies.FullBio;
-import ecgberht.Strategies.FullBioFE;
-import ecgberht.Strategies.FullMech;
-import ecgberht.Strategies.MechGreedyFE;
+import ecgberht.Strategies.*;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.type.Race;
@@ -257,9 +254,34 @@ public class IntelligenceAgency {
                 break;
             case Protoss:
                 if (detectZealotRush()) return;
-                //if (detectCannonRush()) return;
+                if (detectProtossFE()) return;
+                if (detectCannonRush()) return;
                 break;
         }
+    }
+
+    private static boolean detectProtossFE() {
+        if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
+            int probes = IntelligenceAgency.getNumEnemyWorkers();
+            if (getNumEnemyBases(mainEnemy) > 1 && probes <= 16){
+                enemyStrat = EnemyStrats.ProtossFE;
+                getGs().ih.sendText("Nice FE");
+                String strat = getGs().strat.name;
+                if(strat.equals("FullBio") || strat.equals("FullBioFE")){
+                    getGs().strat = new BioGreedyFE();
+                }
+                if(strat.equals("BioMech") || strat.equals("BioMechFE")){
+                    getGs().strat = new BioMechGreedyFE();
+                }
+                if(strat.equals("FullMech")){
+                    getGs().strat = new MechGreedyFE();
+                }
+                getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+                Ecgberht.transition();
+                return true;
+            }
+        }
+        return false;
     }
 
     static void onFrame() {
@@ -382,5 +404,5 @@ public class IntelligenceAgency {
         return timeCheck && raceCheck;
     }
 
-    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, MechRush}
+    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, MechRush}
 }

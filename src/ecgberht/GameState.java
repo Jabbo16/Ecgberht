@@ -197,6 +197,23 @@ public class GameState {
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
             }
+            int totalGamesPlayed = EI.wins + EI.losses;
+            if (totalGamesPlayed < 1) {
+                ih.sendText("I dont know you that well yet, lets pick the standard strategy");
+                switch (enemyRace) {
+                    case Zerg:
+                        return bGFE;
+                    case Terran:
+                        return FM;
+                    case Protoss:
+                        return bMFE;
+                    case Random:
+                        return b;
+                    case Unknown:
+                        return b;
+                }
+                return b;
+            }
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
@@ -205,29 +222,26 @@ public class GameState {
                     strategies.put(bFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bFE.name, bFE);
 
-                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bGFE.name, bGFE);
-
                     strategies.put(tPW.name, new MutablePair<>(0, 0));
                     nameStrat.put(tPW.name, tPW);
 
-                    strategies.put(bM.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bM.name, bM);
+                    strategies.put(bGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bGFE.name, bGFE);
 
                     strategies.put(bbs.name, new MutablePair<>(0, 0));
                     nameStrat.put(bbs.name, bbs);
 
-                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bMGFE.name, bGFE);
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
 
-                    strategies.put(pER.name, new MutablePair<>(0, 0));
-                    nameStrat.put(pER.name, pER);
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bMGFE);
 
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(mGFE.name, bGFE);
+                    nameStrat.put(mGFE.name, mGFE);
 
                     strategies.put(b.name, new MutablePair<>(0, 0));
                     nameStrat.put(b.name, b);
@@ -238,26 +252,26 @@ public class GameState {
                     break;
 
                 case Terran:
-                    strategies.put(bFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bFE.name, bFE);
-
-                    strategies.put(bM.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bM.name, bM);
-
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
 
-                    strategies.put(bbs.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bbs.name, bbs);
+                    strategies.put(bM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bM.name, bM);
 
                     strategies.put(pER.name, new MutablePair<>(0, 0));
                     nameStrat.put(pER.name, pER);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(mGFE.name, bGFE);
+                    nameStrat.put(mGFE.name, mGFE);
+
+                    strategies.put(bFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bFE.name, bFE);
+
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
 
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bMGFE.name, bGFE);
+                    nameStrat.put(bMGFE.name, bMGFE);
 
                     strategies.put(bGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bGFE.name, bGFE);
@@ -270,14 +284,14 @@ public class GameState {
                     break;
 
                 case Protoss:
+                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bMGFE.name, bMGFE);
+
                     strategies.put(bM.name, new MutablePair<>(0, 0));
                     nameStrat.put(bM.name, bM);
 
                     strategies.put(b.name, new MutablePair<>(0, 0));
                     nameStrat.put(b.name, b);
-
-                    strategies.put(bMGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bMGFE.name, bGFE);
 
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
@@ -292,11 +306,12 @@ public class GameState {
                     nameStrat.put(bMFE.name, bMFE);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(mGFE.name, bGFE);
+                    nameStrat.put(mGFE.name, mGFE);
 
                     strategies.put(bFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bFE.name, bFE);
                     break;
+
                 case Unknown:
                     strategies.put(b.name, new MutablePair<>(0, 0));
                     nameStrat.put(b.name, b);
@@ -308,7 +323,7 @@ public class GameState {
                     nameStrat.put(bGFE.name, bGFE);
 
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bMGFE.name, bGFE);
+                    nameStrat.put(bMGFE.name, bMGFE);
 
                     strategies.put(FM.name, new MutablePair<>(0, 0));
                     nameStrat.put(FM.name, FM);
@@ -317,7 +332,7 @@ public class GameState {
                     nameStrat.put(bbs.name, bbs);
 
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
-                    nameStrat.put(mGFE.name, bGFE);
+                    nameStrat.put(mGFE.name, mGFE);
 
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);
@@ -331,23 +346,6 @@ public class GameState {
                 return nameStrat.get(forcedStrat);
             }
 
-            int totalGamesPlayed = EI.wins + EI.losses;
-            if (totalGamesPlayed < 1) {
-                ih.sendText("I dont know you that well yet, lets pick the standard strategy");
-                switch (enemyRace) {
-                    case Zerg:
-                        return bFE;
-                    case Terran:
-                        return FM;
-                    case Protoss:
-                        return bM;
-                    case Random:
-                        return b;
-                    case Unknown:
-                        return b;
-                }
-                return b;
-            }
             for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
                 if (strategies.containsKey(r.strategyName)) {
                     strategies.get(r.strategyName).first += r.wins;
