@@ -497,10 +497,15 @@ public class SimManager {
      * @return True if the unit is not getting attacked and far from the fight
      */
     public boolean farFromFight(Unit u, SimInfo s) { // TODO test
+        if (u == null || !u.exists()) return true;
         if (!s.allies.contains(u) || s.enemies.isEmpty()) return true;
         WeaponType weapon = Util.getWeapon(u.getType());
         int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
-        return !((PlayerUnit) u).isUnderAttack() && u.getDistance(Util.getClosestUnit(u, s.enemies)) > range * 1.5;
+        Unit closest = Util.getClosestUnit(u, s.enemies);
+        if (closest != null) {
+            return !((PlayerUnit) u).isUnderAttack() && u.getDistance(closest) > range * 1.5;
+        }
+        return true;
     }
 
     public SimInfo getSimulation(Cluster c) {

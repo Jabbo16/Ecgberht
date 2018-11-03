@@ -263,17 +263,17 @@ public class IntelligenceAgency {
     private static boolean detectProtossFE() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
             int probes = IntelligenceAgency.getNumEnemyWorkers();
-            if (getNumEnemyBases(mainEnemy) > 1 && probes <= 16){
+            if (getNumEnemyBases(mainEnemy) > 1 && probes <= 16) {
                 enemyStrat = EnemyStrats.ProtossFE;
                 getGs().ih.sendText("Nice FE");
                 String strat = getGs().strat.name;
-                if(strat.equals("FullBio") || strat.equals("FullBioFE")){
+                if (strat.equals("FullBio") || strat.equals("FullBioFE")) {
                     getGs().strat = new BioGreedyFE();
                 }
-                if(strat.equals("BioMech") || strat.equals("BioMechFE")){
+                if (strat.equals("BioMech") || strat.equals("BioMechFE")) {
                     getGs().strat = new BioMechGreedyFE();
                 }
-                if(strat.equals("FullMech")){
+                if (strat.equals("FullMech")) {
                     getGs().strat = new MechGreedyFE();
                 }
                 getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();

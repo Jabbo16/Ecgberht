@@ -192,7 +192,7 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            //if (true) return pER; // TEST ONLY
+            //if (true) return FM; // TEST ONLY
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
@@ -287,20 +287,20 @@ public class GameState {
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMGFE.name, bMGFE);
 
+                    strategies.put(FM.name, new MutablePair<>(0, 0));
+                    nameStrat.put(FM.name, FM);
+
                     strategies.put(bM.name, new MutablePair<>(0, 0));
                     nameStrat.put(bM.name, bM);
+
+                    strategies.put(pER.name, new MutablePair<>(0, 0));
+                    nameStrat.put(pER.name, pER);
 
                     strategies.put(b.name, new MutablePair<>(0, 0));
                     nameStrat.put(b.name, b);
 
-                    strategies.put(FM.name, new MutablePair<>(0, 0));
-                    nameStrat.put(FM.name, FM);
-
                     strategies.put(bGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bGFE.name, bGFE);
-
-                    strategies.put(pER.name, new MutablePair<>(0, 0));
-                    nameStrat.put(pER.name, pER);
 
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);

@@ -129,4 +129,39 @@ public class UtilMicro {
         if (!(unit instanceof MobileUnit)) return unit.getPosition();
         return unit.getPosition().add(new Position((int) (frames * ((MobileUnit) unit).getVelocityX()), (int) (frames * ((MobileUnit) unit).getVelocityY())));
     }
+
+    private static boolean verifyPosition(Position position) {
+        if (!getGs().getGame().getBWMap().isValidPosition(position)) return false;
+        if (getGs().map.getMap()[position.getY() / 32][position.getX() / 32].equals("0")) return false;
+        return getGs().getGame().getBWMap().isWalkable(position.toWalkPosition());
+    }
+
+    // Based on @Locutus micro logic, credits to him.
+    public static Position kiteAwayAlt(Position unitPos, Position fleePos) {
+        Position delta = fleePos.subtract(unitPos);
+        double angleToTarget = Math.atan2(delta.getY(), delta.getX());
+        Position bestPosition = null;
+        boolean shouldBreak = false;
+        for (int i = 0; i <= 3; i++) {
+            if (shouldBreak) break;
+            for (int sign = -1; i == 0 ? sign == -1 : sign <= 1; sign += 2) {
+                double a = angleToTarget + (i * sign * Math.PI / 6);
+                Position position = new Position(unitPos.getX() - (int) Math.round(64.0 * Math.cos(a)),
+                        unitPos.getY() - (int) Math.round(64.0 * Math.sin(a)));
+                if (!verifyPosition(position) || !verifyPosition(position.add(new Position(-16, -16))) ||
+                        !verifyPosition(position.add(new Position(16, -16))) ||
+                        !verifyPosition(position.add(new Position(16, 16))) ||
+                        !verifyPosition(position.add(new Position(-16, 16)))) {
+                    continue;
+                }
+                bestPosition = position;
+                shouldBreak = true;
+            }
+        }
+        if (bestPosition != null && getGs().getGame().getBWMap().isValidPosition(bestPosition)) {
+            return bestPosition;
+        }
+        return null;
+    }
+
 }

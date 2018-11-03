@@ -30,13 +30,13 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             if (!unit.exists()) return true;
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
-            mainTargets.clear();
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
             Position attack = getBestBaseToHarass();
             AirAttacker closestThreat = null;
             double bestDist = Double.MAX_VALUE;
             airAttackers = getGs().sim.getSimulation(unit, SimInfo.SimType.AIR).enemies;
+            Set<Unit> closeEnemies = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies;
             Iterator<Unit> it = airAttackers.iterator();
             while (it.hasNext()) {
                 Unit u = it.next();
@@ -48,8 +48,8 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 }
                 if (dist > hisAirWeaponRange) it.remove();
             }
-            mainTargets = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies;
-            Unit harassed = chooseHarassTarget();
+            Set<Unit> mainTargets = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies;
+            Unit harassed = chooseHarassTarget(mainTargets);
             if (airAttackers.isEmpty()) {
                 if (closestThreat != null) {
                     Weapon myWeapon = closestThreat.isFlying() ? unit.getAirWeapon() : unit.getGroundWeapon();
@@ -98,7 +98,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         return Util.chooseAttackPosition(unit.getPosition(), true);
     }
 
-    private Unit chooseHarassTarget() {
+    private Unit chooseHarassTarget(Set<Unit> mainTargets) {
         Unit chosen = null;
         double maxScore = Double.MIN_VALUE;
         for (Unit u : mainTargets) {

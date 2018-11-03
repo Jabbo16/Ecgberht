@@ -247,14 +247,15 @@ public class WorkerScoutAgent extends Agent {
             sortedVertices = temp;
         }
         enemyBaseBorders = sortedVertices;
-        double bestDist = 1000000;
+        /*double bestDist = 1000000;
         for (int i = 0; i < sortedVertices.size(); i++) {
             double dist = sortedVertices.get(i).getDistance(enemyCenter);
             if (dist < bestDist) {
                 bestDist = dist;
                 currentVertex = i;
             }
-        }
+        }*/
+        currentVertex = 0;
         if (!getGs().learningManager.isNaughty()) {
             Base enemyNatural = getGs().enemyNaturalBase;
             if (enemyNatural != null) {

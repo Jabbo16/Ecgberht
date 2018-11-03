@@ -3,9 +3,6 @@ package ecgberht.Agents;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Unit;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 public abstract class Agent {
 
     public Unit myUnit;
@@ -14,8 +11,6 @@ public abstract class Agent {
     Unit attackUnit = null;
     int frameLastOrder = 0;
     int actualFrame = 0;
-    Set<Unit> closeEnemies = new TreeSet<>();
-    Set<Unit> mainTargets = new TreeSet<>();
 
     public String statusToString() {
         if (status == Status.ATTACK) return "Attack";
