@@ -8,6 +8,7 @@ import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
+import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
@@ -139,8 +140,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void retreat() {
         Position CC = getGs().getNearestCC(myUnit.getPosition());
-        if (CC != null) ((MobileUnit) myUnit).move(CC);
-        else ((MobileUnit) myUnit).move(getGs().getPlayer().getStartLocation().toPosition());
+        if (CC != null) UtilMicro.move(unit, CC);
+        else UtilMicro.move(unit, getGs().getPlayer().getStartLocation().toPosition());
         attackPos = null;
         attackUnit = null;
     }
@@ -201,7 +202,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private boolean checkOnlyMelees() {
         for (Unit e : mySim.enemies) {
             int weaponRange = e instanceof GroundAttacker ? ((GroundAttacker) e).getGroundWeaponMaxRange() : 0;
-            if (weaponRange > 32 || e instanceof Bunker) return false;
+            WeaponType weapon = Util.getWeapon(e, unit);
+            if ((weaponRange > 32 || e instanceof Bunker) && e.getDistance(unit) < ((PlayerUnit) e).getPlayer().getUnitStatCalculator().weaponMaxRange(weapon))
+                return false;
         }
         return true;
     }

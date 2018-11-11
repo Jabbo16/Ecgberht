@@ -293,6 +293,7 @@ public class IntelligenceAgency {
     private static void updateMaxAmountTypes() {
         if (getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)) {
             int goliaths = 0;
+            Integer amount;
             switch (getGs().enemyRace) {
                 case Zerg:
                     // Mutas
@@ -300,17 +301,17 @@ public class IntelligenceAgency {
                     Integer greaterSpireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Greater_Spire);
                     if ((spireAmount != null && spireAmount > 0) || (greaterSpireAmount != null && greaterSpireAmount > 0))
                         goliaths += 3;
-                    Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
+                    amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
                     goliaths += (amount != null ? (Math.round(amount / 2.0)) : 0);
                     break;
                 case Terran:
                     // Wraiths
                     amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
-                    goliaths += amount != null ? (amount / 2 + 1) : 0;
+                    goliaths += amount != null ? Math.ceil(amount.doubleValue() / 2.0) : 0;
 
                     // BattleCruisers
                     amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
-                    goliaths += amount != null ? (amount * 4) : 0;
+                    goliaths += amount != null ? (amount * 3) : 0;
                     break;
                 case Protoss:
                     // Scouts!!

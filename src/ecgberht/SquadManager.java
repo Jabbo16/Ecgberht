@@ -35,7 +35,7 @@ public class SquadManager {
     void updateBunkers() {
         for (Map.Entry<Bunker, Set<Unit>> bunker : getGs().DBs.entrySet()) {
             SimInfo bunkerSim = getGs().sim.getSimulation(bunker.getKey(), SimInfo.SimType.MIX);
-            if (!bunkerSim.enemies.isEmpty() && !getGs().learningManager.isNaughty()) {
+            if (!bunkerSim.enemies.isEmpty()) {
                 if (bunker.getValue().size() < 4) {
                     Marine closest = null;
                     double bestDist = Double.MAX_VALUE;

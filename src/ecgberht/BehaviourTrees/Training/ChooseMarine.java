@@ -29,6 +29,8 @@ public class ChooseMarine extends Action {
                         return State.FAILURE;
                     }
                 }
+                if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 6 && !this.handler.defense)
+                    return State.FAILURE;
                 for (Barracks b : this.handler.MBs) {
                     if (!b.isTraining()) {
                         this.handler.chosenUnit = UnitType.Terran_Marine;

@@ -44,8 +44,7 @@ public class TrainUnit extends Action {
                     return State.SUCCESS;
                 }
             }
-            if (this.handler.getSupply() > 4 || this.handler.checkSupply() ||
-                    this.handler.getPlayer().supplyTotal() >= 400) {
+            if (this.handler.getSupply() > 4 || this.handler.checkSupply() || this.handler.getPlayer().supplyTotal() >= 400) {
                 if (!this.handler.defense && this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
                     boolean found = false;
                     for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
@@ -56,7 +55,7 @@ public class TrainUnit extends Action {
                     }
                     if (!found) {
                         this.handler.chosenBuilding = null;
-                        this.handler.chosenToBuild = UnitType.None;
+                        this.handler.chosenUnit = UnitType.None;
                         return State.FAILURE;
                     }
                 }

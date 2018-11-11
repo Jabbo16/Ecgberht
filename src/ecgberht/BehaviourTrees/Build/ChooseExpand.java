@@ -30,7 +30,7 @@ public class ChooseExpand extends Action {
             if (strat.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
                 return State.FAILURE;
             }
-            if (this.handler.iReallyWantToExpand || this.handler.getCash().first >= 500) {
+            if (this.handler.iReallyWantToExpand || this.handler.getCash().first >= 550) {
                 this.handler.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }

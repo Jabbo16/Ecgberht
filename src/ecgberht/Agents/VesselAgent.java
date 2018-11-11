@@ -59,6 +59,32 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                 retreat();
                 return false;
             }
+            switch (status) {
+                case DMATRIX:
+                    if (unit.getEnergy() <= TechType.Defensive_Matrix.energyCost()) {
+                        getGs().wizard.irradiatedUnits.remove(unit);
+                        status = Status.IDLE;
+                        target = null;
+                        oldTarget = null;
+                    }
+                    break;
+                case IRRADIATE:
+                    if (unit.getEnergy() <= TechType.Irradiate.energyCost()) {
+                        getGs().wizard.irradiatedUnits.remove(unit);
+                        status = Status.IDLE;
+                        target = null;
+                        oldTarget = null;
+                    }
+                    break;
+                case EMP:
+                    if (unit.getEnergy() <= TechType.EMP_Shockwave.energyCost()) {
+                        getGs().wizard.EMPedUnits.remove(unit);
+                        status = Status.IDLE;
+                        target = null;
+                        oldTarget = null;
+                    }
+                    break;
+            }
             center = follow.getSquadCenter();
             getNewStatus();
             switch (status) {
@@ -220,7 +246,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                         maxScore = score;
                     }
                 }
-                if (maxScore >= 5.5) {
+                if (maxScore >= 5) {
                     status = Status.IRRADIATE;
                     target = chosen;
                     return;

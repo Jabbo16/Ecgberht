@@ -405,7 +405,7 @@ public class Ecgberht implements BWEventListener {
                 gs.getIH().leaveGame();
             }
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
-            if (gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs)) {
+            if (gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs) && !gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                 gs.strat = new FullMech();
                 transition();
             }
@@ -879,7 +879,10 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
-                } else if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility) && !gs.enemyBuildingMemory.containsKey(arg0)) {
+                } else if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
+                    if (gs.enemyBuildingMemory.containsKey(arg0)) {
+                        gs.enemyBuildingMemory.remove(arg0);
+                    }
                     gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
                 }
             }

@@ -123,7 +123,7 @@ public class SimManager {
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Egg && !Util.isEnemy(((PlayerUnit) u).getPlayer())) continue;
+            if (u instanceof Egg && !((Egg) u).getPlayer().isEnemy()) continue;
             enemyUnits.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
@@ -242,15 +242,11 @@ public class SimManager {
     private MutablePair<Integer, Integer> scores() {
         ToIntFunction<Agent> score = a -> {
             PlayerUnit unit = (PlayerUnit) a.getUserObject();
-            if (unit == null) {
-                return 0;
-            }
+            if (unit == null) return 0;
             UnitType unitType = unit.getType();
             int result = (unitType.destroyScore() * (a.getHealth() * 3 + a.getShields() + 1)) / (
                     (unitType.maxHitPoints() * 3) + unitType.maxShields());
-            if (unitType == UnitType.Terran_Bunker) {
-                result += UnitType.Terran_Marine.destroyScore() * 4;
-            }
+            if (unitType == UnitType.Terran_Bunker) result += UnitType.Terran_Marine.destroyScore() * 4;
             return result;
         };
         return new MutablePair<>(Assmulator.getAgentsA().stream().mapToInt(score).sum(),

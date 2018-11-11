@@ -69,7 +69,7 @@ public class ChooseSituationalUnit extends Action {
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !this.handler.needToAttack())
                 return State.FAILURE;
             String strat = this.handler.strat.name;
-            if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.getNumberCCs() < 3)
+            if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.getNumberCCs() + (int) this.handler.workerTask.values().stream().filter(u -> u instanceof CommandCenter).count() < 3)
                 return State.FAILURE;
             tower = false;
             boolean science = false;

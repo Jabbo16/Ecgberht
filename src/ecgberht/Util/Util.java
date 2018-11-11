@@ -600,7 +600,13 @@ public class Util {
         if (rangedType.isFlyer() && target instanceof SiegeTank) return 10;
         if (targetType == UnitType.Protoss_High_Templar || targetType == UnitType.Zerg_Defiler) return 12;
         if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
-        if (targetType == UnitType.Terran_Bunker) return 9;
+        if (isStaticDefense(target)) {
+            if (canAttack(target, rangedUnit)) {
+                if (target.isCompleted()) return 9;
+                return 10;
+            } else if (target.isCompleted()) return 8;
+            return 7;
+        }
         if (canAttack(target, rangedUnit) && !targetType.isWorker()) {
             if (rangedUnit.getDistance(target) > 48 + getAttackRange((Attacker) target, rangedUnit)) return 8;
             return 10;
@@ -611,7 +617,6 @@ public class Util {
         }
         if (targetType.isWorker()) {
             if (rangedType == UnitType.Terran_Vulture) return 11;
-            // Repairing or blocking a choke makes you critical.
             if (target instanceof SCV) {
                 if (((SCV) target).isRepairing()) return 11;
                 if (((SCV) target).isConstructing()) return 10;
@@ -645,7 +650,7 @@ public class Util {
         if (attackerType == UnitType.Protoss_Reaver && !target.isFlying()) return 8 * 32;
         if (attackerType == UnitType.Protoss_Carrier) return 8 * 32;
         if (attackerType == UnitType.Terran_Bunker) {
-            return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(WeaponType.Gauss_Rifle);
+            return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(WeaponType.Gauss_Rifle) + 32;
         }
         WeaponType weapon = getWeapon(attacker, target);
         if (weapon == WeaponType.None) return 0;
