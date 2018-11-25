@@ -56,11 +56,12 @@ public class GameState {
     public int builtRefinery;
     public int frameCount;
     public int mapSize = 2;
-    public int maxWraiths = 5;
+    public int maxWraiths = 6;
     public int maxBats = 0;
     public int mining;
     public int startCount;
     public int vulturesTrained = 0;
+    public int wraithsTrained = 0;
     public int workerCountToSustain = 0;
     public List<Base> blockedBLs = new ArrayList<>();
     public List<Base> BLs = new ArrayList<>();
@@ -86,7 +87,6 @@ public class GameState {
     public Map<Worker, Position> workerDefenders = new TreeMap<>();
     public MutablePair<Base, Unit> mainCC = null;
     public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
-    public MutablePair<Integer, Unit> chosenMarine = null;
     public Player neutral = null;
     public Position attackPosition;
     public Position defendPosition = null;

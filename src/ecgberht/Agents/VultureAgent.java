@@ -214,8 +214,11 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         Optional<Unit> closestUnit = mySim.enemies.stream().min(Unit::getDistance);
         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.getPosition())).orElse(null);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
-            retreat();
-            return;
+            kite = UtilMicro.kiteAway(unit, mySim.enemies);
+            if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
+                retreat();
+                return;
+            }
         }
         UtilMicro.move(unit, kite);
     }

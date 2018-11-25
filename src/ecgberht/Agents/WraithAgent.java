@@ -50,7 +50,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
             Set<Unit> mainTargets = getGs().sim.getSimulation(unit, SimInfo.SimType.MIX).enemies;
             Unit harassed = chooseHarassTarget(mainTargets);
-            if (airAttackers.isEmpty()) {
+            if (airAttackers.isEmpty()) { // TODO improve this
                 if (closestThreat != null) {
                     Weapon myWeapon = closestThreat.isFlying() ? unit.getAirWeapon() : unit.getGroundWeapon();
                     double hisAirWeaponRange = closestThreat.getAirWeaponMaxRange();

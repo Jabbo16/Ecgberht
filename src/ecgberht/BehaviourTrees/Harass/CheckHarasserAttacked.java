@@ -7,6 +7,7 @@ import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.*;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -45,7 +46,11 @@ public class CheckHarasserAttacked extends Conditional {
                     }
                 }
             }
-            if (workers > 1) this.handler.learningManager.defendHarass();
+            if (workers > 1) {
+                this.handler.learningManager.setHarass(true);
+                this.handler.chosenUnitToHarass = null;
+                return State.FAILURE;
+            }
             if (attackers.isEmpty()) {
                 if (!this.handler.getGame().getBWMap().isVisible(this.handler.enemyMainBase.getLocation()) &&
                         this.handler.chosenUnitToHarass == null) {
@@ -67,10 +72,18 @@ public class CheckHarasserAttacked extends Conditional {
                         this.handler.chosenHarasser = null;
                         this.handler.chosenUnitToHarass = null;
                     } else {
-                        Position kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
-                        if (this.handler.bw.getBWMap().isValidPosition(kite)) {
-                            this.handler.chosenHarasser.move(kite);
+                        //Position kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
+                        Optional<Unit> closestUnit = attackers.stream().min(Unit::getDistance);
+                        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(this.handler.chosenHarasser.getPosition(), unit1.getPosition())).orElse(null);
+                        if (kite != null && this.handler.bw.getBWMap().isValidPosition(kite)) {
+                            UtilMicro.move(this.handler.chosenHarasser, kite);
                             this.handler.chosenUnitToHarass = null;
+                        } else {
+                            kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
+                            if (kite != null && this.handler.bw.getBWMap().isValidPosition(kite)) {
+                                UtilMicro.move(this.handler.chosenHarasser, kite);
+                                this.handler.chosenUnitToHarass = null;
+                            }
                         }
                     }
                     return State.FAILURE;

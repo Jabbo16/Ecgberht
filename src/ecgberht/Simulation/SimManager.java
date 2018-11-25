@@ -127,7 +127,7 @@ public class SimManager {
             enemyUnits.add(u);
         }
         for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (Util.isStaticDefense(u.unit) || u.unit.isVisible()) enemyUnits.add(u.unit);
+            if (Util.isStaticDefense(u.type) || u.unit.isVisible()) enemyUnits.add(u.unit);
         }
         clustering = new MeanShift(enemyUnits, radius);
         enemies = clustering.run(iterations);

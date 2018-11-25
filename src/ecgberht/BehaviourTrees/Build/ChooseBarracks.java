@@ -56,6 +56,9 @@ public class ChooseBarracks extends Action {
                 if (!this.handler.Fs.isEmpty()) found = true;
                 if (count + this.handler.MBs.size() > this.handler.strat.numRaxForFac && !found) return State.FAILURE;
             }
+            if (Util.countBuildingAll(UnitType.Terran_Academy) == 0 && Util.countBuildingAll(UnitType.Terran_Barracks) >= 2) {
+                return State.FAILURE;
+            }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) == this.handler.MBs.size()
                     && this.handler.getPlayer().minerals() >= 600) {
                 this.handler.chosenToBuild = UnitType.Terran_Barracks;

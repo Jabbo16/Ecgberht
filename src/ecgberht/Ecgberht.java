@@ -352,7 +352,6 @@ public class Ecgberht implements BWEventListener {
             gs.updateStrat();
             IntelligenceAgency.setStartStrat(gs.strat.name);
             gs.initStartLocations();
-
             boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
             for (Base b : bwem.getMap().getBases()) {
                 if (fortress) {
@@ -434,6 +433,10 @@ public class Ecgberht implements BWEventListener {
                         gs.enemyCombatUnitMemory.add(u);
                     }
                 }
+            }
+            if (gs.strat.name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
+                gs.strat = new BioMechFE();
+                transition();
             }
             gs.cancelDyingThings();
             IntelligenceAgency.updateBullets();
@@ -528,13 +531,7 @@ public class Ecgberht implements BWEventListener {
                             gs.testMap = gs.map.clone();
                         }
                         if (arg0 instanceof Addon) return;
-                        if (arg0 instanceof CommandCenter) {
-                            if (ih.getFrameCount() == 0) return;
-                            if (gs.strat.name.equals("TwoPortWraith") && bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
-                                gs.strat = new BioMechFE();
-                                transition();
-                            }
-                        }
+                        if (arg0 instanceof CommandCenter && ih.getFrameCount() == 0) return;
                         if (arg0 instanceof Bunker && gs.learningManager.isNaughty() && gs.enemyRace == Race.Zerg) {
                             gs.defendPosition = arg0.getPosition();
                         }
@@ -551,6 +548,7 @@ public class Ecgberht implements BWEventListener {
                 } else if (pU.getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0);
                     if (arg0 instanceof Vulture) gs.vulturesTrained++;
+                    if (arg0 instanceof Wraith) gs.wraithsTrained++;
                 }
             }
         } catch (Exception e) {

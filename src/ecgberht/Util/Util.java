@@ -220,13 +220,6 @@ public class Util {
         return !getGs().bwem.getMap().getPath(start.toPosition(), end.toPosition()).isEmpty();
     }
 
-    public static Position getCentroid(Set<Unit> units) {
-        Position point = new Position(0, 0);
-        if (units.size() == 1) return units.iterator().next().getPosition();
-        for (Unit u : units) point = point.add(u.getPosition());
-        return point;
-    }
-
     //Credits to @PurpleWaveJadien / Dan
     public static double broodWarDistance(Position a, Position b) {
         return broodWarDistance(a.getX(), a.getY(), b.getX(), b.getY());
@@ -417,6 +410,10 @@ public class Util {
     public static boolean isStaticDefense(Unit u) {
         return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
                 || u instanceof SunkenColony || u instanceof PhotonCannon;
+    }
+
+    public static boolean isStaticDefense(UnitType u) {
+        return u.isBuilding() && (u.canAttack() || u == UnitType.Terran_Bunker);
     }
 
     public static boolean isGroundStaticDefense(Unit u) {

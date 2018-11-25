@@ -247,10 +247,10 @@ public class Squad implements Comparable<Squad> {
                 boolean found = false;
                 boolean close = false;
                 for (Unit e : squadSim.enemies) {
-                    if (e.isFlying() || e instanceof Worker || (e instanceof Building && !Util.isStaticDefense(e)))
+                    if (e.isFlying() || e instanceof Worker || e instanceof Medic || (e instanceof Building && !Util.isStaticDefense(e)))
                         continue;
                     double distance = u.getDistance(e);
-                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() && ((PlayerUnit) e).getHitPoints() + ((PlayerUnit) e).getShields() > 60) {
+                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() && (((PlayerUnit) e).getHitPoints() + ((PlayerUnit) e).getShields() > 60 || squadSim.enemies.size() > 2)) {
                         found = true;
                     }
                     if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) close = true;
@@ -414,13 +414,14 @@ public class Squad implements Comparable<Squad> {
             UtilMicro.attack((Attacker) u, target);
             return;
         }
+        Position predictedPosition = null;
         int targetRange = ((PlayerUnit) target).getPlayer().getUnitStatCalculator().weaponMaxRange(Util.getWeapon(target, u));
         boolean kite = true;
         boolean moveCloser = target.getType() == UnitType.Terran_Siege_Tank_Siege_Mode ||
                 (target instanceof SCV && ((SCV) target).isRepairing() && ((SCV) target).getOrderTarget() != null && ((SCV) target).getOrderTarget().getType() == UnitType.Terran_Bunker) ||
                 (target.getType().isBuilding() && !Util.canAttack((PlayerUnit) target, u));
         if (!moveCloser) {
-            Position predictedPosition = UtilMicro.predictUnitPosition(target, 1);
+            predictedPosition = UtilMicro.predictUnitPosition(target, 1);
             if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
                 double distPredicted = u.getDistance(predictedPosition);
                 double distCurrent = u.getDistance(target.getPosition());
@@ -433,14 +434,19 @@ public class Squad implements Comparable<Squad> {
             }
         }
         if (moveCloser) {
-            if (distToTarget > 16) UtilMicro.move(u, target.getPosition());
-            else UtilMicro.attack((Attacker) u, target);
+            if (distToTarget > 16) {
+                if (predictedPosition != null) UtilMicro.move(u, predictedPosition);
+                else UtilMicro.move(u, target.getPosition());
+            } else UtilMicro.attack((Attacker) u, target);
             return;
         }
         if (kite) {
-            //Position kitePos = UtilMicro.kiteAway(u, squadSim.enemies);
             Position kitePos = UtilMicro.kiteAwayAlt(u.getPosition(), target.getPosition());
             if (kitePos != null) UtilMicro.move(u, kitePos);
+            else {
+                kitePos = UtilMicro.kiteAway(u, squadSim.enemies);
+                if (kitePos != null) UtilMicro.move(u, kitePos);
+            }
         } else UtilMicro.attack((Attacker) u, target);
     }
 
