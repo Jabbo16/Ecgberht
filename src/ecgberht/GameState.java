@@ -193,10 +193,10 @@ public class GameState {
                 return new PlasmaWraithHell();
             }
             //if (true) return FM; // TEST ONLY
-            String enemyName = EI.opponent.toLowerCase().replace(" ", "");
+            /*String enemyName = EI.opponent.toLowerCase().replace(" ", "");
             if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
                 return tPW;
-            }
+            }*/
 
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
@@ -369,13 +369,14 @@ public class GameState {
                 ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "%");
                 return nameStrat.get(bestStrat);
             }
-            double C = 0.55;
+            double C = 0.6;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
                 int sGamesPlayed = strat.getValue().first + strat.getValue().second;
                 double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.55 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+                double ucbVal = sGamesPlayed == 0 ? 0.6 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+                if(strat.getKey().equals("ProxyEightRax") && mapSize == 2) ucbVal += 0.1;
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat.getKey();
@@ -1125,7 +1126,7 @@ public class GameState {
     }
 
     void alwaysPools() {
-        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish"));
+        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish", "jumpydoggobot"));
         LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
         if (enemyRace == Race.Zerg && poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
             EI.naughty = true;

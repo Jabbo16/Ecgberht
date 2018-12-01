@@ -48,8 +48,8 @@ public class SimManager {
         evaluator = new Evaluator();
         factory = new BWAPI4JAgentFactory(bw.getBWMap());
         if (ConfigManager.getConfig().ecgConfig.sscait) {
-            shortSimFrames = 45;
-            longSimFrames = 170;
+            shortSimFrames = 60;
+            longSimFrames = 180;
             iterations = 0;
         }
         switch (bw.getInteractionHandler().enemy().getRace()) {
@@ -86,6 +86,7 @@ public class SimManager {
             case Terran:
                 if (IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                     radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+                    return;
                 }
                 break;
             case Protoss:
