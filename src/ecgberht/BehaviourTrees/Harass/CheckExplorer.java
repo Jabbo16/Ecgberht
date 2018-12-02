@@ -13,7 +13,7 @@ public class CheckExplorer extends Conditional {
     @Override
     public State execute() {
         try {
-            if (!this.handler.learningManager.defendHarass()) return State.FAILURE;
+            if (!this.handler.learningManager.defendHarass() && !this.handler.explore) return State.FAILURE;
             else {
                 this.handler.chosenUnitToHarass = null;
                 return State.SUCCESS;

@@ -20,7 +20,7 @@ public class PlasmaWraithHell extends Strategy {
         numBays = 1;
         raxPerCC = 2;
         facPerCC = 0;
-        numRaxForAca = 3;
+        numRaxForAca = 2;
         numRaxForFac = 1;
         bunker = false;
         supplyForFirstRefinery = 28;

@@ -56,6 +56,10 @@ public class IntelligenceAgency {
         return enemyStrat;
     }
 
+    public static void setEnemyStrat(EnemyStrats newEnemyStrat) {
+        enemyStrat = newEnemyStrat;
+    }
+
     /**
      * Returns the number of bases or resource depots that a {@link org.openbw.bwapi4j.Player} owns
      *

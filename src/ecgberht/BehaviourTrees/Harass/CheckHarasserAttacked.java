@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Util.UtilMicro;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -61,12 +62,17 @@ public class CheckHarasserAttacked extends Conditional {
                 boolean winHarass = this.handler.sim.simulateHarass(this.handler.chosenHarasser, attackers, 70);
                 if (winHarass) {
                     if (workers == 1 && !attacker.equals(this.handler.chosenUnitToHarass)) {
-                        this.handler.chosenHarasser.attack(attacker);
+                        UtilMicro.attack(this.handler.chosenHarasser, attacker);
                         this.handler.chosenUnitToHarass = attacker;
                         return State.SUCCESS;
                     }
                 } else {
-                    if (this.handler.chosenHarasser.getHitPoints() <= 15) {
+                    if (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.Unknown) {
+                        this.handler.explore = true;
+                        this.handler.chosenUnitToHarass = null;
+                        this.handler.chosenHarasser.stop(false);
+                        return State.FAILURE;
+                    } else if (this.handler.chosenHarasser.getHitPoints() <= 15) {
                         this.handler.workerIdle.add(this.handler.chosenHarasser);
                         this.handler.chosenHarasser.stop(false);
                         this.handler.chosenHarasser = null;

@@ -27,9 +27,11 @@ public class Squad implements Comparable<Squad> {
     private Position center;
     private Integer id;
     private SimInfo squadSim;
+    protected boolean lose;
 
     Squad(int id, Position center, SimInfo squadSim) {
         this.id = id;
+        this.lose = squadSim.lose;
         this.squadSim = squadSim;
         for (Unit m : squadSim.allies) {
             if (isArmyUnit(m) && !getGs().agents.containsKey(m)) this.members.add((PlayerUnit) m);
@@ -394,16 +396,12 @@ public class Squad implements Comparable<Squad> {
     }
 
     private void executeRangedAttackLogic(MobileUnit u) {
-        double speed = u.getType().topSpeed();
         Unit target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
             if (attack != null) UtilMicro.attack(u, attack);
             return;
         }
-        if (speed < 0.001 && (target.isFlying() ? ((AirAttacker) u).getAirWeaponCooldown() == 0 : ((GroundAttacker) u).getGroundWeaponCooldown() == 0)) {
-            UtilMicro.attack((Attacker) u, target);
-            return;
-        }
+        double speed = u.getType().topSpeed();
         if (getGs().frameCount - u.getLastCommandFrame() <= 15) return;
         WeaponType w = Util.getWeapon(u, target);
         double range = u.getPlayer().getUnitStatCalculator().weaponMaxRange(w);
@@ -440,7 +438,7 @@ public class Squad implements Comparable<Squad> {
             } else UtilMicro.attack((Attacker) u, target);
             return;
         }
-        if (kite) {
+        if (kite && target.getType().topSpeed() > 0) {
             Position kitePos = UtilMicro.kiteAwayAlt(u.getPosition(), target.getPosition());
             if (kitePos != null) UtilMicro.move(u, kitePos);
             else {

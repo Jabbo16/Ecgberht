@@ -347,6 +347,7 @@ public class Ecgberht implements BWEventListener {
             gs.initEnemyRace();
             gs.learningManager.onStart(ih.enemy().getName(), Util.raceToString(bw.getInteractionHandler().enemy().getRace()));
             gs.alwaysPools();
+            gs.alwaysZealotRushes();
             if (gs.enemyRace == Race.Zerg && gs.learningManager.isNaughty()) gs.playSound("rushed.mp3");
             gs.strat = gs.initStrat();
             gs.updateStrat();
@@ -406,6 +407,18 @@ public class Ecgberht implements BWEventListener {
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
             if (gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs) && !gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                 gs.strat = new FullMech();
+                transition();
+            }
+            // If rushing and enough time has passed -> transition to Bio
+            if (gs.frameCount == 24 * 60 * 8 && gs.strat.proxy) {
+                gs.strat = new FullBio();
+                List<Worker> workersToDelete = new ArrayList<>();
+                for (Unit u : gs.myArmy) {
+                    if (!(u instanceof Worker)) continue;
+                    workersToDelete.add((Worker) u);
+                }
+                gs.myArmy.removeAll(workersToDelete);
+                gs.workerIdle.addAll(workersToDelete);
                 transition();
             }
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma transition

@@ -20,7 +20,7 @@ public class BioGreedyFE extends Strategy {
         numBays = 2;
         raxPerCC = 3;
         facPerCC = 0;
-        numRaxForAca = 3;
+        numRaxForAca = 2;
         numRaxForFac = 3;
         numCCForPort = 2;
         numCCForScience = 2;

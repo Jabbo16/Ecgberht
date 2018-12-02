@@ -33,7 +33,7 @@ public class CheckBuildingFlames extends Action {
                         u.getKey().rightClick(u.getValue(), false);
                     }
                 } else if (Util.countBuildingAll(UnitType.Terran_Command_Center) < 2 && u.getValue() instanceof Bunker &&
-                        IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush) {
+                        IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && this.handler.frameCount >= 24 * 60 * 2.2) {
                     if (u.getKey().getDistance(u.getValue()) > 3 * 32) u.getKey().move(u.getValue().getPosition());
                 } else {
                     u.getKey().stop(false);
@@ -43,7 +43,7 @@ public class CheckBuildingFlames extends Action {
             }
             for (SCV s : toRemove) this.handler.repairerTask.remove(s);
             boolean isBeingRepaired;
-            boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush;
+            boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && this.handler.frameCount >= 24 * 60 * 2.2;
             for (Bunker w : this.handler.DBs.keySet()) {
                 int count = 0;
                 if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints() ||

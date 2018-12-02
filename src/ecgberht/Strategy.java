@@ -20,7 +20,7 @@ public abstract class Strategy implements Comparable<Strategy> {
     public int numCCForPort = 0;
     public int workerGas = 3;
     public int numCCForScience = 0;
-    public int numRaxForAca = 1;
+    public int numRaxForAca = 2;
     public int numRaxForFac = 0;
     public int numFacForPort = 1;
     public int portPerCC = 0;

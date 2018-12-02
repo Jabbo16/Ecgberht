@@ -32,7 +32,7 @@ public class SquadManager {
         squads.values().stream().filter(u -> !u.members.isEmpty()).forEach(Squad::updateSquad);
     }
 
-    void updateBunkers() {
+    void updateBunkers() { // TODO improve
         for (Map.Entry<Bunker, Set<Unit>> bunker : getGs().DBs.entrySet()) {
             SimInfo bunkerSim = getGs().sim.getSimulation(bunker.getKey(), SimInfo.SimType.MIX);
             if (!bunkerSim.enemies.isEmpty()) {

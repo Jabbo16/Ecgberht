@@ -45,7 +45,7 @@ public class WorkerScoutAgent extends Agent {
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
-                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().learningManager.isNaughty())) {
+                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected())) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
             removedIndex = true;

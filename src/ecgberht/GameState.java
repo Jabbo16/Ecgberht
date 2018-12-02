@@ -127,6 +127,7 @@ public class GameState {
     public Worker chosenHarasser = null;
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
+    public boolean explore = false;
     boolean firstExpand = true;
     public int maxGoliaths = 0;
     public double luckyDraw;
@@ -376,7 +377,7 @@ public class GameState {
                 int sGamesPlayed = strat.getValue().first + strat.getValue().second;
                 double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
                 double ucbVal = sGamesPlayed == 0 ? 0.6 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
-                if(strat.getKey().equals("ProxyEightRax") && mapSize == 2) ucbVal += 0.1;
+                if (nameStrat.get(strat.getKey()).proxy && mapSize == 2) ucbVal += 0.06;
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat.getKey();
@@ -1126,13 +1127,22 @@ public class GameState {
     }
 
     void alwaysPools() {
+        if (enemyRace != Race.Zerg) return;
         List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish", "jumpydoggobot"));
         LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-        if (enemyRace == Race.Zerg && poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
+        if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
             EI.naughty = true;
             return;
         }
         EI.naughty = false;
+    }
+
+    void alwaysZealotRushes() {
+        if (enemyRace != Race.Protoss) return;
+        List<String> zealots = new ArrayList<>(Arrays.asList("purplewavelet", "wulibot", "flash", "carstennielsen"));
+        if (zealots.contains(learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", ""))) {
+            IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
+        }
     }
 
     private boolean requiredUnitsForAttack() {
@@ -1277,5 +1287,17 @@ public class GameState {
             if (b.isCompleted()) continue; // Is this even needed??
             if (b.isUnderAttack() && b.getHitPoints() <= 30) b.cancelConstruction();
         }
+    }
+
+    public boolean basicCombatUnitsDetected() {
+        switch (enemyRace) {
+            case Zerg:
+                return IntelligenceAgency.enemyHasType(UnitType.Zerg_Zergling);
+            case Terran:
+                return IntelligenceAgency.enemyHasType(UnitType.Terran_Marine);
+            case Protoss:
+                return IntelligenceAgency.enemyHasType(UnitType.Protoss_Zealot) || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dragoon);
+        }
+        return false;
     }
 }

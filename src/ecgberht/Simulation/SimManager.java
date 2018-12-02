@@ -5,7 +5,6 @@ import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
 import ecgberht.IntelligenceAgency;
-import ecgberht.Util.ColorUtil;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
@@ -19,10 +18,7 @@ import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.ToIntFunction;
 
 import static ecgberht.Ecgberht.getGs;
@@ -127,8 +123,8 @@ public class SimManager {
             if (u instanceof Egg && !((Egg) u).getPlayer().isEnemy()) continue;
             enemyUnits.add(u);
         }
-        for (EnemyBuilding u : getGs().enemyBuildingMemory.values()) {
-            if (Util.isStaticDefense(u.type) || u.unit.isVisible()) enemyUnits.add(u.unit);
+        for (Map.Entry<Unit, EnemyBuilding> u : getGs().enemyBuildingMemory.entrySet()) {
+            if (Util.isStaticDefense(u.getValue().type) || u.getKey().isVisible()) enemyUnits.add(u.getKey());
         }
         clustering = new MeanShift(enemyUnits, radius);
         enemies = clustering.run(iterations);
@@ -160,11 +156,11 @@ public class SimManager {
         if (!friendly.isEmpty()) {
             //getGs().sqManager.createSquads(friendly);
             createSimInfos();
-            getGs().sqManager.createSquads(friendly);
             if (!noNeedForSim()) {
                 doSimJFAP();
                 //doSimASS();
             }
+            getGs().sqManager.createSquads(friendly);
         }
         time = System.currentTimeMillis() - time;
     }
@@ -397,8 +393,8 @@ public class SimManager {
         Color color = Color.RED;
         if (ally) color = Color.GREEN;
         Position centroid = new Position((int) c.modeX, (int) c.modeY);
-        getGs().getGame().getMapDrawer().drawCircleMap(centroid, 5, color, true);
-        getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), ColorUtil.formatText(Integer.toString(id), ColorUtil.White));
+        getGs().getGame().getMapDrawer().drawCircleMap(centroid, 4, color, true);
+        //getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), ColorUtil.formatText(Integer.toString(id), ColorUtil.White));
         for (Unit u : c.units) getGs().getGame().getMapDrawer().drawLineMap(u.getPosition(), centroid, color);
     }
 

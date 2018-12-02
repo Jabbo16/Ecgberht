@@ -34,9 +34,7 @@ public class ChooseAcademy extends Action {
                     if (w.first == UnitType.Terran_Academy) return State.FAILURE;
                 }
                 for (Building w : this.handler.workerTask.values()) {
-                    if (w instanceof Academy) {
-                        return State.FAILURE;
-                    }
+                    if (w instanceof Academy) return State.FAILURE;
                 }
                 this.handler.chosenToBuild = UnitType.Terran_Academy;
                 return State.SUCCESS;
