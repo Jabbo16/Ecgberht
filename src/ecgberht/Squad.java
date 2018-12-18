@@ -40,7 +40,7 @@ public class Squad implements Comparable<Squad> {
         if (getGs().defendPosition != null) attack = getGs().defendPosition;
         else if (!getGs().DBs.isEmpty()) attack = getGs().DBs.keySet().iterator().next().getPosition();
         else {
-            Position closestCC = getGs().getNearestCC(center);
+            Position closestCC = getGs().getNearestCC(center, false);
             if (closestCC != null) attack = closestCC;
             else attack = center;
         }
@@ -78,6 +78,7 @@ public class Squad implements Comparable<Squad> {
         if (status == Status.DEFENSE) return;
         if (squadSim.lose) status = Status.REGROUP;
         else if (status == Status.ATTACK && squadSim.enemies.isEmpty()) status = Status.ADVANCE;
+        else if (status == Status.IDLE && !squadSim.enemies.isEmpty()) status = Status.ATTACK;
     }
 
     void updateSquad() {
@@ -150,7 +151,7 @@ public class Squad implements Comparable<Squad> {
                     executeRangedAttackLogic(u);
                     return;
                 }
-                Position pos = getGs().getNearestCC(u.getPosition());
+                Position pos = getGs().getNearestCC(u.getPosition(), true);
                 if (Util.broodWarDistance(pos, u.getPosition()) >= 400) {
                     UtilMicro.move(u, pos);
                 }
@@ -175,7 +176,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 //Experimental storm dodging?
                 if (u.isUnderStorm()) {
-                    Position closestCC = getGs().getNearestCC(u.getPosition());
+                    Position closestCC = getGs().getNearestCC(u.getPosition(), true);
                     if (closestCC != null) {
                         UtilMicro.move(u, closestCC);
                         return;
@@ -225,7 +226,7 @@ public class Squad implements Comparable<Squad> {
                 break;
             case REGROUP:
                 if (u.isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim)) return;
-                Position pos = getGs().getNearestCC(u.getPosition());
+                Position pos = getGs().getNearestCC(u.getPosition(), true);
                 if (Util.broodWarDistance(pos, u.getPosition()) >= 400) {
                     UtilMicro.move(u, pos);
                 }
@@ -264,7 +265,7 @@ public class Squad implements Comparable<Squad> {
                         return;
                     }
 
-                } else if (u.isSieged() && u.getOrder() != Order.Unsieging && Math.random() * 10 <= 4) {
+                } else if (u.isSieged() && u.getOrder() != Order.Unsieging && Math.random() * 10 <= 2.5) {
                     u.unsiege();
                     return;
                 }
@@ -310,7 +311,7 @@ public class Squad implements Comparable<Squad> {
                 break;
             case REGROUP:
                 if (u.isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim)) return;
-                Position pos = getGs().getNearestCC(u.getPosition());
+                Position pos = getGs().getNearestCC(u.getPosition(), true);
                 if (Util.broodWarDistance(pos, u.getPosition()) >= 400) UtilMicro.move(u, pos);
                 break;
             case ADVANCE:
@@ -339,7 +340,7 @@ public class Squad implements Comparable<Squad> {
                 } else if (u.getDistance(getGs().defendPosition) > range) UtilMicro.move(u, getGs().defendPosition);
             }
         } else if (status == Status.REGROUP) {
-            Position pos = getGs().getNearestCC(u.getPosition());
+            Position pos = getGs().getNearestCC(u.getPosition(), true);
             if (Util.broodWarDistance(pos, u.getPosition()) >= 400) {
                 UtilMicro.heal(u, pos);
             }
@@ -419,7 +420,7 @@ public class Squad implements Comparable<Squad> {
                 (target instanceof SCV && ((SCV) target).isRepairing() && ((SCV) target).getOrderTarget() != null && ((SCV) target).getOrderTarget().getType() == UnitType.Terran_Bunker) ||
                 (target.getType().isBuilding() && !Util.canAttack((PlayerUnit) target, u));
         if (!moveCloser) {
-            predictedPosition = UtilMicro.predictUnitPosition(target, 1);
+            predictedPosition = UtilMicro.predictUnitPosition(target, 2);
             if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
                 double distPredicted = u.getDistance(predictedPosition);
                 double distCurrent = u.getDistance(target.getPosition());
@@ -432,7 +433,7 @@ public class Squad implements Comparable<Squad> {
             }
         }
         if (moveCloser) {
-            if (distToTarget > 16) {
+            if (distToTarget > 32) {
                 if (predictedPosition != null) UtilMicro.move(u, predictedPosition);
                 else UtilMicro.move(u, target.getPosition());
             } else UtilMicro.attack((Attacker) u, target);

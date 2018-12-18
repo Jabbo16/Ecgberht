@@ -139,7 +139,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void retreat() {
-        Position CC = getGs().getNearestCC(myUnit.getPosition());
+        Position CC = getGs().getNearestCC(myUnit.getPosition(), true);
         if (CC != null) UtilMicro.move(unit, CC);
         else UtilMicro.move(unit, getGs().getPlayer().getStartLocation().toPosition());
         attackPos = null;

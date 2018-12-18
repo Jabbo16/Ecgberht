@@ -104,7 +104,7 @@ public class SendDefenders extends Action {
                                 if (!this.handler.DBs.isEmpty())
                                     closestDefense = this.handler.DBs.keySet().iterator().next().getPosition();
                                 if (closestDefense == null)
-                                    closestDefense = this.handler.getNearestCC(u.getKey().getPosition());
+                                    closestDefense = this.handler.getNearestCC(u.getKey().getPosition(), false);
                                 if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange() * 0.95) {
                                     u.getKey().move(closestDefense);
                                     continue;

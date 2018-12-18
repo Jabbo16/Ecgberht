@@ -31,6 +31,7 @@ import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
 import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
+import ecgberht.Strategies.FullBioFE;
 import ecgberht.Strategies.FullMech;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -361,7 +362,7 @@ public class Ecgberht implements BWEventListener {
                         gs.fortressSpecialBLs.put(b, gs.getMineralWalkPatchesFortress(b));
                     gs.BLs.add(b);
 
-                } else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b);
+                } //else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b); // Island expansions disabled for now
                 else gs.BLs.add(b);
             }
             gs.initBlockingMinerals();
@@ -448,7 +449,10 @@ public class Ecgberht implements BWEventListener {
                 }
             }
             if (gs.strat.name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
-                gs.strat = new BioMechFE();
+                if(gs.learningManager.getEnemyInfo().opponent.replace(" ","").toLowerCase().equals("mariandevecka")){
+                    gs.strat = new FullBioFE();
+                }
+                else gs.strat = new BioMechFE();
                 transition();
             }
             gs.cancelDyingThings();
@@ -753,19 +757,28 @@ public class Ecgberht implements BWEventListener {
                             gs.workerGas.remove(arg0);
                         }
                         if (gs.workerTask.containsKey(arg0)) {
+                            if (!gs.islandBases.isEmpty() && gs.workerTask.get(arg0) instanceof CommandCenter) {
+                                Base ccBase = Util.getClosestBaseLocation(gs.workerTask.get(arg0).getPosition());
+                                if (gs.islandBases.contains(ccBase)) gs.islandExpand = false;
+                            }
                             gs.buildingLot.add(gs.workerTask.get(arg0));
                             gs.workerTask.remove(arg0);
                         }
                         if (gs.workerBuild.containsKey(arg0)) {
-                            if (gs.workerBuild.get(arg0).first == UnitType.Terran_Command_Center
-                                    && bwem.getMap().getArea(gs.workerBuild.get(arg0).second).equals(gs.naturalArea)) {
-                                Bunker b = gs.DBs.keySet().iterator().next();
-                                if (b != null) gs.defendPosition = b.getPosition();
-                                else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                            if (gs.workerBuild.get(arg0).first == UnitType.Terran_Command_Center) {
+                                if (bwem.getMap().getArea(gs.workerBuild.get(arg0).second).equals(gs.naturalArea)) {
+                                    Bunker b = gs.DBs.keySet().iterator().next();
+                                    if (b != null) gs.defendPosition = b.getPosition();
+                                    else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                }
+                                if (!gs.islandBases.isEmpty()) {
+                                    Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
+                                    if (gs.islandBases.contains(ccBase)) gs.islandExpand = false;
+                                }
+                                gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
+                                gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
+                                gs.workerBuild.remove(arg0);
                             }
-                            gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
-                            gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
-                            gs.workerBuild.remove(arg0);
                         }
                     } else if (type.isBuilding()) {
                         if (type != UnitType.Terran_Command_Center) {
@@ -780,11 +793,16 @@ public class Ecgberht implements BWEventListener {
                         }
                         for (Entry<SCV, Building> w : gs.workerTask.entrySet()) {
                             if (w.getValue().equals(arg0)) {
-                                if (w.getValue() instanceof CommandCenter
-                                        && bwem.getMap().getArea(w.getValue().getTilePosition()).equals(gs.naturalArea)) {
-                                    Bunker b = gs.DBs.keySet().iterator().next();
-                                    if (b != null) gs.defendPosition = b.getPosition();
-                                    else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                if (w.getValue() instanceof CommandCenter) {
+                                    if(bwem.getMap().getArea(w.getValue().getTilePosition()).equals(gs.naturalArea)){
+                                        Bunker b = gs.DBs.keySet().iterator().next();
+                                        if (b != null) gs.defendPosition = b.getPosition();
+                                        else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+                                    }
+                                    if (!gs.islandBases.isEmpty()) {
+                                        Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
+                                        if (gs.islandBases.contains(ccBase)) gs.islandExpand = false;
+                                    }
                                 }
                                 gs.workerTask.remove(w.getKey());
                                 gs.workerIdle.add(w.getKey());

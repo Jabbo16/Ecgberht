@@ -248,7 +248,7 @@ public class DebugManager {
             mapDrawer.drawTextScreen(10, 95, ColorUtil.formatText("EnemyStrategy: ", ColorUtil.White) + ColorUtil.formatText(IntelligenceAgency.getEnemyStrat().toString(), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 110, ColorUtil.formatText("SimTime(ms): ", ColorUtil.White) + ColorUtil.formatText(String.valueOf(gameState.sim.time), ColorUtil.Teal));
             if (gameState.enemyRace == Race.Zerg && gameState.learningManager.isNaughty()) {
-                mapDrawer.drawTextScreen(10, 110, ColorUtil.formatText("Naughty Zerg: ", ColorUtil.White) + ColorUtil.formatText("yes", ColorUtil.Green));
+                mapDrawer.drawTextScreen(10, 125, ColorUtil.formatText("Naughty Zerg: ", ColorUtil.White) + ColorUtil.formatText("yes", ColorUtil.Green));
             }
         } catch (Exception e) {
             System.err.println("debugText Exception");

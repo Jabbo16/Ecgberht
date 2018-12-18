@@ -111,7 +111,7 @@ public class CheckPerimeter extends Conditional {
                         continue;
                     }
                 }
-                closestDefense = this.handler.getNearestCC(u.getPosition());
+                closestDefense = this.handler.getNearestCC(u.getPosition(), false);
                 if (closestDefense != null) {
                     u.move(closestDefense);
                     toDelete.add(u);
@@ -124,7 +124,7 @@ public class CheckPerimeter extends Conditional {
             }
             for (Squad u : this.handler.sqManager.squads.values()) {
                 if (u.status == Status.DEFENSE) {
-                    Position closestCC = this.handler.getNearestCC(u.getSquadCenter());
+                    Position closestCC = this.handler.getNearestCC(u.getSquadCenter(), false);
                     if (closestCC != null) {
                         Area squad = this.handler.bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
                         Area regCC = this.handler.bwem.getMap().getArea(closestCC.toTilePosition());

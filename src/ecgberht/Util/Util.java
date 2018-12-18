@@ -2,6 +2,7 @@ package ecgberht.Util;
 
 import bwem.Base;
 import bwem.ChokePoint;
+import bwem.area.Area;
 import ecgberht.EnemyBuilding;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
@@ -652,5 +653,16 @@ public class Util {
         WeaponType weapon = getWeapon(attacker, target);
         if (weapon == WeaponType.None) return 0;
         return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(weapon);
+    }
+
+    public static boolean isInOurBases(Unit u) {
+        if (u == null || !u.exists()) return false;
+        Area uArea = getGs().bwem.getMap().getArea(u.getTilePosition());
+        if (uArea == null) return false;
+        if (uArea.equals(getGs().enemyMainArea) || uArea.equals(getGs().enemyNaturalArea)) return false;
+        for (Base b : getGs().CCs.keySet()){
+            if(b.getArea().equals(uArea)) return true;
+        }
+        return false;
     }
 }

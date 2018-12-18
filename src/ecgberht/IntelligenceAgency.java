@@ -329,7 +329,7 @@ public class IntelligenceAgency {
                     goliaths += amount != null ? (amount * 3) : 0;
                     break;
             }
-            getGs().maxGoliaths = goliaths;
+            getGs().maxGoliaths = Math.min(15, goliaths);
         }
     }
 

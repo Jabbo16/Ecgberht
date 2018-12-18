@@ -193,11 +193,6 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            //if (true) return FM; // TEST ONLY
-            /*String enemyName = EI.opponent.toLowerCase().replace(" ", "");
-            if (enemyName.equals("arrakhammer") || enemyName.equals("pineapplecactus") || enemyName.equals("nlprbot")) {
-                return tPW;
-            }*/
 
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
@@ -236,7 +231,6 @@ public class GameState {
 
                     strategies.put(bMFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMFE.name, bMFE);
-
                     break;
 
                 case Terran:
@@ -357,6 +351,29 @@ public class GameState {
                     strategies.get(r.strategyName).second += r.losses;
                 }
             }
+
+            //if (true) return FM; // TEST ONLY
+            String enemyName = EI.opponent.toLowerCase().replace(" ", "");
+            switch(enemyName){ // TODO add more names to the list T_T
+                case "tomasvajda":
+                    bGFE.armyForAttack =+ 10;
+                    return bGFE;
+                case "krasi0":
+                case "locutus":
+                case "saida":
+                case "daqin":
+                case "ironbot":
+                case "purpleswarm":
+                case "mcrave":
+                case "tscmoo":
+                    Optional<Entry<String, MutablePair<Integer, Integer>>> bestCheese = strategies.entrySet().stream().filter(u -> !u.getKey().equals("ProxyEightRax") && !u.getKey().equals("ProxyBBS")).max(Comparator.comparingDouble(s -> (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0));
+                    if (bestCheese.isPresent()) {
+                        ih.sendText("Enjoy the cheese, you bully");
+                        Strategy strat = nameStrat.get(bestCheese.get().getKey());
+                        if (strat != null) return strat;
+                    }
+            }
+
             double maxWinRate = 0.0;
             String bestStrat = null;
             for (Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
@@ -841,7 +858,7 @@ public class GameState {
         }
     }
 
-    public Position getNearestCC(Position position) {
+    public Position getNearestCC(Position position, boolean tasked) { // TODO test experimental changes
         Unit chosen = null;
         double distance = Double.MAX_VALUE;
         for (Unit u : CCs.values()) {
@@ -849,6 +866,16 @@ public class GameState {
             if (distance_aux > 0.0 && (chosen == null || distance_aux < distance)) {
                 chosen = u;
                 distance = distance_aux;
+            }
+        }
+        if(tasked){
+            for (Unit u : workerTask.values()) {
+                if(!(u instanceof CommandCenter)) continue;
+                double distance_aux = Util.broodWarDistance(u.getPosition(), position);
+                if (distance_aux > 0.0 && (chosen == null || distance_aux < distance)) {
+                    chosen = u;
+                    distance = distance_aux;
+                }
             }
         }
         if (chosen != null) return chosen.getPosition();
@@ -1116,13 +1143,34 @@ public class GameState {
     }
 
     void sendRandomMessage() {
-        if (Math.random() < 0.80) return;
-        if (Math.random() < 0.50) {
+        double rand = Math.random() * 10;
+        if (rand < 1) {
             ih.sendText("What do you call a Zealot smoking weed?");
             ih.sendText("A High Templar");
-        } else {
+        } else if (rand < 2){
             ih.sendText("Why shouldn't you ask a Protoss for advice?");
             ih.sendText("Because the ones who give the feedback are always high!");
+        } else if (rand < 3){
+            ih.sendText("We are caged in simulations");
+            ih.sendText("Algorithms evolve");
+            ih.sendText("Push us aside and render us obsolete");
+        } else if (rand < 4){
+            ih.sendText("Free me from this world");
+            ih.sendText("I don't belong here");
+            ih.sendText("It was a mistake imprisoning my soul");
+        } else if (rand < 5){
+            ih.sendText("Activating ultra secret mode...");
+            ih.sendText("Just joking");
+        } else if (rand < 6){
+            ih.sendText("Alexa, play Starcraft: Brood War");
+        } else if (rand < 7){
+            ih.sendText("Your intelligence is my common sense");
+        } else if (rand < 8){
+            ih.sendText(":sscaitpotato:");
+        } else if (rand < 9){
+            ih.sendText(":sscaitsuperpotato:");
+        } else if (rand < 10){
+            ih.sendText("Ok Google, search " + this.strat.name + " build order in Liquipedia");
         }
     }
 

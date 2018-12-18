@@ -120,6 +120,7 @@ public class SimManager {
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
         for (Unit u : getGs().enemyCombatUnitMemory) {
+            if (u instanceof Worker && Util.isInOurBases(u) && getGs().strat.proxy) continue;
             if (u instanceof Egg && !((Egg) u).getPlayer().isEnemy()) continue;
             enemyUnits.add(u);
         }
@@ -132,7 +133,7 @@ public class SimManager {
 
     private boolean isArmyUnit(Unit u) {
         try {
-            if (!u.exists()) return false;
+            if (u == null || !u.exists()) return false;
             if (u instanceof SCV && (getGs().strat.name.equals("ProxyBBS") || getGs().strat.name.equals("ProxyEightRax")))
                 return true;
             if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;

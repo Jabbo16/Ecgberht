@@ -97,17 +97,19 @@ public class CheckBuildingFlames extends Action {
                     }
                 }
             }
-            isBeingRepaired = false;
-            for (Barracks b : this.handler.MBs) {
-                if (UnitType.Terran_Barracks.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : this.handler.repairerTask.values()) {
-                        if (b.equals(r)) {
-                            isBeingRepaired = true;
+            if(!this.handler.strat.proxy){
+                isBeingRepaired = false;
+                for (Barracks b : this.handler.MBs) {
+                    if (UnitType.Terran_Barracks.maxHitPoints() != b.getHitPoints()) {
+                        for (Mechanical r : this.handler.repairerTask.values()) {
+                            if (b.equals(r)) {
+                                isBeingRepaired = true;
+                            }
                         }
-                    }
-                    if (!isBeingRepaired) {
-                        this.handler.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        if (!isBeingRepaired) {
+                            this.handler.chosenUnitRepair = b;
+                            return State.SUCCESS;
+                        }
                     }
                 }
             }
