@@ -80,6 +80,9 @@ public class SimManager {
                 }
                 break;
             case Terran:
+                if (getGs().strat != null && getGs().strat.proxy && radius == UnitType.Terran_Missile_Turret.airWeapon().maxRange()) {
+                    radius -= 32;
+                }
                 if (IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                     radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
                     return;
@@ -125,7 +128,8 @@ public class SimManager {
             enemyUnits.add(u);
         }
         for (Map.Entry<Unit, EnemyBuilding> u : getGs().enemyBuildingMemory.entrySet()) {
-            if (Util.isStaticDefense(u.getValue().type) || u.getKey().isVisible()) enemyUnits.add(u.getKey());
+            if (Util.isStaticDefense(u.getValue().type) || u.getValue().unit.isVisible())
+                enemyUnits.add(u.getValue().unit);
         }
         clustering = new MeanShift(enemyUnits, radius);
         enemies = clustering.run(iterations);
@@ -355,8 +359,8 @@ public class SimManager {
             s.stateAfterJFAP = simulator.getState();
             //Bad lose sim logic, testing
             if (s.stateAfterJFAP.first.isEmpty()) s.lose = true;
-            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalcJFAP(s, 1.3);
-            else if (getGs().strat.name.equals("ProxyEightRax")) s.lose = !scoreCalcJFAP(s, 1.5);
+            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalcJFAP(s, 1.2);
+            else if (getGs().strat.name.equals("ProxyEightRax")) s.lose = !scoreCalcJFAP(s, 1.35);
             else s.lose = !scoreCalcJFAP(s, 2);
         }
     }

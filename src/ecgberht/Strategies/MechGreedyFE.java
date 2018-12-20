@@ -27,7 +27,7 @@ public class MechGreedyFE extends Strategy {
         portPerCC = 1;
         bunker = true;
         supplyForFirstRefinery = 36;
-        armyForAttack = 25;
+        armyForAttack = 30;
         armyForExpand = 0;
         facForArmory = 2;
         numArmories = 1;

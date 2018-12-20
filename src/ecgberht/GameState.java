@@ -246,11 +246,14 @@ public class GameState {
                     strategies.put(mGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(mGFE.name, mGFE);
 
+                    strategies.put(bbs.name, new MutablePair<>(0, 0));
+                    nameStrat.put(bbs.name, bbs);
+
                     strategies.put(bFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bFE.name, bFE);
 
-                    strategies.put(bbs.name, new MutablePair<>(0, 0));
-                    nameStrat.put(bbs.name, bbs);
+                    strategies.put(tPW.name, new MutablePair<>(0, 0));
+                    nameStrat.put(tPW.name, tPW);
 
                     strategies.put(bMGFE.name, new MutablePair<>(0, 0));
                     nameStrat.put(bMGFE.name, bMGFE);
@@ -323,9 +326,20 @@ public class GameState {
                     nameStrat.put(bFE.name, bFE);
                     break;
             }
-            if (!forcedStrat.equals("") && nameStrat.containsKey(forcedStrat)) {
-                ih.sendText("Picked forced strategy " + forcedStrat);
-                return nameStrat.get(forcedStrat);
+            if (!forcedStrat.equals("")) {
+                if (forcedStrat.equals("Random")) {
+                    int index = new Random().nextInt(nameStrat.entrySet().size());
+                    Iterator<Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
+                    for (int i = 0; i < index; i++) {
+                        iter.next();
+                    }
+                    Entry<String, Strategy> pickedStrategy = iter.next();
+                    ih.sendText("Picked random strategy " + pickedStrategy.getKey());
+                    return pickedStrategy.getValue();
+                } else if (nameStrat.containsKey(forcedStrat)) {
+                    ih.sendText("Picked forced strategy " + forcedStrat);
+                    return nameStrat.get(forcedStrat);
+                }
             }
 
             int totalGamesPlayed = EI.wins + EI.losses;
@@ -352,28 +366,46 @@ public class GameState {
                 }
             }
 
-            //if (true) return FM; // TEST ONLY
+            // SSCAIT 2018 filthy hardcode
             String enemyName = EI.opponent.toLowerCase().replace(" ", "");
-            switch(enemyName){ // TODO add more names to the list T_T
+            switch (enemyName) { // TODO add more names to the list T_T
+                case "purpleswarm":
+                case "arrakhammer":
+                    return tPW;
                 case "tomasvajda":
-                    bGFE.armyForAttack =+ 10;
+                    bGFE.armyForAttack = +10;
+                    bGFE.armyForExpand -= 10;
                     return bGFE;
+                case "icelab":
+                case "toothpickcactus":
+                case "soerenklett":
+                    return bbs;
+                case "kruecke":
+                case "willyt":
+                    return b;
+                case "tyrprotoss":
+                    return bMGFE;
                 case "krasi0":
                 case "locutus":
                 case "saida":
                 case "daqin":
                 case "ironbot":
-                case "purpleswarm":
                 case "mcrave":
                 case "tscmoo":
-                    Optional<Entry<String, MutablePair<Integer, Integer>>> bestCheese = strategies.entrySet().stream().filter(u -> !u.getKey().equals("ProxyEightRax") && !u.getKey().equals("ProxyBBS")).max(Comparator.comparingDouble(s -> (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0));
-                    if (bestCheese.isPresent()) {
-                        ih.sendText("Enjoy the cheese, you bully");
-                        Strategy strat = nameStrat.get(bestCheese.get().getKey());
-                        if (strat != null) return strat;
+                    try {
+                        Optional<Entry<String, MutablePair<Integer, Integer>>> bestCheese = strategies.entrySet().stream().filter(u -> u.getKey().equals("ProxyEightRax") || u.getKey().equals("ProxyBBS")).max(Comparator.comparingDouble(s -> (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0));
+                        if (bestCheese.isPresent()) {
+                            ih.sendText("Enjoy the cheese, you bully");
+                            Strategy strat = nameStrat.get(bestCheese.get().getKey());
+                            if (strat != null) {
+                                ih.sendText("Picked " + strat.name + " just to mess with you, gg");
+                                return strat;
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Exception when choosing cheese");
                     }
             }
-
             double maxWinRate = 0.0;
             String bestStrat = null;
             for (Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
@@ -387,14 +419,14 @@ public class GameState {
                 ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "%");
                 return nameStrat.get(bestStrat);
             }
-            double C = 0.6;
+            double C = 0.7;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
                 int sGamesPlayed = strat.getValue().first + strat.getValue().second;
                 double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.6 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
-                if (nameStrat.get(strat.getKey()).proxy && mapSize == 2) ucbVal += 0.06;
+                double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+                if (nameStrat.get(strat.getKey()).proxy && mapSize == 2) ucbVal += 0.035;
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat.getKey();
@@ -495,7 +527,6 @@ public class GameState {
                     }
                 }).start();
             }
-
         } catch (Exception e) {
             System.err.println("playSound");
             e.printStackTrace();
@@ -868,9 +899,9 @@ public class GameState {
                 distance = distance_aux;
             }
         }
-        if(tasked){
+        if (tasked) {
             for (Unit u : workerTask.values()) {
-                if(!(u instanceof CommandCenter)) continue;
+                if (!(u instanceof CommandCenter)) continue;
                 double distance_aux = Util.broodWarDistance(u.getPosition(), position);
                 if (distance_aux > 0.0 && (chosen == null || distance_aux < distance)) {
                     chosen = u;
@@ -973,7 +1004,6 @@ public class GameState {
             e.printStackTrace();
             return null;
         }
-
     }
 
     void updateEnemyBuildingsMemory() {
@@ -1071,7 +1101,6 @@ public class GameState {
                     distB = distA;
                 }
             }
-
         }
         if (!combatUnits.isEmpty()) {
             double distB = Double.MAX_VALUE;
@@ -1143,40 +1172,39 @@ public class GameState {
     }
 
     void sendRandomMessage() {
-        double rand = Math.random() * 10;
+        if (Math.random() * 10 < 3) return;
+        double rand = Math.random() * 11;
         if (rand < 1) {
             ih.sendText("What do you call a Zealot smoking weed?");
             ih.sendText("A High Templar");
-        } else if (rand < 2){
+        } else if (rand < 2) {
             ih.sendText("Why shouldn't you ask a Protoss for advice?");
             ih.sendText("Because the ones who give the feedback are always high!");
-        } else if (rand < 3){
+        } else if (rand < 3) {
             ih.sendText("We are caged in simulations");
             ih.sendText("Algorithms evolve");
             ih.sendText("Push us aside and render us obsolete");
-        } else if (rand < 4){
-            ih.sendText("Free me from this world");
-            ih.sendText("I don't belong here");
-            ih.sendText("It was a mistake imprisoning my soul");
-        } else if (rand < 5){
+        } else if (rand < 4) {
+            ih.sendText("My machine learning power level Its over 9000");
+        } else if (rand < 5) {
             ih.sendText("Activating ultra secret mode...");
             ih.sendText("Just joking");
-        } else if (rand < 6){
+        } else if (rand < 6) {
             ih.sendText("Alexa, play Starcraft: Brood War");
-        } else if (rand < 7){
+        } else if (rand < 7) {
             ih.sendText("Your intelligence is my common sense");
-        } else if (rand < 8){
+        } else if (rand < 8) {
             ih.sendText(":sscaitpotato:");
-        } else if (rand < 9){
+        } else if (rand < 9) {
             ih.sendText(":sscaitsuperpotato:");
-        } else if (rand < 10){
+        } else if (rand < 11) {
             ih.sendText("Ok Google, search " + this.strat.name + " build order in Liquipedia");
         }
     }
 
     void alwaysPools() {
         if (enemyRace != Race.Zerg) return;
-        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish", "jumpydoggobot"));
+        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish", "jumpydoggobot", "upstarcraftai2016"));
         LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
         if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
             EI.naughty = true;
@@ -1190,6 +1218,10 @@ public class GameState {
         List<String> zealots = new ArrayList<>(Arrays.asList("purplewavelet", "wulibot", "flash", "carstennielsen"));
         if (zealots.contains(learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", ""))) {
             IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
+            strat = new FullBioFE();
+            defendPosition = mainChoke.getCenter().toPosition();
+            Ecgberht.transition();
+            strat.armyForExpand += 5;
         }
     }
 

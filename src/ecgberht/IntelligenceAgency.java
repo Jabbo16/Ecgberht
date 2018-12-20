@@ -390,7 +390,7 @@ public class IntelligenceAgency {
         if (timeCheck && rushStratDetected) return true;
         switch (getGs().enemyRace) {
             case Zerg:
-                if (getGs().enemyInBase.stream().filter(u -> u instanceof Zergling).count() >= 4 && getGs().myArmy.size() < 3)
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof Zergling).count() >= 4 && getGs().myArmy.size() < 4)
                     raceCheck = true;
                 break;
             case Terran:
@@ -402,7 +402,7 @@ public class IntelligenceAgency {
             case Protoss:
                 if (getGs().enemyInBase.stream().filter(u -> u instanceof Probe).count() >= 3 && getGs().myArmy.size() < 3)
                     raceCheck = true;
-                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Zealot).count() >= 3 && getGs().myArmy.size() < 4)
+                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Zealot).count() >= 3 && getGs().myArmy.size() < 6)
                     raceCheck = true;
                 break;
         }

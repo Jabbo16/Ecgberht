@@ -101,7 +101,7 @@ public class LearningManager {
         }
     }
 
-    EnemyInfo getEnemyInfo() {
+    public EnemyInfo getEnemyInfo() {
         return enemyInfo;
     }
 

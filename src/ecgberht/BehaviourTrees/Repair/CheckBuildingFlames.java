@@ -97,7 +97,7 @@ public class CheckBuildingFlames extends Action {
                     }
                 }
             }
-            if(!this.handler.strat.proxy){
+            if (!this.handler.strat.proxy) {
                 isBeingRepaired = false;
                 for (Barracks b : this.handler.MBs) {
                     if (UnitType.Terran_Barracks.maxHitPoints() != b.getHitPoints()) {

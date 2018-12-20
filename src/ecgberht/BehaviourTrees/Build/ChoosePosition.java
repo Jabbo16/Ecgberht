@@ -105,6 +105,8 @@ public class ChoosePosition extends Action {
                 if (!this.handler.chosenToBuild.equals(UnitType.Terran_Bunker) && !this.handler.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
                     if (this.handler.strat.proxy && this.handler.chosenToBuild == UnitType.Terran_Barracks) {
                         origin = new TilePosition(this.handler.getGame().getBWMap().mapWidth() / 2, this.handler.getGame().getBWMap().mapHeight() / 2);
+                    } else if (this.handler.mainCC != null && this.handler.mainCC.first != null) {
+                        origin = this.handler.mainCC.first.getLocation();
                     } else origin = self.getStartLocation();
                 } else if (this.handler.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
                     if (this.handler.defendPosition != null) origin = this.handler.defendPosition.toTilePosition();

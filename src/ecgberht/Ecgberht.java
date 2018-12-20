@@ -449,10 +449,9 @@ public class Ecgberht implements BWEventListener {
                 }
             }
             if (gs.strat.name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
-                if(gs.learningManager.getEnemyInfo().opponent.replace(" ","").toLowerCase().equals("mariandevecka")){
+                if (gs.learningManager.getEnemyInfo().opponent.replace(" ", "").toLowerCase().equals("mariandevecka")) {
                     gs.strat = new FullBioFE();
-                }
-                else gs.strat = new BioMechFE();
+                } else gs.strat = new BioMechFE();
                 transition();
             }
             gs.cancelDyingThings();
@@ -794,7 +793,7 @@ public class Ecgberht implements BWEventListener {
                         for (Entry<SCV, Building> w : gs.workerTask.entrySet()) {
                             if (w.getValue().equals(arg0)) {
                                 if (w.getValue() instanceof CommandCenter) {
-                                    if(bwem.getMap().getArea(w.getValue().getTilePosition()).equals(gs.naturalArea)){
+                                    if (bwem.getMap().getArea(w.getValue().getTilePosition()).equals(gs.naturalArea)) {
                                         Bunker b = gs.DBs.keySet().iterator().next();
                                         if (b != null) gs.defendPosition = b.getPosition();
                                         else gs.defendPosition = gs.mainChoke.getCenter().toPosition();

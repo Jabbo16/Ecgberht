@@ -660,9 +660,9 @@ public class Util {
         Area uArea = getGs().bwem.getMap().getArea(u.getTilePosition());
         if (uArea == null) return false;
         if (uArea.equals(getGs().enemyMainArea) || uArea.equals(getGs().enemyNaturalArea)) return false;
-        for (Base b : getGs().CCs.keySet()){
-            if(b.getArea().equals(uArea)) return true;
+        for (Base b : getGs().CCs.keySet()) {
+            if (b.getArea().equals(uArea)) return true;
         }
-        return false;
+        return uArea.equals(getGs().naturalArea);
     }
 }

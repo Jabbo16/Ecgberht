@@ -118,7 +118,7 @@ public class WorkerScoutAgent extends Agent {
 
     private Status chooseNewStatus() {
         String strat = getGs().strat.name;
-        if (getGs().luckyDraw >= 0.1 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
+        if ((getGs().luckyDraw >= 0.25 || getGs().learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", "").equals("mariandevecka")) || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
