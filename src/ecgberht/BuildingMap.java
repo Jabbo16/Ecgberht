@@ -28,7 +28,7 @@ public class BuildingMap implements Cloneable {
     private BW bw;
     private BWEM bwem;
 
-    public BuildingMap(BW bw, Player self, BWEM bwem) {
+    BuildingMap(BW bw, Player self, BWEM bwem) {
         this.bw = bw;
         this.self = self;
         this.height = bw.getBWMap().mapHeight();
@@ -38,7 +38,7 @@ public class BuildingMap implements Cloneable {
         if (tilesArea.isEmpty()) initTilesArea();
     }
 
-    public BuildingMap(BW bw, Player self, int height, int width, String[][] map, BWEM bwem) {
+    private BuildingMap(BW bw, Player self, int height, int width, String[][] map, BWEM bwem) {
         this.bw = bw;
         this.self = self;
         this.height = height;
@@ -98,7 +98,7 @@ public class BuildingMap implements Cloneable {
                 else map[jj][ii] = "0";
             }
         }
-        // Finds minerals and geysers
+        // Finds minerals
         for (MineralPatch resource : bw.getMineralPatches()) {
             TilePosition resourceTile = resource.getTilePosition();
             TilePosition resourceSize = resource.getType().tileSize();
@@ -109,6 +109,7 @@ public class BuildingMap implements Cloneable {
                 }
             }
         }
+        // Finds geysers
         for (VespeneGeyser resource : bw.getVespeneGeysers()) {
             TilePosition resourceTile = resource.getTilePosition();
             TilePosition resourceSize = resource.getType().tileSize();
@@ -119,6 +120,19 @@ public class BuildingMap implements Cloneable {
                 }
             }
         }
+        // Finds weird neutral buildings
+        for (Unit resource : bw.getAllUnits()) {
+            if (!(resource instanceof SpecialBuilding)) continue;
+            TilePosition resourceTile = resource.getTilePosition();
+            TilePosition resourceSize = resource.getType().tileSize();
+            for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
+                for (int j = resourceTile.getX(); j < resourceTile.getX() + resourceSize.getX(); j++) {
+                    if (i < 0 || i >= height || j < 0 || j >= width) continue;
+                    map[i][j] = "E";
+                }
+            }
+        }
+
         for (Area a : bwem.getMap().getAreas()) {
             for (Base b : a.getBases()) {
                 TilePosition starting = b.getLocation();

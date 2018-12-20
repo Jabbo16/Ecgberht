@@ -2,28 +2,27 @@ package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Starport;
 
 
 public class ChooseWraith extends Action {
 
-    public ChooseWraith(String name, GameHandler gh) {
+    public ChooseWraith(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
     public State execute() {
         try {
-            if (!((GameState) this.handler).Ps.isEmpty()) {
-                if (Util.countUnitTypeSelf(UnitType.Terran_Wraith) <= ((GameState) this.handler).maxWraiths) {
-                    for (Starport b : ((GameState) this.handler).Ps) {
+            if (!this.handler.Ps.isEmpty()) {
+                if (Util.countUnitTypeSelf(UnitType.Terran_Wraith) <= this.handler.maxWraiths) {
+                    for (Starport b : this.handler.Ps) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Wraith)) {
-                            ((GameState) this.handler).chosenUnit = UnitType.Terran_Wraith;
-                            ((GameState) this.handler).chosenBuilding = b;
+                            this.handler.chosenUnit = UnitType.Terran_Wraith;
+                            this.handler.chosenBuilding = b;
                             return State.SUCCESS;
                         }
                     }

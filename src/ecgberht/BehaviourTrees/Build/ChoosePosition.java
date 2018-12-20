@@ -7,9 +7,8 @@ import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
@@ -22,76 +21,71 @@ import java.util.Map.Entry;
 
 public class ChoosePosition extends Action {
 
-    public ChoosePosition(String name, GameHandler gh) {
+    public ChoosePosition(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).chosenToBuild == UnitType.None) return State.FAILURE;
-            Player self = ((GameState) this.handler).getPlayer();
+            if (this.handler.chosenToBuild == UnitType.None) return State.FAILURE;
+            Player self = this.handler.getPlayer();
             TilePosition origin;
-            if (((GameState) this.handler).chosenToBuild.isRefinery()) {
-                if (!((GameState) this.handler).vespeneGeysers.isEmpty()) {
-                    for (Entry<VespeneGeyser, Boolean> g : ((GameState) this.handler).vespeneGeysers.entrySet()) {
+            if (this.handler.chosenToBuild.isRefinery()) {
+                if (!this.handler.vespeneGeysers.isEmpty()) {
+                    for (Entry<VespeneGeyser, Boolean> g : this.handler.vespeneGeysers.entrySet()) {
                         if (!g.getValue()) {
-                            ((GameState) this.handler).chosenPosition = g.getKey().getTilePosition();
+                            this.handler.chosenPosition = g.getKey().getTilePosition();
                             return State.SUCCESS;
                         }
                     }
                 }
-            } else if (((GameState) this.handler).chosenToBuild == UnitType.Terran_Command_Center) {
-                if (!((GameState) this.handler).islandBases.isEmpty()) { // TODO uncomment when BWAPI island bug is fixed
-                    if (((GameState) this.handler).islandCCs.size() < ((GameState) this.handler).islandBases.size()) {
-                        if (((GameState) this.handler).islandExpand) return State.FAILURE;
-                        for (Agent u : ((GameState) this.handler).agents.values()) {
-                            if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
-                                ((GameState) this.handler).islandExpand = true;
-                                return State.FAILURE;
-                            }
+            } else if (this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
+                if (!this.handler.islandBases.isEmpty() && this.handler.islandCCs.size() < this.handler.islandBases.size()) {
+                    if (this.handler.islandExpand) return State.FAILURE;
+                    for (Agent u : this.handler.agents.values()) {
+                        if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
+                            this.handler.islandExpand = true;
+                            return State.FAILURE;
                         }
                     }
                 }
                 TilePosition main;
-                if (((GameState) this.handler).mainCC != null)
-                    main = ((GameState) this.handler).mainCC.second.getTilePosition();
-                else main = ((GameState) this.handler).getPlayer().getStartLocation();
+                if (this.handler.mainCC != null) main = this.handler.mainCC.second.getTilePosition();
+                else main = this.handler.getPlayer().getStartLocation();
                 List<Base> valid = new ArrayList<>();
-                if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                    for (Base b : ((GameState) this.handler).specialBLs) {
-                        if (!((GameState) this.handler).CCs.containsKey(b)) {
-                            ((GameState) this.handler).chosenPosition = b.getLocation();
+                if (this.handler.strat.name.equals("PlasmaWraithHell")) {
+                    for (Base b : this.handler.specialBLs) {
+                        if (!this.handler.CCs.containsKey(b)) {
+                            this.handler.chosenPosition = b.getLocation();
                             return State.SUCCESS;
                         }
                     }
                 }
-                for (Base b : ((GameState) this.handler).BLs) {
-                    if (!((GameState) this.handler).CCs.containsKey(b) && Util.isConnected(b.getLocation(), main)) {
-                        valid.add(b);
-                    }
+                for (Base b : this.handler.BLs) {
+                    if (!this.handler.CCs.containsKey(b) && Util.isConnected(b.getLocation(), main)) valid.add(b);
                 }
                 List<Base> remove = new ArrayList<>();
                 for (Base b : valid) {
-                    if (((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation())
-                            && !((GameState) this.handler).getGame().getBWMap().isBuildable(b.getLocation(), true)) {
+                    if (this.handler.getGame().getBWMap().isVisible(b.getLocation())
+                            && !this.handler.getGame().getBWMap().isBuildable(b.getLocation(), true)) {
                         remove.add(b);
                         continue;
                     }
-                    if (b.getArea() != ((GameState) this.handler).naturalArea) {
-                        for (Unit u : ((GameState) this.handler).enemyCombatUnitMemory) {
-                            if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()) == null ||
+                    if (b.getArea() != this.handler.naturalArea) {
+                        for (Unit u : this.handler.enemyCombatUnitMemory) {
+                            if (this.handler.bwem.getMap().getArea(u.getTilePosition()) == null ||
                                     !(u instanceof Attacker) || u instanceof Worker) {
                                 continue;
                             }
-                            if (((GameState) this.handler).bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
+                            if (this.handler.bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
                                 remove.add(b);
                                 break;
                             }
                         }
-                        for (EnemyBuilding u : ((GameState) this.handler).enemyBuildingMemory.values()) {
-                            if (((GameState) this.handler).bwem.getMap().getArea(u.pos) == null) continue;
-                            if (((GameState) this.handler).bwem.getMap().getArea(u.pos).equals(b.getArea())) {
+                        for (EnemyBuilding u : this.handler.enemyBuildingMemory.values()) {
+                            if (this.handler.bwem.getMap().getArea(u.pos) == null) continue;
+                            if (this.handler.bwem.getMap().getArea(u.pos).equals(b.getArea())) {
                                 remove.add(b);
                                 break;
                             }
@@ -100,78 +94,73 @@ public class ChoosePosition extends Action {
                 }
                 valid.removeAll(remove);
                 if (valid.isEmpty()) return State.FAILURE;
-                ((GameState) this.handler).chosenPosition = valid.get(0).getLocation();
+                this.handler.chosenPosition = valid.get(0).getLocation();
                 return State.SUCCESS;
             } else {
-                if (!((GameState) this.handler).workerBuild.isEmpty()) {
-                    for (MutablePair<UnitType, TilePosition> w : ((GameState) this.handler).workerBuild.values()) {
-                        ((GameState) this.handler).testMap.updateMap(w.second, w.first, false);
+                if (!this.handler.workerBuild.isEmpty()) {
+                    for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+                        this.handler.testMap.updateMap(w.second, w.first, false);
                     }
                 }
-                if (!((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Bunker) && !((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (((GameState) this.handler).strat.proxy && ((GameState) this.handler).chosenToBuild == UnitType.Terran_Barracks) {
-                        origin = new TilePosition(((GameState) this.handler).getGame().getBWMap().mapWidth() / 2, ((GameState) this.handler).getGame().getBWMap().mapHeight() / 2);
-                    } else {
-                        origin = self.getStartLocation();
-                    }
-                } else if (((GameState) this.handler).chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (((GameState) this.handler).defendPosition != null) {
-                        origin = ((GameState) this.handler).defendPosition.toTilePosition();
-                    } else if (((GameState) this.handler).DBs.isEmpty()) {
+                if (!this.handler.chosenToBuild.equals(UnitType.Terran_Bunker) && !this.handler.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
+                    if (this.handler.strat.proxy && this.handler.chosenToBuild == UnitType.Terran_Barracks) {
+                        origin = new TilePosition(this.handler.getGame().getBWMap().mapWidth() / 2, this.handler.getGame().getBWMap().mapHeight() / 2);
+                    } else if (this.handler.mainCC != null && this.handler.mainCC.first != null) {
+                        origin = this.handler.mainCC.first.getLocation();
+                    } else origin = self.getStartLocation();
+                } else if (this.handler.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
+                    if (this.handler.defendPosition != null) origin = this.handler.defendPosition.toTilePosition();
+                    else if (this.handler.DBs.isEmpty()) {
                         origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
-                        origin = ((GameState) this.handler).DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                        origin = this.handler.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                     }
-                } else if (((GameState) this.handler).EI.naughty && ((GameState) this.handler).enemyRace == Race.Zerg) {
-                    origin = ((GameState) this.handler).getBunkerPositionAntiPool();
+                } else if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg) {
+                    origin = this.handler.getBunkerPositionAntiPool();
                     if (origin != null) {
-                        ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                        ((GameState) this.handler).chosenPosition = origin;
+                        this.handler.testMap = this.handler.map.clone();
+                        this.handler.chosenPosition = origin;
                         return State.SUCCESS;
                     } else {
-                        origin = ((GameState) this.handler).testMap.findBunkerPositionAntiPool();
+                        origin = this.handler.testMap.findBunkerPositionAntiPool();
                         if (origin != null) {
-                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                            ((GameState) this.handler).chosenPosition = origin;
+                            this.handler.testMap = this.handler.map.clone();
+                            this.handler.chosenPosition = origin;
                             return State.SUCCESS;
-                        } else if (((GameState) this.handler).mainCC != null) {
-                            origin = ((GameState) this.handler).mainCC.second.getTilePosition();
-                        } else origin = ((GameState) this.handler).getPlayer().getStartLocation();
+                        } else if (this.handler.mainCC != null) origin = this.handler.mainCC.second.getTilePosition();
+                        else origin = this.handler.getPlayer().getStartLocation();
                     }
-                } else if (((GameState) this.handler).Ts.isEmpty()) {
-                    if (((GameState) this.handler).mainChoke != null &&
-                            !((GameState) this.handler).strat.name.equals("MechGreedyFE") &&
-                            !((GameState) this.handler).strat.name.equals("BioGreedyFE") &&
-                            !((GameState) this.handler).strat.name.equals("BioMechGreedyFE")) {
-                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
+                } else if (this.handler.Ts.isEmpty()) {
+                    if (this.handler.mainChoke != null &&
+                            !this.handler.strat.name.equals("MechGreedyFE") &&
+                            !this.handler.strat.name.equals("BioGreedyFE") &&
+                            !this.handler.strat.name.equals("BioMechGreedyFE")) {
+                        origin = this.handler.testMap.findBunkerPosition(this.handler.mainChoke);
                         if (origin != null) {
-                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                            ((GameState) this.handler).chosenPosition = origin;
+                            this.handler.testMap = this.handler.map.clone();
+                            this.handler.chosenPosition = origin;
                             return State.SUCCESS;
-                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
-                    } else if (((GameState) this.handler).naturalChoke != null) {
-                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).naturalChoke);
+                        } else origin = this.handler.mainChoke.getCenter().toTilePosition();
+                    } else if (this.handler.naturalChoke != null) {
+                        origin = this.handler.testMap.findBunkerPosition(this.handler.naturalChoke);
                         if (origin != null) {
-                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                            ((GameState) this.handler).chosenPosition = origin;
+                            this.handler.testMap = this.handler.map.clone();
+                            this.handler.chosenPosition = origin;
                             return State.SUCCESS;
-                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                        } else origin = this.handler.mainChoke.getCenter().toTilePosition();
                     } else {
-                        origin = ((GameState) this.handler).testMap.findBunkerPosition(((GameState) this.handler).mainChoke);
+                        origin = this.handler.testMap.findBunkerPosition(this.handler.mainChoke);
                         if (origin != null) {
-                            ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
-                            ((GameState) this.handler).chosenPosition = origin;
+                            this.handler.testMap = this.handler.map.clone();
+                            this.handler.chosenPosition = origin;
                             return State.SUCCESS;
-                        } else origin = ((GameState) this.handler).mainChoke.getCenter().toTilePosition();
+                        } else origin = this.handler.mainChoke.getCenter().toTilePosition();
                     }
-                } else {
-                    origin = ((GameState) this.handler).Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
-                }
-                //TilePosition position = ((GameState) this.handler).testMap.findPosition(((GameState) this.handler).chosenToBuild, origin);
-                TilePosition position = ((GameState) this.handler).testMap.findPositionNew(((GameState) this.handler).chosenToBuild, origin);
-                ((GameState) this.handler).testMap = ((GameState) this.handler).map.clone();
+                } else origin = this.handler.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                TilePosition position = this.handler.testMap.findPositionNew(this.handler.chosenToBuild, origin);
+                this.handler.testMap = this.handler.map.clone();
                 if (position != null) {
-                    ((GameState) this.handler).chosenPosition = position;
+                    this.handler.chosenPosition = position;
                     return State.SUCCESS;
                 }
             }

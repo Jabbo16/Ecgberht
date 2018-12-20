@@ -27,7 +27,7 @@ public class MechGreedyFE extends Strategy {
         portPerCC = 1;
         bunker = true;
         supplyForFirstRefinery = 36;
-        armyForAttack = 25;
+        armyForAttack = 30;
         armyForExpand = 0;
         facForArmory = 2;
         numArmories = 1;
@@ -56,7 +56,6 @@ public class MechGreedyFE extends Strategy {
         buildUnits.add(UnitType.Terran_Academy);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

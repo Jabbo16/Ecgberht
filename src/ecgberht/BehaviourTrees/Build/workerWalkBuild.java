@@ -5,9 +5,8 @@ import bwem.area.Area;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MineralPatch;
@@ -17,20 +16,22 @@ import java.util.Map.Entry;
 
 public class workerWalkBuild extends Action {
 
-    public workerWalkBuild(String name, GameHandler gh) {
+    public workerWalkBuild(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
     public State execute() {
         try {
-            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : ((GameState) this.handler).workerBuild.entrySet()) {
+            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : this.handler.workerBuild.entrySet()) {
                 SCV chosen = u.getKey();
-                if (u.getValue().first != UnitType.Terran_Command_Center || ((GameState) this.handler).getGame().getBWMap().isVisible(u.getValue().second) || !((GameState) this.handler).fortressSpecialBLsTiles.contains(u.getValue().second))
+                if (u.getValue().first != UnitType.Terran_Command_Center
+                        || this.handler.getGame().getBWMap().isVisible(u.getValue().second)
+                        || !this.handler.fortressSpecialBLsTiles.contains(u.getValue().second))
                     continue;
                 Base myBase = Util.getClosestBaseLocation(u.getValue().second.toPosition());
-                MutablePair<MineralPatch, MineralPatch> minerals = ((GameState) this.handler).fortressSpecialBLs.get(myBase);
-                Area scvArea = ((GameState) this.handler).bwem.getMap().getArea(chosen.getTilePosition());
+                MutablePair<MineralPatch, MineralPatch> minerals = this.handler.fortressSpecialBLs.get(myBase);
+                Area scvArea = this.handler.bwem.getMap().getArea(chosen.getTilePosition());
                 if (!u.getValue().second.equals(new TilePosition(7, 118))) {
                     if (scvArea != null && scvArea.equals(myBase.getArea())) {
                         if (chosen.getDistance(minerals.first) > 3 * 32) {
@@ -60,10 +61,7 @@ public class workerWalkBuild extends Action {
                         }
                     }
                     chosen.gather(minerals.first);
-
                 }
-
-
             }
             return State.SUCCESS;
         } catch (Exception e) {

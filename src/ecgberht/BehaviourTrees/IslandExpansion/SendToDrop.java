@@ -1,9 +1,8 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Worker;
 
@@ -12,7 +11,7 @@ import java.util.TreeSet;
 
 public class SendToDrop extends Action {
 
-    public SendToDrop(String name, GameHandler gh) {
+    public SendToDrop(String name, GameState gh) {
         super(name, gh);
 
     }
@@ -20,29 +19,27 @@ public class SendToDrop extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).chosenDropShip != null && ((GameState) this.handler).chosenWorker != null) {
-                Worker chosen = ((GameState) this.handler).chosenWorker;
-                if (((GameState) this.handler).workerIdle.contains(chosen)) {
-                    ((GameState) this.handler).workerIdle.remove(chosen);
-                } else {
-                    if (((GameState) this.handler).workerMining.containsKey(chosen)) {
-                        MineralPatch mineral = ((GameState) this.handler).workerMining.get(chosen);
-                        ((GameState) this.handler).workerMining.remove(chosen);
-                        if (((GameState) this.handler).mineralsAssigned.containsKey(mineral)) {
-                            ((GameState) this.handler).mining--;
-                            ((GameState) this.handler).mineralsAssigned.put(mineral, ((GameState) this.handler).mineralsAssigned.get(mineral) - 1);
-                        }
+            if (this.handler.chosenDropShip != null && this.handler.chosenWorker != null) {
+                Worker chosen = this.handler.chosenWorker;
+                if (this.handler.workerIdle.contains(chosen)) {
+                    this.handler.workerIdle.remove(chosen);
+                } else if (this.handler.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = this.handler.workerMining.get(chosen);
+                    this.handler.workerMining.remove(chosen);
+                    if (this.handler.mineralsAssigned.containsKey(mineral)) {
+                        this.handler.mining--;
+                        this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
                     }
                 }
-                ((GameState) this.handler).chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(((GameState) this.handler).chosenWorker)));
-                ((GameState) this.handler).chosenDropShip.setTarget(((GameState) this.handler).chosenIsland.getLocation().toPosition());
-                ((GameState) this.handler).chosenWorkerDrop = ((GameState) this.handler).chosenWorker;
-                ((GameState) this.handler).chosenWorker = null;
+                this.handler.chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(this.handler.chosenWorker)));
+                this.handler.chosenDropShip.setTarget(this.handler.chosenIsland.getLocation().toPosition());
+                this.handler.chosenWorkerDrop = this.handler.chosenWorker;
+                this.handler.chosenWorker = null;
                 return State.SUCCESS;
             }
-            ((GameState) this.handler).chosenDropShip = null;
-            ((GameState) this.handler).chosenWorker = null;
-            ((GameState) this.handler).chosenIsland = null;
+            this.handler.chosenDropShip = null;
+            this.handler.chosenWorker = null;
+            this.handler.chosenIsland = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

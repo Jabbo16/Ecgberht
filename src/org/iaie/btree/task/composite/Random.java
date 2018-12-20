@@ -33,7 +33,7 @@
 
 package org.iaie.btree.task.composite;
 
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -48,7 +48,7 @@ public class Random extends Composite {
     }
 
     @Override
-    public State run() {
+    public BehavioralTree.State run() {
         int task = ThreadLocalRandom.current().nextInt(0, this.children.size() + 1);
         return this.children.get(task).run();
     }

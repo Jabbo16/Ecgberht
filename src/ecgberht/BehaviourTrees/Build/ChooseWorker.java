@@ -1,15 +1,15 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwem.area.Area;
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Worker;
 
 public class ChooseWorker extends Action {
 
-    public ChooseWorker(String name, GameHandler gh) {
+    public ChooseWorker(String name, GameState gh) {
         super(name, gh);
 
     }
@@ -18,21 +18,27 @@ public class ChooseWorker extends Action {
     public State execute() {
         try {
             Worker closestWorker = null;
-            int frame = ((GameState) this.handler).frameCount;
-            Position chosen = ((GameState) this.handler).chosenPosition.toPosition();
-            if (!((GameState) this.handler).workerIdle.isEmpty()) {
-                for (Worker u : ((GameState) this.handler).workerIdle) {
-                    if (u.getLastCommandFrame() == frame) {
+            int frame = this.handler.frameCount;
+            Position chosen = this.handler.chosenPosition.toPosition();
+            Area posArea = this.handler.bwem.getMap().getArea(this.handler.chosenPosition);
+            if (!this.handler.workerIdle.isEmpty()) {
+                for (Worker u : this.handler.workerIdle) {
+                    if (u.getLastCommandFrame() == frame) continue;
+                    Area workerArea = this.handler.bwem.getMap().getArea(u.getTilePosition());
+                    if (workerArea == null) continue;
+                    if (posArea != null && !posArea.equals(workerArea) && !posArea.isAccessibleFrom(workerArea)) {
                         continue;
                     }
-                    if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
+                    if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)))
                         closestWorker = u;
-                    }
                 }
             }
-            if (!((GameState) this.handler).workerMining.isEmpty()) {
-                for (Worker u : ((GameState) this.handler).workerMining.keySet()) {
-                    if (u.getLastCommandFrame() == frame) {
+            if (!this.handler.workerMining.isEmpty()) {
+                for (Worker u : this.handler.workerMining.keySet()) {
+                    if (u.getLastCommandFrame() == frame) continue;
+                    Area workerArea = this.handler.bwem.getMap().getArea(u.getTilePosition());
+                    if (workerArea == null) continue;
+                    if (posArea != null && !posArea.equals(workerArea) && !posArea.isAccessibleFrom(workerArea)) {
                         continue;
                     }
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
@@ -41,7 +47,7 @@ public class ChooseWorker extends Action {
                 }
             }
             if (closestWorker != null) {
-                ((GameState) this.handler).chosenWorker = closestWorker;
+                this.handler.chosenWorker = closestWorker;
                 return State.SUCCESS;
             }
             return State.FAILURE;

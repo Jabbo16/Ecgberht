@@ -33,8 +33,8 @@
 
 package org.iaie.btree.task;
 
-import org.iaie.btree.state.State;
-import org.iaie.btree.util.GameHandler;
+import ecgberht.GameState;
+import org.iaie.btree.BehavioralTree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,17 +49,17 @@ public abstract class Task {
 
     protected final List<Task> children;
     private final String name;
-    protected GameHandler handler;
-    protected State state = State.RUNNING;
+    protected GameState handler;
+    protected BehavioralTree.State state = BehavioralTree.State.RUNNING;
 
-    public Task(String name, GameHandler gh) {
-        this.state = State.READY;
+    public Task(String name, GameState gh) {
+        this.state = BehavioralTree.State.READY;
         this.name = name;
         this.children = new ArrayList<>();
         this.handler = gh;
     }
 
-    public Task(String name, GameHandler gh, Task... tasks) {
+    public Task(String name, GameState gh, Task... tasks) {
         this(name, gh);
         this.children.addAll(Arrays.asList(tasks));
     }
@@ -77,16 +77,16 @@ public abstract class Task {
     }
 
     public final void running() {
-        this.state = State.RUNNING;
+        this.state = BehavioralTree.State.RUNNING;
     }
 
     public final void success() {
-        this.state = State.SUCCESS;
+        this.state = BehavioralTree.State.SUCCESS;
     }
 
     public final void failure() {
-        this.state = State.FAILURE;
+        this.state = BehavioralTree.State.FAILURE;
     }
 
-    public abstract State run();
+    public abstract BehavioralTree.State run();
 }

@@ -33,9 +33,9 @@
 
 package org.iaie.btree.task.leaf;
 
-import org.iaie.btree.state.State;
+import ecgberht.GameState;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.Task;
-import org.iaie.btree.util.GameHandler;
 
 /**
  * @param <GameHandler>
@@ -43,30 +43,30 @@ import org.iaie.btree.util.GameHandler;
  */
 public abstract class Leaf extends Task {
 
-    public Leaf(String name, GameHandler gh) {
+    public Leaf(String name, GameState gh) {
         super(name, gh);
     }
 
-    public abstract State execute();
+    public abstract BehavioralTree.State execute();
 
     @Override
-    public State run() {
-        State result = this.execute();
+    public BehavioralTree.State run() {
+        BehavioralTree.State result = this.execute();
 
         if (result != null) {
             switch (result) {
                 case SUCCESS:
                     this.success();
-                    return State.SUCCESS;
+                    return BehavioralTree.State.SUCCESS;
                 case FAILURE:
                     this.failure();
-                    return State.FAILURE;
+                    return BehavioralTree.State.FAILURE;
                 case ERROR:
-                    return State.ERROR;
+                    return BehavioralTree.State.ERROR;
                 default:
                     break;
             }
-        } else return State.ERROR;
-        return State.FAILURE;
+        } else return BehavioralTree.State.ERROR;
+        return BehavioralTree.State.FAILURE;
     }
 }

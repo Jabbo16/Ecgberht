@@ -1,7 +1,9 @@
 package ecgberht.Clustering;
 
 
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class MeanShift {
     public MeanShift(Collection<Unit> units, double radius) {
         this.radius = Math.pow(radius, 2);
         for (Unit u : units) {
-            //if (!u.isVisible()) continue;
+            if (u instanceof Building && !Util.isStaticDefense(u) && !u.isVisible()) continue;
             Position p = u.getPosition();
             this.points.add(new UnitPos(u, p.getX(), p.getY()));
         }
@@ -76,6 +78,7 @@ public class MeanShift {
                 clusters.get(c).updateCentroid();
             }
             time = System.currentTimeMillis() - time;
+            clusters.forEach(Cluster::updateCMaxDistFromCenter);
             return clusters;
         } catch (Exception e) {
             System.err.println("MeanShift run exception");

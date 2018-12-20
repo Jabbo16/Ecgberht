@@ -2,13 +2,12 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import bwem.Base;
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.iaie.btree.util.GameHandler;
 
 public class CheckVisibleBase extends Conditional {
 
-    public CheckVisibleBase(String name, GameHandler gh) {
+    public CheckVisibleBase(String name, GameState gh) {
         super(name, gh);
 
     }
@@ -16,13 +15,11 @@ public class CheckVisibleBase extends Conditional {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).chosenScout == null) {
-                return State.FAILURE;
-            }
-            if (!((GameState) this.handler).scoutSLs.isEmpty()) {
-                for (Base b : ((GameState) this.handler).scoutSLs) {
-                    if ((((GameState) this.handler).getGame().getBWMap().isVisible(b.getLocation()))) {
-                        ((GameState) this.handler).scoutSLs.remove(b);
+            if (this.handler.chosenScout == null) return State.FAILURE;
+            if (!this.handler.scoutSLs.isEmpty()) {
+                for (Base b : this.handler.scoutSLs) {
+                    if ((this.handler.getGame().getBWMap().isVisible(b.getLocation()))) {
+                        this.handler.scoutSLs.remove(b);
                         return State.SUCCESS;
                     }
                 }

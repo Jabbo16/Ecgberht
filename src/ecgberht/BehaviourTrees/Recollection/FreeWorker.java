@@ -1,14 +1,13 @@
 package ecgberht.BehaviourTrees.Recollection;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.Worker;
 
 public class FreeWorker extends Action {
 
-    public FreeWorker(String name, GameHandler gh) {
+    public FreeWorker(String name, GameState gh) {
         super(name, gh);
 
     }
@@ -16,11 +15,12 @@ public class FreeWorker extends Action {
     @Override
     public State execute() {
         try {
-            if (!((GameState) this.handler).workerIdle.isEmpty()) {
-                int frame = ((GameState) this.handler).frameCount;
-                for (Worker w : ((GameState) this.handler).workerIdle) {
+            this.handler.chosenWorker = null;
+            if (!this.handler.workerIdle.isEmpty()) {
+                int frame = this.handler.frameCount;
+                for (Worker w : this.handler.workerIdle) {
                     if (w.getLastCommandFrame() != frame) {
-                        ((GameState) this.handler).chosenWorker = w;
+                        this.handler.chosenWorker = w;
                         return State.SUCCESS;
                     }
                 }

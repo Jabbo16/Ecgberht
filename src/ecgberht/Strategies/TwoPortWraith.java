@@ -48,7 +48,6 @@ public class TwoPortWraith extends Strategy {
     public void initBuildUnits() {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

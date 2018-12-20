@@ -10,9 +10,9 @@ import java.util.TreeMap;
 
 
 public class SpellsManager {
-    private Map<ScienceVessel, PlayerUnit> irradiatedUnits = new TreeMap<>();
-    private Map<ScienceVessel, MobileUnit> defenseMatrixedUnits = new TreeMap<>();
-    private Map<ScienceVessel, PlayerUnit> EMPedUnits = new TreeMap<>(); // TODO change when using Position instead
+    public Map<ScienceVessel, PlayerUnit> irradiatedUnits = new TreeMap<>();
+    public Map<ScienceVessel, MobileUnit> defenseMatrixedUnits = new TreeMap<>();
+    public Map<ScienceVessel, PlayerUnit> EMPedUnits = new TreeMap<>(); // TODO change when using Position instead
 
     void onFrameSpellManager() {
         try {
@@ -60,4 +60,5 @@ public class SpellsManager {
     public void addEMPed(ScienceVessel vessel, PlayerUnit unit) {
         EMPedUnits.put(vessel, unit);
     }
+
 }

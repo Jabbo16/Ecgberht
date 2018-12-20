@@ -20,7 +20,7 @@ public class BioGreedyFE extends Strategy {
         numBays = 2;
         raxPerCC = 3;
         facPerCC = 0;
-        numRaxForAca = 3;
+        numRaxForAca = 2;
         numRaxForFac = 3;
         numCCForPort = 2;
         numCCForScience = 2;
@@ -53,7 +53,6 @@ public class BioGreedyFE extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

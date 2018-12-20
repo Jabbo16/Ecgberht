@@ -3,9 +3,8 @@ package ecgberht.BehaviourTrees.Scouting;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.Worker;
 
@@ -14,7 +13,7 @@ import java.util.List;
 
 public class SendScout extends Action {
 
-    public SendScout(String name, GameHandler gh) {
+    public SendScout(String name, GameState gh) {
         super(name, gh);
 
     }
@@ -22,32 +21,32 @@ public class SendScout extends Action {
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).enemyMainBase == null) {
-                if (!((GameState) this.handler).scoutSLs.isEmpty()) {
+            if (this.handler.enemyMainBase == null) {
+                if (!this.handler.scoutSLs.isEmpty()) {
                     List<Base> aux = new ArrayList<>();
-                    for (Base b : ((GameState) this.handler).scoutSLs) {
-                        if (((GameState) this.handler).fortressSpecialBLs.containsKey(b)) continue;
-                        if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                            if (((MobileUnit) ((GameState) this.handler).chosenScout).move(b.getLocation().toPosition())) {
+                    for (Base b : this.handler.scoutSLs) {
+                        if (this.handler.fortressSpecialBLs.containsKey(b)) continue;
+                        if (this.handler.strat.name.equals("PlasmaWraithHell")) {
+                            if (((MobileUnit) this.handler.chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
-                        } else if (Util.isConnected(b.getLocation(), ((GameState) this.handler).chosenScout.getTilePosition())) {
-                            if (((MobileUnit) ((GameState) this.handler).chosenScout).move(b.getLocation().toPosition())) {
+                        } else if (Util.isConnected(b.getLocation(), this.handler.chosenScout.getTilePosition())) {
+                            if (((MobileUnit) this.handler.chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
                         } else aux.add(b);
                     }
-                    ((GameState) this.handler).scoutSLs.removeAll(aux);
+                    this.handler.scoutSLs.removeAll(aux);
                 }
             }
-            if (((GameState) this.handler).strat.name.equals("PlasmaWraithHell")) {
-                ((MobileUnit) ((GameState) this.handler).chosenScout).stop(false);
-                ((GameState) this.handler).chosenScout = null;
+            if (this.handler.strat.name.equals("PlasmaWraithHell")) {
+                ((MobileUnit) this.handler.chosenScout).stop(false);
+                this.handler.chosenScout = null;
                 return State.FAILURE;
             }
-            ((GameState) this.handler).workerIdle.add((Worker) ((GameState) this.handler).chosenScout);
-            ((MobileUnit) ((GameState) this.handler).chosenScout).stop(false);
-            ((GameState) this.handler).chosenScout = null;
+            this.handler.workerIdle.add((Worker) this.handler.chosenScout);
+            ((MobileUnit) this.handler.chosenScout).stop(false);
+            this.handler.chosenScout = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

@@ -33,7 +33,7 @@
 
 package org.iaie.btree.task.composite;
 
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.Task;
 
 /**
@@ -52,13 +52,13 @@ public class Sequence extends Composite {
     }
 
     @Override
-    public State run() {
+    public BehavioralTree.State run() {
 
         for (int i = 0; i < this.children.size(); i++) {
-            State result = this.children.get(i).run();
-            if (result == State.FAILURE) return State.FAILURE;
-            if (result == State.ERROR) return State.ERROR;
+            BehavioralTree.State result = this.children.get(i).run();
+            if (result == BehavioralTree.State.FAILURE) return BehavioralTree.State.FAILURE;
+            if (result == BehavioralTree.State.ERROR) return BehavioralTree.State.ERROR;
         }
-        return State.SUCCESS;
+        return BehavioralTree.State.SUCCESS;
     }
 }

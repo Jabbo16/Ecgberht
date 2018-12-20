@@ -20,7 +20,7 @@ public class PlasmaWraithHell extends Strategy {
         numBays = 1;
         raxPerCC = 2;
         facPerCC = 0;
-        numRaxForAca = 3;
+        numRaxForAca = 2;
         numRaxForFac = 1;
         bunker = false;
         supplyForFirstRefinery = 28;
@@ -52,7 +52,6 @@ public class PlasmaWraithHell extends Strategy {
         buildUnits.add(UnitType.Terran_Factory);
         buildUnits.add(UnitType.Terran_Starport);
         buildUnits.add(UnitType.Terran_Science_Facility);
-        if (bunker) buildUnits.add(UnitType.Terran_Bunker);
     }
 
     @Override

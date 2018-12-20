@@ -3,14 +3,13 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.Position;
 
 public class ChooseIsland extends Action {
 
-    public ChooseIsland(String name, GameHandler gh) {
+    public ChooseIsland(String name, GameState gh) {
         super(name, gh);
 
     }
@@ -20,9 +19,9 @@ public class ChooseIsland extends Action {
         try {
             Base chosen = null;
             double distMax = Double.MAX_VALUE;
-            Position drop = ((GameState) this.handler).chosenDropShip.unit.getPosition();
-            for (Base b : ((GameState) this.handler).islandBases) {
-                if (((GameState) this.handler).islandCCs.containsKey(b)) continue;
+            Position drop = this.handler.chosenDropShip.unit.getPosition();
+            for (Base b : this.handler.islandBases) {
+                if (this.handler.islandCCs.containsKey(b)) continue;
                 double dist = Util.broodWarDistance(b.getLocation().toPosition(), drop);
                 if (dist < distMax) {
                     distMax = dist;
@@ -30,12 +29,12 @@ public class ChooseIsland extends Action {
                 }
             }
             if (chosen != null) {
-                ((GameState) this.handler).chosenIsland = chosen;
+                this.handler.chosenIsland = chosen;
                 return State.SUCCESS;
             }
-            ((GameState) this.handler).chosenDropShip = null;
-            ((GameState) this.handler).chosenWorker = null;
-            ((GameState) this.handler).chosenIsland = null;
+            this.handler.chosenDropShip = null;
+            this.handler.chosenWorker = null;
+            this.handler.chosenIsland = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

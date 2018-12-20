@@ -1,30 +1,27 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
 import ecgberht.GameState;
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.iaie.btree.util.GameHandler;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.unit.MachineShop;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 
 public class ChooseSiegeMode extends Action {
 
-    public ChooseSiegeMode(String name, GameHandler gh) {
+    public ChooseSiegeMode(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
     public State execute() {
         try {
-            if (((GameState) this.handler).UBs.isEmpty()) {
-                return State.FAILURE;
-            }
-            for (ResearchingFacility u : ((GameState) this.handler).UBs) {
+            if (this.handler.UBs.isEmpty()) return State.FAILURE;
+            for (ResearchingFacility u : this.handler.UBs) {
                 if (!(u instanceof MachineShop)) continue;
-                if (!((GameState) this.handler).getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
-                    ((GameState) this.handler).chosenUnitUpgrader = u;
-                    ((GameState) this.handler).chosenResearch = TechType.Tank_Siege_Mode;
+                if (!this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
+                    this.handler.chosenUnitUpgrader = u;
+                    this.handler.chosenResearch = TechType.Tank_Siege_Mode;
                     return State.SUCCESS;
                 }
             }

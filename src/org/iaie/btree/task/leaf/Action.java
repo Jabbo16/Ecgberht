@@ -5,7 +5,7 @@
  */
 package org.iaie.btree.task.leaf;
 
-import org.iaie.btree.util.GameHandler;
+import ecgberht.GameState;
 
 /**
  * @param <GameHandler>
@@ -13,7 +13,7 @@ import org.iaie.btree.util.GameHandler;
  */
 public abstract class Action extends Leaf {
 
-    public Action(String name, GameHandler gh) {
+    public Action(String name, GameState gh) {
         super(name, gh);
     }
 }

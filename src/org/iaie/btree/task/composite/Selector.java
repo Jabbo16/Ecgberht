@@ -33,14 +33,14 @@
 
 package org.iaie.btree.task.composite;
 
-import org.iaie.btree.state.State;
+import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.Task;
 
 /**
  * @param <GameHandler>
  * @author Moises Martinez <mmartinez at bebee.com>
  */
-public class Selector<GameHandler> extends Composite {
+public class Selector extends Composite {
 
     public Selector(String name) {
         super(name, null);
@@ -52,12 +52,12 @@ public class Selector<GameHandler> extends Composite {
     }
 
     @Override
-    public State run() {
+    public BehavioralTree.State run() {
 
         for (int i = 0; i < this.children.size(); i++) {
-            if (this.children.get(i).run() == State.SUCCESS) return State.SUCCESS;
+            if (this.children.get(i).run() == BehavioralTree.State.SUCCESS) return BehavioralTree.State.SUCCESS;
         }
 
-        return State.FAILURE;
+        return BehavioralTree.State.FAILURE;
     }
 }
