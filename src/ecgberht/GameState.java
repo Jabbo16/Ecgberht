@@ -365,47 +365,6 @@ public class GameState {
                     strategies.get(r.strategyName).second += r.losses;
                 }
             }
-
-            // SSCAIT 2018 filthy hardcode
-            String enemyName = EI.opponent.toLowerCase().replace(" ", "");
-            switch (enemyName) { // TODO add more names to the list T_T
-                case "purpleswarm":
-                case "arrakhammer":
-                    return tPW;
-                case "tomasvajda":
-                    bGFE.armyForAttack = +10;
-                    bGFE.armyForExpand -= 10;
-                    return bGFE;
-                case "icelab":
-                case "toothpickcactus":
-                case "soerenklett":
-                    return bbs;
-                case "kruecke":
-                case "willyt":
-                    return b;
-                case "tyrprotoss":
-                    return bMGFE;
-                case "krasi0":
-                case "locutus":
-                case "saida":
-                case "daqin":
-                case "ironbot":
-                case "mcrave":
-                case "tscmoo":
-                    try {
-                        Optional<Entry<String, MutablePair<Integer, Integer>>> bestCheese = strategies.entrySet().stream().filter(u -> u.getKey().equals("ProxyEightRax") || u.getKey().equals("ProxyBBS")).max(Comparator.comparingDouble(s -> (s.getValue().first + s.getValue().second) > 0 ? (double) s.getValue().first / (s.getValue().first + s.getValue().second) : 0));
-                        if (bestCheese.isPresent()) {
-                            ih.sendText("Enjoy the cheese, you bully");
-                            Strategy strat = nameStrat.get(bestCheese.get().getKey());
-                            if (strat != null) {
-                                ih.sendText("Picked " + strat.name + " just to mess with you, gg");
-                                return strat;
-                            }
-                        }
-                    } catch (Exception e) {
-                        System.err.println("Exception when choosing cheese");
-                    }
-            }
             double maxWinRate = 0.0;
             String bestStrat = null;
             for (Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
