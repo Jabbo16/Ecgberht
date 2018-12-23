@@ -24,8 +24,8 @@ public class FullBioFE extends Strategy {
         numRaxForFac = 4;
         bunker = false;
         supplyForFirstRefinery = 36;
-        armyForAttack = 30;
-        armyForExpand = 6;
+        armyForAttack = 28;
+        armyForExpand = 8;
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;
