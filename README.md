@@ -4,7 +4,7 @@
 
 # Ecgberht
 
-[![Build status](https://ci.appveyor.com/api/projects/status/ka5uam9blh1i8qtn?svg=true)](https://ci.appveyor.com/project/Jabbo16/ecgberht) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
+[![Build status](https://ci.appveyor.com/api/projects/status/ka5uam9blh1i8qtn?svg=true)](https://ci.appveyor.com/project/Jabbo16/ecgberht) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Description
 
