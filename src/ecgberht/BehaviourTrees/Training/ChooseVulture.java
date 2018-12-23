@@ -18,7 +18,7 @@ public class ChooseVulture extends Action {
     public State execute() {
         try {
             if (!this.handler.Fs.isEmpty()) {
-                if (Util.countUnitTypeSelf(UnitType.Terran_Vulture) * 2 <= Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) + 2) {
+                if (this.handler.strat.name.equals("VultureRush") || Util.countUnitTypeSelf(UnitType.Terran_Vulture) * 2 <= Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) + 2) {
                     for (Factory b : this.handler.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Vulture)) {
                             this.handler.chosenUnit = UnitType.Terran_Vulture;

@@ -23,13 +23,15 @@ public class ChooseMarine extends Action {
                 int multiplier = 2;
                 String strat = this.handler.strat.name;
                 Player self = this.handler.getPlayer();
-                if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
+                if (strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("VultureRush")) multiplier = 15;
                 if (!this.handler.Fs.isEmpty() && (self.isResearching(TechType.Tank_Siege_Mode) || self.hasResearched(TechType.Tank_Siege_Mode)) && self.gas() >= UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice() && self.minerals() <= 200) {
                     if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                         return State.FAILURE;
                     }
                 }
                 if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith")) && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 6 && !this.handler.defense)
+                    return State.FAILURE;
+                if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !this.handler.defense)
                     return State.FAILURE;
                 for (Barracks b : this.handler.MBs) {
                     if (!b.isTraining()) {
