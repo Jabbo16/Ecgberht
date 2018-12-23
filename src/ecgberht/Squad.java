@@ -293,15 +293,15 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (move != null) {
                     WeaponType weapon = Util.getWeapon(u.getType());
-                    int range = weapon.maxRange();
+                    double randomRange = weapon.maxRange() * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0;
                     if (u.getOrder() == Order.AttackMove) {
-                        if (u.getDistance(move) <= range * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.getPosition())) {
+                        if (u.getDistance(move) <= randomRange && Util.shouldIStop(u.getPosition())) {
                             if (!u.isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
                                 u.siege();
                             } else UtilMicro.stop(u);
                             return;
                         }
-                    } else if (u.getDistance(move) > range) {
+                    } else if (u.getDistance(move) > randomRange) {
                         if (u.isSieged() && !getGs().defense) {
                             u.unsiege();
                         } else UtilMicro.attack(u, move);
