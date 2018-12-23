@@ -49,7 +49,7 @@ public class WorkerScoutAgent extends Agent {
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
-                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected())) {
+                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected(mySim.enemies))) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
             removedIndex = true;
@@ -91,8 +91,7 @@ public class WorkerScoutAgent extends Agent {
             stoppedDisrupting = true;
             removedIndex = true;
         } else if (mySim.enemies.stream().anyMatch(u -> u.getDistance(unit) <= 4 * 32)) {
-            boolean zerglings = mySim.enemies.stream().anyMatch(u -> u instanceof Zergling);
-            if (zerglings) {
+            if (mySim.enemies.stream().anyMatch(u -> u instanceof Zergling)) {
                 unit.haltConstruction();
                 stoppedDisrupting = true;
                 if (!removedIndex) {

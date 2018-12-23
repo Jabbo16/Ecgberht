@@ -1342,4 +1342,16 @@ public class GameState {
         }
         return false;
     }
+
+    public boolean basicCombatUnitsDetected(Set<Unit> units) {
+        switch (enemyRace) {
+            case Zerg:
+                return units.stream().anyMatch(u -> u.getType() == UnitType.Zerg_Zergling);
+            case Terran:
+                return units.stream().anyMatch(u -> u.getType() == UnitType.Terran_Marine);
+            case Protoss:
+                return units.stream().anyMatch(u -> u.getType() == UnitType.Protoss_Zealot || u.getType() == UnitType.Protoss_Dragoon);
+        }
+        return false;
+    }
 }
