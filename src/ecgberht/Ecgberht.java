@@ -458,6 +458,7 @@ public class Ecgberht implements BWEventListener {
             }
             if (gs.strat.name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
                 gs.strat = new FullMech();
+                if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                 transition();
             }
             gs.cancelDyingThings();

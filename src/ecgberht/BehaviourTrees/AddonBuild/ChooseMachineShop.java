@@ -16,7 +16,8 @@ public class ChooseMachineShop extends Action {
     @Override
     public State execute() {
         try {
-            if(this.handler.strat.name.equals("VultureRush") && this.handler.Fs.size() < 2 && this.handler.UBs.stream().anyMatch(u -> u instanceof MachineShop)) return State.FAILURE;
+            if (this.handler.strat.name.equals("VultureRush") && (this.handler.Fs.size() < 2 || this.handler.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
+                return State.FAILURE;
             if (!this.handler.Fs.isEmpty()) {
                 for (Factory c : this.handler.Fs) {
                     if (!c.isTraining() && c.getAddon() == null) {

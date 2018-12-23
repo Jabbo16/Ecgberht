@@ -487,8 +487,8 @@ public class Util {
     public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies, Position pos) {
         int bestScore = -999999;
         Unit bestTarget = null;
-        if(rangedUnit == null || enemies.isEmpty()) return null;
-        if(pos == null) return getRangedTarget(rangedUnit, enemies);
+        if (rangedUnit == null || enemies.isEmpty()) return null;
+        if (pos == null) return getRangedTarget(rangedUnit, enemies);
         for (Unit enemy : enemies) {
             if (enemy == null || !enemy.exists()) continue;
             PlayerUnit target = (PlayerUnit) enemy;
@@ -539,7 +539,7 @@ public class Util {
     public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies) {
         int bestScore = -999999;
         Unit bestTarget = null;
-        if(rangedUnit == null || enemies.isEmpty()) return null;
+        if (rangedUnit == null || enemies.isEmpty()) return null;
         for (Unit enemy : enemies) {
             PlayerUnit target = (PlayerUnit) enemy;
             int priority = getRangedAttackPriority(rangedUnit, target);

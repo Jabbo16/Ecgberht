@@ -43,11 +43,12 @@ public class WorkerScoutAgent extends Agent {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
             return true;
         }
-        if(getGs().strat.proxy && mySim.allies.stream().anyMatch(u -> u instanceof Marine)){
+        if (getGs().strat.proxy && mySim.allies.stream().anyMatch(u -> u instanceof Marine)) {
             getGs().myArmy.add(unit);
             return true;
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
+        mySim = getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND);
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
                 || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush
                 || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected(mySim.enemies)
@@ -56,7 +57,6 @@ public class WorkerScoutAgent extends Agent {
             enemyNaturalIndex = -1;
             removedIndex = true;
         }
-        mySim = getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND);
         status = chooseNewStatus();
         cancelDisrupter();
         switch (status) {

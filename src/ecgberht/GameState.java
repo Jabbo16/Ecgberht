@@ -194,9 +194,7 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if(true){
-                return vR;
-            }
+
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 

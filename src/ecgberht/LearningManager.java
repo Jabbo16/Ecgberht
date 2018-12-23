@@ -1,13 +1,14 @@
 package ecgberht;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.type.Race;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class LearningManager {
 
     private EnemyHistory enemyHistory = new EnemyHistory();
     private EnemyInfo enemyInfo;
+    private final String dir = "bwapi-data/write/";
 
     LearningManager(String name, Race race) {
         enemyInfo = new EnemyInfo(name, race);
@@ -44,37 +46,29 @@ public class LearningManager {
         }
     }
 
-    private void writeOpponentInfo(String name, boolean enemyIsRandom) {
-        String dir = "bwapi-data/write/";
-        String path = dir + name + ".json";
-        Util.getIH().sendText("Writing result to: " + path);
-        Gson aux = new Gson();
-        if (enemyIsRandom && enemyInfo.naughty) enemyInfo.naughty = false;
-        String print = aux.toJson(enemyInfo);
+    private void writeJSON(Object content, String path) {
+        Gson aux = new GsonBuilder().setPrettyPrinting().create();
         File directory = new File(dir);
         if (!directory.exists()) directory.mkdir();
-        try (PrintWriter out = new PrintWriter(path)) {
-            out.println(print);
-        } catch (FileNotFoundException e) {
-            System.err.println("writeOpponentInfo");
+        try (FileWriter writer = new FileWriter(path)) {
+            aux.toJson(content, writer);
+        } catch (IOException e) {
+            System.err.println("writeOpponentHistory");
             e.printStackTrace();
         }
     }
 
+    private void writeOpponentInfo(String name, boolean enemyIsRandom) {
+        if (enemyIsRandom && enemyInfo.naughty) enemyInfo.naughty = false;
+        String path = dir + name + ".json";
+        Util.getIH().sendText("Writing result to: " + path);
+        writeJSON(enemyInfo, path);
+    }
+
     private void writeOpponentHistory(String name) {
-        String dir = "bwapi-data/write/";
         String path = dir + name + "-History.json";
         Util.getIH().sendText("Writing history to: " + path);
-        Gson aux = new Gson();
-        String print = aux.toJson(enemyHistory);
-        File directory = new File(dir);
-        if (!directory.exists()) directory.mkdir();
-        try (PrintWriter out = new PrintWriter(path)) {
-            out.println(print);
-        } catch (FileNotFoundException e) {
-            System.err.println("writeOpponentHistory");
-            e.printStackTrace();
-        }
+        writeJSON(enemyHistory, path);
     }
 
     private void readOpponentInfo(String opponentName) {

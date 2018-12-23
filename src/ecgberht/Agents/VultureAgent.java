@@ -171,7 +171,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                     if (weaponRange > type.groundWeapon().maxRange()) return;
                 }*/
                 if (cd > 0) {
-                    if(attackUnit != null){
+                    if (attackUnit != null) {
                         Position predictedPosition = UtilMicro.predictUnitPosition(attackUnit, 2);
                         if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
                             double distPredicted = unit.getDistance(predictedPosition);
@@ -179,7 +179,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                             if (distPredicted > distCurrent) {
                                 status = Status.COMBAT;
                                 return;
-                            } else{
+                            } else {
                                 attackUnit = null;
                                 attackPos = null;
                                 status = Status.KITE;
@@ -187,7 +187,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                             }
                         }
                     }
-                    if (mySim.enemies.isEmpty()){
+                    if (mySim.enemies.isEmpty()) {
                         status = Status.ATTACK;
                         return;
                     }
