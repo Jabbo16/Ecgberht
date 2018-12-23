@@ -410,7 +410,7 @@ public class Util {
 
     public static boolean isStaticDefense(Unit u) {
         return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
-                || u instanceof SunkenColony || u instanceof PhotonCannon;
+                || u instanceof SunkenColony || u instanceof PhotonCannon || u instanceof CreepColony;
     }
 
     public static boolean isStaticDefense(UnitType u) {
@@ -488,22 +488,23 @@ public class Util {
         int bestScore = -999999;
         Unit bestTarget = null;
         if(rangedUnit == null || enemies.isEmpty()) return null;
+        if(pos == null) return getRangedTarget(rangedUnit, enemies);
         for (Unit enemy : enemies) {
             if (enemy == null || !enemy.exists()) continue;
             PlayerUnit target = (PlayerUnit) enemy;
             int priority = getRangedAttackPriority(rangedUnit, target);
-            int range = rangedUnit.getDistance(target);
+            int distance = rangedUnit.getDistance(target);
             double closerToGoal = rangedUnit.getDistance(pos) - target.getDistance(pos);
-            if (range >= 13 * 32) continue;
-            int score = 5 * 32 * priority - range;
+            if (distance >= 13 * 32) continue;
+            int score = 5 * 32 * priority - distance;
             if (closerToGoal > 0) score += 2 * 32;
             boolean isThreat = canAttack(target, rangedUnit);
-            boolean canShootBack = isThreat && range <= 32 + getAttackRange((Attacker) target, rangedUnit);
+            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, rangedUnit);
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = getWeapon(target, rangedUnit).maxRange();
-                    if (range < weaponDist) score += 6 * 32;
+                    double weaponDist = target.getPlayer().getUnitStatCalculator().weaponMaxRange(getWeapon(target, rangedUnit));
+                    if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
             } else if (enemy instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
@@ -538,19 +539,20 @@ public class Util {
     public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies) {
         int bestScore = -999999;
         Unit bestTarget = null;
+        if(rangedUnit == null || enemies.isEmpty()) return null;
         for (Unit enemy : enemies) {
             PlayerUnit target = (PlayerUnit) enemy;
             int priority = getRangedAttackPriority(rangedUnit, target);
-            int range = rangedUnit.getDistance(target);
-            if (range >= 13 * 32) continue;
-            int score = 5 * 32 * priority - range;
+            int distance = rangedUnit.getDistance(target);
+            if (distance >= 13 * 32) continue;
+            int score = 5 * 32 * priority - distance;
             boolean isThreat = canAttack(target, rangedUnit);
-            boolean canShootBack = isThreat && range <= 32 + getAttackRange((Attacker) target, rangedUnit);
+            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, rangedUnit);
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
                     double weaponDist = getWeapon(target, rangedUnit).maxRange();
-                    if (range < weaponDist) score += 6 * 32;
+                    if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
             } else if (enemy instanceof MobileUnit && !((MobileUnit) target).isMoving()) {

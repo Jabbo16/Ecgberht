@@ -914,9 +914,7 @@ public class Ecgberht implements BWEventListener {
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 } else if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
-                    if (gs.enemyBuildingMemory.containsKey(arg0)) {
-                        gs.enemyBuildingMemory.remove(arg0);
-                    }
+                    gs.enemyBuildingMemory.remove(arg0);
                     gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
                 }
             }
@@ -983,6 +981,7 @@ public class Ecgberht implements BWEventListener {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding()) {
+                    gs.enemyBuildingMemory.remove(arg0);
                     gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
                     if (!gs.enemyBuildingMemory.containsKey(arg0)) {
                         gs.map.updateMap(arg0.getTilePosition(), type, false);

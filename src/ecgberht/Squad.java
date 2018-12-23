@@ -301,7 +301,7 @@ public class Squad implements Comparable<Squad> {
                             } else UtilMicro.stop(u);
                             return;
                         }
-                    } else if (u.getDistance(move) > randomRange) {
+                    } else if (u.getDistance(move) < randomRange) {
                         if (u.isSieged() && !getGs().defense) {
                             u.unsiege();
                         } else UtilMicro.attack(u, move);
