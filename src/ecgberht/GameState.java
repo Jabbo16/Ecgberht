@@ -128,7 +128,7 @@ public class GameState {
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
     public boolean explore = false;
-    boolean firstExpand = true;
+    public boolean firstExpand = true;
     public int maxGoliaths = 0;
     public double luckyDraw;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),

@@ -35,6 +35,8 @@ public class CheckBuildingFlames extends Action {
                 } else if (Util.countBuildingAll(UnitType.Terran_Command_Center) < 2 && u.getValue() instanceof Bunker &&
                         IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && this.handler.frameCount >= 24 * 60 * 2.2) {
                     if (u.getKey().getDistance(u.getValue()) > 3 * 32) u.getKey().move(u.getValue().getPosition());
+                }else if (Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && this.handler.CCs.size() < 2 && u.getValue() instanceof Bunker) {
+                    if (u.getKey().getDistance(u.getValue()) > 3 * 32) u.getKey().move(u.getValue().getPosition());
                 } else {
                     u.getKey().stop(false);
                     this.handler.workerIdle.add(u.getKey());
@@ -44,14 +46,15 @@ public class CheckBuildingFlames extends Action {
             for (SCV s : toRemove) this.handler.repairerTask.remove(s);
             boolean isBeingRepaired;
             boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && this.handler.frameCount >= 24 * 60 * 2.2;
+            boolean fastExpanding = this.handler.strat.name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && this.handler.CCs.size() < 2 && this.handler.firstExpand;
             for (Bunker w : this.handler.DBs.keySet()) {
                 int count = 0;
                 if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints() ||
-                        (cheesed && Util.countBuildingAll(UnitType.Terran_Command_Center) < 2)) {
+                        (cheesed && Util.countBuildingAll(UnitType.Terran_Command_Center) < 2) || fastExpanding) {
                     for (Mechanical r : this.handler.repairerTask.values()) {
                         if (w.equals(r)) count++;
                     }
-                    if (count < 2 && (this.handler.defense || cheesed)) {
+                    if (count < 2 && (this.handler.defense || cheesed || fastExpanding)) {
                         this.handler.chosenUnitRepair = w;
                         return State.SUCCESS;
                     }
