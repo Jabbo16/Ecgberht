@@ -24,7 +24,7 @@ public class BuildingMap implements Cloneable {
     private Player self;
     private int height;
     private int width;
-    private String map[][];
+    private String[][] map;
     private BW bw;
     private BWEM bwem;
 
@@ -59,7 +59,7 @@ public class BuildingMap implements Cloneable {
             } else if (!naturalOrdered && getGs().naturalArea.equals(a)) {
                 tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(getGs().BLs.get(1).getLocation())));
                 naturalOrdered = true;
-            } else if(a.getBases().size() == 1) tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getBases().get(0).getLocation());
+            } else if(a.getBases().size() == 1) tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getBases().get(0).getLocation())));
               else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
         }
         for (int jj = 0; jj < height; jj++) {
@@ -89,7 +89,7 @@ public class BuildingMap implements Cloneable {
     }
 
     // Generates an initial building map
-    public void initMap() {
+    void initMap() {
         //Find valid and no valid positions for building
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
@@ -348,7 +348,7 @@ public class BuildingMap implements Cloneable {
     }
 
     // Finds a valid position in the map for a specific building type starting with a given tileposition
-    public TilePosition findPosition(UnitType buildingType, TilePosition starting) {
+    private TilePosition findPosition(UnitType buildingType, TilePosition starting) {
         TilePosition buildingSize = buildingType.tileSize();
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
         if (buildingType.canBuildAddon()) size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
