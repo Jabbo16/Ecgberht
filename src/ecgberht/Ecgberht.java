@@ -449,9 +449,9 @@ public class Ecgberht implements BWEventListener {
                 }
             }
             if (gs.strat.name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
-                if (gs.learningManager.getEnemyInfo().opponent.replace(" ", "").toLowerCase().equals("mariandevecka")) {
-                    gs.strat = new FullBioFE();
-                } else gs.strat = new BioMechFE();
+                if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) {
+                    gs.strat = new BioMechFE();
+                } else gs.strat = new FullBioFE();
                 transition();
             }
             gs.cancelDyingThings();
