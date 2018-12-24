@@ -194,7 +194,12 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-
+            if(alwaysZealotRushes()){
+                IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
+                bFE.armyForExpand += 5;
+                bFE.workerGas = 2;
+                return bFE;
+            }
             Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
             Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
@@ -1168,21 +1173,16 @@ public class GameState {
         LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
         if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
             EI.naughty = true;
+            IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.EarlyPool);
             return;
         }
         EI.naughty = false;
     }
 
-    void alwaysZealotRushes() {
-        if (enemyRace != Race.Protoss) return;
+    private boolean alwaysZealotRushes() {
+        if (enemyRace != Race.Protoss) return false;
         List<String> zealots = new ArrayList<>(Arrays.asList("purplewavelet", "wulibot", "flash", "carstennielsen"));
-        if (zealots.contains(learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", ""))) {
-            IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
-            strat = new FullBioFE();
-            defendPosition = mainChoke.getCenter().toPosition();
-            Ecgberht.transition();
-            strat.armyForExpand += 5;
-        }
+        return zealots.contains(learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", ""));
     }
 
     private boolean requiredUnitsForAttack() {

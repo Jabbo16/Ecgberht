@@ -329,6 +329,7 @@ public class Ecgberht implements BWEventListener {
                 System.setOut(nullOut);
             }
             self = bw.getInteractionHandler().self();
+            skycladObserver = new CameraModule(self.getStartLocation(), bw);
             ih = bw.getInteractionHandler();
             debugManager = new DebugManager(bw.getMapDrawer(), bw.getInteractionHandler());
             IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
@@ -350,7 +351,6 @@ public class Ecgberht implements BWEventListener {
             gs.initEnemyRace();
             gs.learningManager.onStart(ih.enemy().getName(), Util.raceToString(bw.getInteractionHandler().enemy().getRace()));
             gs.alwaysPools();
-            gs.alwaysZealotRushes();
             if (gs.enemyRace == Race.Zerg && gs.learningManager.isNaughty()) gs.playSound("rushed.mp3");
             gs.strat = gs.initStrat();
             gs.updateStrat();
@@ -371,6 +371,11 @@ public class Ecgberht implements BWEventListener {
             gs.initBaseLocations();
             gs.checkBasesWithBLockingMinerals();
             gs.initChokes();
+            IntelligenceAgency.EnemyStrats ES = IntelligenceAgency.getEnemyStrat();
+            if(gs.mainChoke != null && (ES == IntelligenceAgency.EnemyStrats.ZealotRush
+                    || ES == IntelligenceAgency.EnemyStrats.EarlyPool)){
+                gs.defendPosition = gs.mainChoke.getCenter().toPosition();
+            }
             gs.map = new BuildingMap(bw, ih.self(), bwem);
             gs.map.initMap();
             gs.testMap = gs.map.clone();
@@ -387,7 +392,6 @@ public class Ecgberht implements BWEventListener {
             initScanTree();
             initHarassTree();
             initIslandTree();
-            skycladObserver = new CameraModule(self.getStartLocation(), bw);
             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
         } catch (Exception e) {
             System.err.println("onStart Exception");

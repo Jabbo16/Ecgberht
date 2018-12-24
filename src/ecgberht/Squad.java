@@ -78,7 +78,7 @@ public class Squad implements Comparable<Squad> {
         if (status == Status.DEFENSE) return;
         if (squadSim.lose) status = Status.REGROUP;
         else if (status == Status.ATTACK && squadSim.enemies.isEmpty()) status = Status.ADVANCE;
-        else if (status == Status.IDLE && !squadSim.enemies.isEmpty()) status = Status.ATTACK;
+        else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing()) status = Status.ATTACK;
     }
 
     void updateSquad() {
