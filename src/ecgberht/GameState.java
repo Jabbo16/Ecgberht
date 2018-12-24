@@ -138,6 +138,7 @@ public class GameState {
     InteractionHandler ih;
     public BWEM bwem;
     protected Player self;
+    public UnitStorage unitStorage = new UnitStorage();
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
             "Forward Unto Dawn", "Gettysburg", "Grafton", "Halcyon", "Hannibal", "Harbinger of Piety", "High Charity",

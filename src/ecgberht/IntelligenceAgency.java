@@ -280,6 +280,9 @@ public class IntelligenceAgency {
                 if (strat.equals("FullMech")) {
                     getGs().strat = new MechGreedyFE();
                 }
+                if (strat.contains("GreedyFE")) {
+                    getGs().strat.armyForAttack += 10;
+                }
                 getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
                 Ecgberht.transition();
                 return true;

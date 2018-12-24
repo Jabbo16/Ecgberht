@@ -405,6 +405,7 @@ public class Ecgberht implements BWEventListener {
         try {
             gs.frameCount = ih.getFrameCount();
             skycladObserver.onFrame();
+            gs.unitStorage.onFrame();
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
@@ -553,6 +554,7 @@ public class Ecgberht implements BWEventListener {
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
                 if (arg0 instanceof Building) {
                     if (pU.getPlayer().getId() == self.getId()) {
+                        gs.unitStorage.onUnitCreate(arg0);
                         if (!(arg0 instanceof CommandCenter)) {
                             gs.map.updateMap(arg0.getTilePosition(), type, false);
                             gs.testMap = gs.map.clone();
@@ -595,6 +597,7 @@ public class Ecgberht implements BWEventListener {
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = arg0.getType();
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {
+                gs.unitStorage.onUnitComplete(arg0);
                 if (gs.ih.getFrameCount() > 0) gs.supplyMan.onComplete(arg0);
                 if (type.isBuilding()) {
                     gs.builtBuildings++;
@@ -719,6 +722,7 @@ public class Ecgberht implements BWEventListener {
                 first = true;
             }
             if (!type.isNeutral() && (!type.isSpecialBuilding() || type.isRefinery())) {
+                gs.unitStorage.onUnitDestroy(arg0);
                 if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
@@ -916,6 +920,7 @@ public class Ecgberht implements BWEventListener {
         try {
             UnitType type = arg0.getType();
             if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
+                gs.unitStorage.onUnitMorph(arg0);
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 } else if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
@@ -965,7 +970,7 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onUnitRenegade(Unit arg0) {
-
+        if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().equals(self)) gs.unitStorage.onUnitComplete(arg0);
     }
 
     @Override
@@ -976,6 +981,7 @@ public class Ecgberht implements BWEventListener {
             UnitType type = arg0.getType();
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && p.isEnemy()) {
+                gs.unitStorage.onUnitShow(arg0);
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) {
                     gs.enemyRace = type.getRace();

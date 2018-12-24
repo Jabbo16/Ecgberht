@@ -5,6 +5,7 @@ import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.EnemyBuilding;
 import ecgberht.IntelligenceAgency;
+import ecgberht.UnitStorage;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
@@ -122,7 +123,7 @@ public class SimManager {
         friendly = clustering.run(iterations);
         // Enemy Clusters
         List<Unit> enemyUnits = new ArrayList<>();
-        for (Unit u : getGs().enemyCombatUnitMemory) {
+        /*for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Worker && Util.isInOurBases(u) && getGs().strat.proxy) continue;
             if (u instanceof Egg && !((Egg) u).getPlayer().isEnemy()) continue;
             enemyUnits.add(u);
@@ -130,6 +131,12 @@ public class SimManager {
         for (Map.Entry<Unit, EnemyBuilding> u : getGs().enemyBuildingMemory.entrySet()) {
             if (Util.isStaticDefense(u.getValue().type) || u.getValue().unit.isVisible())
                 enemyUnits.add(u.getValue().unit);
+        }*/
+        for(UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values()){
+            if (getGs().strat.proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
+            if (u.unit instanceof Egg && !u.player.isEnemy()) continue;
+            if (Util.isStaticDefense(u.unitType) || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
+                enemyUnits.add(u.unit);
         }
         clustering = new MeanShift(enemyUnits, radius);
         enemies = clustering.run(iterations);

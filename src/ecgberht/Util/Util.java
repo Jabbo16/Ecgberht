@@ -4,6 +4,7 @@ import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
 import ecgberht.EnemyBuilding;
+import ecgberht.UnitStorage;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
@@ -335,6 +336,12 @@ public class Util {
         return new MutablePair<>(pos.first / norm, pos.second / norm);
     }
 
+    public static double getSpeed(UnitStorage.UnitInfo unit) {
+        if (unit.unitType.isBuilding() && !unit.flying) return 0.0;
+        if (unit.burrowed) return 0.0;
+        return unit.player.getUnitStatCalculator().topSpeed(unit.unitType);
+    }
+
     private static MutablePair<Double, Double> rotatePosition(MutablePair<Double, Double> pos, double angle) {
         final double cosAngle = Math.cos(angle);
         final double sinAngle = Math.sin(angle);
@@ -490,7 +497,7 @@ public class Util {
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
         for (Unit enemy : enemies) {
-            if (enemy == null || !enemy.exists()) continue;
+            if (enemy == null || !enemy.exists() || !enemy.isVisible()) continue;
             PlayerUnit target = (PlayerUnit) enemy;
             int priority = getRangedAttackPriority(rangedUnit, target);
             int distance = rangedUnit.getDistance(target);
@@ -541,6 +548,7 @@ public class Util {
         Unit bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (Unit enemy : enemies) {
+            if (enemy == null || !enemy.exists() || !enemy.isVisible()) continue;
             PlayerUnit target = (PlayerUnit) enemy;
             int priority = getRangedAttackPriority(rangedUnit, target);
             int distance = rangedUnit.getDistance(target);
