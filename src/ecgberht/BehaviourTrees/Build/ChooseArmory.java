@@ -6,6 +6,7 @@ import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Armory;
 import org.openbw.bwapi4j.unit.Building;
@@ -19,8 +20,8 @@ public class ChooseArmory extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.Fs.isEmpty()) return State.FAILURE;
-            if (this.handler.getArmySize() < this.handler.strat.facForArmory) return State.FAILURE;
+            if (this.handler.Fs.isEmpty() || !this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) return State.FAILURE;
+            if (this.handler.Fs.size() < this.handler.strat.facForArmory) return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < this.handler.strat.numArmories) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Armory) return State.FAILURE;

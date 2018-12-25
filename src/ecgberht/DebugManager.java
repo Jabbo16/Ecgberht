@@ -143,18 +143,14 @@ public class DebugManager {
                 print(r.getValue(), Color.YELLOW);
                 mapDrawer.drawLineMap(r.getKey().getPosition(), r.getValue().getPosition(), Color.YELLOW);
             }
-            /*for (EnemyBuilding b : gameState.enemyBuildingMemory.values()) {
-                mapDrawer.drawTextMap(b.pos.toPosition().add(new Position(0, 16)), ColorUtil.formatText(b.type.toString(), ColorUtil.White));
-                print(b.pos, b.type, Color.RED);
-            }*/
-            for (UnitStorage.UnitInfo ui : gameState.unitStorage.getEnemyUnits().values()) {
+            /*for (UnitStorage.UnitInfo ui : gameState.unitStorage.getEnemyUnits().values()) {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.RED);
             }
             for (UnitStorage.UnitInfo ui : gameState.unitStorage.getAllyUnits().values()) {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.BLUE);
-            }
+            }*/
             if (gameState.chosenScout != null) {
                 mapDrawer.drawTextMap(gameState.chosenScout.getPosition(), ColorUtil.formatText("Scouter", ColorUtil.White));
                 print(gameState.chosenScout, Color.PURPLE);

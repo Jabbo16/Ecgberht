@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Strategy;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -25,7 +26,9 @@ public class ChooseAcademy extends Action {
             }
             Strategy strat = this.handler.strat;
             if ((strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE"))
-                    && Util.countBuildingAll(UnitType.Terran_Factory) >= strat.facPerCC) {
+                    && (this.handler.Fs.size() >= strat.facPerCC
+                    || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dark_Templar)
+                    || IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker))) {
                 this.handler.chosenToBuild = UnitType.Terran_Academy;
                 return State.SUCCESS;
             }

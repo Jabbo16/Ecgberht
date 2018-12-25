@@ -496,7 +496,7 @@ public class Util {
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
         for (UnitStorage.UnitInfo enemy : enemies) {
-            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible) continue;
+            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
             PlayerUnit target = enemy.unit;
             int priority = getRangedAttackPriority(rangedUnit, target);
             int distance = rangedUnit.getDistance(target);
@@ -547,7 +547,7 @@ public class Util {
         Unit bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (UnitStorage.UnitInfo enemy : enemies) {
-            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible) continue;
+            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
             PlayerUnit target = enemy.unit;
             int priority = getRangedAttackPriority(rangedUnit, target);
             int distance = rangedUnit.getDistance(target);

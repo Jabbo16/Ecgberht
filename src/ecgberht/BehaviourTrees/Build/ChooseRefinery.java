@@ -6,6 +6,7 @@ import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
@@ -29,6 +30,9 @@ public class ChooseRefinery extends Action {
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("FullBio") || strat.equals("FullBioFE"))
                     && this.handler.getCash().second >= 150) {
+                return State.FAILURE;
+            }
+            if (this.handler.strat.techToResearch.contains(TechType.Tank_Siege_Mode) && this.handler.getCash().second >= 250) {
                 return State.FAILURE;
             }
             if (this.handler.refineriesAssigned.size() == 1) {
@@ -59,7 +63,7 @@ public class ChooseRefinery extends Action {
                 if (w.first == UnitType.Terran_Refinery) return State.FAILURE;
             }
             for (Building w : this.handler.workerTask.values()) {
-                if (w instanceof Refinery && w.getTilePosition().equals(geyser.getTilePosition()))
+                if (w instanceof Refinery && geyser != null && w.getTilePosition().equals(geyser.getTilePosition()))
                     return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&
