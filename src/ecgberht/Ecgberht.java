@@ -405,6 +405,7 @@ public class Ecgberht implements BWEventListener {
         try {
             gs.frameCount = ih.getFrameCount();
             skycladObserver.onFrame();
+            gs.fix();
             gs.unitStorage.onFrame();
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
@@ -420,13 +421,13 @@ public class Ecgberht implements BWEventListener {
             // If rushing and enough time has passed -> transition to Bio
             if (gs.frameCount == 24 * 60 * 8 && gs.strat.proxy) {
                 gs.strat = new FullBio();
-                List<Worker> workersToDelete = new ArrayList<>();
-                for (Unit u : gs.myArmy) {
-                    if (!(u instanceof Worker)) continue;
-                    workersToDelete.add((Worker) u);
+                List<UnitStorage.UnitInfo> workersToDelete = new ArrayList<>();
+                for (UnitStorage.UnitInfo u : gs.myArmy) {
+                    if (!(u.unit instanceof Worker)) continue;
+                    workersToDelete.add(u);
                 }
                 gs.myArmy.removeAll(workersToDelete);
-                gs.workerIdle.addAll(workersToDelete);
+                workersToDelete.forEach(u -> gs.workerIdle.add((Worker) u.unit));
                 transition();
             }
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma transition
@@ -469,8 +470,6 @@ public class Ecgberht implements BWEventListener {
             gs.cancelDyingThings();
             IntelligenceAgency.updateBullets();
             gs.wizard.onFrameSpellManager();
-            gs.fix();
-            gs.updateEnemyBuildingsMemory();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
             gs.sqManager.updateBunkers();
@@ -630,7 +629,10 @@ public class Ecgberht implements BWEventListener {
                             gs.addNewResources(ccBase);
                             if (gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense)
                                 gs.workerTransfer();
-                            if (gs.frameCount != 0 && gs.firstExpand) gs.firstExpand = false;
+                            if (gs.frameCount != 0 && gs.firstExpand){
+                                gs.firstExpand = false;
+                                if(gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
+                            }
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
                             }
@@ -673,7 +675,7 @@ public class Ecgberht implements BWEventListener {
                             gs.agents.put(arg0, new WraithAgent(arg0, name));
                         }
                     } else {
-                        gs.myArmy.add(arg0);
+                        gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
                         if (!gs.strat.name.equals("ProxyBBS")) {
                             if (!gs.strat.name.equals("ProxyEightRax") && (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg)) {
                                 if (!gs.DBs.isEmpty()) {
@@ -727,14 +729,15 @@ public class Ecgberht implements BWEventListener {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
                     if (type.isBuilding()) {
-                        gs.enemyBuildingMemory.remove(arg0);
                         if (!type.isResourceDepot()) gs.map.updateMap(arg0.getTilePosition(), type, true);
                     } else gs.initDefensePosition = arg0.getTilePosition();
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("ProxyEightRax"))
-                            gs.myArmy.remove(arg0);
+                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("ProxyEightRax")){
+                            UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
+                            if(ally != null) gs.myArmy.remove(ally);
+                        }
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
                                 gs.workerIdle.add((Worker) arg0);
@@ -781,7 +784,7 @@ public class Ecgberht implements BWEventListener {
                         if (gs.workerBuild.containsKey(arg0)) {
                             if (gs.workerBuild.get(arg0).first == UnitType.Terran_Command_Center) {
                                 if (bwem.getMap().getArea(gs.workerBuild.get(arg0).second).equals(gs.naturalArea)) {
-                                    Bunker b = gs.DBs.keySet().iterator().next();
+                                    Bunker b = !gs.DBs.isEmpty() ? gs.DBs.keySet().iterator().next() : null;
                                     if (b != null) gs.defendPosition = b.getPosition();
                                     else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                                 }
@@ -827,7 +830,7 @@ public class Ecgberht implements BWEventListener {
                             if (w.equals(arg0)) {
                                 if (w instanceof CommandCenter
                                         && bwem.getMap().getArea(w.getTilePosition()).equals(gs.naturalArea)) {
-                                    Bunker b = gs.DBs.keySet().iterator().next();
+                                    Bunker b = !gs.DBs.isEmpty() ? gs.DBs.keySet().iterator().next() : null;
                                     if (b != null) gs.defendPosition = b.getPosition();
                                     else gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                                 }
@@ -906,7 +909,8 @@ public class Ecgberht implements BWEventListener {
                         gs.shipNames.add(wraith);
                         gs.agents.remove(arg0);
                     }
-                    gs.myArmy.remove(arg0);
+                    UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
+                    if(ally != null) gs.myArmy.remove(ally);
                 }
             }
         } catch (Exception e) {
@@ -923,12 +927,8 @@ public class Ecgberht implements BWEventListener {
                 gs.unitStorage.onUnitMorph(arg0);
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
-                } else if (arg0 instanceof Building && !(arg0 instanceof GasMiningFacility)) {
-                    gs.enemyBuildingMemory.remove(arg0);
-                    gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
                 }
             }
-
             if (arg0 instanceof Refinery && ((PlayerUnit) arg0).getPlayer().equals(self)) {
                 for (Entry<GasMiningFacility, Integer> r : gs.refineriesAssigned.entrySet()) {
                     if (r.getKey().getTilePosition().equals(arg0.getTilePosition())) {
@@ -991,12 +991,8 @@ public class Ecgberht implements BWEventListener {
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
-                if (type.isBuilding()) {
-                    gs.enemyBuildingMemory.remove(arg0);
-                    gs.enemyBuildingMemory.put(arg0, new EnemyBuilding(arg0));
-                    if (!gs.enemyBuildingMemory.containsKey(arg0)) {
-                        gs.map.updateMap(arg0.getTilePosition(), type, false);
-                    }
+                if (type.isBuilding() && !gs.unitStorage.getEnemyUnits().containsKey(arg0)) {
+                    gs.map.updateMap(arg0.getTilePosition(), type, false);
                 }
             }
         } catch (Exception e) {

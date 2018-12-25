@@ -2,12 +2,17 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
+import ecgberht.UnitStorage;
 import ecgberht.Util.UtilMicro;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.Attacker;
+import org.openbw.bwapi4j.unit.Building;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Worker;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,19 +37,15 @@ public class CheckHarasserAttacked extends Conditional {
             }
             Unit attacker = null;
             int workers = 0;
-            Set<Unit> attackers = new TreeSet<>();
+            Set<UnitStorage.UnitInfo> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
-            for (Unit u : this.handler.enemyCombatUnitMemory) {
-                if (!(u instanceof Building) && u instanceof Attacker && u.exists()) {
-                    Unit target = ((Attacker) u).getTargetUnit() == null ? ((PlayerUnit) u).getOrderTarget() :
-                            ((Attacker) u).getTargetUnit();
-                    if (target != null && target.equals(this.handler.chosenHarasser)) {
-                        if (u instanceof Worker) {
+            for (UnitStorage.UnitInfo u : this.handler.unitStorage.getAllyUnits().get(this.handler.chosenHarasser).attackers) {
+                if (!(u.unit instanceof Building) && u.unit instanceof Attacker && u.unit.exists()) {
+                        if (u.unit instanceof Worker) {
                             workers++;
-                            attacker = u;
+                            attacker = u.unit;
                         }
                         attackers.add(u);
-                    }
                 }
             }
             if (workers > 1) {
@@ -79,8 +80,8 @@ public class CheckHarasserAttacked extends Conditional {
                         this.handler.chosenUnitToHarass = null;
                     } else {
                         //Position kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
-                        Optional<Unit> closestUnit = attackers.stream().min(Unit::getDistance);
-                        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(this.handler.chosenHarasser.getPosition(), unit1.getPosition())).orElse(null);
+                        Optional<UnitStorage.UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(this.handler.chosenHarasser)));
+                        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(this.handler.chosenHarasser.getPosition(), unit1.position)).orElse(null);
                         if (kite != null && this.handler.bw.getBWMap().isValidPosition(kite)) {
                             UtilMicro.move(this.handler.chosenHarasser, kite);
                             this.handler.chosenUnitToHarass = null;

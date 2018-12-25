@@ -1,9 +1,11 @@
 package ecgberht.BehaviourTrees.Harass;
 
-import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
+import ecgberht.UnitStorage;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
+
+import java.util.stream.Collectors;
 
 public class ChooseBuildingToHarass extends Action {
 
@@ -15,9 +17,8 @@ public class ChooseBuildingToHarass extends Action {
     public State execute() {
         try {
             if (this.handler.chosenUnitToHarass != null) return State.FAILURE;
-            for (EnemyBuilding u : this.handler.enemyBuildingMemory.values()) {
-                if (this.handler.enemyMainBase != null && u.type.isBuilding()
-                        && this.handler.bwem.getMap().getArea(u.pos).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
+            for (UnitStorage.UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                if (this.handler.enemyMainBase != null && this.handler.bwem.getMap().getArea(u.tileposition).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
                     this.handler.chosenUnitToHarass = u.unit;
                     return State.SUCCESS;
                 }

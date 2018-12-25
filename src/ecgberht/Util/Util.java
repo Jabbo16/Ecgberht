@@ -3,7 +3,6 @@ package ecgberht.Util;
 import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
-import ecgberht.EnemyBuilding;
 import ecgberht.UnitStorage;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
@@ -256,12 +255,12 @@ public class Util {
     public static Position chooseAttackPosition(Position p, boolean flying) {
         Position chosen = null;
         double maxScore = 0;
-        for (EnemyBuilding b : getGs().enemyBuildingMemory.values()) {
-            double influence = getScoreAttackPosition(b.unit);
+        for (UnitStorage.UnitInfo b : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+            double influence = getScoreAttackPosition((Building) b.unit);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * (flying ? b.pos.toPosition().getDistance(p) : Util.getGroundDistance(p, b.pos.toPosition())));
+            double score = influence / (2.5 * (flying ? b.lastPosition.getDistance(p) : Util.getGroundDistance(p, b.lastPosition)));
             if (score > maxScore) {
-                chosen = b.pos.toPosition();
+                chosen = b.lastPosition;
                 maxScore = score;
             }
         }
@@ -275,15 +274,15 @@ public class Util {
         return 3;
     }
 
-    public static Unit getClosestUnit(Unit unit, Set<Unit> enemies) {
+    public static Unit getClosestUnit(Unit unit, Set<UnitStorage.UnitInfo> enemies) {
         Unit chosen = null;
         double minDist = Double.MAX_VALUE;
-        for (Unit u : enemies) {
-            if (!u.exists()) continue;
-            double dist = unit.getDistance(u);
+        for (UnitStorage.UnitInfo u : enemies) {
+            if (!u.unit.exists()) continue;
+            double dist = unit.getDistance(u.unit);
             if (chosen == null || dist < minDist) {
                 minDist = dist;
-                chosen = u;
+                chosen = u.unit;
             }
         }
         return chosen;
@@ -474,31 +473,31 @@ public class Util {
         return getGs().getIH();
     }
 
-    public static Unit getTankTarget(SiegeTank t, Set<Unit> tankTargets) {
+    public static Unit getTankTarget(SiegeTank t, Set<UnitStorage.UnitInfo> tankTargets) {
         Unit chosenTarget = null;
         int highPriority = 0;
         int closestDist = Integer.MAX_VALUE;
-        for (Unit target : tankTargets) {
-            int distance = t.getDistance(target);
-            int priority = getRangedAttackPriority(t, (PlayerUnit) target);
+        for (UnitStorage.UnitInfo target : tankTargets) {
+            int distance = t.getDistance(target.unit);
+            int priority = getRangedAttackPriority(t, target.unit);
             if (chosenTarget == null || (priority > highPriority) || (priority == highPriority && distance < closestDist)) {
                 closestDist = distance;
                 highPriority = priority;
-                chosenTarget = target;
+                chosenTarget = target.unit;
             }
         }
         return chosenTarget;
     }
 
     // Credits to SH
-    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies, Position pos) {
+    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<UnitStorage.UnitInfo> enemies, Position pos) {
         int bestScore = -999999;
         Unit bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
-        for (Unit enemy : enemies) {
-            if (enemy == null || !enemy.exists() || !enemy.isVisible()) continue;
-            PlayerUnit target = (PlayerUnit) enemy;
+        for (UnitStorage.UnitInfo enemy : enemies) {
+            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible) continue;
+            PlayerUnit target = enemy.unit;
             int priority = getRangedAttackPriority(rangedUnit, target);
             int distance = rangedUnit.getDistance(target);
             double closerToGoal = rangedUnit.getDistance(pos) - target.getDistance(pos);
@@ -514,13 +513,13 @@ public class Util {
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
-            } else if (enemy instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
+            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
                 if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
                         target.getOrder() == Order.Unsieging ||
                         (target instanceof Burrowable && ((Burrowable) target).isBurrowed())) {
                     score += 48;
                 } else score += 24;
-            } else if (enemy instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
+            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
             else if (target.getPlayer().getUnitStatCalculator().topSpeed(target.getType()) >= rangedUnit.getPlayer().getUnitStatCalculator().topSpeed(rangedUnit.getType())) {
                 score -= 4 * 32;
             }
@@ -543,13 +542,13 @@ public class Util {
     }
 
     // Credits to SH
-    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<Unit> enemies) {
+    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<UnitStorage.UnitInfo> enemies) {
         int bestScore = -999999;
         Unit bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
-        for (Unit enemy : enemies) {
-            if (enemy == null || !enemy.exists() || !enemy.isVisible()) continue;
-            PlayerUnit target = (PlayerUnit) enemy;
+        for (UnitStorage.UnitInfo enemy : enemies) {
+            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible) continue;
+            PlayerUnit target = enemy.unit;
             int priority = getRangedAttackPriority(rangedUnit, target);
             int distance = rangedUnit.getDistance(target);
             if (distance >= 13 * 32) continue;
@@ -563,13 +562,13 @@ public class Util {
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
-            } else if (enemy instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
+            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
                 if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
                         target.getOrder() == Order.Unsieging ||
                         (target instanceof Burrowable && ((Burrowable) target).isBurrowed())) {
                     score += 48;
                 } else score += 24;
-            } else if (enemy instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
+            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
             else if (target.getPlayer().getUnitStatCalculator().topSpeed(target.getType()) >= rangedUnit.getPlayer().getUnitStatCalculator().topSpeed(rangedUnit.getType())) {
                 score -= 4 * 32;
             }

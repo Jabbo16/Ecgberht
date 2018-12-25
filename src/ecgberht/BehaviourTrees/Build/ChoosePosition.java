@@ -3,8 +3,8 @@ package ecgberht.BehaviourTrees.Build;
 import bwem.Base;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
-import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
+import ecgberht.UnitStorage;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
@@ -18,6 +18,7 @@ import org.openbw.bwapi4j.unit.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class ChoosePosition extends Action {
 
@@ -83,9 +84,9 @@ public class ChoosePosition extends Action {
                                 break;
                             }
                         }
-                        for (EnemyBuilding u : this.handler.enemyBuildingMemory.values()) {
-                            if (this.handler.bwem.getMap().getArea(u.pos) == null) continue;
-                            if (this.handler.bwem.getMap().getArea(u.pos).equals(b.getArea())) {
+                        for (UnitStorage.UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                            if (this.handler.bwem.getMap().getArea(u.tileposition) == null) continue;
+                            if (this.handler.bwem.getMap().getArea(u.tileposition).equals(b.getArea())) {
                                 remove.add(b);
                                 break;
                             }

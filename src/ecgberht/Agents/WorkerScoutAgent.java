@@ -5,6 +5,7 @@ import bwem.area.Area;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.UnitStorage;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
@@ -34,6 +35,7 @@ public class WorkerScoutAgent extends Agent {
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
         this.unit = (SCV) unit;
+        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.enemyBase = enemyBase;
         this.myUnit = unit;
     }
@@ -43,12 +45,12 @@ public class WorkerScoutAgent extends Agent {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
             return true;
         }
-        if (getGs().strat.proxy && mySim.allies.stream().anyMatch(u -> u instanceof Marine)) {
-            getGs().myArmy.add(unit);
+        if (getGs().strat.proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
+            getGs().myArmy.add(unitInfo);
             return true;
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
-        mySim = getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND);
+        mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
                 || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush
                 || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected(mySim.enemies)
@@ -92,8 +94,8 @@ public class WorkerScoutAgent extends Agent {
             unit.haltConstruction();
             stoppedDisrupting = true;
             removedIndex = true;
-        } else if (mySim.enemies.stream().anyMatch(u -> u.getDistance(unit) <= 4 * 32)) {
-            if (mySim.enemies.stream().anyMatch(u -> u instanceof Zergling)) {
+        } else if (mySim.enemies.stream().anyMatch(u -> u.unit.getDistance(unit) <= 4 * 32)) {
+            if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
                 unit.haltConstruction();
                 stoppedDisrupting = true;
                 if (!removedIndex) {
@@ -104,9 +106,9 @@ public class WorkerScoutAgent extends Agent {
                 return;
             }
             if (mySim.enemies.size() == 1) {
-                Unit closest = mySim.enemies.iterator().next();
-                Area enemyArea = getGs().bwem.getMap().getArea(closest.getTilePosition());
-                if (closest instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
+                UnitStorage.UnitInfo closest = mySim.enemies.iterator().next();
+                Area enemyArea = getGs().bwem.getMap().getArea(closest.tileposition);
+                if (closest.unit instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
                     if (mySim.lose) {
                         unit.haltConstruction();
                         stoppedDisrupting = true;
@@ -115,7 +117,7 @@ public class WorkerScoutAgent extends Agent {
                             enemyNaturalIndex = -1;
                             removedIndex = true;
                         }
-                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next()); // TODO add attack state
+                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next().unit); // TODO add attack state
                 }
             }
         } else unit.resumeBuilding(disrupter);

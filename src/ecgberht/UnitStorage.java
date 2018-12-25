@@ -106,6 +106,7 @@ public class UnitStorage {
         public Set<UnitInfo> attackers = new TreeSet<>();
         public boolean burrowed = false;
         public boolean flying = false;
+        public boolean visible = false;
         public Player player = null;
         public PlayerUnit unit;
         public UnitType unitType = UnitType.None;
@@ -129,7 +130,6 @@ public class UnitStorage {
             tileposition = unit.getTilePosition();
             if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
             else walkposition = tileposition.toWalkPosition();
-            lastPosition = unit.getLastKnownPosition();
             health = unit.getHitPoints();
             shields = unit.getShields();
             if(unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();
@@ -137,7 +137,9 @@ public class UnitStorage {
             percentShield = unitType.maxShields() > 0 ? (double)shields / (double)unitType.maxShields() : 1.0;
             if(unit instanceof Burrowable && ((Burrowable) unit).isBurrowed()) burrowed = true;
             if(unit instanceof FlyingBuilding || unitType.isFlyer()) flying = true;
-            lastVisibleFrame = unit.isVisible() ? getGs().frameCount : unit.getLastSpotted();
+            visible = unit.isVisible();
+            if(visible) lastPosition = position;
+            lastVisibleFrame = visible ? getGs().frameCount : unit.getLastSpotted();
             lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : unit.getLastSpotted();
             speed = Util.getSpeed(this);
             target = (unit instanceof Attacker) ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();

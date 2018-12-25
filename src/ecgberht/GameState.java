@@ -71,7 +71,7 @@ public class GameState {
     public Map<Base, CommandCenter> CCs = new LinkedHashMap<>();
     public Map<Base, CommandCenter> islandCCs = new HashMap<>();
     public Map<Base, Neutral> blockedBases = new HashMap<>();
-    public Map<Bunker, Set<Unit>> DBs = new TreeMap<>();
+    public Map<Bunker, Set<UnitStorage.UnitInfo>> DBs = new TreeMap<>();
     public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
     public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
@@ -80,7 +80,6 @@ public class GameState {
     public Map<SCV, Building> workerTask = new TreeMap<>();
     public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
     public Map<Unit, Agent> agents = new TreeMap<>();
-    public Map<Unit, EnemyBuilding> enemyBuildingMemory = new TreeMap<>();
     public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
     public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
     public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
@@ -103,7 +102,7 @@ public class GameState {
     public Set<MissileTurret> Ts = new TreeSet<>();
     public Set<ResearchingFacility> UBs = new TreeSet<>();
     public Set<Starport> Ps = new TreeSet<>();
-    public Set<Unit> myArmy = new TreeSet<>();
+    public Set<UnitStorage.UnitInfo> myArmy = new TreeSet<>();
     public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
@@ -351,17 +350,19 @@ public class GameState {
 
             int totalGamesPlayed = EI.wins + EI.losses;
             if (totalGamesPlayed < 1) {
-                ih.sendText("I dont know you that well yet, lets pick the standard strategy");
                 switch (enemyRace) {
                     case Zerg:
+                        ih.sendText("I dont know you that well yet, lets pick the standard strategy, " + bGFE.name);
                         return bGFE;
                     case Terran:
+                        ih.sendText("I dont know you that well yet, lets pick the standard strategy, " + FM.name);
                         return FM;
                     case Protoss:
+                        ih.sendText("I dont know you that well yet, lets pick the standard strategy, " + bMFE.name);
                         return bMFE;
                     case Random:
-                        return b;
                     case Unknown:
+                        ih.sendText("I dont know you that well yet, lets pick the standard strategy, " + b.name);
                         return b;
                 }
                 return b;
@@ -621,7 +622,14 @@ public class GameState {
 
     void fix() {
         if (defense && enemyInBase.isEmpty()) defense = false;
-
+        Iterator<Entry<Unit, UnitStorage.UnitInfo>> allyIT = unitStorage.getAllyUnits().entrySet().iterator();
+        while(allyIT.hasNext()){
+            Entry<Unit, UnitStorage.UnitInfo> u = allyIT.next();
+            if (!u.getKey().exists()) {
+                myArmy.remove(u.getValue());
+                allyIT.remove();
+            }
+        }
         List<Worker> removeGas = new ArrayList<>();
         for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
             if (!w.getKey().isGatheringGas()) {
@@ -690,7 +698,7 @@ public class GameState {
     }
 
     void checkMainEnemyBase() {
-        if (enemyBuildingMemory.isEmpty() && scoutSLs.isEmpty()) {
+        if (unitStorage.getEnemyUnits().values().stream().noneMatch(u -> u.unitType.isBuilding()) && scoutSLs.isEmpty()) {
             enemyMainBase = null;
             chosenScout = null;
             for (Base b : BLs) {
@@ -801,13 +809,13 @@ public class GameState {
         return count + agents.size() * 2;
     }
 
-    public int getArmySize(Set<Unit> units) {
+    public int getArmySize(Set<UnitStorage.UnitInfo> units) {
         int count = 0;
         if (units.isEmpty()) return count;
         else {
-            for (Unit u : units) {
+            for (UnitStorage.UnitInfo u : units) {
                 count++;
-                if (u instanceof SiegeTank || u instanceof Vulture || u instanceof Wraith || u instanceof ScienceVessel)
+                if (u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith || u.unit instanceof ScienceVessel)
                     count++;
             }
         }
@@ -972,18 +980,6 @@ public class GameState {
         }
     }
 
-    void updateEnemyBuildingsMemory() {
-        List<Unit> aux = new ArrayList<>();
-        for (EnemyBuilding u : enemyBuildingMemory.values()) {
-            if (bw.getBWMap().isVisible(u.pos)) {
-                if (!Util.getUnitsOnTile(u.pos).contains(u.unit)) aux.add(u.unit);
-                else if (u.unit.isVisible()) u.pos = u.unit.getTilePosition();
-                u.type = u.unit.getType();
-            }
-        }
-        for (Unit u : aux) enemyBuildingMemory.remove(u);
-    }
-
     /**
      * Credits and thanks to Yegers for the method
      * Number of workers needed to sustain a number of units.
@@ -1016,7 +1012,7 @@ public class GameState {
                     if (count <= workerCountToSustain) break;
                     if (!scv.getKey().isCarryingMinerals()) {
                         scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
-                        myArmy.add(scv.getKey());
+                        myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
                         if (mineralsAssigned.containsKey(scv.getValue())) {
                             mining--;
                             mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
@@ -1035,7 +1031,7 @@ public class GameState {
                 if (!scv.getKey().isCarryingMinerals()) {
                     //addToSquad(scv.getKey());
                     scv.getKey().stop(false);
-                    myArmy.add(scv.getKey());
+                    myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
                     if (mineralsAssigned.containsKey(scv.getValue())) {
                         mining--;
                         mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
@@ -1342,14 +1338,14 @@ public class GameState {
         return false;
     }
 
-    public boolean basicCombatUnitsDetected(Set<Unit> units) {
+    public boolean basicCombatUnitsDetected(Set<UnitStorage.UnitInfo> units) {
         switch (enemyRace) {
             case Zerg:
-                return units.stream().anyMatch(u -> u.getType() == UnitType.Zerg_Zergling);
+                return units.stream().anyMatch(u -> u.unitType == UnitType.Zerg_Zergling);
             case Terran:
-                return units.stream().anyMatch(u -> u.getType() == UnitType.Terran_Marine);
+                return units.stream().anyMatch(u -> u.unitType == UnitType.Terran_Marine);
             case Protoss:
-                return units.stream().anyMatch(u -> u.getType() == UnitType.Protoss_Zealot || u.getType() == UnitType.Protoss_Dragoon);
+                return units.stream().anyMatch(u -> u.unitType == UnitType.Protoss_Zealot || u.unitType == UnitType.Protoss_Dragoon);
         }
         return false;
     }

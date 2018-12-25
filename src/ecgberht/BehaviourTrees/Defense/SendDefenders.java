@@ -4,6 +4,7 @@ import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
+import ecgberht.UnitStorage;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
@@ -31,11 +32,13 @@ public class SendDefenders extends Action {
                 if (!cannon_rush && (u instanceof Pylon || u instanceof PhotonCannon)) cannon_rush = true;
                 air_only = false;
             }
-            Set<Unit> friends = new TreeSet<>();
+            Set<UnitStorage.UnitInfo> friends = new TreeSet<>();
             for (Squad s : this.handler.sqManager.squads.values()) friends.addAll(s.members);
             boolean bunker = false;
             if (!this.handler.DBs.isEmpty()) {
-                friends.addAll(this.handler.DBs.keySet());
+                for(Bunker b : this.handler.DBs.keySet()){
+                    friends.add(this.handler.unitStorage.getAllyUnits().get(b));
+                }
                 bunker = true;
             }
             int defenders = 6;

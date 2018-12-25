@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
+import ecgberht.UnitStorage;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
@@ -8,7 +9,6 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
-import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Set;
 
@@ -28,7 +28,7 @@ public class ChooseMedic extends Action {
                     if (u instanceof Academy) {
                         int marine_count = 0;
                         if (!this.handler.DBs.isEmpty()) {
-                            for (Set<Unit> p : this.handler.DBs.values()) marine_count += p.size();
+                            for (Set<UnitStorage.UnitInfo> p : this.handler.DBs.values()) marine_count += p.size();
                         }
                         if (!this.handler.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
                             for (Barracks b : this.handler.MBs) {

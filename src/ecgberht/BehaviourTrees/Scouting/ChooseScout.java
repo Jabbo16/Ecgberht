@@ -2,10 +2,10 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import ecgberht.GameState;
 import ecgberht.Squad;
+import ecgberht.UnitStorage;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 import org.openbw.bwapi4j.unit.Wraith;
 
@@ -20,9 +20,9 @@ public class ChooseScout extends Action {
         try {
             if (this.handler.strat.name.equals("PlasmaWraithHell")) {
                 for (Squad s : this.handler.sqManager.squads.values()) {
-                    for (Unit u : s.members) {
-                        if (u instanceof Wraith) {
-                            this.handler.chosenScout = u;
+                    for (UnitStorage.UnitInfo u : s.members) {
+                        if (u.unit instanceof Wraith) {
+                            this.handler.chosenScout = u.unit;
                             s.members.remove(u);
                             return State.SUCCESS;
                         }

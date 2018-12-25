@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Scouting;
 
-import ecgberht.EnemyBuilding;
 import ecgberht.GameState;
+import ecgberht.UnitStorage;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
@@ -11,6 +11,7 @@ import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CheckEnemyBaseVisible extends Action {
 
@@ -23,9 +24,9 @@ public class CheckEnemyBaseVisible extends Action {
         try {
             List<PlayerUnit> enemies = this.handler.getGame().getUnits(this.handler.getIH().enemy());
             if (!enemies.isEmpty()) {
-                for (EnemyBuilding u : this.handler.enemyBuildingMemory.values()) {
-                    if (Util.broodWarDistance(this.handler.chosenScout.getPosition(), u.pos.toPosition()) <= 500) {
-                        this.handler.enemyMainBase = Util.getClosestBaseLocation(u.pos.toPosition());
+                for (UnitStorage.UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                    if (Util.broodWarDistance(this.handler.chosenScout.getPosition(), u.lastPosition) <= 500) {
+                        this.handler.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
                         this.handler.scoutSLs = new HashSet<>();
                         if (!this.handler.strat.name.equals("PlasmaWraithHell")) {
                             this.handler.chosenHarasser = (Worker) this.handler.chosenScout;
