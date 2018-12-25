@@ -36,7 +36,7 @@ public class SendDefenders extends Action {
             for (Squad s : this.handler.sqManager.squads.values()) friends.addAll(s.members);
             boolean bunker = false;
             if (!this.handler.DBs.isEmpty()) {
-                for(Bunker b : this.handler.DBs.keySet()){
+                for (Bunker b : this.handler.DBs.keySet()) {
                     friends.add(this.handler.unitStorage.getAllyUnits().get(b));
                 }
                 bunker = true;

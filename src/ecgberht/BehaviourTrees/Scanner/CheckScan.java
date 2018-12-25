@@ -5,7 +5,10 @@ import ecgberht.GameState;
 import ecgberht.UnitStorage;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.Attacker;
+import org.openbw.bwapi4j.unit.Burrowable;
+import org.openbw.bwapi4j.unit.ComsatStation;
+import org.openbw.bwapi4j.unit.PlayerUnit;
 
 import java.util.ArrayList;
 import java.util.List;

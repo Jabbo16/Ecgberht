@@ -51,7 +51,7 @@ public class ConfigManager {
             boolean debugScreen = false;
             boolean debugText = false;
             boolean sounds = false;
-            boolean enableLatCom  = true;
+            boolean enableLatCom = true;
             boolean enableSkyCladObserver = false;
             String forceStrat = "";
 

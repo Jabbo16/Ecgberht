@@ -69,7 +69,8 @@ public class Squad implements Comparable<Squad> {
         int count = 0;
         for (UnitStorage.UnitInfo u : members) {
             count++;
-            if (u.unit instanceof Goliath || u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith) count++;
+            if (u.unit instanceof Goliath || u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith)
+                count++;
         }
         return count;
     }
@@ -78,7 +79,8 @@ public class Squad implements Comparable<Squad> {
         if (status == Status.DEFENSE) return;
         if (squadSim.lose) status = Status.REGROUP;
         else if (status == Status.ATTACK && squadSim.enemies.isEmpty()) status = Status.ADVANCE;
-        else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing()) status = Status.ATTACK;
+        else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing())
+            status = Status.ATTACK;
     }
 
     void updateSquad() {
@@ -147,7 +149,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (((MobileUnit)u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim) || squadSim.enemies.stream().noneMatch(e -> Util.getWeapon(e.unit, u.unit).maxRange() > 32)) {
+                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim) || squadSim.enemies.stream().noneMatch(e -> Util.getWeapon(e.unit, u.unit).maxRange() > 32)) {
                     executeRangedAttackLogic(u);
                     return;
                 }
@@ -175,7 +177,7 @@ public class Squad implements Comparable<Squad> {
                     return;
                 }
                 //Experimental storm dodging?
-                if (((MobileUnit)u.unit).isUnderStorm()) {
+                if (((MobileUnit) u.unit).isUnderStorm()) {
                     Position closestCC = getGs().getNearestCC(u.position, true);
                     if (closestCC != null) {
                         UtilMicro.move((MobileUnit) u.unit, closestCC);
@@ -225,7 +227,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (((MobileUnit)u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim)) return;
+                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim)) return;
                 Position pos = getGs().getNearestCC(u.position, true);
                 if (Util.broodWarDistance(pos, u.position) >= 400) {
                     UtilMicro.move((MobileUnit) u.unit, pos);
@@ -242,7 +244,7 @@ public class Squad implements Comparable<Squad> {
     }
 
     private void microTank(UnitStorage.UnitInfo u) {
-        SiegeTank st = (SiegeTank)u.unit;
+        SiegeTank st = (SiegeTank) u.unit;
         if (st.isSieged() && st.getOrder() == Order.Unsieging) return;
         if (!st.isSieged() && st.getOrder() == Order.Sieging) return;
         switch (status) {

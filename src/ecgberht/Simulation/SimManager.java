@@ -134,7 +134,7 @@ public class SimManager {
             if (Util.isStaticDefense(u.getValue().type) || u.getValue().unit.isVisible())
                 enemyUnits.add(u.getValue().unit);
         }*/
-        for(UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values()){
+        for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
             if (getGs().strat.proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
             if (Util.isStaticDefense(u.unitType) || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
@@ -409,7 +409,8 @@ public class SimManager {
         Position centroid = new Position((int) c.modeX, (int) c.modeY);
         getGs().getGame().getMapDrawer().drawCircleMap(centroid, 4, color, true);
         //getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), ColorUtil.formatText(Integer.toString(id), ColorUtil.White));
-        for (UnitStorage.UnitInfo u : c.units) getGs().getGame().getMapDrawer().drawLineMap(u.lastPosition, centroid, color);
+        for (UnitStorage.UnitInfo u : c.units)
+            getGs().getGame().getMapDrawer().drawLineMap(u.lastPosition, centroid, color);
     }
 
     /**

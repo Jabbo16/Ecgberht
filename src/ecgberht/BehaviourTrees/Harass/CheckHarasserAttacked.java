@@ -41,11 +41,11 @@ public class CheckHarasserAttacked extends Conditional {
             //Thanks to @N00byEdge for cleaner code
             for (UnitStorage.UnitInfo u : this.handler.unitStorage.getAllyUnits().get(this.handler.chosenHarasser).attackers) {
                 if (!(u.unit instanceof Building) && u.unit instanceof Attacker && u.unit.exists()) {
-                        if (u.unit instanceof Worker) {
-                            workers++;
-                            attacker = u.unit;
-                        }
-                        attackers.add(u);
+                    if (u.unit instanceof Worker) {
+                        workers++;
+                        attacker = u.unit;
+                    }
+                    attackers.add(u);
                 }
             }
             if (workers > 1) {

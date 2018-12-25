@@ -22,10 +22,10 @@ public class Cluster {
         int x = 0;
         int y = 0;
         for (UnitStorage.UnitInfo u : units) {
-            if(u.visible){
+            if (u.visible) {
                 x += u.position.getX();
                 y += u.position.getY();
-            } else{
+            } else {
                 x += u.lastPosition.getX();
                 y += u.lastPosition.getY();
             }
@@ -40,7 +40,7 @@ public class Cluster {
             return;
         }
         for (UnitStorage.UnitInfo u : units) {
-            double dist = u.visible ? u.position.getDistance(new Position((int)mode()[0], (int)mode()[1])) : u.lastPosition.getDistance(new Position((int)mode()[0], (int)mode()[1]));
+            double dist = u.visible ? u.position.getDistance(new Position((int) mode()[0], (int) mode()[1])) : u.lastPosition.getDistance(new Position((int) mode()[0], (int) mode()[1]));
             if (dist > maxDistFromCenter) maxDistFromCenter = dist;
         }
     }

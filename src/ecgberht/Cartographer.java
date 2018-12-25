@@ -7,8 +7,8 @@ public class Cartographer {
     private JPS.Map mapJPS;
 
     private JPS jps;
-    
-    public Cartographer(){
+
+    public Cartographer() {
         initCollisionGrid();
     }
 

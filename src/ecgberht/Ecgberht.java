@@ -372,8 +372,8 @@ public class Ecgberht implements BWEventListener {
             gs.checkBasesWithBLockingMinerals();
             gs.initChokes();
             IntelligenceAgency.EnemyStrats ES = IntelligenceAgency.getEnemyStrat();
-            if(gs.mainChoke != null && (ES == IntelligenceAgency.EnemyStrats.ZealotRush
-                    || ES == IntelligenceAgency.EnemyStrats.EarlyPool)){
+            if (gs.mainChoke != null && (ES == IntelligenceAgency.EnemyStrats.ZealotRush
+                    || ES == IntelligenceAgency.EnemyStrats.EarlyPool)) {
                 gs.defendPosition = gs.mainChoke.getCenter().toPosition();
             }
             gs.map = new BuildingMap(bw, ih.self(), bwem);
@@ -629,9 +629,10 @@ public class Ecgberht implements BWEventListener {
                             gs.addNewResources(ccBase);
                             if (gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense)
                                 gs.workerTransfer();
-                            if (gs.frameCount != 0 && gs.firstExpand){
+                            if (gs.frameCount != 0 && gs.firstExpand) {
                                 gs.firstExpand = false;
-                                if(gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
+                                if (gs.naturalChoke != null)
+                                    gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                             }
                             if (((CommandCenter) arg0).getAddon() != null && !gs.CSs.contains(((CommandCenter) arg0).getAddon())) {
                                 gs.CSs.add((ComsatStation) ((CommandCenter) arg0).getAddon());
@@ -734,9 +735,9 @@ public class Ecgberht implements BWEventListener {
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("ProxyEightRax")){
+                        if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("ProxyEightRax")) {
                             UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
-                            if(ally != null) gs.myArmy.remove(ally);
+                            if (ally != null) gs.myArmy.remove(ally);
                         }
                         for (SCV r : gs.repairerTask.keySet()) {
                             if (r.equals(arg0)) {
@@ -910,7 +911,7 @@ public class Ecgberht implements BWEventListener {
                         gs.agents.remove(arg0);
                     }
                     UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
-                    if(ally != null) gs.myArmy.remove(ally);
+                    if (ally != null) gs.myArmy.remove(ally);
                 }
             }
         } catch (Exception e) {
@@ -970,7 +971,8 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onUnitRenegade(Unit arg0) {
-        if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().equals(self)) gs.unitStorage.onUnitComplete(arg0);
+        if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().equals(self))
+            gs.unitStorage.onUnitComplete(arg0);
     }
 
     @Override

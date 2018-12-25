@@ -303,7 +303,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     if (u.unit instanceof Mechanical) score = 8;
                     if (u.unit instanceof Marine || u.unit instanceof Firebat) score = 3;
                     if (u.unit instanceof SCV || u.unit instanceof Medic) score = 1;
-                    score *= (double)u.unitType.maxHitPoints() / (double)u.health;
+                    score *= (double) u.unitType.maxHitPoints() / (double) u.health;
                     if (chosen == null || score > maxScore) {
                         chosen = u.unit;
                         maxScore = score;

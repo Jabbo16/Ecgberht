@@ -194,7 +194,7 @@ public class GameState {
                 maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if(alwaysZealotRushes()){
+            if (alwaysZealotRushes()) {
                 IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
                 bFE.armyForExpand += 5;
                 bFE.workerGas = 2;
@@ -623,7 +623,7 @@ public class GameState {
     void fix() {
         if (defense && enemyInBase.isEmpty()) defense = false;
         Iterator<Entry<Unit, UnitStorage.UnitInfo>> allyIT = unitStorage.getAllyUnits().entrySet().iterator();
-        while(allyIT.hasNext()){
+        while (allyIT.hasNext()) {
             Entry<Unit, UnitStorage.UnitInfo> u = allyIT.next();
             if (!u.getKey().exists()) {
                 myArmy.remove(u.getValue());
