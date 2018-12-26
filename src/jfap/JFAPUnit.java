@@ -1,5 +1,6 @@
 package jfap;
 
+import ecgberht.UnitStorage;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.type.*;
@@ -80,7 +81,44 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
         doThings(u, JFAP.game);
     }
 
-    public JFAPUnit() {
+    public JFAPUnit(UnitStorage.UnitInfo u) { // TODO range upgrades
+        unit = u.unit;
+        x = u.lastPosition.getX();
+        y = u.lastPosition.getY();
+        id = unit.getId();
+        unitType = u.unitType;
+        player = u.player;
+        health = u.health;
+        unitSize = unitType.size();
+        maxHealth = unitType.maxHitPoints();
+        armor = u.unit.getArmor();
+        shields = u.shields;
+        shieldArmor = player.getUpgradeLevel(UpgradeType.Protoss_Plasma_Shields);
+        maxShields = unitType.maxShields();
+        speed = u.speed;
+        speedSquared = speed * speed;
+        flying = u.flying;
+        groundDamage = unitType.groundWeapon().damageAmount();
+        groundCooldown = unitType.groundWeapon().damageFactor() > 0 && unitType.maxGroundHits() > 0 ? unitType.groundWeapon().damageCooldown() /
+                (unitType.groundWeapon().damageFactor() * unitType.maxGroundHits()) : 0;
+        groundMaxRange = (int) u.groundRange;
+        groundMaxRangeSquared = groundMaxRange * groundMaxRange;
+        groundMinRangeSquared = unitType.groundWeapon().minRange() * unitType.groundWeapon().minRange();
+        groundDamageType = unitType.groundWeapon().damageType();
+        airDamage = unitType.airWeapon().damageAmount();
+        airCooldown = unitType.airWeapon().damageFactor() > 0 && unitType.maxAirHits() > 0 ? unitType.airWeapon().damageCooldown() /
+                unitType.airWeapon().damageFactor() * unitType.maxAirHits() : 0;
+        airMaxRangeSquared = (int) (u.airRange * u.airRange);
+        airMinRangeSquared = unitType.airWeapon().minRange() * unitType.airWeapon().minRange();
+        airDamageType = unitType.airWeapon().damageType();
+
+        isOrganic = unitType.isOrganic();
+        score = unitType.destroyScore();
+        race = unitType.getRace();
+        doThings(u.unit, JFAP.game);
+    }
+
+    JFAPUnit() {
     }
 
     private void doThings(Unit u, BW game) {

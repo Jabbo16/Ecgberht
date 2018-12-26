@@ -37,7 +37,7 @@ public class ChooseSCV extends Action {
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && this.handler.getCash().first < 150) {
                 return State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < this.handler.mineralsAssigned.size() * 2 + this.handler.refineriesAssigned.size() * 3 + 2 && !this.handler.CCs.isEmpty()) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) <= this.handler.mineralsAssigned.size() * 2 + this.handler.refineriesAssigned.size() * 3 + this.handler.strat.extraSCVs && !this.handler.CCs.isEmpty()) {
                 for (Map.Entry<Base, CommandCenter> b : this.handler.islandCCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         this.handler.chosenUnit = UnitType.Terran_SCV;

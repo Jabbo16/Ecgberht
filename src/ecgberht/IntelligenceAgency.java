@@ -17,7 +17,7 @@ import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
 
-    static Map<Player, TreeSet<EnemyBuilding>> enemyBases;
+    static Map<Player, TreeSet<UnitStorage.UnitInfo>> enemyBases;
     static Map<Player, HashSet<UnitType>> enemyTypes;
     private static Player mainEnemy;
     private static Set<Unit> enemyWorkers;
@@ -119,10 +119,10 @@ public class IntelligenceAgency {
         // Bases
         if (type.isResourceDepot()) {
             // If base and player known skip
-            if (enemyBases.containsKey(player) && enemyBases.get(player).contains(new EnemyBuilding(unit))) return;
+            if (enemyBases.containsKey(player) && enemyBases.get(player).contains(getGs().unitStorage.getEnemyUnits().get(unit))) return;
             for (Base b : getGs().BLs) {
                 if (b.getLocation().equals(unit.getTilePosition())) {
-                    enemyBases.get(player).add(new EnemyBuilding(unit));
+                    enemyBases.get(player).add(getGs().unitStorage.getEnemyUnits().get(unit));
                     break;
                 }
             }
@@ -158,7 +158,7 @@ public class IntelligenceAgency {
 
         Player player = ((PlayerUnit) unit).getPlayer();
         if (type.isResourceDepot() && enemyBases.containsKey(player))
-            enemyBases.get(player).remove(new EnemyBuilding(unit));
+            enemyBases.get(player).remove(getGs().unitStorage.getEnemyUnits().get(unit));
         if (getGs().enemyRace == Race.Zerg && unit instanceof Drone) enemyWorkers.remove(unit);
     }
 
@@ -169,7 +169,7 @@ public class IntelligenceAgency {
         if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && !getGs().learningManager.isNaughty() && exploredMinerals) {
             int drones = IntelligenceAgency.getNumEnemyWorkers();
             boolean foundPool = enemyHasType(UnitType.Zerg_Spawning_Pool);
-            if (foundPool && drones <= 5) {
+            if (foundPool && drones <= 6) {
                 enemyStrat = EnemyStrats.EarlyPool;
                 getGs().learningManager.setNaughty(true);
                 getGs().ih.sendText("Bad zerg!, bad!");
@@ -193,7 +193,7 @@ public class IntelligenceAgency {
             int countGates = (int) getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType == UnitType.Protoss_Gateway).count();
             int probes = IntelligenceAgency.getNumEnemyWorkers();
             boolean foundGas = enemyHasType(UnitType.Protoss_Assimilator);
-            if (countGates >= 2 && probes <= 12 && !foundGas) {
+            if (countGates >= 2 && probes <= 13 && !foundGas) {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");

@@ -5,6 +5,8 @@ import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.WalkPosition;
+import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -14,6 +16,8 @@ import static ecgberht.Ecgberht.getGs;
 
 public class UnitStorage {
 
+    private final int PROTOSSSHIELDREGEN = 7;
+    private final int ZERGREGEN = 4;
     private Map<Unit, UnitInfo> ally = new TreeMap<>();
     private Map<Unit, UnitInfo> enemy = new TreeMap<>();
 
@@ -29,7 +33,7 @@ public class UnitStorage {
         Iterator<Map.Entry<Unit, UnitInfo>> allyIT = this.ally.entrySet().iterator();
         while (allyIT.hasNext()) {
             Map.Entry<Unit, UnitInfo> ally = allyIT.next();
-            if (ally.getKey() == null || !ally.getKey().exists()) {
+            if (!ally.getKey().exists() || ally.getValue().unit == null || !ally.getValue().unit.exists()) {
                 allyIT.remove();
                 continue;
             }
@@ -38,7 +42,7 @@ public class UnitStorage {
         Iterator<Map.Entry<Unit, UnitInfo>> enemyIT = this.enemy.entrySet().iterator();
         while (enemyIT.hasNext()) {
             Map.Entry<Unit, UnitInfo> enemy = enemyIT.next();
-            if (enemy.getKey().exists() && enemy.getKey().getType() != enemy.getValue().unitType) {
+            if (enemy.getKey().exists() && enemy.getValue().unitType != UnitType.None && !(enemy.getKey() instanceof SiegeTank) && enemy.getKey().getType() != enemy.getValue().unitType) {
                 enemyIT.remove();
                 continue;
             }
@@ -50,13 +54,12 @@ public class UnitStorage {
     void onUnitCreate(Unit unit) {
         if (!unit.getType().isBuilding()) return;
         UnitInfo u = new UnitInfo((PlayerUnit) unit);
-        u.update();
         ally.put(unit, u);
     }
 
     void onUnitComplete(Unit unit) {
+        if(this.ally.containsKey(unit)) return;
         UnitInfo u = new UnitInfo((PlayerUnit) unit);
-        u.update();
         ally.put(unit, u);
     }
 
@@ -64,15 +67,13 @@ public class UnitStorage {
         UnitInfo stored = enemy.get(unit);
         if (stored != null && stored.unitType != unit.getType()) enemy.remove(unit);
         UnitInfo u = new UnitInfo((PlayerUnit) unit);
-        u.update();
         enemy.put(unit, u);
     }
 
     void onUnitMorph(Unit unit) {
         UnitInfo stored = enemy.get(unit);
-        if (stored != null && stored.unitType != unit.getType()) enemy.remove(unit);
+        if (stored != null && !(unit instanceof SiegeTank) && stored.unitType != unit.getType()) enemy.remove(unit);
         UnitInfo u = new UnitInfo((PlayerUnit) unit);
-        u.update();
         enemy.put(unit, u);
     }
 
@@ -114,35 +115,57 @@ public class UnitStorage {
         public TilePosition tileposition = null;
         public WalkPosition walkposition = null;
         public Position lastPosition = null;
+        public TilePosition lastTileposition = null;
+        public WalkPosition lastWalkposition = null;
         public Unit target = null;
+        public Order currentOrder;
 
         public UnitInfo(PlayerUnit u) {
             unit = u;
-            update();
+        }
+
+        // Credits to N00byEdge
+        private int expectedHealth() {
+            if (unitType.getRace() == Race.Zerg && unitType.regeneratesHP())
+            return Math.min(((getGs().frameCount - lastVisibleFrame) * ZERGREGEN) / 256 + health, unitType.maxHitPoints());
+            return health;
+        }
+
+        // Credits to N00byEdge
+        private int expectedShields() {
+            if (unitType.getRace() == Race.Protoss)
+            return Math.min(((getGs().frameCount - lastVisibleFrame) * PROTOSSSHIELDREGEN) / 256 + shields, unitType.maxShields());
+            return shields;
         }
 
         void update() {
             player = unit.getPlayer();
             unitType = unit.getType();
+            visible = unit.isVisible();
+            position = visible ? unit.getPosition() : position;
+            currentOrder = unit.getOrder();
+            tileposition = visible ? unit.getTilePosition() : tileposition;
+            if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
+            else walkposition = tileposition.toWalkPosition();
+            if (visible){
+                lastPosition = position;
+                lastTileposition = tileposition;
+                lastWalkposition = walkposition;
+            }
+            lastVisibleFrame = visible ? getGs().frameCount : lastVisibleFrame;
+            lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : lastVisibleFrame;
             if (unit instanceof GroundAttacker)
                 groundRange = player.getUnitStatCalculator().weaponMaxRange(unitType.groundWeapon());
             if (unit instanceof AirAttacker)
                 airRange = player.getUnitStatCalculator().weaponMaxRange(unitType.airWeapon());
-            position = unit.getPosition();
-            tileposition = unit.getTilePosition();
-            if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
-            else walkposition = tileposition.toWalkPosition();
-            health = unit.getHitPoints();
-            shields = unit.getShields();
+            health = visible ? unit.getHitPoints() : expectedHealth();
+            shields = visible ? unit.getShields() : expectedShields();
             if (unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();
             percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
             percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
             if (unit instanceof Burrowable && ((Burrowable) unit).isBurrowed()) burrowed = true;
             if (unit instanceof FlyingBuilding || unitType.isFlyer()) flying = true;
-            visible = unit.isVisible();
-            if (visible) lastPosition = position;
-            lastVisibleFrame = visible ? getGs().frameCount : unit.getLastSpotted();
-            lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : unit.getLastSpotted();
+
             speed = Util.getSpeed(this);
             target = (unit instanceof Attacker) ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
         }
@@ -166,6 +189,17 @@ public class UnitStorage {
         @Override
         public int compareTo(UnitInfo o) {
             return this.unit.getId() - o.unit.getId();
+        }
+
+        public double getDistance(Position pos) {
+            if(this.visible) return this.unit.getDistance(pos);
+            return this.lastPosition.getDistance(pos);
+        }
+
+
+        public int getDistance(UnitInfo target) {
+            if(this.visible) return target.visible ? this.unit.getDistance(target.unit) : (int) unit.getDistance(target.lastPosition);
+            return target.visible ? (int) target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
         }
     }
 }

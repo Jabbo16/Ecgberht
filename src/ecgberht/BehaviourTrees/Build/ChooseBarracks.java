@@ -7,6 +7,7 @@ import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
+import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.Building;
@@ -27,6 +28,10 @@ public class ChooseBarracks extends Action {
                     Util.countBuildingAll(UnitType.Terran_Command_Center) == 1 &&
                     Util.countBuildingAll(UnitType.Terran_Barracks) > 1 &&
                     this.handler.frameCount <= 24 * 240) {
+                return State.FAILURE;
+            }
+            if(!this.handler.strat.techToResearch.contains(TechType.Stim_Packs) && this.handler.strat.raxPerCC == 1
+                    && this.handler.MBs.size() > 0){
                 return State.FAILURE;
             }
             if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg

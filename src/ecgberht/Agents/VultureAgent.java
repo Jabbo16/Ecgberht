@@ -42,6 +42,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
+            if (!unit.exists() || unitInfo == null) return true;
             if (unit.getHitPoints() <= 20) {
                 MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
@@ -112,11 +113,11 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void combat() {
-        Unit toAttack = Util.getRangedTarget(unit, mySim.enemies);
+        UnitStorage.UnitInfo toAttack = Util.getRangedTarget(unitInfo, mySim.enemies);
         if (toAttack != null) {
-            if (attackUnit != null && attackUnit.equals(toAttack)) return;
-            UtilMicro.attack(unit, toAttack);
-            attackUnit = toAttack;
+            if (attackUnit != null && attackUnit.equals(toAttack.unit)) return;
+            UtilMicro.attack(unit, toAttack.unit);
+            attackUnit = toAttack.unit;
         }
     }
 

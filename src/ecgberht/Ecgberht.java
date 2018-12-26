@@ -467,6 +467,11 @@ public class Ecgberht implements BWEventListener {
                 if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                 transition();
             }
+            if (gs.strat.name.equals("TheNitekat") && gs.CCs.size() > 1) {
+                gs.strat = new FullMech();
+                if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
+                transition();
+            }
             gs.cancelDyingThings();
             IntelligenceAgency.updateBullets();
             gs.wizard.onFrameSpellManager();
@@ -663,7 +668,7 @@ public class Ecgberht implements BWEventListener {
                     }
                 } else {
                     if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
-                    else if (type == UnitType.Terran_Vulture) gs.agents.put(arg0, new VultureAgent(arg0));
+                    else if (type == UnitType.Terran_Vulture && !gs.strat.name.equals("TheNitekat")) gs.agents.put(arg0, new VultureAgent(arg0));
                     else if (type == UnitType.Terran_Dropship) {
                         DropShipAgent d = new DropShipAgent(arg0);
                         gs.agents.put(arg0, d);
@@ -677,8 +682,8 @@ public class Ecgberht implements BWEventListener {
                         }
                     } else {
                         gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                        if (!gs.strat.name.equals("ProxyBBS")) {
-                            if (!gs.strat.name.equals("ProxyEightRax") && (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg)) {
+                        if (!gs.strat.name.equals("ProxyBBS") && !gs.strat.name.equals("ProxyEightRax")) {
+                            if (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg) {
                                 if (!gs.DBs.isEmpty()) {
                                     ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
                                 } else if (gs.mainChoke != null) {
@@ -725,7 +730,6 @@ public class Ecgberht implements BWEventListener {
                 first = true;
             }
             if (!type.isNeutral() && (!type.isSpecialBuilding() || type.isRefinery())) {
-                gs.unitStorage.onUnitDestroy(arg0);
                 if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
@@ -913,6 +917,7 @@ public class Ecgberht implements BWEventListener {
                     UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
                     if (ally != null) gs.myArmy.remove(ally);
                 }
+                gs.unitStorage.onUnitDestroy(arg0);
             }
         } catch (Exception e) {
             System.err.println("OnUnitDestroy Exception");

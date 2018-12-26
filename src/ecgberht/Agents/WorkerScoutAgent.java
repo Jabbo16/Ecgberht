@@ -41,7 +41,7 @@ public class WorkerScoutAgent extends Agent {
     }
 
     public boolean runAgent() {
-        if (unit == null || !unit.exists()) {
+        if (unit == null || !unit.exists() || unitInfo == null) {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
             return true;
         }

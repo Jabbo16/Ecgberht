@@ -29,7 +29,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() { // TODO improve
         try {
-            if (!unit.exists()) return true;
+            if (!unit.exists() || unitInfo == null) return true;
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             airAttackers.clear();
@@ -78,9 +78,9 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 UtilMicro.move(unit, kitePos);
                 return false;
             }
-            Unit target = Util.getRangedTarget(unit, closeEnemies);
+            UnitStorage.UnitInfo target = Util.getRangedTarget(unitInfo, closeEnemies);
             if (target != null) {
-                UtilMicro.attack(unit, target);
+                UtilMicro.attack(unit, target.unit);
                 return false;
             }
             if (attack != null) {

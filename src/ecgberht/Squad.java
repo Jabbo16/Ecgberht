@@ -185,8 +185,8 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
-                    Unit target = Util.getRangedTarget((MobileUnit) u.unit, squadSim.enemies, attack);
-                    UtilMicro.attack((Attacker) u.unit, target);
+                    UnitStorage.UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
+                    UtilMicro.attack((Attacker) u.unit, target.unit);
                 }
                 break;
             case IDLE:
@@ -400,33 +400,34 @@ public class Squad implements Comparable<Squad> {
     }
 
     private void executeRangedAttackLogic(UnitStorage.UnitInfo u) {
-        Unit target = Util.getRangedTarget((MobileUnit) u.unit, squadSim.enemies, attack);
+        UnitStorage.UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
             if (attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);
             return;
         }
         double speed = u.speed;
         if (getGs().frameCount - u.unit.getLastCommandFrame() <= 15) return;
-        WeaponType w = Util.getWeapon(u.unit, target);
+        WeaponType w = Util.getWeapon(u.unit, target.unit);
         double range = u.player.getUnitStatCalculator().weaponMaxRange(w);
-        double distToTarget = u.unit.getDistance(target);
-        int cooldown = (target.isFlying() ? ((AirAttacker) u.unit).getAirWeaponCooldown() : ((GroundAttacker) u.unit).getGroundWeaponCooldown()) - getGs().getIH().getRemainingLatencyFrames() - 2;
+        double distToTarget = u.getDistance(target);
+        int cooldown = (target.flying ? ((AirAttacker) u.unit).getAirWeaponCooldown() : ((GroundAttacker) u.unit).getGroundWeaponCooldown()) - getGs().getIH().getRemainingLatencyFrames() - 2;
         int framesToFiringRange = (int) Math.ceil(Math.max(0, distToTarget - range) / speed);
         if (cooldown <= framesToFiringRange) {
-            UtilMicro.attack((Attacker) u.unit, target);
+            if (target.visible) UtilMicro.attack((Attacker) u.unit, target.unit);
+            else UtilMicro.attack((MobileUnit) u.unit, target.lastPosition);
             return;
         }
         Position predictedPosition = null;
-        int targetRange = ((PlayerUnit) target).getPlayer().getUnitStatCalculator().weaponMaxRange(Util.getWeapon(target, u.unit));
+        int targetRange = target.player.getUnitStatCalculator().weaponMaxRange(Util.getWeapon(target.unit, u.unit));
         boolean kite = true;
-        boolean moveCloser = target.getType() == UnitType.Terran_Siege_Tank_Siege_Mode ||
-                (target instanceof SCV && ((SCV) target).isRepairing() && ((SCV) target).getOrderTarget() != null && ((SCV) target).getOrderTarget().getType() == UnitType.Terran_Bunker) ||
-                (target.getType().isBuilding() && !Util.canAttack((PlayerUnit) target, u.unit));
+        boolean moveCloser = target.unitType == UnitType.Terran_Siege_Tank_Siege_Mode ||
+                (target.unit instanceof SCV && ((SCV) target.unit).isRepairing() && target.unit.getOrderTarget() != null && ((SCV) target.unit).getOrderTarget().getType() == UnitType.Terran_Bunker) ||
+                (target.unitType.isBuilding() && !Util.canAttack(target.unit, u.unit));
         if (!moveCloser) {
-            predictedPosition = UtilMicro.predictUnitPosition(target, 2);
+            predictedPosition = UtilMicro.predictUnitPosition(target.unit, 2);
             if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
                 double distPredicted = u.unit.getDistance(predictedPosition);
-                double distCurrent = u.unit.getDistance(target.getPosition());
+                double distCurrent = u.unit.getDistance(target.lastPosition);
                 if (distPredicted > distCurrent) {
                     kite = false;
                     if (distToTarget > (range - 24)) moveCloser = true;
@@ -438,18 +439,18 @@ public class Squad implements Comparable<Squad> {
         if (moveCloser) {
             if (distToTarget > 32) {
                 if (predictedPosition != null) UtilMicro.move((MobileUnit) u.unit, predictedPosition);
-                else UtilMicro.move((MobileUnit) u.unit, target.getPosition());
-            } else UtilMicro.attack((Attacker) u.unit, target);
+                else UtilMicro.move((MobileUnit) u.unit, target.lastPosition);
+            } else UtilMicro.attack((Attacker) u.unit, target.unit);
             return;
         }
-        if (kite && target.getType().topSpeed() > 0) {
-            Position kitePos = UtilMicro.kiteAwayAlt(u.position, target.getPosition());
+        if (kite && target.unitType.topSpeed() > 0) {
+            Position kitePos = UtilMicro.kiteAwayAlt(u.position, target.lastPosition);
             if (kitePos != null) UtilMicro.move((MobileUnit) u.unit, kitePos);
             else {
                 kitePos = UtilMicro.kiteAway(u.unit, squadSim.enemies);
                 if (kitePos != null) UtilMicro.move((MobileUnit) u.unit, kitePos);
             }
-        } else UtilMicro.attack((Attacker) u.unit, target);
+        } else UtilMicro.attack((Attacker) u.unit, target.unit);
     }
 
     public void giveMoveOrder(Position retreat) {

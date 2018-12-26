@@ -125,15 +125,6 @@ public class SimManager {
         friendly = clustering.run(iterations);
         // Enemy Clusters
         List<UnitStorage.UnitInfo> enemyUnits = new ArrayList<>();
-        /*for (Unit u : getGs().enemyCombatUnitMemory) {
-            if (u instanceof Worker && Util.isInOurBases(u) && getGs().strat.proxy) continue;
-            if (u instanceof Egg && !((Egg) u).getPlayer().isEnemy()) continue;
-            enemyUnits.add(u);
-        }
-        for (Map.Entry<Unit, EnemyBuilding> u : getGs().enemyBuildingMemory.entrySet()) {
-            if (Util.isStaticDefense(u.getValue().type) || u.getValue().unit.isVisible())
-                enemyUnits.add(u.getValue().unit);
-        }*/
         for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
             if (getGs().strat.proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
@@ -281,7 +272,7 @@ public class SimManager {
                 if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
                 if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
                 if (!Util.isStaticDefense(u.unit) && !u.unitType.canAttack()) continue;
-                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || (u.unit instanceof Lurker && ((Lurker) u.unit).isBurrowed()))) {
+                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || (u.unit instanceof Lurker && u.burrowed))) {
                     if (energy >= 1) energy -= 1;
                     else {
                         s.lose = true;
@@ -331,7 +322,7 @@ public class SimManager {
             simulator.clear();
             if (s.enemies.isEmpty()) continue;
             for (UnitStorage.UnitInfo u : s.allies) {
-                JFAPUnit jU = new JFAPUnit(u.unit);
+                JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer1(jU);
                 s.stateBeforeJFAP.first.add(jU);
             }
@@ -339,14 +330,14 @@ public class SimManager {
                 if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
                 if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
                 if (!Util.isStaticDefense(u.unit) && !u.unitType.canAttack()) continue;
-                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || (u.unit instanceof Lurker && ((Lurker) u.unit).isBurrowed()))) {
+                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || (u.unit instanceof Lurker && u.burrowed))) {
                     if (energy >= 1) energy -= 1;
                     else {
                         s.lose = true;
                         break;
                     }
                 }
-                JFAPUnit jU = new JFAPUnit(u.unit);
+                JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer2(jU);
                 s.stateBeforeJFAP.second.add(jU);
             }

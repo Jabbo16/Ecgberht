@@ -490,91 +490,95 @@ public class Util {
     }
 
     // Credits to SH
-    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<UnitStorage.UnitInfo> enemies, Position pos) {
+    public static UnitStorage.UnitInfo getRangedTarget(UnitStorage.UnitInfo rangedUnit, Set<UnitStorage.UnitInfo> enemies, Position pos) {
         int bestScore = -999999;
-        Unit bestTarget = null;
+        UnitStorage.UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
         for (UnitStorage.UnitInfo enemy : enemies) {
-            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
+            if (enemy.unit == null || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
+            if(enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
+            if(!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             PlayerUnit target = enemy.unit;
-            int priority = getRangedAttackPriority(rangedUnit, target);
-            int distance = rangedUnit.getDistance(target);
-            double closerToGoal = rangedUnit.getDistance(pos) - target.getDistance(pos);
+            int priority = getRangedAttackPriority((MobileUnit) rangedUnit.unit, target);
+            int distance = rangedUnit.getDistance(enemy);
+            double closerToGoal = rangedUnit.getDistance(pos) - enemy.getDistance(pos);
             if (distance >= 13 * 32) continue;
             int score = 5 * 32 * priority - distance;
             if (closerToGoal > 0) score += 2 * 32;
-            boolean isThreat = canAttack(target, rangedUnit);
-            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, rangedUnit);
+            boolean isThreat = canAttack(target, rangedUnit.unit);
+            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, (MobileUnit) rangedUnit.unit);
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = target.getPlayer().getUnitStatCalculator().weaponMaxRange(getWeapon(target, rangedUnit));
+                    double weaponDist = target.getPlayer().getUnitStatCalculator().weaponMaxRange(getWeapon(target, rangedUnit.unit));
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
             } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
                 if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
                         target.getOrder() == Order.Unsieging ||
-                        (target instanceof Burrowable && ((Burrowable) target).isBurrowed())) {
+                        (target instanceof Burrowable && enemy.burrowed)) {
                     score += 48;
                 } else score += 24;
             } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
-            else if (target.getPlayer().getUnitStatCalculator().topSpeed(target.getType()) >= rangedUnit.getPlayer().getUnitStatCalculator().topSpeed(rangedUnit.getType())) {
+            else if (enemy.speed >= rangedUnit.speed) {
                 score -= 4 * 32;
             }
-            if (target.getType().getRace() == Race.Protoss && target.getShields() <= 5) score += 32;
-            if (target.getHitPoints() < target.getType().maxHitPoints()) score += 24;
-            DamageType damage = getWeapon(rangedUnit, target).damageType();
+            if (enemy.unitType.getRace() == Race.Protoss && enemy.shields <= 5) score += 32;
+            if (enemy.health < target.getType().maxHitPoints()) score += 24;
+            DamageType damage = getWeapon(rangedUnit.unit, target).damageType();
             if (damage == DamageType.Explosive) {
-                if (target.getType().size() == UnitSizeType.Large) score += 32;
+                if (enemy.unitType.size() == UnitSizeType.Large) score += 32;
 
             } else if (damage == DamageType.Concussive) {
-                if (target.getType().size() == UnitSizeType.Small) score += 32;
-                else if (target.getType().size() == UnitSizeType.Large) score -= 32;
+                if (enemy.unitType.size() == UnitSizeType.Small) score += 32;
+                else if (enemy.unitType.size() == UnitSizeType.Large) score -= 32;
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestTarget = target;
+                bestTarget = enemy;
             }
         }
         return bestScore > 0 ? bestTarget : null;
     }
 
     // Credits to SH
-    public static Unit getRangedTarget(MobileUnit rangedUnit, Set<UnitStorage.UnitInfo> enemies) {
+    public static UnitStorage.UnitInfo getRangedTarget(UnitStorage.UnitInfo rangedUnit, Set<UnitStorage.UnitInfo> enemies) {
         int bestScore = -999999;
-        Unit bestTarget = null;
+        UnitStorage.UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (UnitStorage.UnitInfo enemy : enemies) {
             if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
+            if(enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
+            if(!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             PlayerUnit target = enemy.unit;
-            int priority = getRangedAttackPriority(rangedUnit, target);
-            int distance = rangedUnit.getDistance(target);
+            int priority = getRangedAttackPriority((MobileUnit) rangedUnit.unit, target);
+            int distance = rangedUnit.getDistance(enemy);
             if (distance >= 13 * 32) continue;
             int score = 5 * 32 * priority - distance;
-            boolean isThreat = canAttack(target, rangedUnit);
-            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, rangedUnit);
+            boolean isThreat = canAttack(target, rangedUnit.unit);
+            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, (MobileUnit) rangedUnit.unit);
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = getWeapon(target, rangedUnit).maxRange();
+                    double weaponDist = getWeapon(target, rangedUnit.unit).maxRange();
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
             } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
                 if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
                         target.getOrder() == Order.Unsieging ||
-                        (target instanceof Burrowable && ((Burrowable) target).isBurrowed())) {
+                        (target instanceof Burrowable && enemy.burrowed)) {
                     score += 48;
                 } else score += 24;
             } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
-            else if (target.getPlayer().getUnitStatCalculator().topSpeed(target.getType()) >= rangedUnit.getPlayer().getUnitStatCalculator().topSpeed(rangedUnit.getType())) {
+            else if (enemy.speed >= rangedUnit.speed) {
                 score -= 4 * 32;
             }
             if (target.getType().getRace() == Race.Protoss && target.getShields() <= 5) score += 32;
             if (target.getHitPoints() < target.getType().maxHitPoints()) score += 24;
-            DamageType damage = getWeapon(rangedUnit, target).damageType();
+            DamageType damage = getWeapon(rangedUnit.unit, target).damageType();
             if (damage == DamageType.Explosive) {
                 if (target.getType().size() == UnitSizeType.Large) score += 32;
 
@@ -584,7 +588,7 @@ public class Util {
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestTarget = target;
+                bestTarget = enemy;
             }
         }
         return bestScore > 0 ? bestTarget : null;

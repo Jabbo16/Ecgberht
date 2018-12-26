@@ -187,6 +187,8 @@ public class GameState {
             TwoPortWraith tPW = new TwoPortWraith();
             ProxyEightRax pER = new ProxyEightRax();
             VultureRush vR = new VultureRush();
+            TheNitekat tNK = new TheNitekat();
+            if(true) return FM;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
             if (enemyRace == Race.Zerg && EI.naughty) return b;

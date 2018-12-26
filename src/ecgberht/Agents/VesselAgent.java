@@ -50,7 +50,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
-            if (!unit.exists()) return true;
+            if (!unit.exists() || unitInfo == null) return true;
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             airAttackers.clear();
