@@ -63,7 +63,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             }
             switch (status) {
                 case DMATRIX:
-                    if (unit.getEnergy() <= TechType.Defensive_Matrix.energyCost()) {
+                    if (unitInfo.energy <= TechType.Defensive_Matrix.energyCost()) {
                         getGs().wizard.irradiatedUnits.remove(unit);
                         status = Status.IDLE;
                         target = null;
@@ -71,7 +71,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     }
                     break;
                 case IRRADIATE:
-                    if (unit.getEnergy() <= TechType.Irradiate.energyCost()) {
+                    if (unitInfo.energy <= TechType.Irradiate.energyCost()) {
                         getGs().wizard.irradiatedUnits.remove(unit);
                         status = Status.IDLE;
                         target = null;
@@ -79,7 +79,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     }
                     break;
                 case EMP:
-                    if (unit.getEnergy() <= TechType.EMP_Shockwave.energyCost()) {
+                    if (unitInfo.energy <= TechType.EMP_Shockwave.energyCost()) {
                         getGs().wizard.EMPedUnits.remove(unit);
                         status = Status.IDLE;
                         target = null;
@@ -130,7 +130,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         Squad chosen = null;
         double scoreMax = Double.MIN_VALUE;
         for (Squad s : getGs().sqManager.squads.values()) {
-            double dist = s.getSquadCenter().getDistance(unit.getPosition());
+            double dist = s.getSquadCenter().getDistance(unitInfo.position);
             double score = -Math.pow(s.members.size(), 3) / dist;
             if (chosen == null || score > scoreMax) {
                 chosen = s;
@@ -141,13 +141,13 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void emp() {
-        if (unit.getOrder() == Order.CastEMPShockwave) {
+        if (unitInfo.currentOrder == Order.CastEMPShockwave) {
             if (target != null && oldTarget != null && !target.equals(oldTarget)) {
                 UtilMicro.emp(unit, target.getPosition());
                 getGs().wizard.addEMPed(unit, (PlayerUnit) target);
                 oldTarget = target;
             }
-        } else if (target != null && target.exists() && unit.getOrder() != Order.CastEMPShockwave) {
+        } else if (target != null && target.exists() && unitInfo.currentOrder != Order.CastEMPShockwave) {
             UtilMicro.emp(unit, target.getPosition());
             getGs().wizard.addEMPed(unit, (PlayerUnit) target);
             oldTarget = target;
@@ -157,13 +157,13 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void irradiate() {
-        if (unit.getOrder() == Order.CastIrradiate) {
+        if (unitInfo.currentOrder == Order.CastIrradiate) {
             if (target != null && oldTarget != null && !target.equals(oldTarget)) {
                 UtilMicro.irradiate(unit, (PlayerUnit) target);
                 getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
                 oldTarget = target;
             }
-        } else if (target != null && target.exists() && unit.getOrder() != Order.CastIrradiate) {
+        } else if (target != null && target.exists() && unitInfo.currentOrder != Order.CastIrradiate) {
             UtilMicro.irradiate(unit, (PlayerUnit) target);
             getGs().wizard.addIrradiated(unit, (PlayerUnit) target);
             oldTarget = target;
@@ -173,13 +173,13 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void dMatrix() {
-        if (unit.getOrder() == Order.CastDefensiveMatrix) {
+        if (unitInfo.currentOrder == Order.CastDefensiveMatrix) {
             if (target != null && oldTarget != null && !target.equals(oldTarget)) {
                 UtilMicro.defenseMatrix(unit, (MobileUnit) target);
                 getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
                 oldTarget = target;
             }
-        } else if (target != null && target.exists() && unit.getOrder() != Order.CastDefensiveMatrix) {
+        } else if (target != null && target.exists() && unitInfo.currentOrder != Order.CastDefensiveMatrix) {
             UtilMicro.defenseMatrix(unit, (MobileUnit) target);
             getGs().wizard.addDefenseMatrixed(unit, (MobileUnit) target);
             oldTarget = target;
@@ -261,7 +261,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             Set<UnitStorage.UnitInfo> empTargets = new TreeSet<>(mySimMix.enemies);
             if (follow != null && !empTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.EMP_Shockwave) && unit.getEnergy() >= TechType.EMP_Shockwave.energyCost() && follow.status != Squad.Status.IDLE) {
                 for (UnitStorage.UnitInfo u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
-                    if (u.unit instanceof Building || u.unit instanceof Worker || u.unit instanceof MobileUnit && (((MobileUnit) u.unit).isIrradiated() || ((MobileUnit) u.unit).isStasised()))
+                    if (u.unit instanceof Building || u.unit instanceof Worker || u.unit instanceof MobileUnit && (u.unit.isIrradiated() || ((MobileUnit) u.unit).isStasised()))
                         continue;
                     if (getGs().wizard.isUnitEMPed(u.unit)) continue;
                     double score = 1;

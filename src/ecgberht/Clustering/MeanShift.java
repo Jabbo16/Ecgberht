@@ -23,7 +23,7 @@ public class MeanShift {
         this.radius = Math.pow(radius, 2);
         for (UnitStorage.UnitInfo u : units) {
             if (u.unit instanceof Building && !Util.isStaticDefense(u.unit) && !u.visible) continue;
-            Position p = u.position;
+            Position p = u.lastPosition;
             this.points.add(new UnitPos(u, p.getX(), p.getY()));
         }
     }
