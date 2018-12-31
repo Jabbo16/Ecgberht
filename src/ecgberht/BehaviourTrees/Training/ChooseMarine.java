@@ -34,6 +34,8 @@ public class ChooseMarine extends Action {
                     return State.FAILURE;
                 if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !this.handler.defense)
                     return State.FAILURE;
+                if (strat.equals("JoyORush") && Util.countBuildingAll(UnitType.Terran_Factory) < 2)
+                    return State.FAILURE;
                 for (Barracks b : this.handler.MBs) {
                     if (!b.isTraining()) {
                         this.handler.chosenUnit = UnitType.Terran_Marine;

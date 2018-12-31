@@ -7,6 +7,8 @@ import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Factory;
+import org.openbw.bwapi4j.unit.SiegeTank;
+import org.openbw.bwapi4j.unit.Unit;
 
 
 public class ChooseTank extends Action {
@@ -25,6 +27,7 @@ public class ChooseTank extends Action {
                 }
                 int multiplier = 2;
                 String strat = this.handler.strat.name;
+                if (strat.equals("JoyORush") && this.handler.tanksTrained == 3) return State.FAILURE;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                     MutablePair<Integer, Integer> cash = this.handler.getCash();

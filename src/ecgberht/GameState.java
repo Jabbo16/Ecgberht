@@ -62,6 +62,7 @@ public class GameState {
     public int startCount;
     public int vulturesTrained = 0;
     public int wraithsTrained = 0;
+    public int tanksTrained = 0;
     public int workerCountToSustain = 0;
     public List<Base> blockedBLs = new ArrayList<>();
     public List<Base> BLs = new ArrayList<>();
@@ -188,7 +189,8 @@ public class GameState {
             ProxyEightRax pER = new ProxyEightRax();
             VultureRush vR = new VultureRush();
             TheNitekat tNK = new TheNitekat();
-            if(true) return FM;
+            JoyORush jOR = new JoyORush();
+            if(true) return jOR;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
@@ -1350,5 +1352,31 @@ public class GameState {
                 return units.stream().anyMatch(u -> u.unitType == UnitType.Protoss_Zealot || u.unitType == UnitType.Protoss_Dragoon);
         }
         return false;
+    }
+
+    void vespeneManager(){
+        int workersAtGas = workerGas.keySet().size();
+        int refineries = refineriesAssigned.size();
+        if(getCash().second >= 200){
+            int workersNeeded;
+            if(strat.techToResearch.contains(TechType.Stim_Packs) && !strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
+                workersNeeded = refineries;
+                strat.workerGas = 1;
+            } else workersNeeded = 2 * refineries;
+            if(workersAtGas > workersNeeded){
+                Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
+                while(iterGas.hasNext()){
+                    Entry<Worker, GasMiningFacility> w = iterGas.next();
+                    if(w.getKey().getOrder() == Order.HarvestGas) continue;
+                    workerIdle.add(w.getKey());
+                    w.getKey().returnCargo();
+                    w.getKey().stop(true);
+                    refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
+                    iterGas.remove();
+                    workersNeeded--;
+                    if(workersNeeded == 0) break;
+                }
+            }
+        } else if(strat.workerGas < 3 && workersAtGas == strat.workerGas) strat.workerGas++;
     }
 }

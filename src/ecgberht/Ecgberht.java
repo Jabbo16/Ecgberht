@@ -467,7 +467,7 @@ public class Ecgberht implements BWEventListener {
                 if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                 transition();
             }
-            if (gs.strat.name.equals("TheNitekat") && gs.CCs.size() > 1) {
+            if (gs.strat.name.equals("TheNitekat") || gs.strat.name.equals("JoyORush") && gs.CCs.size() > 1) {
                 gs.strat = new FullMech();
                 if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                 transition();
@@ -477,6 +477,7 @@ public class Ecgberht implements BWEventListener {
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
+            gs.vespeneManager();
             gs.sqManager.updateBunkers();
             gs.checkDisrupter();
             buildingLotTree.run();
@@ -582,6 +583,15 @@ public class Ecgberht implements BWEventListener {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0);
                     if (arg0 instanceof Vulture) gs.vulturesTrained++;
                     if (arg0 instanceof Wraith) gs.wraithsTrained++;
+                    if (arg0 instanceof SiegeTank){
+                        gs.tanksTrained++;
+                        if (gs.tanksTrained == 3 && gs.strat.name.equals("JoyORush")){
+                            gs.strat.trainUnits.add(UnitType.Terran_Vulture);
+                            gs.strat.upgradesToResearch.add(UpgradeType.Ion_Thrusters);
+                            gs.strat.techToResearch.add(TechType.Spider_Mines);
+                            transition();
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
