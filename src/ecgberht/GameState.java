@@ -72,7 +72,7 @@ public class GameState {
     public Map<Base, CommandCenter> CCs = new LinkedHashMap<>();
     public Map<Base, CommandCenter> islandCCs = new HashMap<>();
     public Map<Base, Neutral> blockedBases = new HashMap<>();
-    public Map<Bunker, Set<UnitStorage.UnitInfo>> DBs = new TreeMap<>();
+    public Map<Bunker, Set<UnitInfo>> DBs = new TreeMap<>();
     public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
     public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
@@ -103,7 +103,7 @@ public class GameState {
     public Set<MissileTurret> Ts = new TreeSet<>();
     public Set<ResearchingFacility> UBs = new TreeSet<>();
     public Set<Starport> Ps = new TreeSet<>();
-    public Set<UnitStorage.UnitInfo> myArmy = new TreeSet<>();
+    public Set<UnitInfo> myArmy = new TreeSet<>();
     public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
@@ -190,7 +190,7 @@ public class GameState {
             VultureRush vR = new VultureRush();
             TheNitekat tNK = new TheNitekat();
             JoyORush jOR = new JoyORush();
-            if(true) return jOR;
+            if (true) return jOR;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
@@ -626,9 +626,9 @@ public class GameState {
 
     void fix() {
         if (defense && enemyInBase.isEmpty()) defense = false;
-        Iterator<Entry<Unit, UnitStorage.UnitInfo>> allyIT = unitStorage.getAllyUnits().entrySet().iterator();
+        Iterator<Entry<Unit, UnitInfo>> allyIT = unitStorage.getAllyUnits().entrySet().iterator();
         while (allyIT.hasNext()) {
-            Entry<Unit, UnitStorage.UnitInfo> u = allyIT.next();
+            Entry<Unit, UnitInfo> u = allyIT.next();
             if (!u.getKey().exists()) {
                 myArmy.remove(u.getValue());
                 allyIT.remove();
@@ -813,11 +813,11 @@ public class GameState {
         return count + agents.size() * 2;
     }
 
-    public int getArmySize(Set<UnitStorage.UnitInfo> units) {
+    public int getArmySize(Set<UnitInfo> units) {
         int count = 0;
         if (units.isEmpty()) return count;
         else {
-            for (UnitStorage.UnitInfo u : units) {
+            for (UnitInfo u : units) {
                 count++;
                 if (u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith || u.unit instanceof ScienceVessel)
                     count++;
@@ -1342,7 +1342,7 @@ public class GameState {
         return false;
     }
 
-    public boolean basicCombatUnitsDetected(Set<UnitStorage.UnitInfo> units) {
+    public boolean basicCombatUnitsDetected(Set<UnitInfo> units) {
         switch (enemyRace) {
             case Zerg:
                 return units.stream().anyMatch(u -> u.unitType == UnitType.Zerg_Zergling);
@@ -1354,29 +1354,29 @@ public class GameState {
         return false;
     }
 
-    void vespeneManager(){
+    void vespeneManager() {
         int workersAtGas = workerGas.keySet().size();
         int refineries = refineriesAssigned.size();
-        if(getCash().second >= 200){
+        if (getCash().second >= 200) {
             int workersNeeded;
-            if(strat.techToResearch.contains(TechType.Stim_Packs) && !strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
+            if (strat.techToResearch.contains(TechType.Stim_Packs) && !strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
                 workersNeeded = refineries;
                 strat.workerGas = 1;
             } else workersNeeded = 2 * refineries;
-            if(workersAtGas > workersNeeded){
+            if (workersAtGas > workersNeeded) {
                 Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
-                while(iterGas.hasNext()){
+                while (iterGas.hasNext()) {
                     Entry<Worker, GasMiningFacility> w = iterGas.next();
-                    if(w.getKey().getOrder() == Order.HarvestGas) continue;
+                    if (w.getKey().getOrder() == Order.HarvestGas) continue;
                     workerIdle.add(w.getKey());
                     w.getKey().returnCargo();
                     w.getKey().stop(true);
                     refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
                     iterGas.remove();
                     workersNeeded--;
-                    if(workersNeeded == 0) break;
+                    if (workersNeeded == 0) break;
                 }
             }
-        } else if(strat.workerGas < 3 && workersAtGas == strat.workerGas) strat.workerGas++;
+        } else if (strat.workerGas < 3 && workersAtGas == strat.workerGas) strat.workerGas++;
     }
 }

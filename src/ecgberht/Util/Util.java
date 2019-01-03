@@ -3,7 +3,7 @@ package ecgberht.Util;
 import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
@@ -255,7 +255,7 @@ public class Util {
     public static Position chooseAttackPosition(Position p, boolean flying) {
         Position chosen = null;
         double maxScore = 0;
-        for (UnitStorage.UnitInfo b : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+        for (UnitInfo b : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
             double influence = getScoreAttackPosition((Building) b.unit);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
             double score = influence / (2.5 * (flying ? b.lastPosition.getDistance(p) : Util.getGroundDistance(p, b.lastPosition)));
@@ -274,10 +274,10 @@ public class Util {
         return 3;
     }
 
-    public static Unit getClosestUnit(Unit unit, Set<UnitStorage.UnitInfo> enemies) {
+    public static Unit getClosestUnit(Unit unit, Set<UnitInfo> enemies) {
         Unit chosen = null;
         double minDist = Double.MAX_VALUE;
-        for (UnitStorage.UnitInfo u : enemies) {
+        for (UnitInfo u : enemies) {
             if (!u.unit.exists()) continue;
             double dist = unit.getDistance(u.unit);
             if (chosen == null || dist < minDist) {
@@ -335,7 +335,7 @@ public class Util {
         return new MutablePair<>(pos.first / norm, pos.second / norm);
     }
 
-    public static double getSpeed(UnitStorage.UnitInfo unit) {
+    public static double getSpeed(UnitInfo unit) {
         if (unit.unitType.isBuilding() && !unit.flying) return 0.0;
         if (unit.burrowed) return 0.0;
         return unit.player.getUnitStatCalculator().topSpeed(unit.unitType);
@@ -473,11 +473,11 @@ public class Util {
         return getGs().getIH();
     }
 
-    public static Unit getTankTarget(SiegeTank t, Set<UnitStorage.UnitInfo> tankTargets) {
+    public static Unit getTankTarget(SiegeTank t, Set<UnitInfo> tankTargets) {
         Unit chosenTarget = null;
         int highPriority = 0;
         int closestDist = Integer.MAX_VALUE;
-        for (UnitStorage.UnitInfo target : tankTargets) {
+        for (UnitInfo target : tankTargets) {
             int distance = t.getDistance(target.unit);
             int priority = getRangedAttackPriority(t, target.unit);
             if (chosenTarget == null || (priority > highPriority) || (priority == highPriority && distance < closestDist)) {
@@ -490,15 +490,15 @@ public class Util {
     }
 
     // Credits to SH
-    public static UnitStorage.UnitInfo getRangedTarget(UnitStorage.UnitInfo rangedUnit, Set<UnitStorage.UnitInfo> enemies, Position pos) {
+    public static UnitInfo getRangedTarget(UnitInfo rangedUnit, Set<UnitInfo> enemies, Position pos) {
         int bestScore = -999999;
-        UnitStorage.UnitInfo bestTarget = null;
+        UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
-        for (UnitStorage.UnitInfo enemy : enemies) {
+        for (UnitInfo enemy : enemies) {
             if (enemy.unit == null || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
-            if(enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
-            if(!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
+            if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
+            if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             PlayerUnit target = enemy.unit;
             int priority = getRangedAttackPriority((MobileUnit) rangedUnit.unit, target);
             int distance = rangedUnit.getDistance(enemy);
@@ -544,14 +544,15 @@ public class Util {
     }
 
     // Credits to SH
-    public static UnitStorage.UnitInfo getRangedTarget(UnitStorage.UnitInfo rangedUnit, Set<UnitStorage.UnitInfo> enemies) {
+    public static UnitInfo getRangedTarget(UnitInfo rangedUnit, Set<UnitInfo> enemies) {
         int bestScore = -999999;
-        UnitStorage.UnitInfo bestTarget = null;
+        UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
-        for (UnitStorage.UnitInfo enemy : enemies) {
-            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
-            if(enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
-            if(!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
+        for (UnitInfo enemy : enemies) {
+            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected()))
+                continue;
+            if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
+            if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             PlayerUnit target = enemy.unit;
             int priority = getRangedAttackPriority((MobileUnit) rangedUnit.unit, target);
             int distance = rangedUnit.getDistance(enemy);

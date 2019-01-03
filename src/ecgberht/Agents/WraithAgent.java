@@ -1,7 +1,7 @@
 package ecgberht.Agents;
 
 import ecgberht.Simulation.SimInfo;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
@@ -16,7 +16,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
 
     public Wraith unit;
     public String name;
-    private Set<UnitStorage.UnitInfo> airAttackers = new TreeSet<>();
+    private Set<UnitInfo> airAttackers = new TreeSet<>();
 
     public WraithAgent(Unit unit, String name) {
         super();
@@ -35,13 +35,13 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
             Position attack = getBestBaseToHarass();
-            UnitStorage.UnitInfo closestThreat = null;
+            UnitInfo closestThreat = null;
             double bestDist = Double.MAX_VALUE;
             airAttackers = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.AIR).enemies;
-            Set<UnitStorage.UnitInfo> closeEnemies = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
-            Iterator<UnitStorage.UnitInfo> it = airAttackers.iterator();
+            Set<UnitInfo> closeEnemies = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
+            Iterator<UnitInfo> it = airAttackers.iterator();
             while (it.hasNext()) {
-                UnitStorage.UnitInfo u = it.next();
+                UnitInfo u = it.next();
                 double dist = unit.getDistance(u.unit);
                 double hisAirWeaponRange = u.airRange;
                 if (dist < bestDist) {
@@ -50,7 +50,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 }
                 if (dist > hisAirWeaponRange) it.remove();
             }
-            Set<UnitStorage.UnitInfo> mainTargets = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
+            Set<UnitInfo> mainTargets = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
             Unit harassed = chooseHarassTarget(mainTargets);
             if (airAttackers.isEmpty()) { // TODO improve this
                 if (closestThreat != null) {
@@ -78,7 +78,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 UtilMicro.move(unit, kitePos);
                 return false;
             }
-            UnitStorage.UnitInfo target = Util.getRangedTarget(unitInfo, closeEnemies);
+            UnitInfo target = Util.getRangedTarget(unitInfo, closeEnemies);
             if (target != null) {
                 UtilMicro.attack(unit, target.unit);
                 return false;
@@ -100,10 +100,10 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         return Util.chooseAttackPosition(unit.getPosition(), true);
     }
 
-    private Unit chooseHarassTarget(Set<UnitStorage.UnitInfo> mainTargets) {
+    private Unit chooseHarassTarget(Set<UnitInfo> mainTargets) {
         Unit chosen = null;
         double maxScore = Double.MIN_VALUE;
-        for (UnitStorage.UnitInfo u : mainTargets) {
+        for (UnitInfo u : mainTargets) {
             if (!u.unit.exists()) continue;
             double dist = myUnit.getDistance(u.unit);
             double score = u.unit instanceof Worker ? 3 : (u.unit instanceof Overlord ? 6 : 1);

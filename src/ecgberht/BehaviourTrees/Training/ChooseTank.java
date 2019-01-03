@@ -7,8 +7,6 @@ import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Factory;
-import org.openbw.bwapi4j.unit.SiegeTank;
-import org.openbw.bwapi4j.unit.Unit;
 
 
 public class ChooseTank extends Action {

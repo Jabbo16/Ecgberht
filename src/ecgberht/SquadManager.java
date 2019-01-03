@@ -32,13 +32,13 @@ public class SquadManager {
     }
 
     void updateBunkers() { // TODO improve
-        for (Map.Entry<Bunker, Set<UnitStorage.UnitInfo>> bunker : getGs().DBs.entrySet()) {
+        for (Map.Entry<Bunker, Set<UnitInfo>> bunker : getGs().DBs.entrySet()) {
             SimInfo bunkerSim = getGs().sim.getSimulation(getGs().unitStorage.getAllyUnits().get(bunker.getKey()), SimInfo.SimType.MIX);
             if (!bunkerSim.enemies.isEmpty()) {
                 if (bunker.getValue().size() < 4) {
                     Marine closest = null;
                     double bestDist = Double.MAX_VALUE;
-                    for (UnitStorage.UnitInfo u : bunkerSim.allies) {
+                    for (UnitInfo u : bunkerSim.allies) {
                         if (!(u.unit instanceof Marine)) continue;
                         double dist = u.unit.getDistance(bunker.getKey());
                         if (dist < bestDist) {
@@ -47,7 +47,7 @@ public class SquadManager {
                         }
                     }
                     if (closest != null) {
-                        UnitStorage.UnitInfo closestUI = getGs().unitStorage.getAllyUnits().get(closest);
+                        UnitInfo closestUI = getGs().unitStorage.getAllyUnits().get(closest);
                         bunker.getValue().add(closestUI);
                         bunkerSim.allies.remove(closestUI);
                         closest.rightClick(bunker.getKey(), false);

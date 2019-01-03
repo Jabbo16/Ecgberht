@@ -17,7 +17,7 @@ import static ecgberht.Ecgberht.getGs;
 
 public class IntelligenceAgency {
 
-    static Map<Player, TreeSet<UnitStorage.UnitInfo>> enemyBases;
+    static Map<Player, TreeSet<UnitInfo>> enemyBases;
     static Map<Player, HashSet<UnitType>> enemyTypes;
     private static Player mainEnemy;
     private static Set<Unit> enemyWorkers;
@@ -119,7 +119,8 @@ public class IntelligenceAgency {
         // Bases
         if (type.isResourceDepot()) {
             // If base and player known skip
-            if (enemyBases.containsKey(player) && enemyBases.get(player).contains(getGs().unitStorage.getEnemyUnits().get(unit))) return;
+            if (enemyBases.containsKey(player) && enemyBases.get(player).contains(getGs().unitStorage.getEnemyUnits().get(unit)))
+                return;
             for (Base b : getGs().BLs) {
                 if (b.getLocation().equals(unit.getTilePosition())) {
                     enemyBases.get(player).add(getGs().unitStorage.getEnemyUnits().get(unit));
@@ -222,7 +223,7 @@ public class IntelligenceAgency {
             int countFactories = 0;
             int countRax = 0;
             boolean foundGas = false;
-            for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+            for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                 if (u.unitType == UnitType.Terran_Factory) countFactories++;
                 if (u.unitType == UnitType.Terran_Refinery) foundGas = true;
                 if (u.unitType == UnitType.Terran_Barracks) countRax++;
@@ -342,7 +343,7 @@ public class IntelligenceAgency {
             boolean foundForge = false;
             boolean foundGas = enemyHasType(UnitType.Protoss_Assimilator);
             if (exploredMinerals) {
-                for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                     if (u.unitType == UnitType.Protoss_Forge && getGs().bwem.getMap().getArea(u.tileposition).equals(getGs().enemyMainArea)) {
                         foundForge = true;
                         break;
@@ -350,7 +351,7 @@ public class IntelligenceAgency {
                 }
             }
             boolean somethingInMyBase = false;
-            for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+            for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                 if ((u.unitType == UnitType.Protoss_Pylon || u.unitType == UnitType.Protoss_Photon_Cannon) &&
                         (getGs().bwem.getMap().getArea(u.tileposition).equals(getGs().BLs.get(0).getArea())
                                 || getGs().bwem.getMap().getArea(u.tileposition).equals(getGs().BLs.get(1).getArea()))) {

@@ -11,9 +11,11 @@ repositories {
     flatDir {
         dirs 'lib'
     }
+    maven { url 'https://jitpack.io' }
 }
 dependencies {
     compile fileTree(dir: 'lib', include: ['*.jar'], exclude: ['*-javadoc.jar'])
+    implementation 'com.github.Bytekeeper:ass:master-SNAPSHOT'
 }
 
 task copyConfig(type: Copy) {

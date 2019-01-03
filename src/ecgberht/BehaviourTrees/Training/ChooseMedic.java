@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
@@ -28,7 +28,7 @@ public class ChooseMedic extends Action {
                     if (u instanceof Academy) {
                         int marine_count = 0;
                         if (!this.handler.DBs.isEmpty()) {
-                            for (Set<UnitStorage.UnitInfo> p : this.handler.DBs.values()) marine_count += p.size();
+                            for (Set<UnitInfo> p : this.handler.DBs.values()) marine_count += p.size();
                         }
                         if (!this.handler.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
                             for (Barracks b : this.handler.MBs) {

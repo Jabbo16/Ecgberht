@@ -6,7 +6,7 @@ import bwem.area.Area;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
@@ -82,13 +82,13 @@ public class CheckBuildingFlames extends Action {
             isBeingRepaired = false;
             for (Squad s : this.handler.sqManager.squads.values()) {
                 if (s.status != Squad.Status.IDLE) continue;
-                for (UnitStorage.UnitInfo u : s.members) {
+                for (UnitInfo u : s.members) {
                     if (u.unit instanceof Mechanical && u.health != u.unitType.maxHitPoints()) {
                         Area unitArea = this.handler.bwem.getMap().getArea(u.tileposition);
                         for (Base b : this.handler.CCs.keySet()) {
                             if (unitArea != null && b.getArea().equals(unitArea)) {
                                 for (Mechanical r : this.handler.repairerTask.values()) {
-                                    if (u.equals(r)) {
+                                    if (u.unit.equals(r)) {
                                         isBeingRepaired = true;
                                     }
                                 }

@@ -20,7 +20,8 @@ public class ChooseArmory extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.Fs.isEmpty() || !this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) return State.FAILURE;
+            if (this.handler.Fs.isEmpty() || !this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode))
+                return State.FAILURE;
             if (this.handler.Fs.size() < this.handler.strat.facForArmory) return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < this.handler.strat.numArmories) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {

@@ -22,7 +22,7 @@ public class Squad implements Comparable<Squad> {
 
     private static boolean stimResearched;
     public Position attack;
-    public Set<UnitStorage.UnitInfo> members = new TreeSet<>();
+    public Set<UnitInfo> members = new TreeSet<>();
     public Status status;
     private Position center;
     private Integer id;
@@ -33,7 +33,7 @@ public class Squad implements Comparable<Squad> {
         this.id = id;
         this.lose = squadSim.lose;
         this.squadSim = squadSim;
-        for (UnitStorage.UnitInfo m : squadSim.allies) {
+        for (UnitInfo m : squadSim.allies) {
             if (isArmyUnit(m.unit) && !getGs().agents.containsKey(m.unit)) this.members.add(m);
         }
         status = getGs().defense ? Status.DEFENSE : Status.IDLE;
@@ -67,7 +67,7 @@ public class Squad implements Comparable<Squad> {
 
     int getSquadMembersCount() {
         int count = 0;
-        for (UnitStorage.UnitInfo u : members) {
+        for (UnitInfo u : members) {
             count++;
             if (u.unit instanceof Goliath || u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith)
                 count++;
@@ -77,7 +77,8 @@ public class Squad implements Comparable<Squad> {
 
     private void setSquadStatus() {
         if (status == Status.DEFENSE) return;
-        if (squadSim.lose || members.stream().noneMatch(u -> u.unitType != UnitType.Terran_Medic)) status = Status.REGROUP;
+        if (squadSim.lose || members.stream().noneMatch(u -> u.unitType != UnitType.Terran_Medic))
+            status = Status.REGROUP;
         else if (status == Status.ATTACK && squadSim.enemies.isEmpty()) status = Status.ADVANCE;
         else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing() && (getGs().defendPosition == null || getGs().defendPosition.getDistance(center) <= 350))
             status = Status.ATTACK;
@@ -93,7 +94,7 @@ public class Squad implements Comparable<Squad> {
     private void microUpdateOrder() {
         try {
             Set<Unit> marinesToHeal = new TreeSet<>();
-            for (UnitStorage.UnitInfo u : members) {
+            for (UnitInfo u : members) {
                 if (u.unit.isLockedDown() || u.unit.isMaelstrommed() || ((MobileUnit) u.unit).isStasised() || ((MobileUnit) u.unit).getTransport() != null)
                     continue;
                 if (u.unit instanceof Marine && shouldStim(u)) ((Marine) u.unit).stimPack();
@@ -110,7 +111,7 @@ public class Squad implements Comparable<Squad> {
     }
 
     // Based on @Locutus micro logic
-    private void microRanged(UnitStorage.UnitInfo u) {
+    private void microRanged(UnitInfo u) {
         switch (status) {
             case ATTACK:
             case DEFENSE:
@@ -168,7 +169,7 @@ public class Squad implements Comparable<Squad> {
         }
     }
 
-    private void microMelee(UnitStorage.UnitInfo u) {
+    private void microMelee(UnitInfo u) {
         switch (status) {
             case ATTACK:
             case DEFENSE:
@@ -185,7 +186,7 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
-                    UnitStorage.UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
+                    UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
                     UtilMicro.attack((Attacker) u.unit, target.unit);
                 }
                 break;
@@ -243,7 +244,7 @@ public class Squad implements Comparable<Squad> {
         }
     }
 
-    private void microTank(UnitStorage.UnitInfo u) {
+    private void microTank(UnitInfo u) {
         SiegeTank st = (SiegeTank) u.unit;
         if (st.isSieged() && u.currentOrder == Order.Unsieging) return;
         if (!st.isSieged() && u.currentOrder == Order.Sieging) return;
@@ -252,7 +253,7 @@ public class Squad implements Comparable<Squad> {
             case DEFENSE:
                 boolean found = false;
                 boolean close = false;
-                for (UnitStorage.UnitInfo e : squadSim.enemies) {
+                for (UnitInfo e : squadSim.enemies) {
                     if (e.flying || e.unit instanceof Worker || e.unit instanceof Medic || (e.unit instanceof Building && !Util.isStaticDefense(e.unit)))
                         continue;
                     double distance = u.getDistance(e);
@@ -272,7 +273,7 @@ public class Squad implements Comparable<Squad> {
                     st.unsiege();
                     return;
                 }
-                Set<UnitStorage.UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
+                Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
                 Unit target = Util.getTankTarget(st, tankTargets);
                 UtilMicro.attack(st, target);
                 break;
@@ -354,14 +355,14 @@ public class Squad implements Comparable<Squad> {
         } else UtilMicro.heal(u, center);
     }
 
-    private boolean shouldStim(UnitStorage.UnitInfo u) {
-        if (((Marine)u.unit).isStimmed() || u.health <= 25) return false;
+    private boolean shouldStim(UnitInfo u) {
+        if (((Marine) u.unit).isStimmed() || u.health <= 25) return false;
         Unit target = u.target;
         if (target != null) {
-            UnitStorage.UnitInfo targetUI = getGs().unitStorage.getEnemyUnits().get(target);
+            UnitInfo targetUI = getGs().unitStorage.getEnemyUnits().get(target);
             double range = u.groundRange;
             double distToTarget;
-            if(targetUI != null) distToTarget = u.getDistance(targetUI);
+            if (targetUI != null) distToTarget = u.getDistance(targetUI);
             else distToTarget = u.unit.getDistance(target);
             return distToTarget > (range - 32) && (target instanceof Attacker || target instanceof SpellCaster);
         }
@@ -385,14 +386,14 @@ public class Squad implements Comparable<Squad> {
 
     private Set<PlayerUnit> getHealable() {
         Set<PlayerUnit> aux = new TreeSet<>();
-        for (UnitStorage.UnitInfo u : this.members) {
+        for (UnitInfo u : this.members) {
             if (u.unit instanceof Marine || u.unit instanceof Firebat) aux.add(u.unit);
         }
         return aux;
     }
 
-    private void executeRangedAttackLogic(UnitStorage.UnitInfo u) {
-        UnitStorage.UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
+    private void executeRangedAttackLogic(UnitInfo u) {
+        UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
             if (attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);
             return;
@@ -447,7 +448,7 @@ public class Squad implements Comparable<Squad> {
 
     public void giveMoveOrder(Position retreat) {
         int frameCount = getGs().frameCount;
-        for (UnitStorage.UnitInfo u : members) {
+        for (UnitInfo u : members) {
             PlayerUnit pU = u.unit;
             if (u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) {
                 continue;

@@ -39,10 +39,7 @@ import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
 import java.io.FileNotFoundException;
@@ -77,6 +74,9 @@ public class Ecgberht implements BWEventListener {
     private BWEM bwem = null;
     private DebugManager debugManager = null;
     private CameraModule skycladObserver = null;
+
+    private Cartographer silentCartographer;
+    private org.bk.ass.path.Result path;
 
     public static void main(String[] args) {
         new Ecgberht().run();
@@ -127,7 +127,7 @@ public class Ecgberht implements BWEventListener {
 
     private static void initBuildTree() {
         Build b = new Build("Build", gs);
-        workerWalkBuild wwB = new workerWalkBuild("worker walk build", gs);
+        WorkerWalkBuild wwB = new WorkerWalkBuild("worker walk build", gs);
         ChooseNothingBuilding cNB = new ChooseNothingBuilding("Choose Nothing", gs);
         ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
@@ -392,6 +392,7 @@ public class Ecgberht implements BWEventListener {
             initScanTree();
             initHarassTree();
             initIslandTree();
+            silentCartographer = new Cartographer(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
         } catch (Exception e) {
             System.err.println("onStart Exception");
@@ -403,6 +404,22 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onFrame() {
         try {
+            if (gs.enemyMainBase != null) {
+                if (path == null) {
+                    if (gs.mainChoke != null) {
+                        path = silentCartographer.getWalkablePath(gs.mainChoke.getCenter(), gs.enemyMainBase.getLocation().toWalkPosition());
+                    } else {
+                        path = silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
+                    }
+
+                } else {
+                    for (org.bk.ass.path.Position p : path.path) {
+                        Position pos = new WalkPosition(p.x, p.y).toPosition();
+                        bw.getMapDrawer().drawCircleMap(pos, 4, Color.RED, true);
+                    }
+                }
+            }
+
             gs.frameCount = ih.getFrameCount();
             skycladObserver.onFrame();
             gs.fix();
@@ -421,8 +438,8 @@ public class Ecgberht implements BWEventListener {
             // If rushing and enough time has passed -> transition to Bio
             if (gs.frameCount == 24 * 60 * 8 && gs.strat.proxy) {
                 gs.strat = new FullBio();
-                List<UnitStorage.UnitInfo> workersToDelete = new ArrayList<>();
-                for (UnitStorage.UnitInfo u : gs.myArmy) {
+                List<UnitInfo> workersToDelete = new ArrayList<>();
+                for (UnitInfo u : gs.myArmy) {
                     if (!(u.unit instanceof Worker)) continue;
                     workersToDelete.add(u);
                 }
@@ -583,9 +600,9 @@ public class Ecgberht implements BWEventListener {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onCreate(arg0);
                     if (arg0 instanceof Vulture) gs.vulturesTrained++;
                     if (arg0 instanceof Wraith) gs.wraithsTrained++;
-                    if (arg0 instanceof SiegeTank){
+                    if (arg0 instanceof SiegeTank) {
                         gs.tanksTrained++;
-                        if (gs.tanksTrained == 3 && gs.strat.name.equals("JoyORush")){
+                        if (gs.tanksTrained == 3 && gs.strat.name.equals("JoyORush")) {
                             gs.strat.trainUnits.add(UnitType.Terran_Vulture);
                             gs.strat.upgradesToResearch.add(UpgradeType.Ion_Thrusters);
                             gs.strat.techToResearch.add(TechType.Spider_Mines);
@@ -678,7 +695,8 @@ public class Ecgberht implements BWEventListener {
                     }
                 } else {
                     if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
-                    else if (type == UnitType.Terran_Vulture && !gs.strat.name.equals("TheNitekat")) gs.agents.put(arg0, new VultureAgent(arg0));
+                    else if (type == UnitType.Terran_Vulture && !gs.strat.name.equals("TheNitekat"))
+                        gs.agents.put(arg0, new VultureAgent(arg0));
                     else if (type == UnitType.Terran_Dropship) {
                         DropShipAgent d = new DropShipAgent(arg0);
                         gs.agents.put(arg0, d);
@@ -750,7 +768,7 @@ public class Ecgberht implements BWEventListener {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
                         if (gs.strat.name.equals("ProxyBBS") || gs.strat.name.equals("ProxyEightRax")) {
-                            UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
+                            UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
                             if (ally != null) gs.myArmy.remove(ally);
                         }
                         for (SCV r : gs.repairerTask.keySet()) {
@@ -924,7 +942,7 @@ public class Ecgberht implements BWEventListener {
                         gs.shipNames.add(wraith);
                         gs.agents.remove(arg0);
                     }
-                    UnitStorage.UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
+                    UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
                     if (ally != null) gs.myArmy.remove(ally);
                 }
                 gs.unitStorage.onUnitDestroy(arg0);

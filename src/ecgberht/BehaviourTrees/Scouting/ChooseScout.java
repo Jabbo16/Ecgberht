@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Scouting;
 
 import ecgberht.GameState;
 import ecgberht.Squad;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
@@ -20,7 +20,7 @@ public class ChooseScout extends Action {
         try {
             if (this.handler.strat.name.equals("PlasmaWraithHell")) {
                 for (Squad s : this.handler.sqManager.squads.values()) {
-                    for (UnitStorage.UnitInfo u : s.members) {
+                    for (UnitInfo u : s.members) {
                         if (u.unit instanceof Wraith) {
                             this.handler.chosenScout = u.unit;
                             s.members.remove(u);

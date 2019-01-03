@@ -14,9 +14,9 @@ import org.openbw.bwapi4j.unit.SCV;
 
 import java.util.Map.Entry;
 
-public class workerWalkBuild extends Action {
+public class WorkerWalkBuild extends Action {
 
-    public workerWalkBuild(String name, GameState gh) {
+    public WorkerWalkBuild(String name, GameState gh) {
         super(name, gh);
     }
 

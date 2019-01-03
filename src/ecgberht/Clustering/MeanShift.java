@@ -1,7 +1,7 @@
 package ecgberht.Clustering;
 
 
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Building;
@@ -19,9 +19,9 @@ public class MeanShift {
     private double radius;
     private List<UnitPos> points = new ArrayList<>();
 
-    public MeanShift(Collection<UnitStorage.UnitInfo> units, double radius) {
+    public MeanShift(Collection<UnitInfo> units, double radius) {
         this.radius = Math.pow(radius, 2);
-        for (UnitStorage.UnitInfo u : units) {
+        for (UnitInfo u : units) {
             if (u.unit instanceof Building && !Util.isStaticDefense(u.unit) && !u.visible) continue;
             Position p = u.lastPosition;
             this.points.add(new UnitPos(u, p.getX(), p.getY()));
@@ -91,7 +91,7 @@ public class MeanShift {
         return Math.exp(-1.0 / 2.0 * distanceSquared / (bandwidth * bandwidth));
     }
 
-    private List<double[]> getNeighbours(UnitStorage.UnitInfo unit, double pointX, double pointY) {
+    private List<double[]> getNeighbours(UnitInfo unit, double pointX, double pointY) {
         List<double[]> neighbours = new ArrayList<>();
         for (UnitPos u : this.points) {
             if (unit.equals(u.unit)) continue;
@@ -107,11 +107,11 @@ public class MeanShift {
 
     static class UnitPos {
 
-        UnitStorage.UnitInfo unit;
+        UnitInfo unit;
         double x;
         double y;
 
-        UnitPos(UnitStorage.UnitInfo unit, double x, double y) {
+        UnitPos(UnitInfo unit, double x, double y) {
             this.unit = unit;
             this.x = x;
             this.y = y;

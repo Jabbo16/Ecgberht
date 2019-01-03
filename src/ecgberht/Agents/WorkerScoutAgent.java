@@ -5,7 +5,7 @@ import bwem.area.Area;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
@@ -106,7 +106,7 @@ public class WorkerScoutAgent extends Agent {
                 return;
             }
             if (mySim.enemies.size() == 1) {
-                UnitStorage.UnitInfo closest = mySim.enemies.iterator().next();
+                UnitInfo closest = mySim.enemies.iterator().next();
                 Area enemyArea = getGs().bwem.getMap().getArea(closest.tileposition);
                 if (closest.unit instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
                     if (mySim.lose) {

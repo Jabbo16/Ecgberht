@@ -2,7 +2,7 @@ package ecgberht.Agents;
 
 import ecgberht.Simulation.SimInfo;
 import ecgberht.Squad;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
@@ -23,7 +23,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     public ScienceVessel unit;
     public Squad follow = null;
     private Status status = Status.IDLE;
-    private Set<UnitStorage.UnitInfo> airAttackers = new TreeSet<>();
+    private Set<UnitInfo> airAttackers = new TreeSet<>();
     private Position center;
     private Unit target;
     private Unit oldTarget;
@@ -208,7 +208,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         double maxScore = 0;
         PlayerUnit chosen = null;
         if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
-            for (UnitStorage.UnitInfo u : mySimAir.enemies) {
+            for (UnitInfo u : mySimAir.enemies) {
                 if (u.unit instanceof Scourge && u.unit.getOrderTarget().equals(unit)) {
                     chasenByScourge = true;
                 } else if (u.unit instanceof SporeColony && u.unit.getDistance(unit) < u.airRange * 1.2) {
@@ -219,12 +219,12 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         }
         if (!mySimMix.enemies.isEmpty()) {
             // Irradiate
-            Set<UnitStorage.UnitInfo> irradiateTargets = new TreeSet<>(mySimMix.enemies);
-            for (UnitStorage.UnitInfo t : mySimMix.allies) {
+            Set<UnitInfo> irradiateTargets = new TreeSet<>(mySimMix.enemies);
+            for (UnitInfo t : mySimMix.allies) {
                 if (t.unit instanceof SiegeTank) irradiateTargets.add(t);
             }
             if (follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && unit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE) {
-                for (UnitStorage.UnitInfo u : irradiateTargets) {
+                for (UnitInfo u : irradiateTargets) {
                     if (u.unit instanceof Building || u.unit instanceof Egg || (!(u.unit instanceof Organic) && !(u.unit instanceof SiegeTank)))
                         continue;
                     if (u.unit instanceof MobileUnit && (u.unit.isIrradiated() || ((MobileUnit) u.unit).isStasised()))
@@ -232,7 +232,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     if (getGs().wizard.isUnitIrradiated(u.unit)) continue;
                     double score = 1;
                     int closeUnits = 0;
-                    for (UnitStorage.UnitInfo close : irradiateTargets) {
+                    for (UnitInfo close : irradiateTargets) {
                         if (u.equals(close) || !(close.unit instanceof Organic)) continue;
                         if (close.unit.getDistance(u.unit) <= 32) closeUnits++;
                     }
@@ -258,15 +258,15 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             maxScore = 0;
 
             // EMP
-            Set<UnitStorage.UnitInfo> empTargets = new TreeSet<>(mySimMix.enemies);
+            Set<UnitInfo> empTargets = new TreeSet<>(mySimMix.enemies);
             if (follow != null && !empTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.EMP_Shockwave) && unit.getEnergy() >= TechType.EMP_Shockwave.energyCost() && follow.status != Squad.Status.IDLE) {
-                for (UnitStorage.UnitInfo u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
+                for (UnitInfo u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
                     if (u.unit instanceof Building || u.unit instanceof Worker || u.unit instanceof MobileUnit && (u.unit.isIrradiated() || ((MobileUnit) u.unit).isStasised()))
                         continue;
                     if (getGs().wizard.isUnitEMPed(u.unit)) continue;
                     double score = 1;
                     double closeUnits = 0;
-                    for (UnitStorage.UnitInfo close : empTargets) {
+                    for (UnitInfo close : empTargets) {
                         if (u.equals(close)) continue;
                         if (close.position.getDistance(u.position) <= WeaponType.EMP_Shockwave.innerSplashRadius())
                             closeUnits += close.shields * 0.6;
@@ -293,9 +293,9 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         }
         if (!mySimMix.allies.isEmpty()) {
             // Defense Matrix
-            Set<UnitStorage.UnitInfo> matrixTargets = new TreeSet<>(mySimMix.allies);
+            Set<UnitInfo> matrixTargets = new TreeSet<>(mySimMix.allies);
             if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
-                for (UnitStorage.UnitInfo u : matrixTargets) {
+                for (UnitInfo u : matrixTargets) {
                     if (!(u.unit instanceof MobileUnit)) continue;
                     if (getGs().wizard.isDefenseMatrixed(u.unit)) continue;
                     double score = 1;

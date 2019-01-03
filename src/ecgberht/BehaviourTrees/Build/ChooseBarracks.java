@@ -30,8 +30,8 @@ public class ChooseBarracks extends Action {
                     this.handler.frameCount <= 24 * 240) {
                 return State.FAILURE;
             }
-            if(!this.handler.strat.techToResearch.contains(TechType.Stim_Packs) && this.handler.strat.raxPerCC == 1
-                    && this.handler.MBs.size() > 0){
+            if (!this.handler.strat.techToResearch.contains(TechType.Stim_Packs) && this.handler.strat.raxPerCC == 1
+                    && this.handler.MBs.size() > 0) {
                 return State.FAILURE;
             }
             if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg

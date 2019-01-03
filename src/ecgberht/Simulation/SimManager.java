@@ -4,7 +4,7 @@ import ecgberht.Clustering.Cluster;
 import ecgberht.Clustering.MeanShift;
 import ecgberht.ConfigManager;
 import ecgberht.IntelligenceAgency;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import jfap.JFAP;
@@ -36,7 +36,7 @@ public class SimManager {
     private Simulator Assmulator;
     private BWAPI4JAgentFactory factory;
     private Evaluator evaluator;
-    private double radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+    private int radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
     private int shortSimFrames = 90;
     private int longSimFrames = 300;
     private int iterations = 10;
@@ -115,8 +115,8 @@ public class SimManager {
      */
     private void createClusters() {
         // Friendly Clusters
-        List<UnitStorage.UnitInfo> myUnits = new ArrayList<>();
-        for (UnitStorage.UnitInfo u : getGs().myArmy) {
+        List<UnitInfo> myUnits = new ArrayList<>();
+        for (UnitInfo u : getGs().myArmy) {
             if (isArmyUnit(u.unit)) myUnits.add(u);
         }
         getGs().DBs.keySet().stream().map(b -> getGs().unitStorage.getAllyUnits().get(b)).forEach(myUnits::add); // Bunkers
@@ -124,8 +124,8 @@ public class SimManager {
         MeanShift clustering = new MeanShift(myUnits, radius);
         friendly = clustering.run(iterations);
         // Enemy Clusters
-        List<UnitStorage.UnitInfo> enemyUnits = new ArrayList<>();
-        for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
+        List<UnitInfo> enemyUnits = new ArrayList<>();
+        for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
             if (getGs().strat.proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
             if (Util.isStaticDefense(u.unitType) || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
@@ -182,7 +182,7 @@ public class SimManager {
             if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) return false;
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
         }
-        for (UnitStorage.UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+        for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
             if (u.unit instanceof Attacker && u.visible) return false;
         }
         return true;
@@ -214,14 +214,14 @@ public class SimManager {
         for (SimInfo s : simulations) {
             SimInfo air = new SimInfo();
             SimInfo ground = new SimInfo();
-            for (UnitStorage.UnitInfo u : s.allies) {
+            for (UnitInfo u : s.allies) {
                 if (u.flying) air.allies.add(u);
                 else ground.allies.add(u);
             }
             boolean emptyAir = air.allies.isEmpty();
             boolean emptyGround = ground.allies.isEmpty();
             if (emptyAir && emptyGround) continue;
-            for (UnitStorage.UnitInfo u : s.enemies) {
+            for (UnitInfo u : s.enemies) {
                 if (u.unit instanceof AirAttacker) air.enemies.add(u);
                 if (u.unit instanceof GroundAttacker || u.unitType == UnitType.Terran_Bunker) ground.enemies.add(u);
             }
@@ -263,12 +263,12 @@ public class SimManager {
         for (SimInfo s : simulations) {
             Assmulator.reset();
             if (s.enemies.isEmpty()) continue;
-            for (UnitStorage.UnitInfo u : s.allies) {
+            for (UnitInfo u : s.allies) {
                 Agent jU = factory.of(u.unit);
                 Assmulator.addAgentA(jU);
                 s.stateBeforeASS.first.add(jU);
             }
-            for (UnitStorage.UnitInfo u : s.enemies) {
+            for (UnitInfo u : s.enemies) {
                 if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
                 if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
                 if (!Util.isStaticDefense(u.unit) && !u.unitType.canAttack()) continue;
@@ -321,12 +321,12 @@ public class SimManager {
         for (SimInfo s : simulations) {
             simulator.clear();
             if (s.enemies.isEmpty()) continue;
-            for (UnitStorage.UnitInfo u : s.allies) {
+            for (UnitInfo u : s.allies) {
                 JFAPUnit jU = new JFAPUnit(u);
                 simulator.addUnitPlayer1(jU);
                 s.stateBeforeJFAP.first.add(jU);
             }
-            for (UnitStorage.UnitInfo u : s.enemies) {
+            for (UnitInfo u : s.enemies) {
                 if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
                 if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
                 if (!Util.isStaticDefense(u.unit) && !u.unitType.canAttack()) continue;
@@ -400,7 +400,7 @@ public class SimManager {
         Position centroid = new Position((int) c.modeX, (int) c.modeY);
         getGs().getGame().getMapDrawer().drawCircleMap(centroid, 4, color, true);
         //getGs().getGame().getMapDrawer().drawTextMap(centroid.add(new Position(0, 5)), ColorUtil.formatText(Integer.toString(id), ColorUtil.White));
-        for (UnitStorage.UnitInfo u : c.units)
+        for (UnitInfo u : c.units)
             getGs().getGame().getMapDrawer().drawLineMap(u.lastPosition, centroid, color);
     }
 
@@ -421,10 +421,10 @@ public class SimManager {
     }
 
     // TODO improve and search for bunkers SimInfos
-    public MutablePair<Boolean, Boolean> simulateDefenseBattle(Set<UnitStorage.UnitInfo> friends, Set<Unit> enemies, int frames, boolean bunker) {
+    public MutablePair<Boolean, Boolean> simulateDefenseBattle(Set<UnitInfo> friends, Set<Unit> enemies, int frames, boolean bunker) {
         simulator.clear();
         MutablePair<Boolean, Boolean> result = new MutablePair<>(true, false);
-        for (UnitStorage.UnitInfo u : friends) simulator.addUnitPlayer1(new JFAPUnit(u.unit));
+        for (UnitInfo u : friends) simulator.addUnitPlayer1(new JFAPUnit(u.unit));
         for (Unit u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u));
         jfap.MutablePair<Integer, Integer> presim_scores = simulator.playerScores();
         simulator.simulate(frames);
@@ -448,10 +448,10 @@ public class SimManager {
     }
 
     // TODO improve and search for harasser SimInfo
-    public boolean simulateHarass(Unit harasser, Set<UnitStorage.UnitInfo> enemies, int frames) {
+    public boolean simulateHarass(Unit harasser, Set<UnitInfo> enemies, int frames) {
         simulator.clear();
         simulator.addUnitPlayer1(new JFAPUnit(harasser));
-        for (UnitStorage.UnitInfo u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u.unit));
+        for (UnitInfo u : enemies) simulator.addUnitPlayer2(new JFAPUnit(u.unit));
         int preSimFriendlyUnitCount = simulator.getState().first.size();
         simulator.simulate(frames);
         int postSimFriendlyUnitCount = simulator.getState().first.size();
@@ -466,7 +466,7 @@ public class SimManager {
      * @param type Type of simulation to search, ground, air or mix
      * @return SimInfo that contains the unit given by parameter and matches SimType
      */
-    public SimInfo getSimulation(UnitStorage.UnitInfo unit, SimInfo.SimType type) {
+    public SimInfo getSimulation(UnitInfo unit, SimInfo.SimType type) {
         for (SimInfo s : simulations) {
             if (s.type == type && s.allies.contains(unit)) return s;
         }
@@ -480,7 +480,7 @@ public class SimManager {
      * @param enemy Where to look at
      * @return First SimInfo found that contains the unit given by parameter
      */
-    public SimInfo getSimulation(UnitStorage.UnitInfo unit, boolean enemy) {
+    public SimInfo getSimulation(UnitInfo unit, boolean enemy) {
         for (SimInfo s : simulations) {
             if (!enemy && s.allies.contains(unit)) return s;
             if (enemy && s.enemies.contains(unit)) return s;
@@ -495,7 +495,7 @@ public class SimManager {
      * @param s The SimInfo the unit should belong
      * @return True if the unit is not getting attacked and far from the fight
      */
-    public boolean farFromFight(UnitStorage.UnitInfo u, SimInfo s) { // TODO test
+    public boolean farFromFight(UnitInfo u, SimInfo s) { // TODO test
         if (u == null || !u.unit.exists()) return true;
         if (!s.allies.contains(u) || s.enemies.isEmpty()) return true;
         WeaponType weapon = Util.getWeapon(u.unitType);

@@ -1,6 +1,6 @@
 package ecgberht.Util;
 
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.unit.*;
@@ -70,14 +70,14 @@ public class UtilMicro {
     }
 
     // Credits to @Yegers for a better kite method
-    public static Position kiteAway(final Unit unit, final Set<UnitStorage.UnitInfo> enemies) {
+    public static Position kiteAway(final Unit unit, final Set<UnitInfo> enemies) {
         try {
             if (enemies.isEmpty()) return null;
             Position ownPosition = unit.getPosition();
             List<MutablePair<Double, Double>> vectors = new ArrayList<>();
 
             //double minDistance = Double.MAX_VALUE;
-            for (final UnitStorage.UnitInfo enemy : enemies) {
+            for (final UnitInfo enemy : enemies) {
                 final Position enemyPosition = enemy.position;
                 Position sub = ownPosition.subtract(enemyPosition);
                 MutablePair<Double, Double> unitV = new MutablePair<>((double) sub.getX(), (double) sub.getY());

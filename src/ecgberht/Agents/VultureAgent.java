@@ -2,7 +2,7 @@ package ecgberht.Agents;
 
 import bwem.Base;
 import ecgberht.Simulation.SimInfo;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
@@ -113,7 +113,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void combat() {
-        UnitStorage.UnitInfo toAttack = Util.getRangedTarget(unitInfo, mySim.enemies);
+        UnitInfo toAttack = Util.getRangedTarget(unitInfo, mySim.enemies);
         if (toAttack != null) {
             if (attackUnit != null && attackUnit.equals(toAttack.unit)) return;
             UtilMicro.attack(unit, toAttack.unit);
@@ -128,10 +128,10 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         return null;
     }
 
-    private Unit getUnitToAttack(Unit myUnit, Set<UnitStorage.UnitInfo> enemies) {
+    private Unit getUnitToAttack(Unit myUnit, Set<UnitInfo> enemies) {
         Unit chosen = null;
         double distB = Double.MAX_VALUE;
-        for (UnitStorage.UnitInfo u : enemies) {
+        for (UnitInfo u : enemies) {
             if (u.flying || u.unit.isCloaked()) continue;
             double distA = Util.broodWarDistance(myUnit.getPosition(), u.position);
             if (chosen == null || distA < distB) {
@@ -223,7 +223,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private boolean checkOnlyMelees() {
-        for (UnitStorage.UnitInfo e : mySim.enemies) {
+        for (UnitInfo e : mySim.enemies) {
             int weaponRange = (int) e.groundRange;
             if ((weaponRange > 32 || e.unit instanceof Bunker) && e.unit.getDistance(unit) < weaponRange)
                 return false;
@@ -233,7 +233,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         //Position kite = UtilMicro.kiteAway(unit, closeEnemies);
-        Optional<UnitStorage.UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> u.unit.getDistance(unit)));
+        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> u.unit.getDistance(unit)));
         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.position)).orElse(null);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
             kite = UtilMicro.kiteAway(unit, mySim.enemies);

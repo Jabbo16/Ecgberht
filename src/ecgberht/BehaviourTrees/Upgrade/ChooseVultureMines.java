@@ -4,7 +4,6 @@ import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UpgradeType;
 import org.openbw.bwapi4j.unit.MachineShop;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 

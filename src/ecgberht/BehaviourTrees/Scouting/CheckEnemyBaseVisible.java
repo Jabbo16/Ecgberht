@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Scouting;
 
 import ecgberht.GameState;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
@@ -24,7 +24,7 @@ public class CheckEnemyBaseVisible extends Action {
         try {
             List<PlayerUnit> enemies = this.handler.getGame().getUnits(this.handler.getIH().enemy());
             if (!enemies.isEmpty()) {
-                for (UnitStorage.UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                for (UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                     if (Util.broodWarDistance(this.handler.chosenScout.getPosition(), u.lastPosition) <= 500) {
                         this.handler.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
                         this.handler.scoutSLs = new HashSet<>();

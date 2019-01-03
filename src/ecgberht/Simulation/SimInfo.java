@@ -1,7 +1,7 @@
 package ecgberht.Simulation;
 
 import ecgberht.Clustering.Cluster;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import jfap.JFAPUnit;
 import jfap.MutablePair;
 import org.bk.ass.Agent;
@@ -14,8 +14,8 @@ import java.util.TreeSet;
 public class SimInfo {
 
     public SimType type = SimType.MIX;
-    public Set<UnitStorage.UnitInfo> allies = new TreeSet<>();
-    public Set<UnitStorage.UnitInfo> enemies = new TreeSet<>();
+    public Set<UnitInfo> allies = new TreeSet<>();
+    public Set<UnitInfo> enemies = new TreeSet<>();
     public Cluster allyCluster;
     MutablePair<Integer, Integer> preSimScore;
     MutablePair<Integer, Integer> postSimScore;

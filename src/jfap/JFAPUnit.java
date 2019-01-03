@@ -1,6 +1,6 @@
 package jfap;
 
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.type.*;
@@ -81,7 +81,7 @@ public class JFAPUnit implements Comparable<JFAPUnit> {
         doThings(u, JFAP.game);
     }
 
-    public JFAPUnit(UnitStorage.UnitInfo u) { // TODO range upgrades
+    public JFAPUnit(UnitInfo u) { // TODO range upgrades
         unit = u.unit;
         x = u.lastPosition.getX();
         y = u.lastPosition.getY();

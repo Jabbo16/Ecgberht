@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Scanner;
 
 import bwem.Base;
 import ecgberht.GameState;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.unit.Attacker;
@@ -25,7 +25,7 @@ public class CheckScan extends Conditional {
         try {
             if (this.handler.CSs.isEmpty()) return State.FAILURE;
             if (this.handler.frameCount - this.handler.startCount > 40 + this.handler.getIH().getLatency()) {
-                for (UnitStorage.UnitInfo u : this.handler.unitStorage.getEnemyUnits().values()) {
+                for (UnitInfo u : this.handler.unitStorage.getEnemyUnits().values()) {
                     PlayerUnit pU = u.unit;
                     if ((pU.isCloaked() || (pU instanceof Burrowable && u.burrowed)) && !pU.isDetected() && u.unit instanceof Attacker) {
                         if (this.handler.sim.getSimulation(u, true).allies.isEmpty()) continue;

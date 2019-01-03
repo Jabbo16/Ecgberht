@@ -4,7 +4,7 @@ import bwem.Base;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.GameState;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
@@ -84,7 +84,7 @@ public class ChoosePosition extends Action {
                                 break;
                             }
                         }
-                        for (UnitStorage.UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                        for (UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                             if (this.handler.bwem.getMap().getArea(u.tileposition) == null) continue;
                             if (this.handler.bwem.getMap().getArea(u.tileposition).equals(b.getArea())) {
                                 remove.add(b);

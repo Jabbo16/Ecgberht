@@ -143,15 +143,15 @@ public class DebugManager {
                 print(r.getValue(), Color.YELLOW);
                 mapDrawer.drawLineMap(r.getKey().getPosition(), r.getValue().getPosition(), Color.YELLOW);
             }
-            for (UnitStorage.UnitInfo ui : gameState.unitStorage.getEnemyUnits().values()) {
+            for (UnitInfo ui : gameState.unitStorage.getEnemyUnits().values()) {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.RED);
             }
-            /*for (UnitStorage.UnitInfo ui : gameState.unitStorage.getAllyUnits().values()) {
+            /*for (UnitInfo ui : gameState.unitStorage.getAllyUnits().values()) {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.BLUE);
             }*/
-            for (UnitStorage.UnitInfo ui : gameState.myArmy) {
+            for (UnitInfo ui : gameState.myArmy) {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.BLUE);
             }

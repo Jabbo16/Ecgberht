@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
-import ecgberht.UnitStorage;
+import ecgberht.UnitInfo;
 import ecgberht.Util.UtilMicro;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -37,9 +37,9 @@ public class CheckHarasserAttacked extends Conditional {
             }
             Unit attacker = null;
             int workers = 0;
-            Set<UnitStorage.UnitInfo> attackers = new TreeSet<>();
+            Set<UnitInfo> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
-            for (UnitStorage.UnitInfo u : this.handler.unitStorage.getAllyUnits().get(this.handler.chosenHarasser).attackers) {
+            for (UnitInfo u : this.handler.unitStorage.getAllyUnits().get(this.handler.chosenHarasser).attackers) {
                 if (!(u.unit instanceof Building) && u.unit instanceof Attacker && u.unit.exists()) {
                     if (u.unit instanceof Worker) {
                         workers++;
@@ -80,7 +80,7 @@ public class CheckHarasserAttacked extends Conditional {
                         this.handler.chosenUnitToHarass = null;
                     } else {
                         //Position kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
-                        Optional<UnitStorage.UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(this.handler.chosenHarasser)));
+                        Optional<UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(this.handler.chosenHarasser)));
                         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(this.handler.chosenHarasser.getPosition(), unit1.position)).orElse(null);
                         if (kite != null && this.handler.bw.getBWMap().isValidPosition(kite)) {
                             UtilMicro.move(this.handler.chosenHarasser, kite);
