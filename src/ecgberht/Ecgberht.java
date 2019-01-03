@@ -419,7 +419,6 @@ public class Ecgberht implements BWEventListener {
                     }
                 }
             }
-
             gs.frameCount = ih.getFrameCount();
             skycladObserver.onFrame();
             gs.fix();
@@ -494,7 +493,7 @@ public class Ecgberht implements BWEventListener {
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
-            gs.vespeneManager();
+            //gs.vespeneManager(); //Disabled until it works
             gs.sqManager.updateBunkers();
             gs.checkDisrupter();
             buildingLotTree.run();

@@ -260,7 +260,7 @@ public class Squad implements Comparable<Squad> {
                     if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() && (e.health + e.shields >= 60 || squadSim.enemies.size() > 2)) {
                         found = true;
                     }
-                    if (distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) close = true;
+                    if (!close && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) close = true;
                     if (found && close) break;
                 }
                 if (found && !close) {
@@ -280,7 +280,7 @@ public class Squad implements Comparable<Squad> {
             case IDLE:
                 Position move = null;
                 if (getGs().defendPosition != null) {
-                    if (u.currentOrder != Order.Move) move = getGs().defendPosition;
+                    move = getGs().defendPosition;
                 } else if (!getGs().DBs.isEmpty()) {
                     Unit bunker = getGs().DBs.keySet().iterator().next();
                     if (Util.broodWarDistance(bunker.getPosition(), center) >= 180 &&
@@ -297,15 +297,15 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (move != null) {
                     WeaponType weapon = Util.getWeapon(u.unitType);
-                    double randomRange = weapon.maxRange() * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0;
-                    if (u.currentOrder == Order.AttackMove) {
-                        if (st.getDistance(move) <= randomRange && Util.shouldIStop(u.position)) {
+                    int range = weapon.maxRange();
+                    if (u.currentOrder == Order.AttackMove || u.currentOrder == Order.PlayerGuard) {
+                        if (u.getDistance(move) <= range * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.position)) {
                             if (!st.isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
                                 st.siege();
                             } else UtilMicro.stop(st);
                             return;
                         }
-                    } else if (st.getDistance(move) > randomRange) {
+                    } else if (u.getDistance(move) > range) {
                         if (st.isSieged() && !getGs().defense) {
                             st.unsiege();
                         } else UtilMicro.attack(st, move);

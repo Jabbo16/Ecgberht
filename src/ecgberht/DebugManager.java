@@ -231,8 +231,9 @@ public class DebugManager {
             mapDrawer.drawTextScreen(320, 20, ColorUtil.formatText(gameState.getArmySize() + "/" + gameState.strat.armyForAttack, ColorUtil.White));
             String defending = gameState.defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
             mapDrawer.drawTextScreen(320, 35, defending);
-            mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText(gameState.chosenUnit.toString(), ColorUtil.White));
-            mapDrawer.drawTextScreen(320, 65, ColorUtil.formatText(gameState.chosenToBuild.toString(), ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText("I want to train: " + gameState.chosenUnit.toString(), ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 65, ColorUtil.formatText("I want to build: " + gameState.chosenToBuild.toString(), ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 80, ColorUtil.formatText("Goliaths: " + gameState.maxGoliaths, ColorUtil.White));
             if (gameState.ih.allies().size() + gameState.ih.enemies().size() == 1) {
                 mapDrawer.drawTextScreen(10, 5,
                         ColorUtil.formatText(gameState.ih.self().getName(), ColorUtil.getColor(gameState.ih.self().getColor())) +

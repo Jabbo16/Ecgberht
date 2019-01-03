@@ -22,7 +22,7 @@ public class BioMechFE extends Strategy {
         raxPerCC = 3;
         facPerCC = 1;
         numRaxForAca = 2;
-        numRaxForFac = 2;
+        numRaxForFac = 1;
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;

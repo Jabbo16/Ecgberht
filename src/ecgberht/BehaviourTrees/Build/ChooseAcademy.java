@@ -25,12 +25,13 @@ public class ChooseAcademy extends Action {
                 return State.FAILURE;
             }
             Strategy strat = this.handler.strat;
-            if ((strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE"))
-                    && (this.handler.Fs.size() >= strat.facPerCC
-                    || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dark_Templar)
-                    || IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker))) {
-                this.handler.chosenToBuild = UnitType.Terran_Academy;
-                return State.SUCCESS;
+            if (strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE")){
+                if(this.handler.Fs.size() >= strat.facPerCC
+                        || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dark_Templar)
+                        || IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)){
+                    this.handler.chosenToBuild = UnitType.Terran_Academy;
+                    return State.SUCCESS;
+                } else return State.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) >= this.handler.strat.numRaxForAca) {
                 for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
