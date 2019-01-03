@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class LearningManager {
@@ -107,9 +108,9 @@ public class LearningManager {
         return enemyInfo.naughty;
     }
 
-    void onEnd(String stratName, int mapSize, boolean win, String opponentName, Race enemyRace, String mapName, boolean enemyIsRandom) {
+    void onEnd(String stratName, int mapSize, boolean win, String opponentName, Race enemyRace, String mapName, boolean enemyIsRandom, IntelligenceAgency.EnemyStrats enemyStrat) {
         enemyInfo.updateStrategyOpponentHistory(stratName, mapSize, win);
-        enemyHistory.history.add(new EnemyHistory.EnemyGame(opponentName, enemyRace, win, stratName, mapName));
+        enemyHistory.history.add(new EnemyHistory.EnemyGame(opponentName, enemyRace, win, stratName, mapName, enemyStrat));
         if (win) enemyInfo.wins++;
         else enemyInfo.losses++;
         writeOpponentInfo(opponentName, enemyIsRandom);
@@ -135,7 +136,7 @@ public class LearningManager {
     }
 
     public static class EnemyHistory {
-        public List<EnemyGame> history = new ArrayList<>();
+        public List<EnemyGame> history = new LinkedList<>();
 
         static class EnemyGame {
             private String opponent;
@@ -143,13 +144,15 @@ public class LearningManager {
             private String outcome;
             private String strategy;
             private String mapName;
+            private String opponentStrategy;
 
-            EnemyGame(String opponent, Race race, boolean outcome, String strategy, String mapName) {
+            EnemyGame(String opponent, Race race, boolean outcome, String strategy, String mapName, IntelligenceAgency.EnemyStrats enemyStrat) {
                 this.opponent = opponent;
                 this.race = Util.raceToString(race);
                 this.outcome = outcome ? "Win" : "Lose";
                 this.strategy = strategy;
                 this.mapName = mapName;
+                this.opponentStrategy = enemyStrat.toString();
             }
         }
     }

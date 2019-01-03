@@ -187,7 +187,8 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
                     UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
-                    UtilMicro.attack((Attacker) u.unit, target.unit);
+                    if(target.visible) UtilMicro.attack((Attacker) u.unit, target.unit);
+                    else UtilMicro.attack((MobileUnit) u.unit, target.lastPosition);
                 }
                 break;
             case IDLE:

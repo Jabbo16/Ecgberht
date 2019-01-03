@@ -251,9 +251,12 @@ public class IntelligenceAgency {
         switch (getGs().enemyRace) {
             case Zerg:
                 if (detectEarlyPool()) return;
+                if (detectNinePool()) return;
+                if (detectFastHatch()) return;
                 break;
             case Terran:
                 if (detectMechRush()) return;
+                if (detectBioPush()) return;
                 break;
             case Protoss:
                 if (detectZealotRush()) return;
@@ -261,6 +264,58 @@ public class IntelligenceAgency {
                 if (detectCannonRush()) return;
                 break;
         }
+    }
+
+    private static boolean detectBioPush() {
+        if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null && exploredMinerals) {
+            int countFactories = 0;
+            int countRax = 0;
+            for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                if (u.unitType == UnitType.Terran_Factory) countFactories++;
+                if (u.unitType == UnitType.Terran_Barracks) countRax++;
+            }
+            if (countFactories < 1 && countRax >= 1) {
+                enemyStrat = EnemyStrats.BioPush;
+                getGs().ih.sendText("Nice Bio strat");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean detectFastHatch() {
+        if (getGs().frameCount < 24 * 200 && getGs().enemyStartBase != null && exploredMinerals) {
+            int drones = IntelligenceAgency.getNumEnemyWorkers();
+            if (getNumEnemyBases(mainEnemy) == 2 && drones >= 10 && drones <= 12) {
+                enemyStrat = EnemyStrats.FastHatch;
+                getGs().ih.sendText("Nice 12 Hatch");
+                if (!getGs().strat.name.contains("GreedyFE") && !getGs().strat.proxy && !getGs().strat.trainUnits.contains(UnitType.Terran_Wraith)) {
+                    getGs().iReallyWantToExpand = true;
+                    getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean detectNinePool() {
+        if (getGs().frameCount < 24 * 180 && getGs().enemyStartBase != null && exploredMinerals) {
+            int drones = IntelligenceAgency.getNumEnemyWorkers();
+            boolean foundPool = enemyHasType(UnitType.Zerg_Spawning_Pool);
+            if (foundPool && getNumEnemyBases(mainEnemy) < 2 && drones >= 7 && drones <= 9) {
+                enemyStrat = EnemyStrats.NinePool;
+                getGs().ih.sendText("Nice 9 pool");
+                /*if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
+                    getGs().strat = new FullBio();
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                }*/
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean detectProtossFE() {
@@ -411,5 +466,5 @@ public class IntelligenceAgency {
         return timeCheck && raceCheck;
     }
 
-    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, MechRush}
+    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, NinePool, FastHatch, BioPush, MechRush}
 }

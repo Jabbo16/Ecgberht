@@ -146,7 +146,6 @@ public class Ecgberht implements BWEventListener {
         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
         Move m = new Move("Move to chosen building position", gs);
         Selector chooseBuildingBuild = new Selector("Choose Building to build", cNB, cE, cBun, cSup);
-        //chooseBuildingBuild.addChild(cBun);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
         if (gs.strat.buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
@@ -407,14 +406,14 @@ public class Ecgberht implements BWEventListener {
             if (gs.enemyMainBase != null) {
                 if (path == null) {
                     if (gs.mainChoke != null) {
-                        path = silentCartographer.getWalkablePath(gs.mainChoke.getCenter(), gs.enemyMainBase.getLocation().toWalkPosition());
+                        path = silentCartographer.getWalkablePath(gs.mainChoke.getCenter().toTilePosition(), gs.enemyMainBase.getLocation());
                     } else {
-                        path = silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
+                        path = silentCartographer.getWalkablePath(self.getStartLocation(), gs.enemyMainBase.getLocation());
                     }
 
                 } else {
                     for (org.bk.ass.path.Position p : path.path) {
-                        Position pos = new WalkPosition(p.x, p.y).toPosition();
+                        Position pos = new TilePosition(p.x, p.y).toPosition();
                         bw.getMapDrawer().drawCircleMap(pos, 4, Color.RED, true);
                     }
                 }
@@ -430,12 +429,12 @@ public class Ecgberht implements BWEventListener {
                 gs.getIH().leaveGame();
             }
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
-            if (gs.frameCount == 24 * 60 * 15 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs) && !gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+            if (gs.frameCount == 24 * 60 * 14 && gs.enemyRace == Race.Terran && gs.strat.techToResearch.contains(TechType.Stim_Packs) && !gs.strat.trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                 gs.strat = new FullMech();
                 transition();
             }
             // If rushing and enough time has passed -> transition to Bio
-            if (gs.frameCount == 24 * 60 * 8 && gs.strat.proxy) {
+            if (gs.frameCount == 24 * 60 * 7 && gs.strat.proxy) {
                 gs.strat = new FullBio();
                 List<UnitInfo> workersToDelete = new ArrayList<>();
                 for (UnitInfo u : gs.myArmy) {
@@ -532,7 +531,7 @@ public class Ecgberht implements BWEventListener {
                 gs.strat.name = "PlasmaWraithHell";
             String oldStrat = IntelligenceAgency.getStartStrat();
             if (oldStrat != null && !oldStrat.equals(gs.strat.name)) gs.strat.name = oldStrat;
-            gs.learningManager.onEnd(gs.strat.name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom);
+            gs.learningManager.onEnd(gs.strat.name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom, IntelligenceAgency.getEnemyStrat());
         } catch (Exception e) {
             System.err.println("onEnd Exception");
             e.printStackTrace();
@@ -604,7 +603,7 @@ public class Ecgberht implements BWEventListener {
                         if (gs.tanksTrained == 3 && gs.strat.name.equals("JoyORush")) {
                             gs.strat.trainUnits.add(UnitType.Terran_Vulture);
                             gs.strat.upgradesToResearch.add(UpgradeType.Ion_Thrusters);
-                            gs.strat.techToResearch.add(TechType.Spider_Mines);
+                            //gs.strat.techToResearch.add(TechType.Spider_Mines);
                             transition();
                         }
                     }
