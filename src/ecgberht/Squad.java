@@ -357,7 +357,8 @@ public class Squad implements Comparable<Squad> {
     }
 
     private boolean shouldStim(UnitInfo u) {
-        if (((Marine) u.unit).isStimmed() || u.health <= 25) return false;
+        if (u.unitType == UnitType.Terran_Marine && ((Marine) u.unit).isStimmed() || u.health <= 25) return false;
+        if (u.unitType == UnitType.Terran_Firebat && ((Firebat) u.unit).isStimmed() || u.health <= 25) return false;
         Unit target = u.target;
         if (target != null) {
             UnitInfo targetUI = getGs().unitStorage.getEnemyUnits().get(target);

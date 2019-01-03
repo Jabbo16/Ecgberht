@@ -2,14 +2,17 @@ package ecgberht.Agents;
 
 import bwem.Base;
 import bwem.area.Area;
+import bwem.unit.Geyser;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.Strategies.TwoPortWraith;
 import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.type.Color;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
@@ -17,6 +20,7 @@ import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -29,15 +33,42 @@ public class WorkerScoutAgent extends Agent {
     private Status status = Status.IDLE;
     private int enemyNaturalIndex = -1;
     private Building disrupter = null;
+    private Building proxier = null;
     private boolean stoppedDisrupting = false;
     private SimInfo mySim;
+    List<TilePosition> validTiles = new ArrayList<>();
     private boolean removedIndex = false;
+    private boolean ableToProxy = false;
+    private TilePosition proxyTile = null;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
         this.unit = (SCV) unit;
         this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.enemyBase = enemyBase;
         this.myUnit = unit;
+        canProxyInThisMap();
+    }
+
+    private void canProxyInThisMap() { // TODO dont build near enemy main chokepoint or path from his depot to choke
+        Area enemyArea = this.enemyBase.getArea();
+        Set<TilePosition> tilesArea = getGs().map.getTilesArea(enemyArea);
+        if(tilesArea == null) return;
+        for(TilePosition t : tilesArea){
+            if(!getGs().map.tileBuildable(t, UnitType.Terran_Factory)) continue;
+            if(t.getDistance(this.enemyBase.getLocation()) <= 11) continue;
+            if(this.enemyBase.getGeysers().stream().anyMatch(u -> t.getDistance(u.getCenter().toTilePosition()) <= 9)) continue;
+            validTiles.add(t);
+        }
+        if(validTiles.isEmpty()) return;
+        double bestDist = 0.0;
+        for(TilePosition p : validTiles){
+            double dist = p.getDistance(enemyBase.getLocation());
+            if(dist > bestDist){
+                bestDist = dist;
+                proxyTile = p;
+            }
+        }
+        if(proxyTile != null) ableToProxy = true;
     }
 
     public boolean runAgent() {
@@ -45,9 +76,12 @@ public class WorkerScoutAgent extends Agent {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
             return true;
         }
-        if (getGs().strat.proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
+        if (status == Status.EXPLORE && getGs().strat.proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
             getGs().myArmy.add(unitInfo);
             return true;
+        }
+        for(TilePosition p : validTiles){
+            getGs().bw.getMapDrawer().drawCircleMap(p.toPosition(), 8, Color.YELLOW, true);
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
         mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
@@ -68,6 +102,8 @@ public class WorkerScoutAgent extends Agent {
             case DISRUPTING:
                 disrupt();
                 break;
+            case PROXYING:
+                proxy();
             case IDLE:
                 break;
         }
@@ -78,6 +114,19 @@ public class WorkerScoutAgent extends Agent {
         if (stoppedDisrupting && disrupter != null && disrupter.getHitPoints() <= 20) {
             disrupter.cancelConstruction();
             disrupter = null;
+        }
+    }
+
+    private void proxy(){
+        if (proxier == null) {
+            if (unit.getBuildUnit() != null) {
+                proxier = (Building) unit.getBuildUnit();
+                return;
+            }
+            if (unit.getOrder() != Order.PlaceBuilding) {
+                if(proxyTile.getDistance(unitInfo.tileposition) <= 3) unit.build(proxyTile, UnitType.Terran_Factory);
+                else UtilMicro.move(unit, proxyTile.toPosition());
+            }
         }
     }
 
@@ -125,6 +174,32 @@ public class WorkerScoutAgent extends Agent {
 
     private Status chooseNewStatus() {
         String strat = getGs().strat.name;
+        if(status == Status.PROXYING){
+            if(proxyTile == null){
+                ableToProxy = false;
+            } else{
+                if(proxier != null && proxier.isCompleted()){
+                    ableToProxy = false;
+                } else{
+                    double dist = unitInfo.tileposition.getDistance(proxyTile);
+                    if(dist <= 3){
+                        if(!unitInfo.attackers.isEmpty()) {
+                            if (proxier != null && proxier.isBeingConstructed()) {
+                                unit.haltConstruction();
+                                ableToProxy = false;
+                                proxier.cancelConstruction();
+                                proxier = null;
+                                return Status.EXPLORE;
+                            }
+                        }
+                    }
+                    return Status.PROXYING;
+                }
+            }
+        }
+        if(ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty()){
+            return Status.PROXYING;
+        }
         if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
@@ -285,11 +360,14 @@ public class WorkerScoutAgent extends Agent {
         }
     }
 
-    enum Status {EXPLORE, DISRUPTING, IDLE}
+    enum Status {
+        EXPLORE, DISRUPTING, IDLE, PROXYING;
+    }
 
     public String statusToString() {
         if (status == Status.EXPLORE) return "Exploring";
         if (status == Status.DISRUPTING) return "Disrupting";
+        if (status == Status.PROXYING) return "Proxying";
         if (status == Status.IDLE) return "Idle";
         return "None";
     }

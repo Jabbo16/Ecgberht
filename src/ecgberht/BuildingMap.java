@@ -4,6 +4,7 @@ import bwem.BWEM;
 import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
+import bwem.tile.Tile;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Player;
@@ -70,6 +71,10 @@ public class BuildingMap implements Cloneable {
                 if (a != null) tilesArea.get(a).add(x);
             }
         }
+    }
+
+    public Set<TilePosition> getTilesArea(Area area){
+        return tilesArea.get(area);
     }
 
     private String[][] copyMap(String[][] map) {
@@ -385,6 +390,14 @@ public class BuildingMap implements Cloneable {
             j++;
         }
         return new TilePosition(coord[1], coord[0]);
+    }
+
+
+    public boolean tileBuildable(TilePosition pos, UnitType type){
+        int x = pos.getY();
+        int y = pos.getX();
+        int size = Math.max(type.tileSize().getY(), type.tileSize().getX());
+        return !map[x][y].equals("M") && !map[x][y].equals("V") && !map[x][y].equals("E") && !map[x][y].equals("B") && Integer.parseInt(map[x][y]) >= size;
     }
 
     public TilePosition findBunkerPosition(ChokePoint choke) {
