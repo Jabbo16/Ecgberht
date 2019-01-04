@@ -18,19 +18,19 @@ public class ChooseMarineRange extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
-            String strat = this.handler.strat.name;
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            String strat = gameState.strat.name;
             if (strat.equals("BioMech") || strat.equals("BioMechGreedyFE") || strat.equals("BioMechFE")) {
-                Player self = this.handler.getPlayer();
+                Player self = gameState.getPlayer();
                 if (!self.isResearching(TechType.Tank_Siege_Mode) && !self.hasResearched(TechType.Tank_Siege_Mode)) {
                     return State.FAILURE;
                 }
             }
-            for (ResearchingFacility u : this.handler.UBs) {
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof Academy)) continue;
-                if (this.handler.getPlayer().hasResearched(TechType.Stim_Packs) && this.handler.getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) < 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenUpgrade = UpgradeType.U_238_Shells;
+                if (gameState.getPlayer().hasResearched(TechType.Stim_Packs) && gameState.getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) < 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenUpgrade = UpgradeType.U_238_Shells;
                     return State.SUCCESS;
                 }
             }

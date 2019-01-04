@@ -20,31 +20,31 @@ public class ChooseSupply extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getPlayer().supplyTotal() >= 400) return State.FAILURE;
-            if (this.handler.strat.name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
+            if (gameState.getPlayer().supplyTotal() >= 400) return State.FAILURE;
+            if (gameState.strat.name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
-            if (this.handler.strat.name.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
+            if (gameState.strat.name.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg
+            if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg
+            if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) == 1
                     && Util.countBuildingAll(UnitType.Terran_Supply_Depot) > 0
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.getSupply() <= 4 * this.handler.getCombatUnitsBuildings()) {
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+            if (gameState.getSupply() <= 4 * gameState.getCombatUnitsBuildings()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Supply_Depot) return State.FAILURE;
                 }
-                for (Building w : this.handler.workerTask.values()) {
+                for (Building w : gameState.workerTask.values()) {
                     if (w instanceof SupplyDepot) return State.FAILURE;
                 }
-                this.handler.chosenToBuild = UnitType.Terran_Supply_Depot;
+                gameState.chosenToBuild = UnitType.Terran_Supply_Depot;
                 return State.SUCCESS;
             }
             return State.FAILURE;

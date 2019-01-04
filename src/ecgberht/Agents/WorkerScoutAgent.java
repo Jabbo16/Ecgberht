@@ -2,17 +2,16 @@ package ecgberht.Agents;
 
 import bwem.Base;
 import bwem.area.Area;
-import bwem.unit.Geyser;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
-import ecgberht.Strategies.TwoPortWraith;
 import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
+import org.bk.ass.path.Result;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.Color;
+import org.openbw.bwapi4j.WalkPosition;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
@@ -52,23 +51,28 @@ public class WorkerScoutAgent extends Agent {
     private void canProxyInThisMap() { // TODO dont build near enemy main chokepoint or path from his depot to choke
         Area enemyArea = this.enemyBase.getArea();
         Set<TilePosition> tilesArea = getGs().map.getTilesArea(enemyArea);
-        if(tilesArea == null) return;
-        for(TilePosition t : tilesArea){
-            if(!getGs().map.tileBuildable(t, UnitType.Terran_Factory)) continue;
-            if(t.getDistance(this.enemyBase.getLocation()) <= 11) continue;
-            if(this.enemyBase.getGeysers().stream().anyMatch(u -> t.getDistance(u.getCenter().toTilePosition()) <= 9)) continue;
+        if (tilesArea == null) return;
+        Result path = getGs().silentCartographer.getWalkablePath(enemyBase.getLocation().toWalkPosition(), getGs().enemyNaturalBase.getLocation().toWalkPosition());
+        for (TilePosition t : tilesArea) {
+            if (!getGs().map.tileBuildable(t, UnitType.Terran_Factory)) continue;
+            if (t.getDistance(Util.getUnitCenterPosition(enemyBase.getLocation().toPosition(), UnitType.Zerg_Hatchery).toTilePosition()) <= 13)
+                continue;
+            if (enemyBase.getGeysers().stream().anyMatch(u -> t.getDistance(u.getCenter().toTilePosition()) <= 9))
+                continue;
+            if (path.path.stream().anyMatch(u -> t.getDistance(new WalkPosition(u.x, u.y).toTilePosition()) <= 10))
+                continue;
             validTiles.add(t);
         }
-        if(validTiles.isEmpty()) return;
+        if (validTiles.isEmpty()) return;
         double bestDist = 0.0;
-        for(TilePosition p : validTiles){
+        for (TilePosition p : validTiles) {
             double dist = p.getDistance(enemyBase.getLocation());
-            if(dist > bestDist){
+            if (dist > bestDist) {
                 bestDist = dist;
                 proxyTile = p;
             }
         }
-        if(proxyTile != null) ableToProxy = true;
+        if (proxyTile != null) ableToProxy = true;
     }
 
     public boolean runAgent() {
@@ -80,9 +84,9 @@ public class WorkerScoutAgent extends Agent {
             getGs().myArmy.add(unitInfo);
             return true;
         }
-        for(TilePosition p : validTiles){
+        /*for(TilePosition p : validTiles){
             getGs().bw.getMapDrawer().drawCircleMap(p.toPosition(), 8, Color.YELLOW, true);
-        }
+        }*/
         if (enemyBaseBorders.isEmpty()) updateBorders();
         mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
@@ -117,14 +121,14 @@ public class WorkerScoutAgent extends Agent {
         }
     }
 
-    private void proxy(){
+    private void proxy() {
         if (proxier == null) {
             if (unit.getBuildUnit() != null) {
                 proxier = (Building) unit.getBuildUnit();
                 return;
             }
             if (unit.getOrder() != Order.PlaceBuilding) {
-                if(proxyTile.getDistance(unitInfo.tileposition) <= 3) unit.build(proxyTile, UnitType.Terran_Factory);
+                if (proxyTile.getDistance(unitInfo.tileposition) <= 3) unit.build(proxyTile, UnitType.Terran_Factory);
                 else UtilMicro.move(unit, proxyTile.toPosition());
             }
         }
@@ -174,16 +178,16 @@ public class WorkerScoutAgent extends Agent {
 
     private Status chooseNewStatus() {
         String strat = getGs().strat.name;
-        if(status == Status.PROXYING){
-            if(proxyTile == null){
+        if (status == Status.PROXYING) {
+            if (proxyTile == null) {
                 ableToProxy = false;
-            } else{
-                if(proxier != null && proxier.isCompleted()){
+            } else {
+                if (proxier != null && proxier.isCompleted()) {
                     ableToProxy = false;
-                } else{
+                } else {
                     double dist = unitInfo.tileposition.getDistance(proxyTile);
-                    if(dist <= 3){
-                        if(!unitInfo.attackers.isEmpty()) {
+                    if (dist <= 3) {
+                        if (!unitInfo.attackers.isEmpty()) {
                             if (proxier != null && proxier.isBeingConstructed()) {
                                 unit.haltConstruction();
                                 ableToProxy = false;
@@ -197,7 +201,7 @@ public class WorkerScoutAgent extends Agent {
                 }
             }
         }
-        if(ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty()){
+        if (ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
             return Status.PROXYING;
         }
         if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
@@ -278,7 +282,8 @@ public class WorkerScoutAgent extends Agent {
                         vertex = new Position((int) x, (int) y);
                     }
                 }
-                unsortedVertices.add(vertex);
+                if (getGs().getGame().getBWMap().isValidPosition(vertex) && getGs().getGame().getBWMap().isWalkable(vertex.toWalkPosition()))
+                    unsortedVertices.add(vertex);
             }
         }
         List<Position> sortedVertices = new ArrayList<>();

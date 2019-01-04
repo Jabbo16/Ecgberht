@@ -23,32 +23,32 @@ public class CheckScan extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.CSs.isEmpty()) return State.FAILURE;
-            if (this.handler.frameCount - this.handler.startCount > 40 + this.handler.getIH().getLatency()) {
-                for (UnitInfo u : this.handler.unitStorage.getEnemyUnits().values()) {
+            if (gameState.CSs.isEmpty()) return State.FAILURE;
+            if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
+                for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values()) {
                     PlayerUnit pU = u.unit;
                     if ((pU.isCloaked() || (pU instanceof Burrowable && u.burrowed)) && !pU.isDetected() && u.unit instanceof Attacker) {
-                        if (this.handler.sim.getSimulation(u, true).allies.isEmpty()) continue;
-                        this.handler.checkScan = u.tileposition;
+                        if (gameState.sim.getSimulation(u, true).allies.isEmpty()) continue;
+                        gameState.checkScan = u.tileposition;
                         return State.SUCCESS;
                     }
                 }
             }
             List<Base> valid = new ArrayList<>();
-            for (Base b : this.handler.enemyBLs) {
-                if (this.handler.getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
+            for (Base b : gameState.enemyBLs) {
+                if (gameState.getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
-                if (this.handler.enemyMainBase != null && this.handler.enemyMainBase.getLocation().equals(b.getLocation())) {
+                if (gameState.enemyMainBase != null && gameState.enemyMainBase.getLocation().equals(b.getLocation())) {
                     continue;
                 }
                 valid.add(b);
             }
             if (valid.isEmpty()) return State.FAILURE;
-            for (ComsatStation u : this.handler.CSs) {
+            for (ComsatStation u : gameState.CSs) {
                 if (u.getEnergy() == 200) {
                     Random random = new Random();
-                    this.handler.checkScan = valid.get(random.nextInt(valid.size())).getLocation();
+                    gameState.checkScan = valid.get(random.nextInt(valid.size())).getLocation();
                     return State.SUCCESS;
                 }
             }

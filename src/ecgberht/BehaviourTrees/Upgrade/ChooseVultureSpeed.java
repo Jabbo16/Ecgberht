@@ -16,12 +16,12 @@ public class ChooseVultureSpeed extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
-            for (ResearchingFacility u : this.handler.UBs) {
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof MachineShop)) continue;
-                if (u.canUpgrade(UpgradeType.Ion_Thrusters) && !u.isResearching() && !u.isUpgrading() && this.handler.getPlayer().getUpgradeLevel(UpgradeType.Ion_Thrusters) < 1) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenUpgrade = UpgradeType.Ion_Thrusters;
+                if (u.canUpgrade(UpgradeType.Ion_Thrusters) && !u.isResearching() && !u.isUpgrading() && gameState.getPlayer().getUpgradeLevel(UpgradeType.Ion_Thrusters) < 1) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenUpgrade = UpgradeType.Ion_Thrusters;
                     return State.SUCCESS;
                 }
             }

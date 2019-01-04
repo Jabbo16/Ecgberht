@@ -14,15 +14,15 @@ public class CheckResourcesUpgrade extends Conditional {
     @Override
     public State execute() {
         try {
-            MutablePair<Integer, Integer> cash = this.handler.getCash();
-            if (this.handler.chosenUpgrade != null) {
-                if (cash.first >= (this.handler.chosenUpgrade.mineralPrice(this.handler.getPlayer().getUpgradeLevel(this.handler.chosenUpgrade)) +
-                        this.handler.deltaCash.first) && cash.second >= (this.handler.chosenUpgrade.gasPrice(this.handler.getPlayer().getUpgradeLevel(this.handler.chosenUpgrade)))
-                        + this.handler.deltaCash.second) {
+            MutablePair<Integer, Integer> cash = gameState.getCash();
+            if (gameState.chosenUpgrade != null) {
+                if (cash.first >= (gameState.chosenUpgrade.mineralPrice(gameState.getPlayer().getUpgradeLevel(gameState.chosenUpgrade)) +
+                        gameState.deltaCash.first) && cash.second >= (gameState.chosenUpgrade.gasPrice(gameState.getPlayer().getUpgradeLevel(gameState.chosenUpgrade)))
+                        + gameState.deltaCash.second) {
                     return State.SUCCESS;
                 }
-            } else if (this.handler.chosenResearch != null) {
-                if (cash.first >= (this.handler.chosenResearch.mineralPrice() + this.handler.deltaCash.first) && cash.second >= (this.handler.chosenResearch.gasPrice()) + this.handler.deltaCash.second) {
+            } else if (gameState.chosenResearch != null) {
+                if (cash.first >= (gameState.chosenResearch.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenResearch.gasPrice()) + gameState.deltaCash.second) {
                     return State.SUCCESS;
                 }
             }

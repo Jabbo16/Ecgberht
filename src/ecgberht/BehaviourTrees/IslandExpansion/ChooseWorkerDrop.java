@@ -17,10 +17,10 @@ public class ChooseWorkerDrop extends Action {
     public State execute() {
         try {
             Worker closestWorker = null;
-            int frame = this.handler.frameCount;
-            Position chosen = this.handler.chosenDropShip.unit.getPosition();
-            if (!this.handler.workerIdle.isEmpty()) {
-                for (Worker u : this.handler.workerIdle) {
+            int frame = gameState.frameCount;
+            Position chosen = gameState.chosenDropShip.unit.getPosition();
+            if (!gameState.workerIdle.isEmpty()) {
+                for (Worker u : gameState.workerIdle) {
                     if (u.isCarryingMinerals()) continue;
                     if (u.getLastCommandFrame() == frame) continue;
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
@@ -28,8 +28,8 @@ public class ChooseWorkerDrop extends Action {
                     }
                 }
             }
-            if (!this.handler.workerMining.isEmpty()) {
-                for (Worker u : this.handler.workerMining.keySet()) {
+            if (!gameState.workerMining.isEmpty()) {
+                for (Worker u : gameState.workerMining.keySet()) {
                     if (u.isCarryingMinerals()) continue;
                     if (u.getLastCommandFrame() == frame) continue;
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
@@ -38,12 +38,12 @@ public class ChooseWorkerDrop extends Action {
                 }
             }
             if (closestWorker != null) {
-                this.handler.chosenWorker = closestWorker;
+                gameState.chosenWorker = closestWorker;
                 return State.SUCCESS;
             }
-            this.handler.chosenDropShip = null;
-            this.handler.chosenWorker = null;
-            this.handler.chosenIsland = null;
+            gameState.chosenDropShip = null;
+            gameState.chosenWorker = null;
+            gameState.chosenIsland = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

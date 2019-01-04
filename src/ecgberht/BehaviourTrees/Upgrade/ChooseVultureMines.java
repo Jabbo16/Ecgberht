@@ -16,12 +16,12 @@ public class ChooseVultureMines extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
-            for (ResearchingFacility u : this.handler.UBs) {
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof MachineShop)) continue;
-                if (!this.handler.getPlayer().hasResearched(TechType.Spider_Mines) && u.canResearch(TechType.Spider_Mines) && !u.isResearching() && !u.isUpgrading()) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenResearch = TechType.Spider_Mines;
+                if (!gameState.getPlayer().hasResearched(TechType.Spider_Mines) && u.canResearch(TechType.Spider_Mines) && !u.isResearching() && !u.isUpgrading()) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenResearch = TechType.Spider_Mines;
                     return State.SUCCESS;
                 }
             }

@@ -187,7 +187,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
                     UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
-                    if(target.visible) UtilMicro.attack((Attacker) u.unit, target.unit);
+                    if (target.visible) UtilMicro.attack((Attacker) u.unit, target.unit);
                     else UtilMicro.attack((MobileUnit) u.unit, target.lastPosition);
                 }
                 break;
@@ -261,7 +261,8 @@ public class Squad implements Comparable<Squad> {
                     if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() && (e.health + e.shields >= 60 || squadSim.enemies.size() > 2)) {
                         found = true;
                     }
-                    if (!close && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange()) close = true;
+                    if (!close && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange())
+                        close = true;
                     if (found && close) break;
                 }
                 if (found && !close) {

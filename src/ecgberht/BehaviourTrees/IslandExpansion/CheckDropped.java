@@ -17,13 +17,13 @@ public class CheckDropped extends Conditional {
     @Override
     public State execute() {
         try {
-            Worker scv = this.handler.chosenWorkerDrop;
-            DropShipAgent ship = this.handler.chosenDropShip;
+            Worker scv = gameState.chosenWorkerDrop;
+            DropShipAgent ship = gameState.chosenDropShip;
             if (ship == null) return State.SUCCESS;
             if (scv != null && ship.statusToString().equals("RETREAT")) {
                 Unit transport = scv.getTransport();
                 if (transport == null) {
-                    this.handler.chosenDropShip = null;
+                    gameState.chosenDropShip = null;
                     return State.SUCCESS;
                 }
             }

@@ -24,16 +24,16 @@ public class Build extends Action {
     public State execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
-            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : this.handler.workerBuild.entrySet()) {
-                if (u.getKey().getOrder() != Order.PlaceBuilding && this.handler.getGame().getBWMap().isVisible(u.getValue().second) && this.handler.canAfford(u.getValue().first)) {
+            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
+                if (u.getKey().getOrder() != Order.PlaceBuilding && gameState.getGame().getBWMap().isVisible(u.getValue().second) && gameState.canAfford(u.getValue().first)) {
                     SCV chosen = u.getKey();
                     if (u.getValue().first == UnitType.Terran_Bunker) {
                         if (!chosen.build(u.getValue().second, u.getValue().first)) {
-                            this.handler.deltaCash.first -= u.getValue().first.mineralPrice();
-                            this.handler.deltaCash.second -= u.getValue().first.gasPrice();
+                            gameState.deltaCash.first -= u.getValue().first.mineralPrice();
+                            gameState.deltaCash.second -= u.getValue().first.gasPrice();
                             toRemove.add(chosen);
                             chosen.stop(false);
-                            this.handler.workerIdle.add(chosen);
+                            gameState.workerIdle.add(chosen);
                         }
                     } else if (u.getKey().getOrder() == Order.PlayerGuard) {
                         if (Math.random() < 0.8) chosen.build(u.getValue().second, u.getValue().first);
@@ -41,7 +41,7 @@ public class Build extends Action {
                     } else chosen.build(u.getValue().second, u.getValue().first);
                 }
             }
-            for (SCV s : toRemove) this.handler.workerBuild.remove(s);
+            for (SCV s : toRemove) gameState.workerBuild.remove(s);
             return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

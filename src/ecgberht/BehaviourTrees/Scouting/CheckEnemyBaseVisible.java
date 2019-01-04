@@ -22,26 +22,26 @@ public class CheckEnemyBaseVisible extends Action {
     @Override
     public State execute() {
         try {
-            List<PlayerUnit> enemies = this.handler.getGame().getUnits(this.handler.getIH().enemy());
+            List<PlayerUnit> enemies = gameState.getGame().getUnits(gameState.getIH().enemy());
             if (!enemies.isEmpty()) {
-                for (UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
-                    if (Util.broodWarDistance(this.handler.chosenScout.getPosition(), u.lastPosition) <= 500) {
-                        this.handler.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
-                        this.handler.scoutSLs = new HashSet<>();
-                        if (!this.handler.strat.name.equals("PlasmaWraithHell")) {
-                            this.handler.chosenHarasser = (Worker) this.handler.chosenScout;
+                for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                    if (Util.broodWarDistance(gameState.chosenScout.getPosition(), u.lastPosition) <= 500) {
+                        gameState.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
+                        gameState.scoutSLs = new HashSet<>();
+                        if (!gameState.strat.name.equals("PlasmaWraithHell")) {
+                            gameState.chosenHarasser = (Worker) gameState.chosenScout;
                         }
-                        this.handler.chosenScout = null;
-                        this.handler.getIH().sendText("!");
-                        this.handler.playSound("gearthere.mp3");
-                        this.handler.enemyBLs.clear();
-                        this.handler.enemyBLs.addAll(this.handler.BLs);
-                        this.handler.enemyBLs.sort(new BaseLocationComparator(this.handler.enemyMainBase));
-                        if (this.handler.firstScout) {
-                            this.handler.enemyStartBase = this.handler.enemyMainBase;
-                            this.handler.enemyMainArea = this.handler.enemyStartBase.getArea();
-                            this.handler.enemyNaturalBase = this.handler.enemyBLs.get(1);
-                            this.handler.enemyNaturalArea = this.handler.enemyNaturalBase.getArea();
+                        gameState.chosenScout = null;
+                        gameState.getIH().sendText("!");
+                        gameState.playSound("gearthere.mp3");
+                        gameState.enemyBLs.clear();
+                        gameState.enemyBLs.addAll(gameState.BLs);
+                        gameState.enemyBLs.sort(new BaseLocationComparator(gameState.enemyMainBase));
+                        if (gameState.firstScout) {
+                            gameState.enemyStartBase = gameState.enemyMainBase;
+                            gameState.enemyMainArea = gameState.enemyStartBase.getArea();
+                            gameState.enemyNaturalBase = gameState.enemyBLs.get(1);
+                            gameState.enemyNaturalArea = gameState.enemyNaturalBase.getArea();
                         }
                         return State.SUCCESS;
                     }

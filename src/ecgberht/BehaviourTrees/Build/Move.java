@@ -20,28 +20,28 @@ public class Move extends Action {
     @Override
     public State execute() {
         try {
-            Worker chosen = this.handler.chosenWorker;
-            Position realEnd = Util.getUnitCenterPosition(this.handler.chosenPosition.toPosition(), this.handler.chosenToBuild);
+            Worker chosen = gameState.chosenWorker;
+            Position realEnd = Util.getUnitCenterPosition(gameState.chosenPosition.toPosition(), gameState.chosenToBuild);
             if (chosen.move(realEnd)) {
-                if (this.handler.workerIdle.contains(chosen)) this.handler.workerIdle.remove(chosen);
-                else if (this.handler.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = this.handler.workerMining.get(chosen);
-                    this.handler.workerMining.remove(chosen);
-                    if (this.handler.mineralsAssigned.containsKey(mineral)) {
-                        this.handler.mining--;
-                        this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
+                if (gameState.workerIdle.contains(chosen)) gameState.workerIdle.remove(chosen);
+                else if (gameState.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = gameState.workerMining.get(chosen);
+                    gameState.workerMining.remove(chosen);
+                    if (gameState.mineralsAssigned.containsKey(mineral)) {
+                        gameState.mining--;
+                        gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
                     }
                 }
-                if (this.handler.chosenToBuild == UnitType.Terran_Command_Center
-                        && this.handler.bwem.getMap().getArea(this.handler.chosenPosition).equals(this.handler.naturalArea)
-                        && this.handler.naturalChoke != null) {
-                    this.handler.defendPosition = this.handler.naturalChoke.getCenter().toPosition();
+                if (gameState.chosenToBuild == UnitType.Terran_Command_Center
+                        && gameState.bwem.getMap().getArea(gameState.chosenPosition).equals(gameState.naturalArea)
+                        && gameState.naturalChoke != null) {
+                    gameState.defendPosition = gameState.naturalChoke.getCenter().toPosition();
                 }
-                this.handler.workerBuild.put((SCV) chosen, new MutablePair<>(this.handler.chosenToBuild, this.handler.chosenPosition));
-                this.handler.deltaCash.first += this.handler.chosenToBuild.mineralPrice();
-                this.handler.deltaCash.second += this.handler.chosenToBuild.gasPrice();
-                this.handler.chosenWorker = null;
-                this.handler.chosenToBuild = UnitType.None;
+                gameState.workerBuild.put((SCV) chosen, new MutablePair<>(gameState.chosenToBuild, gameState.chosenPosition));
+                gameState.deltaCash.first += gameState.chosenToBuild.mineralPrice();
+                gameState.deltaCash.second += gameState.chosenToBuild.gasPrice();
+                gameState.chosenWorker = null;
+                gameState.chosenToBuild = UnitType.None;
                 return State.SUCCESS;
             }
             return State.FAILURE;

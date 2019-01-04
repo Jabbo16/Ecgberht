@@ -17,24 +17,24 @@ public class CollectGas extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getPlayer().gas() >= 400) return State.FAILURE;
-            Worker chosen = this.handler.chosenWorker;
-            if (!this.handler.refineriesAssigned.isEmpty()) {
+            if (gameState.getPlayer().gas() >= 400) return State.FAILURE;
+            Worker chosen = gameState.chosenWorker;
+            if (!gameState.refineriesAssigned.isEmpty()) {
                 GasMiningFacility closestGeyser = null;
-                int workerGas = this.handler.strat.workerGas == 0 ? 3 : this.handler.strat.workerGas;
-                for (Entry<GasMiningFacility, Integer> g : this.handler.refineriesAssigned.entrySet()) {
-                    if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && this.handler.mining > 3) {
+                int workerGas = gameState.strat.workerGas == 0 ? 3 : gameState.strat.workerGas;
+                for (Entry<GasMiningFacility, Integer> g : gameState.refineriesAssigned.entrySet()) {
+                    if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && gameState.mining > 3) {
                         closestGeyser = g.getKey();
                     }
                 }
                 if (closestGeyser != null) {
                     if (chosen.gather(closestGeyser, false)) {
-                        Integer aux = this.handler.refineriesAssigned.get(closestGeyser);
+                        Integer aux = gameState.refineriesAssigned.get(closestGeyser);
                         aux++;
-                        this.handler.refineriesAssigned.put(closestGeyser, aux);
-                        this.handler.workerIdle.remove(chosen);
-                        this.handler.workerGas.put(chosen, closestGeyser);
-                        this.handler.chosenWorker = null;
+                        gameState.refineriesAssigned.put(closestGeyser, aux);
+                        gameState.workerIdle.remove(chosen);
+                        gameState.workerGas.put(chosen, closestGeyser);
+                        gameState.chosenWorker = null;
                         return State.SUCCESS;
                     }
                 }

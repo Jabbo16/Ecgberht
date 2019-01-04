@@ -24,54 +24,54 @@ public class ChooseRefinery extends Action {
     @Override
     public State execute() {
         try {
-            String strat = this.handler.strat.name;
-            if (this.handler.getPlayer().supplyUsed() < this.handler.strat.supplyForFirstRefinery || this.handler.getCash().second >= 300) {
+            String strat = gameState.strat.name;
+            if (gameState.getPlayer().supplyUsed() < gameState.strat.supplyForFirstRefinery || gameState.getCash().second >= 300) {
                 return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("FullBio") || strat.equals("FullBioFE"))
-                    && this.handler.getCash().second >= 150) {
+                    && gameState.getCash().second >= 150) {
                 return State.FAILURE;
             }
-            if (this.handler.strat.techToResearch.contains(TechType.Tank_Siege_Mode) && this.handler.getCash().second >= 250) {
+            if (gameState.strat.techToResearch.contains(TechType.Tank_Siege_Mode) && gameState.getCash().second >= 250) {
                 return State.FAILURE;
             }
-            if (this.handler.refineriesAssigned.size() == 1) {
+            if (gameState.refineriesAssigned.size() == 1) {
                 boolean found = false;
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Barracks) {
                         found = true;
                         break;
                     }
                 }
-                for (Building w : this.handler.workerTask.values()) {
+                for (Building w : gameState.workerTask.values()) {
                     if (w instanceof Barracks) {
                         found = true;
                         break;
                     }
                 }
-                if (this.handler.MBs.isEmpty() && !found) return State.FAILURE;
+                if (gameState.MBs.isEmpty() && !found) return State.FAILURE;
             }
             int count = 0;
             VespeneGeyser geyser = null;
-            for (Entry<VespeneGeyser, Boolean> r : this.handler.vespeneGeysers.entrySet()) {
+            for (Entry<VespeneGeyser, Boolean> r : gameState.vespeneGeysers.entrySet()) {
                 if (r.getValue()) {
                     count++;
                 } else geyser = r.getKey();
             }
-            if (count == this.handler.vespeneGeysers.size()) return State.FAILURE;
-            for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+            if (count == gameState.vespeneGeysers.size()) return State.FAILURE;
+            for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                 if (w.first == UnitType.Terran_Refinery) return State.FAILURE;
             }
-            for (Building w : this.handler.workerTask.values()) {
+            for (Building w : gameState.workerTask.values()) {
                 if (w instanceof Refinery && geyser != null && w.getTilePosition().equals(geyser.getTilePosition()))
                     return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&
-                    !this.handler.refineriesAssigned.isEmpty()
+                    !gameState.refineriesAssigned.isEmpty()
                     && Util.getNumberCCs() <= 2 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < 30) {
                 return State.FAILURE;
             }
-            this.handler.chosenToBuild = UnitType.Terran_Refinery;
+            gameState.chosenToBuild = UnitType.Terran_Refinery;
             return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

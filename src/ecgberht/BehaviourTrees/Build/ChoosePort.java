@@ -17,24 +17,24 @@ public class ChoosePort extends Action {
     @Override
     public State execute() {
         try {
-            String strat = this.handler.strat.name;
+            String strat = gameState.strat.name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
                 if (Util.getNumberCCs() < 2) return State.FAILURE;
-                Player self = this.handler.getPlayer();
+                Player self = gameState.getPlayer();
                 if (Util.countBuildingAll(UnitType.Terran_Starport) >= 1 &&
                         !self.isResearching(TechType.Tank_Siege_Mode) && !self.hasResearched(TechType.Tank_Siege_Mode)) {
                     return State.FAILURE;
                 }
             }
-            if (this.handler.MBs.isEmpty() || this.handler.Fs.isEmpty() || this.handler.strat.numCCForPort > Util.getNumberCCs() ||
-                    (Util.countBuildingAll(UnitType.Terran_Starport) > 0 && this.handler.strat.portPerCC == 0)) {
+            if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.strat.numCCForPort > Util.getNumberCCs() ||
+                    (Util.countBuildingAll(UnitType.Terran_Starport) > 0 && gameState.strat.portPerCC == 0)) {
                 return State.FAILURE;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Starport) == 0 && this.handler.strat.portPerCC == 0) {
-                this.handler.chosenToBuild = UnitType.Terran_Starport;
+            if (Util.countBuildingAll(UnitType.Terran_Starport) == 0 && gameState.strat.portPerCC == 0) {
+                gameState.chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
-            } else if (Util.countBuildingAll(UnitType.Terran_Starport) < this.handler.strat.portPerCC * Util.getNumberCCs()) {
-                this.handler.chosenToBuild = UnitType.Terran_Starport;
+            } else if (Util.countBuildingAll(UnitType.Terran_Starport) < gameState.strat.portPerCC * Util.getNumberCCs()) {
+                gameState.chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
             }
             return State.FAILURE;

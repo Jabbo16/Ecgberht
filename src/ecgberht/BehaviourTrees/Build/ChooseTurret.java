@@ -21,25 +21,25 @@ public class ChooseTurret extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getArmySize() < this.handler.strat.armyForTurret &&
+            if (gameState.getArmySize() < gameState.strat.armyForTurret &&
                     !IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar)) {
                 return State.FAILURE;
             }
             boolean tech = false;
-            for (ResearchingFacility ub : this.handler.UBs) {
+            for (ResearchingFacility ub : gameState.UBs) {
                 if (ub instanceof EngineeringBay) {
                     tech = true;
                     break;
                 }
             }
-            if (tech && this.handler.Ts.isEmpty()) {
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+            if (tech && gameState.Ts.isEmpty()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Missile_Turret) return State.FAILURE;
                 }
-                for (Building w : this.handler.workerTask.values()) {
+                for (Building w : gameState.workerTask.values()) {
                     if (w instanceof MissileTurret) return State.FAILURE;
                 }
-                this.handler.chosenToBuild = UnitType.Terran_Missile_Turret;
+                gameState.chosenToBuild = UnitType.Terran_Missile_Turret;
                 return State.SUCCESS;
             }
             return State.FAILURE;

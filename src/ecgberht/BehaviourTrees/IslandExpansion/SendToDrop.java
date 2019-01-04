@@ -19,27 +19,27 @@ public class SendToDrop extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenDropShip != null && this.handler.chosenWorker != null) {
-                Worker chosen = this.handler.chosenWorker;
-                if (this.handler.workerIdle.contains(chosen)) {
-                    this.handler.workerIdle.remove(chosen);
-                } else if (this.handler.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = this.handler.workerMining.get(chosen);
-                    this.handler.workerMining.remove(chosen);
-                    if (this.handler.mineralsAssigned.containsKey(mineral)) {
-                        this.handler.mining--;
-                        this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
+            if (gameState.chosenDropShip != null && gameState.chosenWorker != null) {
+                Worker chosen = gameState.chosenWorker;
+                if (gameState.workerIdle.contains(chosen)) {
+                    gameState.workerIdle.remove(chosen);
+                } else if (gameState.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = gameState.workerMining.get(chosen);
+                    gameState.workerMining.remove(chosen);
+                    if (gameState.mineralsAssigned.containsKey(mineral)) {
+                        gameState.mining--;
+                        gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
                     }
                 }
-                this.handler.chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(this.handler.chosenWorker)));
-                this.handler.chosenDropShip.setTarget(this.handler.chosenIsland.getLocation().toPosition());
-                this.handler.chosenWorkerDrop = this.handler.chosenWorker;
-                this.handler.chosenWorker = null;
+                gameState.chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(gameState.chosenWorker)));
+                gameState.chosenDropShip.setTarget(gameState.chosenIsland.getLocation().toPosition());
+                gameState.chosenWorkerDrop = gameState.chosenWorker;
+                gameState.chosenWorker = null;
                 return State.SUCCESS;
             }
-            this.handler.chosenDropShip = null;
-            this.handler.chosenWorker = null;
-            this.handler.chosenIsland = null;
+            gameState.chosenDropShip = null;
+            gameState.chosenWorker = null;
+            gameState.chosenIsland = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

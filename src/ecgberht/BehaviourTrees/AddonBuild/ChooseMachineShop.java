@@ -16,21 +16,21 @@ public class ChooseMachineShop extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.strat.name.equals("VultureRush") && (this.handler.Fs.size() < 2 || this.handler.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
+            if (gameState.strat.name.equals("VultureRush") && (gameState.Fs.size() < 2 || gameState.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
                 return State.FAILURE;
-            if (this.handler.strat.name.equals("TheNitekat") && (this.handler.Fs.size() > 1 || this.handler.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
+            if (gameState.strat.name.equals("TheNitekat") && (gameState.Fs.size() > 1 || gameState.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
                 return State.FAILURE;
-            if (!this.handler.Fs.isEmpty()) {
-                for (Factory c : this.handler.Fs) {
+            if (!gameState.Fs.isEmpty()) {
+                for (Factory c : gameState.Fs) {
                     if (!c.isTraining() && c.getAddon() == null) {
-                        this.handler.chosenBuildingAddon = c;
-                        this.handler.chosenAddon = UnitType.Terran_Machine_Shop;
+                        gameState.chosenBuildingAddon = c;
+                        gameState.chosenAddon = UnitType.Terran_Machine_Shop;
                         return State.SUCCESS;
                     }
                 }
             }
-            this.handler.chosenBuildingAddon = null;
-            this.handler.chosenAddon = null;
+            gameState.chosenBuildingAddon = null;
+            gameState.chosenAddon = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

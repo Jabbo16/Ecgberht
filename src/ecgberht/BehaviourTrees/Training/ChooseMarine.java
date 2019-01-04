@@ -19,27 +19,27 @@ public class ChooseMarine extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.MBs.isEmpty()) {
+            if (!gameState.MBs.isEmpty()) {
                 int multiplier = 2;
-                String strat = this.handler.strat.name;
-                Player self = this.handler.getPlayer();
+                String strat = gameState.strat.name;
+                Player self = gameState.getPlayer();
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("VultureRush"))
                     multiplier = 15;
-                if (!this.handler.Fs.isEmpty() && (self.isResearching(TechType.Tank_Siege_Mode) || self.hasResearched(TechType.Tank_Siege_Mode)) && self.gas() >= UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice() && self.minerals() <= 200) {
+                if (!gameState.Fs.isEmpty() && (self.isResearching(TechType.Tank_Siege_Mode) || self.hasResearched(TechType.Tank_Siege_Mode)) && self.gas() >= UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice() && self.minerals() <= 200) {
                     if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                         return State.FAILURE;
                     }
                 }
-                if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith")) && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 6 && !this.handler.defense)
+                if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith")) && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 6 && !gameState.defense)
                     return State.FAILURE;
-                if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !this.handler.defense)
+                if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !gameState.defense)
                     return State.FAILURE;
                 if (strat.equals("JoyORush") && Util.countBuildingAll(UnitType.Terran_Factory) < 2)
                     return State.FAILURE;
-                for (Barracks b : this.handler.MBs) {
+                for (Barracks b : gameState.MBs) {
                     if (!b.isTraining()) {
-                        this.handler.chosenUnit = UnitType.Terran_Marine;
-                        this.handler.chosenBuilding = b;
+                        gameState.chosenUnit = UnitType.Terran_Marine;
+                        gameState.chosenBuilding = b;
                         return State.SUCCESS;
                     }
                 }

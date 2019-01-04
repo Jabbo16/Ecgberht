@@ -17,12 +17,12 @@ public class ChooseWraith extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.Ps.isEmpty()) {
-                if (Util.countUnitTypeSelf(UnitType.Terran_Wraith) <= this.handler.maxWraiths) {
-                    for (Starport b : this.handler.Ps) {
+            if (!gameState.Ps.isEmpty()) {
+                if (Util.countUnitTypeSelf(UnitType.Terran_Wraith) <= gameState.maxWraiths) {
+                    for (Starport b : gameState.Ps) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Wraith)) {
-                            this.handler.chosenUnit = UnitType.Terran_Wraith;
-                            this.handler.chosenBuilding = b;
+                            gameState.chosenUnit = UnitType.Terran_Wraith;
+                            gameState.chosenBuilding = b;
                             return State.SUCCESS;
                         }
                     }

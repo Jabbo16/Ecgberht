@@ -4,7 +4,6 @@ import bwem.BWEM;
 import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
-import bwem.tile.Tile;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.Player;
@@ -73,7 +72,7 @@ public class BuildingMap implements Cloneable {
         }
     }
 
-    public Set<TilePosition> getTilesArea(Area area){
+    public Set<TilePosition> getTilesArea(Area area) {
         return tilesArea.get(area);
     }
 
@@ -393,7 +392,7 @@ public class BuildingMap implements Cloneable {
     }
 
 
-    public boolean tileBuildable(TilePosition pos, UnitType type){
+    public boolean tileBuildable(TilePosition pos, UnitType type) {
         int x = pos.getY();
         int y = pos.getX();
         int size = Math.max(type.tileSize().getY(), type.tileSize().getX());

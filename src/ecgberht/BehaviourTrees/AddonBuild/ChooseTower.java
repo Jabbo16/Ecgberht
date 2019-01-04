@@ -15,15 +15,15 @@ public class ChooseTower extends Action {
     @Override
     public State execute() {
         try {
-            for (Starport c : this.handler.Ps) {
+            for (Starport c : gameState.Ps) {
                 if (!c.isTraining() && c.getAddon() == null) {
-                    this.handler.chosenBuildingAddon = c;
-                    this.handler.chosenAddon = UnitType.Terran_Control_Tower;
+                    gameState.chosenBuildingAddon = c;
+                    gameState.chosenAddon = UnitType.Terran_Control_Tower;
                     return State.SUCCESS;
                 }
             }
-            this.handler.chosenBuildingAddon = null;
-            this.handler.chosenAddon = null;
+            gameState.chosenBuildingAddon = null;
+            gameState.chosenAddon = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

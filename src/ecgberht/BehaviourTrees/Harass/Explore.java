@@ -11,14 +11,14 @@ public class Explore extends Conditional {
         super(name, gh);
     }
 
-    private WorkerScoutAgent scout = null;
 
     @Override
     public State execute() {
         try {
-            if (scout == null && this.handler.chosenHarasser != null) {
-                this.handler.agents.put(this.handler.chosenHarasser, new WorkerScoutAgent(this.handler.chosenHarasser, this.handler.enemyMainBase));
-                this.handler.chosenHarasser = null;
+            if (gameState.chosenHarasser != null) {
+                gameState.agents.put(gameState.chosenHarasser, new WorkerScoutAgent(gameState.chosenHarasser, gameState.enemyMainBase));
+                gameState.naughtySCV = gameState.chosenHarasser;
+                gameState.chosenHarasser = null;
                 return State.SUCCESS;
             }
             return State.FAILURE;

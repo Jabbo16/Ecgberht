@@ -18,50 +18,50 @@ public class Repair extends Action {
     @Override
     public State execute() {
         try {
-            boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && this.handler.frameCount >= 24 * 60 * 2.2;
-            boolean fastExpanding = this.handler.strat.name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && this.handler.CCs.size() < 2 && this.handler.firstExpand;
+            boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && gameState.frameCount >= 24 * 60 * 2.2;
+            boolean fastExpanding = gameState.strat.name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && gameState.CCs.size() < 2 && gameState.firstExpand;
             if (cheesed || fastExpanding) {
-                if (this.handler.chosenRepairer.move(this.handler.chosenUnitRepair.getPosition())) {
-                    if (this.handler.workerIdle.contains(this.handler.chosenRepairer)) {
-                        this.handler.workerIdle.remove(this.handler.chosenRepairer);
+                if (gameState.chosenRepairer.move(gameState.chosenUnitRepair.getPosition())) {
+                    if (gameState.workerIdle.contains(gameState.chosenRepairer)) {
+                        gameState.workerIdle.remove(gameState.chosenRepairer);
                     } else {
-                        if (this.handler.workerMining.containsKey(this.handler.chosenRepairer)) {
-                            MineralPatch mineral = this.handler.workerMining.get(this.handler.chosenRepairer);
-                            this.handler.workerMining.remove(this.handler.chosenRepairer);
-                            if (this.handler.mineralsAssigned.containsKey(mineral)) {
-                                this.handler.mining--;
-                                this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
+                        if (gameState.workerMining.containsKey(gameState.chosenRepairer)) {
+                            MineralPatch mineral = gameState.workerMining.get(gameState.chosenRepairer);
+                            gameState.workerMining.remove(gameState.chosenRepairer);
+                            if (gameState.mineralsAssigned.containsKey(mineral)) {
+                                gameState.mining--;
+                                gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
                             }
                         }
                     }
-                    this.handler.repairerTask.put(this.handler.chosenRepairer, this.handler.chosenUnitRepair);
-                    this.handler.chosenUnitRepair = null;
-                    this.handler.chosenRepairer = null;
+                    gameState.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
+                    gameState.chosenUnitRepair = null;
+                    gameState.chosenRepairer = null;
                     return State.SUCCESS;
                 }
-            } else if (this.handler.chosenRepairer.repair(this.handler.chosenUnitRepair)) {
-                if (this.handler.workerIdle.contains(this.handler.chosenRepairer)) {
-                    this.handler.workerIdle.remove(this.handler.chosenRepairer);
+            } else if (gameState.chosenRepairer.repair(gameState.chosenUnitRepair)) {
+                if (gameState.workerIdle.contains(gameState.chosenRepairer)) {
+                    gameState.workerIdle.remove(gameState.chosenRepairer);
                 } else {
-                    if (this.handler.workerMining.containsKey(this.handler.chosenRepairer)) {
-                        MineralPatch mineral = this.handler.workerMining.get(this.handler.chosenRepairer);
-                        this.handler.workerMining.remove(this.handler.chosenRepairer);
-                        if (this.handler.mineralsAssigned.containsKey(mineral)) {
-                            this.handler.mining--;
-                            this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
+                    if (gameState.workerMining.containsKey(gameState.chosenRepairer)) {
+                        MineralPatch mineral = gameState.workerMining.get(gameState.chosenRepairer);
+                        gameState.workerMining.remove(gameState.chosenRepairer);
+                        if (gameState.mineralsAssigned.containsKey(mineral)) {
+                            gameState.mining--;
+                            gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
                         }
                     }
                 }
-                this.handler.repairerTask.put(this.handler.chosenRepairer, this.handler.chosenUnitRepair);
-                if (this.handler.chosenUnitRepair instanceof MobileUnit) {
-                    ((MobileUnit) this.handler.chosenUnitRepair).move(this.handler.chosenRepairer.getPosition());
+                gameState.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
+                if (gameState.chosenUnitRepair instanceof MobileUnit) {
+                    ((MobileUnit) gameState.chosenUnitRepair).move(gameState.chosenRepairer.getPosition());
                 }
-                this.handler.chosenUnitRepair = null;
-                this.handler.chosenRepairer = null;
+                gameState.chosenUnitRepair = null;
+                gameState.chosenRepairer = null;
                 return State.SUCCESS;
             }
-            this.handler.chosenUnitRepair = null;
-            this.handler.chosenRepairer = null;
+            gameState.chosenUnitRepair = null;
+            gameState.chosenRepairer = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

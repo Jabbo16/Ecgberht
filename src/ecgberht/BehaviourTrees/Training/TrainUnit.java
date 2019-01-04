@@ -18,48 +18,48 @@ public class TrainUnit extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenUnit == UnitType.None) return State.FAILURE;
-            TrainingFacility chosen = this.handler.chosenBuilding;
-            if (this.handler.strat.name.equals("ProxyBBS")) {
+            if (gameState.chosenUnit == UnitType.None) return State.FAILURE;
+            TrainingFacility chosen = gameState.chosenBuilding;
+            if (gameState.strat.name.equals("ProxyBBS")) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2 &&
                         Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
-                    this.handler.chosenBuilding = null;
-                    this.handler.chosenToBuild = UnitType.None;
+                    gameState.chosenBuilding = null;
+                    gameState.chosenToBuild = UnitType.None;
                     return State.FAILURE;
                 }
-                if (this.handler.getSupply() > 0) {
-                    chosen.train(this.handler.chosenUnit);
+                if (gameState.getSupply() > 0) {
+                    chosen.train(gameState.chosenUnit);
                     return State.SUCCESS;
                 }
             }
-            if (this.handler.strat.name.equals("ProxyEightRax")) {
+            if (gameState.strat.name.equals("ProxyEightRax")) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == 0 &&
-                        this.handler.supplyMan.getSupplyUsed() >= 16) {
-                    this.handler.chosenBuilding = null;
-                    this.handler.chosenToBuild = UnitType.None;
+                        gameState.supplyMan.getSupplyUsed() >= 16) {
+                    gameState.chosenBuilding = null;
+                    gameState.chosenToBuild = UnitType.None;
                     return State.FAILURE;
                 }
-                if (this.handler.getSupply() > 0) {
-                    chosen.train(this.handler.chosenUnit);
+                if (gameState.getSupply() > 0) {
+                    chosen.train(gameState.chosenUnit);
                     return State.SUCCESS;
                 }
             }
-            if (this.handler.getSupply() > 4 || this.handler.checkSupply() || this.handler.getPlayer().supplyTotal() >= 400) {
-                if (!this.handler.defense && this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
+            if (gameState.getSupply() > 4 || gameState.checkSupply() || gameState.getPlayer().supplyTotal() >= 400) {
+                if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                     boolean found = false;
-                    for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+                    for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                         if (w.first == UnitType.Terran_Command_Center) {
                             found = true;
                             break;
                         }
                     }
                     if (!found) {
-                        this.handler.chosenBuilding = null;
-                        this.handler.chosenUnit = UnitType.None;
+                        gameState.chosenBuilding = null;
+                        gameState.chosenUnit = UnitType.None;
                         return State.FAILURE;
                     }
                 }
-                chosen.train(this.handler.chosenUnit);
+                chosen.train(gameState.chosenUnit);
                 return State.SUCCESS;
             }
             return State.FAILURE;

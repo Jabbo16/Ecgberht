@@ -15,11 +15,11 @@ public class CheckVisibleBase extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenScout == null) return State.FAILURE;
-            if (!this.handler.scoutSLs.isEmpty()) {
-                for (Base b : this.handler.scoutSLs) {
-                    if ((this.handler.getGame().getBWMap().isVisible(b.getLocation()))) {
-                        this.handler.scoutSLs.remove(b);
+            if (gameState.chosenScout == null) return State.FAILURE;
+            if (!gameState.scoutSLs.isEmpty()) {
+                for (Base b : gameState.scoutSLs) {
+                    if ((gameState.getGame().getBWMap().isVisible(b.getLocation()))) {
+                        gameState.scoutSLs.remove(b);
                         return State.SUCCESS;
                     }
                 }

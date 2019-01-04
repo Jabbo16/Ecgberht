@@ -496,7 +496,7 @@ public class Util {
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
         for (UnitInfo enemy : enemies) {
-            if (enemy.unit == null || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
+            if (enemy.unit == null || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
             if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
             if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             PlayerUnit target = enemy.unit;
@@ -549,8 +549,7 @@ public class Util {
         UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (UnitInfo enemy : enemies) {
-            if (enemy.unit == null || !enemy.unit.exists() || !enemy.visible || (enemy.unit.isCloaked() && !enemy.unit.isDetected()))
-                continue;
+            if (enemy.unit == null || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
             if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
             if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             PlayerUnit target = enemy.unit;

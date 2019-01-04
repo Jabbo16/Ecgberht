@@ -17,21 +17,21 @@ public class ChooseBuildingLot extends Action {
     public State execute() {
         try {
             Building savedTurret = null;
-            for (Building b : this.handler.buildingLot) {
+            for (Building b : gameState.buildingLot) {
                 if (!b.isUnderAttack()) {
                     if (b instanceof Bunker) {
-                        this.handler.chosenBuildingLot = b;
+                        gameState.chosenBuildingLot = b;
                         return State.SUCCESS;
                     }
                     if (b instanceof MissileTurret) savedTurret = b;
-                    this.handler.chosenBuildingLot = b;
+                    gameState.chosenBuildingLot = b;
                 }
             }
             if (savedTurret != null) {
-                this.handler.chosenBuildingLot = savedTurret;
+                gameState.chosenBuildingLot = savedTurret;
                 return State.SUCCESS;
             }
-            if (this.handler.chosenBuildingLot != null) return State.SUCCESS;
+            if (gameState.chosenBuildingLot != null) return State.SUCCESS;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

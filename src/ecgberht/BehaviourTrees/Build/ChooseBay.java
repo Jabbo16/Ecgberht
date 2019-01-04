@@ -19,15 +19,15 @@ public class ChooseBay extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getArmySize() < this.handler.strat.armyForBay) return State.FAILURE;
-            if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < this.handler.strat.numBays) {
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+            if (gameState.getArmySize() < gameState.strat.armyForBay) return State.FAILURE;
+            if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < gameState.strat.numBays) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Engineering_Bay) return State.FAILURE;
                 }
-                for (Building w : this.handler.workerTask.values()) {
+                for (Building w : gameState.workerTask.values()) {
                     if (w instanceof EngineeringBay) return State.FAILURE;
                 }
-                this.handler.chosenToBuild = UnitType.Terran_Engineering_Bay;
+                gameState.chosenToBuild = UnitType.Terran_Engineering_Bay;
                 return State.SUCCESS;
             }
             return State.FAILURE;

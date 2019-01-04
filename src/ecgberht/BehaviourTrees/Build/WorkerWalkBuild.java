@@ -23,15 +23,15 @@ public class WorkerWalkBuild extends Action {
     @Override
     public State execute() {
         try {
-            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : this.handler.workerBuild.entrySet()) {
+            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
                 SCV chosen = u.getKey();
                 if (u.getValue().first != UnitType.Terran_Command_Center
-                        || this.handler.getGame().getBWMap().isVisible(u.getValue().second)
-                        || !this.handler.fortressSpecialBLsTiles.contains(u.getValue().second))
+                        || gameState.getGame().getBWMap().isVisible(u.getValue().second)
+                        || !gameState.fortressSpecialBLsTiles.contains(u.getValue().second))
                     continue;
                 Base myBase = Util.getClosestBaseLocation(u.getValue().second.toPosition());
-                MutablePair<MineralPatch, MineralPatch> minerals = this.handler.fortressSpecialBLs.get(myBase);
-                Area scvArea = this.handler.bwem.getMap().getArea(chosen.getTilePosition());
+                MutablePair<MineralPatch, MineralPatch> minerals = gameState.fortressSpecialBLs.get(myBase);
+                Area scvArea = gameState.bwem.getMap().getArea(chosen.getTilePosition());
                 if (!u.getValue().second.equals(new TilePosition(7, 118))) {
                     if (scvArea != null && scvArea.equals(myBase.getArea())) {
                         if (chosen.getDistance(minerals.first) > 3 * 32) {

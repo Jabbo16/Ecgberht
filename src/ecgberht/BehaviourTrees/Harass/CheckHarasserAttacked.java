@@ -25,21 +25,21 @@ public class CheckHarasserAttacked extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.enemyMainBase == null) {
-                this.handler.chosenUnitToHarass = null;
-                this.handler.chosenHarasser = null;
+            if (gameState.enemyMainBase == null) {
+                gameState.chosenUnitToHarass = null;
+                gameState.chosenHarasser = null;
                 return State.FAILURE;
             }
-            if (this.handler.chosenUnitToHarass != null) {
-                if (!this.handler.bw.getBWMap().isValidPosition(this.handler.chosenUnitToHarass.getPosition())) {
-                    this.handler.chosenUnitToHarass = null;
+            if (gameState.chosenUnitToHarass != null) {
+                if (!gameState.bw.getBWMap().isValidPosition(gameState.chosenUnitToHarass.getPosition())) {
+                    gameState.chosenUnitToHarass = null;
                 }
             }
             Unit attacker = null;
             int workers = 0;
             Set<UnitInfo> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
-            for (UnitInfo u : this.handler.unitStorage.getAllyUnits().get(this.handler.chosenHarasser).attackers) {
+            for (UnitInfo u : gameState.unitStorage.getAllyUnits().get(gameState.chosenHarasser).attackers) {
                 if (!(u.unit instanceof Building) && u.unit instanceof Attacker && u.unit.exists()) {
                     if (u.unit instanceof Worker) {
                         workers++;
@@ -49,47 +49,47 @@ public class CheckHarasserAttacked extends Conditional {
                 }
             }
             if (workers > 1) {
-                this.handler.learningManager.setHarass(true);
-                this.handler.chosenUnitToHarass = null;
+                gameState.learningManager.setHarass(true);
+                gameState.chosenUnitToHarass = null;
                 return State.FAILURE;
             }
             if (attackers.isEmpty()) {
-                if (!this.handler.getGame().getBWMap().isVisible(this.handler.enemyMainBase.getLocation()) &&
-                        this.handler.chosenUnitToHarass == null) {
-                    this.handler.chosenHarasser.move(this.handler.enemyMainBase.getLocation().toPosition());
+                if (!gameState.getGame().getBWMap().isVisible(gameState.enemyMainBase.getLocation()) &&
+                        gameState.chosenUnitToHarass == null) {
+                    gameState.chosenHarasser.move(gameState.enemyMainBase.getLocation().toPosition());
                 }
                 return State.SUCCESS;
             } else {
-                boolean winHarass = this.handler.sim.simulateHarass(this.handler.chosenHarasser, attackers, 70);
+                boolean winHarass = gameState.sim.simulateHarass(gameState.chosenHarasser, attackers, 70);
                 if (winHarass) {
-                    if (workers == 1 && !attacker.equals(this.handler.chosenUnitToHarass)) {
-                        UtilMicro.attack(this.handler.chosenHarasser, attacker);
-                        this.handler.chosenUnitToHarass = attacker;
+                    if (workers == 1 && !attacker.equals(gameState.chosenUnitToHarass)) {
+                        UtilMicro.attack(gameState.chosenHarasser, attacker);
+                        gameState.chosenUnitToHarass = attacker;
                         return State.SUCCESS;
                     }
                 } else {
                     if (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.Unknown) {
-                        this.handler.explore = true;
-                        this.handler.chosenUnitToHarass = null;
-                        this.handler.chosenHarasser.stop(false);
+                        gameState.explore = true;
+                        gameState.chosenUnitToHarass = null;
+                        gameState.chosenHarasser.stop(false);
                         return State.FAILURE;
-                    } else if (this.handler.chosenHarasser.getHitPoints() <= 15) {
-                        this.handler.workerIdle.add(this.handler.chosenHarasser);
-                        this.handler.chosenHarasser.stop(false);
-                        this.handler.chosenHarasser = null;
-                        this.handler.chosenUnitToHarass = null;
+                    } else if (gameState.chosenHarasser.getHitPoints() <= 15) {
+                        gameState.workerIdle.add(gameState.chosenHarasser);
+                        gameState.chosenHarasser.stop(false);
+                        gameState.chosenHarasser = null;
+                        gameState.chosenUnitToHarass = null;
                     } else {
-                        //Position kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
-                        Optional<UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(this.handler.chosenHarasser)));
-                        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(this.handler.chosenHarasser.getPosition(), unit1.position)).orElse(null);
-                        if (kite != null && this.handler.bw.getBWMap().isValidPosition(kite)) {
-                            UtilMicro.move(this.handler.chosenHarasser, kite);
-                            this.handler.chosenUnitToHarass = null;
+                        //Position kite = UtilMicro.kiteAway(gameState.chosenHarasser, attackers);
+                        Optional<UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(gameState.chosenHarasser)));
+                        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(gameState.chosenHarasser.getPosition(), unit1.position)).orElse(null);
+                        if (kite != null && gameState.bw.getBWMap().isValidPosition(kite)) {
+                            UtilMicro.move(gameState.chosenHarasser, kite);
+                            gameState.chosenUnitToHarass = null;
                         } else {
-                            kite = UtilMicro.kiteAway(this.handler.chosenHarasser, attackers);
-                            if (kite != null && this.handler.bw.getBWMap().isValidPosition(kite)) {
-                                UtilMicro.move(this.handler.chosenHarasser, kite);
-                                this.handler.chosenUnitToHarass = null;
+                            kite = UtilMicro.kiteAway(gameState.chosenHarasser, attackers);
+                            if (kite != null && gameState.bw.getBWMap().isValidPosition(kite)) {
+                                UtilMicro.move(gameState.chosenHarasser, kite);
+                                gameState.chosenUnitToHarass = null;
                             }
                         }
                     }

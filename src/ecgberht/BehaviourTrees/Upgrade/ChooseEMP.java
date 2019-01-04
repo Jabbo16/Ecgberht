@@ -17,10 +17,10 @@ public class ChooseEMP extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.enemyRace != Race.Protoss) return State.FAILURE;
+            if (gameState.enemyRace != Race.Protoss) return State.FAILURE;
             boolean found = false;
             ScienceFacility chosen = null;
-            for (ResearchingFacility r : this.handler.UBs) {
+            for (ResearchingFacility r : gameState.UBs) {
                 if (r instanceof ScienceFacility && !r.isResearching()) {
                     found = true;
                     chosen = (ScienceFacility) r;
@@ -28,10 +28,10 @@ public class ChooseEMP extends Action {
                 }
             }
             if (!found) return State.FAILURE;
-            if (!this.handler.getPlayer().isResearching(TechType.EMP_Shockwave) &&
-                    !this.handler.getPlayer().hasResearched(TechType.EMP_Shockwave)) {
-                this.handler.chosenUnitUpgrader = chosen;
-                this.handler.chosenResearch = TechType.EMP_Shockwave;
+            if (!gameState.getPlayer().isResearching(TechType.EMP_Shockwave) &&
+                    !gameState.getPlayer().hasResearched(TechType.EMP_Shockwave)) {
+                gameState.chosenUnitUpgrader = chosen;
+                gameState.chosenResearch = TechType.EMP_Shockwave;
                 return State.SUCCESS;
             }
             return State.FAILURE;

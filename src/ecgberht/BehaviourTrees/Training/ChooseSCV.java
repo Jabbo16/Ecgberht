@@ -21,10 +21,10 @@ public class ChooseSCV extends Action {
     @Override
     public State execute() {
         try {
-            String strat = this.handler.strat.name;
+            String strat = gameState.strat.name;
             if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax")) {
                 boolean notTraining = false;
-                for (Barracks b : this.handler.MBs) {
+                for (Barracks b : gameState.MBs) {
                     if (!b.isTraining()) {
                         notTraining = true;
                         break;
@@ -32,23 +32,23 @@ public class ChooseSCV extends Action {
                 }
                 if (notTraining) return State.FAILURE;
             }
-            if (this.handler.enemyRace == Race.Zerg && this.handler.learningManager.isNaughty()
+            if (gameState.enemyRace == Race.Zerg && gameState.learningManager.isNaughty()
                     && Util.countBuildingAll(UnitType.Terran_Barracks) > 0
-                    && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && this.handler.getCash().first < 150) {
+                    && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && gameState.getCash().first < 150) {
                 return State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) <= this.handler.mineralsAssigned.size() * 2 + this.handler.refineriesAssigned.size() * 3 + this.handler.strat.extraSCVs && !this.handler.CCs.isEmpty()) {
-                for (Map.Entry<Base, CommandCenter> b : this.handler.islandCCs.entrySet()) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) <= gameState.mineralsAssigned.size() * 2 + gameState.refineriesAssigned.size() * 3 + gameState.strat.extraSCVs && !gameState.CCs.isEmpty()) {
+                for (Map.Entry<Base, CommandCenter> b : gameState.islandCCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
-                        this.handler.chosenUnit = UnitType.Terran_SCV;
-                        this.handler.chosenBuilding = b.getValue();
+                        gameState.chosenUnit = UnitType.Terran_SCV;
+                        gameState.chosenBuilding = b.getValue();
                         return State.SUCCESS;
                     }
                 }
-                for (Map.Entry<Base, CommandCenter> b : this.handler.CCs.entrySet()) {
+                for (Map.Entry<Base, CommandCenter> b : gameState.CCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
-                        this.handler.chosenUnit = UnitType.Terran_SCV;
-                        this.handler.chosenBuilding = b.getValue();
+                        gameState.chosenUnit = UnitType.Terran_SCV;
+                        gameState.chosenBuilding = b.getValue();
                         return State.SUCCESS;
                     }
                 }

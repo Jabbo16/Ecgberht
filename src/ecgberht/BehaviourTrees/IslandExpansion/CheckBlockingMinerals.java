@@ -17,10 +17,10 @@ public class CheckBlockingMinerals extends Conditional {
     @Override
     public State execute() {
         try {
-            Worker scv = this.handler.chosenWorkerDrop;
+            Worker scv = gameState.chosenWorkerDrop;
             MineralPatch chosen = null;
-            if (this.handler.chosenIsland == null) return State.FAILURE;
-            for (Mineral p : this.handler.chosenIsland.getBlockingMinerals()) {
+            if (gameState.chosenIsland == null) return State.FAILURE;
+            for (Mineral p : gameState.chosenIsland.getBlockingMinerals()) {
                 if (!p.getUnit().exists()) continue;
                 chosen = (MineralPatch) p.getUnit();
                 break;

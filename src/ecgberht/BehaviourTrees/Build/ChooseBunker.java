@@ -17,12 +17,12 @@ public class ChooseBunker extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getGame().getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
+            if (gameState.getGame().getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
                 return State.FAILURE;
             }
-            if ((needBunker() || this.handler.strat.bunker || IntelligenceAgency.enemyIsRushing() || this.handler.learningManager.isNaughty())
-                    && this.handler.MBs.size() >= 1 && Util.countBuildingAll(UnitType.Terran_Bunker) == 0) {
-                this.handler.chosenToBuild = UnitType.Terran_Bunker;
+            if ((needBunker() || gameState.strat.bunker || IntelligenceAgency.enemyIsRushing() || gameState.learningManager.isNaughty())
+                    && gameState.MBs.size() >= 1 && Util.countBuildingAll(UnitType.Terran_Bunker) == 0) {
+                gameState.chosenToBuild = UnitType.Terran_Bunker;
                 return State.SUCCESS;
             }
             return State.FAILURE;
@@ -34,7 +34,7 @@ public class ChooseBunker extends Action {
     }
 
     private boolean needBunker() {
-        return this.handler.enemyRace == Race.Zerg && !this.handler.strat.name.equals("ProxyBBS")
-                && !this.handler.strat.name.equals("ProxyEightRax");
+        return gameState.enemyRace == Race.Zerg && !gameState.strat.name.equals("ProxyBBS")
+                && !gameState.strat.name.equals("ProxyEightRax");
     }
 }

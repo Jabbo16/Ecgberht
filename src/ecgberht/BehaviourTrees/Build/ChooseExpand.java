@@ -21,35 +21,35 @@ public class ChooseExpand extends Action {
     @Override
     public State execute() {
         try {
-            String strat = this.handler.strat.name;
+            String strat = gameState.strat.name;
             if (strat.equals("JoyORush")) return State.FAILURE;
-            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || (strat.equals("TheNitekat") && this.handler.getCash().first <= 550))
+            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || (strat.equals("TheNitekat") && gameState.getCash().first <= 550))
                 return State.FAILURE;
-            if (strat.equals("FullMech") && (this.handler.myArmy.stream().noneMatch(u -> u.unit instanceof SiegeTank) || !this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && this.handler.firstExpand)
+            if (strat.equals("FullMech") && (gameState.myArmy.stream().noneMatch(u -> u.unit instanceof SiegeTank) || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && gameState.firstExpand)
                 return State.FAILURE;
-            for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+            for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                 if (w.first == UnitType.Terran_Command_Center) return State.FAILURE;
             }
-            for (Building w : this.handler.workerTask.values()) {
+            for (Building w : gameState.workerTask.values()) {
                 if (w instanceof CommandCenter) return State.FAILURE;
             }
             if (strat.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
                 return State.FAILURE;
             }
-            if (this.handler.iReallyWantToExpand || this.handler.getCash().first >= 550) {
-                this.handler.chosenToBuild = UnitType.Terran_Command_Center;
+            if (gameState.iReallyWantToExpand || gameState.getCash().first >= 550) {
+                gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE") ||
-                    strat.equals("PlasmaWraithHell")) && !this.handler.MBs.isEmpty() && this.handler.CCs.size() == 1) {
-                this.handler.chosenToBuild = UnitType.Terran_Command_Center;
+                    strat.equals("PlasmaWraithHell")) && !gameState.MBs.isEmpty() && gameState.CCs.size() == 1) {
+                gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
-            int workers = this.handler.workerIdle.size();
-            for (Integer wt : this.handler.mineralsAssigned.values()) workers += wt;
-            if (this.handler.mineralsAssigned.size() * 2 <= workers - 1 &&
-                    this.handler.getArmySize() >= this.handler.strat.armyForExpand) {
-                this.handler.chosenToBuild = UnitType.Terran_Command_Center;
+            int workers = gameState.workerIdle.size();
+            for (Integer wt : gameState.mineralsAssigned.values()) workers += wt;
+            if (gameState.mineralsAssigned.size() * 2 <= workers - 1 &&
+                    gameState.getArmySize() >= gameState.strat.armyForExpand) {
+                gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
             return State.FAILURE;

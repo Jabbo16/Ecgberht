@@ -75,7 +75,6 @@ public class Ecgberht implements BWEventListener {
     private DebugManager debugManager = null;
     private CameraModule skycladObserver = null;
 
-    private Cartographer silentCartographer;
     private org.bk.ass.path.Result path;
 
     public static void main(String[] args) {
@@ -391,7 +390,7 @@ public class Ecgberht implements BWEventListener {
             initScanTree();
             initHarassTree();
             initIslandTree();
-            silentCartographer = new Cartographer(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
+            gs.silentCartographer = new Cartographer(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
         } catch (Exception e) {
             System.err.println("onStart Exception");
@@ -405,15 +404,15 @@ public class Ecgberht implements BWEventListener {
         try {
             if (gs.enemyMainBase != null) {
                 if (path == null) {
-                    if (gs.mainChoke != null) {
-                        path = silentCartographer.getWalkablePath(gs.mainChoke.getCenter().toTilePosition(), gs.enemyMainBase.getLocation());
+                    if (gs.naturalChoke != null) {
+                        path = gs.silentCartographer.getWalkablePath(gs.naturalChoke.getCenter(), gs.enemyMainBase.getLocation().toWalkPosition());
                     } else {
-                        path = silentCartographer.getWalkablePath(self.getStartLocation(), gs.enemyMainBase.getLocation());
+                        path = gs.silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
                     }
 
                 } else {
                     for (org.bk.ass.path.Position p : path.path) {
-                        Position pos = new TilePosition(p.x, p.y).toPosition();
+                        Position pos = new WalkPosition(p.x, p.y).toPosition();
                         bw.getMapDrawer().drawCircleMap(pos, 4, Color.RED, true);
                     }
                 }
@@ -777,6 +776,7 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                         gs.workerIdle.remove(arg0);
+                        if (arg0.equals(gs.naughtySCV)) gs.naughtySCV = null;
                         if (arg0.equals(gs.chosenScout)) gs.chosenScout = null;
                         if (arg0.equals(gs.chosenHarasser)) {
                             gs.chosenHarasser = null;

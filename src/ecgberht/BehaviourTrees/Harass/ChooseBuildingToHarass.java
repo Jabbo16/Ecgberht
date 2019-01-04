@@ -16,18 +16,18 @@ public class ChooseBuildingToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenUnitToHarass != null) return State.FAILURE;
-            for (UnitInfo u : this.handler.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
-                if (this.handler.enemyMainBase != null && this.handler.bwem.getMap().getArea(u.tileposition).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
-                    this.handler.chosenUnitToHarass = u.unit;
+            if (gameState.chosenUnitToHarass != null) return State.FAILURE;
+            for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                if (gameState.enemyMainBase != null && gameState.bwem.getMap().getArea(u.tileposition).equals(gameState.bwem.getMap().getArea(gameState.enemyMainBase.getLocation()))) {
+                    gameState.chosenUnitToHarass = u.unit;
                     return State.SUCCESS;
                 }
             }
-            if (this.handler.chosenHarasser.isIdle()) {
-                this.handler.workerIdle.add(this.handler.chosenHarasser);
-                this.handler.chosenHarasser.stop(false);
-                this.handler.chosenHarasser = null;
-                this.handler.chosenUnitToHarass = null;
+            if (gameState.chosenHarasser.isIdle()) {
+                gameState.workerIdle.add(gameState.chosenHarasser);
+                gameState.chosenHarasser.stop(false);
+                gameState.chosenHarasser = null;
+                gameState.chosenUnitToHarass = null;
             }
             return State.FAILURE;
         } catch (Exception e) {

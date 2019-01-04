@@ -19,30 +19,30 @@ public class CheckResourcesBuilding extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenPosition == null) {
-                this.handler.chosenWorker = null;
-                //((GameState) this.handler).chosenToBuild = UnitType.None;
+            if (gameState.chosenPosition == null) {
+                gameState.chosenWorker = null;
+                //((GameState) gameState).chosenToBuild = UnitType.None;
                 return State.FAILURE;
             }
-            MutablePair<Integer, Integer> cash = this.handler.getCash();
-            Worker chosen = this.handler.chosenWorker;
+            MutablePair<Integer, Integer> cash = gameState.getCash();
+            Worker chosen = gameState.chosenWorker;
             TilePosition start = chosen.getTilePosition();
-            TilePosition end = this.handler.chosenPosition;
-            Position realEnd = Util.getUnitCenterPosition(end.toPosition(), this.handler.chosenToBuild);
-            if (this.handler.strat.name.equals("ProxyBBS") && this.handler.chosenToBuild == UnitType.Terran_Barracks) {
+            TilePosition end = gameState.chosenPosition;
+            Position realEnd = Util.getUnitCenterPosition(end.toPosition(), gameState.chosenToBuild);
+            if (gameState.strat.name.equals("ProxyBBS") && gameState.chosenToBuild == UnitType.Terran_Barracks) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
-                    if (cash.first + this.handler.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (this.handler.chosenToBuild.mineralPrice() * 2 + 40 + this.handler.deltaCash.first) && cash.second >= (this.handler.chosenToBuild.gasPrice() * 2) + this.handler.deltaCash.second) {
+                    if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() * 2 + 40 + gameState.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice() * 2) + gameState.deltaCash.second) {
                         return State.SUCCESS;
                     }
                 } else if (Util.countBuildingAll(UnitType.Terran_Barracks) == 1)
                     return State.SUCCESS;
                 return State.FAILURE;
-            } else if (cash.first + this.handler.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (this.handler.chosenToBuild.mineralPrice() + this.handler.deltaCash.first) && cash.second >= (this.handler.chosenToBuild.gasPrice()) + this.handler.deltaCash.second) {
+            } else if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice()) + gameState.deltaCash.second) {
                 return State.SUCCESS;
             }
-            this.handler.chosenWorker = null;
-            this.handler.chosenPosition = null;
-            //((GameState) this.handler).chosenToBuild = UnitType.None;
+            gameState.chosenWorker = null;
+            gameState.chosenPosition = null;
+            //((GameState) gameState).chosenToBuild = UnitType.None;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

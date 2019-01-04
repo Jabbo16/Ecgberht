@@ -16,12 +16,12 @@ public class ChooseArmorInfUp extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
-            for (ResearchingFacility u : this.handler.UBs) {
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof EngineeringBay)) continue;
-                if (u.canUpgrade(UpgradeType.Terran_Infantry_Armor) && !u.isResearching() && !u.isUpgrading() && this.handler.getPlayer().getUpgradeLevel(UpgradeType.Terran_Infantry_Armor) < 3) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenUpgrade = UpgradeType.Terran_Infantry_Armor;
+                if (u.canUpgrade(UpgradeType.Terran_Infantry_Armor) && !u.isResearching() && !u.isUpgrading() && gameState.getPlayer().getUpgradeLevel(UpgradeType.Terran_Infantry_Armor) < 3) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenUpgrade = UpgradeType.Terran_Infantry_Armor;
                     return State.SUCCESS;
                 }
             }

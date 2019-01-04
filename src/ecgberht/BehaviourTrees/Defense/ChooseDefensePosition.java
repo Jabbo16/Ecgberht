@@ -14,18 +14,18 @@ public class ChooseDefensePosition extends Conditional {
     }
 
     private Position getDefensePosition() {
-        if (this.handler.defendPosition != null) return this.handler.defendPosition;
-        if (this.handler.initDefensePosition != null)
-            return this.handler.initDefensePosition.toPosition();
-        if (this.handler.mainChoke != null)
-            return this.handler.mainChoke.getCenter().toPosition();
-        return this.handler.getPlayer().getStartLocation().toPosition();
+        if (gameState.defendPosition != null) return gameState.defendPosition;
+        if (gameState.initDefensePosition != null)
+            return gameState.initDefensePosition.toPosition();
+        if (gameState.mainChoke != null)
+            return gameState.mainChoke.getCenter().toPosition();
+        return gameState.getPlayer().getStartLocation().toPosition();
     }
 
     private Position chooseDefensePosition() {
         Position chosen = null;
         double maxScore = 0;
-        for (Unit b : this.handler.enemyInBase) {
+        for (Unit b : gameState.enemyInBase) {
             double influence = getScore(b);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
             double score = influence / (2.5 * Util.getGroundDistance(getDefensePosition(), b.getPosition()));
@@ -50,10 +50,10 @@ public class ChooseDefensePosition extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.defense) {
+            if (gameState.defense) {
                 Position chosenDefensePosition = chooseDefensePosition();
                 if (chosenDefensePosition != null) {
-                    this.handler.attackPosition = chosenDefensePosition;
+                    gameState.attackPosition = chosenDefensePosition;
                     return State.SUCCESS;
                 }
             }

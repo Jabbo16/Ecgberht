@@ -16,21 +16,21 @@ public class FinishBuilding extends Action {
     @Override
     public State execute() {
         try {
-            Worker chosen = this.handler.chosenWorker;
-            if (chosen.rightClick(this.handler.chosenBuildingLot, false)) {
-                if (this.handler.workerIdle.contains(chosen)) this.handler.workerIdle.remove(chosen);
-                else if (this.handler.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = this.handler.workerMining.get(chosen);
-                    this.handler.workerMining.remove(chosen);
-                    if (this.handler.mineralsAssigned.containsKey(mineral)) {
-                        this.handler.mining--;
-                        this.handler.mineralsAssigned.put(mineral, this.handler.mineralsAssigned.get(mineral) - 1);
+            Worker chosen = gameState.chosenWorker;
+            if (chosen.rightClick(gameState.chosenBuildingLot, false)) {
+                if (gameState.workerIdle.contains(chosen)) gameState.workerIdle.remove(chosen);
+                else if (gameState.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = gameState.workerMining.get(chosen);
+                    gameState.workerMining.remove(chosen);
+                    if (gameState.mineralsAssigned.containsKey(mineral)) {
+                        gameState.mining--;
+                        gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
                     }
                 }
-                this.handler.workerTask.put((SCV) chosen, this.handler.chosenBuildingLot);
-                this.handler.chosenWorker = null;
-                this.handler.buildingLot.remove(this.handler.chosenBuildingLot);
-                this.handler.chosenBuildingLot = null;
+                gameState.workerTask.put((SCV) chosen, gameState.chosenBuildingLot);
+                gameState.chosenWorker = null;
+                gameState.buildingLot.remove(gameState.chosenBuildingLot);
+                gameState.chosenBuildingLot = null;
                 return State.SUCCESS;
             }
             return State.FAILURE;

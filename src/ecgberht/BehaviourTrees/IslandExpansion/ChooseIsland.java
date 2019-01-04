@@ -19,9 +19,9 @@ public class ChooseIsland extends Action {
         try {
             Base chosen = null;
             double distMax = Double.MAX_VALUE;
-            Position drop = this.handler.chosenDropShip.unit.getPosition();
-            for (Base b : this.handler.islandBases) {
-                if (this.handler.islandCCs.containsKey(b)) continue;
+            Position drop = gameState.chosenDropShip.unit.getPosition();
+            for (Base b : gameState.islandBases) {
+                if (gameState.islandCCs.containsKey(b)) continue;
                 double dist = Util.broodWarDistance(b.getLocation().toPosition(), drop);
                 if (dist < distMax) {
                     distMax = dist;
@@ -29,12 +29,12 @@ public class ChooseIsland extends Action {
                 }
             }
             if (chosen != null) {
-                this.handler.chosenIsland = chosen;
+                gameState.chosenIsland = chosen;
                 return State.SUCCESS;
             }
-            this.handler.chosenDropShip = null;
-            this.handler.chosenWorker = null;
-            this.handler.chosenIsland = null;
+            gameState.chosenDropShip = null;
+            gameState.chosenWorker = null;
+            gameState.chosenIsland = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

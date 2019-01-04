@@ -19,23 +19,23 @@ public class ChooseBlotWorker extends Action {
     public State execute() {
         try {
             Worker closestWorker = null;
-            Position chosen = this.handler.chosenBuildingLot.getPosition();
-            if (!this.handler.workerIdle.isEmpty()) {
-                for (Worker u : this.handler.workerIdle) {
+            Position chosen = gameState.chosenBuildingLot.getPosition();
+            if (!gameState.workerIdle.isEmpty()) {
+                for (Worker u : gameState.workerIdle) {
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
                         closestWorker = u;
                     }
                 }
             }
-            if (!this.handler.workerMining.isEmpty()) {
-                for (Entry<Worker, MineralPatch> u : this.handler.workerMining.entrySet()) {
+            if (!gameState.workerMining.isEmpty()) {
+                for (Entry<Worker, MineralPatch> u : gameState.workerMining.entrySet()) {
                     if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.getKey().isCarryingMinerals()) {
                         closestWorker = u.getKey();
                     }
                 }
             }
             if (closestWorker != null) {
-                this.handler.chosenWorker = closestWorker;
+                gameState.chosenWorker = closestWorker;
                 return State.SUCCESS;
             }
             return State.FAILURE;

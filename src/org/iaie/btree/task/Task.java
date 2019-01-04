@@ -49,14 +49,14 @@ public abstract class Task {
 
     protected final List<Task> children;
     private final String name;
-    protected GameState handler;
+    protected GameState gameState;
     protected BehavioralTree.State state = BehavioralTree.State.RUNNING;
 
     public Task(String name, GameState gh) {
         this.state = BehavioralTree.State.READY;
         this.name = name;
         this.children = new ArrayList<>();
-        this.handler = gh;
+        gameState = gh;
     }
 
     public Task(String name, GameState gh, Task... tasks) {

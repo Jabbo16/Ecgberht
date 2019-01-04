@@ -13,7 +13,7 @@ public class CheckBuildingsLot extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.buildingLot.isEmpty()) return State.FAILURE;
+            if (gameState.buildingLot.isEmpty()) return State.FAILURE;
             return State.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

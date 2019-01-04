@@ -16,11 +16,11 @@ public class ChooseScience extends Action {
     public State execute() {
         try {
 
-            if (this.handler.MBs.isEmpty() || this.handler.Fs.isEmpty() || this.handler.Ps.isEmpty() || this.handler.strat.numCCForScience > Util.getNumberCCs()) {
+            if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.Ps.isEmpty() || gameState.strat.numCCForScience > Util.getNumberCCs()) {
                 return State.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Science_Facility) == 0) {
-                this.handler.chosenToBuild = UnitType.Terran_Science_Facility;
+                gameState.chosenToBuild = UnitType.Terran_Science_Facility;
                 return State.SUCCESS;
             }
             return State.FAILURE;

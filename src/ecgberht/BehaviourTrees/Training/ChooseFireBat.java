@@ -17,21 +17,21 @@ public class ChooseFireBat extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.enemyRace != Race.Zerg) return State.FAILURE;
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
+            if (gameState.enemyRace != Race.Zerg) return State.FAILURE;
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
             else if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
-                for (ResearchingFacility r : this.handler.UBs) {
+                for (ResearchingFacility r : gameState.UBs) {
                     if (r instanceof Academy) {
                         int count = 0;
-                        for (Unit u : this.handler.getGame().getUnits(this.handler.getPlayer())) {
+                        for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
                             if (!u.exists()) continue;
                             if (u instanceof Firebat) count++;
-                            if (count >= this.handler.maxBats) return State.FAILURE;
+                            if (count >= gameState.maxBats) return State.FAILURE;
                         }
-                        for (Barracks b : this.handler.MBs) {
+                        for (Barracks b : gameState.MBs) {
                             if (!b.isTraining()) {
-                                this.handler.chosenUnit = UnitType.Terran_Firebat;
-                                this.handler.chosenBuilding = b;
+                                gameState.chosenUnit = UnitType.Terran_Firebat;
+                                gameState.chosenBuilding = b;
                                 return State.SUCCESS;
                             }
                         }

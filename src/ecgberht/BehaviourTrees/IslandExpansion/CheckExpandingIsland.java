@@ -14,8 +14,8 @@ public class CheckExpandingIsland extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenWorkerDrop != null && (this.handler.chosenDropShip == null
-                    || !this.handler.chosenDropShip.statusToString().equals("IDLE"))) {
+            if (gameState.chosenWorkerDrop != null && (gameState.chosenDropShip == null
+                    || !gameState.chosenDropShip.statusToString().equals("IDLE"))) {
                 return State.SUCCESS;
             }
             return State.FAILURE;

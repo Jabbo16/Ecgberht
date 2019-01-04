@@ -18,22 +18,22 @@ public class ChooseRepairer extends Action {
     public State execute() {
         try {
             SCV closestWorker = null;
-            Position chosen = this.handler.chosenUnitRepair.getPosition();
-            int frame = this.handler.frameCount;
-            for (Worker u : this.handler.workerIdle) {
+            Position chosen = gameState.chosenUnitRepair.getPosition();
+            int frame = gameState.frameCount;
+            for (Worker u : gameState.workerIdle) {
                 if (u.getLastCommandFrame() == frame) continue;
                 if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
                     closestWorker = (SCV) u;
                 }
             }
-            for (Worker u : this.handler.workerMining.keySet()) {
+            for (Worker u : gameState.workerMining.keySet()) {
                 if (u.getLastCommandFrame() == frame) continue;
                 if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
                     closestWorker = (SCV) u;
                 }
             }
             if (closestWorker != null) {
-                this.handler.chosenRepairer = closestWorker;
+                gameState.chosenRepairer = closestWorker;
                 return State.SUCCESS;
             }
             return State.FAILURE;

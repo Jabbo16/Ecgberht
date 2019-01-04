@@ -16,6 +16,7 @@ public class Cartographer {
     private boolean[][] walkableGrid = new boolean[1024][1024];
     private boolean[][] tileWalkableGrid;
     private Jps mapJPS;
+    private Jps mapJPSTile;
 
     public Cartographer(int width, int height) {
         mapTileWidth = width;
@@ -26,29 +27,31 @@ public class Cartographer {
     }
 
     public Result getWalkablePath(WalkPosition start, WalkPosition end) {
-        mapJPS = new Jps(Map.fromBooleanArray(walkableGrid));
         return mapJPS.findPath(new Position(start.getX(), start.getY()), new Position(end.getX(), end.getY()));
     }
 
     public Result getWalkablePath(TilePosition start, TilePosition end) {
-        mapJPS = new Jps(Map.fromBooleanArray(tileWalkableGrid));
         return mapJPS.findPath(new Position(start.getX(), start.getY()), new Position(end.getX(), end.getY()));
     }
 
     private void initWalkableGrids() {
         for (int ii = 0; ii < mapTileWidth * 4; ii++) {
             for (int jj = 0; jj < mapTileHeight * 4; jj++) {
-                walkableGrid[jj][ii] = getGs().getGame().getBWMap().isWalkable(new WalkPosition(ii, jj));
+                walkableGrid[jj][ii] = getGs().getGame().getBWMap().isWalkable(ii, jj);
             }
         }
         for (int ii = 0; ii < mapTileWidth; ii++) {
             for (int jj = 0; jj < mapTileHeight; jj++) {
-                tileWalkableGrid[jj][ii] = getGs().getGame().getBWMap().isWalkable(new TilePosition(ii, jj).toWalkPosition());
+                tileWalkableGrid[jj][ii] = getGs().getGame().getBWMap().isWalkable(ii * 4, jj * 4);
             }
         }
+        mapJPS = new Jps(Map.fromBooleanArray(walkableGrid));
+        mapJPSTile = new Jps(Map.fromBooleanArray(tileWalkableGrid));
     }
 
     enum Resolution {
         TilePosition, WalkPosition
-    };
+    }
+
+    ;
 }

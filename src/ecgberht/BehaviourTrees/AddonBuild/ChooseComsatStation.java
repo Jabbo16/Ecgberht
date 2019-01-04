@@ -17,13 +17,13 @@ public class ChooseComsatStation extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.CCs.isEmpty()) {
-                for (CommandCenter c : this.handler.CCs.values()) {
+            if (!gameState.CCs.isEmpty()) {
+                for (CommandCenter c : gameState.CCs.values()) {
                     if (!c.isTraining() && c.getAddon() == null) {
-                        for (ResearchingFacility u : this.handler.UBs) {
+                        for (ResearchingFacility u : gameState.UBs) {
                             if (u instanceof Academy) {
-                                this.handler.chosenBuildingAddon = c;
-                                this.handler.chosenAddon = UnitType.Terran_Comsat_Station;
+                                gameState.chosenBuildingAddon = c;
+                                gameState.chosenAddon = UnitType.Terran_Comsat_Station;
                                 return State.SUCCESS;
                             }
                         }
@@ -31,8 +31,8 @@ public class ChooseComsatStation extends Action {
                     }
                 }
             }
-            this.handler.chosenBuildingAddon = null;
-            this.handler.chosenAddon = null;
+            gameState.chosenBuildingAddon = null;
+            gameState.chosenAddon = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

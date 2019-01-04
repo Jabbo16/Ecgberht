@@ -131,11 +131,14 @@ public class GameState {
     public boolean explore = false;
     public boolean firstExpand = true;
     public int maxGoliaths = 0;
+    public Cartographer silentCartographer;
     public double luckyDraw;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),
             new TilePosition(117, 7), new TilePosition(7, 118), new TilePosition(117, 118)));
     public Building disrupterBuilding = null;
+    public Building proxyBuilding = null;
     public BW bw;
+    public Worker naughtySCV = null;
     InteractionHandler ih;
     public BWEM bwem;
     protected Player self;
@@ -191,7 +194,7 @@ public class GameState {
             VultureRush vR = new VultureRush();
             TheNitekat tNK = new TheNitekat();
             JoyORush jOR = new JoyORush();
-            if(true) return tPW;
+            if (true) return tPW;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
             if (enemyRace == Race.Zerg && EI.naughty) return b;
