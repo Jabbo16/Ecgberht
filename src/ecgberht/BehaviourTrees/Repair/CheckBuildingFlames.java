@@ -119,8 +119,8 @@ public class CheckBuildingFlames extends Action {
             }
             isBeingRepaired = false;
             for (Factory b : gameState.Fs) {
+                if (b.equals(gameState.proxyBuilding)) continue;
                 if (UnitType.Terran_Factory.maxHitPoints() != b.getHitPoints()) {
-                    if (b.equals(gameState.proxyBuilding)) continue;
                     for (Mechanical r : gameState.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;

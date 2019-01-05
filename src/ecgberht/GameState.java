@@ -194,7 +194,6 @@ public class GameState {
             VultureRush vR = new VultureRush();
             TheNitekat tNK = new TheNitekat();
             JoyORush jOR = new JoyORush();
-            if (true) return tPW;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
             if (enemyRace == Race.Zerg && EI.naughty) return b;

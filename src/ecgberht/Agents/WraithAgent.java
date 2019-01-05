@@ -5,6 +5,7 @@ import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
+import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -51,14 +52,14 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 if (dist > hisAirWeaponRange) it.remove();
             }
             Set<UnitInfo> mainTargets = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
-            Unit harassed = chooseHarassTarget(mainTargets);
+            UnitInfo harassed = chooseHarassTarget(mainTargets);
             if (airAttackers.isEmpty()) { // TODO improve this
                 if (closestThreat != null) {
                     Weapon myWeapon = closestThreat.flying ? unit.getAirWeapon() : unit.getGroundWeapon();
                     double hisAirWeaponRange = closestThreat.airRange;
                     if (myWeapon.maxRange() > hisAirWeaponRange && bestDist >= hisAirWeaponRange * 1.1) {
                         if (myWeapon.cooldown() > 0) {
-                            UtilMicro.attack(unit, closestThreat.unit);
+                            UtilMicro.attack(unit, closestThreat);
                             return false;
                         }
                     }
@@ -80,7 +81,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
             UnitInfo target = Util.getRangedTarget(unitInfo, closeEnemies);
             if (target != null) {
-                UtilMicro.attack(unit, target.unit);
+                UtilMicro.attack(unit, target);
                 return false;
             }
             if (attack != null) {
@@ -100,18 +101,18 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         return Util.chooseAttackPosition(unit.getPosition(), true);
     }
 
-    private Unit chooseHarassTarget(Set<UnitInfo> mainTargets) {
-        Unit chosen = null;
+    private UnitInfo chooseHarassTarget(Set<UnitInfo> mainTargets) {
+        UnitInfo chosen = null;
         double maxScore = Double.MIN_VALUE;
         for (UnitInfo u : mainTargets) {
-            if (!u.unit.exists()) continue;
-            double dist = myUnit.getDistance(u.unit);
-            double score = u.unit instanceof Worker ? 3 : (u.unit instanceof Overlord ? 6 : 1);
-            WeaponType weapon = Util.getWeapon(unit, u.unit);
+            //if (!u.unit.exists()) continue;
+            double dist = unitInfo.getDistance(u);
+            double score = u.unitType.isWorker() ? 5 : (u.unitType == UnitType.Zerg_Overlord ? 8 : 1);
+            WeaponType weapon = Util.getWeapon(unitInfo, u);
             score *= dist <= weapon.maxRange() ? 1.4 : 0.9;
             score *= (double) u.unitType.maxHitPoints() / (double) u.health;
             if (chosen == null || maxScore < score) {
-                chosen = u.unit;
+                chosen = u;
                 maxScore = score;
             }
         }

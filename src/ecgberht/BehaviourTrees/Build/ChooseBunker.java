@@ -35,6 +35,6 @@ public class ChooseBunker extends Action {
 
     private boolean needBunker() {
         return gameState.enemyRace == Race.Zerg && !gameState.strat.name.equals("ProxyBBS")
-                && !gameState.strat.name.equals("ProxyEightRax");
+                && !gameState.strat.name.equals("ProxyEightRax") && !gameState.strat.name.equals("TwoPortWraith");
     }
 }

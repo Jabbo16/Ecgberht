@@ -28,7 +28,7 @@ public class ChooseMedic extends Action {
                     if (u instanceof Academy) {
                         int marine_count = 0;
                         if (!gameState.DBs.isEmpty()) {
-                            for (Set<UnitInfo> p : gameState.DBs.values()) marine_count += p.size();
+                            marine_count = gameState.DBs.values().stream().mapToInt(Set::size).sum();
                         }
                         if (!gameState.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
                             for (Barracks b : gameState.MBs) {

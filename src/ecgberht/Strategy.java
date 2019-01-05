@@ -12,6 +12,7 @@ public abstract class Strategy implements Comparable<Strategy> {
 
     public boolean bunker = false;
     public boolean proxy = false;
+    public boolean harass = true;
     public int armyForAttack = 0;
     public int armyForExpand = 20;
     public int armyForTurret = 0;

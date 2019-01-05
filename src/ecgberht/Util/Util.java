@@ -162,13 +162,13 @@ public class Util {
         return closestBase;
     }
 
-    public static WeaponType getWeapon(Unit attacker, Unit target) {
-        UnitType attackerType = attacker.getType();
-        UnitType targetType = target.getType();
+    public static WeaponType getWeapon(UnitInfo attacker, UnitInfo target) {
+        UnitType attackerType = attacker.unitType;
+        UnitType targetType = target.unitType;
         if (attackerType == UnitType.Terran_Bunker) return getWeapon(UnitType.Terran_Marine, targetType);
         if (attackerType == UnitType.Protoss_Carrier) return getWeapon(UnitType.Protoss_Interceptor, targetType);
         if (attackerType == UnitType.Protoss_Reaver) return getWeapon(UnitType.Protoss_Scarab, targetType);
-        return target.isFlying() ? attackerType.airWeapon() : attackerType.groundWeapon();
+        return target.flying ? attackerType.airWeapon() : attackerType.groundWeapon();
     }
 
     private static WeaponType getWeapon(UnitType attacker, UnitType target) {
@@ -185,8 +185,8 @@ public class Util {
         return attacker.groundWeapon() != WeaponType.None ? attacker.groundWeapon() : attacker.airWeapon();
     }
 
-    public static boolean canAttack(PlayerUnit attacker, PlayerUnit target) {
-        if (attacker.isLockedDown() || !(attacker instanceof Attacker)) return false;
+    public static boolean canAttack(UnitInfo attacker, UnitInfo target) {
+        if (attacker.unit.isLockedDown() || !(attacker.unit instanceof Attacker)) return false;
         WeaponType weapon = getWeapon(attacker, target);
         return !(weapon == null);
     }
@@ -414,13 +414,12 @@ public class Util {
         return walks.get(0).toPosition().getDistance(walks.get(walks.size() - 1).toPosition());
     }
 
-    public static boolean isStaticDefense(Unit u) {
-        return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony
-                || u instanceof SunkenColony || u instanceof PhotonCannon || u instanceof CreepColony;
+    public static boolean isStaticDefense(UnitInfo u) {
+        return isStaticDefense(u.unitType);
     }
 
     public static boolean isStaticDefense(UnitType u) {
-        return u.isBuilding() && (u.canAttack() || u == UnitType.Terran_Bunker);
+        return u.isBuilding() && (u.canAttack() || u == UnitType.Terran_Bunker || u == UnitType.Zerg_Creep_Colony);
     }
 
     public static boolean isGroundStaticDefense(Unit u) {
@@ -473,17 +472,19 @@ public class Util {
         return getGs().getIH();
     }
 
-    public static Unit getTankTarget(SiegeTank t, Set<UnitInfo> tankTargets) {
-        Unit chosenTarget = null;
+    public static UnitInfo getTankTarget(UnitInfo t, Set<UnitInfo> tankTargets) {
+        UnitInfo chosenTarget = null;
         int highPriority = 0;
         int closestDist = Integer.MAX_VALUE;
         for (UnitInfo target : tankTargets) {
-            int distance = t.getDistance(target.unit);
-            int priority = getRangedAttackPriority(t, target.unit);
+            if(!target.visible) continue;
+            int distance = t.getDistance(target);
+            int priority = getRangedAttackPriority(t, target);
+            if(isStaticDefense(t)) priority *= 1.2;
             if (chosenTarget == null || (priority > highPriority) || (priority == highPriority && distance < closestDist)) {
                 closestDist = distance;
                 highPriority = priority;
-                chosenTarget = target.unit;
+                chosenTarget = target;
             }
         }
         return chosenTarget;
@@ -499,35 +500,34 @@ public class Util {
             if (enemy.unit == null || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
             if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
             if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
-            PlayerUnit target = enemy.unit;
-            int priority = getRangedAttackPriority((MobileUnit) rangedUnit.unit, target);
+            int priority = getRangedAttackPriority(rangedUnit, enemy);
             int distance = rangedUnit.getDistance(enemy);
             double closerToGoal = rangedUnit.getDistance(pos) - enemy.getDistance(pos);
             if (distance >= 13 * 32) continue;
             int score = 5 * 32 * priority - distance;
             if (closerToGoal > 0) score += 2 * 32;
-            boolean isThreat = canAttack(target, rangedUnit.unit);
-            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, (MobileUnit) rangedUnit.unit);
+            boolean isThreat = canAttack(enemy, rangedUnit);
+            boolean canShootBack = isThreat && distance <= 32 + getAttackRange(enemy, rangedUnit);
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = target.getPlayer().getUnitStatCalculator().weaponMaxRange(getWeapon(target, rangedUnit.unit));
+                    double weaponDist = enemy.player.getUnitStatCalculator().weaponMaxRange(getWeapon(enemy, rangedUnit));
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
-            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
-                if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
-                        target.getOrder() == Order.Unsieging ||
-                        (target instanceof Burrowable && enemy.burrowed)) {
+            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) enemy.unit).isMoving()) {
+                if ((enemy.unit instanceof SiegeTank && ((SiegeTank) enemy.unit).isSieged()) || enemy.currentOrder == Order.Sieging ||
+                        enemy.currentOrder == Order.Unsieging ||
+                        (enemy.burrowed)) {
                     score += 48;
                 } else score += 24;
-            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
+            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) enemy.unit).isBraking()) score += 16;
             else if (enemy.speed >= rangedUnit.speed) {
                 score -= 4 * 32;
             }
             if (enemy.unitType.getRace() == Race.Protoss && enemy.shields <= 5) score += 32;
-            if (enemy.health < target.getType().maxHitPoints()) score += 24;
-            DamageType damage = getWeapon(rangedUnit.unit, target).damageType();
+            if (enemy.health < enemy.unitType.maxHitPoints()) score += 24;
+            DamageType damage = getWeapon(rangedUnit, enemy).damageType();
             if (damage == DamageType.Explosive) {
                 if (enemy.unitType.size() == UnitSizeType.Large) score += 32;
 
@@ -552,39 +552,38 @@ public class Util {
             if (enemy.unit == null || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
             if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
             if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
-            PlayerUnit target = enemy.unit;
-            int priority = getRangedAttackPriority((MobileUnit) rangedUnit.unit, target);
+            int priority = getRangedAttackPriority(rangedUnit, enemy);
             int distance = rangedUnit.getDistance(enemy);
             if (distance >= 13 * 32) continue;
             int score = 5 * 32 * priority - distance;
-            boolean isThreat = canAttack(target, rangedUnit.unit);
-            boolean canShootBack = isThreat && distance <= 32 + getAttackRange((Attacker) target, (MobileUnit) rangedUnit.unit);
+            boolean isThreat = canAttack(enemy, rangedUnit);
+            boolean canShootBack = isThreat && distance <= 32 + getAttackRange(enemy, rangedUnit);
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = getWeapon(target, rangedUnit.unit).maxRange();
+                    double weaponDist = getWeapon(enemy, rangedUnit).maxRange();
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
-            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) target).isMoving()) {
-                if ((target instanceof SiegeTank && ((SiegeTank) target).isSieged()) || target.getOrder() == Order.Sieging ||
-                        target.getOrder() == Order.Unsieging ||
-                        (target instanceof Burrowable && enemy.burrowed)) {
+            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) enemy.unit).isMoving()) {
+                if ((enemy.unit instanceof SiegeTank && ((SiegeTank) enemy.unit).isSieged()) || enemy.currentOrder == Order.Sieging ||
+                        enemy.currentOrder == Order.Unsieging ||
+                        (enemy.burrowed)) {
                     score += 48;
                 } else score += 24;
-            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) target).isBraking()) score += 16;
+            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) enemy.unit).isBraking()) score += 16;
             else if (enemy.speed >= rangedUnit.speed) {
                 score -= 4 * 32;
             }
-            if (target.getType().getRace() == Race.Protoss && target.getShields() <= 5) score += 32;
-            if (target.getHitPoints() < target.getType().maxHitPoints()) score += 24;
-            DamageType damage = getWeapon(rangedUnit.unit, target).damageType();
+            if (enemy.unitType.getRace() == Race.Protoss && enemy.shields <= 5) score += 32;
+            if (enemy.health < enemy.unitType.maxHitPoints()) score += 24;
+            DamageType damage = getWeapon(rangedUnit, enemy).damageType();
             if (damage == DamageType.Explosive) {
-                if (target.getType().size() == UnitSizeType.Large) score += 32;
+                if (enemy.unitType.size() == UnitSizeType.Large) score += 32;
 
             } else if (damage == DamageType.Concussive) {
-                if (target.getType().size() == UnitSizeType.Small) score += 32;
-                else if (target.getType().size() == UnitSizeType.Large) score -= 32;
+                if (enemy.unitType.size() == UnitSizeType.Small) score += 32;
+                else if (enemy.unitType.size() == UnitSizeType.Large) score -= 32;
             }
             if (score > bestScore) {
                 bestScore = score;
@@ -595,33 +594,33 @@ public class Util {
     }
 
     // Credits to SH
-    private static int getRangedAttackPriority(MobileUnit rangedUnit, PlayerUnit target) {
-        UnitType rangedType = rangedUnit.getType();
-        UnitType targetType = target.getType();
-        if (targetType == UnitType.Terran_Ghost && target.getOrder() == Order.NukePaint || target.getOrder() == Order.NukeTrack) {
+    private static int getRangedAttackPriority(UnitInfo rangedUnit, UnitInfo target) {
+        UnitType rangedType = rangedUnit.unitType;
+        UnitType targetType = target.unitType;
+        if (targetType == UnitType.Terran_Ghost && target.currentOrder == Order.NukePaint || target.currentOrder == Order.NukeTrack) {
             return 15;
         }
         if (rangedType.isFlyer()) {
             if (targetType == UnitType.Zerg_Scourge) return 12;
-        } else if (targetType == UnitType.Terran_Vulture_Spider_Mine && !((SpiderMine) target).isBurrowed() ||
+        } else if (targetType == UnitType.Terran_Vulture_Spider_Mine && !target.burrowed ||
                 targetType == UnitType.Zerg_Infested_Terran) {
             return 12;
         }
         if (rangedType == UnitType.Terran_Wraith) {
             if (targetType.isFlyer()) return 11;
         } else if (rangedType == UnitType.Terran_Goliath && targetType.isFlyer()) return 10;
-        if (rangedType.isFlyer() && target instanceof SiegeTank) return 10;
+        if (rangedType.isFlyer() && target.unit instanceof SiegeTank) return 10;
         if (targetType == UnitType.Protoss_High_Templar || targetType == UnitType.Zerg_Defiler) return 12;
         if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
         if (isStaticDefense(target)) {
             if (canAttack(target, rangedUnit)) {
-                if (target.isCompleted()) return 9;
+                if (target.completed) return 9;
                 return 10;
-            } else if (target.isCompleted()) return 8;
+            } else if (target.completed) return 8;
             return 7;
         }
         if (canAttack(target, rangedUnit) && !targetType.isWorker()) {
-            if (rangedUnit.getDistance(target) > 48 + getAttackRange((Attacker) target, rangedUnit)) return 8;
+            if (rangedUnit.getDistance(target) > 48 + getAttackRange(target, rangedUnit)) return 8;
             return 10;
         }
         if (targetType == UnitType.Terran_Dropship || targetType == UnitType.Protoss_Shuttle) return 10;
@@ -630,9 +629,9 @@ public class Util {
         }
         if (targetType.isWorker()) {
             if (rangedType == UnitType.Terran_Vulture) return 11;
-            if (target instanceof SCV) {
-                if (((SCV) target).isRepairing()) return 11;
-                if (((SCV) target).isConstructing()) return 10;
+            if (target.unit instanceof SCV) {
+                if (((SCV) target.unit).isRepairing()) return 11;
+                if (((SCV) target.unit).isConstructing()) return 10;
             }
             return 9;
         }
@@ -648,7 +647,7 @@ public class Util {
         if (targetType.isResourceDepot()) return 6;
         if (targetType == UnitType.Protoss_Pylon) return 5;
         if (targetType == UnitType.Terran_Factory || targetType == UnitType.Terran_Armory) return 5;
-        if (targetType.isBuilding() && (!target.isCompleted() || !target.isPowered()) && !(targetType.isResourceDepot()
+        if (targetType.isBuilding() && (!target.completed || !target.unit.isPowered()) && !(targetType.isResourceDepot()
                 || targetType.groundWeapon() != WeaponType.None || targetType.airWeapon() != WeaponType.None)) {
             return 2;
         }
@@ -658,16 +657,16 @@ public class Util {
     }
 
     // Credits to SH
-    private static int getAttackRange(Attacker attacker, MobileUnit target) {
-        UnitType attackerType = attacker.getType();
-        if (attackerType == UnitType.Protoss_Reaver && !target.isFlying()) return 8 * 32;
+    private static int getAttackRange(UnitInfo attacker, UnitInfo target) {
+        UnitType attackerType = attacker.unitType;
+        if (attackerType == UnitType.Protoss_Reaver && !target.flying) return 8 * 32;
         if (attackerType == UnitType.Protoss_Carrier) return 8 * 32;
         if (attackerType == UnitType.Terran_Bunker) {
-            return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(WeaponType.Gauss_Rifle) + 32;
+            return attacker.player.getUnitStatCalculator().weaponMaxRange(WeaponType.Gauss_Rifle) + 32;
         }
         WeaponType weapon = getWeapon(attacker, target);
         if (weapon == WeaponType.None) return 0;
-        return attacker.getPlayer().getUnitStatCalculator().weaponMaxRange(weapon);
+        return attacker.player.getUnitStatCalculator().weaponMaxRange(weapon);
     }
 
     public static boolean isInOurBases(Unit u) {
@@ -679,5 +678,9 @@ public class Util {
             if (b.getArea().equals(uArea)) return true;
         }
         return uArea.equals(getGs().naturalArea);
+    }
+
+    public static boolean isResearched(TechType tech) {
+        return getGs().getPlayer().hasResearched(tech);
     }
 }

@@ -34,7 +34,7 @@ public class ChooseFactory extends Action {
                 gameState.chosenToBuild = UnitType.Terran_Factory;
                 return State.SUCCESS;
             } else if (Util.countBuildingAll(UnitType.Terran_Factory) < gameState.strat.facPerCC * Util.getNumberCCs()) {
-                if (strat.equals("TwoPortWraith") && gameState.naughtySCV != null && gameState.Fs.isEmpty()) {
+                if (strat.equals("TwoPortWraith") && gameState.naughtySCV != null && gameState.Fs.isEmpty() && gameState.proxyBuilding == null) {
                     WorkerScoutAgent w = (WorkerScoutAgent) gameState.agents.get(gameState.naughtySCV);
                     if (w != null && w.statusToString().equals("Proxying")) {
                         gameState.chosenToBuild = UnitType.None;

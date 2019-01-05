@@ -170,20 +170,21 @@ public class WorkerScoutAgent extends Agent {
                             enemyNaturalIndex = -1;
                             removedIndex = true;
                         }
-                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next().unit); // TODO add attack state
+                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next()); // TODO add attack state
                 }
             }
         } else unit.resumeBuilding(disrupter);
     }
 
     private Status chooseNewStatus() {
-        String strat = getGs().strat.name;
+        if (status == Status.DISRUPTING) return Status.DISRUPTING;
         if (status == Status.PROXYING) {
             if (proxyTile == null) {
                 ableToProxy = false;
             } else {
                 if (proxier != null && proxier.isCompleted()) {
                     ableToProxy = false;
+                    getGs().proxyBuilding = proxier;
                 } else {
                     double dist = unitInfo.tileposition.getDistance(proxyTile);
                     if (dist <= 3) {
@@ -201,6 +202,7 @@ public class WorkerScoutAgent extends Agent {
                 }
             }
         }
+        String strat = getGs().strat.name;
         if (ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
             return Status.PROXYING;
         }
@@ -208,7 +210,6 @@ public class WorkerScoutAgent extends Agent {
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
-        if (status == Status.DISRUPTING) return Status.DISRUPTING;
         if (IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex) {
             return Status.DISRUPTING;
         }

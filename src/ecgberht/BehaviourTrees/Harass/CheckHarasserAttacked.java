@@ -35,7 +35,7 @@ public class CheckHarasserAttacked extends Conditional {
                     gameState.chosenUnitToHarass = null;
                 }
             }
-            Unit attacker = null;
+            UnitInfo attacker = null;
             int workers = 0;
             Set<UnitInfo> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
@@ -43,7 +43,7 @@ public class CheckHarasserAttacked extends Conditional {
                 if (!(u.unit instanceof Building) && u.unit instanceof Attacker && u.unit.exists()) {
                     if (u.unit instanceof Worker) {
                         workers++;
-                        attacker = u.unit;
+                        attacker = u;
                     }
                     attackers.add(u);
                 }
@@ -62,9 +62,9 @@ public class CheckHarasserAttacked extends Conditional {
             } else {
                 boolean winHarass = gameState.sim.simulateHarass(gameState.chosenHarasser, attackers, 70);
                 if (winHarass) {
-                    if (workers == 1 && !attacker.equals(gameState.chosenUnitToHarass)) {
+                    if (workers == 1 && !attacker.unit.equals(gameState.chosenUnitToHarass)) {
                         UtilMicro.attack(gameState.chosenHarasser, attacker);
-                        gameState.chosenUnitToHarass = attacker;
+                        gameState.chosenUnitToHarass = attacker.unit;
                         return State.SUCCESS;
                     }
                 } else {

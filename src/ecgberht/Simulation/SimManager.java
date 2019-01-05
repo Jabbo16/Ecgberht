@@ -37,7 +37,7 @@ public class SimManager {
     private BWAPI4JAgentFactory factory;
     private Evaluator evaluator;
     private int radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
-    private int shortSimFrames = 90;
+    private int shortSimFrames = 110;
     private int longSimFrames = 300;
     private int iterations = 10;
 
@@ -47,8 +47,8 @@ public class SimManager {
         evaluator = new Evaluator();
         factory = new BWAPI4JAgentFactory(bw.getBWMap());
         if (ConfigManager.getConfig().ecgConfig.sscait) {
-            shortSimFrames = 60;
-            longSimFrames = 180;
+            shortSimFrames = 80;
+            longSimFrames = 200;
             iterations = 0;
         }
         switch (bw.getInteractionHandler().enemy().getRace()) {
@@ -128,7 +128,8 @@ public class SimManager {
         for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
             if (getGs().strat.proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
-            if (Util.isStaticDefense(u.unitType) || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
+            if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
+                    || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
                 enemyUnits.add(u);
         }
         clustering = new MeanShift(enemyUnits, radius);
@@ -161,10 +162,10 @@ public class SimManager {
         if (!friendly.isEmpty()) {
             //getGs().sqManager.createSquads(friendly);
             createSimInfos();
-            if (!noNeedForSim()) {
-                doSimJFAP();
+            //if (!noNeedForSim()) {
+            doSimJFAP();
                 //doSimASS();
-            }
+            //}
             getGs().sqManager.createSquads(friendly);
         }
         time = System.currentTimeMillis() - time;
@@ -271,8 +272,8 @@ public class SimManager {
             for (UnitInfo u : s.enemies) {
                 if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
                 if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
-                if (!Util.isStaticDefense(u.unit) && !u.unitType.canAttack()) continue;
-                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || (u.unit instanceof Lurker && u.burrowed))) {
+                if (!Util.isStaticDefense(u) && !u.unitType.canAttack()) continue;
+                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
                     if (energy >= 1) energy -= 1;
                     else {
                         s.lose = true;
@@ -329,8 +330,8 @@ public class SimManager {
             for (UnitInfo u : s.enemies) {
                 if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
                 if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
-                if (!Util.isStaticDefense(u.unit) && !u.unitType.canAttack()) continue;
-                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || (u.unit instanceof Lurker && u.burrowed))) {
+                if (!Util.isStaticDefense(u) && !u.unitType.canAttack()) continue;
+                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
                     if (energy >= 1) energy -= 1;
                     else {
                         s.lose = true;

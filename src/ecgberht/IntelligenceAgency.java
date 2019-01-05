@@ -307,6 +307,7 @@ public class IntelligenceAgency {
             if (foundPool && getNumEnemyBases(mainEnemy) < 2 && drones >= 7 && drones <= 9) {
                 enemyStrat = EnemyStrats.NinePool;
                 getGs().ih.sendText("Nice 9 pool");
+                getGs().strat.bunker = true;
                 /*if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
                     getGs().strat = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();

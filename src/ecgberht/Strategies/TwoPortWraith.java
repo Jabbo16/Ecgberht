@@ -23,12 +23,14 @@ public class TwoPortWraith extends Strategy {
         numCCForPort = 1;
         numCCForScience = 2;
         portPerCC = 2;
-        bunker = true;
+        harass = false;
+        bunker = false;
         supplyForFirstRefinery = 26;
         armyForAttack = 25;
-        armyForExpand = 13;
+        armyForExpand = 14;
+        extraSCVs = 1;
         facForArmory = 2;
-        workerGas = 2;
+        workerGas = 3;
         numArmories = 1;
         initTrainUnits();
         initBuildUnits();

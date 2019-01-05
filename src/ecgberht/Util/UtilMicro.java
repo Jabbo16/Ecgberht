@@ -24,13 +24,19 @@ public class UtilMicro {
         attacker.attack(pos);
     }
 
-    public static void attack(Attacker attacker, Unit target) {
-        if (attacker == null || target == null || !attacker.exists() || !target.exists() || attacker.isAttackFrame())
-            return;
-        if (getGs().frameCount == attacker.getLastCommandFrame()) return;
-        Unit targetUnit = attacker.getTargetUnit();
-        if (target.equals(targetUnit)) return;
-        attacker.attack(target);
+    public static void attack(Attacker attacker, UnitInfo target) {
+        try{
+            if (attacker == null || target == null || !attacker.exists() || !target.unit.exists() || attacker.isAttackFrame())
+                return;
+            if (getGs().frameCount == attacker.getLastCommandFrame()) return;
+            Unit targetUnit = attacker.getTargetUnit();
+            if (target.unit.equals(targetUnit)) return;
+            if(target.visible) attacker.attack(target.unit);
+            else ((MobileUnit)attacker).move(target.lastPosition);
+        } catch(Exception e){
+            System.err.println("UtilMicro Attack Exception");
+            e.printStackTrace();
+        }
     }
 
     public static void irradiate(ScienceVessel vessel, PlayerUnit target) {

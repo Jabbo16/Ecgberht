@@ -34,6 +34,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
     public boolean burrowed = false;
     public boolean flying = false;
     public boolean visible = false;
+    public boolean completed = false;
     public Player player = null;
     public PlayerUnit unit;
     public UnitType unitType = UnitType.None;
@@ -70,6 +71,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
         visible = unit.isVisible();
         position = visible ? unit.getPosition() : position;
         currentOrder = unit.getOrder();
+        completed = !completed && visible ? unit.isCompleted() : completed;
         tileposition = visible ? unit.getTilePosition() : tileposition;
         if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
         else walkposition = tileposition.toWalkPosition();
@@ -94,6 +96,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
         speed = Util.getSpeed(this);
         target = (unit instanceof Attacker) ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
+        attackers.clear();
     }
 
     @Override

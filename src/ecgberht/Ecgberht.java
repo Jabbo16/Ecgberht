@@ -474,6 +474,8 @@ public class Ecgberht implements BWEventListener {
                 if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) {
                     gs.strat = new BioMechFE();
                 } else gs.strat = new FullBioFE();
+                gs.strat.armyForAttack +=5;
+                if(gs.proxyBuilding != null) gs.strat.trainUnits.add(UnitType.Terran_Vulture);
                 transition();
             }
             if (gs.strat.name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
@@ -906,6 +908,10 @@ public class Ecgberht implements BWEventListener {
                         gs.CSs.remove(arg0);
                         gs.Fs.remove(arg0);
                         gs.MBs.remove(arg0);
+                        if (arg0.equals(gs.proxyBuilding)){
+                            gs.proxyBuilding = null;
+                            gs.strat.trainUnits.remove(UnitType.Terran_Vulture);
+                        }
                         if (arg0 instanceof ResearchingFacility) gs.UBs.remove(arg0);
                         gs.SBs.remove(arg0);
                         gs.Ts.remove(arg0);
