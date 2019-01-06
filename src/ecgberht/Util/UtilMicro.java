@@ -25,15 +25,15 @@ public class UtilMicro {
     }
 
     public static void attack(Attacker attacker, UnitInfo target) {
-        try{
+        try {
             if (attacker == null || target == null || !attacker.exists() || !target.unit.exists() || attacker.isAttackFrame())
                 return;
             if (getGs().frameCount == attacker.getLastCommandFrame()) return;
             Unit targetUnit = attacker.getTargetUnit();
             if (target.unit.equals(targetUnit)) return;
-            if(target.visible) attacker.attack(target.unit);
-            else ((MobileUnit)attacker).move(target.lastPosition);
-        } catch(Exception e){
+            if (target.visible) attacker.attack(target.unit);
+            else ((MobileUnit) attacker).move(target.lastPosition);
+        } catch (Exception e) {
             System.err.println("UtilMicro Attack Exception");
             e.printStackTrace();
         }

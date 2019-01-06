@@ -471,11 +471,12 @@ public class Ecgberht implements BWEventListener {
                 }
             }
             if (gs.strat.name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
-                if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) {
-                    gs.strat = new BioMechFE();
-                } else gs.strat = new FullBioFE();
-                gs.strat.armyForAttack +=5;
-                if(gs.proxyBuilding != null) gs.strat.trainUnits.add(UnitType.Terran_Vulture);
+                if(gs.enemyRace == Race.Zerg){
+                    if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) gs.strat = new BioMechFE();
+                    else gs.strat = new FullBioFE();
+                    if (gs.proxyBuilding != null) gs.strat.trainUnits.add(UnitType.Terran_Vulture);
+                } else if(gs.enemyRace == Race.Terran) gs.strat = new FullMech();
+                gs.strat.armyForAttack += 5;
                 transition();
             }
             if (gs.strat.name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
@@ -489,7 +490,7 @@ public class Ecgberht implements BWEventListener {
                 transition();
             }
             gs.cancelDyingThings();
-            IntelligenceAgency.updateBullets();
+            //IntelligenceAgency.updateBullets(); //Disabled because its not actually used yet and its slow
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
@@ -908,7 +909,7 @@ public class Ecgberht implements BWEventListener {
                         gs.CSs.remove(arg0);
                         gs.Fs.remove(arg0);
                         gs.MBs.remove(arg0);
-                        if (arg0.equals(gs.proxyBuilding)){
+                        if (arg0.equals(gs.proxyBuilding)) {
                             gs.proxyBuilding = null;
                             gs.strat.trainUnits.remove(UnitType.Terran_Vulture);
                         }

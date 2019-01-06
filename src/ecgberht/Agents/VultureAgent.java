@@ -165,8 +165,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 return;
             }
             int cd = unit.getGroundWeapon().cooldown();
-            Unit closestAttacker = Util.getClosestUnit(unit, mySim.enemies);
-            if (closestAttacker != null && (cd != 0 || closestAttacker.getDistance(unit) < unit.getGroundWeaponMaxRange() * 0.6)) {
+            UnitInfo closestAttacker = Util.getClosestUnit(unitInfo, mySim.enemies);
+            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < unit.getGroundWeaponMaxRange() * 0.6)) {
                 status = Status.KITE;
                 return;
             }

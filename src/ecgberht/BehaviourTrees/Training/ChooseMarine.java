@@ -5,6 +5,7 @@ import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.Player;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Barracks;
@@ -30,7 +31,8 @@ public class ChooseMarine extends Action {
                         return State.FAILURE;
                     }
                 }
-                if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith")) && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 6 && !gameState.defense)
+                if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith"))
+                        && Util.countUnitTypeSelf(UnitType.Terran_Marine) > (gameState.enemyRace == Race.Zerg ? 6 : 3) && !gameState.defense)
                     return State.FAILURE;
                 if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !gameState.defense)
                     return State.FAILURE;

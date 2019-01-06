@@ -1,7 +1,6 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
-import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;

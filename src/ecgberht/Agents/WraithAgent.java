@@ -7,7 +7,9 @@ import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.WeaponType;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Weapon;
+import org.openbw.bwapi4j.unit.Wraith;
 
 import java.util.*;
 

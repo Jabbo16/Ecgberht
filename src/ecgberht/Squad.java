@@ -81,7 +81,8 @@ public class Squad implements Comparable<Squad> {
             status = Status.REGROUP;
         else if (status == Status.ATTACK && squadSim.enemies.isEmpty()) status = Status.ADVANCE;
         else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing() && (getGs().defendPosition == null || getGs().defendPosition.getDistance(center) <= 350))
-            status = Status.ATTACK;
+            if(!squadSim.lose) status = Status.ATTACK;
+            else status = Status.REGROUP;
     }
 
     void updateSquad() {
@@ -150,7 +151,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim) || squadSim.enemies.stream().noneMatch(e -> Util.getWeapon(e, u).maxRange() > 32)) {
+                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, false) || squadSim.enemies.stream().noneMatch(e -> Util.getWeapon(e, u).maxRange() > 32)) {
                     executeRangedAttackLogic(u);
                     return;
                 }
@@ -187,8 +188,8 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
                     UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
-                    if(target != null) UtilMicro.attack((Attacker) u.unit, target);
-                    else if(attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);
+                    if (target != null) UtilMicro.attack((Attacker) u.unit, target);
+                    else if (attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);
                 }
                 break;
             case IDLE:
@@ -229,7 +230,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim)) return;
+                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, true)) return;
                 Position pos = getGs().getNearestCC(u.position, true);
                 if (Util.broodWarDistance(pos, u.position) >= 400) {
                     UtilMicro.move((MobileUnit) u.unit, pos);
@@ -316,7 +317,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (st.isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim)) return;
+                if (st.isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, false)) return;
                 Position pos = getGs().getNearestCC(u.position, true);
                 if (Util.broodWarDistance(pos, u.position) >= 400) UtilMicro.move(st, pos);
                 break;
@@ -352,7 +353,7 @@ public class Squad implements Comparable<Squad> {
             }
         } else if (status == Status.ADVANCE && attack != null) {
             UtilMicro.heal(u, attack);
-        //} else if (attack != null && center.getDistance(u.getPosition()) <= 150) {
+            //} else if (attack != null && center.getDistance(u.getPosition()) <= 150) {
             //UtilMicro.heal(u, attack);
         } else UtilMicro.heal(u, center);
     }

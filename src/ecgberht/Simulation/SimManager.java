@@ -37,8 +37,8 @@ public class SimManager {
     private BWAPI4JAgentFactory factory;
     private Evaluator evaluator;
     private int radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
-    private int shortSimFrames = 110;
-    private int longSimFrames = 300;
+    private int shortSimFrames = 200;
+    private int longSimFrames = 400;
     private int iterations = 10;
 
     public SimManager(BW bw) {
@@ -47,8 +47,8 @@ public class SimManager {
         evaluator = new Evaluator();
         factory = new BWAPI4JAgentFactory(bw.getBWMap());
         if (ConfigManager.getConfig().ecgConfig.sscait) {
-            shortSimFrames = 80;
-            longSimFrames = 200;
+            shortSimFrames = 150;
+            longSimFrames = 300;
             iterations = 0;
         }
         switch (bw.getInteractionHandler().enemy().getRace()) {
@@ -163,8 +163,8 @@ public class SimManager {
             //getGs().sqManager.createSquads(friendly);
             createSimInfos();
             //if (!noNeedForSim()) {
-            doSimJFAP();
-                //doSimASS();
+            //doSimJFAP();
+            doSimASS();
             //}
             getGs().sqManager.createSquads(friendly);
         }
@@ -190,7 +190,7 @@ public class SimManager {
     }
 
     private boolean closeClusters(Cluster c1, Cluster c2) {
-        return Util.broodWarDistance(c1.mode(), c2.mode()) <= radius + Math.max(c1.maxDistFromCenter, c2.maxDistFromCenter);
+        return Util.broodWarDistance(c1.mode(), c2.mode()) <= radius + Math.max(c1.maxDistFromCenter, c2.maxDistFromCenter) * 1.2;
     }
 
     /**
@@ -261,8 +261,9 @@ public class SimManager {
      */
     private void doSimASS() {
         int energy = getGs().CSs.stream().filter(s -> s.getOrder() != Order.CastScannerSweep).mapToInt(s -> s.getEnergy() / 50).sum();
+        Assmulator.reset();
         for (SimInfo s : simulations) {
-            Assmulator.reset();
+            Assmulator.resetUnits();
             if (s.enemies.isEmpty()) continue;
             for (UnitInfo u : s.allies) {
                 Agent jU = factory.of(u.unit);
@@ -307,7 +308,7 @@ public class SimManager {
             s.stateAfterASS = new MutablePair<>(Assmulator.getAgentsA(), Assmulator.getAgentsB());
             //Bad lose sim logic, testing
             if (s.stateAfterASS.first.isEmpty()) s.lose = true;
-            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.3);
+            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
             else if (getGs().strat.name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.5);
             else s.lose = !scoreCalcASS(s, 2);
         }
@@ -494,16 +495,15 @@ public class SimManager {
      *
      * @param u The unit to check
      * @param s The SimInfo the unit should belong
+     * @param melee If the UnitInfo u its a melee unit or not
      * @return True if the unit is not getting attacked and far from the fight
      */
-    public boolean farFromFight(UnitInfo u, SimInfo s) { // TODO test
+    public boolean farFromFight(UnitInfo u, SimInfo s, boolean melee) { // TODO test
         if (u == null || !u.unit.exists()) return true;
-        if (!s.allies.contains(u) || s.enemies.isEmpty()) return true;
-        WeaponType weapon = Util.getWeapon(u.unitType);
-        int range = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : (weapon.maxRange() > 32 ? weapon.maxRange() : UnitType.Terran_Marine.groundWeapon().maxRange());
-        Unit closest = Util.getClosestUnit(u.unit, s.enemies);
-        if (closest != null) {
-            return !u.unit.isUnderAttack() && u.unit.getDistance(closest) > range * 1.5;
+        if (s.enemies.isEmpty()) return true;
+        for(UnitInfo e : s.enemies){
+            boolean isThreat = Util.canAttack(e, u);
+            if (isThreat && u.getDistance(e) <= (!melee ? 32 : 96) + Util.getAttackRange(e, u)) return false;
         }
         return true;
     }

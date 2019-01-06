@@ -274,15 +274,15 @@ public class Util {
         return 3;
     }
 
-    public static Unit getClosestUnit(Unit unit, Set<UnitInfo> enemies) {
-        Unit chosen = null;
+    public static UnitInfo getClosestUnit(UnitInfo unit, Set<UnitInfo> enemies) {
+        UnitInfo chosen = null;
         double minDist = Double.MAX_VALUE;
         for (UnitInfo u : enemies) {
             if (!u.unit.exists()) continue;
-            double dist = unit.getDistance(u.unit);
+            double dist = unit.getDistance(u);
             if (chosen == null || dist < minDist) {
                 minDist = dist;
-                chosen = u.unit;
+                chosen = u;
             }
         }
         return chosen;
@@ -477,10 +477,10 @@ public class Util {
         int highPriority = 0;
         int closestDist = Integer.MAX_VALUE;
         for (UnitInfo target : tankTargets) {
-            if(!target.visible) continue;
+            if (!target.visible) continue;
             int distance = t.getDistance(target);
             int priority = getRangedAttackPriority(t, target);
-            if(isStaticDefense(t)) priority *= 1.2;
+            if (isStaticDefense(t)) priority *= 1.2;
             if (chosenTarget == null || (priority > highPriority) || (priority == highPriority && distance < closestDist)) {
                 closestDist = distance;
                 highPriority = priority;
@@ -657,7 +657,7 @@ public class Util {
     }
 
     // Credits to SH
-    private static int getAttackRange(UnitInfo attacker, UnitInfo target) {
+    public static int getAttackRange(UnitInfo attacker, UnitInfo target) {
         UnitType attackerType = attacker.unitType;
         if (attackerType == UnitType.Protoss_Reaver && !target.flying) return 8 * 32;
         if (attackerType == UnitType.Protoss_Carrier) return 8 * 32;

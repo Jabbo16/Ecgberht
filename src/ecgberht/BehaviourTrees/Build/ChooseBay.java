@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
@@ -19,7 +20,10 @@ public class ChooseBay extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.getArmySize() < gameState.strat.armyForBay) return State.FAILURE;
+            if (!IntelligenceAgency.enemyHasAirOrCloakedThreats()){
+                if (gameState.getArmySize() < gameState.strat.armyForBay) return State.FAILURE;
+                if (gameState.strat.name.contains("BioMech") && gameState.CCs.size() < 2) return State.FAILURE;
+            }
             if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < gameState.strat.numBays) {
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Engineering_Bay) return State.FAILURE;

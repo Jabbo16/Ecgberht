@@ -73,6 +73,7 @@ public class FullBioFE extends Strategy {
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Armor);
         upgradesToResearch.add(UpgradeType.U_238_Shells);
     }
+
     @Override
     public boolean requiredUnitsForAttack() {
         return Util.isResearched(TechType.Stim_Packs) && Util.countUnitTypeSelf(UnitType.Terran_Medic) >= 3;

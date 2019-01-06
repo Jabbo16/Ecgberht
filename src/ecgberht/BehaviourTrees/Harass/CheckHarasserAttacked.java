@@ -9,7 +9,6 @@ import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Attacker;
 import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Comparator;

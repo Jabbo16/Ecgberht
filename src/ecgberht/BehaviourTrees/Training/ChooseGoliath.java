@@ -22,7 +22,6 @@ public class ChooseGoliath extends Action {
             for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
                 if (!u.exists()) continue;
                 if (u.getType() == UnitType.Terran_Goliath) count++;
-                else continue;
                 if (count >= gameState.maxGoliaths) return State.FAILURE;
             }
             if (!gameState.Fs.isEmpty()) {

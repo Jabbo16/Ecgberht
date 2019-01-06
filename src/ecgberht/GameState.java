@@ -454,8 +454,8 @@ public class GameState {
     void addNewResources(Base base) {
         List<Mineral> minerals = base.getMinerals();
         List<Geyser> gas = base.getGeysers();
-        for (Mineral m : minerals) mineralsAssigned.put((MineralPatch) m.getUnit(), 0);
-        for (Geyser g : gas) vespeneGeysers.put((VespeneGeyser) g.getUnit(), false);
+        minerals.forEach(m -> mineralsAssigned.put((MineralPatch) m.getUnit(), 0));
+        gas.forEach(g -> vespeneGeysers.put((VespeneGeyser) g.getUnit(), false));
         if (strat.name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
         } else if (strat.name.equals("ProxyEightRax")) {
@@ -482,7 +482,7 @@ public class GameState {
         }
         for (Geyser g : gas) {
             VespeneGeyser geyser = (VespeneGeyser) g.getUnit();
-            if (vespeneGeysers.containsKey(geyser)) vespeneGeysers.remove(geyser);
+            vespeneGeysers.remove(geyser);
         }
         List<Unit> auxGas = new ArrayList<>();
         for (Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) {
@@ -513,7 +513,7 @@ public class GameState {
     }
 
     public int getSupply() {
-        return (self.supplyTotal() - self.supplyUsed());
+        return self.supplyTotal() - self.supplyUsed();
     }
 
     void initStartLocations() {
@@ -1020,8 +1020,7 @@ public class GameState {
     void runAgents() {
         List<Agent> rem = new ArrayList<>();
         for (Agent ag : agents.values()) {
-            boolean remove = ag.runAgent();
-            if (remove) rem.add(ag);
+            if (ag.runAgent()) rem.add(ag);
         }
         for (Agent ag : rem) {
             if (ag instanceof WraithAgent) {

@@ -25,7 +25,7 @@ public class ChooseTank extends Action {
                 }
                 int multiplier = 2;
                 String strat = gameState.strat.name;
-                if (strat.equals("JoyORush") && gameState.tanksTrained == 3) return State.FAILURE;
+                if (strat.equals("JoyORush") && gameState.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3) return State.FAILURE;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                     MutablePair<Integer, Integer> cash = gameState.getCash();

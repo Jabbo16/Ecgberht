@@ -38,7 +38,7 @@ public class UnitStorage {
         Iterator<Map.Entry<Unit, UnitInfo>> enemyIT = this.enemy.entrySet().iterator();
         while (enemyIT.hasNext()) {
             Map.Entry<Unit, UnitInfo> enemy = enemyIT.next();
-            if (enemy.getKey().exists() && enemy.getValue().unitType != UnitType.None && !(enemy.getKey() instanceof SiegeTank) && enemy.getKey().getType() != enemy.getValue().unitType) {
+            if ((!enemy.getKey().exists() && getGs().getGame().getBWMap().isVisible(enemy.getValue().lastTileposition)) || (enemy.getKey().exists() && enemy.getValue().unitType != UnitType.None && !(enemy.getKey() instanceof SiegeTank) && enemy.getKey().getType() != enemy.getValue().unitType)) {
                 enemyIT.remove();
                 continue;
             }

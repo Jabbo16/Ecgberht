@@ -27,6 +27,7 @@ public class IntelligenceAgency {
     private static String startStrat = null;
     private static boolean exploredMinerals = false;
     private static Map<UnitType, Integer> mainEnemyUnitTypeAmount;
+    private static boolean cloakedThreats = false;
 
     private static int getNumEnemyWorkers() {
         return enemyWorkers.size();
@@ -85,8 +86,8 @@ public class IntelligenceAgency {
         }
     }
 
-    private static boolean enemyHasType(UnitType type) {
-        return enemyTypes.get(mainEnemy).contains(type);
+    public static boolean enemyHasType(UnitType type) {
+        return enemyTypes.values().stream().anyMatch(list -> list.contains(type));
     }
 
     public static boolean playerHasType(Player player, UnitType type) {
@@ -95,10 +96,15 @@ public class IntelligenceAgency {
     }
 
     public static boolean enemyHasType(UnitType... types) {
-        for (UnitType type : types) {
-            if (enemyTypes.values().contains(type)) return true;
-        }
-        return false;
+        return enemyTypes.values().stream().anyMatch(list -> Arrays.stream(types).anyMatch(list::contains));
+    }
+
+    public static boolean mainEnemyHasType(UnitType type) {
+        return enemyTypes.get(mainEnemy).contains(type);
+    }
+
+    public static boolean mainEnemyHasType(UnitType... types) {
+        return Arrays.stream(types).anyMatch(enemyTypes.get(mainEnemy)::contains);
     }
 
     public static void printEnemyTypes() {
@@ -208,7 +214,7 @@ public class IntelligenceAgency {
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
-                getGs().strat.armyForExpand += 5;
+                getGs().strat.armyForExpand += 10;
                 return true;
             }
         }
@@ -359,10 +365,8 @@ public class IntelligenceAgency {
             switch (getGs().enemyRace) {
                 case Zerg:
                     // Mutas
-                    Integer spireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Spire);
-                    Integer greaterSpireAmount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Greater_Spire);
-                    if ((spireAmount != null && spireAmount > 0) || (greaterSpireAmount != null && greaterSpireAmount > 0))
-                        goliaths += 3;
+                    boolean spire = mainEnemyHasType(UnitType.Zerg_Spire, UnitType.Zerg_Greater_Spire);
+                    if (spire) goliaths += 3;
                     amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
                     goliaths += (amount != null ? (Math.round(amount / 2.0)) : 0);
                     break;
@@ -465,6 +469,23 @@ public class IntelligenceAgency {
                 break;
         }
         return timeCheck && raceCheck;
+    }
+
+    public static boolean enemyHasAirOrCloakedThreats() {
+        if (cloakedThreats) return true;
+        switch (getGs().enemyRace) {
+            case Zerg:
+                cloakedThreats = mainEnemyHasType(UnitType.Zerg_Lurker) || mainEnemyHasType(UnitType.Zerg_Mutalisk);
+                break;
+            case Terran:
+                cloakedThreats = mainEnemyHasType(UnitType.Terran_Wraith);
+                break;
+            case Protoss:
+                cloakedThreats = mainEnemyHasType(UnitType.Protoss_Dark_Templar) || mainEnemyHasType(UnitType.Protoss_Carrier);
+                break;
+        }
+        if(cloakedThreats && getGs().strat.numBays == 0) getGs().strat.numBays++;
+        return cloakedThreats;
     }
 
     public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, NinePool, FastHatch, BioPush, MechRush}
