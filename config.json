@@ -8,7 +8,7 @@
     "ecgConfig": {
         "debugConsole": true,
         "debugScreen": true,
-        "debugText": true,
+        "debugText": false,
         "enableLatCom": true,
         "sounds": false,
         "sscait": false,
