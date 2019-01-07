@@ -24,7 +24,7 @@ public class ChooseAcademy extends Action {
             if (Util.countBuildingAll(UnitType.Terran_Refinery) == 0 || Util.countBuildingAll(UnitType.Terran_Academy) > 0) {
                 return State.FAILURE;
             }
-            Strategy strat = gameState.strat;
+            Strategy strat = gameState.getStrat();
             if (strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE")) {
                 if (gameState.Fs.size() >= strat.facPerCC
                         || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dark_Templar)
@@ -33,7 +33,7 @@ public class ChooseAcademy extends Action {
                     return State.SUCCESS;
                 } else return State.FAILURE;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Barracks) >= gameState.strat.numRaxForAca) {
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) >= gameState.getStrat().numRaxForAca) {
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Academy) return State.FAILURE;
                 }

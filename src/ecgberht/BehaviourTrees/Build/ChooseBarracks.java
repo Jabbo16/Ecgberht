@@ -22,15 +22,15 @@ public class ChooseBarracks extends Action {
     @Override
     public State execute() {
         try {
-            if ((gameState.strat.name.equals("BioGreedyFE") ||
-                    gameState.strat.name.equals("MechGreedyFE") ||
-                    gameState.strat.name.equals("BioMechGreedyFE")) &&
+            String strat = gameState.getStrat().name;
+            if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&
                     Util.countBuildingAll(UnitType.Terran_Command_Center) == 1 &&
                     Util.countBuildingAll(UnitType.Terran_Barracks) > 1 &&
                     gameState.frameCount <= 24 * 240) {
                 return State.FAILURE;
             }
-            if (!gameState.strat.techToResearch.contains(TechType.Stim_Packs) && gameState.strat.raxPerCC == 1
+            if (strat.equals("14CC") && Util.countBuildingAll(UnitType.Terran_Command_Center) < 2) return State.FAILURE;
+            if (!gameState.getStrat().techToResearch.contains(TechType.Stim_Packs) && gameState.getStrat().raxPerCC == 1
                     && gameState.MBs.size() > 0) {
                 return State.FAILURE;
             }
@@ -39,15 +39,15 @@ public class ChooseBarracks extends Action {
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
                 return State.FAILURE;
             }
-            if (!gameState.strat.name.equals("ProxyBBS") && !gameState.strat.name.equals("ProxyEightRax")) {
-                if (!gameState.MBs.isEmpty() && Util.countBuildingAll(UnitType.Terran_Barracks) == gameState.strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Academy) == 0) {
+            if (!strat.equals("ProxyBBS") && !strat.equals("ProxyEightRax")) {
+                if (!gameState.MBs.isEmpty() && Util.countBuildingAll(UnitType.Terran_Barracks) == gameState.getStrat().numRaxForAca && Util.countBuildingAll(UnitType.Terran_Academy) == 0) {
                     return State.FAILURE;
                 }
-                if (Util.countBuildingAll(UnitType.Terran_Barracks) == gameState.strat.numRaxForAca && Util.countBuildingAll(UnitType.Terran_Refinery) == 0) {
+                if (Util.countBuildingAll(UnitType.Terran_Barracks) == gameState.getStrat().numRaxForAca && Util.countBuildingAll(UnitType.Terran_Refinery) == 0) {
                     return State.FAILURE;
                 }
             } else if (gameState.getPlayer().supplyUsed() < 16) return State.FAILURE;
-            if (gameState.strat.buildUnits.contains(UnitType.Terran_Factory)) {
+            if (gameState.getStrat().buildUnits.contains(UnitType.Terran_Factory)) {
                 int count = 0;
                 boolean found = false;
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
@@ -59,7 +59,7 @@ public class ChooseBarracks extends Action {
                     if (w instanceof Factory) found = true;
                 }
                 if (!gameState.Fs.isEmpty()) found = true;
-                if (count + gameState.MBs.size() > gameState.strat.numRaxForFac && !found) return State.FAILURE;
+                if (count + gameState.MBs.size() > gameState.getStrat().numRaxForFac && !found) return State.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Academy) == 0 && Util.countBuildingAll(UnitType.Terran_Barracks) >= 2) {
                 return State.FAILURE;
@@ -69,7 +69,7 @@ public class ChooseBarracks extends Action {
                 gameState.chosenToBuild = UnitType.Terran_Barracks;
                 return State.SUCCESS;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Barracks) < gameState.strat.raxPerCC * Util.getNumberCCs()) {
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) < gameState.getStrat().raxPerCC * Util.getNumberCCs()) {
                 gameState.chosenToBuild = UnitType.Terran_Barracks;
                 return State.SUCCESS;
             }

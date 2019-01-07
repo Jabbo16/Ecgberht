@@ -19,7 +19,7 @@ public class Repair extends Action {
     public State execute() {
         try {
             boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && gameState.frameCount >= 24 * 60 * 2.2;
-            boolean fastExpanding = gameState.strat.name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && gameState.CCs.size() < 2 && gameState.firstExpand;
+            boolean fastExpanding = gameState.getStrat().name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && gameState.CCs.size() < 2 && gameState.firstExpand;
             if (cheesed || fastExpanding) {
                 if (gameState.chosenRepairer.move(gameState.chosenUnitRepair.getPosition())) {
                     if (gameState.workerIdle.contains(gameState.chosenRepairer)) {

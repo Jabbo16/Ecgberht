@@ -83,7 +83,7 @@ public class SimManager {
                 }
                 break;
             case Terran:
-                if (getGs().strat != null && getGs().strat.proxy && radius == UnitType.Terran_Missile_Turret.airWeapon().maxRange()) {
+                if (getGs().getStrat() != null && getGs().getStrat().proxy && radius == UnitType.Terran_Missile_Turret.airWeapon().maxRange()) {
                     radius -= 32;
                 }
                 if (IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode)) {
@@ -126,7 +126,7 @@ public class SimManager {
         // Enemy Clusters
         List<UnitInfo> enemyUnits = new ArrayList<>();
         for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
-            if (getGs().strat.proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
+            if (getGs().getStrat().proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
             if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
                     || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
@@ -139,7 +139,7 @@ public class SimManager {
     private boolean isArmyUnit(Unit u) {
         try {
             if (u == null || !u.exists()) return false;
-            if (u instanceof SCV && (getGs().strat.name.equals("ProxyBBS") || getGs().strat.name.equals("ProxyEightRax")))
+            if (u instanceof SCV && (getGs().getStrat().name.equals("ProxyBBS") || getGs().getStrat().name.equals("ProxyEightRax")))
                 return true;
             if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
             return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
@@ -308,8 +308,8 @@ public class SimManager {
             s.stateAfterASS = new MutablePair<>(Assmulator.getAgentsA(), Assmulator.getAgentsB());
             //Bad lose sim logic, testing
             if (s.stateAfterASS.first.isEmpty()) s.lose = true;
-            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
-            else if (getGs().strat.name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.5);
+            else if (getGs().getStrat().name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
+            else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.5);
             else s.lose = !scoreCalcASS(s, 2);
         }
     }
@@ -361,8 +361,8 @@ public class SimManager {
             s.stateAfterJFAP = simulator.getState();
             //Bad lose sim logic, testing
             if (s.stateAfterJFAP.first.isEmpty()) s.lose = true;
-            else if (getGs().strat.name.equals("ProxyBBS")) s.lose = !scoreCalcJFAP(s, 1.2);
-            else if (getGs().strat.name.equals("ProxyEightRax")) s.lose = !scoreCalcJFAP(s, 1.35);
+            else if (getGs().getStrat().name.equals("ProxyBBS")) s.lose = !scoreCalcJFAP(s, 1.2);
+            else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalcJFAP(s, 1.35);
             else s.lose = !scoreCalcJFAP(s, 2);
         }
     }
@@ -493,15 +493,15 @@ public class SimManager {
     /**
      * Returns true if the unit is far from the fight and not getting attacked
      *
-     * @param u The unit to check
-     * @param s The SimInfo the unit should belong
+     * @param u     The unit to check
+     * @param s     The SimInfo the unit should belong
      * @param melee If the UnitInfo u its a melee unit or not
      * @return True if the unit is not getting attacked and far from the fight
      */
     public boolean farFromFight(UnitInfo u, SimInfo s, boolean melee) { // TODO test
         if (u == null || !u.unit.exists()) return true;
         if (s.enemies.isEmpty()) return true;
-        for(UnitInfo e : s.enemies){
+        for (UnitInfo e : s.enemies) {
             boolean isThreat = Util.canAttack(e, u);
             if (isThreat && u.getDistance(e) <= (!melee ? 32 : 96) + Util.getAttackRange(e, u)) return false;
         }

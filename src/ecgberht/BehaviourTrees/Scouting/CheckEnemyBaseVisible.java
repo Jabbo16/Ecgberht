@@ -28,7 +28,7 @@ public class CheckEnemyBaseVisible extends Action {
                     if (Util.broodWarDistance(gameState.chosenScout.getPosition(), u.lastPosition) <= 500) {
                         gameState.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
                         gameState.scoutSLs = new HashSet<>();
-                        if (!gameState.strat.name.equals("PlasmaWraithHell")) {
+                        if (!gameState.getStrat().name.equals("PlasmaWraithHell")) {
                             gameState.chosenHarasser = (Worker) gameState.chosenScout;
                         }
                         gameState.chosenScout = null;

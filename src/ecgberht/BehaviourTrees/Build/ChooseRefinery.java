@@ -24,15 +24,15 @@ public class ChooseRefinery extends Action {
     @Override
     public State execute() {
         try {
-            String strat = gameState.strat.name;
-            if (gameState.getPlayer().supplyUsed() < gameState.strat.supplyForFirstRefinery || gameState.getCash().second >= 300) {
+            String strat = gameState.getStrat().name;
+            if (gameState.getPlayer().supplyUsed() < gameState.getStrat().supplyForFirstRefinery || gameState.getCash().second >= 300) {
                 return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("FullBio") || strat.equals("FullBioFE"))
                     && gameState.getCash().second >= 150) {
                 return State.FAILURE;
             }
-            if (gameState.strat.techToResearch.contains(TechType.Tank_Siege_Mode) && gameState.getCash().second >= 250) {
+            if (gameState.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode) && gameState.getCash().second >= 250) {
                 return State.FAILURE;
             }
             if (gameState.refineriesAssigned.size() == 1) {

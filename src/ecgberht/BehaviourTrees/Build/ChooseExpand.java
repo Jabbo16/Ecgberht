@@ -21,7 +21,7 @@ public class ChooseExpand extends Action {
     @Override
     public State execute() {
         try {
-            String strat = gameState.strat.name;
+            String strat = gameState.getStrat().name;
             if (strat.equals("JoyORush")) return State.FAILURE;
             if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || (strat.equals("TheNitekat") && gameState.getCash().first <= 550))
                 return State.FAILURE;
@@ -36,7 +36,7 @@ public class ChooseExpand extends Action {
             if (strat.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
                 return State.FAILURE;
             }
-            if (gameState.iReallyWantToExpand || gameState.getCash().first >= 550) {
+            if (gameState.iReallyWantToExpand || gameState.getCash().first >= 550 || (strat.equals("14CC") && gameState.supplyMan.getSupplyUsed() == 28)) {
                 gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }
@@ -48,7 +48,7 @@ public class ChooseExpand extends Action {
             int workers = gameState.workerIdle.size();
             for (Integer wt : gameState.mineralsAssigned.values()) workers += wt;
             if (gameState.mineralsAssigned.size() * 2 <= workers - 1 &&
-                    gameState.getArmySize() >= gameState.strat.armyForExpand) {
+                    gameState.getArmySize() >= gameState.getStrat().armyForExpand) {
                 gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }

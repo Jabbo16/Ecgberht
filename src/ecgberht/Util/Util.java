@@ -644,7 +644,10 @@ public class Util {
         }
         if (targetType == UnitType.Protoss_Templar_Archives) return 7;
         if (targetType == UnitType.Zerg_Spawning_Pool) return 7;
-        if (targetType.isResourceDepot()) return 6;
+        if (targetType.isResourceDepot()) {
+            if (getGs().getStrat().proxy) return 3;
+            else return 6;
+        }
         if (targetType == UnitType.Protoss_Pylon) return 5;
         if (targetType == UnitType.Terran_Factory || targetType == UnitType.Terran_Armory) return 5;
         if (targetType.isBuilding() && (!target.completed || !target.unit.isPowered()) && !(targetType.isResourceDepot()

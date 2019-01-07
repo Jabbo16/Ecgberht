@@ -17,7 +17,7 @@ public class ChoosePort extends Action {
     @Override
     public State execute() {
         try {
-            String strat = gameState.strat.name;
+            String strat = gameState.getStrat().name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
                 if (Util.getNumberCCs() < 2) return State.FAILURE;
                 Player self = gameState.getPlayer();
@@ -26,14 +26,14 @@ public class ChoosePort extends Action {
                     return State.FAILURE;
                 }
             }
-            if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.strat.numCCForPort > Util.getNumberCCs() ||
-                    (Util.countBuildingAll(UnitType.Terran_Starport) > 0 && gameState.strat.portPerCC == 0)) {
+            if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.getStrat().numCCForPort > Util.getNumberCCs() ||
+                    (Util.countBuildingAll(UnitType.Terran_Starport) > 0 && gameState.getStrat().portPerCC == 0)) {
                 return State.FAILURE;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Starport) == 0 && gameState.strat.portPerCC == 0) {
+            if (Util.countBuildingAll(UnitType.Terran_Starport) == 0 && gameState.getStrat().portPerCC == 0) {
                 gameState.chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
-            } else if (Util.countBuildingAll(UnitType.Terran_Starport) < gameState.strat.portPerCC * Util.getNumberCCs()) {
+            } else if (Util.countBuildingAll(UnitType.Terran_Starport) < gameState.getStrat().portPerCC * Util.getNumberCCs()) {
                 gameState.chosenToBuild = UnitType.Terran_Starport;
                 return State.SUCCESS;
             }

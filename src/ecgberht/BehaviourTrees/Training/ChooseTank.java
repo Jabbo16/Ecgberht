@@ -19,13 +19,14 @@ public class ChooseTank extends Action {
     public State execute() {
         try {
             if (!gameState.Fs.isEmpty()) {
-                if (gameState.strat.trainUnits.contains(UnitType.Terran_Wraith) &&
+                if (gameState.getStrat().trainUnits.contains(UnitType.Terran_Wraith) &&
                         gameState.maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 <= 1) {
                     return State.FAILURE;
                 }
                 int multiplier = 2;
-                String strat = gameState.strat.name;
-                if (strat.equals("JoyORush") && gameState.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3) return State.FAILURE;
+                String strat = gameState.getStrat().name;
+                if (strat.equals("JoyORush") && gameState.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3)
+                    return State.FAILURE;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                     MutablePair<Integer, Integer> cash = gameState.getCash();

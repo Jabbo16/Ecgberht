@@ -17,7 +17,7 @@ public class ChooseCharonBoosters extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.UBs.isEmpty() || !gameState.strat.trainUnits.contains(UnitType.Terran_Goliath) || gameState.maxGoliaths == 0) {
+            if (gameState.UBs.isEmpty() || !gameState.getStrat().trainUnits.contains(UnitType.Terran_Goliath) || gameState.maxGoliaths == 0) {
                 return State.FAILURE;
             }
             for (ResearchingFacility u : gameState.UBs) {

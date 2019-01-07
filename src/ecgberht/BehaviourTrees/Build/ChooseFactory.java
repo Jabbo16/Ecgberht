@@ -18,7 +18,7 @@ public class ChooseFactory extends Action {
     @Override
     public State execute() {
         try {
-            String strat = gameState.strat.name;
+            String strat = gameState.getStrat().name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) {
                 Player self = gameState.getPlayer();
                 if (Util.countBuildingAll(UnitType.Terran_Factory) > 1 &&
@@ -26,14 +26,14 @@ public class ChooseFactory extends Action {
                     return State.FAILURE;
                 }
             }
-            if (gameState.MBs.isEmpty() || gameState.strat.numRaxForFac > Util.countBuildingAll(UnitType.Terran_Barracks) ||
-                    (Util.countBuildingAll(UnitType.Terran_Factory) > 0 && gameState.strat.facPerCC == 0)) {
+            if (gameState.MBs.isEmpty() || gameState.getStrat().numRaxForFac > Util.countBuildingAll(UnitType.Terran_Barracks) ||
+                    (Util.countBuildingAll(UnitType.Terran_Factory) > 0 && gameState.getStrat().facPerCC == 0)) {
                 return State.FAILURE;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Factory) == 0 && gameState.strat.facPerCC == 0) {
+            if (Util.countBuildingAll(UnitType.Terran_Factory) == 0 && gameState.getStrat().facPerCC == 0) {
                 gameState.chosenToBuild = UnitType.Terran_Factory;
                 return State.SUCCESS;
-            } else if (Util.countBuildingAll(UnitType.Terran_Factory) < gameState.strat.facPerCC * Util.getNumberCCs()) {
+            } else if (Util.countBuildingAll(UnitType.Terran_Factory) < gameState.getStrat().facPerCC * Util.getNumberCCs()) {
                 if (strat.equals("TwoPortWraith") && gameState.naughtySCV != null && gameState.Fs.isEmpty() && gameState.proxyBuilding == null) {
                     WorkerScoutAgent w = (WorkerScoutAgent) gameState.agents.get(gameState.naughtySCV);
                     if (w != null && w.statusToString().equals("Proxying")) {

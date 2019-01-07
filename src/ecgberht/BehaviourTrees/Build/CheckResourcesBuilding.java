@@ -29,7 +29,7 @@ public class CheckResourcesBuilding extends Conditional {
             TilePosition start = chosen.getTilePosition();
             TilePosition end = gameState.chosenPosition;
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), gameState.chosenToBuild);
-            if (gameState.strat.name.equals("ProxyBBS") && gameState.chosenToBuild == UnitType.Terran_Barracks) {
+            if (gameState.getStrat().name.equals("ProxyBBS") && gameState.chosenToBuild == UnitType.Terran_Barracks) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                     if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() * 2 + 40 + gameState.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice() * 2) + gameState.deltaCash.second) {
                         return State.SUCCESS;

@@ -20,7 +20,7 @@ public class TrainUnit extends Action {
         try {
             if (gameState.chosenUnit == UnitType.None) return State.FAILURE;
             TrainingFacility chosen = gameState.chosenBuilding;
-            if (gameState.strat.name.equals("ProxyBBS")) {
+            if (gameState.getStrat().name.equals("ProxyBBS")) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2 &&
                         Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
                     gameState.chosenBuilding = null;
@@ -32,7 +32,7 @@ public class TrainUnit extends Action {
                     return State.SUCCESS;
                 }
             }
-            if (gameState.strat.name.equals("ProxyEightRax")) {
+            if (gameState.getStrat().name.equals("ProxyEightRax")) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == 0 &&
                         gameState.supplyMan.getSupplyUsed() >= 16) {
                     gameState.chosenBuilding = null;

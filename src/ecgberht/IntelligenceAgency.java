@@ -170,7 +170,7 @@ public class IntelligenceAgency {
     }
 
     /**
-     * Detects if the enemy its doing a 4 or 5 Pool strat
+     * Detects if the enemy its doing a 4 or 5 Pool getStrat()
      */
     private static boolean detectEarlyPool() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && !getGs().learningManager.isNaughty() && exploredMinerals) {
@@ -181,8 +181,8 @@ public class IntelligenceAgency {
                 getGs().learningManager.setNaughty(true);
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    getGs().strat = new FullBio();
+                if (getGs().getStrat().name.equals("BioGreedyFE") || getGs().getStrat().name.equals("MechGreedyFE")) {
+                    getGs().setStrat(new FullBio());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
@@ -193,7 +193,7 @@ public class IntelligenceAgency {
     }
 
     /**
-     * Detects if the enemy its doing a "Zealot Rush" strat
+     * Detects if the enemy its doing a "Zealot Rush" getStrat()
      */
     private static boolean detectZealotRush() {
         if (getGs().frameCount < 24 * 150 && getGs().enemyStartBase != null && exploredMinerals) {
@@ -204,17 +204,17 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE") || getGs().strat.name.equals("FullMech")) {
-                    getGs().strat = new FullBio();
+                if (getGs().getStrat().name.contains("GreedyFE") || getGs().getStrat().name.equals("FullMech")) {
+                    getGs().setStrat(new FullBio());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
 
-                } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
-                    getGs().strat = new FullBioFE();
+                } else if (getGs().getStrat().name.equals("BioMech") || getGs().getStrat().name.equals("BioMechFE")) {
+                    getGs().setStrat(new FullBioFE());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
-                getGs().strat.armyForExpand += 10;
+                getGs().getStrat().armyForExpand += 10;
                 return true;
             }
         }
@@ -222,7 +222,7 @@ public class IntelligenceAgency {
     }
 
     /**
-     * Detects if the enemy its doing a "Mech Rush" strat
+     * Detects if the enemy its doing a "Mech Rush" getStrat()
      */
     private static boolean detectMechRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null && exploredMinerals) {
@@ -236,13 +236,13 @@ public class IntelligenceAgency {
             }
             if (countFactories >= 1 && foundGas && countRax == 1) {
                 enemyStrat = EnemyStrats.MechRush;
-                getGs().ih.sendText("Nice Mech strat you got there");
+                getGs().ih.sendText("Nice Mech getStrat() you got there");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name.equals("BioGreedyFE")) {
-                    getGs().strat = new MechGreedyFE();
+                if (getGs().getStrat().name.equals("BioGreedyFE")) {
+                    getGs().setStrat(new MechGreedyFE());
                     Ecgberht.transition();
-                } else if (getGs().strat.name.equals("FullBio") || getGs().strat.name.equals("FullBioFE")) {
-                    getGs().strat = new FullMech();
+                } else if (getGs().getStrat().name.equals("FullBio") || getGs().getStrat().name.equals("FullBioFE")) {
+                    getGs().setStrat(new FullMech());
                     Ecgberht.transition();
                 }
                 return true;
@@ -295,7 +295,7 @@ public class IntelligenceAgency {
             if (getNumEnemyBases(mainEnemy) == 2 && drones >= 10 && drones <= 12) {
                 enemyStrat = EnemyStrats.FastHatch;
                 getGs().ih.sendText("Nice 12 Hatch");
-                if (!getGs().strat.name.contains("GreedyFE") && !getGs().strat.proxy && !getGs().strat.trainUnits.contains(UnitType.Terran_Wraith)) {
+                if (!getGs().getStrat().name.contains("GreedyFE") && !getGs().getStrat().proxy && !getGs().getStrat().trainUnits.contains(UnitType.Terran_Wraith)) {
                     getGs().iReallyWantToExpand = true;
                     getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -313,9 +313,9 @@ public class IntelligenceAgency {
             if (foundPool && getNumEnemyBases(mainEnemy) < 2 && drones >= 7 && drones <= 9) {
                 enemyStrat = EnemyStrats.NinePool;
                 getGs().ih.sendText("Nice 9 pool");
-                getGs().strat.bunker = true;
-                /*if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    getGs().strat = new FullBio();
+                getGs().getStrat().bunker = true;
+                /*if (getGs().getStrat().name.equals("BioGreedyFE") || getGs().getStrat().name.equals("MechGreedyFE")) {
+                    getGs().getStrat() = new FullBio();
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }*/
@@ -331,18 +331,18 @@ public class IntelligenceAgency {
             if (getNumEnemyBases(mainEnemy) > 1 && probes <= 16) {
                 enemyStrat = EnemyStrats.ProtossFE;
                 getGs().ih.sendText("Nice FE");
-                String strat = getGs().strat.name;
+                String strat = getGs().getStrat().name;
                 if (strat.equals("FullBio") || strat.equals("FullBioFE")) {
-                    getGs().strat = new BioGreedyFE();
+                    getGs().setStrat(new BioGreedyFE());
                 }
                 if (strat.equals("BioMech") || strat.equals("BioMechFE")) {
-                    getGs().strat = new BioMechGreedyFE();
+                    getGs().setStrat(new BioMechGreedyFE());
                 }
                 if (strat.equals("FullMech")) {
-                    getGs().strat = new MechGreedyFE();
+                    getGs().setStrat(new MechGreedyFE());
                 }
                 if (strat.contains("GreedyFE")) {
-                    getGs().strat.armyForAttack += 10;
+                    getGs().getStrat().armyForAttack += 10;
                 }
                 getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
                 Ecgberht.transition();
@@ -359,7 +359,7 @@ public class IntelligenceAgency {
     }
 
     private static void updateMaxAmountTypes() {
-        if (getGs().strat.trainUnits.contains(UnitType.Terran_Goliath)) {
+        if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) {
             int goliaths = 0;
             Integer amount;
             switch (getGs().enemyRace) {
@@ -396,7 +396,7 @@ public class IntelligenceAgency {
     }
 
     /**
-     * Detects if the enemy its doing a "Cannon Rush" strat
+     * Detects if the enemy its doing a "Cannon Rush" getStrat()
      */
     private static boolean detectCannonRush() {
         if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
@@ -423,12 +423,12 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.CannonRush;
                 getGs().ih.sendText("Cannon rusher T_T");
                 getGs().playSound("rushed.mp3");
-                if (getGs().strat.name.equals("BioGreedyFE") || getGs().strat.name.equals("MechGreedyFE")) {
-                    getGs().strat = new FullMech();
+                if (getGs().getStrat().name.equals("BioGreedyFE") || getGs().getStrat().name.equals("MechGreedyFE")) {
+                    getGs().setStrat(new FullMech());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
-                } else if (getGs().strat.name.equals("BioMech") || getGs().strat.name.equals("BioMechFE")) {
-                    getGs().strat = new FullMech();
+                } else if (getGs().getStrat().name.equals("BioMech") || getGs().getStrat().name.equals("BioMechFE")) {
+                    getGs().setStrat(new FullMech());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
@@ -484,7 +484,7 @@ public class IntelligenceAgency {
                 cloakedThreats = mainEnemyHasType(UnitType.Protoss_Dark_Templar) || mainEnemyHasType(UnitType.Protoss_Carrier);
                 break;
         }
-        if(cloakedThreats && getGs().strat.numBays == 0) getGs().strat.numBays++;
+        if (cloakedThreats && getGs().getStrat().numBays == 0) getGs().getStrat().numBays++;
         return cloakedThreats;
     }
 

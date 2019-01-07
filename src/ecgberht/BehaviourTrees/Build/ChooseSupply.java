@@ -21,10 +21,10 @@ public class ChooseSupply extends Action {
     public State execute() {
         try {
             if (gameState.getPlayer().supplyTotal() >= 400) return State.FAILURE;
-            if (gameState.strat.name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
+            if (gameState.getStrat().name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
                 return State.FAILURE;
             }
-            if (gameState.strat.name.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
+            if (gameState.getStrat().name.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
             if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg

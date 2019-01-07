@@ -13,7 +13,6 @@ import ecgberht.Agents.DropShipAgent;
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.WraithAgent;
 import ecgberht.Simulation.SimManager;
-import ecgberht.Strategies.*;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -25,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -112,7 +110,6 @@ public class GameState {
     public SimManager sim;
     public SquadManager sqManager = new SquadManager();
     public SpellsManager wizard = new SpellsManager();
-    public Strategy strat = null;
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
     public TilePosition checkScan = null;
@@ -142,6 +139,7 @@ public class GameState {
     InteractionHandler ih;
     public BWEM bwem;
     protected Player self;
+    public StrategyManager scipio;
     public UnitStorage unitStorage = new UnitStorage();
     Set<String> shipNames = new TreeSet<>(Arrays.asList("Adriatic", "Aegis Fate", "Agincourt", "Allegiance",
             "Apocalypso", "Athens", "Beatrice", "Bloodied Spirit", "Callisto", "Clarity of Faith", "Dawn Under Heaven",
@@ -176,177 +174,6 @@ public class GameState {
                 IntelligenceAgency.enemyTypes.put(p, new HashSet<>());
             }
         }
-    }
-
-    Strategy initStrat() {
-        try {
-            FullBio b = new FullBio();
-            ProxyBBS bbs = new ProxyBBS();
-            BioMech bM = new BioMech();
-            FullBioFE bFE = new FullBioFE();
-            BioMechFE bMFE = new BioMechFE();
-            FullMech FM = new FullMech();
-            BioGreedyFE bGFE = new BioGreedyFE();
-            MechGreedyFE mGFE = new MechGreedyFE();
-            BioMechGreedyFE bMGFE = new BioMechGreedyFE();
-            TwoPortWraith tPW = new TwoPortWraith();
-            ProxyEightRax pER = new ProxyEightRax();
-            VultureRush vR = new VultureRush();
-            TheNitekat tNK = new TheNitekat();
-            JoyORush jOR = new JoyORush();
-            String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
-            LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-            if (enemyRace == Race.Zerg && EI.naughty) return b;
-            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
-                maxWraiths = 200; // HELL
-                return new PlasmaWraithHell();
-            }
-            if (alwaysZealotRushes()) {
-                IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
-                bFE.armyForExpand += 5;
-                bFE.workerGas = 2;
-                return bFE;
-            }
-            Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
-            Map<String, Strategy> nameStrat = new LinkedHashMap<>();
-
-            Consumer<Strategy> addStrat = (Strategy strat) -> {
-                strategies.put(strat.name, new MutablePair<>(0, 0));
-                nameStrat.put(strat.name, strat);
-            };
-
-            switch (enemyRace) {
-                case Zerg:
-                    addStrat.accept(bFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(pER);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(bM);
-                    addStrat.accept(bbs);
-                    addStrat.accept(FM);
-                    addStrat.accept(b);
-                    addStrat.accept(bMFE);
-                    break;
-
-                case Terran:
-                    addStrat.accept(FM);
-                    addStrat.accept(bM);
-                    addStrat.accept(pER);
-                    addStrat.accept(mGFE);
-                    addStrat.accept(bbs);
-                    addStrat.accept(bFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(b);
-                    addStrat.accept(bMFE);
-                    break;
-
-                case Protoss:
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(jOR);
-                    addStrat.accept(FM);
-                    addStrat.accept(bM);
-                    addStrat.accept(pER);
-                    addStrat.accept(mGFE);
-                    addStrat.accept(b);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(bMFE);
-                    addStrat.accept(bFE);
-                    break;
-
-                case Unknown:
-                    addStrat.accept(b);
-                    addStrat.accept(bM);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(FM);
-                    addStrat.accept(bbs);
-                    addStrat.accept(mGFE);
-                    addStrat.accept(jOR);
-                    addStrat.accept(bMFE);
-                    addStrat.accept(bFE);
-                    break;
-            }
-            if (!forcedStrat.equals("")) {
-                if (forcedStrat.equals("Random")) {
-                    int index = new Random().nextInt(nameStrat.entrySet().size());
-                    Iterator<Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
-                    for (int i = 0; i < index; i++) {
-                        iter.next();
-                    }
-                    Entry<String, Strategy> pickedStrategy = iter.next();
-                    ih.sendText("Picked random strategy " + pickedStrategy.getKey());
-                    return pickedStrategy.getValue();
-                } else if (nameStrat.containsKey(forcedStrat)) {
-                    ih.sendText("Picked forced strategy " + forcedStrat);
-                    return nameStrat.get(forcedStrat);
-                }
-            }
-
-            int totalGamesPlayed = EI.wins + EI.losses;
-            if (totalGamesPlayed < 1) {
-                Strategy strat = b;
-                switch (enemyRace) {
-                    case Zerg:
-                        strat = bGFE;
-                        break;
-                    case Terran:
-                        strat = FM;
-                        break;
-                    case Protoss:
-                        strat = bMFE;
-                        break;
-                }
-                ih.sendText("I dont know you that well yet, lets pick the standard strategy, " + strat.name);
-                return strat;
-            }
-            for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
-                if (strategies.containsKey(r.strategyName)) {
-                    strategies.get(r.strategyName).first += r.wins;
-                    strategies.get(r.strategyName).second += r.losses;
-                }
-            }
-            double maxWinRate = 0.0;
-            String bestStrat = null;
-            int totalGamesBestS = 0;
-            for (Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
-                int totalGames = s.getValue().first + s.getValue().second;
-                if (totalGames < 2) continue;
-                double winRate = (double) s.getValue().first / totalGames;
-                if (winRate >= 0.75 && winRate > maxWinRate) {
-                    maxWinRate = winRate;
-                    bestStrat = s.getKey();
-                    totalGamesBestS = totalGames;
-                }
-            }
-            if (maxWinRate != 0.0 && bestStrat != null) {
-                ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "% and " + totalGamesBestS + " games played");
-                return nameStrat.get(bestStrat);
-            }
-            double C = 0.7;
-            String bestUCBStrategy = null;
-            double bestUCBStrategyVal = Double.MIN_VALUE;
-            for (Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
-                int sGamesPlayed = strat.getValue().first + strat.getValue().second;
-                double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
-                if (nameStrat.get(strat.getKey()).proxy && mapSize == 2) ucbVal += 0.03;
-                double val = sWinRate + ucbVal;
-                if (val > bestUCBStrategyVal) {
-                    bestUCBStrategy = strat.getKey();
-                    bestUCBStrategyVal = val;
-                }
-            }
-            ih.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-            return nameStrat.get(bestUCBStrategy);
-        } catch (Exception e) {
-            System.err.println("Error initStrat, using default strategy");
-            e.printStackTrace();
-            return new FullBio();
-        }
-
     }
 
     void initEnemyRace() {
@@ -456,9 +283,9 @@ public class GameState {
         List<Geyser> gas = base.getGeysers();
         minerals.forEach(m -> mineralsAssigned.put((MineralPatch) m.getUnit(), 0));
         gas.forEach(g -> vespeneGeysers.put((VespeneGeyser) g.getUnit(), false));
-        if (strat.name.equals("ProxyBBS")) {
+        if (getStrat().name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
-        } else if (strat.name.equals("ProxyEightRax")) {
+        } else if (getStrat().name.equals("ProxyEightRax")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
@@ -501,9 +328,9 @@ public class GameState {
             }
         }
         for (Unit u : auxGas) refineriesAssigned.remove(u);
-        if (strat.name.equals("ProxyBBS")) {
+        if (getStrat().name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
-        } else if (strat.name.equals("ProxyEightRax")) {
+        } else if (getStrat().name.equals("ProxyEightRax")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
@@ -528,7 +355,7 @@ public class GameState {
 
     void initBaseLocations() {
         BLs.sort(new BaseLocationComparator(Util.getClosestBaseLocation(self.getStartLocation().toPosition())));
-        if (strat.name.equals("PlasmaWraithHell")) { // Special logic for Plasma
+        if (getStrat().name.equals("PlasmaWraithHell")) { // Special logic for Plasma
             specialBLs.add(BLs.get(0));
             if (BLs.get(0).getLocation().equals(new TilePosition(77, 63))) { // Start 1
                 for (Base b : BLs) {
@@ -606,7 +433,7 @@ public class GameState {
             workerIdle.add(u);
         }
 
-        if (!strat.name.equals("PlasmaWraithHell")) {
+        if (!getStrat().name.equals("PlasmaWraithHell")) {
             if (chosenScout != null && ((Worker) chosenScout).isIdle()) {
                 workerIdle.add((Worker) chosenScout);
                 chosenScout = null;
@@ -642,7 +469,7 @@ public class GameState {
             chosenScout = null;
             for (Base b : BLs) {
                 if (CCs.containsKey(b)) continue;
-                if (!strat.name.equals("PlasmaWraithHell") && b.getArea().getAccessibleNeighbors().isEmpty()) {
+                if (!getStrat().name.equals("PlasmaWraithHell") && b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
                 scoutSLs.add(b);
@@ -943,7 +770,7 @@ public class GameState {
     }
 
     void checkWorkerMilitia(int rax) {
-        if (strat.name.equals("ProxyBBS")) {
+        if (getStrat().name.equals("ProxyBBS")) {
             if (Util.countBuildingAll(UnitType.Terran_Barracks) == rax) {
                 List<Unit> aux = new ArrayList<>();
                 int count = workerMining.size();
@@ -1101,7 +928,7 @@ public class GameState {
         } else if (rand < 9) {
             ih.sendText(":sscaitsuperpotato:");
         } else if (rand < 11) {
-            ih.sendText("Ok Google, search " + this.strat.name + " build order in Liquipedia");
+            ih.sendText("Ok Google, search " + this.getStrat().name + " build order in Liquipedia");
         }
     }
 
@@ -1117,14 +944,9 @@ public class GameState {
         EI.naughty = false;
     }
 
-    private boolean alwaysZealotRushes() {
-        if (enemyRace != Race.Protoss) return false;
-        List<String> zealots = new ArrayList<>(Arrays.asList("purplewavelet", "wulibot", "flash", "carstennielsen"));
-        return zealots.contains(learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", ""));
-    }
 
     private boolean requiredUnitsForAttack() {
-        return strat.requiredUnitsForAttack();
+        return getStrat().requiredUnitsForAttack();
     }
 
     void workerTransfer() {
@@ -1162,23 +984,23 @@ public class GameState {
     }
 
     public boolean needToAttack() {
-        if ((strat.name.equals("ProxyBBS") || strat.name.equals("ProxyEightRax")) && getArmySize() >= strat.armyForAttack && requiredUnitsForAttack())
+        if ((getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax")) && getArmySize() >= getStrat().armyForAttack && requiredUnitsForAttack())
             return true;
-        return getArmySize() >= strat.armyForAttack * 0.85 && requiredUnitsForAttack();
+        return getArmySize() >= getStrat().armyForAttack * 0.85 && requiredUnitsForAttack();
     }
 
     void updateAttack() {
         try {
-            if (sqManager.squads.isEmpty() || (defense && !strat.name.equals("ProxyBBS") && !strat.name.equals("ProxyEightRax")))
+            if (sqManager.squads.isEmpty() || (defense && !getStrat().name.equals("ProxyBBS") && !getStrat().name.equals("ProxyEightRax")))
                 return;
             boolean needToAttack = needToAttack();
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
-                if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && (strat.proxy || !checkItWasAttacking(u)))
+                if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && (getStrat().proxy || !checkItWasAttacking(u)))
                     continue;
                 Position attackPos = Util.chooseAttackPosition(u.getSquadCenter(), false);
                 if (attackPos != null) {
-                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("ProxyEightRax"))) {
+                    if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
                         getIH().sendText("Get ready for the show!");
                     }
@@ -1187,7 +1009,7 @@ public class GameState {
                         u.status = Squad.Status.ATTACK;
                     }
                 } else if (enemyMainBase != null) {
-                    if (!firstTerranCheese && (strat.name.equals("ProxyBBS") || strat.name.equals("ProxyEightRax"))) {
+                    if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
                         getIH().sendText("Get ready for the show!");
                     }
@@ -1218,10 +1040,12 @@ public class GameState {
 
     }
 
-    void updateStrat() {
-        if (strat.trainUnits.contains(UnitType.Terran_Firebat) && enemyRace == Race.Zerg) maxBats = 3;
-        else maxBats = 0;
-        if (strat.trainUnits.contains(UnitType.Terran_Goliath)) maxGoliaths = 0;
+    public Strategy getStrat() {
+        return scipio.strat;
+    }
+
+    public void setStrat(Strategy strat) {
+        scipio.strat = strat;
     }
 
     MutablePair<MineralPatch, MineralPatch> getMineralWalkPatchesFortress(Base b) {
@@ -1296,9 +1120,9 @@ public class GameState {
         int refineries = refineriesAssigned.size();
         if (getCash().second >= 200) {
             int workersNeeded;
-            if (strat.techToResearch.contains(TechType.Stim_Packs) && !strat.techToResearch.contains(TechType.Tank_Siege_Mode)) {
+            if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
                 workersNeeded = refineries;
-                strat.workerGas = 1;
+                getStrat().workerGas = 1;
             } else workersNeeded = 2 * refineries;
             if (workersAtGas > workersNeeded) {
                 Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
@@ -1314,6 +1138,6 @@ public class GameState {
                     if (workersNeeded == 0) break;
                 }
             }
-        } else if (strat.workerGas < 3 && workersAtGas == strat.workerGas) strat.workerGas++;
+        } else if (getStrat().workerGas < 3 && workersAtGas == getStrat().workerGas) getStrat().workerGas++;
     }
 }

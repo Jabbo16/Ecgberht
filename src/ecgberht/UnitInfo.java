@@ -54,14 +54,14 @@ public class UnitInfo implements Comparable<UnitInfo> {
     // Credits to N00byEdge
     private int expectedHealth() {
         if (unitType.getRace() == Race.Zerg && unitType.regeneratesHP())
-            return Math.min(((getGs().frameCount - lastVisibleFrame) * ZERGREGEN) / 256 + health, unitType.maxHitPoints());
+            return Math.min(((getGs().frameCount - lastVisibleFrame) * ZERGREGEN >> 8) + health, unitType.maxHitPoints());
         return health;
     }
 
     // Credits to N00byEdge
     private int expectedShields() {
         if (unitType.getRace() == Race.Protoss)
-            return Math.min(((getGs().frameCount - lastVisibleFrame) * PROTOSSSHIELDREGEN) / 256 + shields, unitType.maxShields());
+            return Math.min(((getGs().frameCount - lastVisibleFrame) * PROTOSSSHIELDREGEN >> 8) + shields, unitType.maxShields());
         return shields;
     }
 
@@ -93,10 +93,20 @@ public class UnitInfo implements Comparable<UnitInfo> {
         percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
         if (unit instanceof Burrowable && ((Burrowable) unit).isBurrowed()) burrowed = true;
         if (unit instanceof FlyingBuilding || unitType.isFlyer()) flying = true;
-
         speed = Util.getSpeed(this);
-        target = (unit instanceof Attacker) ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
+        target = unit instanceof Attacker ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
         attackers.clear();
+    }
+
+    public double getDistance(Position pos) {
+        if (this.visible) return this.unit.getDistance(pos);
+        return this.lastPosition.getDistance(pos);
+    }
+
+    public int getDistance(UnitInfo target) {
+        if (this.visible)
+            return target.visible ? this.unit.getDistance(target.unit) : (int) unit.getDistance(target.lastPosition);
+        return target.visible ? (int) target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
     }
 
     @Override
@@ -117,17 +127,5 @@ public class UnitInfo implements Comparable<UnitInfo> {
     @Override
     public int compareTo(UnitInfo o) {
         return this.unit.getId() - o.unit.getId();
-    }
-
-    public double getDistance(Position pos) {
-        if (this.visible) return this.unit.getDistance(pos);
-        return this.lastPosition.getDistance(pos);
-    }
-
-
-    public int getDistance(UnitInfo target) {
-        if (this.visible)
-            return target.visible ? this.unit.getDistance(target.unit) : (int) unit.getDistance(target.lastPosition);
-        return target.visible ? (int) target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
     }
 }

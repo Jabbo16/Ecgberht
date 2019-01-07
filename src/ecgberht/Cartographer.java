@@ -21,7 +21,7 @@ public class Cartographer {
     public Cartographer(int width, int height) {
         mapTileWidth = width;
         mapTileHeight = height;
-        tileWalkableGrid = new boolean[mapTileHeight][mapTileWidth];
+        tileWalkableGrid = new boolean[mapTileWidth][mapTileHeight];
         mapCenter = new TilePosition(mapTileWidth / 2, mapTileHeight / 2);
         initWalkableGrids();
     }
@@ -37,12 +37,12 @@ public class Cartographer {
     private void initWalkableGrids() {
         for (int ii = 0; ii < mapTileWidth * 4; ii++) {
             for (int jj = 0; jj < mapTileHeight * 4; jj++) {
-                walkableGrid[jj][ii] = getGs().getGame().getBWMap().isWalkable(ii, jj);
+                walkableGrid[ii][jj] = getGs().getGame().getBWMap().isWalkable(ii, jj);
             }
         }
         for (int ii = 0; ii < mapTileWidth; ii++) {
             for (int jj = 0; jj < mapTileHeight; jj++) {
-                tileWalkableGrid[jj][ii] = getGs().getGame().getBWMap().isWalkable(ii * 4, jj * 4);
+                tileWalkableGrid[ii][jj] = getGs().getGame().getBWMap().isWalkable(ii * 4, jj * 4);
             }
         }
         mapJPS = new Jps(Map.fromBooleanArray(walkableGrid));

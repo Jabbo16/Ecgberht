@@ -55,7 +55,7 @@ public class ChoosePosition extends Action {
                 if (gameState.mainCC != null) main = gameState.mainCC.second.getTilePosition();
                 else main = gameState.getPlayer().getStartLocation();
                 List<Base> valid = new ArrayList<>();
-                if (gameState.strat.name.equals("PlasmaWraithHell")) {
+                if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
                     for (Base b : gameState.specialBLs) {
                         if (!gameState.CCs.containsKey(b)) {
                             gameState.chosenPosition = b.getLocation();
@@ -104,7 +104,7 @@ public class ChoosePosition extends Action {
                     }
                 }
                 if (!gameState.chosenToBuild.equals(UnitType.Terran_Bunker) && !gameState.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (gameState.strat.proxy && gameState.chosenToBuild == UnitType.Terran_Barracks) {
+                    if (gameState.getStrat().proxy && gameState.chosenToBuild == UnitType.Terran_Barracks) {
                         origin = new TilePosition(gameState.getGame().getBWMap().mapWidth() / 2, gameState.getGame().getBWMap().mapHeight() / 2);
                     } else if (gameState.mainCC != null && gameState.mainCC.first != null) {
                         origin = gameState.mainCC.first.getLocation();
@@ -132,10 +132,20 @@ public class ChoosePosition extends Action {
                         else origin = gameState.getPlayer().getStartLocation();
                     }
                 } else if (gameState.Ts.isEmpty()) {
+                    if (gameState.defendPosition != null && gameState.naturalChoke != null
+                            && gameState.defendPosition.equals(gameState.naturalChoke.getCenter().toPosition())) {
+                        origin = gameState.testMap.findBunkerPosition(gameState.naturalChoke);
+                        if (origin != null) {
+                            gameState.testMap = gameState.map.clone();
+                            gameState.chosenPosition = origin;
+                            return State.SUCCESS;
+                        }
+                    }
                     if (gameState.mainChoke != null &&
-                            !gameState.strat.name.equals("MechGreedyFE") &&
-                            !gameState.strat.name.equals("BioGreedyFE") &&
-                            !gameState.strat.name.equals("BioMechGreedyFE")) {
+                            !gameState.getStrat().name.equals("MechGreedyFE") &&
+                            !gameState.getStrat().name.equals("BioGreedyFE") &&
+                            !gameState.getStrat().name.equals("14CC") &&
+                            !gameState.getStrat().name.equals("BioMechGreedyFE")) {
                         origin = gameState.testMap.findBunkerPosition(gameState.mainChoke);
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();

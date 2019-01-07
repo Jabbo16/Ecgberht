@@ -127,7 +127,7 @@ public class SendDefenders extends Action {
                         }
                     }
                 }
-            } else if (!gameState.strat.name.equals("ProxyBBS") && !gameState.strat.name.equals("ProxyEightRax")) {
+            } else if (!gameState.getStrat().name.equals("ProxyBBS") && !gameState.getStrat().name.equals("ProxyEightRax")) {
                 for (Entry<Integer, Squad> u : gameState.sqManager.squads.entrySet()) {
                     if (gameState.attackPosition != null) {
                         u.getValue().giveAttackOrder(gameState.attackPosition);

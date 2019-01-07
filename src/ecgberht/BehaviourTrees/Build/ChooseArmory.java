@@ -22,8 +22,8 @@ public class ChooseArmory extends Action {
         try {
             if (gameState.Fs.isEmpty() || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode))
                 return State.FAILURE;
-            if (gameState.Fs.size() < gameState.strat.facForArmory) return State.FAILURE;
-            if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < gameState.strat.numArmories) {
+            if (gameState.Fs.size() < gameState.getStrat().facForArmory) return State.FAILURE;
+            if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < gameState.getStrat().numArmories) {
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Armory) return State.FAILURE;
                 }
