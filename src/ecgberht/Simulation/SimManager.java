@@ -14,6 +14,7 @@ import org.bk.ass.BWAPI4JAgentFactory;
 import org.bk.ass.Evaluator;
 import org.bk.ass.Simulator;
 import org.openbw.bwapi4j.BW;
+import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;

@@ -6,7 +6,7 @@
         "completeMapInformation": false
     },
     "ecgConfig": {
-        "debugConsole": false,
+        "debugConsole": true,
         "debugScreen": true,
         "debugText": true,
         "enableLatCom": true,
