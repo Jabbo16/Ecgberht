@@ -272,7 +272,14 @@ public class Squad implements Comparable<Squad> {
                         return;
                     }
 
-                } else if (st.isSieged() && u.currentOrder != Order.Unsieging && Math.random() * 10 <= 2.5) {
+                } else if (st.isSieged() && u.currentOrder != Order.Unsieging && Math.random() * 10 <= 2) {
+                    if (getGs().defendPosition != null) {
+                        double range = u.groundRange;
+                        if (u.getDistance(getGs().defendPosition) > range){
+                            st.unsiege();
+                        }
+                        return;
+                    }
                     st.unsiege();
                     return;
                 }
@@ -420,10 +427,10 @@ public class Squad implements Comparable<Squad> {
                 (target.unit instanceof SCV && ((SCV) target.unit).isRepairing() && target.unit.getOrderTarget() != null && target.unit.getOrderTarget().getType() == UnitType.Terran_Bunker) ||
                 (target.unitType.isBuilding() && !Util.canAttack(target, u));
         if (!moveCloser) {
-            predictedPosition = UtilMicro.predictUnitPosition(target.unit, 2);
+            predictedPosition = UtilMicro.predictUnitPosition(target, 2);
             if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
                 double distPredicted = u.unit.getDistance(predictedPosition);
-                double distCurrent = u.unit.getDistance(target.lastPosition);
+                double distCurrent = u.getDistance(target);
                 if (distPredicted > distCurrent) {
                     kite = false;
                     if (distToTarget > (range - 24)) moveCloser = true;
@@ -433,7 +440,7 @@ public class Squad implements Comparable<Squad> {
             }
         }
         if (moveCloser) {
-            if (distToTarget > 32) {
+            if (distToTarget > 32 && !u.unit.isStartingAttack() && !u.unit.isAttackFrame()) {
                 if (predictedPosition != null) UtilMicro.move((MobileUnit) u.unit, predictedPosition);
                 else UtilMicro.move((MobileUnit) u.unit, target.lastPosition);
             } else UtilMicro.attack((Attacker) u.unit, target);

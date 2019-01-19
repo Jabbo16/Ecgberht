@@ -127,10 +127,10 @@ public class SimManager {
         // Enemy Clusters
         List<UnitInfo> enemyUnits = new ArrayList<>();
         for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
-            if (getGs().getStrat().proxy && u.unitType.isWorker() && Util.isInOurBases(u.unit)) continue;
+            if (getGs().getStrat().proxy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking())) continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
             if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
-                    || getGs().frameCount - u.lastVisibleFrame <= 24 * 2)
+                    || getGs().frameCount - u.lastVisibleFrame <= 24 * 4)
                 enemyUnits.add(u);
         }
         clustering = new MeanShift(enemyUnits, radius);
@@ -191,7 +191,7 @@ public class SimManager {
     }
 
     private boolean closeClusters(Cluster c1, Cluster c2) {
-        return Util.broodWarDistance(c1.mode(), c2.mode()) <= radius + Math.max(c1.maxDistFromCenter, c2.maxDistFromCenter) * 1.2;
+        return Util.broodWarDistance(c1.mode(), c2.mode()) <= radius + Math.max(c1.maxDistFromCenter, c2.maxDistFromCenter) * 1.3;
     }
 
     /**
@@ -224,8 +224,8 @@ public class SimManager {
             boolean emptyGround = ground.allies.isEmpty();
             if (emptyAir && emptyGround) continue;
             for (UnitInfo u : s.enemies) {
-                if (u.unit instanceof AirAttacker) air.enemies.add(u);
-                if (u.unit instanceof GroundAttacker || u.unitType == UnitType.Terran_Bunker) ground.enemies.add(u);
+                if (u.unit instanceof AirAttacker || u.unitType == UnitType.Terran_Bunker) air.enemies.add(u);
+                if (u.unit instanceof GroundAttacker || u.unitType == UnitType.Terran_Bunker  || u.unitType == UnitType.Zerg_Creep_Colony) ground.enemies.add(u);
             }
             /*if (!emptyAir && !air.enemies.isEmpty()) {
                 air.type = SimInfo.SimType.AIR;
@@ -264,54 +264,60 @@ public class SimManager {
         int energy = getGs().CSs.stream().filter(s -> s.getOrder() != Order.CastScannerSweep).mapToInt(s -> s.getEnergy() / 50).sum();
         Assmulator.reset();
         for (SimInfo s : simulations) {
-            Assmulator.resetUnits();
-            if (s.enemies.isEmpty()) continue;
-            for (UnitInfo u : s.allies) {
-                Agent jU = factory.of(u.unit);
-                Assmulator.addAgentA(jU);
-                s.stateBeforeASS.first.add(jU);
-            }
-            for (UnitInfo u : s.enemies) {
-                if (u.unit instanceof Worker && !u.unit.isAttacking()) continue;
-                if (u.unit instanceof Building && !u.unit.isCompleted()) continue;
-                if (!Util.isStaticDefense(u) && !u.unitType.canAttack()) continue;
-                if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
-                    if (energy >= 1) energy -= 1;
-                    else {
-                        s.lose = true;
-                        break;
-                    }
+            try{
+                Assmulator.resetUnits();
+                if (s.enemies.isEmpty()) continue;
+                for (UnitInfo u : s.allies) {
+                    Agent jU = factory.of(u.unit);
+                    Assmulator.addAgentA(jU);
+                    s.stateBeforeASS.first.add(jU);
                 }
-                Agent jU = factory.of(u.unit);
-                Assmulator.addAgentB(jU);
-                s.stateBeforeASS.second.add(jU);
+                for (UnitInfo u : s.enemies) {
+                    if (u.unitType.isWorker() && u.visible && !u.unit.isAttacking()) continue;
+                    if (u.unitType.isBuilding() && !u.completed) continue;
+                    if (u.unitType == UnitType.Zerg_Creep_Colony || (!Util.isStaticDefense(u) && !u.unitType.canAttack())) continue;
+                    if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
+                        if (energy >= 1) energy -= 1;
+                        else {
+                            s.lose = true;
+                            break;
+                        }
+                    }
+                    Agent jU = factory.of(u.unit);
+                    Assmulator.addAgentB(jU);
+                    s.stateBeforeASS.second.add(jU);
+                }
+                if (s.lose) continue;
+                s.preSimScoreASS = scores();
+                double estimate = evaluator.evaluate(s.stateBeforeASS.first, s.stateBeforeASS.second);
+                if (estimate < 0.1) {
+                    s.lose = true;
+                    continue;
+                }
+                if (estimate > 0.6) continue;
+                Assmulator.simulate(longSimFrames);
+                s.postSimScoreASS = scores();
+                s.stateAfterASS = new MutablePair<>(Assmulator.getAgentsA(), Assmulator.getAgentsB());
+                int ourLosses = s.preSimScoreASS.first - s.postSimScoreASS.first;
+                int enemyLosses = s.preSimScoreASS.second - s.postSimScoreASS.second;
+                if (s.stateAfterASS.first.isEmpty()) {
+                    s.lose = true;
+                    continue;
+                }
+                if (enemyLosses > ourLosses * 1.35) continue;
+                Assmulator.simulate(longSimFrames);
+                s.postSimScoreASS = scores();
+                s.stateAfterASS = new MutablePair<>(Assmulator.getAgentsA(), Assmulator.getAgentsB());
+                //Bad lose sim logic, testing
+                if (s.stateAfterASS.first.isEmpty()) s.lose = true;
+                else if (getGs().getStrat().name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
+                else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.35);
+                else s.lose = !scoreCalcASS(s, 2);
+            } catch(Exception e){
+                System.err.println("Simulator ASS exception");
+                e.printStackTrace();
             }
-            if (s.lose) continue;
-            s.preSimScoreASS = scores();
-            double estimate = evaluator.evaluate(s.stateBeforeASS.first, s.stateBeforeASS.second);
-            if (estimate < 0.1) {
-                s.lose = true;
-                continue;
-            }
-            if (estimate > 0.6) continue;
-            Assmulator.simulate(longSimFrames);
-            s.postSimScoreASS = scores();
-            s.stateAfterASS = new MutablePair<>(Assmulator.getAgentsA(), Assmulator.getAgentsB());
-            int ourLosses = s.preSimScoreASS.first - s.postSimScoreASS.first;
-            int enemyLosses = s.preSimScoreASS.second - s.postSimScoreASS.second;
-            if (s.stateAfterASS.first.isEmpty()) {
-                s.lose = true;
-                continue;
-            }
-            if (enemyLosses > ourLosses * 1.35) continue;
-            Assmulator.simulate(longSimFrames);
-            s.postSimScoreASS = scores();
-            s.stateAfterASS = new MutablePair<>(Assmulator.getAgentsA(), Assmulator.getAgentsB());
-            //Bad lose sim logic, testing
-            if (s.stateAfterASS.first.isEmpty()) s.lose = true;
-            else if (getGs().getStrat().name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
-            else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.5);
-            else s.lose = !scoreCalcASS(s, 2);
+
         }
     }
 
@@ -345,7 +351,7 @@ public class SimManager {
                 s.stateBeforeJFAP.second.add(jU);
             }
             if (s.lose) continue;
-            if (getGs().getArmySize(s.allies) >= s.enemies.size() * 5) continue;
+            if (getGs().getArmySize(s.allies) > s.enemies.size() * 5) continue;
             s.preSimScore = simulator.playerScores();
             simulator.simulate(shortSimFrames);
             s.postSimScore = simulator.playerScores();

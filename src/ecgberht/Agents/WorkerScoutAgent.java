@@ -78,10 +78,14 @@ public class WorkerScoutAgent extends Agent {
     public boolean runAgent() {
         if (unit == null || !unit.exists() || unitInfo == null) {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
+            getGs().firstScout = false;
+            if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
             return true;
         }
         if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
             getGs().myArmy.add(unitInfo);
+            getGs().firstScout = false;
+            if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
             return true;
         }
         /*for(TilePosition p : validTiles){
@@ -177,6 +181,7 @@ public class WorkerScoutAgent extends Agent {
     }
 
     private Status chooseNewStatus() {
+        if(stoppedDisrupting || !getGs().firstScout) return Status.EXPLORE;
         if (status == Status.DISRUPTING) return Status.DISRUPTING;
         if (status == Status.PROXYING) {
             if (proxyTile == null) {
@@ -265,10 +270,10 @@ public class WorkerScoutAgent extends Agent {
             TilePosition left = new TilePosition(tp.getX() - 1, tp.getY());
             TilePosition up = new TilePosition(tp.getX(), tp.getY() - 1);
             final boolean edge =
-                    (!getGs().getGame().getBWMap().isValidPosition(right) || (getGs().bwem.getMap().getArea(right) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(right)))
-                            || (!getGs().getGame().getBWMap().isValidPosition(bottom) || (getGs().bwem.getMap().getArea(bottom) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(bottom)))
-                            || (!getGs().getGame().getBWMap().isValidPosition(left) || (getGs().bwem.getMap().getArea(left) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(left)))
-                            || (!getGs().getGame().getBWMap().isValidPosition(up) || (getGs().bwem.getMap().getArea(up) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(up)));
+                    (!getGs().getGame().getBWMap().isValidPosition(right) || getGs().bwem.getMap().getArea(right) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(right))
+                            || (!getGs().getGame().getBWMap().isValidPosition(bottom) || getGs().bwem.getMap().getArea(bottom) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(bottom))
+                            || (!getGs().getGame().getBWMap().isValidPosition(left) || getGs().bwem.getMap().getArea(left) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(left))
+                            || (!getGs().getGame().getBWMap().isValidPosition(up) || getGs().bwem.getMap().getArea(up) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(up));
             if (edge && getGs().getGame().getBWMap().isBuildable(tp)) {
                 Position vertex = tp.toPosition().add(new Position(16, 16));
                 double dist = enemyCenter.getDistance(vertex);

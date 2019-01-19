@@ -1,6 +1,7 @@
 package ecgberht;
 
 import ecgberht.Util.Util;
+import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
@@ -65,6 +66,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
         return shields;
     }
 
+    // TODO completion frames
     void update() {
         player = unit.getPlayer();
         unitType = unit.getType();
@@ -91,8 +93,8 @@ public class UnitInfo implements Comparable<UnitInfo> {
         if (unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();
         percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
         percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
-        if (unit instanceof Burrowable && ((Burrowable) unit).isBurrowed()) burrowed = true;
-        if (unit instanceof FlyingBuilding || unitType.isFlyer()) flying = true;
+        if (unit instanceof Burrowable && visible) burrowed = currentOrder == Order.Burrowing || ((Burrowable) unit).isBurrowed();
+        if (visible) flying = unit.isFlying();
         speed = Util.getSpeed(this);
         target = unit instanceof Attacker ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
         attackers.clear();
@@ -107,6 +109,18 @@ public class UnitInfo implements Comparable<UnitInfo> {
         if (this.visible)
             return target.visible ? this.unit.getDistance(target.unit) : (int) unit.getDistance(target.lastPosition);
         return target.visible ? (int) target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
+    }
+
+    public double getPredictedDistance(UnitInfo target) {
+        Position nextPosition = UtilMicro.predictUnitPosition(target, 1);
+        if(nextPosition == null) return 0;
+        return this.unit.getDistance(nextPosition);
+    }
+
+    public double getPredictedDistance(UnitInfo target, int frames) {
+        Position nextPosition = UtilMicro.predictUnitPosition(target, frames);
+        if(nextPosition == null) return 0;
+        return this.unit.getDistance(nextPosition);
     }
 
     @Override

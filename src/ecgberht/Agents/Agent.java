@@ -10,7 +10,7 @@ public abstract class Agent {
     public UnitInfo unitInfo;
     Status status = Status.IDLE;
     Position attackPos = null;
-    Unit attackUnit = null;
+    UnitInfo attackUnit = null;
     int frameLastOrder = 0;
     int actualFrame = 0;
 

@@ -25,11 +25,10 @@ public class CheckScan extends Conditional {
         try {
             if (gameState.CSs.isEmpty()) return State.FAILURE;
             if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
-                for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values()) {
-                    PlayerUnit pU = u.unit;
-                    if ((pU.isCloaked() || (pU instanceof Burrowable && u.burrowed)) && !pU.isDetected() && u.unit instanceof Attacker) {
-                        if (gameState.sim.getSimulation(u, true).allies.isEmpty()) continue;
-                        gameState.checkScan = u.tileposition;
+                for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
+                    if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.unit instanceof Attacker) {
+                        if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(u -> u.unitType.canAttack())) continue;
+                        gameState.checkScan = e.tileposition;
                         return State.SUCCESS;
                     }
                 }

@@ -310,10 +310,10 @@ public class Util {
         return new Position(cropped.first, cropped.second);
     }
 
-    public static Position choosePatrolPositionVulture(Vulture myUnit, Unit attackUnit) {
+    public static Position choosePatrolPositionVulture(Vulture myUnit, UnitInfo attackUnit) {
         try {
             Position myUnitPos = myUnit.getPosition();
-            Position attackUnitPos = attackUnit.getPosition();
+            Position attackUnitPos = attackUnit.lastPosition;
             MutablePair<Double, Double> AT = new MutablePair<>((double) attackUnitPos.getX() - myUnitPos.getX(), (double) attackUnitPos.getY() - myUnitPos.getY());
             MutablePair<Double, Double> patrolDir1 = rotatePosition(AT, Math.PI / 5.0);
             MutablePair<Double, Double> patrolDir2 = rotatePosition(AT, -Math.PI / 5.0);
@@ -388,7 +388,7 @@ public class Util {
 
     public static boolean shouldIStop(Position pos) {
         for (Base b : getGs().BLs) {
-            if (Util.getSquareTiles(b.getLocation(), UnitType.Terran_Command_Center).contains(pos.toTilePosition()))
+            if (getSquareTiles(b.getLocation(), UnitType.Terran_Command_Center).contains(pos.toTilePosition()))
                 return false;
         }
         return getGs().mainChoke != null && getGs().mainChoke.getCenter().toPosition().getDistance(pos) > 32 * 2;
@@ -549,7 +549,7 @@ public class Util {
         UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (UnitInfo enemy : enemies) {
-            if (enemy.unit == null || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
+            if (enemy.unit == null || ((enemy.unit.isCloaked() || enemy.burrowed) && !enemy.unit.isDetected())) continue;
             if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
             if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             int priority = getRangedAttackPriority(rangedUnit, enemy);
@@ -561,14 +561,13 @@ public class Util {
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = getWeapon(enemy, rangedUnit).maxRange();
+                    double weaponDist = enemy.player.getUnitStatCalculator().weaponMaxRange(getWeapon(enemy, rangedUnit));
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
             } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) enemy.unit).isMoving()) {
                 if ((enemy.unit instanceof SiegeTank && ((SiegeTank) enemy.unit).isSieged()) || enemy.currentOrder == Order.Sieging ||
-                        enemy.currentOrder == Order.Unsieging ||
-                        (enemy.burrowed)) {
+                        enemy.currentOrder == Order.Unsieging || enemy.burrowed) {
                     score += 48;
                 } else score += 24;
             } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) enemy.unit).isBraking()) score += 16;
@@ -607,8 +606,8 @@ public class Util {
             return 12;
         }
         if (rangedType == UnitType.Terran_Wraith) {
-            if (targetType.isFlyer()) return 11;
-        } else if (rangedType == UnitType.Terran_Goliath && targetType.isFlyer()) return 10;
+            if (target.flying) return targetType.isFlyingBuilding() ? 5 : 11;
+        } else if (rangedType == UnitType.Terran_Goliath && target.flying) return targetType.isFlyingBuilding() ? 8 : 10;
         if (rangedType.isFlyer() && target.unit instanceof SiegeTank) return 10;
         if (targetType == UnitType.Protoss_High_Templar || targetType == UnitType.Zerg_Defiler) return 12;
         if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
@@ -631,7 +630,14 @@ public class Util {
             if (rangedType == UnitType.Terran_Vulture) return 11;
             if (target.unit instanceof SCV) {
                 if (((SCV) target.unit).isRepairing()) return 11;
-                if (((SCV) target.unit).isConstructing()) return 10;
+                if (((SCV) target.unit).isConstructing()){
+                    if (getGs().getStrat().proxy){
+                        Unit build = target.unit.getBuildUnit();
+                        if((build instanceof Bunker || build instanceof Factory)) return 15;
+                        return 13;
+                    }
+                    return 10;
+                }
             }
             return 9;
         }
@@ -672,9 +678,9 @@ public class Util {
         return attacker.player.getUnitStatCalculator().weaponMaxRange(weapon);
     }
 
-    public static boolean isInOurBases(Unit u) {
-        if (u == null || !u.exists()) return false;
-        Area uArea = getGs().bwem.getMap().getArea(u.getTilePosition());
+    public static boolean isInOurBases(UnitInfo u) {
+        if (u == null)  return false;
+        Area uArea = getGs().bwem.getMap().getArea(u.lastTileposition);
         if (uArea == null) return false;
         if (uArea.equals(getGs().enemyMainArea) || uArea.equals(getGs().enemyNaturalArea)) return false;
         for (Base b : getGs().CCs.keySet()) {

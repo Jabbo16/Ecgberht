@@ -396,6 +396,7 @@ public class GameState {
                 allyIT.remove();
             }
         }
+        DBs.values().forEach(s -> s.removeIf(u -> !u.unit.exists()));
         List<Worker> removeGas = new ArrayList<>();
         for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
             if (!w.getKey().isGatheringGas()) {
@@ -414,7 +415,7 @@ public class GameState {
         }
 
         for (PlayerUnit u : bw.getUnits(self)) {
-            if (!u.exists() || !(u instanceof Building) || u instanceof Addon) continue;
+            if (!u.exists() || !(u instanceof Building) || u instanceof Addon || u.equals(proxyBuilding)) continue;
             if (u.getBuildUnit() != null || enemyNaturalBase == null || u.getTilePosition().equals(enemyNaturalBase.getLocation()))
                 continue;
             if (!u.isCompleted() && !workerTask.values().contains(u) && !buildingLot.contains(u)) {
@@ -620,12 +621,10 @@ public class GameState {
     void mineralLocking() {
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
             if (u.getKey().getLastCommandFrame() == frameCount) continue;
-            if (u.getKey().isIdle() || (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())))
+            if (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())
+                    || u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
+                    && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals())
                 u.getKey().gather(u.getValue());
-            else if (u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
-                    && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals()) {
-                u.getKey().gather(u.getValue());
-            }
         }
     }
 

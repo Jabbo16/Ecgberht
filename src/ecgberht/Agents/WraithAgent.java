@@ -40,30 +40,29 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             Position attack = getBestBaseToHarass();
             UnitInfo closestThreat = null;
             double bestDist = Double.MAX_VALUE;
-            airAttackers = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.AIR).enemies;
-            Set<UnitInfo> closeEnemies = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
-            Iterator<UnitInfo> it = airAttackers.iterator();
-            while (it.hasNext()) {
-                UnitInfo u = it.next();
-                double dist = unit.getDistance(u.unit);
+            SimInfo airSim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.AIR);
+            airAttackers = airSim.enemies;
+            for (UnitInfo u : airAttackers) {
+                double dist = unitInfo.getDistance(u);
+                double predictedDist = unitInfo.getPredictedDistance(u);
                 double hisAirWeaponRange = u.airRange;
-                if (dist < bestDist) {
+                if (dist > hisAirWeaponRange) continue;
+                if (predictedDist < bestDist) {
                     closestThreat = u;
-                    bestDist = dist;
+                    bestDist = predictedDist;
                 }
-                if (dist > hisAirWeaponRange) it.remove();
             }
             Set<UnitInfo> mainTargets = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
             UnitInfo harassed = chooseHarassTarget(mainTargets);
-            if (airAttackers.isEmpty()) { // TODO improve this
+            if (airAttackers.isEmpty()) { // Logic inside is borked
                 if (closestThreat != null) {
                     Weapon myWeapon = closestThreat.flying ? unit.getAirWeapon() : unit.getGroundWeapon();
                     double hisAirWeaponRange = closestThreat.airRange;
-                    if (myWeapon.maxRange() > hisAirWeaponRange && bestDist >= hisAirWeaponRange * 1.1) {
+                    if (myWeapon.maxRange() > hisAirWeaponRange && bestDist >= hisAirWeaponRange) {
                         if (myWeapon.cooldown() > 0) {
                             UtilMicro.attack(unit, closestThreat);
-                            return false;
-                        }
+                        } else UtilMicro.move(unit, closestThreat.lastPosition);
+                        return false;
                     }
                     Position kitePos = UtilMicro.kiteAway(unit, new TreeSet<>(Collections.singleton(closestThreat)));
                     if (kitePos != null) {
@@ -81,7 +80,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 UtilMicro.move(unit, kitePos);
                 return false;
             }
-            UnitInfo target = Util.getRangedTarget(unitInfo, closeEnemies);
+            UnitInfo target = Util.getRangedTarget(unitInfo, mainTargets);
             if (target != null) {
                 UtilMicro.attack(unit, target);
                 return false;

@@ -80,6 +80,7 @@ public class StrategyManager {
                 getGs().maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
+            if(true) return tPW;
             if (alwaysZealotRushes()) {
                 IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
                 bFE.armyForExpand += 5;

@@ -26,7 +26,7 @@ public class UtilMicro {
 
     public static void attack(Attacker attacker, UnitInfo target) {
         try {
-            if (attacker == null || target == null || !attacker.exists() || !target.unit.exists() || attacker.isAttackFrame())
+            if (attacker == null || target == null || !attacker.exists() || attacker.isStartingAttack() || attacker.isAttackFrame())
                 return;
             if (getGs().frameCount == attacker.getLastCommandFrame()) return;
             Unit targetUnit = attacker.getTargetUnit();
@@ -131,10 +131,10 @@ public class UtilMicro {
         u.stop(false);
     }
 
-    public static Position predictUnitPosition(Unit unit, int frames) {
-        if (unit == null || !unit.exists() || !unit.isVisible()) return null;
-        if (!(unit instanceof MobileUnit)) return unit.getPosition();
-        return unit.getPosition().add(new Position((int) (frames * ((MobileUnit) unit).getVelocityX()), (int) (frames * ((MobileUnit) unit).getVelocityY())));
+    public static Position predictUnitPosition(UnitInfo unit, int frames) {
+        if (unit == null) return null;
+        if (unit.speed == 0.0) return unit.lastPosition;
+        return unit.lastPosition.add(new Position((int) (frames * unit.unit.getVelocityX()), (int) (frames * unit.unit.getVelocityY())));
     }
 
     private static boolean verifyPosition(Position position) {

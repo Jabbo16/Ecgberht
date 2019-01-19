@@ -46,11 +46,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.TreeSet;
 
 public class Ecgberht implements BWEventListener {
 
@@ -515,7 +512,7 @@ public class Ecgberht implements BWEventListener {
             gs.runAgents();
             gs.sqManager.updateSquadOrderAndMicro();
             gs.checkMainEnemyBase();
-            if (gs.frameCount > 0 && gs.frameCount % 5 == 0) gs.mineralLocking();
+            if (gs.frameCount > 10 && gs.frameCount % 5 == 0) gs.mineralLocking();
             debugManager.onFrame(gs);
         } catch (Exception e) {
             System.err.println("onFrame Exception");
@@ -714,10 +711,12 @@ public class Ecgberht implements BWEventListener {
                         }
                     } else {
                         gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                        if (!gs.getStrat().name.equals("ProxyBBS") && !gs.getStrat().name.equals("ProxyEightRax")) {
+                        if (!gs.getStrat().proxy) {
                             if (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg) {
                                 if (!gs.DBs.isEmpty()) {
                                     ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
+                                } else if (gs.defendPosition != null) {
+                                    ((MobileUnit) arg0).attack(gs.defendPosition);
                                 } else if (gs.mainChoke != null) {
                                     ((MobileUnit) arg0).attack(gs.mainChoke.getCenter().toPosition());
                                 } else {
@@ -788,6 +787,7 @@ public class Ecgberht implements BWEventListener {
                         if (arg0.equals(gs.chosenHarasser)) {
                             gs.chosenHarasser = null;
                             gs.chosenUnitToHarass = null;
+                            getGs().firstScout = false;
                         }
                         if (arg0.equals(gs.chosenWorker)) gs.chosenWorker = null;
                         if (arg0.equals(gs.chosenRepairer)) gs.chosenRepairer = null;
@@ -846,6 +846,7 @@ public class Ecgberht implements BWEventListener {
                                 break;
                             }
                         }
+                        if(arg0.equals(gs.proxyBuilding)) gs.proxyBuilding = null;
                         for (Entry<SCV, Building> w : gs.workerTask.entrySet()) {
                             if (w.getValue().equals(arg0)) {
                                 if (w.getValue() instanceof CommandCenter) {
