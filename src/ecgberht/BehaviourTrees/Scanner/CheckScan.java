@@ -3,6 +3,8 @@ package ecgberht.BehaviourTrees.Scanner;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.UnitInfo;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
 import org.openbw.bwapi4j.unit.Attacker;
@@ -25,13 +27,17 @@ public class CheckScan extends Conditional {
         try {
             if (gameState.CSs.isEmpty()) return State.FAILURE;
             if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
-                for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
-                    if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.unit instanceof Attacker) {
-                        if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(u -> u.unitType.canAttack())) continue;
-                        gameState.checkScan = e.tileposition;
-                        return State.SUCCESS;
+                for (ComsatStation u : gameState.CSs) {
+                    if(u.getEnergy() < 50) continue;
+                    for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
+                        if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.unit instanceof Attacker) {
+                            if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(a -> a.unitType.canAttack())) continue;
+                            gameState.checkScan = new MutablePair<>(u, e.lastPosition);
+                            return State.SUCCESS;
+                        }
                     }
                 }
+
             }
             List<Base> valid = new ArrayList<>();
             for (Base b : gameState.enemyBLs) {
@@ -47,7 +53,8 @@ public class CheckScan extends Conditional {
             for (ComsatStation u : gameState.CSs) {
                 if (u.getEnergy() == 200) {
                     Random random = new Random();
-                    gameState.checkScan = valid.get(random.nextInt(valid.size())).getLocation();
+                    gameState.checkScan = new MutablePair<>(u,
+                            Util.getUnitCenterPosition(valid.get(random.nextInt(valid.size())).getLocation().toPosition(), gameState.enemyRace.getCenter()));
                     return State.SUCCESS;
                 }
             }

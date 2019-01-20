@@ -112,7 +112,7 @@ public class GameState {
     public SpellsManager wizard = new SpellsManager();
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
-    public TilePosition checkScan = null;
+    public MutablePair<ComsatStation, Position> checkScan = null;
     public TilePosition chosenPosition = null;
     public TilePosition initDefensePosition = null;
     public TrainingFacility chosenBuilding = null;

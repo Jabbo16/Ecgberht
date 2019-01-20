@@ -429,9 +429,9 @@ public class Ecgberht implements BWEventListener {
                 gs.setStrat(new FullMech());
                 transition();
             }
-            // If rushing and enough time has passed -> transition to Bio
-            if (gs.frameCount == 24 * 60 * 7 && gs.getStrat().proxy) {
-                gs.setStrat(new FullBio());
+            // If rushing and enough time has passed -> transition to best strat
+            if (gs.frameCount == 24 * 60 * 8 && gs.getStrat().proxy) {
+                gs.scipio.chooseProxyTransition();
                 List<UnitInfo> workersToDelete = new ArrayList<>();
                 for (UnitInfo u : gs.myArmy) {
                     if (!(u.unit instanceof Worker)) continue;
@@ -577,7 +577,7 @@ public class Ecgberht implements BWEventListener {
                         if (!(arg0 instanceof CommandCenter)) {
                             gs.map.updateMap(arg0.getTilePosition(), type, false);
                             gs.testMap = gs.map.clone();
-                        }
+                        } else if (getGs().iReallyWantToExpand) getGs().iReallyWantToExpand = false;
                         if (arg0 instanceof Addon) return;
                         if (arg0 instanceof CommandCenter && ih.getFrameCount() == 0) return;
                         if (arg0 instanceof Bunker && gs.learningManager.isNaughty() && gs.enemyRace == Race.Zerg) {

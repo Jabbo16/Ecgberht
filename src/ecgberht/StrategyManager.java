@@ -59,6 +59,30 @@ public class StrategyManager {
         if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
+    void chooseProxyTransition() {
+        double C = 0.7;
+        int totalGamesPlayed = getGs().learningManager.getEnemyInfo().wins + getGs().learningManager.getEnemyInfo().losses;
+        List<String> validTransitions = new ArrayList<>(Arrays.asList(b.name, bMFE.name, FM.name));
+        if (getGs().enemyRace == Race.Zerg) validTransitions.add(tPW.name);
+        String bestUCBStrategy = null;
+        double bestUCBStrategyVal = Double.MIN_VALUE;
+        for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
+            if (!validTransitions.contains(strat.getKey())) continue;
+            int sGamesPlayed = strat.getValue().first + strat.getValue().second;
+            double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
+            double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+            double val = sWinRate + ucbVal;
+            if (val > bestUCBStrategyVal) {
+                bestUCBStrategy = strat.getKey();
+                bestUCBStrategyVal = val;
+            }
+        }
+        getGs().ih.sendText("Transitioning from Proxy to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+        strat = nameStrat.get(bestUCBStrategy);
+        if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+    }
+
+
     void updateStrat() {
         if (strat.trainUnits.contains(UnitType.Terran_Firebat) && getGs().enemyRace == Race.Zerg) getGs().maxBats = 3;
         else getGs().maxBats = 0;
@@ -80,7 +104,6 @@ public class StrategyManager {
                 getGs().maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if(true) return tPW;
             if (alwaysZealotRushes()) {
                 IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
                 bFE.armyForExpand += 5;
