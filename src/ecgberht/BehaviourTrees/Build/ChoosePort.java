@@ -1,12 +1,12 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.Player;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.TechType;
+import bwapi.UnitType;
 
 public class ChoosePort extends Action {
 

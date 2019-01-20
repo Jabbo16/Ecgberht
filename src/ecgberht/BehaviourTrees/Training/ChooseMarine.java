@@ -1,14 +1,10 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.*;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Barracks;
 
 
 public class ChooseMarine extends Action {
@@ -38,7 +34,7 @@ public class ChooseMarine extends Action {
                     return State.FAILURE;
                 if (strat.equals("JoyORush") && Util.countBuildingAll(UnitType.Terran_Factory) < 2)
                     return State.FAILURE;
-                for (Barracks b : gameState.MBs) {
+                for (Unit b : gameState.MBs) {
                     if (!b.isTraining()) {
                         gameState.chosenUnit = UnitType.Terran_Marine;
                         gameState.chosenBuilding = b;

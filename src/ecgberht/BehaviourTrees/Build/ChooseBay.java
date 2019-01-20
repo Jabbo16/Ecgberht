@@ -1,15 +1,14 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.EngineeringBay;
+import bwapi.UnitType;
 
 public class ChooseBay extends Action {
 
@@ -28,8 +27,8 @@ public class ChooseBay extends Action {
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Engineering_Bay) return State.FAILURE;
                 }
-                for (Building w : gameState.workerTask.values()) {
-                    if (w instanceof EngineeringBay) return State.FAILURE;
+                for (Unit w : gameState.workerTask.values()) {
+                    if (w.getType() == UnitType.Terran_Engineering_Bay) return State.FAILURE;
                 }
                 gameState.chosenToBuild = UnitType.Terran_Engineering_Bay;
                 return State.SUCCESS;

@@ -1,10 +1,9 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Collections;
 import java.util.TreeSet;
@@ -20,11 +19,11 @@ public class SendToDrop extends Action {
     public State execute() {
         try {
             if (gameState.chosenDropShip != null && gameState.chosenWorker != null) {
-                Worker chosen = gameState.chosenWorker;
+                Unit chosen = gameState.chosenWorker;
                 if (gameState.workerIdle.contains(chosen)) {
                     gameState.workerIdle.remove(chosen);
                 } else if (gameState.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = gameState.workerMining.get(chosen);
+                    Unit mineral = gameState.workerMining.get(chosen);
                     gameState.workerMining.remove(chosen);
                     if (gameState.mineralsAssigned.containsKey(mineral)) {
                         gameState.mining--;

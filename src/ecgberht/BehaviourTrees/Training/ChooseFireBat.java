@@ -1,12 +1,12 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.Race;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
+import bwapi.UnitType;
 
 public class ChooseFireBat extends Action {
 
@@ -20,15 +20,15 @@ public class ChooseFireBat extends Action {
             if (gameState.enemyRace != Race.Zerg) return State.FAILURE;
             if (gameState.UBs.isEmpty()) return State.FAILURE;
             else if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
-                for (ResearchingFacility r : gameState.UBs) {
-                    if (r instanceof Academy) {
+                for (Unit r : gameState.UBs) {
+                    if (r.getType() == UnitType.Terran_Academy) {
                         int count = 0;
-                        for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
+                        for (Unit u : gameState.getPlayer().getUnits()) {
                             if (!u.exists()) continue;
-                            if (u instanceof Firebat) count++;
+                            if (u.getType() == UnitType.Terran_Firebat) count++;
                             if (count >= gameState.maxBats) return State.FAILURE;
                         }
-                        for (Barracks b : gameState.MBs) {
+                        for (Unit b : gameState.MBs) {
                             if (!b.isTraining()) {
                                 gameState.chosenUnit = UnitType.Terran_Firebat;
                                 gameState.chosenBuilding = b;

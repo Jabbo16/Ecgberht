@@ -1,10 +1,9 @@
 package ecgberht;
 
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.PlayerUnit;
-import org.openbw.bwapi4j.unit.SiegeTank;
-import org.openbw.bwapi4j.unit.Unit;
+import bwapi.Player;
+import bwapi.UnitType;
+
+import bwapi.Unit;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class UnitStorage {
         Iterator<Map.Entry<Unit, UnitInfo>> enemyIT = this.enemy.entrySet().iterator();
         while (enemyIT.hasNext()) {
             Map.Entry<Unit, UnitInfo> enemy = enemyIT.next();
-            if ((!enemy.getKey().exists() && getGs().getGame().getBWMap().isVisible(enemy.getValue().lastTileposition)) || (enemy.getKey().exists() && enemy.getValue().unitType != UnitType.None && !(enemy.getKey() instanceof SiegeTank) && enemy.getKey().getType() != enemy.getValue().unitType)) {
+            if ((!enemy.getKey().exists() && getGs().bw.isVisible(enemy.getValue().lastTileposition))) {
                 enemyIT.remove();
                 continue;
             }
@@ -49,33 +48,31 @@ public class UnitStorage {
 
     void onUnitCreate(Unit unit) {
         if (!unit.getType().isBuilding()) return;
-        UnitInfo u = new UnitInfo((PlayerUnit) unit);
+        UnitInfo u = new UnitInfo(unit);
         ally.put(unit, u);
     }
 
     void onUnitComplete(Unit unit) {
         if (this.ally.containsKey(unit)) return;
-        UnitInfo u = new UnitInfo((PlayerUnit) unit);
+        UnitInfo u = new UnitInfo(unit);
         ally.put(unit, u);
     }
 
     void onUnitShow(Unit unit) {
         UnitInfo stored = enemy.get(unit);
         if (stored != null && stored.unitType != unit.getType()) enemy.remove(unit);
-        UnitInfo u = new UnitInfo((PlayerUnit) unit);
+        UnitInfo u = new UnitInfo(unit);
         enemy.put(unit, u);
     }
 
     void onUnitMorph(Unit unit) {
-        UnitInfo stored = enemy.get(unit);
-        if (stored != null && !(unit instanceof SiegeTank) && stored.unitType != unit.getType()) enemy.remove(unit);
-        UnitInfo u = new UnitInfo((PlayerUnit) unit);
+        UnitInfo u = new UnitInfo(unit);
         enemy.put(unit, u);
     }
 
     void onUnitDestroy(Unit unit) {
-        if (unit instanceof PlayerUnit) {
-            Player p = ((PlayerUnit) unit).getPlayer();
+        if (!unit.getPlayer().isNeutral() && !unit.getType().isSpecialBuilding()) {
+            Player p = unit.getPlayer();
             if (p.equals(getGs().self)) this.ally.remove(unit);
             else this.enemy.remove(unit);
         }

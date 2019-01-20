@@ -1,10 +1,10 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
 
 public class ChooseWorkerDrop extends Action {
 
@@ -16,11 +16,11 @@ public class ChooseWorkerDrop extends Action {
     @Override
     public State execute() {
         try {
-            Worker closestWorker = null;
+            Unit closestWorker = null;
             int frame = gameState.frameCount;
-            Position chosen = gameState.chosenDropShip.unit.getPosition();
+            Position chosen = gameState.chosenDropShip.myUnit.getPosition();
             if (!gameState.workerIdle.isEmpty()) {
-                for (Worker u : gameState.workerIdle) {
+                for (Unit u : gameState.workerIdle) {
                     if (u.isCarryingMinerals()) continue;
                     if (u.getLastCommandFrame() == frame) continue;
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
@@ -29,7 +29,7 @@ public class ChooseWorkerDrop extends Action {
                 }
             }
             if (!gameState.workerMining.isEmpty()) {
-                for (Worker u : gameState.workerMining.keySet()) {
+                for (Unit u : gameState.workerMining.keySet()) {
                     if (u.isCarryingMinerals()) continue;
                     if (u.getLastCommandFrame() == frame) continue;
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {

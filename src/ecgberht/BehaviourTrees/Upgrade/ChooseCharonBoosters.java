@@ -1,12 +1,11 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
+import bwapi.Unit;
+import bwapi.UpgradeType;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
-import org.openbw.bwapi4j.unit.MachineShop;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
+import bwapi.UnitType;
 
 public class ChooseCharonBoosters extends Action {
 
@@ -20,8 +19,8 @@ public class ChooseCharonBoosters extends Action {
             if (gameState.UBs.isEmpty() || !gameState.getStrat().trainUnits.contains(UnitType.Terran_Goliath) || gameState.maxGoliaths == 0) {
                 return State.FAILURE;
             }
-            for (ResearchingFacility u : gameState.UBs) {
-                if (!(u instanceof MachineShop)) continue;
+            for (Unit u : gameState.UBs) {
+                if (u.getType() != UnitType.Terran_Machine_Shop) continue;
                 if (gameState.getPlayer().getUpgradeLevel(UpgradeType.Charon_Boosters) < 1 && u.canUpgrade(UpgradeType.Charon_Boosters) && !u.isResearching() && !u.isUpgrading()) {
                     gameState.chosenUnitUpgrader = u;
                     gameState.chosenUpgrade = UpgradeType.Charon_Boosters;

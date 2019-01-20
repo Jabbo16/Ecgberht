@@ -1,10 +1,10 @@
 package ecgberht.Strategies;
 
+import bwapi.TechType;
+import bwapi.UpgradeType;
 import ecgberht.Strategy;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import bwapi.UnitType;
 
 public class FullBio extends Strategy {
 

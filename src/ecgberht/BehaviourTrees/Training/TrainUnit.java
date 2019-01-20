@@ -1,13 +1,13 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.TrainingFacility;
+import bwapi.UnitType;
 
 public class TrainUnit extends Action {
 
@@ -19,7 +19,7 @@ public class TrainUnit extends Action {
     public State execute() {
         try {
             if (gameState.chosenUnit == UnitType.None) return State.FAILURE;
-            TrainingFacility chosen = gameState.chosenBuilding;
+            Unit chosen = gameState.chosenBuilding;
             if (gameState.getStrat().name.equals("ProxyBBS")) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2 &&
                         Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {

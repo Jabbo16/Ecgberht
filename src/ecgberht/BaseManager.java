@@ -1,12 +1,11 @@
 package ecgberht;
 
+import bwapi.Player;
+import bwapi.TilePosition;
 import bwem.BWEM;
 import bwem.Base;
 import bwem.area.Area;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.unit.ResourceDepot;
-import org.openbw.bwapi4j.unit.Unit;
+import bwapi.Unit;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,7 +31,7 @@ public class BaseManager {
     }
 
     public List<Garrison> getEnemyBases() {
-        return garrisons.stream().filter(u -> u.player.equals(getGs().getIH().enemy())).collect(Collectors.toList());
+        return garrisons.stream().filter(u -> u.player.equals(getGs().bw.enemy())).collect(Collectors.toList());
     }
 
     public class Garrison {
@@ -45,7 +44,7 @@ public class BaseManager {
         boolean starting;
         boolean island;
         int lastFrameVisible = 0;
-        ResourceDepot depot = null;
+        Unit depot = null;
 
         public Garrison(Base bwemBase) {
             base = bwemBase;

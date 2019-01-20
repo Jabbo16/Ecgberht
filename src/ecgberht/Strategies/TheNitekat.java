@@ -2,8 +2,8 @@ package ecgberht.Strategies;
 
 import ecgberht.Strategy;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.TechType;
+import bwapi.UnitType;
 
 public class TheNitekat extends Strategy {
 

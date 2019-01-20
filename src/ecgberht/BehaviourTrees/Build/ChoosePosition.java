@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.*;
 import bwem.Base;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
@@ -9,11 +10,6 @@ import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +30,7 @@ public class ChoosePosition extends Action {
             TilePosition origin;
             if (gameState.chosenToBuild.isRefinery()) {
                 if (!gameState.vespeneGeysers.isEmpty()) {
-                    for (Entry<VespeneGeyser, Boolean> g : gameState.vespeneGeysers.entrySet()) {
+                    for (Entry<Unit, Boolean> g : gameState.vespeneGeysers.entrySet()) {
                         if (!g.getValue()) {
                             gameState.chosenPosition = g.getKey().getTilePosition();
                             return State.SUCCESS;
@@ -68,18 +64,18 @@ public class ChoosePosition extends Action {
                 }
                 List<Base> remove = new ArrayList<>();
                 for (Base b : valid) {
-                    if (gameState.getGame().getBWMap().isVisible(b.getLocation())
-                            && !gameState.getGame().getBWMap().isBuildable(b.getLocation(), true)) {
+                    if (gameState.bw.isVisible(b.getLocation())
+                            && !gameState.bw.isBuildable(b.getLocation(), true)) {
                         remove.add(b);
                         continue;
                     }
                     if (b.getArea() != gameState.naturalArea) {
-                        for (Unit u : gameState.enemyCombatUnitMemory) {
-                            if (gameState.bwem.getMap().getArea(u.getTilePosition()) == null ||
-                                    !(u instanceof Attacker) || u instanceof Worker) {
+                        for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values()) {
+                            if (gameState.bwem.getMap().getArea(u.lastTileposition) == null ||
+                                    !u.isAttacker() || u.unitType.isWorker()) {
                                 continue;
                             }
-                            if (gameState.bwem.getMap().getArea(u.getTilePosition()).equals(b.getArea())) {
+                            if (gameState.bwem.getMap().getArea(u.lastTileposition).equals(b.getArea())) {
                                 remove.add(b);
                                 break;
                             }
@@ -105,7 +101,7 @@ public class ChoosePosition extends Action {
                 }
                 if (!gameState.chosenToBuild.equals(UnitType.Terran_Bunker) && !gameState.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
                     if (gameState.getStrat().proxy && gameState.chosenToBuild == UnitType.Terran_Barracks) {
-                        origin = new TilePosition(gameState.getGame().getBWMap().mapWidth() / 2, gameState.getGame().getBWMap().mapHeight() / 2);
+                        origin = new TilePosition(gameState.bw.mapWidth() / 2, gameState.bw.mapHeight() / 2);
                     } else if (gameState.mainCC != null && gameState.mainCC.first != null) {
                         origin = gameState.mainCC.first.getLocation();
                     } else origin = self.getStartLocation();
@@ -114,7 +110,7 @@ public class ChoosePosition extends Action {
                     else if (gameState.DBs.isEmpty()) {
                         origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
-                        origin = gameState.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                        origin = gameState.DBs.keySet().stream().findFirst().map(Unit::getTilePosition).orElse(null);
                     }
                 } else if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg) {
                     origin = gameState.getBunkerPositionAntiPool();
@@ -167,7 +163,7 @@ public class ChoosePosition extends Action {
                             return State.SUCCESS;
                         } else origin = gameState.mainChoke.getCenter().toTilePosition();
                     }
-                } else origin = gameState.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                } else origin = gameState.Ts.stream().findFirst().map(Unit::getTilePosition).orElse(null);
                 TilePosition position = gameState.testMap.findPositionNew(gameState.chosenToBuild, origin);
                 gameState.testMap = gameState.map.clone();
                 if (position != null) {

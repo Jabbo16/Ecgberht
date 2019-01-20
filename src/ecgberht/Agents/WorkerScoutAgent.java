@@ -1,5 +1,6 @@
 package ecgberht.Agents;
 
+import bwapi.*;
 import bwem.Base;
 import bwem.area.Area;
 import ecgberht.BuildingMap;
@@ -9,13 +10,6 @@ import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.bk.ass.path.Result;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.WalkPosition;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +19,14 @@ import static ecgberht.Ecgberht.getGs;
 
 // Based on SteamHammer worker scout management, props to @JayScott
 public class WorkerScoutAgent extends Agent {
-    private SCV unit;
+    private Unit unit;
     private int currentVertex;
     private List<Position> enemyBaseBorders = new ArrayList<>();
     private Base enemyBase;
     private Status status = Status.IDLE;
     private int enemyNaturalIndex = -1;
-    private Building disrupter = null;
-    private Building proxier = null;
+    private Unit disrupter = null;
+    private Unit proxier = null;
     private boolean stoppedDisrupting = false;
     private SimInfo mySim;
     List<TilePosition> validTiles = new ArrayList<>();
@@ -41,7 +35,7 @@ public class WorkerScoutAgent extends Agent {
     private TilePosition proxyTile = null;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
-        this.unit = (SCV) unit;
+        this.unit = unit;
         this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.enemyBase = enemyBase;
         this.myUnit = unit;
@@ -82,7 +76,7 @@ public class WorkerScoutAgent extends Agent {
             if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
             return true;
         }
-        if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
+        if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unitType == UnitType.Terran_Marine)) {
             getGs().myArmy.add(unitInfo);
             getGs().firstScout = false;
             if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
@@ -96,7 +90,7 @@ public class WorkerScoutAgent extends Agent {
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
                 || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush
                 || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected(mySim.enemies)
-                || IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) > 1)) {
+                || IntelligenceAgency.getNumEnemyBases(getGs().bw.enemy()) > 1)) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
             removedIndex = true;
@@ -128,11 +122,11 @@ public class WorkerScoutAgent extends Agent {
     private void proxy() {
         if (proxier == null) {
             if (unit.getBuildUnit() != null) {
-                proxier = (Building) unit.getBuildUnit();
+                proxier = unit.getBuildUnit();
                 return;
             }
             if (unit.getOrder() != Order.PlaceBuilding) {
-                if (proxyTile.getDistance(unitInfo.tileposition) <= 3) unit.build(proxyTile, UnitType.Terran_Factory);
+                if (proxyTile.getDistance(unitInfo.tileposition) <= 3) unit.build(UnitType.Terran_Factory, proxyTile);
                 else UtilMicro.move(unit, proxyTile.toPosition());
             }
         }
@@ -141,18 +135,18 @@ public class WorkerScoutAgent extends Agent {
     private void disrupt() {
         if (disrupter == null) {
             if (unit.getBuildUnit() != null) {
-                disrupter = (Building) unit.getBuildUnit();
+                disrupter = unit.getBuildUnit();
                 return;
             }
             if (unit.getOrder() != Order.PlaceBuilding) {
-                unit.build(getGs().enemyNaturalBase.getLocation(), UnitType.Terran_Engineering_Bay);
+                unit.build(UnitType.Terran_Engineering_Bay, getGs().enemyNaturalBase.getLocation());
             }
         } else if (disrupter.getRemainingBuildTime() <= 25) {
             unit.haltConstruction();
             stoppedDisrupting = true;
             removedIndex = true;
         } else if (mySim.enemies.stream().anyMatch(u -> u.unit.getDistance(unit) <= 4 * 32)) {
-            if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
+            if (mySim.enemies.stream().anyMatch(u -> u.unitType == UnitType.Zerg_Zergling)) {
                 unit.haltConstruction();
                 stoppedDisrupting = true;
                 if (!removedIndex) {
@@ -165,7 +159,7 @@ public class WorkerScoutAgent extends Agent {
             if (mySim.enemies.size() == 1) {
                 UnitInfo closest = mySim.enemies.iterator().next();
                 Area enemyArea = getGs().bwem.getMap().getArea(closest.tileposition);
-                if (closest.unit instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
+                if (closest.unitType == UnitType.Zerg_Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
                     if (mySim.lose) {
                         unit.haltConstruction();
                         stoppedDisrupting = true;
@@ -177,7 +171,7 @@ public class WorkerScoutAgent extends Agent {
                     } else UtilMicro.attack(unit, mySim.enemies.iterator().next()); // TODO add attack state
                 }
             }
-        } else unit.resumeBuilding(disrupter);
+        } else unit.rightClick(disrupter);
     }
 
     private Status chooseNewStatus() {
@@ -215,7 +209,7 @@ public class WorkerScoutAgent extends Agent {
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
-        if (IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex) {
+        if (IntelligenceAgency.getNumEnemyBases(getGs().bw.enemy()) == 1 && currentVertex == enemyNaturalIndex) {
             return Status.DISRUPTING;
         }
         return Status.EXPLORE;
@@ -228,7 +222,7 @@ public class WorkerScoutAgent extends Agent {
             currentVertex = closestPolygonIndex;
             return enemyBaseBorders.get(closestPolygonIndex);
         }
-        if (currentVertex == enemyNaturalIndex && getGs().getGame().getBWMap().isVisible(getGs().enemyNaturalBase.getLocation())) {
+        if (currentVertex == enemyNaturalIndex && getGs().bw.isVisible(getGs().enemyNaturalBase.getLocation())) {
             currentVertex = (currentVertex + 1) % enemyBaseBorders.size();
             return enemyBaseBorders.get(currentVertex);
         }
@@ -270,11 +264,11 @@ public class WorkerScoutAgent extends Agent {
             TilePosition left = new TilePosition(tp.getX() - 1, tp.getY());
             TilePosition up = new TilePosition(tp.getX(), tp.getY() - 1);
             final boolean edge =
-                    (!getGs().getGame().getBWMap().isValidPosition(right) || getGs().bwem.getMap().getArea(right) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(right))
-                            || (!getGs().getGame().getBWMap().isValidPosition(bottom) || getGs().bwem.getMap().getArea(bottom) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(bottom))
-                            || (!getGs().getGame().getBWMap().isValidPosition(left) || getGs().bwem.getMap().getArea(left) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(left))
-                            || (!getGs().getGame().getBWMap().isValidPosition(up) || getGs().bwem.getMap().getArea(up) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(up));
-            if (edge && getGs().getGame().getBWMap().isBuildable(tp)) {
+                    (!right.isValid(getGs().bw) || getGs().bwem.getMap().getArea(right) != enemyRegion || !getGs().bw.isBuildable(right))
+                            || (!bottom.isValid(getGs().bw) || getGs().bwem.getMap().getArea(bottom) != enemyRegion || !getGs().bw.isBuildable(bottom))
+                            || (!left.isValid(getGs().bw) || getGs().bwem.getMap().getArea(left) != enemyRegion || !getGs().bw.isBuildable(left))
+                            || (!up.isValid(getGs().bw) || getGs().bwem.getMap().getArea(up) != enemyRegion || !getGs().bw.isBuildable(up));
+            if (edge && getGs().bw.isBuildable(tp)) {
                 Position vertex = tp.toPosition().add(new Position(16, 16));
                 double dist = enemyCenter.getDistance(vertex);
                 if (dist > 368.0) {
@@ -288,7 +282,7 @@ public class WorkerScoutAgent extends Agent {
                         vertex = new Position((int) x, (int) y);
                     }
                 }
-                if (getGs().getGame().getBWMap().isValidPosition(vertex) && getGs().getGame().getBWMap().isWalkable(vertex.toWalkPosition()))
+                if (vertex.isValid(getGs().bw) && getGs().bw.isWalkable(vertex.toWalkPosition()))
                     unsortedVertices.add(vertex);
             }
         }

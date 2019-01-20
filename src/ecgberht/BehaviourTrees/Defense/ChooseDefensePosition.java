@@ -1,11 +1,12 @@
 package ecgberht.BehaviourTrees.Defense;
 
+import bwapi.Unit;
+import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.*;
+import bwapi.Position;
 
 public class ChooseDefensePosition extends Conditional {
 
@@ -38,12 +39,13 @@ public class ChooseDefensePosition extends Conditional {
     }
 
     private double getScore(Unit unit) {
-        if (unit instanceof Building && unit.getType().canAttack() || unit instanceof Bunker) return 6;
-        else if (unit instanceof Building) return 5;
-        else if (unit instanceof Organic) return 2;
-        else if (unit instanceof Worker) return 1;
-        else if (unit instanceof Mechanical) return 3;
-        else if (unit instanceof Transporter) return 4;
+        UnitType type = unit.getType();
+        if (type.isBuilding() && (unit.getType().canAttack() || type == UnitType.Terran_Bunker)) return 6;
+        else if (type.isBuilding()) return 5;
+        else if (type.isOrganic()) return 2;
+        else if (type.isWorker()) return 1;
+        else if (type.isMechanical()) return 3;
+        else if (type.spaceProvided() > 0) return 4;
         return 1;
     }
 

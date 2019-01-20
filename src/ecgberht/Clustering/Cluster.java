@@ -1,7 +1,7 @@
 package ecgberht.Clustering;
 
 import ecgberht.UnitInfo;
-import org.openbw.bwapi4j.Position;
+import bwapi.Position;
 
 import java.util.Arrays;
 import java.util.Set;

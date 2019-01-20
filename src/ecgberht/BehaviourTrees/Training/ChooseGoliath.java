@@ -3,10 +3,8 @@ package ecgberht.BehaviourTrees.Training;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Armory;
-import org.openbw.bwapi4j.unit.Factory;
-import org.openbw.bwapi4j.unit.Unit;
+import bwapi.UnitType;
+import bwapi.Unit;
 
 public class ChooseGoliath extends Action {
 
@@ -17,15 +15,15 @@ public class ChooseGoliath extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.UBs.stream().filter(unit -> unit instanceof Armory).count() < 1) return State.FAILURE;
+            if (gameState.UBs.stream().filter(unit -> unit.getType() == UnitType.Terran_Armory).count() < 1) return State.FAILURE;
             int count = 0;
-            for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
+            for (Unit u :gameState.getPlayer().getUnits()) {
                 if (!u.exists()) continue;
                 if (u.getType() == UnitType.Terran_Goliath) count++;
                 if (count >= gameState.maxGoliaths) return State.FAILURE;
             }
             if (!gameState.Fs.isEmpty()) {
-                for (Factory b : gameState.Fs) {
+                for (Unit b : gameState.Fs) {
                     if (!b.isTraining() && b.canTrain(UnitType.Terran_Goliath)) {
                         gameState.chosenUnit = UnitType.Terran_Goliath;
                         gameState.chosenBuilding = b;

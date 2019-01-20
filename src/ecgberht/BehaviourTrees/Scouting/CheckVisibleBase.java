@@ -18,7 +18,7 @@ public class CheckVisibleBase extends Conditional {
             if (gameState.chosenScout == null) return State.FAILURE;
             if (!gameState.scoutSLs.isEmpty()) {
                 for (Base b : gameState.scoutSLs) {
-                    if ((gameState.getGame().getBWMap().isVisible(b.getLocation()))) {
+                    if ((gameState.bw.isVisible(b.getLocation()))) {
                         gameState.scoutSLs.remove(b);
                         return State.SUCCESS;
                     }

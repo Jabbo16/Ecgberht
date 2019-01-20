@@ -5,8 +5,6 @@ import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.MobileUnit;
-import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +25,11 @@ public class SendScout extends Action {
                     for (Base b : gameState.scoutSLs) {
                         if (gameState.fortressSpecialBLs.containsKey(b)) continue;
                         if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
-                            if (((MobileUnit) gameState.chosenScout).move(b.getLocation().toPosition())) {
+                            if (gameState.chosenScout.move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
                         } else if (Util.isConnected(b.getLocation(), gameState.chosenScout.getTilePosition())) {
-                            if (((MobileUnit) gameState.chosenScout).move(b.getLocation().toPosition())) {
+                            if (gameState.chosenScout.move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
                         } else aux.add(b);
@@ -40,12 +38,12 @@ public class SendScout extends Action {
                 }
             }
             if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
-                ((MobileUnit) gameState.chosenScout).stop(false);
+                gameState.chosenScout.stop(false);
                 gameState.chosenScout = null;
                 return State.FAILURE;
             }
-            gameState.workerIdle.add((Worker) gameState.chosenScout);
-            ((MobileUnit) gameState.chosenScout).stop(false);
+            gameState.workerIdle.add(gameState.chosenScout);
+            gameState.chosenScout.stop(false);
             gameState.chosenScout = null;
             return State.FAILURE;
         } catch (Exception e) {

@@ -1,12 +1,10 @@
 package ecgberht.Agents;
 
+import bwapi.Order;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.unit.Dropship;
-import org.openbw.bwapi4j.unit.MobileUnit;
-import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
+import bwapi.Unit;
 
 import java.util.Objects;
 import java.util.Set;
@@ -16,9 +14,8 @@ import static ecgberht.Ecgberht.getGs;
 
 public class DropShipAgent extends Agent implements Comparable<Unit> {
 
-    public Dropship unit;
     Status status = Status.IDLE;
-    private Set<Unit> airAttackers = new TreeSet<>();
+    private Set<UnitInfo> airAttackers = new TreeSet<>();
     private Set<Unit> cargoLoaded = new TreeSet<>();
     private Set<Unit> cargoWanted = new TreeSet<>();
     private Position target;
@@ -26,7 +23,6 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     public DropShipAgent(Unit unit) {
         super();
-        this.unit = (Dropship) unit;
         this.myUnit = unit;
     }
 
@@ -49,10 +45,10 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     public void setCargo(Set<Unit> cargo) {
         this.cargoWanted = cargo;
         for (Unit u : this.cargoWanted) {
-            if (u instanceof Worker && (((Worker) u).isCarryingMinerals() || ((Worker) u).isCarryingGas())) {
-                ((Worker) u).returnCargo();
-                ((MobileUnit) u).rightClick(unit, true);
-            } else ((MobileUnit) u).rightClick(unit, false);
+            if (u.getType().isWorker() && (u.isCarryingMinerals() ||  u.isCarryingGas())) {
+                u.returnCargo();
+                u.rightClick(myUnit, true);
+            } else u.rightClick(myUnit, false);
         }
     }
 
@@ -62,8 +58,8 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     private void checkLoaded() {
         if (pickingUp == null) return;
-        Unit transport = ((MobileUnit) pickingUp).getTransport();
-        if (transport != null && transport.equals(unit)) {
+        Unit transport = pickingUp.getTransport();
+        if (transport != null && transport.equals(myUnit)) {
             cargoLoaded.add(pickingUp);
             cargoWanted.remove(pickingUp);
             pickingUp = null;
@@ -72,7 +68,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     private void checkUnloaded() {
         for (Unit u : cargoLoaded) {
-            Unit transport = ((MobileUnit) u).getTransport();
+            Unit transport = u.getTransport();
             if (transport == null) {
                 cargoLoaded.remove(u);
                 break;
@@ -83,9 +79,9 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
-            if (!unit.exists() || unitInfo == null) return true;
+            if (!myUnit.exists() || unitInfo == null) return true;
             actualFrame = getGs().frameCount;
-            frameLastOrder = unit.getLastCommandFrame();
+            frameLastOrder = myUnit.getLastCommandFrame();
             if (actualFrame == frameLastOrder) return false;
             airAttackers.clear();
             if (frameLastOrder == actualFrame) return false;
@@ -119,14 +115,14 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         if (target == null) return;
         checkUnloaded();
         if (cargoLoaded.isEmpty()) return;
-        if (unit.getOrder() == Order.MoveUnload || unit.getOrder() == Order.Unload) return;
-        unit.unloadAll(target);
+        if (myUnit.getOrder() == Order.MoveUnload || myUnit.getOrder() == Order.Unload) return;
+        myUnit.unloadAll(target);
     }
 
     private void moving() {
         if (target == null) return;
-        if (unit.getTargetPosition() != null && unit.getTargetPosition().equals(target)) return;
-        unit.move(target);
+        if (myUnit.getTargetPosition() != null && myUnit.getTargetPosition().equals(target)) return;
+        myUnit.move(target);
     }
 
     private void picking() {
@@ -134,17 +130,17 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         if (pickingUp == null) {
             double distB = Double.MAX_VALUE;
             for (Unit u : cargoWanted) {
-                double distA = Util.broodWarDistance(unit.getPosition(), u.getPosition());
+                double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
                 if (pickingUp == null || distA < distB) {
                     pickingUp = u;
                     distB = distA;
                 }
             }
             if (pickingUp != null) {
-                unit.load((MobileUnit) pickingUp);
+                myUnit.load(pickingUp);
             }
         } else {
-            if (unit.getOrderTarget() != null && unit.getOrderTarget().equals(pickingUp)) return;
+            if (myUnit.getOrderTarget() != null && myUnit.getOrderTarget().equals(pickingUp)) return;
             checkLoaded();
         }
     }
@@ -156,7 +152,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         Position CC = getGs().getNearestCC(myUnit.getPosition(), false);
         if (CC != null) target = CC;
         else target = getGs().getPlayer().getStartLocation().toPosition();
-        ((MobileUnit) myUnit).move(target);
+        myUnit.move(target);
     }
 
     private Status getNewStatus() {
@@ -170,7 +166,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
         }
         if (status == Status.MOVING) {
             if (target == null) return Status.IDLE;
-            if (Util.broodWarDistance(unit.getPosition(), target) < 200) return Status.DROP;
+            if (Util.broodWarDistance(myUnit.getPosition(), target) < 200) return Status.DROP;
             return Status.MOVING;
         }
         if (status == Status.DROP) {
@@ -178,7 +174,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
             else return Status.DROP;
         }
         if (status == Status.RETREAT) {
-            if (target != null && Util.broodWarDistance(unit.getPosition(), target) <= 64) return Status.IDLE;
+            if (target != null && Util.broodWarDistance(myUnit.getPosition(), target) <= 64) return Status.IDLE;
             else return Status.RETREAT;
         }
         return Status.IDLE;
@@ -186,20 +182,20 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this.unit) return true;
+        if (o == this.myUnit) return true;
         if (!(o instanceof DropShipAgent)) return false;
         DropShipAgent dropship = (DropShipAgent) o;
-        return unit.equals(dropship.unit);
+        return myUnit.equals(dropship.myUnit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(unit);
+        return Objects.hash(myUnit.getID());
     }
 
     @Override
     public int compareTo(Unit v1) {
-        return this.unit.getId() - v1.getId();
+        return this.myUnit.getID() - v1.getID();
     }
 
     enum Status {PICKING, MOVING, DROP, RETREAT, IDLE}

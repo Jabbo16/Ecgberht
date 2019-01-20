@@ -1,11 +1,10 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
+import bwapi.Unit;
+import bwapi.UnitType;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.Bunker;
-import org.openbw.bwapi4j.unit.MissileTurret;
 
 public class ChooseBuildingLot extends Action {
 
@@ -16,14 +15,14 @@ public class ChooseBuildingLot extends Action {
     @Override
     public State execute() {
         try {
-            Building savedTurret = null;
-            for (Building b : gameState.buildingLot) {
+            Unit savedTurret = null;
+            for (Unit b : gameState.buildingLot) {
                 if (!b.isUnderAttack()) {
-                    if (b instanceof Bunker) {
+                    if (b.getType() == UnitType.Terran_Bunker) {
                         gameState.chosenBuildingLot = b;
                         return State.SUCCESS;
                     }
-                    if (b instanceof MissileTurret) savedTurret = b;
+                    if (b.getType() == UnitType.Terran_Missile_Turret) savedTurret = b;
                     gameState.chosenBuildingLot = b;
                 }
             }

@@ -1,10 +1,9 @@
 package ecgberht.BehaviourTrees.Recollection;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.GasMiningFacility;
-import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Map.Entry;
 
@@ -18,11 +17,11 @@ public class CollectGas extends Action {
     public State execute() {
         try {
             if (gameState.getPlayer().gas() >= 400) return State.FAILURE;
-            Worker chosen = gameState.chosenWorker;
+            Unit chosen = gameState.chosenWorker;
             if (!gameState.refineriesAssigned.isEmpty()) {
-                GasMiningFacility closestGeyser = null;
+                Unit closestGeyser = null;
                 int workerGas = gameState.getStrat().workerGas == 0 ? 3 : gameState.getStrat().workerGas;
-                for (Entry<GasMiningFacility, Integer> g : gameState.refineriesAssigned.entrySet()) {
+                for (Entry<Unit, Integer> g : gameState.refineriesAssigned.entrySet()) {
                     if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && gameState.mining > 3) {
                         closestGeyser = g.getKey();
                     }

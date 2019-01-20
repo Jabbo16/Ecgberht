@@ -1,10 +1,10 @@
 package ecgberht.BehaviourTrees.AddonBuild;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Starport;
+import bwapi.UnitType;
 
 public class ChooseTower extends Action {
 
@@ -15,7 +15,7 @@ public class ChooseTower extends Action {
     @Override
     public State execute() {
         try {
-            for (Starport c : gameState.Ps) {
+            for (Unit c : gameState.Ps) {
                 if (!c.isTraining() && c.getAddon() == null) {
                     gameState.chosenBuildingAddon = c;
                     gameState.chosenAddon = UnitType.Terran_Control_Tower;

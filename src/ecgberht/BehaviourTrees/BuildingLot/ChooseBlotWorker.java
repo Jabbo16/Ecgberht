@@ -1,11 +1,10 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
 
 import java.util.Map.Entry;
 
@@ -18,17 +17,17 @@ public class ChooseBlotWorker extends Action {
     @Override
     public State execute() {
         try {
-            Worker closestWorker = null;
+            Unit closestWorker = null;
             Position chosen = gameState.chosenBuildingLot.getPosition();
             if (!gameState.workerIdle.isEmpty()) {
-                for (Worker u : gameState.workerIdle) {
+                for (Unit u : gameState.workerIdle) {
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
                         closestWorker = u;
                     }
                 }
             }
             if (!gameState.workerMining.isEmpty()) {
-                for (Entry<Worker, MineralPatch> u : gameState.workerMining.entrySet()) {
+                for (Entry<Unit, Unit> u : gameState.workerMining.entrySet()) {
                     if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.getKey().isCarryingMinerals()) {
                         closestWorker = u.getKey();
                     }

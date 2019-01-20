@@ -1,8 +1,8 @@
 package ecgberht.Agents;
 
 import ecgberht.UnitInfo;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Unit;
+import bwapi.Position;
+import bwapi.Unit;
 
 public abstract class Agent {
 

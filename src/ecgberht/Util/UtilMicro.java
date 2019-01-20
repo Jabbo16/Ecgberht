@@ -1,9 +1,10 @@
 package ecgberht.Util;
 
+import bwapi.Order;
+import bwapi.TechType;
+import bwapi.Unit;
 import ecgberht.UnitInfo;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.unit.*;
+import bwapi.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,65 +14,65 @@ import static ecgberht.Ecgberht.getGs;
 
 public class UtilMicro {
 
-    public static void attack(MobileUnit attacker, Position pos) {
+    public static void attack(Unit attacker, Position pos) {
         if (pos == null || attacker == null || !attacker.exists() || attacker.isAttackFrame() || attacker.isStartingAttack())
             return;
         if (getGs().frameCount == attacker.getLastCommandFrame()) return;
         Position targetPos = attacker.getTargetPosition();
         if (pos.equals(targetPos)) return;
-        if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
-        if (!attacker.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
+        if (!pos.isValid(getGs().bw)) return;
+        if (!attacker.isFlying() && !getGs().bw.isWalkable(pos.toWalkPosition())) return;
         attacker.attack(pos);
     }
 
-    public static void attack(Attacker attacker, UnitInfo target) {
+    public static void attack(Unit attacker, UnitInfo target) {
         try {
             if (attacker == null || target == null || !attacker.exists() || attacker.isStartingAttack() || attacker.isAttackFrame())
                 return;
             if (getGs().frameCount == attacker.getLastCommandFrame()) return;
-            Unit targetUnit = attacker.getTargetUnit();
+            Unit targetUnit = attacker.getTarget();
             if (target.unit.equals(targetUnit)) return;
             if (target.visible) attacker.attack(target.unit);
-            else ((MobileUnit) attacker).move(target.lastPosition);
+            else attacker.move(target.lastPosition);
         } catch (Exception e) {
             System.err.println("UtilMicro Attack Exception");
             e.printStackTrace();
         }
     }
 
-    public static void irradiate(ScienceVessel vessel, PlayerUnit target) {
+    public static void irradiate(Unit vessel, Unit target) {
         if (vessel == null || target == null || !vessel.exists() || !target.exists()) return;
         if (vessel.getOrder() == Order.CastIrradiate) {
-            Unit targetUnit = vessel.getTargetUnit();
+            Unit targetUnit = vessel.getTarget();
             if (target.equals(targetUnit)) return;
         }
-        vessel.irradiate(target);
+        vessel.useTech(TechType.Irradiate, target);
     }
 
-    public static void defenseMatrix(ScienceVessel vessel, MobileUnit target) {
+    public static void defenseMatrix(Unit vessel, Unit target) {
         if (vessel == null || target == null || !vessel.exists() || !target.exists()) return;
         if (vessel.getOrder() == Order.CastDefensiveMatrix) {
-            Unit targetUnit = vessel.getTargetUnit();
+            Unit targetUnit = vessel.getTarget();
             if (target.equals(targetUnit)) return;
         }
-        vessel.defensiveMatrix(target);
+        vessel.useTech(TechType.Defensive_Matrix, target);
     }
 
-    public static void emp(ScienceVessel vessel, Position pos) {
+    public static void emp(Unit vessel, Position pos) {
         if (pos == null || vessel == null || !vessel.exists()) return;
         if (vessel.getOrder() == Order.CastEMPShockwave) {
             Position targetPos = vessel.getTargetPosition();
             if (pos.equals(targetPos)) return;
         }
-        vessel.empShockWave(pos);
+        vessel.useTech(TechType.EMP_Shockwave, pos);
     }
 
-    public static void move(MobileUnit u, Position pos) {
+    public static void move(Unit u, Position pos) {
         if (pos == null || u == null || !u.exists()) return;
         Position targetPos = u.getTargetPosition();
         if (pos.equals(targetPos)) return;
-        if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
-        if (!u.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
+        if (!pos.isValid(getGs().bw)) return;
+        if (!u.isFlying() && !getGs().bw.isWalkable(pos.toWalkPosition())) return;
         u.move(pos);
     }
 
@@ -110,22 +111,22 @@ public class UtilMicro {
         }
     }
 
-    public static void heal(Medic u, PlayerUnit heal) {
+    public static void heal(Unit u, Unit heal) {
         if (u == null || heal == null || u.getLastCommandFrame() == getGs().frameCount) return;
-        Unit targetUnit = u.getTargetUnit();
+        Unit targetUnit = u.getTarget();
         if (heal.equals(targetUnit)) return;
-        u.heal(heal);
+        u.useTech(TechType.Healing, heal);
     }
 
-    public static void heal(Medic u, Position heal) {
-        if (u == null || heal == null || !getGs().bw.getBWMap().isValidPosition(heal)) return;
+    public static void heal(Unit u, Position heal) {
+        if (u == null || heal == null || !heal.isValid(getGs().bw)) return;
         if (u.getLastCommandFrame() == getGs().frameCount) return;
         Position targetPos = u.getTargetPosition();
         if (heal.equals(targetPos)) return;
-        u.heal(heal);
+        u.useTech(TechType.Healing, heal);
     }
 
-    public static void stop(MobileUnit u) {
+    public static void stop(Unit u) {
         if (getGs().frameCount == u.getLastCommandFrame()) return;
         if (u.getOrder() == Order.Stop) return;
         u.stop(false);
@@ -138,9 +139,9 @@ public class UtilMicro {
     }
 
     private static boolean verifyPosition(Position position) {
-        if (!getGs().getGame().getBWMap().isValidPosition(position)) return false;
+        if (!position.isValid(getGs().bw)) return false;
         if (getGs().map.getMap()[position.getY() / 32][position.getX() / 32].equals("0")) return false;
-        return getGs().getGame().getBWMap().isWalkable(position.toWalkPosition());
+        return getGs().bw.isWalkable(position.toWalkPosition());
     }
 
     // Based on @Locutus micro logic, credits to him.
@@ -165,7 +166,7 @@ public class UtilMicro {
                 shouldBreak = true;
             }
         }
-        if (bestPosition != null && getGs().getGame().getBWMap().isValidPosition(bestPosition)) {
+        if (bestPosition != null && bestPosition.isValid(getGs().bw)) {
             return bestPosition;
         }
         return null;

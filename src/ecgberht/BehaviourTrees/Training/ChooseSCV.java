@@ -1,14 +1,13 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.Race;
+import bwapi.Unit;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Barracks;
-import org.openbw.bwapi4j.unit.CommandCenter;
+import bwapi.UnitType;
 
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class ChooseSCV extends Action {
             String strat = gameState.getStrat().name;
             if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax")) {
                 boolean notTraining = false;
-                for (Barracks b : gameState.MBs) {
+                for (Unit b : gameState.MBs) {
                     if (!b.isTraining()) {
                         notTraining = true;
                         break;
@@ -38,15 +37,15 @@ public class ChooseSCV extends Action {
                 return State.FAILURE;
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) <= gameState.mineralsAssigned.size() * 2 + gameState.refineriesAssigned.size() * 3 + gameState.getStrat().extraSCVs && !gameState.CCs.isEmpty()) {
-                for (Map.Entry<Base, CommandCenter> b : gameState.islandCCs.entrySet()) {
-                    if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
+                for (Map.Entry<Base, Unit> b : gameState.islandCCs.entrySet()) {
+                    if (!b.getValue().isTraining() && !(b.getValue().getAddon() != null && !b.getValue().getAddon().isCompleted()) && Util.hasFreePatches(b.getKey())) {
                         gameState.chosenUnit = UnitType.Terran_SCV;
                         gameState.chosenBuilding = b.getValue();
                         return State.SUCCESS;
                     }
                 }
-                for (Map.Entry<Base, CommandCenter> b : gameState.CCs.entrySet()) {
-                    if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
+                for (Map.Entry<Base, Unit> b : gameState.CCs.entrySet()) {
+                    if (!b.getValue().isTraining() && !(b.getValue().getAddon() != null && !b.getValue().getAddon().isCompleted()) && Util.hasFreePatches(b.getKey())) {
                         gameState.chosenUnit = UnitType.Terran_SCV;
                         gameState.chosenBuilding = b.getValue();
                         return State.SUCCESS;

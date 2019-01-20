@@ -1,5 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import bwem.Base;
 import bwem.area.Area;
 import ecgberht.GameState;
@@ -7,10 +9,7 @@ import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.SCV;
+import bwapi.UnitType;
 
 import java.util.Map.Entry;
 
@@ -23,14 +22,14 @@ public class WorkerWalkBuild extends Action {
     @Override
     public State execute() {
         try {
-            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
-                SCV chosen = u.getKey();
+            for (Entry<Unit, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
+                Unit chosen = u.getKey();
                 if (u.getValue().first != UnitType.Terran_Command_Center
-                        || gameState.getGame().getBWMap().isVisible(u.getValue().second)
+                        || gameState.bw.isVisible(u.getValue().second)
                         || !gameState.fortressSpecialBLsTiles.contains(u.getValue().second))
                     continue;
                 Base myBase = Util.getClosestBaseLocation(u.getValue().second.toPosition());
-                MutablePair<MineralPatch, MineralPatch> minerals = gameState.fortressSpecialBLs.get(myBase);
+                MutablePair<Unit, Unit> minerals = gameState.fortressSpecialBLs.get(myBase);
                 Area scvArea = gameState.bwem.getMap().getArea(chosen.getTilePosition());
                 if (!u.getValue().second.equals(new TilePosition(7, 118))) {
                     if (scvArea != null && scvArea.equals(myBase.getArea())) {

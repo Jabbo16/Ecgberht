@@ -1,15 +1,13 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.SCV;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
+import bwapi.UnitType;
 
 public class Move extends Action {
 
@@ -20,12 +18,12 @@ public class Move extends Action {
     @Override
     public State execute() {
         try {
-            Worker chosen = gameState.chosenWorker;
+            Unit chosen = gameState.chosenWorker;
             Position realEnd = Util.getUnitCenterPosition(gameState.chosenPosition.toPosition(), gameState.chosenToBuild);
             if (chosen.move(realEnd)) {
                 if (gameState.workerIdle.contains(chosen)) gameState.workerIdle.remove(chosen);
                 else if (gameState.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = gameState.workerMining.get(chosen);
+                    Unit mineral = gameState.workerMining.get(chosen);
                     gameState.workerMining.remove(chosen);
                     if (gameState.mineralsAssigned.containsKey(mineral)) {
                         gameState.mining--;
@@ -37,7 +35,7 @@ public class Move extends Action {
                         && gameState.naturalChoke != null) {
                     gameState.defendPosition = gameState.naturalChoke.getCenter().toPosition();
                 }
-                gameState.workerBuild.put((SCV) chosen, new MutablePair<>(gameState.chosenToBuild, gameState.chosenPosition));
+                gameState.workerBuild.put(chosen, new MutablePair<>(gameState.chosenToBuild, gameState.chosenPosition));
                 gameState.deltaCash.first += gameState.chosenToBuild.mineralPrice();
                 gameState.deltaCash.second += gameState.chosenToBuild.gasPrice();
                 gameState.chosenWorker = null;

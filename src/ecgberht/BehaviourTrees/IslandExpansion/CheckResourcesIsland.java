@@ -1,14 +1,14 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
+import bwapi.UnitType;
 
 public class CheckResourcesIsland extends Conditional {
 
@@ -20,7 +20,7 @@ public class CheckResourcesIsland extends Conditional {
     public State execute() {
         try {
             MutablePair<Integer, Integer> cash = gameState.getCash();
-            Worker chosen = gameState.chosenWorkerDrop;
+            Unit chosen = gameState.chosenWorkerDrop;
             UnitType chosenType = UnitType.Terran_Command_Center;
             TilePosition start = chosen.getTilePosition();
             TilePosition end = gameState.chosenIsland.getLocation();

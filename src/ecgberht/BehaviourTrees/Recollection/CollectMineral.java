@@ -1,10 +1,9 @@
 package ecgberht.BehaviourTrees.Recollection;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Map.Entry;
 
@@ -17,12 +16,12 @@ public class CollectMineral extends Action {
     @Override
     public State execute() {
         try {
-            Worker chosen = gameState.chosenWorker;
+            Unit chosen = gameState.chosenWorker;
             if (!gameState.mineralsAssigned.isEmpty()) {
-                MineralPatch closestMineral = null;
+                Unit closestMineral = null;
                 int workerPerPatch = 2;
                 if (gameState.workerMining.size() < 7) workerPerPatch = 1;
-                for (Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+                for (Entry<Unit, Integer> m : gameState.mineralsAssigned.entrySet()) {
                     if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral))
                             && m.getValue() < workerPerPatch) {
                         closestMineral = m.getKey();

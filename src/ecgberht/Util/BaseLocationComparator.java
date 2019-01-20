@@ -1,7 +1,7 @@
 package ecgberht.Util;
 
 import bwem.Base;
-import org.openbw.bwapi4j.Position;
+import bwapi.Position;
 
 import java.util.Comparator;
 

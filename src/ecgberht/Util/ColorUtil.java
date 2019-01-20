@@ -1,6 +1,5 @@
 package ecgberht.Util;
 
-import org.openbw.bwapi4j.type.Color;
 
 public class ColorUtil {
     public static final byte Previous = 0x01;
@@ -44,7 +43,7 @@ public class ColorUtil {
         return new String(newTextData);
     }
 
-    public static byte getColor(Color color) {
+  /*  public static byte getColor(Color color) {
         if (color == null) return Clear_formatting;
         switch (color) {
             case RED:
@@ -73,5 +72,5 @@ public class ColorUtil {
                 return Grey;
         }
         return Clear_formatting;
-    }
+    }*/
 }

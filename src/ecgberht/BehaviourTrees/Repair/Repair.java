@@ -1,13 +1,12 @@
 package ecgberht.BehaviourTrees.Repair;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.MobileUnit;
+import bwapi.UnitType;
 
 public class Repair extends Action {
 
@@ -26,7 +25,7 @@ public class Repair extends Action {
                         gameState.workerIdle.remove(gameState.chosenRepairer);
                     } else {
                         if (gameState.workerMining.containsKey(gameState.chosenRepairer)) {
-                            MineralPatch mineral = gameState.workerMining.get(gameState.chosenRepairer);
+                            Unit mineral = gameState.workerMining.get(gameState.chosenRepairer);
                             gameState.workerMining.remove(gameState.chosenRepairer);
                             if (gameState.mineralsAssigned.containsKey(mineral)) {
                                 gameState.mining--;
@@ -44,7 +43,7 @@ public class Repair extends Action {
                     gameState.workerIdle.remove(gameState.chosenRepairer);
                 } else {
                     if (gameState.workerMining.containsKey(gameState.chosenRepairer)) {
-                        MineralPatch mineral = gameState.workerMining.get(gameState.chosenRepairer);
+                        Unit mineral = gameState.workerMining.get(gameState.chosenRepairer);
                         gameState.workerMining.remove(gameState.chosenRepairer);
                         if (gameState.mineralsAssigned.containsKey(mineral)) {
                             gameState.mining--;
@@ -53,8 +52,8 @@ public class Repair extends Action {
                     }
                 }
                 gameState.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
-                if (gameState.chosenUnitRepair instanceof MobileUnit) {
-                    ((MobileUnit) gameState.chosenUnitRepair).move(gameState.chosenRepairer.getPosition());
+                if (gameState.chosenUnitRepair.getType().canMove()) {
+                    gameState.chosenUnitRepair.move(gameState.chosenRepairer.getPosition());
                 }
                 gameState.chosenUnitRepair = null;
                 gameState.chosenRepairer = null;

@@ -1,17 +1,12 @@
 package ecgberht.Agents;
 
+import bwapi.*;
 import bwem.Base;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Bunker;
-import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.Vulture;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -22,7 +17,6 @@ import static ecgberht.Ecgberht.getGs;
 
 public class VultureAgent extends Agent implements Comparable<Unit> {
 
-    public Vulture unit;
     private int mines = 3;
     private UnitType type = UnitType.Terran_Vulture;
     private int lastPatrolFrame = 0;
@@ -31,44 +25,43 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     public VultureAgent(Unit unit) {
         super();
         this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
-        this.unit = (Vulture) unit;
         this.myUnit = unit;
     }
 
     public void placeMine(Position pos) {
-        if (mines > 0) unit.spiderMine(pos);
+        if (mines > 0) myUnit.useTech(TechType.Spider_Mines, pos);
     }
 
     @Override
     public boolean runAgent() {
         try {
-            if (!unit.exists() || unitInfo == null) return true;
-            if (unit.getHitPoints() <= 20) {
+            if (!myUnit.exists() || unitInfo == null) return true;
+            if (myUnit.getHitPoints() <= 20) {
                 MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
                     Position ccPos = cc.second.getPosition();
-                    if (getGs().getGame().getBWMap().isValidPosition(ccPos)) {
-                        unit.move(ccPos);
+                    if (ccPos.isValid(getGs().bw)) {
+                        myUnit.move(ccPos);
                         getGs().myArmy.add(unitInfo);
                         return true;
                     }
                 }
-                unit.move(getGs().getPlayer().getStartLocation().toPosition());
+                myUnit.move(getGs().getPlayer().getStartLocation().toPosition());
                 getGs().myArmy.add(unitInfo);
                 return true;
             }
             mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
             actualFrame = getGs().frameCount;
-            frameLastOrder = unit.getLastCommandFrame();
+            frameLastOrder = myUnit.getLastCommandFrame();
             if (frameLastOrder == actualFrame) return false;
             //Status old = status;
             getNewStatus();
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
-            if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
-                Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
-                if (pos == null || !getGs().getGame().getBWMap().isValidPosition(pos)) return false;
-                UtilMicro.move(unit, pos);
+            if ((status == Status.ATTACK || status == Status.IDLE) && (myUnit.isIdle() || myUnit.getOrder() == Order.PlayerGuard)) {
+                Position pos = Util.chooseAttackPosition(myUnit.getPosition(), false);
+                if (pos == null || !pos.isValid(getGs().bw)) return false;
+                UtilMicro.move(myUnit, pos);
                 status = Status.ATTACK;
                 return false;
 
@@ -99,11 +92,11 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void patrol() {
-        if (unit.getOrder() == Order.Patrol) return;
-        if (attackUnit != null && unit.getOrder() != Order.Patrol) {
-            Position pos = Util.choosePatrolPositionVulture(unit, attackUnit);
-            if (pos != null && getGs().getGame().getBWMap().isValidPosition(pos)) {
-                unit.patrol(pos);
+        if (myUnit.getOrder() == Order.Patrol) return;
+        if (attackUnit != null && myUnit.getOrder() != Order.Patrol) {
+            Position pos = Util.choosePatrolPositionVulture(myUnit, attackUnit);
+            if (pos != null && pos.isValid(getGs().bw)) {
+                myUnit.patrol(pos);
                 attackUnit = null;
                 lastPatrolFrame = actualFrame;
                 return;
@@ -116,14 +109,14 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         UnitInfo toAttack = Util.getRangedTarget(unitInfo, mySim.enemies);
         if (toAttack != null) {
             if (attackUnit != null && attackUnit.equals(toAttack)) return;
-            UtilMicro.attack(unit, toAttack);
+            UtilMicro.attack(myUnit, toAttack);
             attackUnit = toAttack;
         }
     }
 
     private Position selectNewAttack() {
         Position p = Util.chooseAttackPosition(myUnit.getPosition(), false);
-        if (p != null && getGs().getGame().getBWMap().isValidPosition(p)) return p;
+        if (p != null && p.isValid(getGs().bw)) return p;
         if (getGs().enemyMainBase != null) return getGs().enemyMainBase.getLocation().toPosition();
         return null;
     }
@@ -145,8 +138,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void retreat() {
         Position CC = getGs().getNearestCC(myUnit.getPosition(), true);
-        if (CC != null) UtilMicro.move(unit, CC);
-        else UtilMicro.move(unit, getGs().getPlayer().getStartLocation().toPosition());
+        if (CC != null) UtilMicro.move(myUnit, CC);
+        else UtilMicro.move(myUnit, getGs().getPlayer().getStartLocation().toPosition());
         attackPos = null;
         attackUnit = null;
     }
@@ -167,9 +160,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 status = Status.COMBAT;
                 return;
             }
-            int cd = unit.getGroundWeapon().cooldown();
+            int cd = myUnit.getGroundWeaponCooldown();
             UnitInfo closestAttacker = Util.getClosestUnit(unitInfo, mySim.enemies);
-            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < unit.getGroundWeaponMaxRange() * 0.6)) {
+            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < myUnit.getType().groundWeapon().maxRange() * 0.6)) {
                 status = Status.KITE;
                 return;
             }
@@ -181,8 +174,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 if (cd > 0) {
                     if (attackUnit != null) {
                         Position predictedPosition = UtilMicro.predictUnitPosition(attackUnit, 2);
-                        if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
-                            double distPredicted = unit.getDistance(predictedPosition);
+                        if (predictedPosition != null && predictedPosition.isValid(getGs().bw)) {
+                            double distPredicted = myUnit.getDistance(predictedPosition);
                             double distCurrent = unitInfo.getDistance(attackUnit);
                             if (distPredicted > distCurrent) {
                                 status = Status.COMBAT;
@@ -228,7 +221,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private boolean checkOnlyMelees() {
         for (UnitInfo e : mySim.enemies) {
             int weaponRange = (int) e.groundRange;
-            if ((weaponRange > 32 || e.unit instanceof Bunker) && e.unit.getDistance(unit) < weaponRange)
+            if ((weaponRange > 32 || e.unitType == UnitType.Terran_Bunker) && e.unit.getDistance(myUnit) < weaponRange)
                 return false;
         }
         return true;
@@ -236,27 +229,27 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         //Position kite = UtilMicro.kiteAway(unit, closeEnemies);
-        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> u.unit.getDistance(unit)));
-        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.position)).orElse(null);
-        if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
-            kite = UtilMicro.kiteAway(unit, mySim.enemies);
-            if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
+        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> u.unit.getDistance(myUnit)));
+        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(myUnit.getPosition(), unit1.position)).orElse(null);
+        if (kite == null || !kite.isValid(getGs().bw)) {
+            kite = UtilMicro.kiteAway(myUnit, mySim.enemies);
+            if (kite == null || !kite.isValid(getGs().bw)) {
                 retreat();
                 return;
             }
         }
-        UtilMicro.move(unit, kite);
+        UtilMicro.move(myUnit, kite);
     }
 
     private void attack() {
-        if (unit.isAttackFrame()) return;
+        if (myUnit.isAttackFrame()) return;
         attackPos = selectNewAttack();
-        if (attackPos == null || !getGs().bw.getBWMap().isValidPosition(attackPos)) {
+        if (attackPos == null || !attackPos.isValid(getGs().bw)) {
             attackUnit = null;
             attackPos = null;
             return;
         }
-        UtilMicro.attack(unit, attackPos);
+        UtilMicro.attack(myUnit, attackPos);
         attackUnit = null;
     }
 
@@ -265,16 +258,16 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         if (o == this) return true;
         if (!(o instanceof VultureAgent)) return false;
         VultureAgent vulture = (VultureAgent) o;
-        return unit.equals(vulture.unit);
+        return myUnit.equals(vulture.myUnit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(unit);
+        return Objects.hash(myUnit.getID());
     }
 
     @Override
     public int compareTo(Unit v1) {
-        return this.unit.getId() - v1.getId();
+        return this.myUnit.getID() - v1.getID();
     }
 }

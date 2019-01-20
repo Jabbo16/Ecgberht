@@ -1,14 +1,11 @@
 package ecgberht.BehaviourTrees.Scanner;
 
+import bwapi.Unit;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.UnitInfo;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.unit.Attacker;
-import org.openbw.bwapi4j.unit.Burrowable;
-import org.openbw.bwapi4j.unit.ComsatStation;
-import org.openbw.bwapi4j.unit.PlayerUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +21,9 @@ public class CheckScan extends Conditional {
     public State execute() {
         try {
             if (gameState.CSs.isEmpty()) return State.FAILURE;
-            if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
+            if (gameState.frameCount - gameState.startCount > 40 + gameState.bw.getLatency()) {
                 for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
-                    if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.unit instanceof Attacker) {
+                    if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.isAttacker()) {
                         if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(u -> u.unitType.canAttack())) continue;
                         gameState.checkScan = e.tileposition;
                         return State.SUCCESS;
@@ -35,7 +32,7 @@ public class CheckScan extends Conditional {
             }
             List<Base> valid = new ArrayList<>();
             for (Base b : gameState.enemyBLs) {
-                if (gameState.getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
+                if (gameState.bw.isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
                 if (gameState.enemyMainBase != null && gameState.enemyMainBase.getLocation().equals(b.getLocation())) {
@@ -44,7 +41,7 @@ public class CheckScan extends Conditional {
                 valid.add(b);
             }
             if (valid.isEmpty()) return State.FAILURE;
-            for (ComsatStation u : gameState.CSs) {
+            for (Unit u : gameState.CSs) {
                 if (u.getEnergy() == 200) {
                     Random random = new Random();
                     gameState.checkScan = valid.get(random.nextInt(valid.size())).getLocation();

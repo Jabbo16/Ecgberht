@@ -1,11 +1,11 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Factory;
+import bwapi.UnitType;
 
 
 public class ChooseVulture extends Action {
@@ -19,7 +19,7 @@ public class ChooseVulture extends Action {
         try {
             if (!gameState.Fs.isEmpty()) {
                 if (gameState.getStrat().name.equals("VultureRush") || Util.countUnitTypeSelf(UnitType.Terran_Vulture) * 2 <= Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) + 2) {
-                    for (Factory b : gameState.Fs) {
+                    for (Unit b : gameState.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Vulture)) {
                             gameState.chosenUnit = UnitType.Terran_Vulture;
                             gameState.chosenBuilding = b;

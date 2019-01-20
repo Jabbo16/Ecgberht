@@ -1,11 +1,11 @@
 package ecgberht.BehaviourTrees.AddonBuild;
 
+import bwapi.TilePosition;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.UnitType;
 
 public class BuildAddon extends Action {
 

@@ -1,17 +1,11 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.*;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Barracks;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.Factory;
 
 public class ChooseBarracks extends Action {
 
@@ -54,9 +48,9 @@ public class ChooseBarracks extends Action {
                     if (w.first == UnitType.Terran_Barracks) count++;
                     if (w.first == UnitType.Terran_Factory) found = true;
                 }
-                for (Building w : gameState.workerTask.values()) {
-                    if (w instanceof Barracks) count++;
-                    if (w instanceof Factory) found = true;
+                for (Unit w : gameState.workerTask.values()) {
+                    if (w.getType() == UnitType.Terran_Barracks) count++;
+                    if (w.getType() == UnitType.Terran_Factory) found = true;
                 }
                 if (!gameState.Fs.isEmpty()) found = true;
                 if (count + gameState.MBs.size() > gameState.getStrat().numRaxForFac && !found) return State.FAILURE;

@@ -1,11 +1,11 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.Unit;
 import bwem.area.Area;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
 
 public class ChooseWorker extends Action {
 
@@ -17,12 +17,12 @@ public class ChooseWorker extends Action {
     @Override
     public State execute() {
         try {
-            Worker closestWorker = null;
+            Unit closestWorker = null;
             int frame = gameState.frameCount;
             Position chosen = gameState.chosenPosition.toPosition();
             Area posArea = gameState.bwem.getMap().getArea(gameState.chosenPosition);
             if (!gameState.workerIdle.isEmpty()) {
-                for (Worker u : gameState.workerIdle) {
+                for (Unit u : gameState.workerIdle) {
                     if (u.getLastCommandFrame() == frame) continue;
                     Area workerArea = gameState.bwem.getMap().getArea(u.getTilePosition());
                     if (workerArea == null) continue;
@@ -34,7 +34,7 @@ public class ChooseWorker extends Action {
                 }
             }
             if (!gameState.workerMining.isEmpty()) {
-                for (Worker u : gameState.workerMining.keySet()) {
+                for (Unit u : gameState.workerMining.keySet()) {
                     if (u.getLastCommandFrame() == frame) continue;
                     Area workerArea = gameState.bwem.getMap().getArea(u.getTilePosition());
                     if (workerArea == null) continue;

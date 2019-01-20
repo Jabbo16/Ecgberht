@@ -1,12 +1,12 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Factory;
+import bwapi.UnitType;
 
 
 public class ChooseTank extends Action {
@@ -31,7 +31,7 @@ public class ChooseTank extends Action {
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                     MutablePair<Integer, Integer> cash = gameState.getCash();
                     if (cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) return State.FAILURE;
-                    for (Factory b : gameState.Fs) {
+                    for (Unit b : gameState.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                             gameState.chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
                             gameState.chosenBuilding = b;

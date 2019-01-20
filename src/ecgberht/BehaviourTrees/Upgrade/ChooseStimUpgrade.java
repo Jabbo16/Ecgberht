@@ -1,11 +1,11 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
+import bwapi.TechType;
+import bwapi.Unit;
+import bwapi.UnitType;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.unit.Academy;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
 
 public class ChooseStimUpgrade extends Action {
 
@@ -17,8 +17,8 @@ public class ChooseStimUpgrade extends Action {
     public State execute() {
         try {
             if (gameState.UBs.isEmpty()) return State.FAILURE;
-            for (ResearchingFacility u : gameState.UBs) {
-                if (!(u instanceof Academy)) continue;
+            for (Unit u : gameState.UBs) {
+                if (u.getType() != UnitType.Terran_Academy) continue;
                 if (!gameState.getPlayer().hasResearched(TechType.Stim_Packs) && u.canResearch(TechType.Stim_Packs) && !u.isResearching() && !u.isUpgrading()) {
                     gameState.chosenUnitUpgrader = u;
                     gameState.chosenResearch = TechType.Stim_Packs;

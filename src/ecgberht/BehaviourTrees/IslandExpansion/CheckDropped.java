@@ -4,8 +4,7 @@ import ecgberht.Agents.DropShipAgent;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Unit;
 
 
 public class CheckDropped extends Conditional {
@@ -17,7 +16,7 @@ public class CheckDropped extends Conditional {
     @Override
     public State execute() {
         try {
-            Worker scv = gameState.chosenWorkerDrop;
+            Unit scv = gameState.chosenWorkerDrop;
             DropShipAgent ship = gameState.chosenDropShip;
             if (ship == null) return State.SUCCESS;
             if (scv != null && ship.statusToString().equals("RETREAT")) {

@@ -1,13 +1,11 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Academy;
-import org.openbw.bwapi4j.unit.Barracks;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
+import bwapi.UnitType;
 
 import java.util.Set;
 
@@ -23,14 +21,14 @@ public class ChooseMedic extends Action {
         try {
             if (gameState.UBs.isEmpty()) return State.FAILURE;
             else {
-                for (ResearchingFacility u : gameState.UBs) {
-                    if (u instanceof Academy) {
+                for (Unit u : gameState.UBs) {
+                    if (u.getType() == UnitType.Terran_Academy) {
                         int marine_count = 0;
                         if (!gameState.DBs.isEmpty()) {
                             marine_count = gameState.DBs.values().stream().mapToInt(Set::size).sum();
                         }
                         if (!gameState.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
-                            for (Barracks b : gameState.MBs) {
+                            for (Unit b : gameState.MBs) {
                                 if (!b.isTraining()) {
                                     gameState.chosenUnit = UnitType.Terran_Medic;
                                     gameState.chosenBuilding = b;

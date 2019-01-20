@@ -1,13 +1,9 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
+import bwapi.*;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UpgradeType;
-import org.openbw.bwapi4j.unit.Academy;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
 
 public class ChooseMarineRange extends Action {
 
@@ -26,8 +22,8 @@ public class ChooseMarineRange extends Action {
                     return State.FAILURE;
                 }
             }
-            for (ResearchingFacility u : gameState.UBs) {
-                if (!(u instanceof Academy)) continue;
+            for (Unit u : gameState.UBs) {
+                if (u.getType() != UnitType.Terran_Academy) continue;
                 if (gameState.getPlayer().hasResearched(TechType.Stim_Packs) && gameState.getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) < 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
                     gameState.chosenUnitUpgrader = u;
                     gameState.chosenUpgrade = UpgradeType.U_238_Shells;

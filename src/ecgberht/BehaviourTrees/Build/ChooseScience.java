@@ -4,7 +4,7 @@ import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.UnitType;
 
 public class ChooseScience extends Action {
 

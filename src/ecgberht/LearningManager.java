@@ -1,9 +1,9 @@
 package ecgberht;
 
+import bwapi.Race;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.type.Race;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import static ecgberht.Ecgberht.getGame;
 
 public class LearningManager {
 
@@ -62,13 +64,13 @@ public class LearningManager {
     private void writeOpponentInfo(String name, boolean enemyIsRandom) {
         if (enemyIsRandom && enemyInfo.naughty) enemyInfo.naughty = false;
         String path = dir + name + ".json";
-        Util.getIH().sendText("Writing result to: " + path);
+        getGame().sendText("Writing result to: " + path);
         writeJSON(enemyInfo, path);
     }
 
     private void writeOpponentHistory(String name) {
         String path = dir + name + "-History.json";
-        Util.getIH().sendText("Writing history to: " + path);
+        getGame().sendText("Writing history to: " + path);
         writeJSON(enemyHistory, path);
     }
 

@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Defense;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
@@ -8,9 +9,8 @@ import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
+import bwapi.Position;
+import bwapi.UnitType;
 
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,21 +28,21 @@ public class SendDefenders extends Action {
             boolean air_only = true;
             boolean cannon_rush = false;
             for (Unit u : gameState.enemyInBase) {
-                if (u.isFlying() || ((PlayerUnit) u).isCloaked()) continue;
-                if (!cannon_rush && (u instanceof Pylon || u instanceof PhotonCannon)) cannon_rush = true;
+                if (u.isFlying() || u.isCloaked()) continue;
+                if (!cannon_rush && (u.getType() == UnitType.Protoss_Pylon || u.getType() == UnitType.Protoss_Photon_Cannon)) cannon_rush = true;
                 air_only = false;
             }
             Set<UnitInfo> friends = new TreeSet<>();
             for (Squad s : gameState.sqManager.squads.values()) friends.addAll(s.members);
             boolean bunker = false;
             if (!gameState.DBs.isEmpty()) {
-                for (Bunker b : gameState.DBs.keySet()) {
+                for (Unit b : gameState.DBs.keySet()) {
                     friends.add(gameState.unitStorage.getAllyUnits().get(b));
                 }
                 bunker = true;
             }
             int defenders = 6;
-            if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next() instanceof Worker) {
+            if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next().getType().isWorker()) {
                 defenders = 1;
             }
             MutablePair<Boolean, Boolean> battleWin = new MutablePair<>(true, false);
@@ -57,9 +57,9 @@ public class SendDefenders extends Action {
             int notFound = 0;
             if (!air_only && ((!battleWin.first || battleWin.second) || defenders == 1)) {
                 while (gameState.workerDefenders.size() + notFound < defenders && !gameState.workerIdle.isEmpty()) {
-                    Worker closestWorker = null;
+                    Unit closestWorker = null;
                     Position chosen = gameState.attackPosition;
-                    for (Worker u : gameState.workerIdle) {
+                    for (Unit u : gameState.workerIdle) {
                         if (u.getLastCommandFrame() == frame) continue;
                         if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
                             closestWorker = u;
@@ -72,9 +72,9 @@ public class SendDefenders extends Action {
                 }
                 notFound = 0;
                 while (gameState.workerDefenders.size() + notFound < defenders && !gameState.workerMining.isEmpty()) {
-                    Worker closestWorker = null;
+                    Unit closestWorker = null;
                     Position chosen = gameState.attackPosition;
-                    for (Entry<Worker, MineralPatch> u : gameState.workerMining.entrySet()) {
+                    for (Entry<Unit, Unit> u : gameState.workerMining.entrySet()) {
                         if (u.getKey().getLastCommandFrame() == frame) continue;
                         if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen))) {
                             closestWorker = u.getKey();
@@ -82,7 +82,7 @@ public class SendDefenders extends Action {
                     }
                     if (closestWorker != null) {
                         if (gameState.workerMining.containsKey(closestWorker)) {
-                            MineralPatch mineral = gameState.workerMining.get(closestWorker);
+                            Unit mineral = gameState.workerMining.get(closestWorker);
                             gameState.workerDefenders.put(closestWorker, null);
                             if (gameState.mineralsAssigned.containsKey(mineral)) {
                                 gameState.mining--;
@@ -92,11 +92,11 @@ public class SendDefenders extends Action {
                         }
                     } else notFound++;
                 }
-                for (Entry<Worker, Position> u : gameState.workerDefenders.entrySet()) {
+                for (Entry<Unit, Position> u : gameState.workerDefenders.entrySet()) {
                     if (frame == u.getKey().getLastCommandFrame()) continue;
                     if (gameState.attackPosition != null) {
                         gameState.workerDefenders.put(u.getKey(), gameState.attackPosition);
-                        if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next() instanceof Worker) {
+                        if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next().getType().isWorker()) {
                             Unit scouter = gameState.enemyInBase.iterator().next();
                             Unit lastTarget = u.getKey().getOrderTarget();
                             if (lastTarget != null && lastTarget.equals(scouter)) continue;

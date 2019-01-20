@@ -1,17 +1,14 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Barracks;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.Refinery;
-import org.openbw.bwapi4j.unit.VespeneGeyser;
+import bwapi.TechType;
+import bwapi.UnitType;
 
 import java.util.Map.Entry;
 
@@ -43,8 +40,8 @@ public class ChooseRefinery extends Action {
                         break;
                     }
                 }
-                for (Building w : gameState.workerTask.values()) {
-                    if (w instanceof Barracks) {
+                for (Unit w : gameState.workerTask.values()) {
+                    if (w .getType() == UnitType.Terran_Barracks) {
                         found = true;
                         break;
                     }
@@ -52,8 +49,8 @@ public class ChooseRefinery extends Action {
                 if (gameState.MBs.isEmpty() && !found) return State.FAILURE;
             }
             int count = 0;
-            VespeneGeyser geyser = null;
-            for (Entry<VespeneGeyser, Boolean> r : gameState.vespeneGeysers.entrySet()) {
+            Unit geyser = null;
+            for (Entry<Unit, Boolean> r : gameState.vespeneGeysers.entrySet()) {
                 if (r.getValue()) {
                     count++;
                 } else geyser = r.getKey();
@@ -62,8 +59,8 @@ public class ChooseRefinery extends Action {
             for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                 if (w.first == UnitType.Terran_Refinery) return State.FAILURE;
             }
-            for (Building w : gameState.workerTask.values()) {
-                if (w instanceof Refinery && geyser != null && w.getTilePosition().equals(geyser.getTilePosition()))
+            for (Unit w : gameState.workerTask.values()) {
+                if (w.getType() == UnitType.Terran_Refinery && geyser != null && w.getTilePosition().equals(geyser.getTilePosition()))
                     return State.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&

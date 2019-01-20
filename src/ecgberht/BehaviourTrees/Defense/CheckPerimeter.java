@@ -1,5 +1,6 @@
 package ecgberht.BehaviourTrees.Defense;
 
+import bwapi.Unit;
 import bwem.Base;
 import bwem.area.Area;
 import ecgberht.GameState;
@@ -9,9 +10,8 @@ import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
+import bwapi.Position;
+import bwapi.UnitType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,10 +35,11 @@ public class CheckPerimeter extends Conditional {
                 }
             }
             for (Unit u : enemyInvaders) {
+                if(!u.exists()) continue;
                 UnitType uType = u.getType();
-                if (u instanceof Building || ((uType.canAttack() || uType.isSpellcaster() || u instanceof Loadable)
+                if (uType.isBuilding() || ((uType.canAttack() || uType.isSpellcaster() || uType.spaceProvided() > 0)
                         && uType != UnitType.Zerg_Scourge && uType != UnitType.Terran_Valkyrie
-                        && uType != UnitType.Protoss_Corsair && !(u instanceof Overlord))) {
+                        && uType != UnitType.Protoss_Corsair && uType != UnitType.Zerg_Overlord)) {
                     Area enemyArea = gameState.bwem.getMap().getArea(u.getTilePosition());
                     if (enemyArea != null) {
                         Area myMainArea = gameState.mainCC != null ? gameState.mainCC.first.getArea() : null;
@@ -51,8 +52,8 @@ public class CheckPerimeter extends Conditional {
                             break;
                         }
                     }
-                    for (Map.Entry<SCV, Building> c : gameState.workerTask.entrySet()) {
-                        int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
+                    for (Map.Entry<Unit, Unit> c : gameState.workerTask.entrySet()) {
+                        int dist = c.getValue().getType() == UnitType.Terran_Command_Center ? 500 : 200;
                         if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
                             gameState.enemyInBase.add(u);
                             break;
@@ -76,7 +77,7 @@ public class CheckPerimeter extends Conditional {
                             break;
                         }
                     }
-                    for (ResearchingFacility c : gameState.UBs) {
+                    for (Unit c : gameState.UBs) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             gameState.enemyInBase.add(u);
                             break;
@@ -100,8 +101,8 @@ public class CheckPerimeter extends Conditional {
                 return State.SUCCESS;
             }
             int cFrame = gameState.frameCount;
-            List<Worker> toDelete = new ArrayList<>();
-            for (Worker u : gameState.workerDefenders.keySet()) {
+            List<Unit> toDelete = new ArrayList<>();
+            for (Unit u : gameState.workerDefenders.keySet()) {
                 if (u.getLastCommandFrame() == cFrame) continue;
                 Position closestDefense;
                 if (gameState.learningManager.isNaughty()) {
@@ -118,7 +119,7 @@ public class CheckPerimeter extends Conditional {
                     toDelete.add(u);
                 }
             }
-            for (Worker u : toDelete) {
+            for (Unit u : toDelete) {
                 u.stop(false);
                 gameState.workerDefenders.remove(u);
                 gameState.workerIdle.add(u);

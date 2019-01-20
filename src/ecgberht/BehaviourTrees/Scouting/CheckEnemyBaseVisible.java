@@ -1,16 +1,15 @@
 package ecgberht.BehaviourTrees.Scouting;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.UnitInfo;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.PlayerUnit;
-import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CheckEnemyBaseVisible extends Action {
@@ -22,17 +21,17 @@ public class CheckEnemyBaseVisible extends Action {
     @Override
     public State execute() {
         try {
-            List<PlayerUnit> enemies = gameState.getGame().getUnits(gameState.getIH().enemy());
+            Set<Unit> enemies = gameState.bw.enemy().getUnits();
             if (!enemies.isEmpty()) {
                 for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                     if (Util.broodWarDistance(gameState.chosenScout.getPosition(), u.lastPosition) <= 500) {
                         gameState.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
                         gameState.scoutSLs = new HashSet<>();
                         if (!gameState.getStrat().name.equals("PlasmaWraithHell")) {
-                            gameState.chosenHarasser = (Worker) gameState.chosenScout;
+                            gameState.chosenHarasser = gameState.chosenScout;
                         }
                         gameState.chosenScout = null;
-                        gameState.getIH().sendText("!");
+                        gameState.bw.sendText("!");
                         gameState.playSound("gearthere.mp3");
                         gameState.enemyBLs.clear();
                         gameState.enemyBLs.addAll(gameState.BLs);

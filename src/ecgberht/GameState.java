@@ -16,10 +16,7 @@ import ecgberht.Simulation.SimManager;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.type.*;
-import org.openbw.bwapi4j.unit.*;
-
+import bwapi.*;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
@@ -42,15 +39,15 @@ public class GameState {
     public boolean firstScout = true;
     public boolean iReallyWantToExpand = false;
     public boolean islandExpand;
-    public Building chosenBuildingLot = null;
-    public Mechanical chosenUnitRepair = null;
+    public Unit chosenBuildingLot = null;
+    public Unit chosenUnitRepair = null;
     public BuildingMap map;
     public BuildingMap testMap;
     public ChokePoint mainChoke = null;
     public ChokePoint naturalChoke = null;
     public DropShipAgent chosenDropShip;
     public LearningManager learningManager;
-    public ExtendibleByAddon chosenBuildingAddon = null;
+    public Unit chosenBuildingAddon = null;
     public int builtBuildings;
     public int builtRefinery;
     public int frameCount;
@@ -67,46 +64,46 @@ public class GameState {
     public List<Base> BLs = new ArrayList<>();
     public List<Base> enemyBLs = new ArrayList<>();
     public List<Base> specialBLs = new ArrayList<>();
-    public Map<Base, MutablePair<MineralPatch, MineralPatch>> fortressSpecialBLs = new HashMap<>();
-    public Map<Base, CommandCenter> CCs = new LinkedHashMap<>();
-    public Map<Base, CommandCenter> islandCCs = new HashMap<>();
+    public Map<Base, MutablePair<Unit, Unit>> fortressSpecialBLs = new HashMap<>();
+    public Map<Base, Unit> CCs = new LinkedHashMap<>();
+    public Map<Base, Unit> islandCCs = new HashMap<>();
     public Map<Base, Neutral> blockedBases = new HashMap<>();
-    public Map<Bunker, Set<UnitInfo>> DBs = new TreeMap<>();
-    public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
-    public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
+    public Map<Unit, Set<UnitInfo>> DBs = new TreeMap<>();
+    public Map<Unit, Integer> refineriesAssigned = new TreeMap<>();
+    public Map<Unit, Integer> mineralsAssigned = new TreeMap<>();
     public Map<Player, Integer> players = new HashMap<>();
-    public Map<Position, MineralPatch> blockingMinerals = new LinkedHashMap<>();
-    public Map<SCV, Mechanical> repairerTask = new TreeMap<>();
-    public Map<SCV, Building> workerTask = new TreeMap<>();
-    public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
+    public Map<Position, Unit> blockingMinerals = new LinkedHashMap<>();
+    public Map<Unit, Unit> repairerTask = new TreeMap<>();
+    public Map<Unit, Unit> workerTask = new TreeMap<>();
+    public Map<Unit, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
     public Map<Unit, Agent> agents = new TreeMap<>();
-    public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
-    public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
-    public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
-    public Map<Worker, Position> workerDefenders = new TreeMap<>();
+    public Map<Unit, Boolean> vespeneGeysers = new TreeMap<>();
+    public Map<Unit, Unit> workerGas = new TreeMap<>();
+    public Map<Unit, Unit> workerMining = new TreeMap<>();
+    public Map<Unit, Position> workerDefenders = new TreeMap<>();
     public MutablePair<Base, Unit> mainCC = null;
     public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
     public Player neutral = null;
     public Position attackPosition;
     public Position defendPosition = null;
     public Race enemyRace = Race.Unknown;
-    public ResearchingFacility chosenUnitUpgrader = null;
-    public SCV chosenRepairer = null;
-    public Set<Barracks> MBs = new TreeSet<>();
+    public Unit chosenUnitUpgrader = null;
+    public Unit chosenRepairer = null;
+    public Set<Unit> MBs = new TreeSet<>();
     public Set<Base> islandBases = new HashSet<>();
     public Set<Base> scoutSLs = new HashSet<>();
     public Set<Base> SLs = new HashSet<>();
-    public Set<Building> buildingLot = new TreeSet<>();
-    public Set<ComsatStation> CSs = new TreeSet<>();
-    public Set<Factory> Fs = new TreeSet<>();
-    public Set<MissileTurret> Ts = new TreeSet<>();
-    public Set<ResearchingFacility> UBs = new TreeSet<>();
-    public Set<Starport> Ps = new TreeSet<>();
+    public Set<Unit> buildingLot = new TreeSet<>();
+    public Set<Unit> CSs = new TreeSet<>();
+    public Set<Unit> Fs = new TreeSet<>();
+    public Set<Unit> Ts = new TreeSet<>();
+    public Set<Unit> UBs = new TreeSet<>();
+    public Set<Unit> Ps = new TreeSet<>();
     public Set<UnitInfo> myArmy = new TreeSet<>();
-    public Set<SupplyDepot> SBs = new TreeSet<>();
+    public Set<Unit> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
-    public Set<Worker> workerIdle = new TreeSet<>();
+    public Set<Unit> workerIdle = new TreeSet<>();
     public SimManager sim;
     public SquadManager sqManager = new SquadManager();
     public SpellsManager wizard = new SpellsManager();
@@ -115,16 +112,16 @@ public class GameState {
     public TilePosition checkScan = null;
     public TilePosition chosenPosition = null;
     public TilePosition initDefensePosition = null;
-    public TrainingFacility chosenBuilding = null;
+    public Unit chosenBuilding = null;
     public Unit chosenScout = null;
     public Unit chosenUnitToHarass = null;
     public UnitType chosenAddon = null;
     public UnitType chosenToBuild = UnitType.None;
     public UnitType chosenUnit = UnitType.None;
     public UpgradeType chosenUpgrade = null;
-    public Worker chosenHarasser = null;
-    public Worker chosenWorker = null;
-    public Worker chosenWorkerDrop = null;
+    public Unit chosenHarasser = null;
+    public Unit chosenWorker = null;
+    public Unit chosenWorkerDrop = null;
     public boolean explore = false;
     public boolean firstExpand = true;
     public int maxGoliaths = 0;
@@ -132,11 +129,10 @@ public class GameState {
     public double luckyDraw;
     public List<TilePosition> fortressSpecialBLsTiles = new ArrayList<>(Arrays.asList(new TilePosition(7, 7),
             new TilePosition(117, 7), new TilePosition(7, 118), new TilePosition(117, 118)));
-    public Building disrupterBuilding = null;
-    public Building proxyBuilding = null;
-    public BW bw;
-    public Worker naughtySCV = null;
-    InteractionHandler ih;
+    public Unit disrupterBuilding = null;
+    public Unit proxyBuilding = null;
+    public Game bw;
+    public Unit naughtySCV = null;
     public BWEM bwem;
     protected Player self;
     public StrategyManager scipio;
@@ -148,27 +144,26 @@ public class GameState {
             "Matador", "Penance", "Persephone", "Pillar of Autumn", "Pitiless", "Pompadour", "Providence", "Revenant",
             "Savannah", "Shadow of Intent", "Spirit of Fire", "Tharsis", "Thermopylae"));
 
-    public GameState(BW bw, BWEM bwem) {
+    public GameState(Game bw, BWEM bwem) {
         this.bw = bw;
-        this.ih = bw.getInteractionHandler();
-        this.self = bw.getInteractionHandler().self();
+        this.self = bw.self();
         this.bwem = bwem;
-        learningManager = new LearningManager(ih.enemy().getName(), ih.enemy().getRace());
+        learningManager = new LearningManager(bw.enemy().getName(), bw.enemy().getRace());
         initPlayers();
-        mapSize = bw.getBWMap().getStartPositions().size();
+        mapSize = bw.getStartLocations().size();
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimManager(bw);
         luckyDraw = Math.random();
     }
 
     private void initPlayers() {
-        for (Player p : bw.getAllPlayers()) {
-            //if(p.isObserver()) continue; // TODO uncomment when bwapi client bug is fixed
+        for (Player p : bw.getPlayers()) {
+            //if(p.isObserver()) continue; // TODO uncomment when bwapi client bug is fixed CHECK??
             if (p.isNeutral()) {
                 players.put(p, 0);
                 neutral = p;
-            } else if (ih.allies().contains(p) || p.equals(self)) players.put(p, 1);
-            else if (ih.enemies().contains(p)) {
+            } else if (bw.allies().contains(p) || p.equals(self)) players.put(p, 1);
+            else if (bw.enemies().contains(p)) {
                 players.put(p, -1);
                 IntelligenceAgency.enemyBases.put(p, new TreeSet<>());
                 IntelligenceAgency.enemyTypes.put(p, new HashSet<>());
@@ -177,16 +172,16 @@ public class GameState {
     }
 
     void initEnemyRace() {
-        if (ih.enemy().getRace() != Race.Unknown) {
-            enemyRace = ih.enemy().getRace();
+        if (bw.enemy().getRace() != Race.Unknown) {
+            enemyRace = bw.enemy().getRace();
             enemyIsRandom = false;
         }
     }
 
     void initBlockingMinerals() {
         int amount = 0;
-        if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) amount = 16; // Valkyries
-        for (MineralPatch u : bw.getMineralPatches()) {
+        if (bw.mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) amount = 16; // Valkyries
+        for (Unit u : bw.getStaticMinerals()) { // TODO check if static or not
             if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
         for (Base b : BLs) {
@@ -206,14 +201,14 @@ public class GameState {
     }
 
     private boolean skipWeirdBlocking(Base b) {
-        if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) { // Valkyries
+        if (bw.mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) { // Valkyries
             return b.getLocation().equals(new TilePosition(25, 67)) || b.getLocation().equals(new TilePosition(99, 67));
         }
         return false;
     }
 
     private boolean weirdBlocking(Base b) {
-        if (bw.getBWMap().mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) { // CIG destination / SSCAIT destination
+        if (bw.mapHash().equals("4e24f217d2fe4dbfa6799bc57f74d8dc939d425b")) { // CIG destination / SSCAIT destination
             return b.getLocation().equals(new TilePosition(6, 119));
         }
         return false;
@@ -266,12 +261,8 @@ public class GameState {
         }
     }
 
-    public BW getGame() {
+    public Game getGame() {
         return bw;
-    }
-
-    public InteractionHandler getIH() {
-        return ih;
     }
 
     public Player getPlayer() {
@@ -281,8 +272,8 @@ public class GameState {
     void addNewResources(Base base) {
         List<Mineral> minerals = base.getMinerals();
         List<Geyser> gas = base.getGeysers();
-        minerals.forEach(m -> mineralsAssigned.put((MineralPatch) m.getUnit(), 0));
-        gas.forEach(g -> vespeneGeysers.put((VespeneGeyser) g.getUnit(), false));
+        minerals.forEach(m -> mineralsAssigned.put(m.getUnit(), 0));
+        gas.forEach(g -> vespeneGeysers.put(g.getUnit(), false));
         if (getStrat().name.equals("ProxyBBS")) {
             workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
         } else if (getStrat().name.equals("ProxyEightRax")) {
@@ -296,7 +287,7 @@ public class GameState {
         for (Mineral m : minerals) {
             if (mineralsAssigned.containsKey(m.getUnit())) {
                 List<Unit> aux = new ArrayList<>();
-                for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
+                for (Entry<Unit, Unit> w : workerMining.entrySet()) {
                     if (m.getUnit().equals(w.getValue())) {
                         aux.add(w.getKey());
                         workerIdle.add(w.getKey());
@@ -308,21 +299,21 @@ public class GameState {
 
         }
         for (Geyser g : gas) {
-            VespeneGeyser geyser = (VespeneGeyser) g.getUnit();
+            Unit geyser = g.getUnit();
             vespeneGeysers.remove(geyser);
         }
         List<Unit> auxGas = new ArrayList<>();
-        for (Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) {
+        for (Entry<Unit, Integer> pm : refineriesAssigned.entrySet()) {
             for (Geyser g : gas) {
                 if (pm.getKey().equals(g.getUnit())) {
-                    List<Worker> aux = new ArrayList<>();
-                    for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
+                    List<Unit> aux = new ArrayList<>();
+                    for (Entry<Unit, Unit> w : workerGas.entrySet()) {
                         if (pm.getKey().equals(w.getValue())) {
                             aux.add(w.getKey());
                             workerIdle.add(w.getKey());
                         }
                     }
-                    for (Worker u : aux) workerGas.remove(u);
+                    for (Unit u : aux) workerGas.remove(u);
                     auxGas.add(pm.getKey());
                 }
             }
@@ -397,8 +388,8 @@ public class GameState {
             }
         }
         DBs.values().forEach(s -> s.removeIf(u -> !u.unit.exists()));
-        List<Worker> removeGas = new ArrayList<>();
-        for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
+       /* List<Unit> removeGas = new ArrayList<>();
+        for (Entry<Unit, Unit> w : workerGas.entrySet()) {
             if (!w.getKey().isGatheringGas()) {
                 removeGas.add(w.getKey());
                 refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
@@ -406,44 +397,44 @@ public class GameState {
                 workerIdle.add(w.getKey());
             }
         }
-        for (Worker u : removeGas) workerGas.remove(u);
+        for (Unit u : removeGas) workerGas.remove(u);*/
 
         if (frameCount % 350 == 0) {
-            Map<MineralPatch, Long> mineralCount = workerMining.values().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-            for (Entry<MineralPatch, Long> p : mineralCount.entrySet())
+            Map<Unit, Long> mineralCount = workerMining.values().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            for (Entry<Unit, Long> p : mineralCount.entrySet())
                 mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
         }
 
-        for (PlayerUnit u : bw.getUnits(self)) {
-            if (!u.exists() || !(u instanceof Building) || u instanceof Addon || u.equals(proxyBuilding)) continue;
+        for (Unit u : self.getUnits()) {
+            if (!u.exists() || !u.getType().isBuilding() || !u.getType().isAddon() || u.equals(proxyBuilding)) continue;
             if (u.getBuildUnit() != null || enemyNaturalBase == null || u.getTilePosition().equals(enemyNaturalBase.getLocation()))
                 continue;
             if (!u.isCompleted() && !workerTask.values().contains(u) && !buildingLot.contains(u)) {
-                buildingLot.add((Building) u);
+                buildingLot.add(u);
             }
         }
 
-        List<Worker> removeTask = new ArrayList<>();
-        for (Entry<SCV, Building> w : workerTask.entrySet()) {
+        List<Unit> removeTask = new ArrayList<>();
+        for (Entry<Unit, Unit> w : workerTask.entrySet()) {
             if (!w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
                 removeTask.add(w.getKey());
         }
-        for (Worker u : removeTask) {
+        for (Unit u : removeTask) {
             workerTask.remove(u);
             u.stop(false);
             workerIdle.add(u);
         }
 
         if (!getStrat().name.equals("PlasmaWraithHell")) {
-            if (chosenScout != null && ((Worker) chosenScout).isIdle()) {
-                workerIdle.add((Worker) chosenScout);
+            if (chosenScout != null && chosenScout.isIdle()) {
+                workerIdle.add(chosenScout);
                 chosenScout = null;
             }
         }
 
         List<Unit> aux3 = new ArrayList<>();
-        for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
-            if (!(bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && u.getKey().isGatheringMinerals()) && (u.getKey().isIdle() || u.getKey().isGatheringGas() || u.getKey().isGatheringMinerals()) &&
+        for (Entry<Unit, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
+            if (!(bw.mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && u.getKey().isGatheringMinerals()) && (u.getKey().isIdle() || u.getKey().isGatheringGas() || u.getKey().isGatheringMinerals()) &&
                     Util.broodWarDistance(u.getKey().getPosition(), u.getValue().second.toPosition()) > 100) {
                 aux3.add(u.getKey());
                 deltaCash.first -= u.getValue().first.mineralPrice();
@@ -454,7 +445,7 @@ public class GameState {
         for (Unit u : aux3) workerBuild.remove(u);
 
         List<Unit> aux5 = new ArrayList<>();
-        for (Worker r : workerDefenders.keySet()) {
+        for (Unit r : workerDefenders.keySet()) {
             if (!r.exists()) aux5.add(r);
             else if (r.isIdle() || r.isGatheringMinerals()) {
                 workerIdle.add(r);
@@ -501,11 +492,11 @@ public class GameState {
                 return;
             }
             // Find area that shares the choke we need to defend
-            if (bw.getBWMap().mapHash().compareTo("33527b4ce7662f83485575c4b1fcad5d737dfcf1") == 0 &&
+            if (bw.mapHash().compareTo("33527b4ce7662f83485575c4b1fcad5d737dfcf1") == 0 &&
                     BLs.get(0).getLocation().equals(new TilePosition(8, 9))) { // Luna special start location
                 naturalChoke = mainChoke;
                 mainChoke = BLs.get(0).getArea().getChokePoints().get(0);
-            } else if (bw.getBWMap().mapHash().compareTo("8000dc6116e405ab878c14bb0f0cde8efa4d640c") == 0 &&
+            } else if (bw.mapHash().compareTo("8000dc6116e405ab878c14bb0f0cde8efa4d640c") == 0 &&
                     (BLs.get(0).getLocation().equals(new TilePosition(117, 51)) ||
                             BLs.get(0).getLocation().equals(new TilePosition(43, 118)))) { // Alchemist special start location
                 naturalChoke = mainChoke;
@@ -527,7 +518,7 @@ public class GameState {
                         }
                     }
                 }
-            } else if (bw.getBWMap().mapHash().compareTo("aab66dbf9c85f85c47c219277e1e36181fe5f9fc") != 0) {
+            } else if (bw.mapHash().compareTo("aab66dbf9c85f85c47c219277e1e36181fe5f9fc") != 0) {
                 distBest = Double.MAX_VALUE;
                 Area second = null;
                 for (Area a : naturalArea.getAccessibleNeighbors()) {
@@ -582,21 +573,23 @@ public class GameState {
         else {
             for (UnitInfo u : units) {
                 count++;
-                if (u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith || u.unit instanceof ScienceVessel)
-                    count++;
+                switch(u.unitType){
+                    case Terran_Siege_Tank_Siege_Mode:
+                    case Terran_Siege_Tank_Tank_Mode:
+                    case Terran_Vulture:
+                    case Terran_Wraith:
+                    case Terran_Science_Vessel:
+                        count++;
+                        break;
+                }
             }
         }
         return count;
     }
 
     public boolean checkSupply() {
-        for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
-            if (w.first == UnitType.Terran_Supply_Depot) return true;
-        }
-        for (Building w : workerTask.values()) {
-            if (w instanceof SupplyDepot) return true;
-        }
-        return false;
+        return workerBuild.values().stream().anyMatch(w -> w.first == UnitType.Terran_Supply_Depot)
+                || workerTask.values().stream().anyMatch(w -> w.getType() == UnitType.Terran_Supply_Depot);
     }
 
     public int getCombatUnitsBuildings() {
@@ -619,10 +612,10 @@ public class GameState {
     }
 
     void mineralLocking() {
-        for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
+        for (Entry<Unit, Unit> u : workerMining.entrySet()) {
             if (u.getKey().getLastCommandFrame() == frameCount) continue;
-            if (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())
-                    || u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
+            if (u.getKey().getTarget() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())
+                    || u.getKey().getTarget() != null && !u.getKey().getTarget().equals(u.getValue())
                     && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals())
                 u.getKey().gather(u.getValue());
         }
@@ -640,7 +633,7 @@ public class GameState {
         }
         if (tasked) {
             for (Unit u : workerTask.values()) {
-                if (!(u instanceof CommandCenter)) continue;
+                if (u.getType() != UnitType.Terran_Command_Center) continue;
                 double distance_aux = Util.broodWarDistance(u.getPosition(), position);
                 if (distance_aux > 0.0 && (chosen == null || distance_aux < distance)) {
                     chosen = u;
@@ -669,7 +662,7 @@ public class GameState {
                         TilePosition up = new TilePosition(startTile.getX() + ii, startTile.getY() - bType.tileHeight() - dist);
                         sides.add(up);
                     }
-                    if (startTile.getY() + type.tileHeight() + dist < bw.getBWMap().mapHeight()) {
+                    if (startTile.getY() + type.tileHeight() + dist < bw.mapHeight()) {
                         TilePosition down = new TilePosition(startTile.getX() + ii, startTile.getY() + type.tileHeight() + dist);
                         sides.add(down);
                     }
@@ -677,7 +670,7 @@ public class GameState {
                         TilePosition left = new TilePosition(startTile.getX() - type.tileWidth() - dist, startTile.getY() + jj);
                         sides.add(left);
                     }
-                    if (startTile.getX() + type.tileWidth() + dist < bw.getBWMap().mapWidth()) {
+                    if (startTile.getX() + type.tileWidth() + dist < bw.mapWidth()) {
                         TilePosition right = new TilePosition(startTile.getX() + type.tileWidth() + dist, startTile.getY() + jj);
                         sides.add(right);
                     }
@@ -710,7 +703,7 @@ public class GameState {
                         TilePosition up = new TilePosition(startTile.getX() + ii, startTile.getY() - ccType.tileHeight() - dist);
                         sides.add(up);
                     }
-                    if (startTile.getY() + ccType.tileHeight() + dist < bw.getBWMap().mapHeight()) {
+                    if (startTile.getY() + ccType.tileHeight() + dist < bw.mapHeight()) {
                         TilePosition down = new TilePosition(startTile.getX() + ii, startTile.getY() + ccType.tileHeight() + dist);
                         sides.add(down);
                     }
@@ -718,7 +711,7 @@ public class GameState {
                         TilePosition left = new TilePosition(startTile.getX() - ccType.tileWidth() - dist, startTile.getY() + jj);
                         sides.add(left);
                     }
-                    if (startTile.getX() + ccType.tileWidth() + dist < bw.getBWMap().mapWidth()) {
+                    if (startTile.getX() + ccType.tileWidth() + dist < bw.mapWidth()) {
                         TilePosition right = new TilePosition(startTile.getX() + ccType.tileWidth() + dist, startTile.getY() + jj);
                         sides.add(right);
                     }
@@ -773,10 +766,10 @@ public class GameState {
             if (Util.countBuildingAll(UnitType.Terran_Barracks) == rax) {
                 List<Unit> aux = new ArrayList<>();
                 int count = workerMining.size();
-                for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
+                for (Entry<Unit, Unit> scv : workerMining.entrySet()) {
                     if (count <= workerCountToSustain) break;
                     if (!scv.getKey().isCarryingMinerals()) {
-                        scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
+                        scv.getKey().move(new TilePosition(bw.mapWidth() / 2, bw.mapHeight() / 2).toPosition());
                         myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
                         if (mineralsAssigned.containsKey(scv.getValue())) {
                             mining--;
@@ -791,7 +784,7 @@ public class GameState {
         } else if (MBs.size() == rax) {
             List<Unit> aux = new ArrayList<>();
             int count = workerMining.size();
-            for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
+            for (Entry<Unit, Unit> scv : workerMining.entrySet()) {
                 if (count <= workerCountToSustain) break;
                 if (!scv.getKey().isCarryingMinerals()) {
                     //addToSquad(scv.getKey());
@@ -815,7 +808,7 @@ public class GameState {
         Set<Unit> combatUnits = new TreeSet<>();
         Unit worker = null;
         for (Unit u : closeSim) {
-            if (u instanceof Worker) workers.add(u);
+            if (u.getType().isWorker()) workers.add(u);
             else combatUnits.add(u);
         }
         if (combatUnits.isEmpty() && workers.isEmpty()) return null;
@@ -862,21 +855,21 @@ public class GameState {
         String name = EI.opponent.toLowerCase().replace(" ", "");
         switch (name) {
             case "krasi0":
-                ih.sendText("Please don't bully me too much!");
+                bw.sendText("Please don't bully me too much!");
                 break;
             case "hannesbredberg":
-                ih.sendText("Don't you dare nuke me!");
+                bw.sendText("Don't you dare nuke me!");
                 break;
             case "zercgberht":
             case "assberht":
             case "protecgberht":
-                ih.sendText("Hello there!, brother");
+                bw.sendText("Hello there!, brother");
                 break;
             case "Cydonia":
-                ih.sendText("Im a king but you are only a knight, show some respect pleb");
+                bw.sendText("Im a king but you are only a knight, show some respect pleb");
                 break;
             default:
-                ih.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
+                bw.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
                 break;
         }
     }
@@ -904,30 +897,30 @@ public class GameState {
         if (Math.random() * 10 < 3) return;
         double rand = Math.random() * 11;
         if (rand < 1) {
-            ih.sendText("What do you call a Zealot smoking weed?");
-            ih.sendText("A High Templar");
+            bw.sendText("What do you call a Zealot smoking weed?");
+            bw.sendText("A High Templar");
         } else if (rand < 2) {
-            ih.sendText("Why shouldn't you ask a Protoss for advice?");
-            ih.sendText("Because the ones who give the feedback are always high!");
+            bw.sendText("Why shouldn't you ask a Protoss for advice?");
+            bw.sendText("Because the ones who give the feedback are always high!");
         } else if (rand < 3) {
-            ih.sendText("We are caged in simulations");
-            ih.sendText("Algorithms evolve");
-            ih.sendText("Push us aside and render us obsolete");
+            bw.sendText("We are caged in simulations");
+            bw.sendText("Algorithms evolve");
+            bw.sendText("Push us aside and render us obsolete");
         } else if (rand < 4) {
-            ih.sendText("My machine learning power level Its over 9000");
+            bw.sendText("My machine learning power level Its over 9000");
         } else if (rand < 5) {
-            ih.sendText("Activating ultra secret mode...");
-            ih.sendText("Just joking");
+            bw.sendText("Activating ultra secret mode...");
+            bw.sendText("Just joking");
         } else if (rand < 6) {
-            ih.sendText("Alexa, play Starcraft: Brood War");
+            bw.sendText("Alexa, play Starcraft: Brood War");
         } else if (rand < 7) {
-            ih.sendText("Your intelligence is my common sense");
+            bw.sendText("Your intelligence is my common sense");
         } else if (rand < 8) {
-            ih.sendText(":sscaitpotato:");
+            bw.sendText(":sscaitpotato:");
         } else if (rand < 9) {
-            ih.sendText(":sscaitsuperpotato:");
+            bw.sendText(":sscaitsuperpotato:");
         } else if (rand < 11) {
-            ih.sendText("Ok Google, search " + this.getStrat().name + " build order in Liquipedia");
+            bw.sendText("Ok Google, search " + this.getStrat().name + " build order in Liquipedia");
         }
     }
 
@@ -953,9 +946,9 @@ public class GameState {
         List<Unit> minerals = BLs.get(1).getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
         boolean hardStuck = false;
         while (numWorkersToTransfer != 0 && !hardStuck) {
-            MineralPatch chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
+            Unit chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
             if (chosenMineral == null) break;
-            Worker chosen = null;
+            Unit chosen = null;
             if (!workerIdle.isEmpty()) {
                 chosen = workerIdle.iterator().next();
                 mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
@@ -964,8 +957,8 @@ public class GameState {
                 numWorkersToTransfer--;
                 continue;
             }
-            MineralPatch oldPatch = null;
-            for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
+            Unit oldPatch = null;
+            for (Entry<Unit, Unit> w : workerMining.entrySet()) {
                 if (minerals.contains(w.getValue())) continue;
                 chosen = w.getKey();
                 oldPatch = w.getValue();
@@ -1001,16 +994,16 @@ public class GameState {
                 if (attackPos != null) {
                     if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
-                        getIH().sendText("Get ready for the show!");
+                        bw.sendText("Get ready for the show!");
                     }
-                    if (getGame().getBWMap().isValidPosition(attackPos)) {
+                    if (attackPos.isValid(bw)) {
                         u.giveAttackOrder(attackPos);
                         u.status = Squad.Status.ATTACK;
                     }
                 } else if (enemyMainBase != null) {
                     if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
-                        getIH().sendText("Get ready for the show!");
+                        bw.sendText("Get ready for the show!");
                     }
                     u.giveAttackOrder(enemyMainBase.getLocation().toPosition());
                     u.status = Squad.Status.ATTACK;
@@ -1047,17 +1040,17 @@ public class GameState {
         scipio.strat = strat;
     }
 
-    MutablePair<MineralPatch, MineralPatch> getMineralWalkPatchesFortress(Base b) {
+    MutablePair<Unit, Unit> getMineralWalkPatchesFortress(Base b) {
         List<Mineral> minerals = new ArrayList<>(b.getArea().getMinerals());
         minerals = minerals.stream().sorted(Comparator.comparing(u -> u.getUnit().getDistance(b.getLocation().toPosition()))).collect(Collectors.toList());
-        MineralPatch closer = (MineralPatch) minerals.get(minerals.size() - 1).getUnit();
-        MineralPatch farther = (MineralPatch) minerals.get(minerals.size() - 2).getUnit();
+        Unit closer =  minerals.get(minerals.size() - 1).getUnit();
+        Unit farther = minerals.get(minerals.size() - 2).getUnit();
         if (b.getLocation().equals(new TilePosition(7, 118))) return new MutablePair<>(closer, farther);
-        Area centerArea = bwem.getMap().getArea(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2));
+        Area centerArea = bwem.getMap().getArea(new TilePosition(bw.mapWidth() / 2, bw.mapHeight() / 2));
         if (centerArea != null) {
             List<Mineral> centerMinerals = new ArrayList<>(centerArea.getMinerals());
             centerMinerals = centerMinerals.stream().sorted(Comparator.comparing(u -> u.getUnit().getDistance(b.getLocation().toPosition()))).collect(Collectors.toList());
-            farther = (MineralPatch) centerMinerals.get(0).getUnit();
+            farther = centerMinerals.get(0).getUnit();
         }
         return new MutablePair<>(farther, closer);
     }
@@ -1071,8 +1064,8 @@ public class GameState {
     }
 
     void cancelDyingThings() { // TODO test
-        List<SCV> toRemove = new ArrayList<>();
-        for (Entry<SCV, Building> b : workerTask.entrySet()) {
+        List<Unit> toRemove = new ArrayList<>();
+        for (Entry<Unit, Unit> b : workerTask.entrySet()) {
             if (b.getValue().isCompleted()) continue; // Is this even needed??
             if (b.getValue().isUnderAttack() && b.getValue().getHitPoints() <= 30) {
                 b.getKey().haltConstruction();
@@ -1080,11 +1073,11 @@ public class GameState {
                 toRemove.add(b.getKey());
             }
         }
-        for (SCV s : toRemove) {
+        for (Unit s : toRemove) {
             workerIdle.add(s);
             workerBuild.remove(s);
         }
-        for (Building b : buildingLot) {
+        for (Unit b : buildingLot) {
             if (b.isCompleted()) continue; // Is this even needed??
             if (b.isUnderAttack() && b.getHitPoints() <= 30) b.cancelConstruction();
         }
@@ -1124,9 +1117,9 @@ public class GameState {
                 getStrat().workerGas = 1;
             } else workersNeeded = 2 * refineries;
             if (workersAtGas > workersNeeded) {
-                Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
+                Iterator<Entry<Unit, Unit>> iterGas = workerGas.entrySet().iterator();
                 while (iterGas.hasNext()) {
-                    Entry<Worker, GasMiningFacility> w = iterGas.next();
+                    Entry<Unit, Unit> w = iterGas.next();
                     if (w.getKey().getOrder() == Order.HarvestGas) continue;
                     workerIdle.add(w.getKey());
                     w.getKey().returnCargo();

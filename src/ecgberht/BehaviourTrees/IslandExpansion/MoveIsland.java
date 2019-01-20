@@ -1,15 +1,14 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.SCV;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
+import bwapi.UnitType;
 
 public class MoveIsland extends Action {
 
@@ -20,12 +19,12 @@ public class MoveIsland extends Action {
     @Override
     public State execute() {
         try {
-            Worker chosen = gameState.chosenWorkerDrop;
+            Unit chosen = gameState.chosenWorkerDrop;
             UnitType chosenType = UnitType.Terran_Command_Center;
             TilePosition chosenTile = gameState.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(chosenTile.toPosition(), chosenType);
             if (chosen.move(realEnd)) {
-                gameState.workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
+                gameState.workerBuild.put(chosen, new MutablePair<>(chosenType, chosenTile));
                 gameState.deltaCash.first += chosenType.mineralPrice();
                 gameState.deltaCash.second += chosenType.gasPrice();
                 gameState.chosenWorkerDrop = null;

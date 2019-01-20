@@ -1,13 +1,12 @@
 package ecgberht.Util;
 
+import bwapi.*;
 import bwem.Base;
 import bwem.ChokePoint;
+import bwem.MutableInt;
 import bwem.area.Area;
+import bwem.unit.NeutralImpl;
 import ecgberht.UnitInfo;
-import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
-import org.openbw.bwapi4j.type.*;
-import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,7 +46,7 @@ public class Util {
 
     public static List<Unit> getUnitsInRectangle(Position topLeft, Position bottomRight) { //TODO test
         List<Unit> units = new ArrayList<>();
-        if (!getGs().getGame().getBWMap().isVisible(topLeft.toTilePosition()) || !getGs().getGame().getBWMap().isVisible(bottomRight.toTilePosition()))
+        if (!getGs().bw.isVisible(topLeft.toTilePosition()) || !getGs().bw.isVisible(bottomRight.toTilePosition()))
             return units;
         for (Unit u : getGs().bw.getAllUnits()) {
             if (!u.exists() || !u.isVisible()) continue;
@@ -61,7 +60,7 @@ public class Util {
 
     public static List<Unit> getUnitsOnTile(TilePosition tile) { //TODO test
         List<Unit> units = new ArrayList<>();
-        if (!getGs().getGame().getBWMap().isVisible(tile)) return units;
+        if (!getGs().bw.isVisible(tile)) return units;
         for (Unit u : getGs().bw.getAllUnits()) {
             if (!u.exists()) continue;
             if (u.getTilePosition().equals(tile)) units.add(u);
@@ -71,11 +70,11 @@ public class Util {
 
     public static int countUnitTypeSelf(UnitType type) {
         int count = 0;
-        for (Unit u : getGs().bw.getUnits(getGs().getPlayer())) {
+        for (Unit u : getGs().getPlayer().getUnits()) {
             if (!u.exists()) continue;
-            if (!type.isBuilding() && type != UnitType.Terran_Science_Vessel && !((PlayerUnit) u).isCompleted())
+            if (!type.isBuilding() && type != UnitType.Terran_Science_Vessel && !u.isCompleted())
                 continue;
-            if (type == UnitType.Terran_Siege_Tank_Tank_Mode && u instanceof SiegeTank) count++;
+            if (type == UnitType.Terran_Siege_Tank_Tank_Mode) count++;
             else if (u.getType() == type) count++;
         }
         return count;
@@ -186,7 +185,7 @@ public class Util {
     }
 
     public static boolean canAttack(UnitInfo attacker, UnitInfo target) {
-        if (attacker.unit.isLockedDown() || !(attacker.unit instanceof Attacker)) return false;
+        if (attacker.unit.isLockedDown() || !(attacker.unitType.canAttack())) return false; // TODO isAttacker
         WeaponType weapon = getWeapon(attacker, target);
         return !(weapon == null);
     }
@@ -209,11 +208,9 @@ public class Util {
 
     public static int getGroundDistance(Position start, Position end) {
         try {
-            MutableInt dist = new MutableInt();
-            getGs().bwem.getMap().getPath(start, end, dist);
-            return dist.intValue();
+            return getGs().bwem.getMap().getPathLength(start, end);
         } catch (Exception e) {
-            return start != null && end != null ? start.getDistance(end) : Integer.MAX_VALUE;
+            return start != null && end != null ? (int) start.getDistance(end) : Integer.MAX_VALUE;
         }
     }
 
@@ -256,7 +253,7 @@ public class Util {
         Position chosen = null;
         double maxScore = 0;
         for (UnitInfo b : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
-            double influence = getScoreAttackPosition((Building) b.unit);
+            double influence = getScoreAttackPosition(b.unit);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
             double score = influence / (2.5 * (flying ? b.lastPosition.getDistance(p) : Util.getGroundDistance(p, b.lastPosition)));
             if (score > maxScore) {
@@ -267,10 +264,11 @@ public class Util {
         return chosen;
     }
 
-    private static double getScoreAttackPosition(Building unit) {
-        if (unit instanceof ResourceDepot) return 8;
-        if (unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
-        if (unit.getType().canAttack() || unit instanceof Bunker) return 6;
+    private static double getScoreAttackPosition(Unit unit) {
+        UnitType type = unit.getType();
+        if (type.isResourceDepot()) return 8;
+        if (!type.researchesWhat().isEmpty() || type.canProduce()) return 4;
+        if (type.canAttack() || type == UnitType.Terran_Bunker) return 6;
         return 3;
     }
 
@@ -290,8 +288,8 @@ public class Util {
 
     public static MutablePair<Double, Double> cropPosition(MutablePair<Double, Double> unitV) {
         MutablePair<Double, Double> cropped = new MutablePair<>(unitV.first, unitV.second);
-        double sizeX = getGs().getGame().getBWMap().mapWidth() * 32.0;
-        double sizeY = getGs().getGame().getBWMap().mapHeight() * 32.0;
+        double sizeX = getGs().bw.mapWidth() * 32.0;
+        double sizeY = getGs().bw.mapHeight() * 32.0;
         if (cropped.first < 0.0) cropped.first = 0.0;
         else if (cropped.first >= sizeX) cropped.first = sizeX - 1;
         if (cropped.second < 0.0) cropped.second = 0.0;
@@ -301,8 +299,8 @@ public class Util {
 
     static Position cropPosition(Position pos) {
         MutablePair<Integer, Integer> cropped = new MutablePair<>(pos.getX(), pos.getY());
-        int sizeX = getGs().getGame().getBWMap().mapWidth() * 32;
-        int sizeY = getGs().getGame().getBWMap().mapHeight() * 32;
+        int sizeX = getGs().bw.mapWidth() * 32;
+        int sizeY = getGs().bw.mapHeight() * 32;
         if (cropped.first < 0.0) cropped.first = 0;
         else if (cropped.first >= sizeX) cropped.first = sizeX - 1;
         if (cropped.second < 0.0) cropped.second = 0;
@@ -310,18 +308,19 @@ public class Util {
         return new Position(cropped.first, cropped.second);
     }
 
-    public static Position choosePatrolPositionVulture(Vulture myUnit, UnitInfo attackUnit) {
+    public static Position choosePatrolPositionVulture(Unit myUnit, UnitInfo attackUnit) {
         try {
             Position myUnitPos = myUnit.getPosition();
+            int vultureRange = UnitType.Terran_Vulture.groundWeapon().maxRange();
             Position attackUnitPos = attackUnit.lastPosition;
             MutablePair<Double, Double> AT = new MutablePair<>((double) attackUnitPos.getX() - myUnitPos.getX(), (double) attackUnitPos.getY() - myUnitPos.getY());
             MutablePair<Double, Double> patrolDir1 = rotatePosition(AT, Math.PI / 5.0);
             MutablePair<Double, Double> patrolDir2 = rotatePosition(AT, -Math.PI / 5.0);
-            MutablePair<Double, Double> accel = new MutablePair<>(((MobileUnit) myUnit).getVelocityX(), ((MobileUnit) myUnit).getVelocityY());
+            MutablePair<Double, Double> accel = new MutablePair<>(myUnit.getVelocityX(), myUnit.getVelocityY());
             MutablePair<Double, Double> multi = new MutablePair<>(patrolDir1.first * accel.first, patrolDir1.second * accel.second);
             MutablePair<Double, Double> patrolDir = (multi.first >= 0 && multi.second >= 0) ? patrolDir1 : patrolDir2;
             patrolDir = normalize(patrolDir);
-            Position prePatrol = new Position(patrolDir.first.intValue(), patrolDir.second.intValue()).multiply(new Position(myUnit.getGroundWeaponMaxRange() - 5, myUnit.getGroundWeaponMaxRange() - 5));
+            Position prePatrol = new Position(patrolDir.first.intValue(), patrolDir.second.intValue()).multiply(vultureRange - 5);
             return cropPosition(myUnitPos.add(prePatrol));
         } catch (Exception e) {
             System.err.println("choosePatrolPositionVulture Exception");
@@ -338,7 +337,7 @@ public class Util {
     public static double getSpeed(UnitInfo unit) {
         if (unit.unitType.isBuilding() && !unit.flying) return 0.0;
         if (unit.burrowed) return 0.0;
-        return unit.player.getUnitStatCalculator().topSpeed(unit.unitType);
+        return unit.player.topSpeed(unit.unitType);
     }
 
     private static MutablePair<Double, Double> rotatePosition(MutablePair<Double, Double> pos, double angle) {
@@ -348,15 +347,15 @@ public class Util {
     }
 
     public static boolean isPositionMapEdge(Position pos) {
-        return pos.getX() <= 0 || pos.getY() <= 0 || pos.getX() >= getGs().getGame().getBWMap().mapWidth() * 32
-                || pos.getY() >= getGs().getGame().getBWMap().mapHeight() * 32;
+        return pos.getX() <= 0 || pos.getY() <= 0 || pos.getX() >= getGs().bw.mapWidth() * 32
+                || pos.getY() >= getGs().bw.mapHeight() * 32;
     }
 
     public static Position improveMapEdgePosition(Position unitPos, Position pos) {
         //double angle = Math.atan2(unitPos.getY(), unitPos.getX()) - Math.atan2(pos.getY(), pos.getX());
         MutablePair<Integer, Integer> improved = new MutablePair<>(pos.getX(), pos.getY());
-        int mapHeight = getGs().getGame().getBWMap().mapHeight() * 32;
-        int mapWidth = getGs().getGame().getBWMap().mapWidth() * 32;
+        int mapHeight = getGs().bw.mapHeight() * 32;
+        int mapWidth = getGs().bw.mapWidth() * 32;
         if (improved.first <= 0 && improved.second <= 0) {
             if (Math.random() < 0.5) improved.first = 5 * 32;
             else improved.second = 5 * 32;
@@ -423,11 +422,14 @@ public class Util {
     }
 
     public static boolean isGroundStaticDefense(Unit u) {
-        return u instanceof Bunker || u instanceof SunkenColony || u instanceof PhotonCannon;
+        UnitType type = u.getType();
+        return type == UnitType.Terran_Bunker || type == UnitType.Zerg_Sunken_Colony || type == UnitType.Protoss_Photon_Cannon;
     }
 
     public static boolean isAirStaticDefense(Unit u) {
-        return u instanceof Bunker || u instanceof MissileTurret || u instanceof SporeColony || u instanceof PhotonCannon;
+        UnitType type = u.getType();
+        return type == UnitType.Terran_Bunker || type == UnitType.Terran_Missile_Turret
+                || type == UnitType.Zerg_Spore_Colony || type == UnitType.Protoss_Photon_Cannon;
     }
 
     public static int countBuildingAll(UnitType type) {
@@ -440,9 +442,9 @@ public class Util {
     }
 
     public static boolean hasFreePatches(Base base) {
-        List<MineralPatch> minerals = base.getMinerals().stream().map(u -> (MineralPatch) u.getUnit()).collect(Collectors.toList());
+        List<Unit> minerals = base.getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
         int count = 0;
-        for (MineralPatch m : minerals) {
+        for (Unit m : minerals) {
             if (getGs().mineralsAssigned.containsKey(m)) count += getGs().mineralsAssigned.get(m);
         }
         return count < 2 * minerals.size();
@@ -455,10 +457,10 @@ public class Util {
     public static boolean checkSiege() {
         boolean machineShop = false;
         if (getGs().Fs.isEmpty()) return false;
-        int mS = (int) getGs().UBs.stream().filter(u -> u instanceof MachineShop).count();
+        int mS = (int) getGs().UBs.stream().filter(u -> u.getType() == UnitType.Terran_Machine_Shop).count();
         if (mS == 0) {
-            for (Factory f : getGs().Fs) {
-                if (f.getMachineShop() != null) {
+            for (Unit f : getGs().Fs) {
+                if (f.getAddon() != null) {
                     machineShop = true;
                     break;
                 }
@@ -466,10 +468,6 @@ public class Util {
             return !machineShop;
         }
         return mS >= 1;
-    }
-
-    public static InteractionHandler getIH() {
-        return getGs().getIH();
     }
 
     public static UnitInfo getTankTarget(UnitInfo t, Set<UnitInfo> tankTargets) {
@@ -497,9 +495,9 @@ public class Util {
         if (rangedUnit == null || enemies.isEmpty()) return null;
         if (pos == null) return getRangedTarget(rangedUnit, enemies);
         for (UnitInfo enemy : enemies) {
-            if (enemy.unit == null || (enemy.unit.isCloaked() && !enemy.unit.isDetected())) continue;
-            if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
-            if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
+            if (enemy.unit == null || ((enemy.unit.isCloaked() || enemy.burrowed) && !enemy.unit.isDetected())) continue;
+            if (enemy.flying && !rangedUnit.isAirAttacker()) continue;
+            if (!enemy.flying && !rangedUnit.isGroundAttacker()) continue;
             int priority = getRangedAttackPriority(rangedUnit, enemy);
             int distance = rangedUnit.getDistance(enemy);
             double closerToGoal = rangedUnit.getDistance(pos) - enemy.getDistance(pos);
@@ -511,20 +509,17 @@ public class Util {
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = enemy.player.getUnitStatCalculator().weaponMaxRange(getWeapon(enemy, rangedUnit));
+                    double weaponDist = enemy.player.weaponMaxRange(getWeapon(enemy, rangedUnit));
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
-            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) enemy.unit).isMoving()) {
-                if ((enemy.unit instanceof SiegeTank && ((SiegeTank) enemy.unit).isSieged()) || enemy.currentOrder == Order.Sieging ||
-                        enemy.currentOrder == Order.Unsieging ||
-                        (enemy.burrowed)) {
+            } else if (!enemy.unit.isMoving()) {
+                if (enemy.unit.isSieged() || enemy.currentOrder == Order.Sieging || enemy.currentOrder == Order.Unsieging
+                        || enemy.burrowed) {
                     score += 48;
                 } else score += 24;
-            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) enemy.unit).isBraking()) score += 16;
-            else if (enemy.speed >= rangedUnit.speed) {
-                score -= 4 * 32;
-            }
+            } else if (enemy.unit.isBraking()) score += 16;
+            else if (enemy.speed >= rangedUnit.speed) score -= 4 * 32;
             if (enemy.unitType.getRace() == Race.Protoss && enemy.shields <= 5) score += 32;
             if (enemy.health < enemy.unitType.maxHitPoints()) score += 24;
             DamageType damage = getWeapon(rangedUnit, enemy).damageType();
@@ -550,8 +545,8 @@ public class Util {
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (UnitInfo enemy : enemies) {
             if (enemy.unit == null || ((enemy.unit.isCloaked() || enemy.burrowed) && !enemy.unit.isDetected())) continue;
-            if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
-            if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
+            if (enemy.flying && !rangedUnit.isAirAttacker()) continue;
+            if (!enemy.flying && !rangedUnit.isGroundAttacker()) continue;
             int priority = getRangedAttackPriority(rangedUnit, enemy);
             int distance = rangedUnit.getDistance(enemy);
             if (distance >= 13 * 32) continue;
@@ -561,16 +556,16 @@ public class Util {
             if (isThreat) {
                 if (canShootBack) score += 7 * 32;
                 else {
-                    double weaponDist = enemy.player.getUnitStatCalculator().weaponMaxRange(getWeapon(enemy, rangedUnit));
+                    double weaponDist = enemy.player.weaponMaxRange(getWeapon(enemy, rangedUnit));
                     if (distance < weaponDist) score += 6 * 32;
                     else score += 5 * 32;
                 }
-            } else if (enemy.unit instanceof MobileUnit && !((MobileUnit) enemy.unit).isMoving()) {
-                if ((enemy.unit instanceof SiegeTank && ((SiegeTank) enemy.unit).isSieged()) || enemy.currentOrder == Order.Sieging ||
-                        enemy.currentOrder == Order.Unsieging || enemy.burrowed) {
+            } else if (!enemy.unit.isMoving()) {
+                if (enemy.unit.isSieged() || enemy.currentOrder == Order.Sieging || enemy.currentOrder == Order.Unsieging
+                        || enemy.burrowed) {
                     score += 48;
                 } else score += 24;
-            } else if (enemy.unit instanceof MobileUnit && ((MobileUnit) enemy.unit).isBraking()) score += 16;
+            } else if (enemy.unit.isBraking()) score += 16;
             else if (enemy.speed >= rangedUnit.speed) {
                 score -= 4 * 32;
             }
@@ -608,7 +603,7 @@ public class Util {
         if (rangedType == UnitType.Terran_Wraith) {
             if (target.flying) return targetType.isFlyingBuilding() ? 5 : 11;
         } else if (rangedType == UnitType.Terran_Goliath && target.flying) return targetType.isFlyingBuilding() ? 8 : 10;
-        if (rangedType.isFlyer() && target.unit instanceof SiegeTank) return 10;
+        if (rangedType.isFlyer() && target.isTank()) return 10;
         if (targetType == UnitType.Protoss_High_Templar || targetType == UnitType.Zerg_Defiler) return 12;
         if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
         if (isStaticDefense(target)) {
@@ -628,13 +623,16 @@ public class Util {
         }
         if (targetType.isWorker()) {
             if (rangedType == UnitType.Terran_Vulture) return 11;
-            if (target.unit instanceof SCV) {
-                if (((SCV) target.unit).isRepairing()) return 11;
-                if (((SCV) target.unit).isConstructing()){
+            if (target.unitType == UnitType.Terran_SCV) {
+                if (target.unit.isRepairing()) return 11;
+                if (target.unit.isConstructing()){
                     if (getGs().getStrat().proxy){
                         Unit build = target.unit.getBuildUnit();
-                        if((build instanceof Bunker || build instanceof Factory)) return 15;
-                        return 13;
+                        if(build != null){
+                            UnitType type = build.getType();
+                            if(type == UnitType.Terran_Bunker || type == UnitType.Terran_Factory) return 15;
+                            return 13;
+                        }
                     }
                     return 10;
                 }
@@ -671,11 +669,11 @@ public class Util {
         if (attackerType == UnitType.Protoss_Reaver && !target.flying) return 8 * 32;
         if (attackerType == UnitType.Protoss_Carrier) return 8 * 32;
         if (attackerType == UnitType.Terran_Bunker) {
-            return attacker.player.getUnitStatCalculator().weaponMaxRange(WeaponType.Gauss_Rifle) + 32;
+            return attacker.player.weaponMaxRange(WeaponType.Gauss_Rifle) + 32;
         }
         WeaponType weapon = getWeapon(attacker, target);
         if (weapon == WeaponType.None) return 0;
-        return attacker.player.getUnitStatCalculator().weaponMaxRange(weapon);
+        return attacker.player.weaponMaxRange(weapon);
     }
 
     public static boolean isInOurBases(UnitInfo u) {
@@ -691,5 +689,13 @@ public class Util {
 
     public static boolean isResearched(TechType tech) {
         return getGs().getPlayer().hasResearched(tech);
+    }
+
+    public static boolean isAirAttacker(UnitInfo u) { // TODO implement
+        return true;
+    }
+
+    public static boolean isGroundAttacker(UnitInfo u) { // TODO implement
+        return true;
     }
 }

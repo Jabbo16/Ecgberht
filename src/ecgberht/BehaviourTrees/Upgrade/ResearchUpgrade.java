@@ -1,11 +1,11 @@
 package ecgberht.BehaviourTrees.Upgrade;
 
+import bwapi.TilePosition;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.UnitType;
 
 public class ResearchUpgrade extends Action {
 

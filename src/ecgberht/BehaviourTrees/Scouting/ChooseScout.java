@@ -1,13 +1,12 @@
 package ecgberht.BehaviourTrees.Scouting;
 
+import bwapi.Unit;
+import bwapi.UnitType;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.UnitInfo;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.Worker;
-import org.openbw.bwapi4j.unit.Wraith;
 
 public class ChooseScout extends Action {
 
@@ -21,7 +20,7 @@ public class ChooseScout extends Action {
             if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
                 for (Squad s : gameState.sqManager.squads.values()) {
                     for (UnitInfo u : s.members) {
-                        if (u.unit instanceof Wraith) {
+                        if (u.unitType == UnitType.Terran_Wraith) {
                             gameState.chosenScout = u.unit;
                             s.members.remove(u);
                             return State.SUCCESS;
@@ -30,15 +29,15 @@ public class ChooseScout extends Action {
                 }
             }
             if (!gameState.workerIdle.isEmpty()) {
-                Worker chosen = gameState.workerIdle.iterator().next();
+                Unit chosen = gameState.workerIdle.iterator().next();
                 gameState.chosenScout = chosen;
                 gameState.workerIdle.remove(chosen);
             }
             if (gameState.chosenScout == null) {
-                for (Worker u : gameState.workerMining.keySet()) {
+                for (Unit u : gameState.workerMining.keySet()) {
                     if (!u.isCarryingMinerals()) {
                         gameState.chosenScout = u;
-                        MineralPatch mineral = gameState.workerMining.get(u);
+                        Unit mineral = gameState.workerMining.get(u);
                         if (gameState.mineralsAssigned.containsKey(mineral)) {
                             gameState.mining--;
                             gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);

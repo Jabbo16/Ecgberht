@@ -1,9 +1,9 @@
 package ecgberht;
 
+import bwapi.Race;
 import ecgberht.Strategies.*;
 import ecgberht.Util.MutablePair;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.UnitType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -54,7 +54,7 @@ public class StrategyManager {
                 bestUCBStrategyVal = val;
             }
         }
-        getGs().ih.sendText("Transitioning from 14CC to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+        getGs().bw.sendText("Transitioning from 14CC to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
         strat = nameStrat.get(bestUCBStrategy);
         if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
@@ -76,7 +76,7 @@ public class StrategyManager {
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = getGs().learningManager.getEnemyInfo();
             if (getGs().enemyRace == Race.Zerg && EI.naughty) return b;
-            if (getGs().bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
+            if (getGs().bw.mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
                 getGs().maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
@@ -157,10 +157,10 @@ public class StrategyManager {
                         iter.next();
                     }
                     Map.Entry<String, Strategy> pickedStrategy = iter.next();
-                    getGs().ih.sendText("Picked random strategy " + pickedStrategy.getKey());
+                    getGs().bw.sendText("Picked random strategy " + pickedStrategy.getKey());
                     return pickedStrategy.getValue();
                 } else if (nameStrat.containsKey(forcedStrat)) {
-                    getGs().ih.sendText("Picked forced strategy " + forcedStrat);
+                    getGs().bw.sendText("Picked forced strategy " + forcedStrat);
                     if (forcedStrat.equals("14CC")) {
                         for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
                             if (strategies.containsKey(r.strategyName)) {
@@ -187,7 +187,7 @@ public class StrategyManager {
                         strat = bMFE;
                         break;
                 }
-                getGs().ih.sendText("I dont know you that well yet, lets pick the standard strategy, " + strat.name);
+                getGs().bw.sendText("I dont know you that well yet, lets pick the standard strategy, " + strat.name);
                 return strat;
             }
             for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
@@ -210,7 +210,7 @@ public class StrategyManager {
                 }
             }
             if (maxWinRate != 0.0 && bestStrat != null) {
-                getGs().ih.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "% and " + totalGamesBestS + " games played");
+                getGs().bw.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "% and " + totalGamesBestS + " games played");
                 return nameStrat.get(bestStrat);
             }
             double C = 0.7;
@@ -228,7 +228,7 @@ public class StrategyManager {
                     bestUCBStrategyVal = val;
                 }
             }
-            getGs().ih.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+            getGs().bw.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
             return nameStrat.get(bestUCBStrategy);
         } catch (Exception e) {
             System.err.println("Error initStrat, using default strategy");

@@ -1,12 +1,11 @@
 package ecgberht.BehaviourTrees.Training;
 
+import bwapi.TechType;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Academy;
+import bwapi.UnitType;
 
 public class ChooseNothingTrain extends Action {
 
@@ -21,7 +20,7 @@ public class ChooseNothingTrain extends Action {
             boolean stim = gameState.getStrat().techToResearch.contains(TechType.Stim_Packs);
             if (stim && !gameState.getPlayer().hasResearched(TechType.Stim_Packs) &&
                     !gameState.getPlayer().isResearching(TechType.Stim_Packs)
-                    && (int) gameState.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
+                    && (int) gameState.UBs.stream().filter(u -> u.getType() == UnitType.Terran_Academy).count() >= 1) {
                 gameState.chosenUnit = UnitType.None;
                 return State.SUCCESS;
             }

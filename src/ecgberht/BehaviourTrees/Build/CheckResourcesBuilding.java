@@ -1,14 +1,14 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.TilePosition;
+import bwapi.Unit;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
+import bwapi.UnitType;
 
 public class CheckResourcesBuilding extends Conditional {
 
@@ -25,7 +25,7 @@ public class CheckResourcesBuilding extends Conditional {
                 return State.FAILURE;
             }
             MutablePair<Integer, Integer> cash = gameState.getCash();
-            Worker chosen = gameState.chosenWorker;
+            Unit chosen = gameState.chosenWorker;
             TilePosition start = chosen.getTilePosition();
             TilePosition end = gameState.chosenPosition;
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), gameState.chosenToBuild);

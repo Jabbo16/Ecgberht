@@ -1,10 +1,10 @@
 package ecgberht;
 
+import bwapi.Unit;
+import bwapi.UnitType;
 import ecgberht.Clustering.Cluster;
 import ecgberht.Simulation.SimInfo;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Bunker;
-import org.openbw.bwapi4j.unit.Marine;
+import bwapi.Position;
 
 import java.util.List;
 import java.util.Map;
@@ -32,17 +32,17 @@ public class SquadManager {
     }
 
     void updateBunkers() { // TODO improve
-        for (Map.Entry<Bunker, Set<UnitInfo>> bunker : getGs().DBs.entrySet()) {
+        for (Map.Entry<Unit, Set<UnitInfo>> bunker : getGs().DBs.entrySet()) {
             SimInfo bunkerSim = getGs().sim.getSimulation(getGs().unitStorage.getAllyUnits().get(bunker.getKey()), SimInfo.SimType.MIX);
             if (!bunkerSim.enemies.isEmpty()) {
                 if (bunker.getValue().size() < 4) {
-                    Marine closest = null;
+                    Unit closest = null;
                     double bestDist = Double.MAX_VALUE;
                     for (UnitInfo u : bunkerSim.allies) {
-                        if (!(u.unit instanceof Marine)) continue;
+                        if (u.unitType != UnitType.Terran_Marine) continue;
                         double dist = u.unit.getDistance(bunker.getKey());
                         if (dist < bestDist) {
-                            closest = (Marine) u.unit;
+                            closest = u.unit;
                             bestDist = dist;
                         }
                     }

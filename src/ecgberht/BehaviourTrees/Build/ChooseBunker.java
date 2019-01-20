@@ -1,12 +1,12 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwapi.Race;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.UnitType;
 
 public class ChooseBunker extends Action {
 
@@ -17,7 +17,7 @@ public class ChooseBunker extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.getGame().getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
+            if (gameState.getGame().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) {
                 return State.FAILURE;
             }
             if ((needBunker() || gameState.getStrat().bunker || IntelligenceAgency.enemyIsRushing() || gameState.learningManager.isNaughty())

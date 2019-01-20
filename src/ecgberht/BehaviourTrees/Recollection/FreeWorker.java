@@ -1,9 +1,9 @@
 package ecgberht.BehaviourTrees.Recollection;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.unit.Worker;
 
 public class FreeWorker extends Action {
 
@@ -18,7 +18,7 @@ public class FreeWorker extends Action {
             gameState.chosenWorker = null;
             if (!gameState.workerIdle.isEmpty()) {
                 int frame = gameState.frameCount;
-                for (Worker w : gameState.workerIdle) {
+                for (Unit w : gameState.workerIdle) {
                     if (w.getLastCommandFrame() != frame) {
                         gameState.chosenWorker = w;
                         return State.SUCCESS;

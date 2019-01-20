@@ -1,7 +1,7 @@
 package ecgberht.Strategies;
 
 import ecgberht.Strategy;
-import org.openbw.bwapi4j.type.UnitType;
+import bwapi.UnitType;
 
 public class TwoPortWraith extends Strategy {
 

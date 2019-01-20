@@ -1,12 +1,10 @@
 package ecgberht.BehaviourTrees.AddonBuild;
 
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Academy;
-import org.openbw.bwapi4j.unit.CommandCenter;
-import org.openbw.bwapi4j.unit.ResearchingFacility;
+import bwapi.UnitType;
 
 public class ChooseComsatStation extends Action {
 
@@ -18,10 +16,10 @@ public class ChooseComsatStation extends Action {
     public State execute() {
         try {
             if (!gameState.CCs.isEmpty()) {
-                for (CommandCenter c : gameState.CCs.values()) {
+                for (Unit c : gameState.CCs.values()) {
                     if (!c.isTraining() && c.getAddon() == null) {
-                        for (ResearchingFacility u : gameState.UBs) {
-                            if (u instanceof Academy) {
+                        for (Unit u : gameState.UBs) {
+                            if (u.getType() == UnitType.Terran_Academy) {
                                 gameState.chosenBuildingAddon = c;
                                 gameState.chosenAddon = UnitType.Terran_Comsat_Station;
                                 return State.SUCCESS;

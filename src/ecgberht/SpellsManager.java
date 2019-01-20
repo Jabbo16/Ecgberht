@@ -1,18 +1,15 @@
 package ecgberht;
 
-import org.openbw.bwapi4j.unit.MobileUnit;
-import org.openbw.bwapi4j.unit.PlayerUnit;
-import org.openbw.bwapi4j.unit.ScienceVessel;
-import org.openbw.bwapi4j.unit.Unit;
+import bwapi.Unit;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 
 public class SpellsManager {
-    public Map<ScienceVessel, PlayerUnit> irradiatedUnits = new TreeMap<>();
-    public Map<ScienceVessel, MobileUnit> defenseMatrixedUnits = new TreeMap<>();
-    public Map<ScienceVessel, PlayerUnit> EMPedUnits = new TreeMap<>(); // TODO change when using Position instead
+    public Map<Unit, Unit> irradiatedUnits = new TreeMap<>();
+    public Map<Unit, Unit> defenseMatrixedUnits = new TreeMap<>();
+    public Map<Unit, Unit> EMPedUnits = new TreeMap<>(); // TODO change when using Position instead
 
     void onFrameSpellManager() {
         try {
@@ -49,15 +46,15 @@ public class SpellsManager {
         return EMPedUnits.values().contains(u);
     }
 
-    public void addIrradiated(ScienceVessel vessel, PlayerUnit unit) {
+    public void addIrradiated(Unit vessel, Unit unit) {
         irradiatedUnits.put(vessel, unit);
     }
 
-    public void addDefenseMatrixed(ScienceVessel vessel, MobileUnit unit) {
+    public void addDefenseMatrixed(Unit vessel, Unit unit) {
         defenseMatrixedUnits.put(vessel, unit);
     }
 
-    public void addEMPed(ScienceVessel vessel, PlayerUnit unit) {
+    public void addEMPed(Unit vessel, Unit unit) {
         EMPedUnits.put(vessel, unit);
     }
 

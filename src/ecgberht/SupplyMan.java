@@ -1,8 +1,8 @@
 package ecgberht;
 
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
+import bwapi.Race;
+import bwapi.Unit;
+import bwapi.UnitType;
 
 public class SupplyMan {
 
@@ -26,22 +26,20 @@ public class SupplyMan {
     }
 
     void onCreate(Unit unit) {
-        if (unit instanceof Building) return;
+        if (unit.getType().isBuilding()) return;
         UnitType type = unit.getType();
         if (type.supplyRequired() > 0) supplyUsed += type.supplyRequired();
     }
 
     void onComplete(Unit unit) {
-        if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
-            UnitType type = unit.getType();
-            if (type.supplyProvided() > 0) supplyTotal += type.supplyProvided();
-        }
+        if (unit.getType().supplyProvided() > 0) supplyTotal += unit.getType().supplyProvided();
+
     }
 
     void onDestroy(Unit unit) {
         UnitType type = unit.getType();
-        if (unit instanceof SupplyDepot || unit instanceof Pylon || unit instanceof Overlord || unit instanceof ResourceDepot) {
-            if (type.supplyProvided() > 0) supplyTotal -= type.supplyProvided();
+        if (type.supplyProvided() > 0){
+            supplyTotal -= type.supplyProvided();
             return;
         }
         if (type.supplyRequired() > 0) supplyUsed -= type.supplyRequired();

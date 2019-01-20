@@ -1,16 +1,11 @@
 package ecgberht;
 
+import bwapi.*;
 import bwem.BWEM;
 import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.BW;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,20 +20,20 @@ public class BuildingMap implements Cloneable {
     private int height;
     private int width;
     private String[][] map;
-    private BW bw;
+    private Game bw;
     private BWEM bwem;
 
-    BuildingMap(BW bw, Player self, BWEM bwem) {
+    BuildingMap(Game bw, Player self, BWEM bwem) {
         this.bw = bw;
         this.self = self;
-        this.height = bw.getBWMap().mapHeight();
-        this.width = bw.getBWMap().mapWidth();
+        this.height = bw.mapHeight();
+        this.width = bw.mapWidth();
         this.map = new String[this.height][this.width];
         this.bwem = bwem;
         if (tilesArea.isEmpty()) initTilesArea();
     }
 
-    private BuildingMap(BW bw, Player self, int height, int width, String[][] map, BWEM bwem) {
+    private BuildingMap(Game bw, Player self, int height, int width, String[][] map, BWEM bwem) {
         this.bw = bw;
         this.self = self;
         this.height = height;
@@ -99,13 +94,13 @@ public class BuildingMap implements Cloneable {
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
                 TilePosition x = new TilePosition(ii, jj);
-                //if (bw.getBWMap().isBuildable(x, false)) map[jj][ii] = "6";
-                if (bw.getBWMap().isBuildable(x, true)) map[jj][ii] = "6";
+                //if (bw.isBuildable(x, false)) map[jj][ii] = "6";
+                if (bw.isBuildable(x, true)) map[jj][ii] = "6";
                 else map[jj][ii] = "0";
             }
         }
         // Finds minerals
-        for (MineralPatch resource : bw.getMineralPatches()) {
+        for (Unit resource : bw.getStaticMinerals()) {
             TilePosition resourceTile = resource.getTilePosition();
             TilePosition resourceSize = resource.getType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
@@ -116,7 +111,7 @@ public class BuildingMap implements Cloneable {
             }
         }
         // Finds geysers
-        for (VespeneGeyser resource : bw.getVespeneGeysers()) {
+        for (Unit resource : bw.getStaticGeysers()) {
             TilePosition resourceTile = resource.getTilePosition();
             TilePosition resourceSize = resource.getType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
@@ -127,8 +122,7 @@ public class BuildingMap implements Cloneable {
             }
         }
         // Finds weird neutral buildings
-        for (Unit resource : bw.getAllUnits()) {
-            if (!(resource instanceof SpecialBuilding)) continue;
+        for (Unit resource : bw.getStaticNeutralUnits()) { // TODO test, check old bwmirror impl
             TilePosition resourceTile = resource.getTilePosition();
             TilePosition resourceSize = resource.getType().tileSize();
             for (int i = resourceTile.getY(); i < resourceTile.getY() + resourceSize.getY(); i++) {
@@ -448,8 +442,8 @@ public class BuildingMap implements Cloneable {
             if (blockers.size() > 1) return false;
             else {
                 Unit blocker = blockers.get(0);
-                return blocker instanceof PlayerUnit && ((PlayerUnit) blocker).getPlayer().getId() == self.getId() && blocker instanceof Worker &&
-                        ((Worker) blocker).getBuildType() == type;
+                return !blocker.getPlayer().isNeutral() && blocker.getPlayer().getID() == self.getID() && blocker.getType().isWorker() &&
+                        blocker.getBuildType() == type;
             }
         } catch (Exception e) {
             e.printStackTrace();

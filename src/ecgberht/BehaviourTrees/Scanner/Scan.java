@@ -1,10 +1,11 @@
 package ecgberht.BehaviourTrees.Scanner;
 
+import bwapi.Order;
+import bwapi.TechType;
+import bwapi.Unit;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.unit.ComsatStation;
 
 public class Scan extends Action {
 
@@ -15,9 +16,9 @@ public class Scan extends Action {
     @Override
     public State execute() {
         try {
-            for (ComsatStation u : gameState.CSs) {
-                if (u.getEnergy() >= 50 && u.getOrder() != Order.CastScannerSweep && u.scannerSweep(gameState.checkScan.toPosition())) {
-                    gameState.startCount = gameState.getIH().getFrameCount();
+            for (Unit u : gameState.CSs) {
+                if (u.getEnergy() >= 50 && u.getOrder() != Order.CastScannerSweep && u.useTech(TechType.Scanner_Sweep, gameState.checkScan.toPosition())) {
+                    gameState.startCount = gameState.bw.getFrameCount();
                     gameState.playSound("uav.mp3");
                     return State.SUCCESS;
                 }

@@ -1,11 +1,11 @@
 package ecgberht;
 
+import bwapi.TilePosition;
+import bwapi.WalkPosition;
 import org.bk.ass.path.Jps;
 import org.bk.ass.path.Map;
 import org.bk.ass.path.Position;
 import org.bk.ass.path.Result;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.WalkPosition;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -37,12 +37,12 @@ public class Cartographer {
     private void initWalkableGrids() {
         for (int ii = 0; ii < mapTileWidth * 4; ii++) {
             for (int jj = 0; jj < mapTileHeight * 4; jj++) {
-                walkableGrid[ii][jj] = getGs().getGame().getBWMap().isWalkable(ii, jj);
+                walkableGrid[ii][jj] = getGs().bw.isWalkable(ii, jj);
             }
         }
         for (int ii = 0; ii < mapTileWidth; ii++) {
             for (int jj = 0; jj < mapTileHeight; jj++) {
-                tileWalkableGrid[ii][jj] = getGs().getGame().getBWMap().isWalkable(ii * 4, jj * 4);
+                tileWalkableGrid[ii][jj] = getGs().bw.isWalkable(ii * 4, jj * 4);
             }
         }
         mapJPS = new Jps(Map.fromBooleanArray(walkableGrid));
@@ -52,6 +52,4 @@ public class Cartographer {
     enum Resolution {
         TilePosition, WalkPosition
     }
-
-    ;
 }

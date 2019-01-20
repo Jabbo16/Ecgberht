@@ -2,8 +2,8 @@ package ecgberht.Strategies;
 
 import ecgberht.Strategy;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.UpgradeType;
+import bwapi.UnitType;
+import bwapi.UpgradeType;
 
 public class VultureRush extends Strategy {
 

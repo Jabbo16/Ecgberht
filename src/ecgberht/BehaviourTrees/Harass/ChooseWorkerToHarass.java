@@ -1,12 +1,11 @@
 package ecgberht.BehaviourTrees.Harass;
 
+import bwapi.Order;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Unit;
 
 public class ChooseWorkerToHarass extends Action {
 
@@ -17,11 +16,10 @@ public class ChooseWorkerToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.chosenUnitToHarass instanceof Worker) return State.FAILURE;
+            if (gameState.chosenUnitToHarass.getType().isWorker()) return State.FAILURE;
             for (Unit u : gameState.enemyCombatUnitMemory) {
-                if (gameState.enemyMainBase != null && u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
-                    if (((Worker) u).getOrder() != Order.Move && ((Worker) u).getOrder() != Order.PlaceBuilding)
-                        continue;
+                if (gameState.enemyMainBase != null && u.exists() && u.getType().isWorker() && !u.isGatheringGas()) {
+                    if (u.getOrder() != Order.Move && u.getOrder() != Order.PlaceBuilding) continue;
                     if (Util.broodWarDistance(gameState.enemyMainBase.getLocation().toPosition(), gameState.chosenHarasser.getPosition()) <= 700) {
                         gameState.chosenUnitToHarass = u;
                         return State.SUCCESS;

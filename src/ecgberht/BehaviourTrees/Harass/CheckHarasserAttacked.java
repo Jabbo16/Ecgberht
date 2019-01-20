@@ -6,10 +6,7 @@ import ecgberht.UnitInfo;
 import ecgberht.Util.UtilMicro;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Attacker;
-import org.openbw.bwapi4j.unit.Building;
-import org.openbw.bwapi4j.unit.Worker;
+import bwapi.Position;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -30,7 +27,7 @@ public class CheckHarasserAttacked extends Conditional {
                 return State.FAILURE;
             }
             if (gameState.chosenUnitToHarass != null) {
-                if (!gameState.bw.getBWMap().isValidPosition(gameState.chosenUnitToHarass.getPosition())) {
+                if (!gameState.chosenUnitToHarass.getPosition().isValid(gameState.bw)) {
                     gameState.chosenUnitToHarass = null;
                 }
             }
@@ -39,8 +36,8 @@ public class CheckHarasserAttacked extends Conditional {
             Set<UnitInfo> attackers = new TreeSet<>();
             //Thanks to @N00byEdge for cleaner code
             for (UnitInfo u : gameState.unitStorage.getAllyUnits().get(gameState.chosenHarasser).attackers) {
-                if (!(u.unit instanceof Building) && u.unit instanceof Attacker && u.unit.exists()) {
-                    if (u.unit instanceof Worker) {
+                if (u.unit.exists() && !u.unitType.isBuilding() && u.isAttacker()) {
+                    if (u.unitType.isWorker()) {
                         workers++;
                         attacker = u;
                     }
@@ -53,7 +50,7 @@ public class CheckHarasserAttacked extends Conditional {
                 return State.FAILURE;
             }
             if (attackers.isEmpty()) {
-                if (!gameState.getGame().getBWMap().isVisible(gameState.enemyMainBase.getLocation()) &&
+                if (!gameState.bw.isVisible(gameState.enemyMainBase.getLocation()) &&
                         gameState.chosenUnitToHarass == null) {
                     gameState.chosenHarasser.move(gameState.enemyMainBase.getLocation().toPosition());
                 }
@@ -81,12 +78,12 @@ public class CheckHarasserAttacked extends Conditional {
                         //Position kite = UtilMicro.kiteAway(gameState.chosenHarasser, attackers);
                         Optional<UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(gameState.chosenHarasser)));
                         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(gameState.chosenHarasser.getPosition(), unit1.position)).orElse(null);
-                        if (kite != null && gameState.bw.getBWMap().isValidPosition(kite)) {
+                        if (kite != null && kite.isValid(gameState.bw)) {
                             UtilMicro.move(gameState.chosenHarasser, kite);
                             gameState.chosenUnitToHarass = null;
                         } else {
                             kite = UtilMicro.kiteAway(gameState.chosenHarasser, attackers);
-                            if (kite != null && gameState.bw.getBWMap().isValidPosition(kite)) {
+                            if (kite != null && kite.isValid(gameState.bw)) {
                                 UtilMicro.move(gameState.chosenHarasser, kite);
                                 gameState.chosenUnitToHarass = null;
                             }

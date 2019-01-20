@@ -1,15 +1,8 @@
 package ecgberht;
 
+import bwapi.*;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
-import org.openbw.bwapi4j.Player;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.TilePosition;
-import org.openbw.bwapi4j.WalkPosition;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +30,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
     public boolean visible = false;
     public boolean completed = false;
     public Player player = null;
-    public PlayerUnit unit;
+    public Unit unit;
     public UnitType unitType = UnitType.None;
     public Position position = null;
     public TilePosition tileposition = null;
@@ -48,7 +41,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
     public Unit target = null;
     public Order currentOrder;
 
-    public UnitInfo(PlayerUnit u) {
+    public UnitInfo(Unit u) {
         unit = u;
     }
 
@@ -84,19 +77,19 @@ public class UnitInfo implements Comparable<UnitInfo> {
         }
         lastVisibleFrame = visible ? getGs().frameCount : lastVisibleFrame;
         lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : lastVisibleFrame;
-        if (unit instanceof GroundAttacker)
-            groundRange = player.getUnitStatCalculator().weaponMaxRange(unitType.groundWeapon());
-        if (unit instanceof AirAttacker)
-            airRange = player.getUnitStatCalculator().weaponMaxRange(unitType.airWeapon());
+        if (unitType.groundWeapon() != WeaponType.None) // TODO upgrades
+            groundRange = player.weaponMaxRange(unitType.groundWeapon());
+        if (unitType.airWeapon() != WeaponType.None) // TODO upgrades
+            airRange = player.weaponMaxRange(unitType.airWeapon());
         health = visible ? unit.getHitPoints() : expectedHealth();
         shields = visible ? unit.getShields() : expectedShields();
-        if (unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();
+        energy = unit.getEnergy();
         percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
         percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
-        if (unit instanceof Burrowable && visible) burrowed = currentOrder == Order.Burrowing || ((Burrowable) unit).isBurrowed();
+        if (visible) burrowed = currentOrder == Order.Burrowing || unit.isBurrowed();
         if (visible) flying = unit.isFlying();
         speed = Util.getSpeed(this);
-        target = unit instanceof Attacker ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
+        target = unit.getTarget() != null ? unit.getTarget() : unit.getOrderTarget();
         attackers.clear();
     }
 
@@ -107,8 +100,8 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
     public int getDistance(UnitInfo target) {
         if (this.visible)
-            return target.visible ? this.unit.getDistance(target.unit) : (int) unit.getDistance(target.lastPosition);
-        return target.visible ? (int) target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
+            return target.visible ? this.unit.getDistance(target.unit) : unit.getDistance(target.lastPosition);
+        return target.visible ? (int) target.getDistance(this.lastPosition) : (int) target.lastPosition.getDistance(this.lastPosition);
     }
 
     public double getPredictedDistance(UnitInfo target) {
@@ -135,11 +128,31 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(unit);
+        return Objects.hash(unit.getID());
     }
 
     @Override
     public int compareTo(UnitInfo o) {
-        return this.unit.getId() - o.unit.getId();
+        return this.unit.getID() - o.unit.getID();
+    }
+
+    public boolean isTank() {
+        return unitType == UnitType.Terran_Siege_Tank_Siege_Mode || unitType == UnitType.Terran_Siege_Tank_Tank_Mode;
+    }
+
+    public boolean isEgg() {
+        return unitType == UnitType.Zerg_Egg || unitType == UnitType.Zerg_Lurker_Egg;
+    }
+
+    public boolean isAttacker(){
+      return isGroundAttacker() || isAirAttacker();
+    }
+
+    public boolean isAirAttacker() { // TODO implement
+        return true;
+    }
+
+    public boolean isGroundAttacker() { // TODO implement
+        return true;
     }
 }

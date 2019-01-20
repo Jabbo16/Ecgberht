@@ -1,11 +1,10 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
+import bwapi.Unit;
 import bwem.unit.Mineral;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.unit.MineralPatch;
-import org.openbw.bwapi4j.unit.Worker;
 
 
 public class CheckBlockingMinerals extends Conditional {
@@ -17,12 +16,12 @@ public class CheckBlockingMinerals extends Conditional {
     @Override
     public State execute() {
         try {
-            Worker scv = gameState.chosenWorkerDrop;
-            MineralPatch chosen = null;
+            Unit scv = gameState.chosenWorkerDrop;
+            Unit chosen = null;
             if (gameState.chosenIsland == null) return State.FAILURE;
             for (Mineral p : gameState.chosenIsland.getBlockingMinerals()) {
                 if (!p.getUnit().exists()) continue;
-                chosen = (MineralPatch) p.getUnit();
+                chosen = p.getUnit();
                 break;
             }
             if (chosen != null) {

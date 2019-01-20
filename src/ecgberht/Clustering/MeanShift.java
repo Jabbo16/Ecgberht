@@ -3,8 +3,7 @@ package ecgberht.Clustering;
 
 import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
-import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.unit.Building;
+import bwapi.Position;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +21,7 @@ public class MeanShift {
     public MeanShift(Collection<UnitInfo> units, double radius) {
         this.radius = Math.pow(radius, 2);
         for (UnitInfo u : units) {
-            if (u.unit instanceof Building && !Util.isStaticDefense(u) && !u.visible) continue;
+            if (u.unitType.isBuilding() && !Util.isStaticDefense(u) && !u.visible) continue;
             Position p = u.lastPosition;
             this.points.add(new UnitPos(u, p.getX(), p.getY()));
         }
