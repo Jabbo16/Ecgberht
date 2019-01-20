@@ -236,7 +236,9 @@ public class SimManager {
                             break;
                         }
                     }
-                    Agent jU = factory.of(u.unit);
+                    Agent jU = factory.of(u.unit); // TODO OWN FACTORY
+                    jU.setX(u.lastPosition.x);
+                    jU.setY(u.lastPosition.y);
                     simulator.addAgentB(jU);
                     s.stateBefore.second.add(jU);
                 }
@@ -267,8 +269,8 @@ public class SimManager {
                 else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalc(s, 1.35);
                 else s.lose = !scoreCalc(s, 2);
             } catch(Exception e){
-                //System.err.println("Simulator ASS exception");
-                //e.printStackTrace();
+                System.err.println("Simulator ASS exception");
+                e.printStackTrace();
             }
 
         }
