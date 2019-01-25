@@ -3,8 +3,10 @@ package ecgberht;
 import bwem.BWEM;
 import bwem.Base;
 import bwem.area.Area;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.ResourceDepot;
 import org.openbw.bwapi4j.unit.Unit;
 
@@ -15,50 +17,78 @@ import static ecgberht.Ecgberht.getGs;
 
 public class BaseManager {
 
-
-    private Set<Garrison> garrisons = new HashSet<>();
+    private Map<Base, Garrison> garrisons = new HashMap<>();
 
     public BaseManager(BWEM bwem) {
-        bwem.getMap().getBases().forEach(b -> garrisons.add(new Garrison(b)));
+        bwem.getMap().getBases().forEach(b -> garrisons.put(b, new Garrison(b)));
         updateGarrisons();
     }
 
-    private void updateGarrisons() {
+    public void updateGarrisons() {
+        for(Garrison g : garrisons.values()){
+            if(getGs().getGame().getBWMap().isVisible(g.tile)) g.lastFrameVisible = getGs().frameCount;
+        }
+    }
 
+    public void onCreate(ResourceDepot depot){
+        Base b = Util.getClosestBaseLocation(depot.getPosition());
+        Garrison g = garrisons.get(b);
+        g.lastFrameVisible = getGs().frameCount;
+        g.player = depot.getPlayer();
+        g.depot = depot;
+
+    }
+
+    public void onDestroy(ResourceDepot depot){
+        Base b = Util.getClosestBaseLocation(depot.getPosition());
+        Garrison g = garrisons.get(b);
+        g.lastFrameVisible = getGs().frameCount;
+        g.player = null;
+        g.depot = null;
     }
 
     public List<Garrison> getMyBases() {
-        return garrisons.stream().filter(u -> u.player.equals(getGs().self)).collect(Collectors.toList());
+        return garrisons.values().stream().filter(u -> getGs().self.equals(u.player)).collect(Collectors.toList());
     }
 
     public List<Garrison> getEnemyBases() {
-        return garrisons.stream().filter(u -> u.player.equals(getGs().getIH().enemy())).collect(Collectors.toList());
+        return garrisons.values().stream().filter(u -> getGs().getIH().enemy().equals(u.player)).collect(Collectors.toList());
+    }
+
+    public List<Garrison> getEnemyBasesSorted() {
+        return garrisons.values().stream().filter(u -> getGs().getIH().enemy().equals(u.player))
+                .sorted(Comparator.comparing(Garrison::frameVisibleDiff).reversed()).collect(Collectors.toList());
+    }
+
+    public List<Garrison> getScoutingBasesSorted() {
+        return garrisons.values().stream().filter(u -> u.player == null)
+                .sorted(Comparator.comparing(Garrison::frameVisibleDiff).reversed()).collect(Collectors.toList());
     }
 
     public class Garrison {
-        Base base;
-        TilePosition tile;
-        Set<Unit> minerals = new TreeSet<>();
-        Map<Unit, Boolean> geysers = new TreeMap<>();
-        Area area;
-        Player player;
-        boolean starting;
-        boolean island;
-        int lastFrameVisible = 0;
-        ResourceDepot depot = null;
+        public Base base;
+        public TilePosition tile;
+        public Set<MineralPatch> minerals = new TreeSet<>();
+        public Map<Unit, Boolean> geysers = new TreeMap<>();
+        public Area area;
+        public Player player;
+        public boolean starting;
+        public boolean island;
+        public int lastFrameVisible = 0;
+        public ResourceDepot depot = null;
 
-        public Garrison(Base bwemBase) {
+        Garrison(Base bwemBase) {
             base = bwemBase;
             tile = base.getLocation();
-            base.getMinerals().forEach(t -> minerals.add(t.getUnit()));
+            base.getMinerals().forEach(t -> minerals.add((MineralPatch) t.getUnit()));
             base.getGeysers().forEach(t -> geysers.put(t.getUnit(), false));
             area = base.getArea();
             starting = base.isStartingLocation();
             island = area.getAccessibleNeighbors().isEmpty();
-            if (getGs().self.getStartLocation().equals(tile)) {
-                player = getGs().self;
-                depot = getGs().CCs.values().iterator().next();
-            }
+            if (getGs().self.getStartLocation().equals(tile)) player = getGs().self;
+            lastFrameVisible = getGs().frameCount;
         }
+
+        int frameVisibleDiff() { return getGs().frameCount - lastFrameVisible; }
     }
 }

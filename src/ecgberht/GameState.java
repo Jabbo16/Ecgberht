@@ -36,6 +36,7 @@ public class GameState {
     public Base enemyMainBase = null;
     public Base enemyNaturalBase = null;
     public Base enemyStartBase = null;
+    public BaseManager baseManager = null;
     public boolean defense = false;
     public boolean enemyIsRandom = true;
     public boolean firstTerranCheese = false;

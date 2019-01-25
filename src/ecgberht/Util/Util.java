@@ -3,6 +3,7 @@ package ecgberht.Util;
 import bwem.Base;
 import bwem.ChokePoint;
 import bwem.area.Area;
+import ecgberht.BaseManager;
 import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
@@ -262,6 +263,12 @@ public class Util {
             if (score > maxScore) {
                 chosen = b.lastPosition;
                 maxScore = score;
+            }
+        }
+        if(chosen == null){
+            for(BaseManager.Garrison g : getGs().baseManager.getScoutingBasesSorted()) {
+                if(!flying && g.island) continue;
+                return g.tile.toPosition();
             }
         }
         return chosen;

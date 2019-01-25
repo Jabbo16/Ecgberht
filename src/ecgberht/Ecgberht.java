@@ -343,6 +343,7 @@ public class Ecgberht implements BWEventListener {
             bwem.initialize();
             bwem.getMap().assignStartingLocationsToSuitableBases();
             gs = new GameState(bw, bwem);
+            gs.baseManager = new BaseManager(bwem);
             gs.initEnemyRace();
             gs.learningManager.onStart(ih.enemy().getName(), Util.raceToString(bw.getInteractionHandler().enemy().getRace()));
             gs.alwaysPools();
@@ -399,6 +400,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onFrame() {
         try {
+            // Testing
             if (gs.enemyMainBase != null) {
                 if (path == null) {
                     if (gs.naturalChoke != null) {
@@ -415,6 +417,7 @@ public class Ecgberht implements BWEventListener {
                 }
             }
             gs.frameCount = ih.getFrameCount();
+            gs.baseManager.updateGarrisons();
             skycladObserver.onFrame();
             gs.fix();
             gs.unitStorage.onFrame();
@@ -569,6 +572,7 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
                     || arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             PlayerUnit pU = (PlayerUnit) arg0;
+            if(arg0 instanceof ResourceDepot) gs.baseManager.onCreate((ResourceDepot) arg0);
             UnitType type = arg0.getType();
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
                 if (arg0 instanceof Building) {
@@ -711,7 +715,7 @@ public class Ecgberht implements BWEventListener {
                         }
                     } else {
                         gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                        if (gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
+                        if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
                             ((MobileUnit) arg0).move(gs.silentCartographer.mapCenter.toPosition());
                         }
                     }
@@ -749,6 +753,7 @@ public class Ecgberht implements BWEventListener {
                 first = true;
             }
             if (!type.isNeutral() && (!type.isSpecialBuilding() || type.isRefinery())) {
+                if (arg0 instanceof ResourceDepot) gs.baseManager.onDestroy((ResourceDepot) arg0);
                 if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
