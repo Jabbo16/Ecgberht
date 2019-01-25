@@ -93,7 +93,7 @@ public class UnitInfo implements Comparable<UnitInfo> {
         if (unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();
         percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
         percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
-        if (unit instanceof Burrowable && visible) burrowed = currentOrder == Order.Burrowing || ((Burrowable) unit).isBurrowed();
+        if (unit instanceof Burrowable && visible) burrowed = ((Burrowable) unit).isBurrowed();
         if (visible) flying = unit.isFlying();
         speed = Util.getSpeed(this);
         target = unit instanceof Attacker ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();

@@ -711,20 +711,8 @@ public class Ecgberht implements BWEventListener {
                         }
                     } else {
                         gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                        if (!gs.getStrat().proxy) {
-                            if (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg) {
-                                if (!gs.DBs.isEmpty()) {
-                                    ((MobileUnit) arg0).attack(gs.DBs.keySet().iterator().next().getPosition());
-                                } else if (gs.defendPosition != null) {
-                                    ((MobileUnit) arg0).attack(gs.defendPosition);
-                                } else if (gs.mainChoke != null) {
-                                    ((MobileUnit) arg0).attack(gs.mainChoke.getCenter().toPosition());
-                                } else {
-                                    ((MobileUnit) arg0).attack(Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toPosition());
-                                }
-                            }
-                        } else if (new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
-                            ((MobileUnit) arg0).attack(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
+                        if (gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
+                            ((MobileUnit) arg0).move(gs.silentCartographer.mapCenter.toPosition());
                         }
                     }
                 }

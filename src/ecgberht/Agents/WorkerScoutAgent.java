@@ -48,7 +48,7 @@ public class WorkerScoutAgent extends Agent {
         canProxyInThisMap();
     }
 
-    private void canProxyInThisMap() { // TODO dont build near enemy main chokepoint or path from his depot to choke
+    private void canProxyInThisMap() {
         Area enemyArea = this.enemyBase.getArea();
         Set<TilePosition> tilesArea = getGs().map.getTilesArea(enemyArea);
         if (tilesArea == null) return;
@@ -76,7 +76,7 @@ public class WorkerScoutAgent extends Agent {
     }
 
     public boolean runAgent() {
-        if (unit == null || !unit.exists() || unitInfo == null) {
+        if (unit == null || !unit.exists() || unitInfo == null || !getGs().firstScout) {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
             getGs().firstScout = false;
             if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
@@ -151,38 +151,48 @@ public class WorkerScoutAgent extends Agent {
             unit.haltConstruction();
             stoppedDisrupting = true;
             removedIndex = true;
-        } else if (mySim.enemies.stream().anyMatch(u -> u.unit.getDistance(unit) <= 4 * 32)) {
-            if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
-                unit.haltConstruction();
-                stoppedDisrupting = true;
-                if (!removedIndex) {
-                    enemyBaseBorders.remove(enemyNaturalIndex);
-                    enemyNaturalIndex = -1;
-                    removedIndex = true;
+        } else if(!stoppedDisrupting){
+            if (mySim.enemies.stream().anyMatch(u -> u.unit.getDistance(unit) <= 4 * 32)) {
+                if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
+                    unit.haltConstruction();
+                    stoppedDisrupting = true;
+                    if (!removedIndex) {
+                        enemyBaseBorders.remove(enemyNaturalIndex);
+                        enemyNaturalIndex = -1;
+                        removedIndex = true;
+                    }
+                    return;
                 }
-                return;
-            }
-            if (mySim.enemies.size() == 1) {
-                UnitInfo closest = mySim.enemies.iterator().next();
-                Area enemyArea = getGs().bwem.getMap().getArea(closest.tileposition);
-                if (closest.unit instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
-                    if (mySim.lose) {
-                        unit.haltConstruction();
-                        stoppedDisrupting = true;
-                        if (!removedIndex) {
-                            enemyBaseBorders.remove(enemyNaturalIndex);
-                            enemyNaturalIndex = -1;
-                            removedIndex = true;
+                if (mySim.enemies.size() == 1) {
+                    UnitInfo closest = mySim.enemies.iterator().next();
+                    Area enemyArea = getGs().bwem.getMap().getArea(closest.tileposition);
+                    if (closest.unit instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
+                        if (mySim.lose) {
+                            unit.haltConstruction();
+                            stoppedDisrupting = true;
+                            if (!removedIndex) {
+                                enemyBaseBorders.remove(enemyNaturalIndex);
+                                enemyNaturalIndex = -1;
+                                removedIndex = true;
+                            }
                         }
-                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next()); // TODO add attack state
+                    }
                 }
             }
-        } else unit.resumeBuilding(disrupter);
+        } else if(mySim.enemies.isEmpty() && disrupter != null) unit.resumeBuilding(disrupter);
+        else if(!mySim.enemies.isEmpty() && (unitInfo.attackers.isEmpty() || !mySim.lose)){
+            UnitInfo target = Util.getRangedTarget(unitInfo, mySim.enemies);
+            if(target != null) UtilMicro.attack(unit, target);
+            else if(disrupter != null) unit.resumeBuilding(disrupter);
+        }
+        if(disrupter != null) unit.resumeBuilding(disrupter);
     }
 
     private Status chooseNewStatus() {
-        if(stoppedDisrupting || !getGs().firstScout) return Status.EXPLORE;
-        if (status == Status.DISRUPTING) return Status.DISRUPTING;
+        if (status == Status.DISRUPTING){
+            if(stoppedDisrupting && !unitInfo.attackers.isEmpty() && mySim.lose) return Status.EXPLORE;
+            return Status.DISRUPTING;
+        }
         if (status == Status.PROXYING) {
             if (proxyTile == null) {
                 ableToProxy = false;

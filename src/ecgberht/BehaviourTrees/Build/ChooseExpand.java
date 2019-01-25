@@ -22,8 +22,7 @@ public class ChooseExpand extends Action {
     public State execute() {
         try {
             String strat = gameState.getStrat().name;
-            if (strat.equals("JoyORush")) return State.FAILURE;
-            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || (strat.equals("TheNitekat") && gameState.getCash().first <= 550))
+            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || ((strat.equals("JoyORush") ||strat.equals("TheNitekat")) && gameState.getCash().first <= 550))
                 return State.FAILURE;
             if (strat.equals("FullMech") && (gameState.myArmy.stream().noneMatch(u -> u.unit instanceof SiegeTank) || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && gameState.firstExpand)
                 return State.FAILURE;
@@ -36,7 +35,7 @@ public class ChooseExpand extends Action {
             if (strat.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
                 return State.FAILURE;
             }
-            if (gameState.iReallyWantToExpand || gameState.getCash().first >= 550 || (strat.equals("14CC") && gameState.supplyMan.getSupplyUsed() == 28)) {
+            if (gameState.iReallyWantToExpand || (gameState.getCash().first >= 550 && gameState.getArmySize() >= gameState.getStrat().armyForExpand) || (strat.equals("14CC") && gameState.supplyMan.getSupplyUsed() == 28)) {
                 gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return State.SUCCESS;
             }

@@ -190,8 +190,7 @@ public class GameState {
             if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
         for (Base b : BLs) {
-            if (b.isStartingLocation()) continue;
-            if (skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
             if (weirdBlocking(b)) blockedBLs.add(b);
             else {
                 for (ChokePoint p : b.getArea().getChokePoints()) {
@@ -425,7 +424,7 @@ public class GameState {
 
         List<Worker> removeTask = new ArrayList<>();
         for (Entry<SCV, Building> w : workerTask.entrySet()) {
-            if (!w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
+            if (!w.getKey().exists() || !w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
                 removeTask.add(w.getKey());
         }
         for (Worker u : removeTask) {
@@ -620,7 +619,7 @@ public class GameState {
 
     void mineralLocking() {
         for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
-            if (u.getKey().getLastCommandFrame() == frameCount) continue;
+            if (u.getKey().getLastCommandFrame() == frameCount || u.getKey().isCarryingMinerals()) continue;
             if (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())
                     || u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
                     && u.getKey().getOrder() == Order.MoveToMinerals && !u.getKey().isCarryingMinerals())

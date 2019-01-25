@@ -181,7 +181,8 @@ public class IntelligenceAgency {
                 getGs().learningManager.setNaughty(true);
                 getGs().ih.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
-                if (getGs().getStrat().name.equals("BioGreedyFE") || getGs().getStrat().name.equals("MechGreedyFE")) {
+                String strat = getGs().getStrat().name;
+                if (strat.contains("GreedyFE") || strat.equals("14CC")) { // TODO cancel 14CC??
                     getGs().setStrat(new FullBio());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -204,7 +205,8 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.ZealotRush;
                 getGs().ih.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
-                if (getGs().getStrat().name.contains("GreedyFE") || getGs().getStrat().name.equals("FullMech")) {
+                String strat = getGs().getStrat().name;
+                if (strat.contains("GreedyFE") || strat.equals("FullMech") || strat.equals("14CC")) {
                     getGs().setStrat(new FullBio());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
@@ -282,6 +284,7 @@ public class IntelligenceAgency {
             }
             if (countFactories < 1 && countRax >= 1) {
                 enemyStrat = EnemyStrats.BioPush;
+                getGs().getStrat().bunker = true;
                 getGs().ih.sendText("Nice Bio strat");
                 return true;
             }
@@ -314,11 +317,12 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.NinePool;
                 getGs().ih.sendText("Nice 9 pool");
                 getGs().getStrat().bunker = true;
-                /*if (getGs().getStrat().name.equals("BioGreedyFE") || getGs().getStrat().name.equals("MechGreedyFE")) {
-                    getGs().getStrat() = new FullBio();
+                String strat = getGs().getStrat().name;
+                if (strat.equals("14CC")) { // TODO cancel 14CC??
+                    getGs().setStrat(new FullBio());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
-                }*/
+                }
                 return true;
             }
         }
@@ -332,18 +336,10 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.ProtossFE;
                 getGs().ih.sendText("Nice FE");
                 String strat = getGs().getStrat().name;
-                if (strat.equals("FullBio") || strat.equals("FullBioFE")) {
-                    getGs().setStrat(new BioGreedyFE());
-                }
-                if (strat.equals("BioMech") || strat.equals("BioMechFE")) {
-                    getGs().setStrat(new BioMechGreedyFE());
-                }
-                if (strat.equals("FullMech")) {
-                    getGs().setStrat(new MechGreedyFE());
-                }
-                if (strat.contains("GreedyFE")) {
-                    getGs().getStrat().armyForAttack += 10;
-                }
+                if (strat.equals("FullBio") || strat.equals("FullBioFE")) getGs().setStrat(new BioGreedyFE());
+                if (strat.equals("BioMech") || strat.equals("BioMechFE")) getGs().setStrat(new BioMechGreedyFE());
+                if (strat.equals("FullMech")) getGs().setStrat(new MechGreedyFE());
+                if (strat.contains("GreedyFE")) getGs().getStrat().armyForAttack += 10;
                 getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
                 Ecgberht.transition();
                 return true;
@@ -423,15 +419,10 @@ public class IntelligenceAgency {
                 enemyStrat = EnemyStrats.CannonRush;
                 getGs().ih.sendText("Cannon rusher T_T");
                 getGs().playSound("rushed.mp3");
-                if (getGs().getStrat().name.equals("BioGreedyFE") || getGs().getStrat().name.equals("MechGreedyFE")) {
-                    getGs().setStrat(new FullMech());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
-                    Ecgberht.transition();
-                } else if (getGs().getStrat().name.equals("BioMech") || getGs().getStrat().name.equals("BioMechFE")) {
-                    getGs().setStrat(new FullMech());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
-                    Ecgberht.transition();
-                }
+                getGs().setStrat(new FullMech());
+                getGs().getStrat().armyForExpand += 10; // TODO add preconditions for expanding
+                getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                Ecgberht.transition();
                 return true;
             }
         }
@@ -447,7 +438,8 @@ public class IntelligenceAgency {
 
     public static boolean enemyIsRushing() {
         boolean timeCheck = getGs().frameCount <= 24 * 500;
-        boolean rushStratDetected = enemyStrat == EnemyStrats.ZealotRush || enemyStrat == EnemyStrats.EarlyPool || enemyStrat == EnemyStrats.CannonRush || getGs().learningManager.isNaughty();
+        boolean rushStratDetected = enemyStrat == EnemyStrats.ZealotRush || enemyStrat == EnemyStrats.EarlyPool
+                || enemyStrat == EnemyStrats.CannonRush || enemyStrat == EnemyStrats.NinePool|| getGs().learningManager.isNaughty();
         boolean raceCheck = false;
         if (timeCheck && rushStratDetected) return true;
         switch (getGs().enemyRace) {
