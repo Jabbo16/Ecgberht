@@ -14,7 +14,6 @@ import org.bk.ass.BWAPI4JAgentFactory;
 import org.bk.ass.Evaluator;
 import org.bk.ass.Simulator;
 import org.openbw.bwapi4j.BW;
-import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
@@ -127,7 +126,8 @@ public class SimManager {
         // Enemy Clusters
         List<UnitInfo> enemyUnits = new ArrayList<>();
         for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
-            if (getGs().getStrat().proxy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking())) continue;
+            if (getGs().getStrat().proxy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking()))
+                continue;
             if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
             if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
                     || getGs().frameCount - u.lastVisibleFrame <= 24 * 4)
@@ -225,7 +225,8 @@ public class SimManager {
             if (emptyAir && emptyGround) continue;
             for (UnitInfo u : s.enemies) {
                 if (u.unit instanceof AirAttacker || u.unitType == UnitType.Terran_Bunker) air.enemies.add(u);
-                if (u.unit instanceof GroundAttacker || u.unitType == UnitType.Terran_Bunker  || u.unitType == UnitType.Zerg_Creep_Colony) ground.enemies.add(u);
+                if (u.unit instanceof GroundAttacker || u.unitType == UnitType.Terran_Bunker || u.unitType == UnitType.Zerg_Creep_Colony)
+                    ground.enemies.add(u);
             }
             /*if (!emptyAir && !air.enemies.isEmpty()) {
                 air.type = SimInfo.SimType.AIR;
@@ -264,7 +265,7 @@ public class SimManager {
         int energy = getGs().CSs.stream().filter(s -> s.getOrder() != Order.CastScannerSweep).mapToInt(s -> s.getEnergy() / 50).sum();
         Assmulator.reset();
         for (SimInfo s : simulations) {
-            try{
+            try {
                 Assmulator.resetUnits();
                 if (s.enemies.isEmpty()) continue;
                 for (UnitInfo u : s.allies) {
@@ -275,7 +276,8 @@ public class SimManager {
                 for (UnitInfo u : s.enemies) {
                     if (u.unitType.isWorker() && u.visible && !u.unit.isAttacking()) continue;
                     if (u.unitType.isBuilding() && !u.completed) continue;
-                    if (u.unitType == UnitType.Zerg_Creep_Colony || (!Util.isStaticDefense(u) && !u.unitType.canAttack())) continue;
+                    if (u.unitType == UnitType.Zerg_Creep_Colony || (!Util.isStaticDefense(u) && !u.unitType.canAttack()))
+                        continue;
                     if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
                         if (energy >= 1) energy -= 1;
                         else {
@@ -313,7 +315,7 @@ public class SimManager {
                 else if (getGs().getStrat().name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
                 else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.35);
                 else s.lose = !scoreCalcASS(s, 2);
-            } catch(Exception e){
+            } catch (Exception e) {
                 System.err.println("Simulator ASS exception");
                 e.printStackTrace();
             }

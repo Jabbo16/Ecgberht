@@ -96,8 +96,12 @@ public class LearningManager {
         }
     }
 
-    public EnemyInfo getEnemyInfo() {
+    EnemyInfo getEnemyInfo() {
         return enemyInfo;
+    }
+
+    public LinkedList<EnemyHistory.EnemyGame> getEnemyHistory() {
+        return enemyHistory.history;
     }
 
     public void setRace(String raceToString) {
@@ -117,7 +121,7 @@ public class LearningManager {
         writeOpponentHistory(opponentName);
     }
 
-    public void setNaughty(boolean naughty) {
+    void setNaughty(boolean naughty) {
         enemyInfo.naughty = naughty;
     }
 
@@ -129,14 +133,14 @@ public class LearningManager {
         enemyInfo.defendHarass = harass;
     }
 
-    public void onStart(String name, String raceToString) {
+    void onStart(String name, String raceToString) {
         readOpponentInfo(name);
         readOpponentHistory(name);
         setRace(raceToString);
     }
 
     public static class EnemyHistory {
-        public List<EnemyGame> history = new LinkedList<>();
+        public LinkedList<EnemyGame> history = new LinkedList<>();
 
         static class EnemyGame {
             private String opponent;
@@ -144,7 +148,7 @@ public class LearningManager {
             private String outcome;
             private String strategy;
             private String mapName;
-            private String opponentStrategy;
+            public String opponentStrategy;
 
             EnemyGame(String opponent, Race race, boolean outcome, String strategy, String mapName, IntelligenceAgency.EnemyStrats enemyStrat) {
                 this.opponent = opponent;

@@ -24,7 +24,7 @@ public class Squad implements Comparable<Squad> {
     private Position center;
     private Integer id;
     private SimInfo squadSim;
-    protected boolean lose;
+    boolean lose;
 
     Squad(int id, Position center, SimInfo squadSim) {
         this.id = id;
@@ -116,7 +116,7 @@ public class Squad implements Comparable<Squad> {
                 executeRangedAttackLogic(u);
                 break;
             case IDLE:
-                if(getGs().getStrat().proxy) return;
+                if (getGs().getStrat().proxy) return;
                 Position move = null;
                 if (getGs().defendPosition != null) {
                     if (u.currentOrder != Order.Stop) move = getGs().defendPosition;
@@ -186,27 +186,17 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case IDLE:
+                if (getGs().getStrat().proxy) return;
                 Position move = null;
-                if (getGs().getStrat().proxy && !getGs().MBs.isEmpty()) {
-                    Position firstRax = getGs().MBs.iterator().next().getPosition();
-                    if (firstRax.getDistance(u.position) > 200) {
-                        UtilMicro.move((MobileUnit) u.unit, firstRax);
-                        return;
-                    }
-                } else if (getGs().defendPosition != null) {
-                    if (u.currentOrder != Order.Move) move = getGs().defendPosition;
+                if (getGs().defendPosition != null) {
+                    if (u.currentOrder != Order.Stop) move = getGs().defendPosition;
                 } else if (!getGs().DBs.isEmpty()) {
                     Unit bunker = getGs().DBs.keySet().iterator().next();
-                    if (Util.broodWarDistance(bunker.getPosition(), center) >= 180 &&
-                            getGs().getArmySize() < getGs().getStrat().armyForAttack) {
-                        if (u.currentOrder != Order.Move) move = bunker.getPosition();
-                    }
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty()) {
-                    if (Util.broodWarDistance(getGs().mainChoke.getCenter().toPosition(), center) >= 200 &&
-                            getGs().getArmySize() < getGs().getStrat().armyForAttack) {
-                        if (u.currentOrder != Order.Move) move = getGs().mainChoke.getCenter().toPosition();
-                    }
-                } else if (Util.broodWarDistance(u.position, center) >= 180 && u.currentOrder != Order.Move) {
+                    if (u.currentOrder != Order.Stop) move = bunker.getPosition();
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                    if (u.currentOrder != Order.Stop) move = getGs().mainChoke.getCenter().toPosition();
+
+                } else if (Util.broodWarDistance(u.position, center) >= 190 && u.currentOrder != Order.Move) {
                     if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition())) move = center;
                 }
                 if (move != null) {
@@ -276,18 +266,18 @@ public class Squad implements Comparable<Squad> {
                     return;
                 }
                 Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
-                if(st.isSieged()){
+                if (st.isSieged()) {
                     tankTargets.removeIf(e -> u.getDistance(e) >= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.canAttack() && !e.unitType.isSpellcaster()));
-                    if(tankTargets.isEmpty()){
+                    if (tankTargets.isEmpty()) {
                         st.unsiege();
                         return;
                     }
                 }
 
                 UnitInfo target = Util.getTankTarget(u, tankTargets);
-                if(target != null) UtilMicro.attack(st, target);
-                else if(attack != null){
-                    if(st.isSieged()) st.unsiege();
+                if (target != null) UtilMicro.attack(st, target);
+                else if (attack != null) {
+                    if (st.isSieged()) st.unsiege();
                     else UtilMicro.move(st, attack);
                 }
                 break;
@@ -359,14 +349,9 @@ public class Squad implements Comparable<Squad> {
             }
         } else if (status == Status.REGROUP) {
             Position pos = getGs().getNearestCC(u.getPosition(), true);
-            if (Util.broodWarDistance(pos, u.getPosition()) >= 400) {
-                UtilMicro.heal(u, pos);
-            }
-        } else if (status == Status.ADVANCE && attack != null) {
-            UtilMicro.heal(u, attack);
-            //} else if (attack != null && center.getDistance(u.getPosition()) <= 150) {
-            //UtilMicro.heal(u, attack);
-        } else if (center.getDistance(u.getPosition()) > 32 * 6) UtilMicro.heal(u, center);
+            if (Util.broodWarDistance(pos, u.getPosition()) >= 400) UtilMicro.heal(u, pos);
+        } else if (status == Status.ADVANCE && attack != null) UtilMicro.heal(u, attack);
+        else if (center.getDistance(u.getPosition()) > 32 * 6) UtilMicro.heal(u, center);
     }
 
     private boolean shouldStim(UnitInfo u) {
@@ -415,7 +400,7 @@ public class Squad implements Comparable<Squad> {
         }
         double distToTarget = u.getDistance(target);
         Optional<UnitInfo> bunker = squadSim.allies.stream().filter(ally -> ally.unitType == UnitType.Terran_Bunker).findFirst();
-        if(status == Status.DEFENSE && IntelligenceAgency.enemyIsRushing() && bunker.isPresent() && u.getDistance(bunker.get()) > distToTarget){
+        if (status == Status.DEFENSE && IntelligenceAgency.enemyIsRushing() && bunker.isPresent() && u.getDistance(bunker.get()) > distToTarget) {
             UtilMicro.move((MobileUnit) u.unit, bunker.get().lastPosition);
         }
         double speed = u.speed;

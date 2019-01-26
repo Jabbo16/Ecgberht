@@ -265,9 +265,9 @@ public class Util {
                 maxScore = score;
             }
         }
-        if(chosen == null){
-            for(BaseManager.Garrison g : getGs().baseManager.getScoutingBasesSorted()) {
-                if(!flying && g.island) continue;
+        if (chosen == null) {
+            for (BaseManager.Garrison g : getGs().baseManager.getScoutingBasesSorted()) {
+                if (!flying && g.island) continue;
                 return g.tile.toPosition();
             }
         }
@@ -556,7 +556,8 @@ public class Util {
         UnitInfo bestTarget = null;
         if (rangedUnit == null || enemies.isEmpty()) return null;
         for (UnitInfo enemy : enemies) {
-            if (enemy.unit == null || ((enemy.unit.isCloaked() || enemy.burrowed) && !enemy.unit.isDetected())) continue;
+            if (enemy.unit == null || ((enemy.unit.isCloaked() || enemy.burrowed) && !enemy.unit.isDetected()))
+                continue;
             if (enemy.flying && !(rangedUnit.unit instanceof AirAttacker)) continue;
             if (!enemy.flying && !(rangedUnit.unit instanceof GroundAttacker)) continue;
             int priority = getRangedAttackPriority(rangedUnit, enemy);
@@ -614,7 +615,8 @@ public class Util {
         }
         if (rangedType == UnitType.Terran_Wraith) {
             if (target.flying) return targetType.isFlyingBuilding() ? 5 : 11;
-        } else if (rangedType == UnitType.Terran_Goliath && target.flying) return targetType.isFlyingBuilding() ? 8 : 10;
+        } else if (rangedType == UnitType.Terran_Goliath && target.flying)
+            return targetType.isFlyingBuilding() ? 8 : 10;
         if (rangedType.isFlyer() && target.unit instanceof SiegeTank) return 10;
         if (targetType == UnitType.Protoss_High_Templar || targetType == UnitType.Zerg_Defiler) return 12;
         if (targetType == UnitType.Protoss_Reaver || targetType == UnitType.Protoss_Arbiter) return 11;
@@ -637,10 +639,10 @@ public class Util {
             if (rangedType == UnitType.Terran_Vulture) return 11;
             if (target.unit instanceof SCV) {
                 if (((SCV) target.unit).isRepairing()) return 11;
-                if (((SCV) target.unit).isConstructing()){
-                    if (getGs().getStrat().proxy){
+                if (((SCV) target.unit).isConstructing()) {
+                    if (getGs().getStrat().proxy) {
                         Unit build = target.unit.getBuildUnit();
-                        if((build instanceof Bunker || build instanceof Factory)) return 15;
+                        if ((build instanceof Bunker || build instanceof Factory)) return 15;
                         return 13;
                     }
                     return 10;
@@ -686,7 +688,7 @@ public class Util {
     }
 
     public static boolean isInOurBases(UnitInfo u) {
-        if (u == null)  return false;
+        if (u == null) return false;
         Area uArea = getGs().bwem.getMap().getArea(u.lastTileposition);
         if (uArea == null) return false;
         if (uArea.equals(getGs().enemyMainArea) || uArea.equals(getGs().enemyNaturalArea)) return false;

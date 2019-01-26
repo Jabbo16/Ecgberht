@@ -34,6 +34,7 @@ public class WorkerScoutAgent extends Agent {
     private Building disrupter = null;
     private Building proxier = null;
     private boolean stoppedDisrupting = false;
+    private boolean finishedDisrupting = false;
     private SimInfo mySim;
     List<TilePosition> validTiles = new ArrayList<>();
     private boolean removedIndex = false;
@@ -79,13 +80,15 @@ public class WorkerScoutAgent extends Agent {
         if (unit == null || !unit.exists() || unitInfo == null || !getGs().firstScout) {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
             getGs().firstScout = false;
-            if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
+            if (getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted())
+                getGs().proxyBuilding.cancelConstruction();
             return true;
         }
         if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
             getGs().myArmy.add(unitInfo);
             getGs().firstScout = false;
-            if(getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted()) getGs().proxyBuilding.cancelConstruction();
+            if (getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted())
+                getGs().proxyBuilding.cancelConstruction();
             return true;
         }
         /*for(TilePosition p : validTiles){
@@ -149,9 +152,10 @@ public class WorkerScoutAgent extends Agent {
             }
         } else if (disrupter.getRemainingBuildTime() <= 25) {
             unit.haltConstruction();
+            finishedDisrupting = true;
             stoppedDisrupting = true;
             removedIndex = true;
-        } else if(!stoppedDisrupting){
+        } else if (!stoppedDisrupting) {
             if (mySim.enemies.stream().anyMatch(u -> u.unit.getDistance(unit) <= 4 * 32)) {
                 if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
                     unit.haltConstruction();
@@ -179,18 +183,19 @@ public class WorkerScoutAgent extends Agent {
                     }
                 }
             }
-        } else if(mySim.enemies.isEmpty() && disrupter != null) unit.resumeBuilding(disrupter);
-        else if(!mySim.enemies.isEmpty() && (unitInfo.attackers.isEmpty() || !mySim.lose)){
+        } else if (mySim.enemies.isEmpty() && disrupter != null) unit.resumeBuilding(disrupter);
+        else if (!mySim.enemies.isEmpty() && (unitInfo.attackers.isEmpty() || !mySim.lose)) {
             UnitInfo target = Util.getRangedTarget(unitInfo, mySim.enemies);
-            if(target != null) UtilMicro.attack(unit, target);
-            else if(disrupter != null) unit.resumeBuilding(disrupter);
+            if (target != null) UtilMicro.attack(unit, target);
+            else if (disrupter != null) unit.resumeBuilding(disrupter);
         }
-        if(disrupter != null) unit.resumeBuilding(disrupter);
+        if (disrupter != null) unit.resumeBuilding(disrupter);
     }
 
     private Status chooseNewStatus() {
-        if (status == Status.DISRUPTING){
-            if(stoppedDisrupting && !unitInfo.attackers.isEmpty() && mySim.lose) return Status.EXPLORE;
+        if (status == Status.DISRUPTING) {
+            if (finishedDisrupting || (stoppedDisrupting && !unitInfo.attackers.isEmpty() && mySim.lose))
+                return Status.EXPLORE;
             return Status.DISRUPTING;
         }
         if (status == Status.PROXYING) {
@@ -224,7 +229,7 @@ public class WorkerScoutAgent extends Agent {
         if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
-        if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
+        if (getGs().enemyRace != Race.Zerg || stoppedDisrupting || finishedDisrupting) return Status.EXPLORE;
         if (IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex) {
             return Status.DISRUPTING;
         }

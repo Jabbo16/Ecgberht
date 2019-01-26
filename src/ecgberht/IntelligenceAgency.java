@@ -439,7 +439,7 @@ public class IntelligenceAgency {
     public static boolean enemyIsRushing() {
         boolean timeCheck = getGs().frameCount <= 24 * 500;
         boolean rushStratDetected = enemyStrat == EnemyStrats.ZealotRush || enemyStrat == EnemyStrats.EarlyPool
-                || enemyStrat == EnemyStrats.CannonRush || enemyStrat == EnemyStrats.NinePool|| getGs().learningManager.isNaughty();
+                || enemyStrat == EnemyStrats.CannonRush || enemyStrat == EnemyStrats.NinePool || getGs().learningManager.isNaughty();
         boolean raceCheck = false;
         if (timeCheck && rushStratDetected) return true;
         switch (getGs().enemyRace) {

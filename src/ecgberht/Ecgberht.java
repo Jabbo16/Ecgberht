@@ -46,8 +46,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.TreeSet;
 
 public class Ecgberht implements BWEventListener {
 
@@ -572,7 +575,7 @@ public class Ecgberht implements BWEventListener {
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
                     || arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             PlayerUnit pU = (PlayerUnit) arg0;
-            if(arg0 instanceof ResourceDepot) gs.baseManager.onCreate((ResourceDepot) arg0);
+            if (arg0 instanceof ResourceDepot) gs.baseManager.onCreate((ResourceDepot) arg0);
             UnitType type = arg0.getType();
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
                 if (arg0 instanceof Building) {
@@ -839,7 +842,7 @@ public class Ecgberht implements BWEventListener {
                                 break;
                             }
                         }
-                        if(arg0.equals(gs.proxyBuilding)) gs.proxyBuilding = null;
+                        if (arg0.equals(gs.proxyBuilding)) gs.proxyBuilding = null;
                         for (Entry<SCV, Building> w : gs.workerTask.entrySet()) {
                             if (w.getValue().equals(arg0)) {
                                 if (w.getValue() instanceof CommandCenter) {

@@ -22,7 +22,7 @@ public class ChooseExpand extends Action {
     public State execute() {
         try {
             String strat = gameState.getStrat().name;
-            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || ((strat.equals("JoyORush") ||strat.equals("TheNitekat")) && gameState.getCash().first <= 550))
+            if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || ((strat.equals("JoyORush") || strat.equals("TheNitekat")) && gameState.getCash().first <= 550))
                 return State.FAILURE;
             if (strat.equals("FullMech") && (gameState.myArmy.stream().noneMatch(u -> u.unit instanceof SiegeTank) || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && gameState.firstExpand)
                 return State.FAILURE;

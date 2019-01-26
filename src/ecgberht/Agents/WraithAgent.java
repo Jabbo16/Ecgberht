@@ -11,7 +11,10 @@ import org.openbw.bwapi4j.unit.Unit;
 import org.openbw.bwapi4j.unit.Weapon;
 import org.openbw.bwapi4j.unit.Wraith;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static ecgberht.Ecgberht.getGs;
 

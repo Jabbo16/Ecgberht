@@ -157,10 +157,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         } else {
             boolean meleeOnly = checkOnlyMelees();
             if (!meleeOnly && getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND).lose) {
-                if(Util.isInOurBases(unitInfo)){
+                if (Util.isInOurBases(unitInfo)) {
                     status = Status.KITE;
-                }
-                else status = Status.RETREAT;
+                } else status = Status.RETREAT;
                 return;
             }
             if (status == Status.PATROL && actualFrame - lastPatrolFrame > 5) {

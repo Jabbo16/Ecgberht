@@ -25,12 +25,12 @@ public class BaseManager {
     }
 
     public void updateGarrisons() {
-        for(Garrison g : garrisons.values()){
-            if(getGs().getGame().getBWMap().isVisible(g.tile)) g.lastFrameVisible = getGs().frameCount;
+        for (Garrison g : garrisons.values()) {
+            if (getGs().getGame().getBWMap().isVisible(g.tile)) g.lastFrameVisible = getGs().frameCount;
         }
     }
 
-    public void onCreate(ResourceDepot depot){
+    public void onCreate(ResourceDepot depot) {
         Base b = Util.getClosestBaseLocation(depot.getPosition());
         Garrison g = garrisons.get(b);
         g.lastFrameVisible = getGs().frameCount;
@@ -39,7 +39,7 @@ public class BaseManager {
 
     }
 
-    public void onDestroy(ResourceDepot depot){
+    public void onDestroy(ResourceDepot depot) {
         Base b = Util.getClosestBaseLocation(depot.getPosition());
         Garrison g = garrisons.get(b);
         g.lastFrameVisible = getGs().frameCount;
@@ -89,6 +89,8 @@ public class BaseManager {
             lastFrameVisible = getGs().frameCount;
         }
 
-        int frameVisibleDiff() { return getGs().frameCount - lastFrameVisible; }
+        int frameVisibleDiff() {
+            return getGs().frameCount - lastFrameVisible;
+        }
     }
 }
