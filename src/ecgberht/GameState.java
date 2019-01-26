@@ -932,28 +932,33 @@ public class GameState {
     }
 
     void alwaysPools() {
-        if (enemyRace != Race.Zerg) return;
-        List<String> poolers = new ArrayList<>(Arrays.asList("newbiezerg", "neoedmundzerg", "peregrinebot",
-                "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish",
-                "jumpydoggobot", "upstarcraftai2016"));
-        LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-        LinkedList<LearningManager.EnemyHistory.EnemyGame> history = (LinkedList<LearningManager.EnemyHistory.EnemyGame>) learningManager.getEnemyHistory().clone();
-        Collections.reverse(history);
-        int count = 0;
-        boolean reallyNaughty = false;
-        for (int ii = 0; ii < history.size() && ii < 4; ii++) {
-            if (history.get(ii).opponentStrategy.equals("EarlyPool")) count++;
-            if (count > 2) {
-                reallyNaughty = true;
-                break;
+        try {
+            if (enemyRace != Race.Zerg) return;
+            List<String> poolers = new ArrayList<>(Arrays.asList("newbiezerg", "neoedmundzerg", "peregrinebot",
+                    "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish",
+                    "jumpydoggobot", "upstarcraftai2016"));
+            LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
+            LinkedList<LearningManager.EnemyHistory.EnemyGame> history = (LinkedList<LearningManager.EnemyHistory.EnemyGame>) learningManager.getEnemyHistory().clone();
+            Collections.reverse(history);
+            int count = 0;
+            boolean reallyNaughty = false;
+            for (int ii = 0; ii < history.size() && ii < 4; ii++) {
+                if ("EarlyPool".equals(history.get(ii).opponentStrategy)) count++;
+                if (count > 2) {
+                    reallyNaughty = true;
+                    break;
+                }
             }
+            if (reallyNaughty || poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
+                EI.naughty = true;
+                IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.EarlyPool);
+                return;
+            }
+            EI.naughty = false;
+        } catch (Exception e) {
+            System.err.println("alwaysPools Exception");
+            e.printStackTrace();
         }
-        if (reallyNaughty || poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
-            EI.naughty = true;
-            IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.EarlyPool);
-            return;
-        }
-        EI.naughty = false;
     }
 
 
