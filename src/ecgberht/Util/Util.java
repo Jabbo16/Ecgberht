@@ -265,7 +265,7 @@ public class Util {
                 maxScore = score;
             }
         }
-        if (chosen == null) {
+        if (chosen == null && getGs().enemyMainBase == null) {
             for (BaseManager.Garrison g : getGs().baseManager.getScoutingBasesSorted()) {
                 if (!flying && g.island) continue;
                 return g.tile.toPosition();
