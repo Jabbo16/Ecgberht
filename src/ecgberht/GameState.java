@@ -191,7 +191,7 @@ public class GameState {
             if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
         for (Base b : BLs) {
-            if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b)) continue;
             if (weirdBlocking(b)) blockedBLs.add(b);
             else {
                 for (ChokePoint p : b.getArea().getChokePoints()) {
@@ -222,7 +222,7 @@ public class GameState {
     void checkBasesWithBLockingMinerals() {
         if (blockingMinerals.isEmpty()) return;
         for (bwem.Base b : BLs) {
-            if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b)) continue;
             for (ChokePoint c : b.getArea().getChokePoints()) {
                 for (Position m : blockingMinerals.keySet()) {
                     if (Util.broodWarDistance(m, c.getCenter().toPosition()) < 40) {

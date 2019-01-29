@@ -83,7 +83,7 @@ public class BaseManager {
             base.getMinerals().forEach(t -> minerals.add((MineralPatch) t.getUnit()));
             base.getGeysers().forEach(t -> geysers.put(t.getUnit(), false));
             area = base.getArea();
-            starting = base.isStartingLocation();
+            starting = base.isStartingLocation() || getGs().getGame().getBWMap().getStartPositions().contains(tile);
             island = area.getAccessibleNeighbors().isEmpty();
             if (getGs().self.getStartLocation().equals(tile)) player = getGs().self;
             lastFrameVisible = getGs().frameCount;
