@@ -344,7 +344,8 @@ public class Ecgberht implements BWEventListener {
                 ih.sendText("Hitchhiker :(");
             }
             bwem.initialize();
-            bwem.getMap().assignStartingLocationsToSuitableBases();
+            if(!bw.getBWMap().mapHash().equals("e6d0144e14315118d916905ff5e7045f68db541e")) // Aztec KSL crash fix
+                bwem.getMap().assignStartingLocationsToSuitableBases();
             gs = new GameState(bw, bwem);
             gs.baseManager = new BaseManager(bwem);
             gs.initEnemyRace();

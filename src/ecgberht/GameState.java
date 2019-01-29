@@ -346,7 +346,7 @@ public class GameState {
     void initStartLocations() {
         Base startBot = Util.getClosestBaseLocation(self.getStartLocation().toPosition());
         for (bwem.Base b : bwem.getMap().getBases()) {
-            if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) {
+            if ((b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation())) && !b.getLocation().equals(startBot.getLocation())) {
                 SLs.add(b);
                 scoutSLs.add(b);
             }
