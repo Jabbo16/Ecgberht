@@ -313,12 +313,17 @@ public class IntelligenceAgency {
         if (getGs().frameCount < 24 * 180 && getGs().enemyStartBase != null && exploredMinerals) {
             int drones = IntelligenceAgency.getNumEnemyWorkers();
             boolean foundPool = enemyHasType(UnitType.Zerg_Spawning_Pool);
-            if (foundPool && getNumEnemyBases(mainEnemy) < 2 && drones >= 7 && drones <= 9) {
+            if (foundPool && getNumEnemyBases(mainEnemy) < 2 && drones >= 7 && drones <= 10) {
                 enemyStrat = EnemyStrats.NinePool;
-                getGs().ih.sendText("Nice 9 pool");
+                getGs().ih.sendText(drones == 10 ? "Nice Overpool" : "Nice 9 pool");
                 getGs().getStrat().bunker = true;
                 String strat = getGs().getStrat().name;
                 if (strat.equals("14CC")) { // TODO cancel 14CC??
+                    getGs().setStrat(new FullBio());
+                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    Ecgberht.transition();
+                }
+                if (strat.contains("GreedyFE")) { // TODO cancel FE??
                     getGs().setStrat(new FullBio());
                     getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
