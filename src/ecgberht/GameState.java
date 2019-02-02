@@ -1157,4 +1157,8 @@ public class GameState {
             }
         } else if (getStrat().workerGas < 3 && workersAtGas == getStrat().workerGas) getStrat().workerGas++;
     }
+
+    public boolean isGoingToExpand() {
+        return workerBuild.values().stream().anyMatch(u -> u.first == UnitType.Terran_Command_Center);
+    }
 }

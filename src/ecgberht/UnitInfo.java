@@ -100,27 +100,27 @@ public class UnitInfo implements Comparable<UnitInfo> {
         attackers.clear();
     }
 
-    public double getDistance(Position pos) {
-        if (this.visible) return this.unit.getDistance(pos);
+    public int getDistance(Position pos) {
+        if (this.visible) return Util.getDistance(this.unit, pos);
         return this.lastPosition.getDistance(pos);
     }
 
     public int getDistance(UnitInfo target) {
         if (this.visible)
-            return target.visible ? this.unit.getDistance(target.unit) : (int) unit.getDistance(target.lastPosition);
-        return target.visible ? (int) target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
+            return target.visible ? this.unit.getDistance(target.unit) : this.getDistance(target.lastPosition);
+        return target.visible ? target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
     }
 
     public double getPredictedDistance(UnitInfo target) {
         Position nextPosition = UtilMicro.predictUnitPosition(target, 1);
         if (nextPosition == null) return 0;
-        return this.unit.getDistance(nextPosition);
+        return this.getDistance(nextPosition);
     }
 
     public double getPredictedDistance(UnitInfo target, int frames) {
         Position nextPosition = UtilMicro.predictUnitPosition(target, frames);
         if (nextPosition == null) return 0;
-        return this.unit.getDistance(nextPosition);
+        return this.getDistance(nextPosition);
     }
 
     @Override

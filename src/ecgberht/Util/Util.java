@@ -701,4 +701,20 @@ public class Util {
     public static boolean isResearched(TechType tech) {
         return getGs().getPlayer().hasResearched(tech);
     }
+
+
+    public static int getDistance(Unit unit, Position target) {
+        if (!unit.exists() || target == null) return Integer.MAX_VALUE;
+        int xDist = unit.getLeft() - target.getX();
+        if (xDist < 0) {
+            xDist = target.getX() - (unit.getRight() + 1);
+            if (xDist < 0) xDist = 0;
+        }
+        int yDist = unit.getTop() - target.getY();
+        if (yDist < 0) {
+            yDist = target.getY() - (unit.getBottom() + 1);
+            if (yDist < 0) yDist = 0;
+        }
+        return new Position(0, 0).getDistance(new Position(xDist, yDist));
+    }
 }
