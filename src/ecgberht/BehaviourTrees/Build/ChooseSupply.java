@@ -31,11 +31,12 @@ public class ChooseSupply extends Action {
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
                 return State.FAILURE;
             }
+            if (gameState.getSupply() > 4 * gameState.getCombatUnitsBuildings()) return State.FAILURE;
             int countSupplyDepots = (int) (gameState.workerBuild.values().stream()
                     .filter(u -> u.first == UnitType.Terran_Supply_Depot).count()
                     + gameState.workerTask.values().stream().filter(u -> u instanceof SupplyDepot).count());
             int maxSupplyDepots = gameState.getCash().first >= 400 && !gameState.isGoingToExpand() ? 2 : 1; // TODO improve
-            if (countSupplyDepots < maxSupplyDepots){
+            if (countSupplyDepots < maxSupplyDepots) {
                 gameState.chosenToBuild = UnitType.Terran_Supply_Depot;
                 return State.SUCCESS;
             }

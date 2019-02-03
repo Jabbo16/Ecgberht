@@ -110,7 +110,8 @@ public class StrategyManager {
                 bFE.workerGas = 2;
                 return bFE;
             }
-            Consumer<Strategy> addStrat = (Strategy strat) -> {
+            if(true) return FM;
+            Consumer<Strategy> addStrat = (strat) -> {
                 strategies.put(strat.name, new MutablePair<>(0, 0));
                 nameStrat.put(strat.name, strat);
             };

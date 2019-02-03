@@ -6,15 +6,13 @@ import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
-import org.openbw.bwapi4j.type.Order;
-import org.openbw.bwapi4j.type.Race;
-import org.openbw.bwapi4j.type.TechType;
-import org.openbw.bwapi4j.type.WeaponType;
+import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -130,7 +128,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         Squad chosen = null;
         double scoreMax = Double.MIN_VALUE;
         for (Squad s : getGs().sqManager.squads.values()) {
-            double dist = s.getSquadCenter().getDistance(unitInfo.position);
+            double dist = unitInfo.getDistance(s.getSquadCenter());
             double score = -Math.pow(s.members.size(), 3) / dist;
             if (chosen == null || score > scoreMax) {
                 chosen = s;
@@ -190,6 +188,14 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void kite() {
+        Set<UnitInfo> airThreats = airAttackers.stream().filter(u -> u.unitType == UnitType.Zerg_Scourge || u.unitType == UnitType.Zerg_Spore_Colony).collect(Collectors.toSet());
+        if(!airThreats.isEmpty()){
+            Position kite = UtilMicro.kiteAway(unit, airThreats);
+            if(kite != null){
+                UtilMicro.move(unit, kite);
+                return;
+            }
+        }
         Position kite = UtilMicro.kiteAway(unit, airAttackers);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) return;
         UtilMicro.move(unit, kite);

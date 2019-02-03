@@ -275,7 +275,7 @@ public class IntelligenceAgency {
     }
 
     private static boolean detectBioPush() {
-        if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null && exploredMinerals) {
+        if (getGs().frameCount < 24 * 210 && getGs().enemyStartBase != null) {
             int countFactories = 0;
             int countRax = 0;
             for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {

@@ -32,7 +32,7 @@ public class UtilMicro {
             Unit targetUnit = attacker.getTargetUnit();
             if (target.unit.equals(targetUnit)) return;
             if (target.visible) attacker.attack(target.unit);
-            else ((MobileUnit) attacker).move(target.lastPosition);
+            else move((MobileUnit) attacker, target.lastPosition);
         } catch (Exception e) {
             System.err.println("UtilMicro Attack Exception");
             e.printStackTrace();

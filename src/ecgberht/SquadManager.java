@@ -29,6 +29,7 @@ public class SquadManager {
 
     void updateSquadOrderAndMicro() {
         squads.values().stream().filter(u -> !u.members.isEmpty()).forEach(Squad::updateSquad);
+        squads.values().stream().filter(u -> !u.members.isEmpty()).forEach(Squad::runSquad);
     }
 
     void updateBunkers() { // TODO improve
