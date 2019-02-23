@@ -97,6 +97,7 @@ public class StrategyManager {
 
     private Strategy initStrat() {
         try {
+            if(true) return tPW;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = getGs().learningManager.getEnemyInfo();
             if (getGs().enemyRace == Race.Zerg && EI.naughty) return b;

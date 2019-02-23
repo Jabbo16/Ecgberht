@@ -116,7 +116,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         UnitInfo toAttack = Util.getRangedTarget(unitInfo, mySim.enemies);
         if (toAttack != null) {
             if (attackUnit != null && attackUnit.equals(toAttack)) return;
-            UtilMicro.attack(unit, toAttack);
+            UtilMicro.attack(unitInfo, toAttack);
             attackUnit = toAttack;
         }
     }

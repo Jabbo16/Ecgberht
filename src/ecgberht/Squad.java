@@ -167,6 +167,7 @@ public class Squad implements Comparable<Squad> {
         switch (status) {
             case ATTACK:
             case DEFENSE:
+                if(u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
                 if (squadSim.enemies.isEmpty() && attack != null) {
                     UtilMicro.attack((MobileUnit) u.unit, attack);
                     return;
@@ -181,7 +182,7 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
                     UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
-                    if (target != null) UtilMicro.attack((Attacker) u.unit, target);
+                    if (target != null) UtilMicro.attack(u, target);
                     else if (attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);
                 }
                 break;
@@ -231,7 +232,7 @@ public class Squad implements Comparable<Squad> {
 
     private void microTank(UnitInfo u) {
         SiegeTank st = (SiegeTank) u.unit;
-        if (st.isSieged() && u.currentOrder == Order.Unsieging) return;
+        if (st.isAttackFrame() || st.isStartingAttack() || st.isSieged() && u.currentOrder == Order.Unsieging) return;
         if (!st.isSieged() && u.currentOrder == Order.Sieging) return;
         if (u.currentOrder == Order.Unsieging || u.currentOrder == Order.Sieging) return;
         switch (status) {
@@ -271,7 +272,7 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 UnitInfo target = Util.getTankTarget(u, tankTargets);
-                if (target != null) UtilMicro.attack(st, target);
+                if (target != null) UtilMicro.attack(u, target);
                 else if (attack != null && Math.random() * 10 <= 2.5) {
                     if (st.isSieged()) st.unsiege();
                     else UtilMicro.move(st, attack);
@@ -396,6 +397,7 @@ public class Squad implements Comparable<Squad> {
     }
 
     private void executeRangedAttackLogic(UnitInfo u) {
+        if(u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
         UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
             if (attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);
@@ -414,7 +416,7 @@ public class Squad implements Comparable<Squad> {
         int cooldown = (target.flying ? ((AirAttacker) u.unit).getAirWeaponCooldown() : ((GroundAttacker) u.unit).getGroundWeaponCooldown()) - getGs().getIH().getRemainingLatencyFrames() - 2;
         int framesToFiringRange = (int) Math.ceil(Math.max(0, distToTarget - range) / speed);
         if (cooldown <= framesToFiringRange) {
-            UtilMicro.attack((Attacker) u.unit, target);
+            UtilMicro.attack(u, target);
             return;
         }
         Position predictedPosition = null;
@@ -441,7 +443,7 @@ public class Squad implements Comparable<Squad> {
             if (distToTarget > 32 && !u.unit.isStartingAttack() && !u.unit.isAttackFrame()) {
                 if (predictedPosition != null) UtilMicro.move((MobileUnit) u.unit, predictedPosition);
                 else UtilMicro.move((MobileUnit) u.unit, target.lastPosition);
-            } else UtilMicro.attack((Attacker) u.unit, target);
+            } else UtilMicro.attack(u, target);
             return;
         }
         if ((kite || enemyTooClose) && target.unitType.topSpeed() > 0) {
@@ -451,7 +453,7 @@ public class Squad implements Comparable<Squad> {
                 kitePos = UtilMicro.kiteAway(u.unit, squadSim.enemies);
                 if (kitePos != null) UtilMicro.move((MobileUnit) u.unit, kitePos);
             }
-        } else UtilMicro.attack((Attacker) u.unit, target);
+        } else UtilMicro.attack(u, target);
     }
 
     public void giveMoveOrder(Position retreat) {

@@ -186,7 +186,7 @@ public class WorkerScoutAgent extends Agent {
         } else if (mySim.enemies.isEmpty() && disrupter != null) unit.resumeBuilding(disrupter);
         else if (!mySim.enemies.isEmpty() && (unitInfo.attackers.isEmpty() || !mySim.lose)) {
             UnitInfo target = Util.getRangedTarget(unitInfo, mySim.enemies);
-            if (target != null) UtilMicro.attack(unit, target);
+            if (target != null) UtilMicro.attack(unitInfo, target);
             else if (disrupter != null) unit.resumeBuilding(disrupter);
         }
         if (disrupter != null) unit.resumeBuilding(disrupter);

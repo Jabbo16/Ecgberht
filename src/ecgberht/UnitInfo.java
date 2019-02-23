@@ -113,13 +113,13 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
     public double getPredictedDistance(UnitInfo target) {
         Position nextPosition = UtilMicro.predictUnitPosition(target, 1);
-        if (nextPosition == null) return 0;
+        if (nextPosition == null) return -1;
         return this.getDistance(nextPosition);
     }
 
     public double getPredictedDistance(UnitInfo target, int frames) {
         Position nextPosition = UtilMicro.predictUnitPosition(target, frames);
-        if (nextPosition == null) return 0;
+        if (nextPosition == null) return -1;
         return this.getDistance(nextPosition);
     }
 

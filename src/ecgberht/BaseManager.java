@@ -19,18 +19,18 @@ public class BaseManager {
 
     private Map<Base, Garrison> garrisons = new HashMap<>();
 
-    public BaseManager(BWEM bwem) {
+    BaseManager(BWEM bwem) {
         bwem.getMap().getBases().forEach(b -> garrisons.put(b, new Garrison(b)));
         updateGarrisons();
     }
 
-    public void updateGarrisons() {
+    void updateGarrisons() {
         for (Garrison g : garrisons.values()) {
             if (getGs().getGame().getBWMap().isVisible(g.tile)) g.lastFrameVisible = getGs().frameCount;
         }
     }
 
-    public void onCreate(ResourceDepot depot) {
+    void onCreate(ResourceDepot depot) {
         Base b = Util.getClosestBaseLocation(depot.getPosition());
         Garrison g = garrisons.get(b);
         g.lastFrameVisible = getGs().frameCount;
@@ -39,7 +39,7 @@ public class BaseManager {
 
     }
 
-    public void onDestroy(ResourceDepot depot) {
+    void onDestroy(ResourceDepot depot) {
         Base b = Util.getClosestBaseLocation(depot.getPosition());
         Garrison g = garrisons.get(b);
         g.lastFrameVisible = getGs().frameCount;

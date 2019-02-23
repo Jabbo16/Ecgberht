@@ -12,7 +12,7 @@ import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.WraithAgent;
-import ecgberht.Simulation.SimManager;
+import ecgberht.Simulation.SimulationTheory;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -108,7 +108,7 @@ public class GameState {
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
     public Set<Worker> workerIdle = new TreeSet<>();
-    public SimManager sim;
+    public SimulationTheory sim;
     public SquadManager sqManager = new SquadManager();
     public SpellsManager wizard = new SpellsManager();
     public SupplyMan supplyMan;
@@ -158,7 +158,7 @@ public class GameState {
         initPlayers();
         mapSize = bw.getBWMap().getStartPositions().size();
         supplyMan = new SupplyMan(self.getRace());
-        sim = new SimManager(bw);
+        sim = new SimulationTheory(bw);
         luckyDraw = Math.random();
     }
 

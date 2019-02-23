@@ -24,6 +24,30 @@ public class UtilMicro {
         attacker.attack(pos);
     }
 
+    public static void attack(UnitInfo attacker, UnitInfo target) {
+        try {
+            Attacker attackerUnit = (Attacker) attacker.unit;
+            if (attackerUnit == null || target == null || !attackerUnit.exists() || attackerUnit.isStartingAttack() || attackerUnit.isAttackFrame())
+                return;
+            if (getGs().frameCount == attackerUnit.getLastCommandFrame()) return;
+            Unit targetUnit = attackerUnit.getTargetUnit();
+            if (target.unit.equals(targetUnit)) return;
+            if (target.visible) {
+                int range = Util.getWeapon(attacker, target).maxRange();
+                if (range >= attacker.getDistance(target)){
+                    attackerUnit.attack(target.unit);
+                    return;
+                }
+                Position predicted = predictUnitPosition(target, 1);
+                if (predicted != null) move((MobileUnit) attackerUnit, predicted);
+            }
+            else move((MobileUnit) attackerUnit, target.lastPosition);
+        } catch (Exception e) {
+            System.err.println("UtilMicro Attack Exception");
+            e.printStackTrace();
+        }
+    }
+
     public static void attack(Attacker attacker, UnitInfo target) {
         try {
             if (attacker == null || target == null || !attacker.exists() || attacker.isStartingAttack() || attacker.isAttackFrame())

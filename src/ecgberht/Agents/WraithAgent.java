@@ -46,10 +46,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             SimInfo airSim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.AIR);
             airAttackers = airSim.enemies;
             for (UnitInfo u : airAttackers) {
-                double dist = unitInfo.getDistance(u);
                 double predictedDist = unitInfo.getPredictedDistance(u);
-                double hisAirWeaponRange = u.airRange;
-                if (dist > hisAirWeaponRange) continue;
                 if (predictedDist < bestDist) {
                     closestThreat = u;
                     bestDist = predictedDist;
@@ -57,39 +54,36 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
             Set<UnitInfo> mainTargets = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
             UnitInfo harassed = chooseHarassTarget(mainTargets);
-            if (airAttackers.isEmpty()) { // Logic inside is borked
-                if (closestThreat != null) {
-                    Weapon myWeapon = closestThreat.flying ? unit.getAirWeapon() : unit.getGroundWeapon();
-                    double hisAirWeaponRange = closestThreat.airRange;
-                    if (myWeapon.maxRange() > hisAirWeaponRange && bestDist >= hisAirWeaponRange) {
-                        if (myWeapon.cooldown() > 0) {
-                            UtilMicro.attack(unit, closestThreat);
-                        } else UtilMicro.move(unit, closestThreat.lastPosition);
-                        return false;
-                    }
-                    Position kitePos = UtilMicro.kiteAway(unit, new TreeSet<>(Collections.singleton(closestThreat)));
-                    if (kitePos != null) {
-                        UtilMicro.move(unit, kitePos);
-                        return false;
-                    }
+            if (closestThreat != null) {
+                Weapon myWeapon = closestThreat.flying ? unit.getAirWeapon() : unit.getGroundWeapon();
+                double hisAirWeaponRange = closestThreat.airRange;
+                Position kitePos = UtilMicro.kiteAway(unit, new TreeSet<>(Collections.singleton(closestThreat)));
+                if (myWeapon.maxRange() > hisAirWeaponRange && bestDist >= hisAirWeaponRange) {
+                    if (myWeapon.cooldown() != 0) {
+                        if (kitePos != null) {
+                            UtilMicro.move(unit, kitePos);
+                            return false;
+                        }
+                    } else UtilMicro.attack(unitInfo, closestThreat);
+                    return false;
                 }
-                if (harassed != null) {
-                    UtilMicro.attack(unit, harassed);
+                if (kitePos != null) {
+                    UtilMicro.move(unit, kitePos);
                     return false;
                 }
             }
-            Position kitePos = UtilMicro.kiteAway(unit, airAttackers);
-            if (kitePos != null) {
-                UtilMicro.move(unit, kitePos);
+            if (harassed != null) {
+                UtilMicro.attack(unitInfo, harassed);
                 return false;
             }
+
             UnitInfo target = Util.getRangedTarget(unitInfo, mainTargets);
             if (target != null) {
-                UtilMicro.attack(unit, target);
+                UtilMicro.attack(unitInfo, target);
                 return false;
             }
             if (attack != null) {
-                if (attack.getDistance(unit.getPosition()) >= 32 * 5) UtilMicro.move(unit, attack);
+                if (attack.getDistance(myUnit.getPosition()) >= 32 * 5) UtilMicro.move(unit, attack);
                 else UtilMicro.attack(unit, attack);
                 return false;
             }
