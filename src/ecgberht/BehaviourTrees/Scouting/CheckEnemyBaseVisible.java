@@ -34,7 +34,7 @@ public class CheckEnemyBaseVisible extends Action {
                         gameState.chosenScout = null;
                         gameState.getIH().sendText("!");
                         gameState.playSound("gearthere.mp3");
-                        if(gameState.enemyStartBase == null){
+                        if (gameState.enemyStartBase == null) {
                             gameState.enemyBLs.clear();
                             gameState.enemyBLs.addAll(gameState.BLs);
                             gameState.enemyBLs.sort(new BaseLocationComparator(gameState.enemyMainBase));

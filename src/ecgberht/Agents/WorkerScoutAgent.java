@@ -6,6 +6,7 @@ import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.UnitInfo;
+import ecgberht.Util.ColorUtil;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.bk.ass.path.Result;
@@ -36,7 +37,7 @@ public class WorkerScoutAgent extends Agent {
     private boolean stoppedDisrupting = false;
     private boolean finishedDisrupting = false;
     private SimInfo mySim;
-    List<TilePosition> validTiles = new ArrayList<>();
+    private List<TilePosition> validTiles = new ArrayList<>();
     private boolean removedIndex = false;
     private boolean ableToProxy = false;
     private TilePosition proxyTile = null;
@@ -91,9 +92,6 @@ public class WorkerScoutAgent extends Agent {
                 getGs().proxyBuilding.cancelConstruction();
             return true;
         }
-        /*for(TilePosition p : validTiles){
-            getGs().bw.getMapDrawer().drawCircleMap(p.toPosition(), 8, Color.YELLOW, true);
-        }*/
         if (enemyBaseBorders.isEmpty()) updateBorders();
         mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
@@ -118,6 +116,8 @@ public class WorkerScoutAgent extends Agent {
             case IDLE:
                 break;
         }
+        if (disrupter != null)
+            getGs().getGame().getMapDrawer().drawTextMap(disrupter.getPosition().add(new Position(0, -16)), ColorUtil.formatText("BM!", ColorUtil.White));
         return false;
     }
 
@@ -183,13 +183,13 @@ public class WorkerScoutAgent extends Agent {
                     }
                 }
             }
-        } else if (mySim.enemies.isEmpty() && disrupter != null) unit.resumeBuilding(disrupter);
+        } else if (mySim.enemies.isEmpty() && disrupter != null && !finishedDisrupting) unit.resumeBuilding(disrupter);
         else if (!mySim.enemies.isEmpty() && (unitInfo.attackers.isEmpty() || !mySim.lose)) {
             UnitInfo target = Util.getRangedTarget(unitInfo, mySim.enemies);
             if (target != null) UtilMicro.attack(unitInfo, target);
-            else if (disrupter != null) unit.resumeBuilding(disrupter);
+            else if (disrupter != null && !finishedDisrupting) unit.resumeBuilding(disrupter);
         }
-        if (disrupter != null) unit.resumeBuilding(disrupter);
+        if (disrupter != null && !finishedDisrupting) unit.resumeBuilding(disrupter);
     }
 
     private Status chooseNewStatus() {
@@ -222,11 +222,12 @@ public class WorkerScoutAgent extends Agent {
                 }
             }
         }
+        if (finishedDisrupting) return Status.EXPLORE;
         String strat = getGs().getStrat().name;
         if (getGs().luckyDraw >= 0.7 && ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
             return Status.PROXYING;
         }
-        if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
+        if (getGs().luckyDraw >= 1 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting || finishedDisrupting) return Status.EXPLORE;
@@ -355,14 +356,6 @@ public class WorkerScoutAgent extends Agent {
             sortedVertices = temp;
         }
         enemyBaseBorders = sortedVertices;
-        /*double bestDist = 1000000;
-        for (int i = 0; i < sortedVertices.size(); i++) {
-            double dist = sortedVertices.get(i).getDistance(enemyCenter);
-            if (dist < bestDist) {
-                bestDist = dist;
-                currentVertex = i;
-            }
-        }*/
         currentVertex = 0;
         if (!getGs().learningManager.isNaughty()) {
             Base enemyNatural = getGs().enemyNaturalBase;
@@ -387,7 +380,7 @@ public class WorkerScoutAgent extends Agent {
     }
 
     enum Status {
-        EXPLORE, DISRUPTING, IDLE, PROXYING;
+        EXPLORE, DISRUPTING, IDLE, PROXYING
     }
 
     public String statusToString() {

@@ -17,7 +17,7 @@ public class CheckVisibleBase extends Conditional {
     public State execute() {
         try {
             if (gameState.chosenScout == null) return State.FAILURE;
-            if (gameState.scoutSLs.size() == 1 && gameState.enemyMainBase == null){
+            if (gameState.scoutSLs.size() == 1 && gameState.enemyMainBase == null) {
                 gameState.enemyMainBase = gameState.scoutSLs.iterator().next();
                 gameState.enemyBLs.clear();
                 gameState.enemyBLs.addAll(gameState.BLs);

@@ -32,7 +32,7 @@ public class ChooseMarine extends Action {
                     }
                 }
                 if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith"))
-                        && Util.countUnitTypeSelf(UnitType.Terran_Marine) > (gameState.enemyRace == Race.Zerg ? 6 : 3) && !gameState.defense)
+                        && Util.countUnitTypeSelf(UnitType.Terran_Marine) > (gameState.enemyRace == Race.Zerg ? 4 : 2) && !gameState.defense)
                     return State.FAILURE;
                 if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !gameState.defense)
                     return State.FAILURE;

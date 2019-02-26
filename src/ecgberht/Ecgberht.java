@@ -344,7 +344,7 @@ public class Ecgberht implements BWEventListener {
                 ih.sendText("Hitchhiker :(");
             }
             bwem.initialize();
-            if(!bw.getBWMap().mapHash().equals("e6d0144e14315118d916905ff5e7045f68db541e")) // Aztec KSL crash fix
+            if (!bw.getBWMap().mapHash().equals("e6d0144e14315118d916905ff5e7045f68db541e")) // Aztec KSL crash fix
                 bwem.getMap().assignStartingLocationsToSuitableBases();
             gs = new GameState(bw, bwem);
             gs.baseManager = new BaseManager(bwem);
@@ -498,7 +498,7 @@ public class Ecgberht implements BWEventListener {
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
-            //gs.vespeneManager(); //Disabled until it works
+            gs.vespeneManager(); //Disabled until it works
             gs.sqManager.updateBunkers();
             gs.checkDisrupter();
             buildingLotTree.run();

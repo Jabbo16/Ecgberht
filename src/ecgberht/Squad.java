@@ -167,7 +167,7 @@ public class Squad implements Comparable<Squad> {
         switch (status) {
             case ATTACK:
             case DEFENSE:
-                if(u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
+                if (u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
                 if (squadSim.enemies.isEmpty() && attack != null) {
                     UtilMicro.attack((MobileUnit) u.unit, attack);
                     return;
@@ -345,7 +345,7 @@ public class Squad implements Comparable<Squad> {
                 } else if (u.getDistance(getGs().defendPosition) > range) UtilMicro.move(u, getGs().defendPosition);
             }
         } else if (status == Status.REGROUP) {
-            if(medicOnly){
+            if (medicOnly) {
                 Optional<Squad> closest = getGs().sqManager.squads.values().stream().
                         filter(s -> !s.medicOnly).
                         min(Comparator.comparingDouble(s -> u.getDistance(s.getSquadCenter())));
@@ -397,7 +397,7 @@ public class Squad implements Comparable<Squad> {
     }
 
     private void executeRangedAttackLogic(UnitInfo u) {
-        if(u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
+        if (u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
         UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
             if (attack != null) UtilMicro.attack((MobileUnit) u.unit, attack);

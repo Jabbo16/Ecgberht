@@ -97,7 +97,7 @@ public class StrategyManager {
 
     private Strategy initStrat() {
         try {
-            if(true) return tPW;
+            if (true) return tPW;
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = getGs().learningManager.getEnemyInfo();
             if (getGs().enemyRace == Race.Zerg && EI.naughty) return b;
@@ -111,7 +111,7 @@ public class StrategyManager {
                 bFE.workerGas = 2;
                 return bFE;
             }
-            if(true) return FM;
+            if (true) return FM;
             Consumer<Strategy> addStrat = (strat) -> {
                 strategies.put(strat.name, new MutablePair<>(0, 0));
                 nameStrat.put(strat.name, strat);

@@ -189,9 +189,9 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         Set<UnitInfo> airThreats = airAttackers.stream().filter(u -> u.unitType == UnitType.Zerg_Scourge || u.unitType == UnitType.Zerg_Spore_Colony).collect(Collectors.toSet());
-        if(!airThreats.isEmpty()){
+        if (!airThreats.isEmpty()) {
             Position kite = UtilMicro.kiteAway(unit, airThreats);
-            if(kite != null){
+            if (kite != null) {
                 UtilMicro.move(unit, kite);
                 return;
             }

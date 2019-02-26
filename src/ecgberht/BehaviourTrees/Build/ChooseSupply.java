@@ -20,7 +20,8 @@ public class ChooseSupply extends Action {
             if (gameState.getPlayer().supplyTotal() >= 400) return State.FAILURE;
             String strat = gameState.getStrat().name;
             if (strat.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) return State.FAILURE;
-            if (strat.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) return State.FAILURE;
+            if (strat.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1)
+                return State.FAILURE;
             if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;

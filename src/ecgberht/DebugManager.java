@@ -114,6 +114,8 @@ public class DebugManager {
             }
             if (gameState.enemyStartBase != null)
                 mapDrawer.drawTextMap(gameState.enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));
+            if (gameState.disrupterBuilding != null)
+                mapDrawer.drawTextMap(gameState.disrupterBuilding.getPosition().add(new Position(0, -8)), ColorUtil.formatText("BM!", ColorUtil.White));
             if (gameState.enemyNaturalBase != null)
                 mapDrawer.drawTextMap(gameState.enemyNaturalBase.getLocation().toPosition(), ColorUtil.formatText("EnemyNaturalBase", ColorUtil.White));
             if (gameState.mainChoke != null) {
@@ -136,6 +138,7 @@ public class DebugManager {
                 print(gameState.chosenUnitToHarass, Color.RED);
                 mapDrawer.drawTextMap(gameState.chosenUnitToHarass.getPosition(), ColorUtil.formatText("UnitToHarass", ColorUtil.White));
             }
+
             for (Map.Entry<SCV, Mechanical> r : gameState.repairerTask.entrySet()) {
                 print(r.getKey(), Color.YELLOW);
                 mapDrawer.drawTextMap(r.getKey().getPosition(), ColorUtil.formatText("Repairer", ColorUtil.White));

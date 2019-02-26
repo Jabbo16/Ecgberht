@@ -34,14 +34,13 @@ public class UtilMicro {
             if (target.unit.equals(targetUnit)) return;
             if (target.visible) {
                 int range = Util.getWeapon(attacker, target).maxRange();
-                if (range >= attacker.getDistance(target)){
+                if (range >= attacker.getDistance(target)) {
                     attackerUnit.attack(target.unit);
                     return;
                 }
                 Position predicted = predictUnitPosition(target, 1);
                 if (predicted != null) move((MobileUnit) attackerUnit, predicted);
-            }
-            else move((MobileUnit) attackerUnit, target.lastPosition);
+            } else move((MobileUnit) attackerUnit, target.lastPosition);
         } catch (Exception e) {
             System.err.println("UtilMicro Attack Exception");
             e.printStackTrace();

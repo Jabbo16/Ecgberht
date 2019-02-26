@@ -191,7 +191,8 @@ public class GameState {
             if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
         for (Base b : BLs) {
-            if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b))
+                continue;
             if (weirdBlocking(b)) blockedBLs.add(b);
             else {
                 for (ChokePoint p : b.getArea().getChokePoints()) {
@@ -222,7 +223,8 @@ public class GameState {
     void checkBasesWithBLockingMinerals() {
         if (blockingMinerals.isEmpty()) return;
         for (bwem.Base b : BLs) {
-            if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b))
+                continue;
             for (ChokePoint c : b.getArea().getChokePoints()) {
                 for (Position m : blockingMinerals.keySet()) {
                     if (Util.broodWarDistance(m, c.getCenter().toPosition()) < 40) {
@@ -1140,22 +1142,28 @@ public class GameState {
             if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
                 workersNeeded = refineries;
                 getStrat().workerGas = 1;
-            } else workersNeeded = 2 * refineries;
+            } else {
+                workersNeeded = 2 * refineries;
+                getStrat().workerGas = 2;
+            }
             if (workersAtGas > workersNeeded) {
                 Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
                 while (iterGas.hasNext()) {
                     Entry<Worker, GasMiningFacility> w = iterGas.next();
                     if (w.getKey().getOrder() == Order.HarvestGas) continue;
                     workerIdle.add(w.getKey());
-                    w.getKey().returnCargo();
-                    w.getKey().stop(true);
+                    if (w.getKey().isCarryingGas()) {
+                        w.getKey().returnCargo();
+                        w.getKey().stop(true);
+                    } else w.getKey().stop(false);
                     refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
                     iterGas.remove();
-                    workersNeeded--;
-                    if (workersNeeded == 0) break;
+                    workersAtGas--;
+                    if (workersNeeded == workersAtGas) break;
                 }
             }
-        } else if (getStrat().workerGas < 3 && workersAtGas == getStrat().workerGas) getStrat().workerGas++;
+        } else if (getCash().second < 100 && getStrat().workerGas < 3 && workersAtGas / refineries == getStrat().workerGas)
+            getStrat().workerGas++;
     }
 
     public boolean isGoingToExpand() {

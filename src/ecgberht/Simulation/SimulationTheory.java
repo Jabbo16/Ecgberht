@@ -244,10 +244,9 @@ public class SimulationTheory {
      */
     private void doSimASS() {
         int energy = getGs().CSs.stream().filter(s -> s.getOrder() != Order.CastScannerSweep).mapToInt(s -> s.getEnergy() / 50).sum();
-        simulator.reset();
         for (SimInfo s : simulations) {
             try {
-                simulator.resetUnits();
+                simulator.reset();
                 if (s.enemies.isEmpty()) continue;
                 for (UnitInfo u : s.allies) {
                     Agent jU = factory.of(u.unit);
@@ -350,7 +349,7 @@ public class SimulationTheory {
 
     // TODO improve and search for bunkers SimInfos
     public MutablePair<Boolean, Boolean> simulateDefenseBattle(Set<UnitInfo> friends, Set<Unit> enemies, int frames, boolean bunker) {
-        simulator.resetUnits();
+        simulator.reset();
         MutablePair<Boolean, Boolean> result = new MutablePair<>(true, false);
         for (UnitInfo u : friends) simulator.addAgentA(factory.of(u.unit));
         for (Unit u : enemies) simulator.addAgentB(factory.of((PlayerUnit) u));
@@ -364,7 +363,7 @@ public class SimulationTheory {
             boolean bunkerDead = true;
             for (Agent unit : simulator.getAgentsA()) {
                 if (unit == null || unit.getUserObject() == null) continue;
-                if (((Unit)unit.getUserObject()).getType() == UnitType.Terran_Bunker) {
+                if (((Unit) unit.getUserObject()).getType() == UnitType.Terran_Bunker) {
                     bunkerDead = false;
                     break;
                 }
@@ -376,7 +375,7 @@ public class SimulationTheory {
 
     // TODO improve and search for harasser SimInfo
     public boolean simulateHarass(Unit harasser, Set<UnitInfo> enemies, int frames) {
-        simulator.resetUnits();
+        simulator.reset();
         simulator.addAgentA(factory.of((PlayerUnit) harasser));
         for (UnitInfo u : enemies) simulator.addAgentB(factory.of(u.unit));
         int preSimFriendlyUnitCount = simulator.getAgentsA().size();
