@@ -227,7 +227,7 @@ public class WorkerScoutAgent extends Agent {
         if (getGs().luckyDraw >= 0.7 && ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
             return Status.PROXYING;
         }
-        if (getGs().luckyDraw >= 1 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
+        if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
         if (getGs().enemyRace != Race.Zerg || stoppedDisrupting || finishedDisrupting) return Status.EXPLORE;

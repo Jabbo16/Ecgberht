@@ -282,7 +282,7 @@ public class IntelligenceAgency {
                 if (u.unitType == UnitType.Terran_Factory) countFactories++;
                 if (u.unitType == UnitType.Terran_Barracks) countRax++;
             }
-            if (countFactories < 1 && countRax >= 1) {
+            if (countFactories < 1 && countRax > 1) {
                 enemyStrat = EnemyStrats.BioPush;
                 getGs().getStrat().bunker = true;
                 getGs().ih.sendText("Nice Bio strat");

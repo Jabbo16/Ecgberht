@@ -18,7 +18,8 @@ public class UtilMicro {
             return;
         if (getGs().frameCount == attacker.getLastCommandFrame()) return;
         Position targetPos = attacker.getTargetPosition();
-        if (pos.equals(targetPos)) return;
+        if (pos.equals(targetPos) || (targetPos != null && pos.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
         if (!attacker.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
         attacker.attack(pos);
@@ -91,8 +92,10 @@ public class UtilMicro {
 
     public static void move(MobileUnit u, Position pos) {
         if (pos == null || u == null || !u.exists()) return;
+        if (getGs().frameCount == u.getLastCommandFrame()) return;
         Position targetPos = u.getTargetPosition();
-        if (pos.equals(targetPos)) return;
+        if (pos.equals(targetPos) || (targetPos != null && pos.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
         if (!u.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
         u.move(pos);
@@ -144,7 +147,8 @@ public class UtilMicro {
         if (u == null || heal == null || !getGs().bw.getBWMap().isValidPosition(heal)) return;
         if (u.getLastCommandFrame() == getGs().frameCount) return;
         Position targetPos = u.getTargetPosition();
-        if (heal.equals(targetPos)) return;
+        if (heal.equals(targetPos) || (targetPos != null && heal.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         u.heal(heal);
     }
 
