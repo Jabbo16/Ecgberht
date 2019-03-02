@@ -235,7 +235,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         //Position kite = UtilMicro.kiteAway(unit, closeEnemies);
-        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> u.unit.getDistance(unit)));
+        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> unitInfo.getDistance(u)));
         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.position)).orElse(null);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
             kite = UtilMicro.kiteAway(unit, mySim.enemies);

@@ -79,7 +79,7 @@ public class CheckHarasserAttacked extends Conditional {
                         gameState.chosenUnitToHarass = null;
                     } else {
                         //Position kite = UtilMicro.kiteAway(gameState.chosenHarasser, attackers);
-                        Optional<UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.unit.getDistance(gameState.chosenHarasser)));
+                        Optional<UnitInfo> closestUnit = attackers.stream().min(Comparator.comparing(u -> u.getDistance(gameState.chosenHarasser)));
                         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(gameState.chosenHarasser.getPosition(), unit1.position)).orElse(null);
                         if (kite != null && gameState.bw.getBWMap().isValidPosition(kite)) {
                             UtilMicro.move(gameState.chosenHarasser, kite);
