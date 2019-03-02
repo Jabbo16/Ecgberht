@@ -13,9 +13,10 @@ public class CheckExplorer extends Conditional {
     @Override
     public State execute() {
         try {
-            if (!this.handler.learningManager.defendHarass() && !this.handler.explore) return State.FAILURE;
+            if (!gameState.learningManager.defendHarass() && !gameState.explore && gameState.getStrat().harass)
+                return State.FAILURE;
             else {
-                this.handler.chosenUnitToHarass = null;
+                gameState.chosenUnitToHarass = null;
                 return State.SUCCESS;
             }
         } catch (Exception e) {

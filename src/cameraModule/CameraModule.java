@@ -178,7 +178,7 @@ public class CameraModule {
     }
 
     public void moveCameraUnitCompleted(Unit unit) {
-        if (enabled) {
+        if (enabled && unit != null) {
             int prio = 1;
             if (shouldMoveCamera(prio) && unit instanceof PlayerUnit && ((PlayerUnit) unit).getPlayer().equals(self)
                     && !(unit instanceof Worker)) {

@@ -17,18 +17,18 @@ public class ChooseWorkerToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.chosenUnitToHarass instanceof Worker) return State.FAILURE;
-            for (Unit u : this.handler.enemyCombatUnitMemory) {
-                if (this.handler.enemyMainBase != null && u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
+            if (gameState.chosenUnitToHarass instanceof Worker) return State.FAILURE;
+            for (Unit u : gameState.enemyCombatUnitMemory) {
+                if (gameState.enemyMainBase != null && u instanceof Worker && !((Worker) u).isGatheringGas() && u.exists()) {
                     if (((Worker) u).getOrder() != Order.Move && ((Worker) u).getOrder() != Order.PlaceBuilding)
                         continue;
-                    if (Util.broodWarDistance(this.handler.enemyMainBase.getLocation().toPosition(), this.handler.chosenHarasser.getPosition()) <= 700) {
-                        this.handler.chosenUnitToHarass = u;
+                    if (Util.broodWarDistance(gameState.enemyMainBase.getLocation().toPosition(), gameState.chosenHarasser.getPosition()) <= 700) {
+                        gameState.chosenUnitToHarass = u;
                         return State.SUCCESS;
                     }
                 }
             }
-            this.handler.chosenUnitToHarass = null;
+            gameState.chosenUnitToHarass = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

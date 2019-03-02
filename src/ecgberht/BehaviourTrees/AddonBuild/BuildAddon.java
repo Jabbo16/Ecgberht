@@ -16,9 +16,9 @@ public class BuildAddon extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.defense && this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
+            if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 boolean found = false;
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Command_Center) {
                         found = true;
                         break;
@@ -26,13 +26,13 @@ public class BuildAddon extends Action {
                 }
                 if (!found) return State.FAILURE;
             }
-            if (this.handler.chosenBuildingAddon.getAddon() == null && this.handler.chosenBuildingAddon.build(this.handler.chosenAddon)) {
-                this.handler.chosenBuildingAddon = null;
-                this.handler.chosenAddon = null;
+            if (gameState.chosenBuildingAddon.getAddon() == null && gameState.chosenBuildingAddon.build(gameState.chosenAddon)) {
+                gameState.chosenBuildingAddon = null;
+                gameState.chosenAddon = null;
                 return State.SUCCESS;
             }
-            this.handler.chosenBuildingAddon = null;
-            this.handler.chosenAddon = null;
+            gameState.chosenBuildingAddon = null;
+            gameState.chosenAddon = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

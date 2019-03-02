@@ -1,8 +1,10 @@
 package ecgberht.BehaviourTrees.Scanner;
 
 import ecgberht.GameState;
+import ecgberht.Util.MutablePair;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
+import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.unit.ComsatStation;
 
@@ -15,12 +17,13 @@ public class Scan extends Action {
     @Override
     public State execute() {
         try {
-            for (ComsatStation u : this.handler.CSs) {
-                if (u.getEnergy() >= 50 && u.getOrder() != Order.CastScannerSweep && u.scannerSweep(this.handler.checkScan.toPosition())) {
-                    this.handler.startCount = this.handler.getIH().getFrameCount();
-                    this.handler.playSound("uav.mp3");
-                    return State.SUCCESS;
-                }
+            if (gameState.checkScan == null) return State.FAILURE;
+            MutablePair<ComsatStation, Position> pair = gameState.checkScan;
+            if (pair.first.getEnergy() >= 50 && pair.first.getOrder() != Order.CastScannerSweep && pair.first.scannerSweep(pair.second)) {
+                gameState.startCount = gameState.getIH().getFrameCount();
+                gameState.playSound("uav.mp3");
+                gameState.checkScan = null;
+                return State.SUCCESS;
             }
             return State.FAILURE;
         } catch (Exception e) {

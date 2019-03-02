@@ -11,7 +11,7 @@
 Ecgberht is a `Starcraft: Brood War` AI written in Java.
 <p><img src="https://i.imgur.com/xUfYQ9H.png" width="48" height="48"/></p>
 
-Currently participating in the [SSCAIT](http://www.sscaitournament.com/) ladder:
+Currently participating in [SSCAIT](http://www.sscaitournament.com/) and [BASIL](http://basil.bytekeeper.org/ranking.html) ladders:
 
 [Ecgberht Profile on SSCAIT](http://www.sscaitournament.com/index.php?action=botDetails&bot=Ecgberht)
 
@@ -19,7 +19,7 @@ Frameworks and libs used:
 
 * [BWAPI4J](https://github.com/OpenBW/BWAPI4J)
 * [BWAPI 4.2.0](https://github.com/bwapi/bwapi)
-* [JFAP](https://github.com/Jabbo16/JFAP)
+* [ASS](https://github.com/JavaBWAPI/ass)
 * [Gson](https://github.com/google/gson)
 * [JLayer](http://www.javazoom.net/javalayer/javalayer.html)
 

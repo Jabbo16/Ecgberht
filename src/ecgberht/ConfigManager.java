@@ -46,22 +46,22 @@ public class ConfigManager {
         BwapiConfig bwapiConfig = new BwapiConfig();
 
         public static class EcgberhtConfig {
-            public boolean sscait;
-            boolean debugConsole;
-            boolean debugScreen;
-            boolean debugText;
-            boolean sounds;
-            boolean enableLatCom;
-            boolean enableSkyCladObserver;
+            public boolean sscait = true;
+            boolean debugConsole = false;
+            boolean debugScreen = false;
+            boolean debugText = false;
+            boolean sounds = false;
+            boolean enableLatCom = true;
+            boolean enableSkyCladObserver = false;
             String forceStrat = "";
 
         }
 
         static class BwapiConfig {
             int localSpeed = 42;
-            int frameSkip;
+            int frameSkip = -1;
             boolean userInput = true;
-            boolean completeMapInformation;
+            boolean completeMapInformation = false;
 
         }
     }

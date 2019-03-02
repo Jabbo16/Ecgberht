@@ -18,13 +18,13 @@ public class ChooseWorker extends Action {
     public State execute() {
         try {
             Worker closestWorker = null;
-            int frame = this.handler.frameCount;
-            Position chosen = this.handler.chosenPosition.toPosition();
-            Area posArea = this.handler.bwem.getMap().getArea(this.handler.chosenPosition);
-            if (!this.handler.workerIdle.isEmpty()) {
-                for (Worker u : this.handler.workerIdle) {
+            int frame = gameState.frameCount;
+            Position chosen = gameState.chosenPosition.toPosition();
+            Area posArea = gameState.bwem.getMap().getArea(gameState.chosenPosition);
+            if (!gameState.workerIdle.isEmpty()) {
+                for (Worker u : gameState.workerIdle) {
                     if (u.getLastCommandFrame() == frame) continue;
-                    Area workerArea = this.handler.bwem.getMap().getArea(u.getTilePosition());
+                    Area workerArea = gameState.bwem.getMap().getArea(u.getTilePosition());
                     if (workerArea == null) continue;
                     if (posArea != null && !posArea.equals(workerArea) && !posArea.isAccessibleFrom(workerArea)) {
                         continue;
@@ -33,10 +33,10 @@ public class ChooseWorker extends Action {
                         closestWorker = u;
                 }
             }
-            if (!this.handler.workerMining.isEmpty()) {
-                for (Worker u : this.handler.workerMining.keySet()) {
+            if (!gameState.workerMining.isEmpty()) {
+                for (Worker u : gameState.workerMining.keySet()) {
                     if (u.getLastCommandFrame() == frame) continue;
-                    Area workerArea = this.handler.bwem.getMap().getArea(u.getTilePosition());
+                    Area workerArea = gameState.bwem.getMap().getArea(u.getTilePosition());
                     if (workerArea == null) continue;
                     if (posArea != null && !posArea.equals(workerArea) && !posArea.isAccessibleFrom(workerArea)) {
                         continue;
@@ -47,7 +47,7 @@ public class ChooseWorker extends Action {
                 }
             }
             if (closestWorker != null) {
-                this.handler.chosenWorker = closestWorker;
+                gameState.chosenWorker = closestWorker;
                 return State.SUCCESS;
             }
             return State.FAILURE;

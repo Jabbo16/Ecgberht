@@ -8,7 +8,6 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.Barracks;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
-import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Set;
 
@@ -22,19 +21,19 @@ public class ChooseMedic extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
             else {
-                for (ResearchingFacility u : this.handler.UBs) {
+                for (ResearchingFacility u : gameState.UBs) {
                     if (u instanceof Academy) {
                         int marine_count = 0;
-                        if (!this.handler.DBs.isEmpty()) {
-                            for (Set<Unit> p : this.handler.DBs.values()) marine_count += p.size();
+                        if (!gameState.DBs.isEmpty()) {
+                            marine_count = gameState.DBs.values().stream().mapToInt(Set::size).sum();
                         }
-                        if (!this.handler.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
-                            for (Barracks b : this.handler.MBs) {
+                        if (!gameState.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
+                            for (Barracks b : gameState.MBs) {
                                 if (!b.isTraining()) {
-                                    this.handler.chosenUnit = UnitType.Terran_Medic;
-                                    this.handler.chosenBuilding = b;
+                                    gameState.chosenUnit = UnitType.Terran_Medic;
+                                    gameState.chosenBuilding = b;
                                     return State.SUCCESS;
                                 }
                             }

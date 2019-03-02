@@ -5,10 +5,14 @@ import bwem.area.Area;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.UnitInfo;
+import ecgberht.Util.ColorUtil;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
+import org.bk.ass.path.Result;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
+import org.openbw.bwapi4j.WalkPosition;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
@@ -16,6 +20,7 @@ import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -28,29 +33,75 @@ public class WorkerScoutAgent extends Agent {
     private Status status = Status.IDLE;
     private int enemyNaturalIndex = -1;
     private Building disrupter = null;
+    private Building proxier = null;
     private boolean stoppedDisrupting = false;
+    private boolean finishedDisrupting = false;
     private SimInfo mySim;
+    private List<TilePosition> validTiles = new ArrayList<>();
     private boolean removedIndex = false;
+    private boolean ableToProxy = false;
+    private TilePosition proxyTile = null;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
         this.unit = (SCV) unit;
+        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.enemyBase = enemyBase;
         this.myUnit = unit;
+        canProxyInThisMap();
+    }
+
+    private void canProxyInThisMap() {
+        Area enemyArea = this.enemyBase.getArea();
+        Set<TilePosition> tilesArea = getGs().map.getTilesArea(enemyArea);
+        if (tilesArea == null) return;
+        Result path = getGs().silentCartographer.getWalkablePath(enemyBase.getLocation().toWalkPosition(), getGs().enemyNaturalBase.getLocation().toWalkPosition());
+        for (TilePosition t : tilesArea) {
+            if (!getGs().map.tileBuildable(t, UnitType.Terran_Factory)) continue;
+            if (t.getDistance(Util.getUnitCenterPosition(enemyBase.getLocation().toPosition(), UnitType.Zerg_Hatchery).toTilePosition()) <= 13)
+                continue;
+            if (enemyBase.getGeysers().stream().anyMatch(u -> t.getDistance(u.getCenter().toTilePosition()) <= 9))
+                continue;
+            if (path.path.stream().anyMatch(u -> t.getDistance(new WalkPosition(u.x, u.y).toTilePosition()) <= 10))
+                continue;
+            validTiles.add(t);
+        }
+        if (validTiles.isEmpty()) return;
+        double bestDist = 0.0;
+        for (TilePosition p : validTiles) {
+            double dist = p.getDistance(enemyBase.getLocation());
+            if (dist > bestDist) {
+                bestDist = dist;
+                proxyTile = p;
+            }
+        }
+        if (proxyTile != null) ableToProxy = true;
     }
 
     public boolean runAgent() {
-        if (unit == null || !unit.exists()) {
+        if (unit == null || !unit.exists() || unitInfo == null || !getGs().firstScout) {
             if (disrupter != null) getGs().disrupterBuilding = disrupter;
+            getGs().firstScout = false;
+            if (getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted())
+                getGs().proxyBuilding.cancelConstruction();
+            return true;
+        }
+        if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
+            getGs().myArmy.add(unitInfo);
+            getGs().firstScout = false;
+            if (getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted())
+                getGs().proxyBuilding.cancelConstruction();
             return true;
         }
         if (enemyBaseBorders.isEmpty()) updateBorders();
+        mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
         if (enemyNaturalIndex != -1 && (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.EarlyPool
-                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected())) {
+                || IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush
+                || getGs().learningManager.isNaughty() || getGs().basicCombatUnitsDetected(mySim.enemies)
+                || IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) > 1)) {
             enemyBaseBorders.remove(enemyNaturalIndex);
             enemyNaturalIndex = -1;
             removedIndex = true;
         }
-        mySim = getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND);
         status = chooseNewStatus();
         cancelDisrupter();
         switch (status) {
@@ -60,9 +111,13 @@ public class WorkerScoutAgent extends Agent {
             case DISRUPTING:
                 disrupt();
                 break;
+            case PROXYING:
+                proxy();
             case IDLE:
                 break;
         }
+        if (disrupter != null)
+            getGs().getGame().getMapDrawer().drawTextMap(disrupter.getPosition().add(new Position(0, -16)), ColorUtil.formatText("BM!", ColorUtil.White));
         return false;
     }
 
@@ -70,6 +125,19 @@ public class WorkerScoutAgent extends Agent {
         if (stoppedDisrupting && disrupter != null && disrupter.getHitPoints() <= 20) {
             disrupter.cancelConstruction();
             disrupter = null;
+        }
+    }
+
+    private void proxy() {
+        if (proxier == null) {
+            if (unit.getBuildUnit() != null) {
+                proxier = (Building) unit.getBuildUnit();
+                return;
+            }
+            if (unit.getOrder() != Order.PlaceBuilding) {
+                if (proxyTile.getDistance(unitInfo.tileposition) <= 3) unit.build(proxyTile, UnitType.Terran_Factory);
+                else UtilMicro.move(unit, proxyTile.toPosition());
+            }
         }
     }
 
@@ -84,45 +152,85 @@ public class WorkerScoutAgent extends Agent {
             }
         } else if (disrupter.getRemainingBuildTime() <= 25) {
             unit.haltConstruction();
+            finishedDisrupting = true;
             stoppedDisrupting = true;
             removedIndex = true;
-        } else if (mySim.enemies.stream().anyMatch(u -> u.getDistance(unit) <= 4 * 32)) {
-            boolean zerglings = mySim.enemies.stream().anyMatch(u -> u instanceof Zergling);
-            if (zerglings) {
-                unit.haltConstruction();
-                stoppedDisrupting = true;
-                if (!removedIndex) {
-                    enemyBaseBorders.remove(enemyNaturalIndex);
-                    enemyNaturalIndex = -1;
-                    removedIndex = true;
+        } else if (!stoppedDisrupting) {
+            if (mySim.enemies.stream().anyMatch(u -> u.unit.getDistance(unit) <= 4 * 32)) {
+                if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
+                    unit.haltConstruction();
+                    stoppedDisrupting = true;
+                    if (!removedIndex) {
+                        enemyBaseBorders.remove(enemyNaturalIndex);
+                        enemyNaturalIndex = -1;
+                        removedIndex = true;
+                    }
+                    return;
                 }
-                return;
-            }
-            if (mySim.enemies.size() == 1) {
-                Unit closest = mySim.enemies.iterator().next();
-                Area enemyArea = getGs().bwem.getMap().getArea(closest.getTilePosition());
-                if (closest instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
-                    if (mySim.lose) {
-                        unit.haltConstruction();
-                        stoppedDisrupting = true;
-                        if (!removedIndex) {
-                            enemyBaseBorders.remove(enemyNaturalIndex);
-                            enemyNaturalIndex = -1;
-                            removedIndex = true;
+                if (mySim.enemies.size() == 1) {
+                    UnitInfo closest = mySim.enemies.iterator().next();
+                    Area enemyArea = getGs().bwem.getMap().getArea(closest.tileposition);
+                    if (closest.unit instanceof Drone && enemyArea != null && enemyArea.equals(getGs().enemyNaturalArea)) {
+                        if (mySim.lose) {
+                            unit.haltConstruction();
+                            stoppedDisrupting = true;
+                            if (!removedIndex) {
+                                enemyBaseBorders.remove(enemyNaturalIndex);
+                                enemyNaturalIndex = -1;
+                                removedIndex = true;
+                            }
                         }
-                    } else UtilMicro.attack(unit, mySim.enemies.iterator().next()); // TODO add attack state
+                    }
                 }
             }
-        } else unit.resumeBuilding(disrupter);
+        } else if (mySim.enemies.isEmpty() && disrupter != null && !finishedDisrupting) unit.resumeBuilding(disrupter);
+        else if (!mySim.enemies.isEmpty() && (unitInfo.attackers.isEmpty() || !mySim.lose)) {
+            UnitInfo target = Util.getRangedTarget(unitInfo, mySim.enemies);
+            if (target != null) UtilMicro.attack(unitInfo, target);
+            else if (disrupter != null && !finishedDisrupting) unit.resumeBuilding(disrupter);
+        }
+        if (disrupter != null && !finishedDisrupting) unit.resumeBuilding(disrupter);
     }
 
     private Status chooseNewStatus() {
-        String strat = getGs().strat.name;
+        if (status == Status.DISRUPTING) {
+            if (finishedDisrupting || (stoppedDisrupting && !unitInfo.attackers.isEmpty() && mySim.lose))
+                return Status.EXPLORE;
+            return Status.DISRUPTING;
+        }
+        if (status == Status.PROXYING) {
+            if (proxyTile == null) {
+                ableToProxy = false;
+            } else {
+                if (proxier != null && proxier.isCompleted()) {
+                    ableToProxy = false;
+                    getGs().proxyBuilding = proxier;
+                } else {
+                    double dist = unitInfo.tileposition.getDistance(proxyTile);
+                    if (dist <= 3) {
+                        if (!unitInfo.attackers.isEmpty()) {
+                            if (proxier != null && proxier.isBeingConstructed()) {
+                                unit.haltConstruction();
+                                ableToProxy = false;
+                                proxier.cancelConstruction();
+                                proxier = null;
+                                return Status.EXPLORE;
+                            }
+                        }
+                    }
+                    return Status.PROXYING;
+                }
+            }
+        }
+        if (finishedDisrupting) return Status.EXPLORE;
+        String strat = getGs().getStrat().name;
+        if (getGs().luckyDraw >= 0.7 && ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
+            return Status.PROXYING;
+        }
         if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
                 || strat.equals("BioMechGreedyFE") || strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || getGs().learningManager.isNaughty())
             return Status.EXPLORE;
-        if (getGs().enemyRace != Race.Zerg || stoppedDisrupting) return Status.EXPLORE;
-        if (status == Status.DISRUPTING) return Status.DISRUPTING;
+        if (getGs().enemyRace != Race.Zerg || stoppedDisrupting || finishedDisrupting) return Status.EXPLORE;
         if (IntelligenceAgency.getNumEnemyBases(getGs().getIH().enemy()) == 1 && currentVertex == enemyNaturalIndex) {
             return Status.DISRUPTING;
         }
@@ -178,10 +286,10 @@ public class WorkerScoutAgent extends Agent {
             TilePosition left = new TilePosition(tp.getX() - 1, tp.getY());
             TilePosition up = new TilePosition(tp.getX(), tp.getY() - 1);
             final boolean edge =
-                    (!getGs().getGame().getBWMap().isValidPosition(right) || (getGs().bwem.getMap().getArea(right) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(right)))
-                            || (!getGs().getGame().getBWMap().isValidPosition(bottom) || (getGs().bwem.getMap().getArea(bottom) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(bottom)))
-                            || (!getGs().getGame().getBWMap().isValidPosition(left) || (getGs().bwem.getMap().getArea(left) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(left)))
-                            || (!getGs().getGame().getBWMap().isValidPosition(up) || (getGs().bwem.getMap().getArea(up) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(up)));
+                    (!getGs().getGame().getBWMap().isValidPosition(right) || getGs().bwem.getMap().getArea(right) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(right))
+                            || (!getGs().getGame().getBWMap().isValidPosition(bottom) || getGs().bwem.getMap().getArea(bottom) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(bottom))
+                            || (!getGs().getGame().getBWMap().isValidPosition(left) || getGs().bwem.getMap().getArea(left) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(left))
+                            || (!getGs().getGame().getBWMap().isValidPosition(up) || getGs().bwem.getMap().getArea(up) != enemyRegion || !getGs().getGame().getBWMap().isBuildable(up));
             if (edge && getGs().getGame().getBWMap().isBuildable(tp)) {
                 Position vertex = tp.toPosition().add(new Position(16, 16));
                 double dist = enemyCenter.getDistance(vertex);
@@ -196,7 +304,8 @@ public class WorkerScoutAgent extends Agent {
                         vertex = new Position((int) x, (int) y);
                     }
                 }
-                unsortedVertices.add(vertex);
+                if (getGs().getGame().getBWMap().isValidPosition(vertex) && getGs().getGame().getBWMap().isWalkable(vertex.toWalkPosition()))
+                    unsortedVertices.add(vertex);
             }
         }
         List<Position> sortedVertices = new ArrayList<>();
@@ -247,14 +356,6 @@ public class WorkerScoutAgent extends Agent {
             sortedVertices = temp;
         }
         enemyBaseBorders = sortedVertices;
-        /*double bestDist = 1000000;
-        for (int i = 0; i < sortedVertices.size(); i++) {
-            double dist = sortedVertices.get(i).getDistance(enemyCenter);
-            if (dist < bestDist) {
-                bestDist = dist;
-                currentVertex = i;
-            }
-        }*/
         currentVertex = 0;
         if (!getGs().learningManager.isNaughty()) {
             Base enemyNatural = getGs().enemyNaturalBase;
@@ -278,11 +379,14 @@ public class WorkerScoutAgent extends Agent {
         }
     }
 
-    enum Status {EXPLORE, DISRUPTING, IDLE}
+    enum Status {
+        EXPLORE, DISRUPTING, IDLE, PROXYING
+    }
 
     public String statusToString() {
         if (status == Status.EXPLORE) return "Exploring";
         if (status == Status.DISRUPTING) return "Disrupting";
+        if (status == Status.PROXYING) return "Proxying";
         if (status == Status.IDLE) return "Idle";
         return "None";
     }

@@ -16,24 +16,24 @@ public class ChooseBuilderToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.enemyRace != Race.Terran) return State.FAILURE;
-            for (Unit u : this.handler.enemyCombatUnitMemory) {
+            if (gameState.enemyRace != Race.Terran) return State.FAILURE;
+            for (Unit u : gameState.enemyCombatUnitMemory) {
                 Unit aux = null;
-                if (this.handler.enemyMainBase != null && u instanceof SCV && ((SCV) u).isConstructing()) {
-                    if (this.handler.bwem.getMap().getArea(u.getTilePosition()).equals(this.handler.bwem.getMap().getArea(this.handler.enemyMainBase.getLocation()))) {
+                if (gameState.enemyMainBase != null && u instanceof SCV && ((SCV) u).isConstructing()) {
+                    if (gameState.bwem.getMap().getArea(u.getTilePosition()).equals(gameState.bwem.getMap().getArea(gameState.enemyMainBase.getLocation()))) {
                         if (((SCV) u).getBuildType().canProduce()) {
-                            this.handler.chosenUnitToHarass = u;
+                            gameState.chosenUnitToHarass = u;
                             return State.SUCCESS;
                         }
                         aux = u;
                     }
                     if (aux != null) {
-                        this.handler.chosenUnitToHarass = aux;
+                        gameState.chosenUnitToHarass = aux;
                         return State.SUCCESS;
                     }
                 }
             }
-            this.handler.chosenUnitToHarass = null;
+            gameState.chosenUnitToHarass = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

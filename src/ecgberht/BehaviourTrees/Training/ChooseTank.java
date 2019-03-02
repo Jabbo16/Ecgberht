@@ -18,21 +18,23 @@ public class ChooseTank extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.Fs.isEmpty()) {
-                if (this.handler.strat.trainUnits.contains(UnitType.Terran_Wraith) &&
-                        this.handler.maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 <= 1) {
+            if (!gameState.Fs.isEmpty()) {
+                if (gameState.getStrat().trainUnits.contains(UnitType.Terran_Wraith) &&
+                        gameState.maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 <= 1) {
                     return State.FAILURE;
                 }
                 int multiplier = 2;
-                String strat = this.handler.strat.name;
+                String strat = gameState.getStrat().name;
+                if (strat.equals("JoyORush") && gameState.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3)
+                    return State.FAILURE;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
-                    MutablePair<Integer, Integer> cash = this.handler.getCash();
+                    MutablePair<Integer, Integer> cash = gameState.getCash();
                     if (cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) return State.FAILURE;
-                    for (Factory b : this.handler.Fs) {
+                    for (Factory b : gameState.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
-                            this.handler.chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
-                            this.handler.chosenBuilding = b;
+                            gameState.chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
+                            gameState.chosenBuilding = b;
                             return State.SUCCESS;
                         }
                     }

@@ -14,12 +14,12 @@ public class CheckResourcesAddon extends Conditional {
     @Override
     public State execute() {
         try {
-            MutablePair<Integer, Integer> cash = this.handler.getCash();
-            if (cash.first >= (this.handler.chosenAddon.mineralPrice() + this.handler.deltaCash.first) && cash.second >= (this.handler.chosenAddon.gasPrice()) + this.handler.deltaCash.second) {
+            MutablePair<Integer, Integer> cash = gameState.getCash();
+            if (cash.first >= (gameState.chosenAddon.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenAddon.gasPrice()) + gameState.deltaCash.second) {
                 return State.SUCCESS;
             }
-            this.handler.chosenBuildingAddon = null;
-            this.handler.chosenAddon = null;
+            gameState.chosenBuildingAddon = null;
+            gameState.chosenAddon = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

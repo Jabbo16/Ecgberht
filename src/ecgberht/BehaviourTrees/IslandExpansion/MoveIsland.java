@@ -20,17 +20,17 @@ public class MoveIsland extends Action {
     @Override
     public State execute() {
         try {
-            Worker chosen = this.handler.chosenWorkerDrop;
+            Worker chosen = gameState.chosenWorkerDrop;
             UnitType chosenType = UnitType.Terran_Command_Center;
-            TilePosition chosenTile = this.handler.chosenIsland.getLocation();
+            TilePosition chosenTile = gameState.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(chosenTile.toPosition(), chosenType);
             if (chosen.move(realEnd)) {
-                this.handler.workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
-                this.handler.deltaCash.first += chosenType.mineralPrice();
-                this.handler.deltaCash.second += chosenType.gasPrice();
-                this.handler.chosenWorkerDrop = null;
-                this.handler.chosenIsland = null;
-                this.handler.islandExpand = false;
+                gameState.workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
+                gameState.deltaCash.first += chosenType.mineralPrice();
+                gameState.deltaCash.second += chosenType.gasPrice();
+                gameState.chosenWorkerDrop = null;
+                gameState.chosenIsland = null;
+                gameState.islandExpand = false;
                 return State.SUCCESS;
             }
             return State.FAILURE;

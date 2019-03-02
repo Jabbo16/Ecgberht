@@ -1,6 +1,7 @@
 package ecgberht.Strategies;
 
 import ecgberht.Strategy;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
@@ -24,8 +25,8 @@ public class FullBioFE extends Strategy {
         numRaxForFac = 4;
         bunker = false;
         supplyForFirstRefinery = 36;
-        armyForAttack = 30;
-        armyForExpand = 6;
+        armyForAttack = 28;
+        armyForExpand = 8;
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;
@@ -71,5 +72,10 @@ public class FullBioFE extends Strategy {
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Weapons);
         upgradesToResearch.add(UpgradeType.Terran_Infantry_Armor);
         upgradesToResearch.add(UpgradeType.U_238_Shells);
+    }
+
+    @Override
+    public boolean requiredUnitsForAttack() {
+        return Util.isResearched(TechType.Stim_Packs) && Util.countUnitTypeSelf(UnitType.Terran_Medic) >= 3;
     }
 }

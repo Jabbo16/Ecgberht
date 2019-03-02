@@ -12,6 +12,7 @@ public abstract class Strategy implements Comparable<Strategy> {
 
     public boolean bunker = false;
     public boolean proxy = false;
+    public boolean harass = true;
     public int armyForAttack = 0;
     public int armyForExpand = 20;
     public int armyForTurret = 0;
@@ -23,6 +24,7 @@ public abstract class Strategy implements Comparable<Strategy> {
     public int numRaxForAca = 2;
     public int numRaxForFac = 0;
     public int numFacForPort = 1;
+    public int extraSCVs = 3;
     public int portPerCC = 0;
     public int raxPerCC = 0;
     public int supplyForFirstRefinery = 0;

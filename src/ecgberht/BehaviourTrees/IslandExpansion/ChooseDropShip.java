@@ -16,15 +16,15 @@ public class ChooseDropShip extends Action {
     @Override
     public State execute() {
         try {
-            for (Agent u : this.handler.agents.values()) {
+            for (Agent u : gameState.agents.values()) {
                 if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
-                    this.handler.chosenDropShip = (DropShipAgent) u;
+                    gameState.chosenDropShip = (DropShipAgent) u;
                     return State.SUCCESS;
                 }
             }
-            this.handler.chosenDropShip = null;
-            this.handler.chosenWorker = null;
-            this.handler.chosenIsland = null;
+            gameState.chosenDropShip = null;
+            gameState.chosenWorker = null;
+            gameState.chosenIsland = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

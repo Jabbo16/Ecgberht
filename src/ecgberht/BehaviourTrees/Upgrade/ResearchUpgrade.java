@@ -16,9 +16,9 @@ public class ResearchUpgrade extends Action {
     @Override
     public State execute() {
         try {
-            if (!this.handler.defense && this.handler.chosenToBuild == UnitType.Terran_Command_Center) {
+            if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 boolean found = false;
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Command_Center) {
                         found = true;
                         break;
@@ -26,20 +26,20 @@ public class ResearchUpgrade extends Action {
                 }
                 if (!found) return State.FAILURE;
             }
-            if (this.handler.chosenUpgrade != null) {
-                if (this.handler.chosenUnitUpgrader.upgrade(this.handler.chosenUpgrade)) {
-                    this.handler.chosenUpgrade = null;
+            if (gameState.chosenUpgrade != null) {
+                if (gameState.chosenUnitUpgrader.upgrade(gameState.chosenUpgrade)) {
+                    gameState.chosenUpgrade = null;
                     return State.SUCCESS;
                 }
-            } else if (this.handler.chosenResearch != null) {
-                if (this.handler.chosenUnitUpgrader.research(this.handler.chosenResearch)) {
-                    this.handler.chosenResearch = null;
+            } else if (gameState.chosenResearch != null) {
+                if (gameState.chosenUnitUpgrader.research(gameState.chosenResearch)) {
+                    gameState.chosenResearch = null;
                     return State.SUCCESS;
                 }
             }
-            this.handler.chosenUnitUpgrader = null;
-            this.handler.chosenUpgrade = null;
-            this.handler.chosenResearch = null;
+            gameState.chosenUnitUpgrader = null;
+            gameState.chosenUpgrade = null;
+            gameState.chosenResearch = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

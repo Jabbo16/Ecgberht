@@ -17,10 +17,10 @@ public class ChooseIrradiate extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.enemyRace != Race.Zerg) return State.FAILURE;
+            if (gameState.enemyRace != Race.Zerg) return State.FAILURE;
             boolean found = false;
             ScienceFacility chosen = null;
-            for (ResearchingFacility r : this.handler.UBs) {
+            for (ResearchingFacility r : gameState.UBs) {
                 if (r instanceof ScienceFacility && !r.isResearching()) {
                     found = true;
                     chosen = (ScienceFacility) r;
@@ -28,10 +28,10 @@ public class ChooseIrradiate extends Action {
                 }
             }
             if (!found) return State.FAILURE;
-            if (!this.handler.getPlayer().isResearching(TechType.Irradiate) &&
-                    !this.handler.getPlayer().hasResearched(TechType.Irradiate)) {
-                this.handler.chosenUnitUpgrader = chosen;
-                this.handler.chosenResearch = TechType.Irradiate;
+            if (!gameState.getPlayer().isResearching(TechType.Irradiate) &&
+                    !gameState.getPlayer().hasResearched(TechType.Irradiate)) {
+                gameState.chosenUnitUpgrader = chosen;
+                gameState.chosenResearch = TechType.Irradiate;
                 return State.SUCCESS;
             }
             return State.FAILURE;

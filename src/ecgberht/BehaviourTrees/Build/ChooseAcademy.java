@@ -1,6 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
+import ecgberht.IntelligenceAgency;
 import ecgberht.Strategy;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -23,20 +24,23 @@ public class ChooseAcademy extends Action {
             if (Util.countBuildingAll(UnitType.Terran_Refinery) == 0 || Util.countBuildingAll(UnitType.Terran_Academy) > 0) {
                 return State.FAILURE;
             }
-            Strategy strat = this.handler.strat;
-            if ((strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE"))
-                    && Util.countBuildingAll(UnitType.Terran_Factory) >= strat.facPerCC) {
-                this.handler.chosenToBuild = UnitType.Terran_Academy;
-                return State.SUCCESS;
+            Strategy strat = gameState.getStrat();
+            if (strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE")) {
+                if (gameState.Fs.size() >= strat.facPerCC
+                        || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dark_Templar)
+                        || IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) {
+                    gameState.chosenToBuild = UnitType.Terran_Academy;
+                    return State.SUCCESS;
+                } else return State.FAILURE;
             }
-            if (Util.countBuildingAll(UnitType.Terran_Barracks) >= this.handler.strat.numRaxForAca) {
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
+            if (Util.countBuildingAll(UnitType.Terran_Barracks) >= gameState.getStrat().numRaxForAca) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Academy) return State.FAILURE;
                 }
-                for (Building w : this.handler.workerTask.values()) {
+                for (Building w : gameState.workerTask.values()) {
                     if (w instanceof Academy) return State.FAILURE;
                 }
-                this.handler.chosenToBuild = UnitType.Terran_Academy;
+                gameState.chosenToBuild = UnitType.Terran_Academy;
                 return State.SUCCESS;
             }
             return State.FAILURE;

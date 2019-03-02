@@ -19,10 +19,10 @@ public class BioMech extends Strategy {
         armyForBay = 15;
         armyForTurret = 10;
         numBays = 1;
-        raxPerCC = 3;
+        raxPerCC = 2;
         facPerCC = 1;
         numRaxForAca = 2;
-        numRaxForFac = 2;
+        numRaxForFac = 1;
         numCCForPort = 2;
         numCCForScience = 2;
         portPerCC = 0;

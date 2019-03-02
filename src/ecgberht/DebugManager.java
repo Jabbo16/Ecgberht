@@ -114,6 +114,8 @@ public class DebugManager {
             }
             if (gameState.enemyStartBase != null)
                 mapDrawer.drawTextMap(gameState.enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));
+            if (gameState.disrupterBuilding != null)
+                mapDrawer.drawTextMap(gameState.disrupterBuilding.getPosition().add(new Position(0, -8)), ColorUtil.formatText("BM!", ColorUtil.White));
             if (gameState.enemyNaturalBase != null)
                 mapDrawer.drawTextMap(gameState.enemyNaturalBase.getLocation().toPosition(), ColorUtil.formatText("EnemyNaturalBase", ColorUtil.White));
             if (gameState.mainChoke != null) {
@@ -136,6 +138,7 @@ public class DebugManager {
                 print(gameState.chosenUnitToHarass, Color.RED);
                 mapDrawer.drawTextMap(gameState.chosenUnitToHarass.getPosition(), ColorUtil.formatText("UnitToHarass", ColorUtil.White));
             }
+
             for (Map.Entry<SCV, Mechanical> r : gameState.repairerTask.entrySet()) {
                 print(r.getKey(), Color.YELLOW);
                 mapDrawer.drawTextMap(r.getKey().getPosition(), ColorUtil.formatText("Repairer", ColorUtil.White));
@@ -143,10 +146,18 @@ public class DebugManager {
                 print(r.getValue(), Color.YELLOW);
                 mapDrawer.drawLineMap(r.getKey().getPosition(), r.getValue().getPosition(), Color.YELLOW);
             }
-            for (EnemyBuilding b : gameState.enemyBuildingMemory.values()) {
-                mapDrawer.drawTextMap(b.pos.toPosition().add(new Position(0, 16)), ColorUtil.formatText(b.type.toString(), ColorUtil.White));
-                print(b.pos, b.type, Color.RED);
+            for (UnitInfo ui : gameState.unitStorage.getEnemyUnits().values()) {
+                mapDrawer.drawTextMap(ui.lastPosition.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
+                print(ui.unit, Color.RED);
             }
+            /*for (UnitInfo ui : gameState.unitStorage.getAllyUnits().values()) {
+                mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
+                print(ui.unit, Color.BLUE);
+            }*/
+            /*for (UnitInfo ui : gameState.myArmy) {
+                mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
+                print(ui.unit, Color.BLUE);
+            }*/
             if (gameState.chosenScout != null) {
                 mapDrawer.drawTextMap(gameState.chosenScout.getPosition(), ColorUtil.formatText("Scouter", ColorUtil.White));
                 print(gameState.chosenScout, Color.PURPLE);
@@ -201,7 +212,7 @@ public class DebugManager {
             for (Squad s : gameState.sqManager.squads.values()) {
                 if (s.members.isEmpty()) continue;
                 Position center = s.getSquadCenter();
-                mapDrawer.drawCircleMap(center, 90, Color.GREEN);
+                //mapDrawer.drawCircleMap(center, 90, Color.GREEN);
                 mapDrawer.drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
                 mapDrawer.drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp() * 2)), ColorUtil.formatText(s.lose ? "Lose" : "Win", ColorUtil.White));
             }
@@ -220,11 +231,12 @@ public class DebugManager {
         try {
             if (!ConfigManager.getConfig().ecgConfig.debugText) return;
             mapDrawer.drawTextScreen(320, 5, ColorUtil.formatText(gameState.supplyMan.getSupplyUsed() + "/" + gameState.supplyMan.getSupplyTotal(), ColorUtil.White));
-            mapDrawer.drawTextScreen(320, 20, ColorUtil.formatText(gameState.getArmySize() + "/" + gameState.strat.armyForAttack, ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 20, ColorUtil.formatText(gameState.getArmySize() + "/" + gameState.getStrat().armyForAttack, ColorUtil.White));
             String defending = gameState.defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
             mapDrawer.drawTextScreen(320, 35, defending);
-            mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText(gameState.chosenUnit.toString(), ColorUtil.White));
-            mapDrawer.drawTextScreen(320, 65, ColorUtil.formatText(gameState.chosenToBuild.toString(), ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText("I want to train: " + gameState.chosenUnit.toString(), ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 65, ColorUtil.formatText("I want to build: " + gameState.chosenToBuild.toString(), ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 80, ColorUtil.formatText("Max_Goliaths: " + gameState.maxGoliaths, ColorUtil.White));
             if (gameState.ih.allies().size() + gameState.ih.enemies().size() == 1) {
                 mapDrawer.drawTextScreen(10, 5,
                         ColorUtil.formatText(gameState.ih.self().getName(), ColorUtil.getColor(gameState.ih.self().getColor())) +
@@ -244,7 +256,7 @@ public class DebugManager {
             mapDrawer.drawTextScreen(10, 50, ColorUtil.formatText("Framecount: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(gameState.frameCount), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 65, ColorUtil.formatText("FPS: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(gameState.ih.getFPS()), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(65, 65, ColorUtil.formatText("APM: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(gameState.ih.getAPM()), ColorUtil.Yellow));
-            mapDrawer.drawTextScreen(10, 80, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(gameState.strat.name, ColorUtil.Yellow));
+            mapDrawer.drawTextScreen(10, 80, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(gameState.getStrat().name, ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 95, ColorUtil.formatText("EnemyStrategy: ", ColorUtil.White) + ColorUtil.formatText(IntelligenceAgency.getEnemyStrat().toString(), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 110, ColorUtil.formatText("SimTime(ms): ", ColorUtil.White) + ColorUtil.formatText(String.valueOf(gameState.sim.time), ColorUtil.Teal));
             if (gameState.enemyRace == Race.Zerg && gameState.learningManager.isNaughty()) {

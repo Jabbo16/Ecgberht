@@ -2,9 +2,13 @@ package ecgberht.BehaviourTrees.Scanner;
 
 import bwem.Base;
 import ecgberht.GameState;
+import ecgberht.UnitInfo;
+import ecgberht.Util.MutablePair;
+import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.Attacker;
+import org.openbw.bwapi4j.unit.ComsatStation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,32 +23,37 @@ public class CheckScan extends Conditional {
     @Override
     public State execute() {
         try {
-            if (this.handler.CSs.isEmpty()) return State.FAILURE;
-            if (this.handler.frameCount - this.handler.startCount > 40 + this.handler.getIH().getLatency()) {
-                for (Unit u : this.handler.enemyCombatUnitMemory) {
-                    PlayerUnit pU = (PlayerUnit) u;
-                    if ((pU.isCloaked() || (pU instanceof Burrowable && ((Burrowable) pU).isBurrowed())) && !pU.isDetected() && u instanceof Attacker) {
-                        if (this.handler.sim.getSimulation(u, true).allies.isEmpty()) continue;
-                        this.handler.checkScan = u.getTilePosition();
-                        return State.SUCCESS;
+            if (gameState.CSs.isEmpty()) return State.FAILURE;
+            if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
+                for (ComsatStation u : gameState.CSs) {
+                    if (u.getEnergy() < 50) continue;
+                    for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
+                        if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.unit instanceof Attacker) {
+                            if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(a -> a.unitType.canAttack()))
+                                continue;
+                            gameState.checkScan = new MutablePair<>(u, e.lastPosition);
+                            return State.SUCCESS;
+                        }
                     }
                 }
+
             }
             List<Base> valid = new ArrayList<>();
-            for (Base b : this.handler.enemyBLs) {
-                if (this.handler.getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
+            for (Base b : gameState.enemyBLs) {
+                if (gameState.getGame().getBWMap().isVisible(b.getLocation()) || b.getArea().getAccessibleNeighbors().isEmpty()) {
                     continue;
                 }
-                if (this.handler.enemyMainBase != null && this.handler.enemyMainBase.getLocation().equals(b.getLocation())) {
+                if (gameState.enemyMainBase != null && gameState.enemyMainBase.getLocation().equals(b.getLocation())) {
                     continue;
                 }
                 valid.add(b);
             }
             if (valid.isEmpty()) return State.FAILURE;
-            for (ComsatStation u : this.handler.CSs) {
+            for (ComsatStation u : gameState.CSs) {
                 if (u.getEnergy() == 200) {
                     Random random = new Random();
-                    this.handler.checkScan = valid.get(random.nextInt(valid.size())).getLocation();
+                    gameState.checkScan = new MutablePair<>(u,
+                            Util.getUnitCenterPosition(valid.get(random.nextInt(valid.size())).getLocation().toPosition(), gameState.enemyRace.getCenter()));
                     return State.SUCCESS;
                 }
             }

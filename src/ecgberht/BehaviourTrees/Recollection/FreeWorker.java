@@ -15,12 +15,12 @@ public class FreeWorker extends Action {
     @Override
     public State execute() {
         try {
-            this.handler.chosenWorker = null;
-            if (!this.handler.workerIdle.isEmpty()) {
-                int frame = this.handler.frameCount;
-                for (Worker w : this.handler.workerIdle) {
+            gameState.chosenWorker = null;
+            if (!gameState.workerIdle.isEmpty()) {
+                int frame = gameState.frameCount;
+                for (Worker w : gameState.workerIdle) {
                     if (w.getLastCommandFrame() != frame) {
-                        this.handler.chosenWorker = w;
+                        gameState.chosenWorker = w;
                         return State.SUCCESS;
                     }
                 }

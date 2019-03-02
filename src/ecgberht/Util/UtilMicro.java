@@ -1,5 +1,6 @@
 package ecgberht.Util;
 
+import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.unit.*;
@@ -17,19 +18,49 @@ public class UtilMicro {
             return;
         if (getGs().frameCount == attacker.getLastCommandFrame()) return;
         Position targetPos = attacker.getTargetPosition();
-        if (pos.equals(targetPos)) return;
+        if (pos.equals(targetPos) || (targetPos != null && pos.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
         if (!attacker.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
         attacker.attack(pos);
     }
 
-    public static void attack(Attacker attacker, Unit target) {
-        if (attacker == null || target == null || !attacker.exists() || !target.exists() || attacker.isAttackFrame())
-            return;
-        if (getGs().frameCount == attacker.getLastCommandFrame()) return;
-        Unit targetUnit = attacker.getTargetUnit();
-        if (target.equals(targetUnit)) return;
-        attacker.attack(target);
+    public static void attack(UnitInfo attacker, UnitInfo target) {
+        try {
+            Attacker attackerUnit = (Attacker) attacker.unit;
+            if (attackerUnit == null || target == null || !attackerUnit.exists() || attackerUnit.isStartingAttack() || attackerUnit.isAttackFrame())
+                return;
+            if (getGs().frameCount == attackerUnit.getLastCommandFrame()) return;
+            Unit targetUnit = attackerUnit.getTargetUnit();
+            if (target.unit.equals(targetUnit)) return;
+            if (target.visible) {
+                int range = Util.getWeapon(attacker, target).maxRange();
+                if (range >= attacker.getDistance(target)) {
+                    attackerUnit.attack(target.unit);
+                    return;
+                }
+                Position predicted = predictUnitPosition(target, 1);
+                if (predicted != null) move((MobileUnit) attackerUnit, predicted);
+            } else move((MobileUnit) attackerUnit, target.lastPosition);
+        } catch (Exception e) {
+            System.err.println("UtilMicro Attack Exception");
+            e.printStackTrace();
+        }
+    }
+
+    public static void attack(Attacker attacker, UnitInfo target) {
+        try {
+            if (attacker == null || target == null || !attacker.exists() || attacker.isStartingAttack() || attacker.isAttackFrame())
+                return;
+            if (getGs().frameCount == attacker.getLastCommandFrame()) return;
+            Unit targetUnit = attacker.getTargetUnit();
+            if (target.unit.equals(targetUnit)) return;
+            if (target.visible) attacker.attack(target.unit);
+            else move((MobileUnit) attacker, target.lastPosition);
+        } catch (Exception e) {
+            System.err.println("UtilMicro Attack Exception");
+            e.printStackTrace();
+        }
     }
 
     public static void irradiate(ScienceVessel vessel, PlayerUnit target) {
@@ -61,23 +92,25 @@ public class UtilMicro {
 
     public static void move(MobileUnit u, Position pos) {
         if (pos == null || u == null || !u.exists()) return;
+        if (getGs().frameCount == u.getLastCommandFrame()) return;
         Position targetPos = u.getTargetPosition();
-        if (pos.equals(targetPos)) return;
+        if (pos.equals(targetPos) || (targetPos != null && pos.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         if (!getGs().getGame().getBWMap().isValidPosition(pos)) return;
         if (!u.isFlying() && !getGs().getGame().getBWMap().isWalkable(pos.toWalkPosition())) return;
         u.move(pos);
     }
 
     // Credits to @Yegers for a better kite method
-    public static Position kiteAway(final Unit unit, final Set<Unit> enemies) {
+    public static Position kiteAway(final Unit unit, final Set<UnitInfo> enemies) {
         try {
             if (enemies.isEmpty()) return null;
             Position ownPosition = unit.getPosition();
             List<MutablePair<Double, Double>> vectors = new ArrayList<>();
 
             //double minDistance = Double.MAX_VALUE;
-            for (final Unit enemy : enemies) {
-                final Position enemyPosition = enemy.getPosition();
+            for (final UnitInfo enemy : enemies) {
+                final Position enemyPosition = enemy.position;
                 Position sub = ownPosition.subtract(enemyPosition);
                 MutablePair<Double, Double> unitV = new MutablePair<>((double) sub.getX(), (double) sub.getY());
                 //final double distance = enemy.getDistance(unit);
@@ -114,7 +147,8 @@ public class UtilMicro {
         if (u == null || heal == null || !getGs().bw.getBWMap().isValidPosition(heal)) return;
         if (u.getLastCommandFrame() == getGs().frameCount) return;
         Position targetPos = u.getTargetPosition();
-        if (heal.equals(targetPos)) return;
+        if (heal.equals(targetPos) || (targetPos != null && heal.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         u.heal(heal);
     }
 
@@ -124,10 +158,10 @@ public class UtilMicro {
         u.stop(false);
     }
 
-    public static Position predictUnitPosition(Unit unit, int frames) {
-        if (unit == null || !unit.exists() || !unit.isVisible()) return null;
-        if (!(unit instanceof MobileUnit)) return unit.getPosition();
-        return unit.getPosition().add(new Position((int) (frames * ((MobileUnit) unit).getVelocityX()), (int) (frames * ((MobileUnit) unit).getVelocityY())));
+    public static Position predictUnitPosition(UnitInfo unit, int frames) {
+        if (unit == null) return null;
+        if (unit.speed == 0.0) return unit.lastPosition;
+        return unit.lastPosition.add(new Position((int) (frames * unit.unit.getVelocityX()), (int) (frames * unit.unit.getVelocityY())));
     }
 
     private static boolean verifyPosition(Position position) {

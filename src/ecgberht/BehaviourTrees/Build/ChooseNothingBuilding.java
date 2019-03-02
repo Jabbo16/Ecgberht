@@ -18,20 +18,20 @@ public class ChooseNothingBuilding extends Action {
     public State execute() {
         try {
             // Bio Builds and no Stim
-            boolean stim = this.handler.strat.techToResearch.contains(TechType.Stim_Packs);
-            if (stim && !this.handler.getPlayer().hasResearched(TechType.Stim_Packs) &&
-                    !this.handler.getPlayer().isResearching(TechType.Stim_Packs)
-                    && (int) this.handler.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
-                this.handler.chosenToBuild = UnitType.None;
+            boolean stim = gameState.getStrat().techToResearch.contains(TechType.Stim_Packs);
+            if (stim && !gameState.getPlayer().hasResearched(TechType.Stim_Packs) &&
+                    !gameState.getPlayer().isResearching(TechType.Stim_Packs)
+                    && (int) gameState.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
+                gameState.chosenToBuild = UnitType.None;
                 return State.SUCCESS;
             }
             // Mech builds and no siege
-            boolean siege = this.handler.strat.techToResearch.contains(TechType.Tank_Siege_Mode);
+            boolean siege = gameState.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode);
             if (siege && Util.getNumberCCs() >= 2 &&
-                    !this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode) &&
-                    !this.handler.getPlayer().isResearching(TechType.Tank_Siege_Mode) &&
+                    !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode) &&
+                    !gameState.getPlayer().isResearching(TechType.Tank_Siege_Mode) &&
                     Util.checkSiege()) {
-                this.handler.chosenToBuild = UnitType.None;
+                gameState.chosenToBuild = UnitType.None;
                 return State.SUCCESS;
             }
             return State.FAILURE;

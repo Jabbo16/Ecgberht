@@ -17,14 +17,14 @@ public class ChooseCharonBoosters extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty() || !this.handler.strat.trainUnits.contains(UnitType.Terran_Goliath) || this.handler.maxGoliaths == 0) {
+            if (gameState.UBs.isEmpty() || !gameState.getStrat().trainUnits.contains(UnitType.Terran_Goliath) || gameState.maxGoliaths == 0) {
                 return State.FAILURE;
             }
-            for (ResearchingFacility u : this.handler.UBs) {
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof MachineShop)) continue;
-                if (this.handler.getPlayer().getUpgradeLevel(UpgradeType.Charon_Boosters) < 1 && u.canUpgrade(UpgradeType.Charon_Boosters) && !u.isResearching() && !u.isUpgrading()) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenUpgrade = UpgradeType.Charon_Boosters;
+                if (gameState.getPlayer().getUpgradeLevel(UpgradeType.Charon_Boosters) < 1 && u.canUpgrade(UpgradeType.Charon_Boosters) && !u.isResearching() && !u.isUpgrading()) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenUpgrade = UpgradeType.Charon_Boosters;
                     return State.SUCCESS;
                 }
             }

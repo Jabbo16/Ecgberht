@@ -1,14 +1,16 @@
 package ecgberht.Agents;
 
+import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Unit;
 
 public abstract class Agent {
 
     public Unit myUnit;
+    public UnitInfo unitInfo;
     Status status = Status.IDLE;
     Position attackPos = null;
-    Unit attackUnit = null;
+    UnitInfo attackUnit = null;
     int frameLastOrder = 0;
     int actualFrame = 0;
 

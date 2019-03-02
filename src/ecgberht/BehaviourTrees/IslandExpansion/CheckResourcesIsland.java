@@ -19,13 +19,13 @@ public class CheckResourcesIsland extends Conditional {
     @Override
     public State execute() {
         try {
-            MutablePair<Integer, Integer> cash = this.handler.getCash();
-            Worker chosen = this.handler.chosenWorkerDrop;
+            MutablePair<Integer, Integer> cash = gameState.getCash();
+            Worker chosen = gameState.chosenWorkerDrop;
             UnitType chosenType = UnitType.Terran_Command_Center;
             TilePosition start = chosen.getTilePosition();
-            TilePosition end = this.handler.chosenIsland.getLocation();
+            TilePosition end = gameState.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), chosenType);
-            if (cash.first + this.handler.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + this.handler.deltaCash.first) {
+            if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + gameState.deltaCash.first) {
                 return State.SUCCESS;
             }
             return State.FAILURE;

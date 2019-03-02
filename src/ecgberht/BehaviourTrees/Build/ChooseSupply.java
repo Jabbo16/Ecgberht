@@ -1,14 +1,11 @@
 package ecgberht.BehaviourTrees.Build;
 
 import ecgberht.GameState;
-import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.SupplyDepot;
 
 public class ChooseSupply extends Action {
@@ -20,31 +17,28 @@ public class ChooseSupply extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.getPlayer().supplyTotal() >= 400) return State.FAILURE;
-            if (this.handler.strat.name.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) {
+            if (gameState.getPlayer().supplyTotal() >= 400) return State.FAILURE;
+            String strat = gameState.getStrat().name;
+            if (strat.equals("ProxyBBS") && Util.countBuildingAll(UnitType.Terran_Barracks) < 2) return State.FAILURE;
+            if (strat.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1)
                 return State.FAILURE;
-            }
-            if (this.handler.strat.name.equals("ProxyEightRax") && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
-                return State.FAILURE;
-            }
-            if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg
+            if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.learningManager.isNaughty() && this.handler.enemyRace == Race.Zerg
+            if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg
                     && Util.countBuildingAll(UnitType.Terran_Barracks) == 1
                     && Util.countBuildingAll(UnitType.Terran_Supply_Depot) > 0
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1) {
                 return State.FAILURE;
             }
-            if (this.handler.getSupply() <= 4 * this.handler.getCombatUnitsBuildings()) {
-                for (MutablePair<UnitType, TilePosition> w : this.handler.workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Supply_Depot) return State.FAILURE;
-                }
-                for (Building w : this.handler.workerTask.values()) {
-                    if (w instanceof SupplyDepot) return State.FAILURE;
-                }
-                this.handler.chosenToBuild = UnitType.Terran_Supply_Depot;
+            if (gameState.getSupply() > 4 * gameState.getCombatUnitsBuildings()) return State.FAILURE;
+            int countSupplyDepots = (int) (gameState.workerBuild.values().stream()
+                    .filter(u -> u.first == UnitType.Terran_Supply_Depot).count()
+                    + gameState.workerTask.values().stream().filter(u -> u instanceof SupplyDepot).count());
+            int maxSupplyDepots = gameState.getCash().first >= 400 && !gameState.isGoingToExpand() ? 2 : 1; // TODO improve
+            if (countSupplyDepots < maxSupplyDepots) {
+                gameState.chosenToBuild = UnitType.Terran_Supply_Depot;
                 return State.SUCCESS;
             }
             return State.FAILURE;

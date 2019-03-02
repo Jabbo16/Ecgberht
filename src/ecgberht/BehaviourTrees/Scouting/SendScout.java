@@ -21,32 +21,32 @@ public class SendScout extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.enemyMainBase == null) {
-                if (!this.handler.scoutSLs.isEmpty()) {
+            if (gameState.enemyMainBase == null) {
+                if (!gameState.scoutSLs.isEmpty()) {
                     List<Base> aux = new ArrayList<>();
-                    for (Base b : this.handler.scoutSLs) {
-                        if (this.handler.fortressSpecialBLs.containsKey(b)) continue;
-                        if (this.handler.strat.name.equals("PlasmaWraithHell")) {
-                            if (((MobileUnit) this.handler.chosenScout).move(b.getLocation().toPosition())) {
+                    for (Base b : gameState.scoutSLs) {
+                        if (gameState.fortressSpecialBLs.containsKey(b)) continue;
+                        if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
+                            if (((MobileUnit) gameState.chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
-                        } else if (Util.isConnected(b.getLocation(), this.handler.chosenScout.getTilePosition())) {
-                            if (((MobileUnit) this.handler.chosenScout).move(b.getLocation().toPosition())) {
+                        } else if (Util.isConnected(b.getLocation(), gameState.chosenScout.getTilePosition())) {
+                            if (((MobileUnit) gameState.chosenScout).move(b.getLocation().toPosition())) {
                                 return State.SUCCESS;
                             }
                         } else aux.add(b);
                     }
-                    this.handler.scoutSLs.removeAll(aux);
+                    gameState.scoutSLs.removeAll(aux);
                 }
             }
-            if (this.handler.strat.name.equals("PlasmaWraithHell")) {
-                ((MobileUnit) this.handler.chosenScout).stop(false);
-                this.handler.chosenScout = null;
+            if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
+                ((MobileUnit) gameState.chosenScout).stop(false);
+                gameState.chosenScout = null;
                 return State.FAILURE;
             }
-            this.handler.workerIdle.add((Worker) this.handler.chosenScout);
-            ((MobileUnit) this.handler.chosenScout).stop(false);
-            this.handler.chosenScout = null;
+            gameState.workerIdle.add((Worker) gameState.chosenScout);
+            ((MobileUnit) gameState.chosenScout).stop(false);
+            gameState.chosenScout = null;
             return State.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());

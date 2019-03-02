@@ -20,11 +20,11 @@ import static ecgberht.Ecgberht.getGs;
 
 public class BuildingMap implements Cloneable {
 
-    public static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
+    public final static Map<Area, Set<TilePosition>> tilesArea = new HashMap<>();
     private Player self;
     private int height;
     private int width;
-    private String map[][];
+    private String[][] map;
     private BW bw;
     private BWEM bwem;
 
@@ -59,7 +59,9 @@ public class BuildingMap implements Cloneable {
             } else if (!naturalOrdered && getGs().naturalArea.equals(a)) {
                 tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(getGs().BLs.get(1).getLocation())));
                 naturalOrdered = true;
-            } else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
+            } else if (a.getBases().size() == 1)
+                tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getBases().get(0).getLocation())));
+            else tilesArea.put(a, new TreeSet<>(new tilesAreaComparator(a.getTop().toTilePosition())));
         }
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
@@ -68,6 +70,10 @@ public class BuildingMap implements Cloneable {
                 if (a != null) tilesArea.get(a).add(x);
             }
         }
+    }
+
+    public Set<TilePosition> getTilesArea(Area area) {
+        return tilesArea.get(area);
     }
 
     private String[][] copyMap(String[][] map) {
@@ -88,7 +94,7 @@ public class BuildingMap implements Cloneable {
     }
 
     // Generates an initial building map
-    public void initMap() {
+    void initMap() {
         //Find valid and no valid positions for building
         for (int jj = 0; jj < height; jj++) {
             for (int ii = 0; ii < width; ii++) {
@@ -347,7 +353,7 @@ public class BuildingMap implements Cloneable {
     }
 
     // Finds a valid position in the map for a specific building type starting with a given tileposition
-    public TilePosition findPosition(UnitType buildingType, TilePosition starting) {
+    private TilePosition findPosition(UnitType buildingType, TilePosition starting) {
         TilePosition buildingSize = buildingType.tileSize();
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
         if (buildingType.canBuildAddon()) size = Math.max(buildingSize.getY(), buildingSize.getX() + 2);
@@ -383,6 +389,14 @@ public class BuildingMap implements Cloneable {
             j++;
         }
         return new TilePosition(coord[1], coord[0]);
+    }
+
+
+    public boolean tileBuildable(TilePosition pos, UnitType type) {
+        int x = pos.getY();
+        int y = pos.getX();
+        int size = Math.max(type.tileSize().getY(), type.tileSize().getX());
+        return !map[x][y].equals("M") && !map[x][y].equals("V") && !map[x][y].equals("E") && !map[x][y].equals("B") && Integer.parseInt(map[x][y]) >= size;
     }
 
     public TilePosition findBunkerPosition(ChokePoint choke) {

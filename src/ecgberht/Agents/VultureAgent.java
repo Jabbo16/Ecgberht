@@ -2,15 +2,18 @@ package ecgberht.Agents;
 
 import bwem.Base;
 import ecgberht.Simulation.SimInfo;
+import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.type.WeaponType;
-import org.openbw.bwapi4j.unit.*;
+import org.openbw.bwapi4j.unit.Bunker;
+import org.openbw.bwapi4j.unit.Unit;
+import org.openbw.bwapi4j.unit.Vulture;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +30,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     public VultureAgent(Unit unit) {
         super();
+        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.unit = (Vulture) unit;
         this.myUnit = unit;
     }
@@ -38,21 +42,22 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     @Override
     public boolean runAgent() {
         try {
+            if (!unit.exists() || unitInfo == null) return true;
             if (unit.getHitPoints() <= 20) {
                 MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
                     Position ccPos = cc.second.getPosition();
                     if (getGs().getGame().getBWMap().isValidPosition(ccPos)) {
                         unit.move(ccPos);
-                        getGs().myArmy.add(unit);
+                        getGs().myArmy.add(unitInfo);
                         return true;
                     }
                 }
                 unit.move(getGs().getPlayer().getStartLocation().toPosition());
-                getGs().myArmy.add(unit);
+                getGs().myArmy.add(unitInfo);
                 return true;
             }
-            mySim = getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND);
+            mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             if (frameLastOrder == actualFrame) return false;
@@ -108,10 +113,10 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void combat() {
-        Unit toAttack = Util.getRangedTarget(unit, mySim.enemies);
+        UnitInfo toAttack = Util.getRangedTarget(unitInfo, mySim.enemies);
         if (toAttack != null) {
             if (attackUnit != null && attackUnit.equals(toAttack)) return;
-            UtilMicro.attack(unit, toAttack);
+            UtilMicro.attack(unitInfo, toAttack);
             attackUnit = toAttack;
         }
     }
@@ -123,12 +128,12 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         return null;
     }
 
-    private Unit getUnitToAttack(Unit myUnit, Set<Unit> enemies) {
-        Unit chosen = null;
+    private UnitInfo getUnitToAttack(Set<UnitInfo> enemies) {
+        UnitInfo chosen = null;
         double distB = Double.MAX_VALUE;
-        for (Unit u : enemies) {
-            if (u.getType().isFlyer() || ((PlayerUnit) u).isCloaked()) continue;
-            double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
+        for (UnitInfo u : enemies) {
+            if (u.flying || u.unit.isCloaked()) continue;
+            double distA = unitInfo.getDistance(u);
             if (chosen == null || distA < distB) {
                 chosen = u;
                 distB = distA;
@@ -151,8 +156,10 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             status = Status.ATTACK;
         } else {
             boolean meleeOnly = checkOnlyMelees();
-            if (!meleeOnly && getGs().sim.getSimulation(unit, SimInfo.SimType.GROUND).lose) {
-                status = Status.RETREAT;
+            if (!meleeOnly && getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND).lose) {
+                if (Util.isInOurBases(unitInfo)) {
+                    status = Status.KITE;
+                } else status = Status.RETREAT;
                 return;
             }
             if (status == Status.PATROL && actualFrame - lastPatrolFrame > 5) {
@@ -160,27 +167,45 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 return;
             }
             int cd = unit.getGroundWeapon().cooldown();
-            Unit closestAttacker = Util.getClosestUnit(unit, mySim.enemies);
-            if (closestAttacker != null && (cd != 0 || closestAttacker.getDistance(unit) < unit.getGroundWeaponMaxRange() * 0.6)) {
+            UnitInfo closestAttacker = Util.getClosestUnit(unitInfo, mySim.enemies);
+            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < unit.getGroundWeaponMaxRange() * 0.6)) {
                 status = Status.KITE;
                 return;
             }
             if (status == Status.COMBAT || status == Status.ATTACK) {
-                if (attackUnit != null) {
+                /*if (attackUnit != null) {
                     int weaponRange = attackUnit instanceof GroundAttacker ? ((GroundAttacker) attackUnit).getGroundWeaponMaxRange() : 0;
                     if (weaponRange > type.groundWeapon().maxRange()) return;
-                }
+                }*/
                 if (cd > 0) {
-                    attackUnit = null;
-                    attackPos = null;
-                    status = Status.KITE;
+                    if (attackUnit != null) {
+                        Position predictedPosition = UtilMicro.predictUnitPosition(attackUnit, 2);
+                        if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
+                            double distPredicted = unit.getDistance(predictedPosition);
+                            double distCurrent = unitInfo.getDistance(attackUnit);
+                            if (distPredicted > distCurrent) {
+                                status = Status.COMBAT;
+                                return;
+                            } else {
+                                attackUnit = null;
+                                attackPos = null;
+                                status = Status.KITE;
+                                return;
+                            }
+                        }
+                    }
+                    if (mySim.enemies.isEmpty()) {
+                        status = Status.ATTACK;
+                        return;
+                    }
+                    status = Status.COMBAT;
                     return;
                 }
             }
             if (status == Status.KITE) {
-                Unit closest = getUnitToAttack(unit, mySim.enemies);
+                UnitInfo closest = getUnitToAttack(mySim.enemies);
                 if (closest != null) {
-                    double dist = unit.getDistance(closest);
+                    double dist = unitInfo.getDistance(closest);
                     double speed = type.topSpeed();
                     double timeToEnter = 0.0;
                     if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
@@ -200,10 +225,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private boolean checkOnlyMelees() {
-        for (Unit e : mySim.enemies) {
-            int weaponRange = e instanceof GroundAttacker ? ((GroundAttacker) e).getGroundWeaponMaxRange() : 0;
-            WeaponType weapon = Util.getWeapon(e, unit);
-            if ((weaponRange > 32 || e instanceof Bunker) && e.getDistance(unit) < ((PlayerUnit) e).getPlayer().getUnitStatCalculator().weaponMaxRange(weapon))
+        for (UnitInfo e : mySim.enemies) {
+            int weaponRange = (int) e.groundRange;
+            if ((weaponRange > 32 || e.unit instanceof Bunker) && e.unit.getDistance(unit) < weaponRange)
                 return false;
         }
         return true;
@@ -211,8 +235,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         //Position kite = UtilMicro.kiteAway(unit, closeEnemies);
-        Optional<Unit> closestUnit = mySim.enemies.stream().min(Unit::getDistance);
-        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.getPosition())).orElse(null);
+        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> u.unit.getDistance(unit)));
+        Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.position)).orElse(null);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
             kite = UtilMicro.kiteAway(unit, mySim.enemies);
             if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {

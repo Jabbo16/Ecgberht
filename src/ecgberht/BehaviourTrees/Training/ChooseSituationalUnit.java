@@ -19,8 +19,8 @@ public class ChooseSituationalUnit extends Action {
         try {
             // Testing dropships islands
             boolean dropship = true;
-            if (!this.handler.islandBases.isEmpty()) {
-                for (Unit u : this.handler.getGame().getUnits(this.handler.getPlayer())) {
+            if (!gameState.islandBases.isEmpty()) {
+                for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
                     if (!u.exists()) continue;
                     if (u instanceof Dropship) {
                         dropship = false;
@@ -29,18 +29,18 @@ public class ChooseSituationalUnit extends Action {
                 }
             } else dropship = false;
             boolean tower = false;
-            if (dropship && !this.handler.strat.name.equals("2PortWraith")) {
-                for (ResearchingFacility u : this.handler.UBs) {
+            if (dropship && !gameState.getStrat().name.equals("2PortWraith")) {
+                for (ResearchingFacility u : gameState.UBs) {
                     if (u instanceof ControlTower) {
                         tower = true;
                         break;
                     }
                 }
                 if (!tower) return State.FAILURE;
-                for (Starport s : this.handler.Ps) {
+                for (Starport s : gameState.Ps) {
                     if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
-                        this.handler.chosenUnit = UnitType.Terran_Dropship;
-                        this.handler.chosenBuilding = s;
+                        gameState.chosenUnit = UnitType.Terran_Dropship;
+                        gameState.chosenBuilding = s;
                         return State.SUCCESS;
                     }
                 }
@@ -48,51 +48,51 @@ public class ChooseSituationalUnit extends Action {
             // Testing dropships offensive drops
             /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
 
-            for (ResearchingFacility u : ((GameState) this.handler).UBs) {
+            for (ResearchingFacility u : ((GameState) gameState).UBs) {
                 if (u instanceof ControlTower) {
                     tower = true;
                     break;
                 }
             }
             if (!tower) return State.FAILURE;
-            for (Starport s : ((GameState) this.handler).Ps) {
+            for (Starport s : ((GameState) gameState).Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
-                    ((GameState) this.handler).chosenUnit = UnitType.Terran_Dropship;
-                    ((GameState) this.handler).chosenBuilding = s;
+                    ((GameState) gameState).chosenUnit = UnitType.Terran_Dropship;
+                    ((GameState) gameState).chosenBuilding = s;
                     return State.SUCCESS;
                 }
             }*/
 
             // Testing vessels
-            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || this.handler.workerMining.isEmpty())
+            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || gameState.workerMining.isEmpty())
                 return State.FAILURE;
-            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !this.handler.needToAttack())
+            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !gameState.needToAttack())
                 return State.FAILURE;
-            String strat = this.handler.strat.name;
-            if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.getNumberCCs() + (int) this.handler.workerTask.values().stream().filter(u -> u instanceof CommandCenter).count() < 3)
+            String strat = gameState.getStrat().name;
+            if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.getNumberCCs() + (int) gameState.workerTask.values().stream().filter(u -> u instanceof CommandCenter).count() < 3)
                 return State.FAILURE;
             tower = false;
             boolean science = false;
-            for (ResearchingFacility u : this.handler.UBs) {
+            for (ResearchingFacility u : gameState.UBs) {
                 if (u instanceof ControlTower) tower = true;
                 else if (u instanceof ScienceFacility) science = true;
                 if (science && tower) break;
             }
             if (!tower || !science) return State.FAILURE;
-            for (Starport s : this.handler.Ps) {
+            for (Starport s : gameState.Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
-                    if (this.handler.getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
-                            && this.handler.getCash().first >= UnitType.Terran_Science_Vessel.mineralPrice() + 50) {
-                        for (Barracks b : this.handler.MBs) {
+                    if (gameState.getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
+                            && gameState.getCash().first >= UnitType.Terran_Science_Vessel.mineralPrice() + 50) {
+                        for (Barracks b : gameState.MBs) {
                             if (!b.isTraining()) {
-                                this.handler.chosenUnit = UnitType.Terran_Marine;
-                                this.handler.chosenBuilding = b;
+                                gameState.chosenUnit = UnitType.Terran_Marine;
+                                gameState.chosenBuilding = b;
                                 return State.SUCCESS;
                             }
                         }
                     }
-                    this.handler.chosenUnit = UnitType.Terran_Science_Vessel;
-                    this.handler.chosenBuilding = s;
+                    gameState.chosenUnit = UnitType.Terran_Science_Vessel;
+                    gameState.chosenBuilding = s;
                     return State.SUCCESS;
                 }
             }

@@ -16,12 +16,12 @@ public class ChooseArmorMechUp extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
-            for (ResearchingFacility u : this.handler.UBs) {
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof Armory)) continue;
-                if (u.canUpgrade(UpgradeType.Terran_Vehicle_Plating) && !u.isResearching() && !u.isUpgrading() && this.handler.getPlayer().getUpgradeLevel(UpgradeType.Terran_Vehicle_Plating) < 3) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenUpgrade = UpgradeType.Terran_Vehicle_Plating;
+                if (u.canUpgrade(UpgradeType.Terran_Vehicle_Plating) && !u.isResearching() && !u.isUpgrading() && gameState.getPlayer().getUpgradeLevel(UpgradeType.Terran_Vehicle_Plating) < 3) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenUpgrade = UpgradeType.Terran_Vehicle_Plating;
                     return State.SUCCESS;
                 }
             }

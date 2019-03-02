@@ -16,12 +16,12 @@ public class ChooseSiegeMode extends Action {
     @Override
     public State execute() {
         try {
-            if (this.handler.UBs.isEmpty()) return State.FAILURE;
-            for (ResearchingFacility u : this.handler.UBs) {
+            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            for (ResearchingFacility u : gameState.UBs) {
                 if (!(u instanceof MachineShop)) continue;
-                if (!this.handler.getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
-                    this.handler.chosenUnitUpgrader = u;
-                    this.handler.chosenResearch = TechType.Tank_Siege_Mode;
+                if (!gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
+                    gameState.chosenUnitUpgrader = u;
+                    gameState.chosenResearch = TechType.Tank_Siege_Mode;
                     return State.SUCCESS;
                 }
             }
