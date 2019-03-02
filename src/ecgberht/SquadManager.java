@@ -41,7 +41,7 @@ public class SquadManager {
                     double bestDist = Double.MAX_VALUE;
                     for (UnitInfo u : bunkerSim.allies) {
                         if (!(u.unit instanceof Marine)) continue;
-                        double dist = u.unit.getDistance(bunker.getKey());
+                        double dist = u.getDistance(bunker.getKey());
                         if (dist < bestDist) {
                             closest = (Marine) u.unit;
                             bestDist = dist;

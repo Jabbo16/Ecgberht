@@ -105,6 +105,11 @@ public class UnitInfo implements Comparable<UnitInfo> {
         return this.lastPosition.getDistance(pos);
     }
 
+    public int getDistance(Unit u) {
+        if (this.visible) return this.unit.getDistance(u);
+        return this.lastPosition.getDistance(u.getPosition());
+    }
+
     public int getDistance(UnitInfo target) {
         if (this.visible)
             return target.visible ? this.unit.getDistance(target.unit) : this.getDistance(target.lastPosition);

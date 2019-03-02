@@ -133,11 +133,11 @@ public class Squad implements Comparable<Squad> {
                     WeaponType weapon = Util.getWeapon(u.unitType);
                     int range2 = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : weapon.maxRange();
                     if (u.currentOrder == Order.AttackMove) {
-                        if (u.unit.getDistance(move) <= range2 * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.position)) {
+                        if (u.getDistance(move) <= range2 * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.position)) {
                             UtilMicro.stop((MobileUnit) u.unit);
                             return;
                         }
-                    } else if (u.unit.getDistance(move) > range2) {
+                    } else if (u.getDistance(move) > range2) {
                         UtilMicro.attack((MobileUnit) u.unit, move);
                         return;
                     }
@@ -203,11 +203,11 @@ public class Squad implements Comparable<Squad> {
                 if (move != null) {
                     int range2 = UnitType.Terran_Marine.groundWeapon().maxRange();
                     if (u.currentOrder == Order.AttackMove || u.currentOrder == Order.Move || u.currentOrder == Order.PlayerGuard) {
-                        if (u.unit.getDistance(move) <= range2 * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.position)) {
+                        if (u.getDistance(move) <= range2 * ((double) (new Random().nextInt((10 + 1) - 4) + 4)) / 10.0 && Util.shouldIStop(u.position)) {
                             UtilMicro.stop((MobileUnit) u.unit);
                             return;
                         }
-                    } else if (u.unit.getDistance(move) > range2) {
+                    } else if (u.getDistance(move) > range2) {
                         UtilMicro.attack((MobileUnit) u.unit, move);
                         return;
                     }
@@ -358,19 +358,19 @@ public class Squad implements Comparable<Squad> {
         else if (center.getDistance(u.getPosition()) > 32 * 6) UtilMicro.heal(u, center);
     }
 
-    private boolean shouldStim(UnitInfo u) {
-        if (u.unitType == UnitType.Terran_Marine && ((Marine) u.unit).isStimmed() || u.health <= 25) return false;
-        if (u.unitType == UnitType.Terran_Firebat && ((Firebat) u.unit).isStimmed() || u.health <= 25) return false;
-        Unit target = u.target;
-        if (target != null) {
-            UnitInfo targetUI = getGs().unitStorage.getEnemyUnits().get(target);
-            double range = u.groundRange;
-            double distToTarget;
-            if (targetUI != null) distToTarget = u.getDistance(targetUI);
-            else distToTarget = u.unit.getDistance(target);
-            return distToTarget > (range - 32) && (target instanceof Attacker || target instanceof SpellCaster);
-        }
-        return false;
+    private boolean shouldStim(UnitInfo stimmer) {
+        if (stimmer.unitType == UnitType.Terran_Marine && ((Marine) stimmer.unit).isStimmed() || stimmer.health <= 25)
+            return false;
+        if (stimmer.unitType == UnitType.Terran_Firebat && ((Firebat) stimmer.unit).isStimmed() || stimmer.health <= 25)
+            return false;
+        Unit target = stimmer.target;
+        if (target == null) return false;
+        UnitInfo targetUI = getGs().unitStorage.getEnemyUnits().get(target);
+        double range = stimmer.groundRange;
+        double distToTarget;
+        if (targetUI != null) distToTarget = stimmer.getDistance(targetUI);
+        else distToTarget = stimmer.getDistance(target);
+        return distToTarget > (range - 32) && (target instanceof Attacker || target instanceof SpellCaster || Util.isStaticDefense(target.getType()));
     }
 
     private PlayerUnit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
@@ -429,7 +429,7 @@ public class Squad implements Comparable<Squad> {
         if (!moveCloser) {
             predictedPosition = UtilMicro.predictUnitPosition(target, 2);
             if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
-                double distPredicted = u.unit.getDistance(predictedPosition);
+                double distPredicted = u.getDistance(predictedPosition);
                 double distCurrent = u.getDistance(target);
                 if (distPredicted > distCurrent) {
                     kite = false;
