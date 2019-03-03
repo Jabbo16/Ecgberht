@@ -21,7 +21,7 @@ public class CheckScan extends Conditional {
     public State execute() {
         try {
             if (gameState.CSs.isEmpty()) return State.FAILURE;
-            if (gameState.frameCount - gameState.startCount > 40 + gameState.bw.getLatency()) {
+            if (gameState.frameCount - gameState.startCount > 40) {
                 for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
                     if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.isAttacker()) {
                         if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(u -> u.unitType.canAttack())) continue;
