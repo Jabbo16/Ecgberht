@@ -1137,6 +1137,7 @@ public class GameState {
     void vespeneManager() {
         int workersAtGas = workerGas.keySet().size();
         int refineries = refineriesAssigned.size();
+        if (refineries == 0) return;
         if (getCash().second >= 200) {
             int workersNeeded;
             if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
