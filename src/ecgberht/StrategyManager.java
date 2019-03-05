@@ -123,8 +123,8 @@ public class StrategyManager {
                     addStrat.accept(bFE);
                     addStrat.accept(fastCC);
                     addStrat.accept(bMGFE);
-                    addStrat.accept(bM);
                     addStrat.accept(bbs);
+                    addStrat.accept(bM);
                     addStrat.accept(FM);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
@@ -134,25 +134,25 @@ public class StrategyManager {
                     addStrat.accept(FM);
                     addStrat.accept(fastCC);
                     addStrat.accept(pER);
+                    addStrat.accept(bMGFE);
+                    addStrat.accept(tPW);
                     addStrat.accept(bM);
                     addStrat.accept(mGFE);
                     addStrat.accept(bbs);
                     addStrat.accept(bFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(bMGFE);
                     addStrat.accept(bGFE);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
                     break;
 
                 case Protoss:
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(jOR);
-                    addStrat.accept(fastCC);
                     addStrat.accept(FM);
+                    addStrat.accept(jOR);
                     addStrat.accept(pER);
+                    addStrat.accept(fastCC);
                     addStrat.accept(bM);
                     addStrat.accept(mGFE);
+                    addStrat.accept(bMGFE);
                     addStrat.accept(b);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMFE);
@@ -161,10 +161,10 @@ public class StrategyManager {
 
                 case Unknown:
                     addStrat.accept(b);
+                    addStrat.accept(FM);
                     addStrat.accept(bM);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMGFE);
-                    addStrat.accept(FM);
                     addStrat.accept(bbs);
                     addStrat.accept(mGFE);
                     addStrat.accept(jOR);
@@ -173,7 +173,7 @@ public class StrategyManager {
                     break;
             }
             if (!forcedStrat.equals("")) {
-                if (forcedStrat.equals("Random")) {
+                if (forcedStrat.toLowerCase().equals("random")) {
                     int index = new Random().nextInt(nameStrat.entrySet().size());
                     Iterator<Map.Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
                     for (int i = 0; i < index; i++) {
