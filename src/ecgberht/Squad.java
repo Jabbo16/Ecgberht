@@ -409,7 +409,7 @@ public class Squad implements Comparable<Squad> {
             UtilMicro.move((MobileUnit) u.unit, bunker.get().lastPosition);
         }
         double speed = u.speed;
-        if (getGs().frameCount - u.unit.getLastCommandFrame() <= 15) return;
+        if (getGs().frameCount - u.unit.getLastCommandFrame() <= 10) return;
         WeaponType w = Util.getWeapon(u, target);
         double range = u.player.getUnitStatCalculator().weaponMaxRange(w);
 
@@ -460,9 +460,7 @@ public class Squad implements Comparable<Squad> {
         int frameCount = getGs().frameCount;
         for (UnitInfo u : members) {
             PlayerUnit pU = u.unit;
-            if (u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) {
-                continue;
-            }
+            if (u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) continue;
             if (u.unitType == UnitType.Terran_Siege_Tank_Tank_Mode && pU.getOrder() == Order.Sieging) continue;
             Position lastTarget = ((MobileUnit) u.unit).getTargetPosition() == null ? pU.getOrderTargetPosition() :
                     ((MobileUnit) u.unit).getTargetPosition();

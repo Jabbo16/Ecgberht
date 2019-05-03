@@ -64,7 +64,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                             UtilMicro.move(unit, kitePos);
                             return false;
                         }
-                    } else if (harassed != null && myWeapon.maxRange() >= unitInfo.getDistance(harassed)) {
+                    } else if (harassed != null && unitInfo.getDistance(harassed) <= myWeapon.maxRange()) {
                         UtilMicro.attack(unitInfo, harassed);
                     } else UtilMicro.attack(unitInfo, closestThreat);
                     return false;
