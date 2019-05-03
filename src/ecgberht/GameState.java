@@ -137,6 +137,7 @@ public class GameState {
     public Building proxyBuilding = null;
     public BW bw;
     public Worker naughtySCV = null;
+    public int maxVessels = 0;
     InteractionHandler ih;
     public BWEM bwem;
     protected Player self;

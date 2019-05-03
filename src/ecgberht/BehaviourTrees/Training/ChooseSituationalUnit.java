@@ -1,9 +1,11 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
+import ecgberht.Strategy;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
+import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
@@ -64,7 +66,7 @@ public class ChooseSituationalUnit extends Action {
             }*/
 
             // Testing vessels
-            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 2 || gameState.workerMining.isEmpty())
+            if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > gameState.maxVessels || gameState.workerMining.isEmpty())
                 return State.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !gameState.needToAttack())
                 return State.FAILURE;
@@ -81,7 +83,7 @@ public class ChooseSituationalUnit extends Action {
             if (!tower || !science) return State.FAILURE;
             for (Starport s : gameState.Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
-                    if (gameState.getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
+                    if (strat.contains("Bio") && gameState.getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
                             && gameState.getCash().first >= UnitType.Terran_Science_Vessel.mineralPrice() + 50) {
                         for (Barracks b : gameState.MBs) {
                             if (!b.isTraining()) {

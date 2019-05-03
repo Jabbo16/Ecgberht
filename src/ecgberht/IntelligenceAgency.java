@@ -359,41 +359,73 @@ public class IntelligenceAgency {
         updateMaxAmountTypes();
     }
 
-    private static void updateMaxAmountTypes() {
-        if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) {
-            int goliaths = 0;
-            Integer amount;
-            switch (getGs().enemyRace) {
-                case Zerg:
-                    // Mutas
-                    boolean spire = mainEnemyHasType(UnitType.Zerg_Spire, UnitType.Zerg_Greater_Spire);
-                    if (spire) goliaths += 3;
-                    amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
-                    goliaths += (amount != null ? (Math.round(amount / 2.0)) : 0);
-                    break;
-                case Terran:
-                    // Wraiths
-                    amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
-                    goliaths += amount != null ? Math.ceil(amount.doubleValue() / 2.0) : 0;
+    private static void updateGoliaths(){
+        int goliaths = 0;
+        Integer amount;
+        switch (getGs().enemyRace) {
+            case Zerg:
+                // Mutas
+                boolean spire = mainEnemyHasType(UnitType.Zerg_Spire, UnitType.Zerg_Greater_Spire);
+                if (spire) goliaths += 3;
+                amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
+                goliaths += (amount != null ? (Math.round(amount / 2.0)) : 0);
+                break;
+            case Terran:
+                // Wraiths
+                amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Wraith);
+                goliaths += amount != null ? Math.ceil(amount.doubleValue() / 2.0) : 0;
 
-                    // BattleCruisers
-                    amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
-                    goliaths += amount != null ? (amount * 3) : 0;
-                    break;
-                case Protoss:
-                    // Scouts!!
-                    amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Scout);
-                    goliaths += amount != null ? amount : 0;
+                // BattleCruisers
+                amount = mainEnemyUnitTypeAmount.get(UnitType.Terran_Battlecruiser);
+                goliaths += amount != null ? (amount * 3) : 0;
+                break;
+            case Protoss:
+                // Scouts!!
+                amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Scout);
+                goliaths += amount != null ? amount : 0;
 
-                    // Carriers
-                    Integer stargateAmount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Stargate);
-                    if (stargateAmount != null && stargateAmount > 0) goliaths += 3;
-                    amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
-                    goliaths += amount != null ? (amount * 3) : 0;
-                    break;
-            }
-            getGs().maxGoliaths = Math.min(15, goliaths);
+                // Carriers
+                Integer stargateAmount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Stargate);
+                if (stargateAmount != null && stargateAmount > 0) goliaths += 3;
+                amount = mainEnemyUnitTypeAmount.get(UnitType.Protoss_Carrier);
+                goliaths += amount != null ? (amount * 3) : 0;
+                break;
         }
+        getGs().maxGoliaths = Math.min(15, goliaths);
+    }
+
+    private static void updateVessels(){
+        Strategy strat = getGs().getStrat();
+        String stratName = strat.name.toLowerCase();
+        if (getGs().enemyRace == Race.Zerg){
+            if (stratName.contains("bio")){
+                int mm = (int) getGs().myArmy.stream().filter(u -> u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Medic).count();
+                if(stratName.contains("full") || stratName.contains("greedy")){
+                    getGs().maxVessels =  Math.max(3, mm % 12);
+                    return;
+                }
+                getGs().maxVessels = Math.max(3, mm % 18);
+                return;
+            }
+        }
+        getGs().maxVessels =  2;
+
+    }
+
+    private static boolean canTrainVessels(){
+        boolean tower = false;
+        boolean science = false;
+        for (ResearchingFacility u : getGs().UBs) {
+            if (u instanceof ControlTower) tower = true;
+            else if (u instanceof ScienceFacility) science = true;
+            if (science && tower) break;
+        }
+        return science && tower;
+    }
+
+    private static void updateMaxAmountTypes() {
+        if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) updateGoliaths();
+        if (canTrainVessels()) updateVessels();
     }
 
     /**
