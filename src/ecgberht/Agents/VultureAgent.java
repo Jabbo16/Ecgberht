@@ -139,8 +139,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 distB = distA;
             }
         }
-        if (chosen != null) return chosen;
-        return null;
+        return chosen;
     }
 
     private void retreat() {
@@ -157,9 +156,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         } else {
             boolean meleeOnly = checkOnlyMelees();
             if (!meleeOnly && getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND).lose) {
-                if (Util.isInOurBases(unitInfo)) {
-                    status = Status.KITE;
-                } else status = Status.RETREAT;
+                status = Util.isInOurBases(unitInfo) ? Status.KITE : Status.RETREAT;
                 return;
             }
             if (status == Status.PATROL && actualFrame - lastPatrolFrame > 5) {
@@ -167,8 +164,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 return;
             }
             int cd = unit.getGroundWeapon().cooldown();
-            UnitInfo closestAttacker = Util.getClosestUnit(unitInfo, mySim.enemies);
-            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < unit.getGroundWeaponMaxRange() * 0.6)) {
+            UnitInfo closestAttacker = Util.getClosestUnit(unitInfo, mySim.enemies, true);
+            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < unitInfo.groundRange * 0.6)) {
                 status = Status.KITE;
                 return;
             }
@@ -269,7 +266,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(unit);
+        return Objects.hash(unit.getId());
     }
 
     @Override

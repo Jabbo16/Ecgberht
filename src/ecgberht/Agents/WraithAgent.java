@@ -116,8 +116,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 maxScore = score;
             }
         }
-        if (chosen != null) return chosen;
-        return null;
+        return chosen;
     }
 
     @Override
@@ -130,7 +129,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(unit);
+        return Objects.hash(unit.getId());
     }
 
     @Override
