@@ -409,6 +409,12 @@ public class IntelligenceAgency {
         return 2;
     }
 
+    private static int updateFirebats(){
+        return (int) Math.max(3, Math.exp((mainEnemyUnitTypeAmount.get(UnitType.Zerg_Zergling) - 3) / 15));
+    }
+
+
+
     private static boolean canTrainVessels(){
         boolean tower = false;
         boolean science = false;
@@ -423,6 +429,7 @@ public class IntelligenceAgency {
     private static void updateMaxAmountTypes() {
         if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) getGs().maxGoliaths = updateGoliaths();
         if (canTrainVessels()) getGs().maxVessels = updateVessels();
+        if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Firebat)) getGs().maxBats = updateFirebats();
     }
 
     /**

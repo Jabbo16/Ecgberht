@@ -82,7 +82,7 @@ public class StrategyManager {
         if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
-
+    // TODO delete this (useless)?
     void updateStrat() {
         if (strat.trainUnits.contains(UnitType.Terran_Firebat) && getGs().enemyRace == Race.Zerg) getGs().maxBats = 3;
         else getGs().maxBats = 0;
