@@ -359,7 +359,7 @@ public class IntelligenceAgency {
         updateMaxAmountTypes();
     }
 
-    private static void updateGoliaths(){
+    private static int updateGoliaths(){
         int goliaths = 0;
         Integer amount;
         switch (getGs().enemyRace) {
@@ -391,25 +391,22 @@ public class IntelligenceAgency {
                 goliaths += amount != null ? (amount * 3) : 0;
                 break;
         }
-        getGs().maxGoliaths = Math.min(15, goliaths);
+        return Math.min(20, goliaths);
     }
 
-    private static void updateVessels(){
+    private static int updateVessels(){
         Strategy strat = getGs().getStrat();
         String stratName = strat.name.toLowerCase();
+        if (getGs().getArmySize() <= 12) return 0;
         if (getGs().enemyRace == Race.Zerg){
             if (stratName.contains("bio")){
                 int mm = (int) getGs().myArmy.stream().filter(u -> u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Medic).count();
-                if(stratName.contains("full") || stratName.contains("greedy")){
-                    getGs().maxVessels =  Math.max(3, mm % 12);
-                    return;
-                }
-                getGs().maxVessels = Math.max(3, mm % 18);
-                return;
+                if(stratName.contains("full") || stratName.contains("greedy")) return Math.max(3, mm % 12);
+                return Math.max(3, mm % 18);
             }
         }
-        getGs().maxVessels =  2;
-
+        if (getGs().enemyRace == Race.Protoss && enemyHasType(UnitType.Protoss_Arbiter)) return 4;
+        return 2;
     }
 
     private static boolean canTrainVessels(){
@@ -424,8 +421,8 @@ public class IntelligenceAgency {
     }
 
     private static void updateMaxAmountTypes() {
-        if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) updateGoliaths();
-        if (canTrainVessels()) updateVessels();
+        if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) getGs().maxGoliaths = updateGoliaths();
+        if (canTrainVessels()) getGs().maxVessels = updateVessels();
     }
 
     /**
