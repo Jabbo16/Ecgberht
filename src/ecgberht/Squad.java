@@ -245,7 +245,7 @@ public class Squad implements Comparable<Squad> {
                     if (e.flying || e.unit instanceof Worker || e.unit instanceof Medic || (e.unitType.isBuilding() && !Util.isStaticDefense(e)))
                         continue;
                     int distance = u.getDistance(e);
-                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() && (e.health + e.shields >= 60 || threats > 2)) {
+                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 && (e.health + e.shields >= 60 || threats > 2)) {
                         found = true;
                     }
                     if (!close && distance < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange())
@@ -259,13 +259,13 @@ public class Squad implements Comparable<Squad> {
                     }
                 }
                 if (status == Status.DEFENSE && st.isSieged() && getGs().defendPosition != null) {
-                    double range = u.groundRange;
+                    double range = u.groundRange - 8;
                     if (u.getDistance(getGs().defendPosition) > range) st.unsiege();
                     return;
                 }
                 Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
                 if (st.isSieged()) {
-                    tankTargets.removeIf(e -> u.getDistance(e) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()));
+                    tankTargets.removeIf(e -> u.getDistance(e) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()));
                     if (tankTargets.isEmpty() && Math.random() * 10 <= 3) {
                         st.unsiege();
                         return;

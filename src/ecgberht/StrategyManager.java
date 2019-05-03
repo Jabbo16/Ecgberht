@@ -39,8 +39,16 @@ public class StrategyManager {
     void choose14CCTransition() {
         double C = 0.75;
         int totalGamesPlayed = getGs().learningManager.getEnemyInfo().wins + getGs().learningManager.getEnemyInfo().losses;
-        List<String> validTransitions = new ArrayList<>(Arrays.asList(b.name, bMFE.name, FM.name));
-        if (getGs().enemyRace == Race.Zerg) validTransitions.add(tPW.name);
+        List<String> validTransitions = new ArrayList<>();
+        switch (getGs().enemyRace) {
+            case Zerg:
+                validTransitions.addAll(Arrays.asList(bGFE.name, bMGFE.name, tPW.name));
+                break;
+            case Terran:
+            case Protoss:
+                validTransitions.addAll(Arrays.asList(FM.name, bMGFE.name, bGFE.name));
+                break;
+        }
         String bestUCBStrategy = null;
         double bestUCBStrategyVal = Double.MIN_VALUE;
         for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
@@ -117,8 +125,8 @@ public class StrategyManager {
 
             switch (getGs().enemyRace) {
                 case Zerg:
-                    addStrat.accept(tPW);
                     addStrat.accept(bGFE);
+                    addStrat.accept(tPW);
                     addStrat.accept(pER);
                     addStrat.accept(bFE);
                     addStrat.accept(fastCC);
@@ -128,6 +136,8 @@ public class StrategyManager {
                     addStrat.accept(FM);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Terran:
@@ -143,6 +153,8 @@ public class StrategyManager {
                     addStrat.accept(bGFE);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Protoss:
@@ -150,13 +162,15 @@ public class StrategyManager {
                     addStrat.accept(jOR);
                     addStrat.accept(pER);
                     addStrat.accept(fastCC);
-                    addStrat.accept(bM);
                     addStrat.accept(mGFE);
+                    addStrat.accept(bM);
                     addStrat.accept(bMGFE);
                     addStrat.accept(b);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMFE);
                     addStrat.accept(bFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Unknown:

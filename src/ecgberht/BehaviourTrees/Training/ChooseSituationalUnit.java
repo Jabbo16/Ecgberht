@@ -1,11 +1,9 @@
 package ecgberht.BehaviourTrees.Training;
 
 import ecgberht.GameState;
-import ecgberht.Strategy;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
-import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 

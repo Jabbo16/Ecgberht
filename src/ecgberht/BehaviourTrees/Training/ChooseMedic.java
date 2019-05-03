@@ -29,7 +29,7 @@ public class ChooseMedic extends Action {
                         if (!gameState.DBs.isEmpty()) {
                             marine_count = gameState.DBs.values().stream().mapToInt(Set::size).sum();
                         }
-                        if (!gameState.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) + Util.countUnitTypeSelf(UnitType.Terran_Firebat) - marine_count) {
+                        if (!gameState.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
                             for (Barracks b : gameState.MBs) {
                                 if (!b.isTraining()) {
                                     gameState.chosenUnit = UnitType.Terran_Medic;

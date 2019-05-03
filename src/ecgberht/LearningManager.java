@@ -62,7 +62,7 @@ public class LearningManager {
 
     private void writeOpponentInfo(String name, boolean enemyIsRandom) {
         if (enemyIsRandom && enemyInfo.naughty) enemyInfo.naughty = false;
-        String path = dir + name + "_" + enemyInfo.race +  ".json";
+        String path = dir + name + "_" + enemyInfo.race + ".json";
         Util.getIH().sendText("Writing result to: " + path);
         writeJSON(enemyInfo, path);
     }
@@ -76,18 +76,18 @@ public class LearningManager {
     private void readOpponentInfo(String opponentName) {
         Gson enemyInfoJSON = new Gson();
         String filename = opponentName + "_" + enemyInfo.race + ".json";
-        String path = "bwapi-data/read/" + filename ;
+        String path = "bwapi-data/read/" + filename;
         try {
             if (Files.exists(Paths.get(path))) {
                 enemyInfo = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
                 return;
             }
-            path = "bwapi-data/write/" + filename ;
+            path = "bwapi-data/write/" + filename;
             if (Files.exists(Paths.get(path))) {
                 enemyInfo = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
                 return;
             }
-            path = "bwapi-data/AI/" + filename ;
+            path = "bwapi-data/AI/" + filename;
             if (Files.exists(Paths.get(path))) {
                 enemyInfo = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
             }

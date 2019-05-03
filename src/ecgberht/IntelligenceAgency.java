@@ -52,6 +52,7 @@ public class IntelligenceAgency {
         startStrat = null;
         exploredMinerals = false;
         mainEnemyUnitTypeAmount = new HashMap<>();
+        cloakedThreats = false;
     }
 
     public static EnemyStrats getEnemyStrat() {
@@ -113,6 +114,11 @@ public class IntelligenceAgency {
                 System.out.println(entry.getKey() + ": " + type);
             }
         }
+    }
+
+    public static int getNumberEnemyType(UnitType type) {
+        Integer number = mainEnemyUnitTypeAmount.get(type);
+        return number == null ? 0 : number;
     }
 
     static void onShow(Unit unit, UnitType type) {
@@ -359,7 +365,7 @@ public class IntelligenceAgency {
         updateMaxAmountTypes();
     }
 
-    private static int updateGoliaths(){
+    private static int updateGoliaths() {
         int goliaths = 0;
         Integer amount;
         switch (getGs().enemyRace) {
@@ -394,14 +400,14 @@ public class IntelligenceAgency {
         return Math.min(20, goliaths);
     }
 
-    private static int updateVessels(){
+    private static int updateVessels() {
         Strategy strat = getGs().getStrat();
         String stratName = strat.name.toLowerCase();
         if (getGs().getArmySize() <= 12) return 0;
-        if (getGs().enemyRace == Race.Zerg){
-            if (stratName.contains("bio")){
+        if (getGs().enemyRace == Race.Zerg) {
+            if (stratName.contains("bio")) {
                 int mm = (int) getGs().myArmy.stream().filter(u -> u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Medic).count();
-                if(stratName.contains("full") || stratName.contains("greedy")) return Math.max(3, mm % 12);
+                if (stratName.contains("full") || stratName.contains("greedy")) return Math.max(3, mm % 14);
                 return Math.max(3, mm % 18);
             }
         }
@@ -409,13 +415,12 @@ public class IntelligenceAgency {
         return 2;
     }
 
-    private static int updateFirebats(){
-        return (int) Math.max(3, Math.exp((mainEnemyUnitTypeAmount.get(UnitType.Zerg_Zergling) - 3) / 15));
+    private static int updateFirebats() {
+        return (int) Math.max(3, Math.exp(((double) getNumberEnemyType(UnitType.Zerg_Zergling) - 3) / 15.0));
     }
 
 
-
-    private static boolean canTrainVessels(){
+    private static boolean canTrainVessels() {
         boolean tower = false;
         boolean science = false;
         for (ResearchingFacility u : getGs().UBs) {
