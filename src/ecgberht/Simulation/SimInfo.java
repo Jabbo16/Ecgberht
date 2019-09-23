@@ -3,7 +3,7 @@ package ecgberht.Simulation;
 import ecgberht.Clustering.Cluster;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
-import org.bk.ass.Agent;
+import org.bk.ass.sim.Agent;
 
 import java.util.ArrayList;
 import java.util.Collection;

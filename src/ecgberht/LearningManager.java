@@ -190,7 +190,6 @@ public class LearningManager {
         }
 
         static class StrategyOpponentHistory {
-
             int losses = 0;
             int mapSize;
             int wins = 0;
