@@ -17,9 +17,8 @@ public class ChooseFireBat extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.enemyRace != Race.Zerg) return State.FAILURE;
-            if (gameState.UBs.isEmpty()) return State.FAILURE;
-            else if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
+            if (gameState.enemyRace != Race.Zerg || gameState.UBs.isEmpty()) return State.FAILURE;
+            if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
                 for (ResearchingFacility r : gameState.UBs) {
                     if (r instanceof Academy) {
                         int count = 0;

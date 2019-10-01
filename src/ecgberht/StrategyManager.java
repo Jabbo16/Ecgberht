@@ -39,8 +39,16 @@ public class StrategyManager {
     void choose14CCTransition() {
         double C = 0.75;
         int totalGamesPlayed = getGs().learningManager.getEnemyInfo().wins + getGs().learningManager.getEnemyInfo().losses;
-        List<String> validTransitions = new ArrayList<>(Arrays.asList(b.name, bMFE.name, FM.name));
-        if (getGs().enemyRace == Race.Zerg) validTransitions.add(tPW.name);
+        List<String> validTransitions = new ArrayList<>();
+        switch (getGs().enemyRace) {
+            case Zerg:
+                validTransitions.addAll(Arrays.asList(bGFE.name, bMGFE.name, tPW.name));
+                break;
+            case Terran:
+            case Protoss:
+                validTransitions.addAll(Arrays.asList(FM.name, bMGFE.name, bGFE.name));
+                break;
+        }
         String bestUCBStrategy = null;
         double bestUCBStrategyVal = Double.MIN_VALUE;
         for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
@@ -82,7 +90,7 @@ public class StrategyManager {
         if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
-
+    // TODO delete this (useless)?
     void updateStrat() {
         if (strat.trainUnits.contains(UnitType.Terran_Firebat) && getGs().enemyRace == Race.Zerg) getGs().maxBats = 3;
         else getGs().maxBats = 0;
@@ -117,54 +125,60 @@ public class StrategyManager {
 
             switch (getGs().enemyRace) {
                 case Zerg:
-                    addStrat.accept(tPW);
                     addStrat.accept(bGFE);
+                    addStrat.accept(tPW);
                     addStrat.accept(pER);
                     addStrat.accept(bFE);
                     addStrat.accept(fastCC);
                     addStrat.accept(bMGFE);
-                    addStrat.accept(bM);
                     addStrat.accept(bbs);
+                    addStrat.accept(bM);
                     addStrat.accept(FM);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Terran:
                     addStrat.accept(FM);
                     addStrat.accept(fastCC);
                     addStrat.accept(pER);
+                    addStrat.accept(bMGFE);
+                    addStrat.accept(tPW);
                     addStrat.accept(bM);
                     addStrat.accept(mGFE);
                     addStrat.accept(bbs);
                     addStrat.accept(bFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(bMGFE);
                     addStrat.accept(bGFE);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Protoss:
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(jOR);
-                    addStrat.accept(fastCC);
                     addStrat.accept(FM);
+                    addStrat.accept(jOR);
                     addStrat.accept(pER);
-                    addStrat.accept(bM);
+                    addStrat.accept(fastCC);
                     addStrat.accept(mGFE);
+                    addStrat.accept(bM);
+                    addStrat.accept(bMGFE);
                     addStrat.accept(b);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMFE);
                     addStrat.accept(bFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Unknown:
                     addStrat.accept(b);
+                    addStrat.accept(FM);
                     addStrat.accept(bM);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMGFE);
-                    addStrat.accept(FM);
                     addStrat.accept(bbs);
                     addStrat.accept(mGFE);
                     addStrat.accept(jOR);
@@ -173,7 +187,7 @@ public class StrategyManager {
                     break;
             }
             if (!forcedStrat.equals("")) {
-                if (forcedStrat.equals("Random")) {
+                if (forcedStrat.toLowerCase().equals("random")) {
                     int index = new Random().nextInt(nameStrat.entrySet().size());
                     Iterator<Map.Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
                     for (int i = 0; i < index; i++) {

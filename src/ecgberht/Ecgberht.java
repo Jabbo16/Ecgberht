@@ -364,7 +364,8 @@ public class Ecgberht implements BWEventListener {
                         gs.fortressSpecialBLs.put(b, gs.getMineralWalkPatchesFortress(b));
                     gs.BLs.add(b);
 
-                } //else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b); // Island expansions disabled for now
+                } else if (b.getArea().getAccessibleNeighbors().isEmpty())
+                    gs.islandBases.add(b); // Island expansions re-enabled
                 else gs.BLs.add(b);
             }
             gs.initBlockingMinerals();
@@ -412,7 +413,6 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         path = gs.silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
                     }
-
                 } else {
                     for (org.bk.ass.path.Position p : path.path) {
                         Position pos = new WalkPosition(p.x, p.y).toPosition();
@@ -702,26 +702,24 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                     }
+                } else if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
+                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat"))
+                    gs.agents.put(arg0, new VultureAgent(arg0));
+                else if (type == UnitType.Terran_Dropship) {
+                    DropShipAgent d = new DropShipAgent(arg0);
+                    gs.agents.put(arg0, d);
+                } else if (type == UnitType.Terran_Science_Vessel) {
+                    VesselAgent v = new VesselAgent(arg0);
+                    gs.agents.put(arg0, v);
+                } else if (type == UnitType.Terran_Wraith) {
+                    if (!gs.getStrat().name.equals("PlasmaWraithHell")) {
+                        String name = gs.pickShipName();
+                        gs.agents.put(arg0, new WraithAgent(arg0, name));
+                    }
                 } else {
-                    if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
-                    else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat"))
-                        gs.agents.put(arg0, new VultureAgent(arg0));
-                    else if (type == UnitType.Terran_Dropship) {
-                        DropShipAgent d = new DropShipAgent(arg0);
-                        gs.agents.put(arg0, d);
-                    } else if (type == UnitType.Terran_Science_Vessel) {
-                        VesselAgent v = new VesselAgent(arg0);
-                        gs.agents.put(arg0, v);
-                    } else if (type == UnitType.Terran_Wraith) {
-                        if (!gs.getStrat().name.equals("PlasmaWraithHell")) {
-                            String name = gs.pickShipName();
-                            gs.agents.put(arg0, new WraithAgent(arg0, name));
-                        }
-                    } else {
-                        gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                        if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
-                            ((MobileUnit) arg0).move(gs.silentCartographer.mapCenter.toPosition());
-                        }
+                    gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
+                    if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
+                        ((MobileUnit) arg0).move(gs.silentCartographer.mapCenter.toPosition());
                     }
                 }
             }
@@ -877,9 +875,7 @@ public class Ecgberht implements BWEventListener {
                         for (CommandCenter u : gs.CCs.values()) {
                             if (u.equals(arg0)) {
                                 gs.removeResources(arg0);
-                                if (u.getAddon() != null) {
-                                    gs.CSs.remove(u.getAddon());
-                                }
+                                if (u.getAddon() != null) gs.CSs.remove(u.getAddon());
                                 if (bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
                                     gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                                 }
@@ -938,13 +934,10 @@ public class Ecgberht implements BWEventListener {
                             }
                         }
                         gs.testMap = gs.map.clone();
-                    } else if (type == UnitType.Terran_Vulture) {
-                        gs.agents.remove(arg0);
-                    } else if (type == UnitType.Terran_Dropship) {
-                        gs.agents.remove(arg0);
-                    } else if (type == UnitType.Terran_Science_Vessel) {
-                        gs.agents.remove(arg0);
-                    } else if (type == UnitType.Terran_Wraith && !gs.getStrat().name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
+                    } else if (type == UnitType.Terran_Vulture) gs.agents.remove(arg0);
+                    else if (type == UnitType.Terran_Dropship) gs.agents.remove(arg0);
+                    else if (type == UnitType.Terran_Science_Vessel) gs.agents.remove(arg0);
+                    else if (type == UnitType.Terran_Wraith && !gs.getStrat().name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
                         String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
                         gs.shipNames.add(wraith);
                         gs.agents.remove(arg0);

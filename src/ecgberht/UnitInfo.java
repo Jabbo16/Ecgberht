@@ -88,6 +88,10 @@ public class UnitInfo implements Comparable<UnitInfo> {
             groundRange = player.getUnitStatCalculator().weaponMaxRange(unitType.groundWeapon());
         if (unit instanceof AirAttacker)
             airRange = player.getUnitStatCalculator().weaponMaxRange(unitType.airWeapon());
+        if (unit instanceof Bunker) {
+            airRange = 5 * 32;
+            groundRange = 5 * 32;
+        }
         health = visible ? unit.getHitPoints() : expectedHealth();
         shields = visible ? unit.getShields() : expectedShields();
         if (unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();

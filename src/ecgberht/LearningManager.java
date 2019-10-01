@@ -27,18 +27,19 @@ public class LearningManager {
 
     private void readOpponentHistory(String opponentName) {
         Gson enemyHistoryJSON = new Gson();
-        String path = "bwapi-data/read/" + opponentName + "-History.json";
+        String filename = opponentName + "_" + enemyInfo.race + "-History.json";
+        String path = "bwapi-data/read/" + filename;
         try {
             if (Files.exists(Paths.get(path))) {
                 enemyHistory = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
                 return;
             }
-            path = "bwapi-data/write/" + opponentName + "-History.json";
+            path = "bwapi-data/write/" + filename;
             if (Files.exists(Paths.get(path))) {
                 enemyHistory = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
                 return;
             }
-            path = "bwapi-data/AI/" + opponentName + "-History.json";
+            path = "bwapi-data/AI/" + filename;
             if (Files.exists(Paths.get(path)))
                 enemyHistory = enemyHistoryJSON.fromJson(new FileReader(path), EnemyHistory.class);
         } catch (Exception e) {
@@ -61,31 +62,32 @@ public class LearningManager {
 
     private void writeOpponentInfo(String name, boolean enemyIsRandom) {
         if (enemyIsRandom && enemyInfo.naughty) enemyInfo.naughty = false;
-        String path = dir + name + ".json";
+        String path = dir + name + "_" + enemyInfo.race + ".json";
         Util.getIH().sendText("Writing result to: " + path);
         writeJSON(enemyInfo, path);
     }
 
     private void writeOpponentHistory(String name) {
-        String path = dir + name + "-History.json";
+        String path = dir + name + "_" + enemyInfo.race + "-History.json";
         Util.getIH().sendText("Writing history to: " + path);
         writeJSON(enemyHistory, path);
     }
 
     private void readOpponentInfo(String opponentName) {
         Gson enemyInfoJSON = new Gson();
-        String path = "bwapi-data/read/" + opponentName + ".json";
+        String filename = opponentName + "_" + enemyInfo.race + ".json";
+        String path = "bwapi-data/read/" + filename;
         try {
             if (Files.exists(Paths.get(path))) {
                 enemyInfo = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
                 return;
             }
-            path = "bwapi-data/write/" + opponentName + ".json";
+            path = "bwapi-data/write/" + filename;
             if (Files.exists(Paths.get(path))) {
                 enemyInfo = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
                 return;
             }
-            path = "bwapi-data/AI/" + opponentName + ".json";
+            path = "bwapi-data/AI/" + filename;
             if (Files.exists(Paths.get(path))) {
                 enemyInfo = enemyInfoJSON.fromJson(new FileReader(path), EnemyInfo.class);
             }
@@ -100,7 +102,7 @@ public class LearningManager {
         return enemyInfo;
     }
 
-    public LinkedList<EnemyHistory.EnemyGame> getEnemyHistory() {
+    LinkedList<EnemyHistory.EnemyGame> getEnemyHistory() {
         return enemyHistory.history;
     }
 
@@ -134,9 +136,9 @@ public class LearningManager {
     }
 
     void onStart(String name, String raceToString) {
+        setRace(raceToString);
         readOpponentInfo(name);
         readOpponentHistory(name);
-        setRace(raceToString);
     }
 
     public static class EnemyHistory {
@@ -188,7 +190,6 @@ public class LearningManager {
         }
 
         static class StrategyOpponentHistory {
-
             int losses = 0;
             int mapSize;
             int wins = 0;

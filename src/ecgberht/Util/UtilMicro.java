@@ -3,6 +3,7 @@ package ecgberht.Util;
 import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Order;
+import org.openbw.bwapi4j.type.WeaponType;
 import org.openbw.bwapi4j.unit.*;
 
 import java.util.ArrayList;
@@ -34,12 +35,13 @@ public class UtilMicro {
             Unit targetUnit = attackerUnit.getTargetUnit();
             if (target.unit.equals(targetUnit)) return;
             if (target.visible) {
-                int range = Util.getWeapon(attacker, target).maxRange();
-                if (range >= attacker.getDistance(target)) {
+                WeaponType w = Util.getWeapon(attacker, target);
+                double range = attacker.player.getUnitStatCalculator().weaponMaxRange(w);
+                if (attacker.getDistance(target) <= range) {
                     attackerUnit.attack(target.unit);
                     return;
                 }
-                Position predicted = predictUnitPosition(target, 1);
+                Position predicted = predictUnitPosition(target, 3);
                 if (predicted != null) move((MobileUnit) attackerUnit, predicted);
             } else move((MobileUnit) attackerUnit, target.lastPosition);
         } catch (Exception e) {

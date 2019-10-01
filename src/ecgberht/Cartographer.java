@@ -1,7 +1,7 @@
 package ecgberht;
 
 import org.bk.ass.path.Jps;
-import org.bk.ass.path.Map;
+import org.bk.ass.path.PPMap;
 import org.bk.ass.path.Position;
 import org.bk.ass.path.Result;
 import org.openbw.bwapi4j.TilePosition;
@@ -45,13 +45,11 @@ public class Cartographer {
                 tileWalkableGrid[ii][jj] = getGs().getGame().getBWMap().isWalkable(ii * 4, jj * 4);
             }
         }
-        mapJPS = new Jps(Map.fromBooleanArray(walkableGrid));
-        mapJPSTile = new Jps(Map.fromBooleanArray(tileWalkableGrid));
+        mapJPS = new Jps(PPMap.fromBooleanArray(walkableGrid));
+        mapJPSTile = new Jps(PPMap.fromBooleanArray(tileWalkableGrid));
     }
 
     enum Resolution {
         TilePosition, WalkPosition
     }
-
-    ;
 }

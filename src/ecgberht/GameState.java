@@ -137,6 +137,7 @@ public class GameState {
     public Building proxyBuilding = null;
     public BW bw;
     public Worker naughtySCV = null;
+    public int maxVessels = 0;
     InteractionHandler ih;
     public BWEM bwem;
     protected Player self;
@@ -1135,35 +1136,41 @@ public class GameState {
     }
 
     void vespeneManager() {
-        int workersAtGas = workerGas.keySet().size();
-        int refineries = refineriesAssigned.size();
-        if (getCash().second >= 200) {
-            int workersNeeded;
-            if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
-                workersNeeded = refineries;
-                getStrat().workerGas = 1;
-            } else {
-                workersNeeded = 2 * refineries;
-                getStrat().workerGas = 2;
-            }
-            if (workersAtGas > workersNeeded) {
-                Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
-                while (iterGas.hasNext()) {
-                    Entry<Worker, GasMiningFacility> w = iterGas.next();
-                    if (w.getKey().getOrder() == Order.HarvestGas) continue;
-                    workerIdle.add(w.getKey());
-                    if (w.getKey().isCarryingGas()) {
-                        w.getKey().returnCargo();
-                        w.getKey().stop(true);
-                    } else w.getKey().stop(false);
-                    refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
-                    iterGas.remove();
-                    workersAtGas--;
-                    if (workersNeeded == workersAtGas) break;
+        try {
+            int workersAtGas = workerGas.keySet().size();
+            int refineries = refineriesAssigned.size();
+            if (refineries == 0) return;
+            if (getCash().second >= 200) {
+                int workersNeeded;
+                if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
+                    workersNeeded = refineries;
+                    getStrat().workerGas = 1;
+                } else {
+                    workersNeeded = 2 * refineries;
+                    getStrat().workerGas = 2;
                 }
-            }
-        } else if (getCash().second < 100 && getStrat().workerGas < 3 && workersAtGas / refineries == getStrat().workerGas)
-            getStrat().workerGas++;
+                if (workersAtGas > workersNeeded) {
+                    Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
+                    while (iterGas.hasNext()) {
+                        Entry<Worker, GasMiningFacility> w = iterGas.next();
+                        if (w.getKey().getOrder() == Order.HarvestGas) continue;
+                        workerIdle.add(w.getKey());
+                        if (w.getKey().isCarryingGas()) {
+                            w.getKey().returnCargo();
+                            w.getKey().stop(true);
+                        } else w.getKey().stop(false);
+                        refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
+                        iterGas.remove();
+                        workersAtGas--;
+                        if (workersNeeded == workersAtGas) break;
+                    }
+                }
+            } else if (getCash().second < 100 && getStrat().workerGas < 3 && workersAtGas / refineries == getStrat().workerGas)
+                getStrat().workerGas++;
+        } catch (Exception e) {
+            System.err.println("vespeneManager exception");
+            e.printStackTrace();
+        }
     }
 
     public boolean isGoingToExpand() {

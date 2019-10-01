@@ -237,6 +237,9 @@ public class DebugManager {
             mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText("I want to train: " + gameState.chosenUnit.toString(), ColorUtil.White));
             mapDrawer.drawTextScreen(320, 65, ColorUtil.formatText("I want to build: " + gameState.chosenToBuild.toString(), ColorUtil.White));
             mapDrawer.drawTextScreen(320, 80, ColorUtil.formatText("Max_Goliaths: " + gameState.maxGoliaths, ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 95, ColorUtil.formatText("Max_Vessels: " + gameState.maxVessels, ColorUtil.White));
+            if (gameState.enemyRace == Race.Zerg)
+                mapDrawer.drawTextScreen(320, 110, ColorUtil.formatText("Max_Firebats: " + gameState.maxBats, ColorUtil.White));
             if (gameState.ih.allies().size() + gameState.ih.enemies().size() == 1) {
                 mapDrawer.drawTextScreen(10, 5,
                         ColorUtil.formatText(gameState.ih.self().getName(), ColorUtil.getColor(gameState.ih.self().getColor())) +

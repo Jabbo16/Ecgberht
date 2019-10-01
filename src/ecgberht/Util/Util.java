@@ -281,11 +281,11 @@ public class Util {
         return 3;
     }
 
-    public static UnitInfo getClosestUnit(UnitInfo unit, Set<UnitInfo> enemies) {
+    public static UnitInfo getClosestUnit(UnitInfo unit, Set<UnitInfo> enemies, boolean ignoreAir) {
         UnitInfo chosen = null;
         double minDist = Double.MAX_VALUE;
         for (UnitInfo u : enemies) {
-            if (!u.unit.exists()) continue;
+            if (!u.unit.exists() || (ignoreAir && u.flying)) continue;
             double dist = unit.getDistance(u);
             if (chosen == null || dist < minDist) {
                 minDist = dist;
