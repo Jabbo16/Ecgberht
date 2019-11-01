@@ -1,18 +1,11 @@
 package ecgberht;
 
-import bwem.BWEM;
-import bwem.Base;
-import bwem.ChokePoint;
-import bwem.area.Area;
-import bwem.unit.Geyser;
-import bwem.unit.Mineral;
-import bwem.unit.Neutral;
-import bwem.unit.NeutralImpl;
+import bwem.*;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.Agents.VesselAgent;
 import ecgberht.Agents.WraithAgent;
-import ecgberht.Simulation.SimManager;
+import ecgberht.Simulation.SimulationTheory;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
@@ -33,6 +26,7 @@ public class GameState {
     public Base enemyMainBase = null;
     public Base enemyNaturalBase = null;
     public Base enemyStartBase = null;
+    public BaseManager baseManager = null;
     public boolean defense = false;
     public boolean enemyIsRandom = true;
     public boolean firstTerranCheese = false;
@@ -101,15 +95,14 @@ public class GameState {
     public Set<Unit> Ps = new TreeSet<>();
     public Set<UnitInfo> myArmy = new TreeSet<>();
     public Set<Unit> SBs = new TreeSet<>();
-    public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
-    public Set<Unit> enemyInBase = new TreeSet<>();
+    public Set<UnitInfo> enemyInBase = new TreeSet<>();
     public Set<Unit> workerIdle = new TreeSet<>();
-    public SimManager sim;
+    public SimulationTheory sim;
     public SquadManager sqManager = new SquadManager();
     public SpellsManager wizard = new SpellsManager();
     public SupplyMan supplyMan;
     public TechType chosenResearch = null;
-    public TilePosition checkScan = null;
+    public MutablePair<Unit, Position> checkScan = null;
     public TilePosition chosenPosition = null;
     public TilePosition initDefensePosition = null;
     public Unit chosenBuilding = null;
@@ -133,6 +126,7 @@ public class GameState {
     public Unit proxyBuilding = null;
     public Game bw;
     public Unit naughtySCV = null;
+    public int maxVessels = 0;
     public BWEM bwem;
     protected Player self;
     public StrategyManager scipio;
@@ -152,7 +146,7 @@ public class GameState {
         initPlayers();
         mapSize = bw.getStartLocations().size();
         supplyMan = new SupplyMan(self.getRace());
-        sim = new SimManager(bw);
+        sim = new SimulationTheory(bw);
         luckyDraw = Math.random();
     }
 
@@ -185,8 +179,8 @@ public class GameState {
             if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
         }
         for (Base b : BLs) {
-            if (b.isStartingLocation()) continue;
-            if (skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || bw.getStartLocations().contains(b.getLocation()) || skipWeirdBlocking(b))
+                continue;
             if (weirdBlocking(b)) blockedBLs.add(b);
             else {
                 for (ChokePoint p : b.getArea().getChokePoints()) {
@@ -217,7 +211,8 @@ public class GameState {
     void checkBasesWithBLockingMinerals() {
         if (blockingMinerals.isEmpty()) return;
         for (bwem.Base b : BLs) {
-            if (b.isStartingLocation() || skipWeirdBlocking(b)) continue;
+            if (b.isStartingLocation() || bw.getStartLocations().contains(b.getLocation()) || skipWeirdBlocking(b))
+                continue;
             for (ChokePoint c : b.getArea().getChokePoints()) {
                 for (Position m : blockingMinerals.keySet()) {
                     if (Util.broodWarDistance(m, c.getCenter().toPosition()) < 40) {
@@ -337,7 +332,7 @@ public class GameState {
     void initStartLocations() {
         Base startBot = Util.getClosestBaseLocation(self.getStartLocation().toPosition());
         for (bwem.Base b : bwem.getMap().getBases()) {
-            if (b.isStartingLocation() && !b.getLocation().equals(startBot.getLocation())) {
+            if ((b.isStartingLocation() || bw.getStartLocations().contains(b.getLocation())) && !b.getLocation().equals(startBot.getLocation())) {
                 SLs.add(b);
                 scoutSLs.add(b);
             }
@@ -416,7 +411,7 @@ public class GameState {
 
         List<Unit> removeTask = new ArrayList<>();
         for (Entry<Unit, Unit> w : workerTask.entrySet()) {
-            if (!w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
+            if (!w.getKey().exists() || !w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
                 removeTask.add(w.getKey());
         }
         for (Unit u : removeTask) {
@@ -802,32 +797,32 @@ public class GameState {
         }
     }
 
-    public Unit getUnitToAttack(Unit myUnit, Set<Unit> closeSim) {
+    public Unit getUnitToAttack(Unit myUnit, Set<UnitInfo> closeSim) {
         Unit chosen = null;
-        Set<Unit> workers = new TreeSet<>();
-        Set<Unit> combatUnits = new TreeSet<>();
+        Set<UnitInfo> workers = new TreeSet<>();
+        Set<UnitInfo> combatUnits = new TreeSet<>();
         Unit worker = null;
-        for (Unit u : closeSim) {
-            if (u.getType().isWorker()) workers.add(u);
+        for (UnitInfo u : closeSim) {
+            if (u.unitType.isWorker()) workers.add(u);
             else combatUnits.add(u);
         }
         if (combatUnits.isEmpty() && workers.isEmpty()) return null;
         if (!workers.isEmpty()) {
             double distB = Double.MAX_VALUE;
-            for (Unit u : workers) {
-                double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
+            for (UnitInfo u : workers) {
+                double distA = u.getDistance(myUnit);
                 if (worker == null || distA < distB) {
-                    worker = u;
+                    worker = u.unit;
                     distB = distA;
                 }
             }
         }
         if (!combatUnits.isEmpty()) {
             double distB = Double.MAX_VALUE;
-            for (Unit u : combatUnits) {
-                double distA = Util.broodWarDistance(myUnit.getPosition(), u.getPosition());
+            for (UnitInfo u : combatUnits) {
+                double distA = u.getDistance(myUnit);
                 if (chosen == null || distA < distB) {
-                    chosen = u;
+                    chosen = u.unit;
                     distB = distA;
                 }
             }
@@ -925,15 +920,33 @@ public class GameState {
     }
 
     void alwaysPools() {
-        if (enemyRace != Race.Zerg) return;
-        List<String> poolers = new ArrayList<>(Arrays.asList("neoedmundzerg", "peregrinebot", "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish", "jumpydoggobot", "upstarcraftai2016"));
-        LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-        if (poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
-            EI.naughty = true;
-            IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.EarlyPool);
-            return;
+        try {
+            if (enemyRace != Race.Zerg) return;
+            List<String> poolers = new ArrayList<>(Arrays.asList("newbiezerg", "neoedmundzerg", "peregrinebot",
+                    "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish",
+                    "jumpydoggobot", "upstarcraftai2016"));
+            LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
+            LinkedList<LearningManager.EnemyHistory.EnemyGame> history = (LinkedList<LearningManager.EnemyHistory.EnemyGame>) learningManager.getEnemyHistory().clone();
+            Collections.reverse(history);
+            int count = 0;
+            boolean reallyNaughty = false;
+            for (int ii = 0; ii < history.size() && ii < 4; ii++) {
+                if ("EarlyPool".equals(history.get(ii).opponentStrategy)) count++;
+                if (count > 2) {
+                    reallyNaughty = true;
+                    break;
+                }
+            }
+            if (reallyNaughty || poolers.contains(EI.opponent.toLowerCase().replace(" ", ""))) {
+                EI.naughty = true;
+                IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.EarlyPool);
+                return;
+            }
+            EI.naughty = false;
+        } catch (Exception e) {
+            System.err.println("alwaysPools Exception");
+            e.printStackTrace();
         }
-        EI.naughty = false;
     }
 
 
@@ -943,7 +956,7 @@ public class GameState {
 
     void workerTransfer() {
         int numWorkersToTransfer = (workerIdle.size() + workerMining.size()) / 2;
-        List<Unit> minerals = BLs.get(1).getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
+        List<Unit> minerals = BLs.get(1).getMinerals().stream().map(Neutral::getUnit).collect(Collectors.toList());
         boolean hardStuck = false;
         while (numWorkersToTransfer != 0 && !hardStuck) {
             Unit chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
@@ -1108,28 +1121,44 @@ public class GameState {
     }
 
     void vespeneManager() {
-        int workersAtGas = workerGas.keySet().size();
-        int refineries = refineriesAssigned.size();
-        if (getCash().second >= 200) {
-            int workersNeeded;
-            if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
-                workersNeeded = refineries;
-                getStrat().workerGas = 1;
-            } else workersNeeded = 2 * refineries;
-            if (workersAtGas > workersNeeded) {
-                Iterator<Entry<Unit, Unit>> iterGas = workerGas.entrySet().iterator();
-                while (iterGas.hasNext()) {
-                    Entry<Unit, Unit> w = iterGas.next();
-                    if (w.getKey().getOrder() == Order.HarvestGas) continue;
-                    workerIdle.add(w.getKey());
-                    w.getKey().returnCargo();
-                    w.getKey().stop(true);
-                    refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
-                    iterGas.remove();
-                    workersNeeded--;
-                    if (workersNeeded == 0) break;
+        try {
+            int workersAtGas = workerGas.keySet().size();
+            int refineries = refineriesAssigned.size();
+            if (refineries == 0) return;
+            if (getCash().second >= 200) {
+                int workersNeeded;
+                if (getStrat().techToResearch.contains(TechType.Stim_Packs) && !getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) {
+                    workersNeeded = refineries;
+                    getStrat().workerGas = 1;
+                } else {
+                    workersNeeded = 2 * refineries;
+                    getStrat().workerGas = 2;
                 }
-            }
-        } else if (getStrat().workerGas < 3 && workersAtGas == getStrat().workerGas) getStrat().workerGas++;
+                if (workersAtGas > workersNeeded) {
+                    Iterator<Entry<Unit, Unit>> iterGas = workerGas.entrySet().iterator();
+                    while (iterGas.hasNext()) {
+                        Entry<Unit, Unit> w = iterGas.next();
+                        if (w.getKey().getOrder() == Order.HarvestGas) continue;
+                        workerIdle.add(w.getKey());
+                        if (w.getKey().isCarryingGas()) {
+                            w.getKey().returnCargo();
+                            w.getKey().stop(true);
+                        } else w.getKey().stop(false);
+                        refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
+                        iterGas.remove();
+                        workersAtGas--;
+                        if (workersNeeded == workersAtGas) break;
+                    }
+                }
+            } else if (getCash().second < 100 && getStrat().workerGas < 3 && workersAtGas / refineries == getStrat().workerGas)
+                getStrat().workerGas++;
+        } catch (Exception e) {
+            System.err.println("vespeneManager exception");
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isGoingToExpand() {
+        return workerBuild.values().stream().anyMatch(u -> u.first == UnitType.Terran_Command_Center);
     }
 }

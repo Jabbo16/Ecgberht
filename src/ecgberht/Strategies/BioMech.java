@@ -16,7 +16,7 @@ public class BioMech extends Strategy {
     @Override
     public void initStrategy() {
         name = "BioMech";
-        armyForBay = 15;
+        armyForBay = 24;
         armyForTurret = 10;
         numBays = 1;
         raxPerCC = 2;

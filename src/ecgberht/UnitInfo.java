@@ -79,14 +79,17 @@ public class UnitInfo implements Comparable<UnitInfo> {
         lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : lastVisibleFrame;
         if (unitType.groundWeapon() != WeaponType.None) // TODO upgrades
             groundRange = player.weaponMaxRange(unitType.groundWeapon());
+        else if (unitType == UnitType.Terran_Bunker) groundRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon());
         if (unitType.airWeapon() != WeaponType.None) // TODO upgrades
             airRange = player.weaponMaxRange(unitType.airWeapon());
+        else if (unitType == UnitType.Terran_Bunker) groundRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon());
         health = visible ? unit.getHitPoints() : expectedHealth();
         shields = visible ? unit.getShields() : expectedShields();
         energy = unit.getEnergy();
         percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
         percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
         if (visible) burrowed = currentOrder == Order.Burrowing || unit.isBurrowed();
+
         if (visible) flying = unit.isFlying();
         speed = Util.getSpeed(this);
         target = unit.getTarget() != null ? unit.getTarget() : unit.getOrderTarget();
@@ -98,6 +101,11 @@ public class UnitInfo implements Comparable<UnitInfo> {
         return this.lastPosition.getDistance(pos);
     }
 
+    public double getDistance(Unit u) {
+        if (this.visible) return this.unit.getDistance(u);
+        return this.lastPosition.getDistance(u.getPosition());
+    }
+
     public int getDistance(UnitInfo target) {
         if (this.visible)
             return target.visible ? this.unit.getDistance(target.unit) : unit.getDistance(target.lastPosition);
@@ -106,14 +114,14 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
     public double getPredictedDistance(UnitInfo target) {
         Position nextPosition = UtilMicro.predictUnitPosition(target, 1);
-        if(nextPosition == null) return 0;
-        return this.unit.getDistance(nextPosition);
+        if (nextPosition == null) return this.getDistance(target);
+        return this.getDistance(nextPosition);
     }
 
     public double getPredictedDistance(UnitInfo target, int frames) {
         Position nextPosition = UtilMicro.predictUnitPosition(target, frames);
-        if(nextPosition == null) return 0;
-        return this.unit.getDistance(nextPosition);
+        if (nextPosition == null) return this.getDistance(target);
+        return this.getDistance(nextPosition);
     }
 
     @Override
@@ -148,11 +156,11 @@ public class UnitInfo implements Comparable<UnitInfo> {
       return isGroundAttacker() || isAirAttacker();
     }
 
-    public boolean isAirAttacker() { // TODO implement
-        return true;
+    public boolean isAirAttacker() {
+        return airRange > 0;
     }
 
     public boolean isGroundAttacker() { // TODO implement
-        return true;
+        return groundRange > 0;
     }
 }

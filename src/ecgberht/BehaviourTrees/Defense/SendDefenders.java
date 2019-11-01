@@ -7,6 +7,7 @@ import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
+import ecgberht.Util.UtilMicro;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import bwapi.Position;
@@ -27,9 +28,9 @@ public class SendDefenders extends Action {
         try {
             boolean air_only = true;
             boolean cannon_rush = false;
-            for (Unit u : gameState.enemyInBase) {
-                if (u.isFlying() || u.isCloaked()) continue;
-                if (!cannon_rush && (u.getType() == UnitType.Protoss_Pylon || u.getType() == UnitType.Protoss_Photon_Cannon)) cannon_rush = true;
+            for (UnitInfo u : gameState.enemyInBase) {
+                if (u.flying || u.unit.isCloaked()) continue;
+                if (!cannon_rush && (u.unitType == UnitType.Protoss_Pylon || u.unitType == UnitType.Protoss_Photon_Cannon)) cannon_rush = true;
                 air_only = false;
             }
             Set<UnitInfo> friends = new TreeSet<>();
@@ -42,7 +43,7 @@ public class SendDefenders extends Action {
                 bunker = true;
             }
             int defenders = 6;
-            if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next().getType().isWorker()) {
+            if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next().unitType.isWorker()) {
                 defenders = 1;
             }
             MutablePair<Boolean, Boolean> battleWin = new MutablePair<>(true, false);
@@ -96,11 +97,11 @@ public class SendDefenders extends Action {
                     if (frame == u.getKey().getLastCommandFrame()) continue;
                     if (gameState.attackPosition != null) {
                         gameState.workerDefenders.put(u.getKey(), gameState.attackPosition);
-                        if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next().getType().isWorker()) {
-                            Unit scouter = gameState.enemyInBase.iterator().next();
+                        if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next().unitType.isWorker()) {
+                            UnitInfo scouter = gameState.enemyInBase.iterator().next();
                             Unit lastTarget = u.getKey().getOrderTarget();
-                            if (lastTarget != null && lastTarget.equals(scouter)) continue;
-                            u.getKey().attack(scouter);
+                            if (lastTarget != null && lastTarget.equals(scouter.unit)) continue;
+                            UtilMicro.attack(u.getKey(), scouter);
                         } else {
                             Position closestDefense = null;
                             if (gameState.learningManager.isNaughty()) {

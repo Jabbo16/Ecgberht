@@ -1,6 +1,8 @@
 package ecgberht.Util;
 
 
+import bwapi.Color;
+
 public class ColorUtil {
     public static final byte Previous = 0x01;
     public static final byte Cyan = 0x02;
@@ -43,34 +45,32 @@ public class ColorUtil {
         return new String(newTextData);
     }
 
-  /*  public static byte getColor(Color color) {
+    public static byte getColor(Color color) {
         if (color == null) return Clear_formatting;
-        switch (color) {
-            case RED:
+        switch (color.id) {
+            case Red:
                 return Red;
-            case BLUE:
+            case Blue:
                 return Blue;
-            case TEAL:
+            case Teal:
                 return Teal;
-            case PURPLE:
+            case Purple:
                 return Purple;
-            case ORANGE:
+            case Orange:
                 return Orange;
-            case BROWN:
+            case Brown:
                 return Brown;
-            case WHITE:
+            case White:
                 return White;
-            case YELLOW:
+            case Yellow:
                 return Yellow;
-            case GREEN:
+            case Green:
                 return Green;
-            case CYAN:
+            case Cyan:
                 return Cyan;
-            case BLACK:
-                return Pinkish;
-            case GREY:
+            case Grey:
                 return Grey;
         }
         return Clear_formatting;
-    }*/
+    }
 }

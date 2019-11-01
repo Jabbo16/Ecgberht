@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
 import bwapi.Unit;
-import bwem.area.Area;
+import bwem.Area;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;

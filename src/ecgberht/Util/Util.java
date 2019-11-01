@@ -3,9 +3,10 @@ package ecgberht.Util;
 import bwapi.*;
 import bwem.Base;
 import bwem.ChokePoint;
-import bwem.MutableInt;
-import bwem.area.Area;
-import bwem.unit.NeutralImpl;
+import bwem.Area;
+import bwem.Neutral;
+import ecgberht.BaseManager;
+
 import ecgberht.UnitInfo;
 
 import java.util.ArrayList;
@@ -261,6 +262,12 @@ public class Util {
                 maxScore = score;
             }
         }
+        if (chosen == null && getGs().enemyMainBase == null) {
+            for (BaseManager.Garrison g : getGs().baseManager.getScoutingBasesSorted()) {
+                if (!flying && g.island) continue;
+                return g.tile.toPosition();
+            }
+        }
         return chosen;
     }
 
@@ -272,11 +279,11 @@ public class Util {
         return 3;
     }
 
-    public static UnitInfo getClosestUnit(UnitInfo unit, Set<UnitInfo> enemies) {
+    public static UnitInfo getClosestUnit(UnitInfo unit, Set<UnitInfo> enemies, boolean ignoreAir) {
         UnitInfo chosen = null;
         double minDist = Double.MAX_VALUE;
         for (UnitInfo u : enemies) {
-            if (!u.unit.exists()) continue;
+            if (!u.unit.exists() || (ignoreAir && u.flying)) continue;
             double dist = unit.getDistance(u);
             if (chosen == null || dist < minDist) {
                 minDist = dist;
@@ -442,7 +449,7 @@ public class Util {
     }
 
     public static boolean hasFreePatches(Base base) {
-        List<Unit> minerals = base.getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
+        List<Unit> minerals = base.getMinerals().stream().map(Neutral::getUnit).collect(Collectors.toList());
         int count = 0;
         for (Unit m : minerals) {
             if (getGs().mineralsAssigned.containsKey(m)) count += getGs().mineralsAssigned.get(m);
@@ -467,7 +474,7 @@ public class Util {
             }
             return !machineShop;
         }
-        return mS >= 1;
+        return true;
     }
 
     public static UnitInfo getTankTarget(UnitInfo t, Set<UnitInfo> tankTargets) {
@@ -677,7 +684,7 @@ public class Util {
     }
 
     public static boolean isInOurBases(UnitInfo u) {
-        if (u == null)  return false;
+        if (u == null) return false;
         Area uArea = getGs().bwem.getMap().getArea(u.lastTileposition);
         if (uArea == null) return false;
         if (uArea.equals(getGs().enemyMainArea) || uArea.equals(getGs().enemyNaturalArea)) return false;
@@ -691,11 +698,27 @@ public class Util {
         return getGs().getPlayer().hasResearched(tech);
     }
 
-    public static boolean isAirAttacker(UnitInfo u) { // TODO implement
-        return true;
+
+    public static boolean isAirAttacker(UnitInfo u) {
+        return u.airRange > 0;
     }
 
     public static boolean isGroundAttacker(UnitInfo u) { // TODO implement
-        return true;
+        return u.groundRange > 0;
+    }
+
+    public static double getDistance(Unit unit, Position target) {
+        if (!unit.exists() || target == null) return Integer.MAX_VALUE;
+        int xDist = unit.getLeft() - target.getX();
+        if (xDist < 0) {
+            xDist = target.getX() - (unit.getRight() + 1);
+            if (xDist < 0) xDist = 0;
+        }
+        int yDist = unit.getTop() - target.getY();
+        if (yDist < 0) {
+            yDist = target.getY() - (unit.getBottom() + 1);
+            if (yDist < 0) yDist = 0;
+        }
+        return new Position(0, 0).getDistance(new Position(xDist, yDist));
     }
 }

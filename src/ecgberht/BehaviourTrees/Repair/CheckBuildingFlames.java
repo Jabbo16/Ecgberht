@@ -4,7 +4,7 @@ package ecgberht.BehaviourTrees.Repair;
 import bwapi.Order;
 import bwapi.Unit;
 import bwem.Base;
-import bwem.area.Area;
+import bwem.Area;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;

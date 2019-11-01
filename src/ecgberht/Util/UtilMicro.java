@@ -1,10 +1,7 @@
 package ecgberht.Util;
 
-import bwapi.Order;
-import bwapi.TechType;
-import bwapi.Unit;
+import bwapi.*;
 import ecgberht.UnitInfo;
-import bwapi.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +20,30 @@ public class UtilMicro {
         if (!pos.isValid(getGs().bw)) return;
         if (!attacker.isFlying() && !getGs().bw.isWalkable(pos.toWalkPosition())) return;
         attacker.attack(pos);
+    }
+
+    public static void attack(UnitInfo attacker, UnitInfo target) {
+        try {
+            Unit attackerUnit = attacker.unit;
+            if (attackerUnit == null || target == null || !attackerUnit.exists() || attackerUnit.isStartingAttack() || attackerUnit.isAttackFrame())
+                return;
+            if (getGs().frameCount == attackerUnit.getLastCommandFrame()) return;
+            Unit targetUnit = attackerUnit.getTarget();
+            if (target.unit.equals(targetUnit)) return;
+            if (target.visible) {
+                WeaponType w = Util.getWeapon(attacker, target);
+                double range = Util.getAttackRange(attacker, target);
+                if (attacker.getDistance(target) <= range) {
+                    attackerUnit.attack(target.unit);
+                    return;
+                }
+                Position predicted = predictUnitPosition(target, 3);
+                if (predicted != null) move(attackerUnit, predicted);
+            } else move(attackerUnit, target.lastPosition);
+        } catch (Exception e) {
+            System.err.println("UtilMicro Attack Exception");
+            e.printStackTrace();
+        }
     }
 
     public static void attack(Unit attacker, UnitInfo target) {
@@ -69,8 +90,10 @@ public class UtilMicro {
 
     public static void move(Unit u, Position pos) {
         if (pos == null || u == null || !u.exists()) return;
+        if (getGs().frameCount == u.getLastCommandFrame()) return;
         Position targetPos = u.getTargetPosition();
-        if (pos.equals(targetPos)) return;
+        if (pos.equals(targetPos) || (targetPos != null && pos.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         if (!pos.isValid(getGs().bw)) return;
         if (!u.isFlying() && !getGs().bw.isWalkable(pos.toWalkPosition())) return;
         u.move(pos);
@@ -122,7 +145,8 @@ public class UtilMicro {
         if (u == null || heal == null || !heal.isValid(getGs().bw)) return;
         if (u.getLastCommandFrame() == getGs().frameCount) return;
         Position targetPos = u.getTargetPosition();
-        if (heal.equals(targetPos)) return;
+        if (heal.equals(targetPos) || (targetPos != null && heal.toTilePosition().equals(targetPos.toTilePosition())))
+            return;
         u.useTech(TechType.Healing, heal);
     }
 

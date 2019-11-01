@@ -36,6 +36,7 @@ import ecgberht.Strategies.FullBioFE;
 import ecgberht.Strategies.FullMech;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
+import ecgberht.Util.UtilMicro;
 import org.iaie.btree.BehavioralTree;
 import org.iaie.btree.task.composite.Selector;
 import org.iaie.btree.task.composite.Sequence;
@@ -44,8 +45,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.TreeSet;
 
 public class Ecgberht extends DefaultBWListener {
 
@@ -339,8 +343,10 @@ public class Ecgberht extends DefaultBWListener {
                 bw.sendText("Hitchhiker :(");
             }
             bwem.initialize();
-            bwem.getMap().assignStartingLocationsToSuitableBases();
+            if (!bw.mapHash().equals("e6d0144e14315118d916905ff5e7045f68db541e")) // Aztec KSL crash fix
+                bwem.getMap().assignStartingLocationsToSuitableBases();
             gs = new GameState(bw, bwem);
+            gs.baseManager = new BaseManager(bwem);
             gs.initEnemyRace();
             gs.learningManager.onStart(bw.enemy().getName(), Util.raceToString(bw.enemy().getRace()));
             gs.alwaysPools();
@@ -357,7 +363,8 @@ public class Ecgberht extends DefaultBWListener {
                         gs.fortressSpecialBLs.put(b, gs.getMineralWalkPatchesFortress(b));
                     gs.BLs.add(b);
 
-                } //else if (b.getArea().getAccessibleNeighbors().isEmpty()) gs.islandBases.add(b); // Island expansions disabled for now
+                } else if (b.getArea().getAccessibleNeighbors().isEmpty())
+                    gs.islandBases.add(b); // Island expansions re-enabled
                 else gs.BLs.add(b);
             }
             gs.initBlockingMinerals();
@@ -397,6 +404,7 @@ public class Ecgberht extends DefaultBWListener {
     @Override
     public void onFrame() {
         try {
+            // Testing
             if (gs.enemyMainBase != null) {
                 if (path == null) {
                     if (gs.naturalChoke != null) {
@@ -404,7 +412,6 @@ public class Ecgberht extends DefaultBWListener {
                     } else {
                         path = gs.silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
                     }
-
                 } else {
                     for (org.bk.ass.path.Position p : path.path) {
                         Position pos = new WalkPosition(p.x, p.y).toPosition();
@@ -413,6 +420,7 @@ public class Ecgberht extends DefaultBWListener {
                 }
             }
             gs.frameCount = bw.getFrameCount();
+            gs.baseManager.updateGarrisons();
             skycladObserver.onFrame();
             gs.fix();
             gs.unitStorage.onFrame();
@@ -427,9 +435,9 @@ public class Ecgberht extends DefaultBWListener {
                 gs.setStrat(new FullMech());
                 transition();
             }
-            // If rushing and enough time has passed -> transition to Bio
-            if (gs.frameCount == 24 * 60 * 7 && gs.getStrat().proxy) {
-                gs.setStrat(new FullBio());
+            // If rushing and enough time has passed -> transition to best strat
+            if (gs.frameCount == 24 * 60 * 8 && gs.getStrat().proxy) {
+                gs.scipio.chooseProxyTransition();
                 List<UnitInfo> workersToDelete = new ArrayList<>();
                 for (UnitInfo u : gs.myArmy) {
                     if (!u.unitType.isWorker()) continue;
@@ -453,6 +461,8 @@ public class Ecgberht extends DefaultBWListener {
                 gs.maxWraiths = 999;
                 transition();
             }
+            // TODO fix/improve Plasma play
+            /*
             if (bw.mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma special eggs
                     !gs.getStrat().name.equals("PlasmaWraithHell")) {
                 for (Unit u : bw.getAllUnits()) {
@@ -465,6 +475,7 @@ public class Ecgberht extends DefaultBWListener {
                     }
                 }
             }
+            */
             if (gs.getStrat().name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
                 if (gs.enemyRace == Race.Zerg) {
                     if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) gs.setStrat(new BioMechFE());
@@ -489,7 +500,7 @@ public class Ecgberht extends DefaultBWListener {
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
             gs.sim.onFrameSim();
-            //gs.vespeneManager(); //Disabled until it works
+            gs.vespeneManager(); //Disabled until it works
             gs.sqManager.updateBunkers();
             gs.checkDisrupter();
             buildingLotTree.run();
@@ -564,21 +575,31 @@ public class Ecgberht extends DefaultBWListener {
     public void onUnitCreate(Unit arg0) {
         try {
             if (arg0 == null) return;
-            //if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding
-            //        || arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             UnitType type = arg0.getType();
-            if(type.isMineralField() || type.isSpecialBuilding() || type == UnitType.Resource_Vespene_Geyser || type.isNeutral()) return;
-            if (type.isBuilding()) {
-                if (arg0.getPlayer().getID() == self.getID()) {
-                    gs.unitStorage.onUnitCreate(arg0);
-                    if (type != UnitType.Terran_Command_Center) {
-                        gs.map.updateMap(arg0.getTilePosition(), type, false);
-                        gs.testMap = gs.map.clone();
-                    }
-                    if (type.isAddon()) return;
-                    if (type == UnitType.Terran_Command_Center && bw.getFrameCount() == 0) return;
-                    if (type == UnitType.Terran_Bunker && gs.learningManager.isNaughty() && gs.enemyRace == Race.Zerg) {
-                        gs.defendPosition = arg0.getPosition();
+            if (type.isResourceContainer() || type.isCritter() || type == UnitType.Spell_Scanner_Sweep || type.isSpecialBuilding()) return;
+            if (type.isResourceDepot()) gs.baseManager.onCreate(arg0);
+            if (!type.isNeutral() && !type.isSpecialBuilding()) {
+                if (type.isBuilding()) {
+                    if (arg0.getPlayer().getID() == self.getID()) {
+                        gs.unitStorage.onUnitCreate(arg0);
+                        if (type != UnitType.Terran_Command_Center) {
+                            gs.map.updateMap(arg0.getTilePosition(), type, false);
+                            gs.testMap = gs.map.clone();
+                        } else if (getGs().iReallyWantToExpand) getGs().iReallyWantToExpand = false;
+                        if (type.isAddon()) return;
+                        if (type == UnitType.Terran_Command_Center && getGame().getFrameCount() == 0) return;
+                        if (type == UnitType.Terran_Bunker && gs.learningManager.isNaughty() && gs.enemyRace == Race.Zerg) {
+                            gs.defendPosition = arg0.getPosition();
+                        }
+                        Unit worker = arg0.getBuildUnit();
+                        if (worker != null) {
+                            if (gs.workerBuild.containsKey(worker) && type.equals(gs.workerBuild.get(worker).first)) {
+                                gs.workerTask.put(worker, arg0);
+                                gs.deltaCash.first -= type.mineralPrice();
+                                gs.deltaCash.second -= type.gasPrice();
+                                gs.workerBuild.remove(worker);
+                            }
+                        }
                     }
                     Unit worker = arg0.getBuildUnit();
                     if (worker != null) {
@@ -691,38 +712,24 @@ public class Ecgberht extends DefaultBWListener {
                             }
                         }
                     }
+                } else if (type.isWorker()) gs.workerIdle.add(arg0);
+                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat"))
+                    gs.agents.put(arg0, new VultureAgent(arg0));
+                else if (type == UnitType.Terran_Dropship) {
+                    DropShipAgent d = new DropShipAgent(arg0);
+                    gs.agents.put(arg0, d);
+                } else if (type == UnitType.Terran_Science_Vessel) {
+                    VesselAgent v = new VesselAgent(arg0);
+                    gs.agents.put(arg0, v);
+                } else if (type == UnitType.Terran_Wraith) {
+                    if (!gs.getStrat().name.equals("PlasmaWraithHell")) {
+                        String name = gs.pickShipName();
+                        gs.agents.put(arg0, new WraithAgent(arg0, name));
+                    }
                 } else {
-                    if (type.isWorker()) gs.workerIdle.add(arg0);
-                    else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat"))
-                        gs.agents.put(arg0, new VultureAgent(arg0));
-                    else if (type == UnitType.Terran_Dropship) {
-                        DropShipAgent d = new DropShipAgent(arg0);
-                        gs.agents.put(arg0, d);
-                    } else if (type == UnitType.Terran_Science_Vessel) {
-                        VesselAgent v = new VesselAgent(arg0);
-                        gs.agents.put(arg0, v);
-                    } else if (type == UnitType.Terran_Wraith) {
-                        if (!gs.getStrat().name.equals("PlasmaWraithHell")) {
-                            String name = gs.pickShipName();
-                            gs.agents.put(arg0, new WraithAgent(arg0, name));
-                        }
-                    } else {
-                        gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                        if (!gs.getStrat().proxy) {
-                            if (!gs.learningManager.isNaughty() || gs.enemyRace != Race.Zerg) {
-                                if (!gs.DBs.isEmpty()) {
-                                    arg0.attack(gs.DBs.keySet().iterator().next().getPosition());
-                                } else if (gs.defendPosition != null) {
-                                    arg0.attack(gs.defendPosition);
-                                } else if (gs.mainChoke != null) {
-                                    arg0.attack(gs.mainChoke.getCenter().toPosition());
-                                } else {
-                                    arg0.attack(Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toPosition());
-                                }
-                            }
-                        } else if (new TilePosition(bw.mapWidth() / 2, bw.mapHeight() / 2).getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
-                            arg0.attack(new TilePosition(bw.mapWidth() / 2, bw.mapHeight() / 2).toPosition());
-                        }
+                    gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
+                    if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
+                        UtilMicro.move(arg0, gs.silentCartographer.mapCenter.toPosition());
                     }
                 }
             }
@@ -758,6 +765,7 @@ public class Ecgberht extends DefaultBWListener {
                 first = true;
             }
             if (!type.isNeutral() && (!type.isSpecialBuilding() || type.isRefinery())) {
+                if (type.isResourceDepot()) gs.baseManager.onDestroy(arg0);
                 if (arg0.getPlayer().isEnemy(self)) {
                     IntelligenceAgency.onDestroy(arg0, type);
                     if (arg0.equals(gs.chosenUnitToHarass)) gs.chosenUnitToHarass = null;
@@ -877,9 +885,7 @@ public class Ecgberht extends DefaultBWListener {
                         for (Unit u : gs.CCs.values()) {
                             if (u.equals(arg0)) {
                                 gs.removeResources(arg0);
-                                if (u.getAddon() != null) {
-                                    gs.CSs.remove(u.getAddon());
-                                }
+                                if (u.getAddon() != null) gs.CSs.remove(u.getAddon());
                                 if (bwem.getMap().getArea(arg0.getTilePosition()).equals(gs.naturalArea)) {
                                     gs.defendPosition = gs.mainChoke.getCenter().toPosition();
                                 }
@@ -938,13 +944,10 @@ public class Ecgberht extends DefaultBWListener {
                             }
                         }
                         gs.testMap = gs.map.clone();
-                    } else if (type == UnitType.Terran_Vulture) {
-                        gs.agents.remove(arg0);
-                    } else if (type == UnitType.Terran_Dropship) {
-                        gs.agents.remove(arg0);
-                    } else if (type == UnitType.Terran_Science_Vessel) {
-                        gs.agents.remove(arg0);
-                    } else if (type == UnitType.Terran_Wraith && !gs.getStrat().name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
+                    } else if (type == UnitType.Terran_Vulture) gs.agents.remove(arg0);
+                    else if (type == UnitType.Terran_Dropship) gs.agents.remove(arg0);
+                    else if (type == UnitType.Terran_Science_Vessel) gs.agents.remove(arg0);
+                    else if (type == UnitType.Terran_Wraith && !gs.getStrat().name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
                         String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
                         gs.shipNames.add(wraith);
                         gs.agents.remove(arg0);
@@ -966,9 +969,6 @@ public class Ecgberht extends DefaultBWListener {
             UnitType type = arg0.getType();
             if (arg0.getPlayer().isEnemy(self)) {
                 gs.unitStorage.onUnitMorph(arg0);
-                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
-                    gs.enemyCombatUnitMemory.add(arg0);
-                }
             }
             if (type.isRefinery() && arg0.getPlayer().equals(self)) {
                 for (Entry<Unit, Integer> r : gs.refineriesAssigned.entrySet()) {
@@ -1006,7 +1006,6 @@ public class Ecgberht extends DefaultBWListener {
 
     @Override
     public void onUnitHide(Unit arg0) {
-        gs.enemyCombatUnitMemory.remove(arg0);
     }
 
     @Override
@@ -1029,9 +1028,6 @@ public class Ecgberht extends DefaultBWListener {
                     gs.enemyRace = type.getRace();
                     if (gs.enemyRace == Race.Zerg && gs.getStrat().trainUnits.contains(UnitType.Terran_Firebat))
                         gs.maxBats = 3;
-                }
-                if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
-                    gs.enemyCombatUnitMemory.add(arg0);
                 }
                 if (type.isBuilding() && !gs.unitStorage.getEnemyUnits().containsKey(arg0)) {
                     gs.map.updateMap(arg0.getTilePosition(), type, false);

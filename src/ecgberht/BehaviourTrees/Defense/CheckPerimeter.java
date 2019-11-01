@@ -2,7 +2,7 @@ package ecgberht.BehaviourTrees.Defense;
 
 import bwapi.Unit;
 import bwem.Base;
-import bwem.area.Area;
+import bwem.Area;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;
@@ -28,19 +28,19 @@ public class CheckPerimeter extends Conditional {
         try {
             gameState.enemyInBase.clear();
             gameState.defense = false;
-            Set<Unit> enemyInvaders = new TreeSet<>(gameState.enemyCombatUnitMemory);
+            Set<UnitInfo> enemyInvaders = new TreeSet<>();
             for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                 if (u.unitType.canAttack() || u.unitType == UnitType.Protoss_Pylon || u.unitType.canProduce() || u.unitType.isRefinery()) {
-                    enemyInvaders.add(u.unit);
+                    enemyInvaders.add(u);
                 }
             }
-            for (Unit u : enemyInvaders) {
-                if(!u.exists()) continue;
-                UnitType uType = u.getType();
+            for (UnitInfo u : enemyInvaders) {
+                if(!u.unit.exists()) continue;
+                UnitType uType = u.unitType;
                 if (uType.isBuilding() || ((uType.canAttack() || uType.isSpellcaster() || uType.spaceProvided() > 0)
                         && uType != UnitType.Zerg_Scourge && uType != UnitType.Terran_Valkyrie
                         && uType != UnitType.Protoss_Corsair && uType != UnitType.Zerg_Overlord)) {
-                    Area enemyArea = gameState.bwem.getMap().getArea(u.getTilePosition());
+                    Area enemyArea = gameState.bwem.getMap().getArea(u.tileposition);
                     if (enemyArea != null) {
                         Area myMainArea = gameState.mainCC != null ? gameState.mainCC.first.getArea() : null;
                         Area myNatArea = gameState.naturalArea;
@@ -54,38 +54,38 @@ public class CheckPerimeter extends Conditional {
                     }
                     for (Map.Entry<Unit, Unit> c : gameState.workerTask.entrySet()) {
                         int dist = c.getValue().getType() == UnitType.Terran_Command_Center ? 500 : 200;
-                        if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
+                        if (Util.broodWarDistance(u.position, c.getValue().getPosition()) <= dist) {
                             gameState.enemyInBase.add(u);
                             break;
                         }
                     }
                     for (Unit c : gameState.CCs.values()) {
-                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 500) {
+                        if (Util.broodWarDistance(u.position, c.getPosition()) <= 500) {
                             gameState.enemyInBase.add(u);
                             break;
                         }
                     }
                     for (Unit c : gameState.DBs.keySet()) {
-                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.position, c.getPosition()) <= 200) {
                             gameState.enemyInBase.add(u);
                             break;
                         }
                     }
                     for (Unit c : gameState.SBs) {
-                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.position, c.getPosition()) <= 200) {
                             gameState.enemyInBase.add(u);
                             break;
                         }
                     }
                     for (Unit c : gameState.UBs) {
-                        if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                        if (Util.broodWarDistance(u.position, c.getPosition()) <= 200) {
                             gameState.enemyInBase.add(u);
                             break;
                         }
                     }
                     if (!gameState.getStrat().name.equals("ProxyBBS") && !gameState.getStrat().name.equals("ProxyEightRax")) {
                         for (Unit c : gameState.MBs) {
-                            if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
+                            if (Util.broodWarDistance(u.position, c.getPosition()) <= 200) {
                                 gameState.enemyInBase.add(u);
                                 break;
                             }

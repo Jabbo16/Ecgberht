@@ -4,7 +4,7 @@ import bwapi.*;
 import bwem.BWEM;
 import bwem.Base;
 import bwem.ChokePoint;
-import bwem.area.Area;
+import bwem.Area;
 import ecgberht.Util.Util;
 
 import java.io.FileWriter;

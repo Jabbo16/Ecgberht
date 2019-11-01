@@ -3,7 +3,7 @@ package ecgberht;
 import bwapi.*;
 import bwem.Base;
 import bwem.ChokePoint;
-import bwem.unit.Mineral;
+import bwem.Mineral;
 import cameraModule.CameraModule;
 import ecgberht.Agents.*;
 import ecgberht.Util.ColorUtil;
@@ -79,7 +79,7 @@ public class DebugManager {
                 counter++;
             }
             for (Unit b : gameState.buildingLot) print(b, Color.Purple);
-            for (Unit u : gameState.enemyInBase) print(u, Color.Red);
+            for (UnitInfo u : gameState.enemyInBase) print(u.unit, Color.Red);
             for (Base b : gameState.islandBases)
                 game.drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
             for (Agent ag : gameState.agents.values()) {
@@ -107,6 +107,8 @@ public class DebugManager {
             }
             if (gameState.enemyStartBase != null)
                 game.drawTextMap(gameState.enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));
+            if (gameState.disrupterBuilding != null)
+                game.drawTextMap(gameState.disrupterBuilding.getPosition().add(new Position(0, -8)), ColorUtil.formatText("BM!", ColorUtil.White));
             if (gameState.enemyNaturalBase != null)
                 game.drawTextMap(gameState.enemyNaturalBase.getLocation().toPosition(), ColorUtil.formatText("EnemyNaturalBase", ColorUtil.White));
             if (gameState.mainChoke != null) {
@@ -227,11 +229,14 @@ public class DebugManager {
             game.drawTextScreen(320, 50, ColorUtil.formatText("I want to train: " + gameState.chosenUnit.toString(), ColorUtil.White));
             game.drawTextScreen(320, 65, ColorUtil.formatText("I want to build: " + gameState.chosenToBuild.toString(), ColorUtil.White));
             game.drawTextScreen(320, 80, ColorUtil.formatText("Max_Goliaths: " + gameState.maxGoliaths, ColorUtil.White));
-            if (gameState.bw.allies().size() + gameState.bw.enemies().size() == 1) {
-                /*game.drawTextScreen(10, 5,
-                        ColorUtil.formatText(gameState.bw.self().getName(), ColorUtil.getColor(gameState.self.getColor())) +
+            game.drawTextScreen(320, 95, ColorUtil.formatText("Max_Vessels: " + gameState.maxVessels, ColorUtil.White));
+            if (gameState.enemyRace == Race.Zerg)
+                game.drawTextScreen(320, 110, ColorUtil.formatText("Max_Firebats: " + gameState.maxBats, ColorUtil.White));
+            if (gameState.getGame().allies().size() + gameState.getGame().enemies().size() == 1) {
+                game.drawTextScreen(10, 5,
+                        ColorUtil.formatText(gameState.self.getName(), ColorUtil.getColor(gameState.self.getColor())) +
                                 ColorUtil.formatText(" vs ", ColorUtil.White) +
-                                ColorUtil.formatText(gameState.bw.enemy().getName(), ColorUtil.getColor(game.enemy().getColor())));*/
+                                ColorUtil.formatText(gameState.bw.enemy().getName(), ColorUtil.getColor(game.enemy().getColor())));
             }
             game.drawTextScreen(10, 5,
                     ColorUtil.formatText(gameState.bw.self().getName(), ColorUtil.Green) + // TODO convert jbwapi color to byte

@@ -2,6 +2,8 @@ package ecgberht.BehaviourTrees.Harass;
 
 import bwapi.Order;
 import ecgberht.GameState;
+import ecgberht.Simulation.SimInfo;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
@@ -16,12 +18,16 @@ public class ChooseWorkerToHarass extends Action {
     @Override
     public State execute() {
         try {
-            if (gameState.chosenUnitToHarass.getType().isWorker()) return State.FAILURE;
-            for (Unit u : gameState.enemyCombatUnitMemory) {
-                if (gameState.enemyMainBase != null && u.exists() && u.getType().isWorker() && !u.isGatheringGas()) {
-                    if (u.getOrder() != Order.Move && u.getOrder() != Order.PlaceBuilding) continue;
+            if (gameState.chosenUnitToHarass == null || gameState.chosenUnitToHarass.getType().isWorker()) return State.FAILURE;
+            UnitInfo unitInfo = gameState.unitStorage.getAllyUnits().get(gameState.chosenHarasser);
+            if (unitInfo == null) return State.FAILURE;
+            SimInfo s = gameState.sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
+            if (s == null) return State.FAILURE;
+            for (UnitInfo u : s.enemies) {
+                if (gameState.enemyMainBase != null && u.unit.exists() && u.unitType.isWorker() && !u.unit.isGatheringGas()) {
+                    if (u.currentOrder != Order.Move && u.currentOrder != Order.PlaceBuilding) continue;
                     if (Util.broodWarDistance(gameState.enemyMainBase.getLocation().toPosition(), gameState.chosenHarasser.getPosition()) <= 700) {
-                        gameState.chosenUnitToHarass = u;
+                        gameState.chosenUnitToHarass = u.unit;
                         return State.SUCCESS;
                     }
                 }

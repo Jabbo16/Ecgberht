@@ -10,6 +10,7 @@ import ecgberht.Util.UtilMicro;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static ecgberht.Ecgberht.getGs;
 
@@ -123,7 +124,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         Squad chosen = null;
         double scoreMax = Double.MIN_VALUE;
         for (Squad s : getGs().sqManager.squads.values()) {
-            double dist = s.getSquadCenter().getDistance(unitInfo.position);
+            double dist = unitInfo.getDistance(s.getSquadCenter());
             double score = -Math.pow(s.members.size(), 3) / dist;
             if (chosen == null || score > scoreMax) {
                 chosen = s;
@@ -183,8 +184,16 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     }
 
     private void kite() {
+        Set<UnitInfo> airThreats = airAttackers.stream().filter(u -> u.unitType == UnitType.Zerg_Scourge || u.unitType == UnitType.Zerg_Spore_Colony).collect(Collectors.toSet());
+        if (!airThreats.isEmpty()) {
+            Position kite = UtilMicro.kiteAway(myUnit, airThreats);
+            if (kite != null) {
+                UtilMicro.move(myUnit, kite);
+                return;
+            }
+        }
         Position kite = UtilMicro.kiteAway(myUnit, airAttackers);
-        if (kite == null || !kite.isValid(getGs().bw)) return;
+        if (kite == null || !kite.isValid(getGs().getGame())) return;
         UtilMicro.move(myUnit, kite);
     }
 
@@ -202,119 +211,119 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         Unit chosen = null;
         if (getGs().enemyRace == Race.Zerg && !mySimAir.enemies.isEmpty()) {
             for (UnitInfo u : mySimAir.enemies) {
-                if (u.unitType == UnitType.Zerg_Scourge && myUnit.equals(u.target)) {
-                    chasenByScourge = true;
-                } else if (u.unitType == UnitType.Zerg_Spore_Colony && u.unit.getDistance(myUnit) < u.airRange * 1.2) {
-                    sporeColony = true;
-                }
+                if (u.unitType == UnitType.Zerg_Scourge && myUnit.equals(u.target)) chasenByScourge = true;
+                else if (u.unitType == UnitType.Zerg_Spore_Colony && u.unit.getDistance(myUnit) < u.airRange * 1.2) sporeColony = true;
                 if (chasenByScourge && sporeColony) break;
             }
-        }
-        if (!mySimMix.enemies.isEmpty()) {
-            // Irradiate
-            Set<UnitInfo> irradiateTargets = new TreeSet<>(mySimMix.enemies);
-            for (UnitInfo t : mySimMix.allies) {
-                if (t.isTank()) irradiateTargets.add(t);
-            }
-            if (follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && myUnit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE) {
-                for (UnitInfo u : irradiateTargets) {
-                    if (u.unitType.isBuilding() || u.isEgg() || (!u.unitType.isOrganic() && !u.isTank())) continue;
-                    if (u.unit.isIrradiated() || u.unit.isStasised()) continue;
-                    if (getGs().wizard.isUnitIrradiated(u.unit)) continue;
-                    double score = 1;
-                    int closeUnits = 0;
-                    for (UnitInfo close : irradiateTargets) {
-                        if (u.equals(close) || !close.unitType.isOrganic()) continue;
-                        if (close.unit.getDistance(u.unit) <= 32) closeUnits++;
+            if (!mySimMix.enemies.isEmpty()) {
+                // Irradiate
+                Set<UnitInfo> irradiateTargets = new TreeSet<>(mySimMix.enemies);
+                for (UnitInfo t : mySimMix.allies) {
+                    if (t.isTank()) irradiateTargets.add(t);
+                }
+                if (follow != null && !irradiateTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.Irradiate) && myUnit.getEnergy() >= TechType.Irradiate.energyCost() && follow.status != Squad.Status.IDLE) {
+                    for (UnitInfo u : irradiateTargets) {
+                        if (u.unitType.isBuilding() || u.isEgg() || (!u.unitType.isOrganic() && !u.isTank())) continue;
+                        if (u.unit.isIrradiated() || u.unit.isStasised()) continue;
+                        if (!u.visible) continue;
+                        if (getGs().wizard.isUnitIrradiated(u.unit)) continue;
+                        double score = 1;
+                        int closeUnits = 0;
+                        for (UnitInfo close : irradiateTargets) {
+                            if (u.equals(close) || !close.unitType.isOrganic() || close.burrowed) continue;
+                            if (close.getDistance(u) <= 32) closeUnits++;
+                        }
+                        if (u.unitType == UnitType.Zerg_Lurker) score = u.burrowed ? 20 : 18; // Kill it with fire!!
+                        else if (u.unitType == UnitType.Zerg_Mutalisk) score = 8;
+                        else if (u.unitType == UnitType.Zerg_Hydralisk) score = 6;
+                        else if (u.unitType == UnitType.Zerg_Zergling) score = 3;
+                        score *= u.percentHealth; //Prefer healthy units
+                        double multiplier = u.isTank() ? 3.75 : u.unitType == UnitType.Zerg_Lurker ? 2.5 : u.unitType == UnitType.Zerg_Mutalisk ? 2 : 1;
+                        score += multiplier * closeUnits;
+                        if (chosen == null || score > maxScore) {
+                            chosen = u.unit;
+                            maxScore = score;
+                        }
                     }
-                    if (u.unitType == UnitType.Zerg_Lurker) score = u.burrowed ? 20 : 18; // Kill it with fire!!
-                    else if (u.unitType == UnitType.Zerg_Mutalisk) score = 8;
-                    else if (u.unitType == UnitType.Zerg_Hydralisk) score = 6;
-                    else if (u.unitType == UnitType.Zerg_Zergling) score = 3;
-                    score *= u.percentHealth; //Prefer healthy units
-                    double multiplier = u.isTank() ? 3.75 : u.unitType == UnitType.Zerg_Lurker ? 2.5 : u.unitType == UnitType.Zerg_Mutalisk ? 2 : 1;
-                    score += multiplier * closeUnits;
-                    if (chosen == null || score > maxScore) {
-                        chosen = u.unit;
-                        maxScore = score;
+                    if (maxScore >= 5) {
+                        status = Status.IRRADIATE;
+                        target = chosen;
+                        return;
                     }
                 }
-                if (maxScore >= 5) {
-                    status = Status.IRRADIATE;
-                    target = chosen;
-                    return;
-                }
-            }
-            chosen = null;
-            maxScore = 0;
+                chosen = null;
+                maxScore = 0;
 
-            // EMP
-            Set<UnitInfo> empTargets = new TreeSet<>(mySimMix.enemies);
-            if (follow != null && !empTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.EMP_Shockwave) && myUnit.getEnergy() >= TechType.EMP_Shockwave.energyCost() && follow.status != Squad.Status.IDLE) {
-                for (UnitInfo u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
-                    if (u.unitType.isBuilding() || u.unitType.isWorker() || u.unit.isIrradiated() || u.unit.isStasised())
-                        continue;
-                    if (getGs().wizard.isUnitEMPed(u.unit)) continue;
-                    double score = 1;
-                    double closeUnits = 0;
-                    for (UnitInfo close : empTargets) {
-                        if (u.equals(close)) continue;
-                        if (close.position.getDistance(u.position) <= WeaponType.EMP_Shockwave.innerSplashRadius())
-                            closeUnits += close.shields * 0.6;
+                // EMP
+                Set<UnitInfo> empTargets = new TreeSet<>(mySimMix.enemies);
+                if (follow != null && !empTargets.isEmpty() && getGs().getPlayer().hasResearched(TechType.EMP_Shockwave) && myUnit.getEnergy() >= TechType.EMP_Shockwave.energyCost() && follow.status != Squad.Status.IDLE) {
+                    for (UnitInfo u : empTargets) { // TODO Change to rectangle to choose best Position and track emped positions
+                        if (u.unitType.isBuilding() || u.unitType.isWorker() || u.unit.isIrradiated() || u.unit.isStasised())
+                            continue;
+                        if (getGs().wizard.isUnitEMPed(u.unit)) continue;
+                        double score = 1;
+                        double closeUnits = 0;
+                        for (UnitInfo close : empTargets) {
+                            if (u.equals(close)) continue;
+                            if (close.lastPosition.getDistance(u.lastPosition) <= WeaponType.EMP_Shockwave.innerSplashRadius())
+                                closeUnits += close.shields * 0.6;
+                        }
+                        if (u.unitType == UnitType.Protoss_High_Templar) score = 10;
+                        else if (u.unitType == UnitType.Protoss_Arbiter) score = 7;
+                        else if (u.unitType == UnitType.Protoss_Archon || u.unitType == UnitType.Protoss_Dark_Archon)
+                            score = 5;
+                        score *= u.percentShield; //Prefer healthy units(shield)
+                        double multiplier = u.unitType == UnitType.Protoss_High_Templar ? 6 : 1;
+                        score += multiplier * closeUnits;
+                        if (chosen == null || score > maxScore) {
+                            chosen = u.unit;
+                            maxScore = score;
+                        }
                     }
-                    if (u.unitType == UnitType.Protoss_High_Templar) score = 10;
-                    else if (u.unitType == UnitType.Protoss_Arbiter ) score = 7;
-                    else if (u.unitType == UnitType.Protoss_Archon || u.unitType == UnitType.Protoss_Dark_Archon) score = 5;
-                    score *= u.percentShield; //Prefer healthy units(shield)
-                    double multiplier = u.unitType == UnitType.Protoss_High_Templar ? 5 : 1;
-                    score += multiplier * closeUnits;
-                    if (chosen == null || score > maxScore) {
-                        chosen = u.unit;
-                        maxScore = score;
+                    if (maxScore >= 7) {
+                        status = Status.EMP;
+                        target = chosen;
+                        return;
                     }
                 }
-                if (maxScore >= 7) {
-                    status = Status.EMP;
-                    target = chosen;
-                    return;
+                chosen = null;
+                maxScore = 0;
+            }
+            if (!mySimMix.allies.isEmpty()) {
+                // Defense Matrix
+                Set<UnitInfo> matrixTargets = new TreeSet<>(mySimMix.allies);
+                if (follow != null && !matrixTargets.isEmpty() && myUnit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
+                    for (UnitInfo u : matrixTargets) {
+                        if (!u.unitType.canMove()) continue;
+                        if (getGs().wizard.isDefenseMatrixed(u.unit)) continue;
+                        double score = 1;
+                        if (!u.unit.isUnderAttack() || u.unit.isDefenseMatrixed()) continue;
+                        if (u.unitType.isMechanical()) score = 8;
+                        if (u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Firebat) score = 3;
+                        if (u.unitType == UnitType.Terran_SCV || u.unitType == UnitType.Terran_Medic) score = 1;
+                        score *= (double) u.unitType.maxHitPoints() / (double) u.health;
+                        if (chosen == null || score > maxScore) {
+                            chosen = u.unit;
+                            maxScore = score;
+                        }
+                    }
+                    if (maxScore >= 2) {
+                        status = Status.DMATRIX;
+                        target = chosen;
+                        return;
+                    }
                 }
             }
-            chosen = null;
-            maxScore = 0;
+            if ((status == Status.IRRADIATE || status == Status.DMATRIX || status == Status.EMP) && target != null)
+                return;
+            if (!mySimAir.enemies.isEmpty()) {
+                if (myUnit.isUnderAttack() || chasenByScourge || sporeColony) status = Status.KITE;
+                else if (Util.broodWarDistance(myUnit.getPosition(), center) >= 100) status = Status.FOLLOW;
+                else if (mySimAir.lose) status = Status.KITE;
+            } else if (mySimMix.lose) status = Status.RETREAT;
+            else if (Util.broodWarDistance(myUnit.getPosition(), center) >= 200) status = Status.FOLLOW;
+            else status = Status.HOVER;
         }
-        if (!mySimMix.allies.isEmpty()) {
-            // Defense Matrix
-            Set<UnitInfo> matrixTargets = new TreeSet<>(mySimMix.allies);
-            if (follow != null && !matrixTargets.isEmpty() && myUnit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
-                for (UnitInfo u : matrixTargets) {
-                    if(!u.unitType.canMove()) continue;
-                    if (getGs().wizard.isDefenseMatrixed(u.unit)) continue;
-                    double score = 1;
-                    if (!u.unit.isUnderAttack() || u.unit.isDefenseMatrixed()) continue;
-                    if (u.unitType.isMechanical()) score = 8;
-                    if (u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Firebat) score = 3;
-                    if (u.unitType == UnitType.Terran_SCV || u.unitType == UnitType.Terran_Medic) score = 1;
-                    score *= (double) u.unitType.maxHitPoints() / (double) u.health;
-                    if (chosen == null || score > maxScore) {
-                        chosen = u.unit;
-                        maxScore = score;
-                    }
-                }
-                if (maxScore >= 2) {
-                    status = Status.DMATRIX;
-                    target = chosen;
-                    return;
-                }
-            }
-        }
-        if ((status == Status.IRRADIATE || status == Status.DMATRIX || status == Status.EMP) && target != null) return;
-        if (!mySimAir.enemies.isEmpty()) {
-            if (myUnit.isUnderAttack() || chasenByScourge || sporeColony) status = Status.KITE;
-            else if (Util.broodWarDistance(myUnit.getPosition(), center) >= 100) status = Status.FOLLOW;
-            else if (mySimAir.lose) status = Status.KITE;
-        } else if (mySimMix.lose) status = Status.RETREAT;
-        else if (Util.broodWarDistance(myUnit.getPosition(), center) >= 200) status = Status.FOLLOW;
-        else status = Status.HOVER;
     }
 
     private void retreat() {
@@ -324,7 +333,6 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
         attackPos = null;
         attackUnit = null;
     }
-
 
     @Override
     public boolean equals(Object o) {

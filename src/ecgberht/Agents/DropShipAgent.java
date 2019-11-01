@@ -84,7 +84,6 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
             frameLastOrder = myUnit.getLastCommandFrame();
             if (actualFrame == frameLastOrder) return false;
             airAttackers.clear();
-            if (frameLastOrder == actualFrame) return false;
             status = getNewStatus();
             switch (status) {
                 case PICKING:

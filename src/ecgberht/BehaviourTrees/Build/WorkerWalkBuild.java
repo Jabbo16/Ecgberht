@@ -3,7 +3,7 @@ package ecgberht.BehaviourTrees.Build;
 import bwapi.TilePosition;
 import bwapi.Unit;
 import bwem.Base;
-import bwem.area.Area;
+import bwem.Area;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;

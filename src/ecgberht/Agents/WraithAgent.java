@@ -2,14 +2,12 @@ package ecgberht.Agents;
 
 import bwapi.Position;
 import bwapi.Unit;
-
 import bwapi.UnitType;
 import bwapi.WeaponType;
 import ecgberht.Simulation.SimInfo;
 import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import ecgberht.Util.UtilMicro;
-
 
 import java.util.Collections;
 import java.util.Objects;
@@ -44,10 +42,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             SimInfo airSim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.AIR);
             airAttackers = airSim.enemies;
             for (UnitInfo u : airAttackers) {
-                double dist = unitInfo.getDistance(u);
                 double predictedDist = unitInfo.getPredictedDistance(u);
-                double hisAirWeaponRange = u.airRange;
-                if (dist > hisAirWeaponRange) continue;
                 if (predictedDist < bestDist) {
                     closestThreat = u;
                     bestDist = predictedDist;
@@ -55,43 +50,36 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             }
             Set<UnitInfo> mainTargets = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.MIX).enemies;
             UnitInfo harassed = chooseHarassTarget(mainTargets);
-            if (airAttackers.isEmpty()) { // Logic inside is borked
-                if (closestThreat != null) {
-                    double myWeaponRange;
-                    double myWeaponCD;
-                    if(closestThreat.flying){
-                        myWeaponRange = UnitType.Terran_Wraith.airWeapon().maxRange();
-                        myWeaponCD = myUnit.getAirWeaponCooldown();
-                    } else{
-                        myWeaponRange = UnitType.Terran_Wraith.groundWeapon().maxRange();
-                        myWeaponCD = myUnit.getGroundWeaponCooldown();
-                    }
-                    double hisAirWeaponRange = closestThreat.airRange;
-                    if (myWeaponRange > hisAirWeaponRange && bestDist >= hisAirWeaponRange) {
-                        if (myWeaponCD > 0) {
-                            UtilMicro.attack(myUnit, closestThreat);
-                        } else UtilMicro.move(myUnit, closestThreat.lastPosition);
-                        return false;
-                    }
-                    Position kitePos = UtilMicro.kiteAway(myUnit, new TreeSet<>(Collections.singleton(closestThreat)));
-                    if (kitePos != null) {
-                        UtilMicro.move(myUnit, kitePos);
-                        return false;
-                    }
+            if (closestThreat != null) {
+                boolean targetIsFlying = closestThreat.flying;
+                int maxRange = targetIsFlying ? UnitType.Terran_Wraith.airWeapon().maxRange() : UnitType.Terran_Wraith.groundWeapon().maxRange();
+                int cd = targetIsFlying ? myUnit.getAirWeaponCooldown() : myUnit.getGroundWeaponCooldown();
+                double hisAirWeaponRange = closestThreat.airRange;
+                Position kitePos = UtilMicro.kiteAway(myUnit, new TreeSet<>(Collections.singleton(closestThreat)));
+                if (maxRange > hisAirWeaponRange && bestDist > hisAirWeaponRange) {
+                    if (cd != 0) {
+                        if (kitePos != null) {
+                            UtilMicro.move(myUnit, kitePos);
+                            return false;
+                        }
+                    } else if (harassed != null && unitInfo.getDistance(harassed) <= maxRange) {
+                        UtilMicro.attack(unitInfo, harassed);
+                    } else UtilMicro.attack(unitInfo, closestThreat);
+                    return false;
                 }
-                if (harassed != null) {
-                    UtilMicro.attack(myUnit, harassed);
+                if (kitePos != null) {
+                    UtilMicro.move(myUnit, kitePos);
                     return false;
                 }
             }
-            Position kitePos = UtilMicro.kiteAway(myUnit, airAttackers);
-            if (kitePos != null) {
-                UtilMicro.move(myUnit, kitePos);
+            if (harassed != null) {
+                UtilMicro.attack(unitInfo, harassed);
                 return false;
             }
+
             UnitInfo target = Util.getRangedTarget(unitInfo, mainTargets);
             if (target != null) {
-                UtilMicro.attack(myUnit, target);
+                UtilMicro.attack(unitInfo, target);
                 return false;
             }
             if (attack != null) {
@@ -126,8 +114,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 maxScore = score;
             }
         }
-        if (chosen != null) return chosen;
-        return null;
+        return chosen;
     }
 
     @Override

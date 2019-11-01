@@ -3,6 +3,7 @@ package ecgberht.BehaviourTrees.Defense;
 import bwapi.Unit;
 import bwapi.UnitType;
 import ecgberht.GameState;
+import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;
@@ -26,21 +27,20 @@ public class ChooseDefensePosition extends Conditional {
     private Position chooseDefensePosition() {
         Position chosen = null;
         double maxScore = 0;
-        for (Unit b : gameState.enemyInBase) {
-            double influence = getScore(b);
+        for (UnitInfo b : gameState.enemyInBase) {
+            double influence = getScore(b.unitType);
             //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * Util.getGroundDistance(getDefensePosition(), b.getPosition()));
+            double score = influence / (2.5 * Util.getGroundDistance(getDefensePosition(), b.position));
             if (score > maxScore) {
-                chosen = b.getPosition();
+                chosen = b.position;
                 maxScore = score;
             }
         }
         return chosen;
     }
 
-    private double getScore(Unit unit) {
-        UnitType type = unit.getType();
-        if (type.isBuilding() && (unit.getType().canAttack() || type == UnitType.Terran_Bunker)) return 6;
+    private double getScore(UnitType type) {
+        if (type.isBuilding() && (type.canAttack() || type == UnitType.Terran_Bunker)) return 6;
         else if (type.isBuilding()) return 5;
         else if (type.isOrganic()) return 2;
         else if (type.isWorker()) return 1;

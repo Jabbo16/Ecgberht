@@ -37,10 +37,18 @@ public class StrategyManager {
     }
 
     void choose14CCTransition() {
-        double C = 0.7;
+        double C = 0.75;
         int totalGamesPlayed = getGs().learningManager.getEnemyInfo().wins + getGs().learningManager.getEnemyInfo().losses;
-        List<String> validTransitions = new ArrayList<>(Arrays.asList(b.name, bMFE.name, FM.name));
-        if (getGs().enemyRace == Race.Zerg) validTransitions.add(tPW.name);
+        List<String> validTransitions = new ArrayList<>();
+        switch (getGs().enemyRace) {
+            case Zerg:
+                validTransitions.addAll(Arrays.asList(bGFE.name, bMGFE.name, tPW.name));
+                break;
+            case Terran:
+            case Protoss:
+                validTransitions.addAll(Arrays.asList(FM.name, bMGFE.name, bGFE.name));
+                break;
+        }
         String bestUCBStrategy = null;
         double bestUCBStrategyVal = Double.MIN_VALUE;
         for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
@@ -59,6 +67,30 @@ public class StrategyManager {
         if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
+    void chooseProxyTransition() {
+        double C = 0.8;
+        int totalGamesPlayed = getGs().learningManager.getEnemyInfo().wins + getGs().learningManager.getEnemyInfo().losses;
+        List<String> validTransitions = new ArrayList<>(Arrays.asList(b.name, bMFE.name, FM.name));
+        if (getGs().enemyRace == Race.Zerg) validTransitions.add(tPW.name);
+        String bestUCBStrategy = null;
+        double bestUCBStrategyVal = Double.MIN_VALUE;
+        for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
+            if (!validTransitions.contains(strat.getKey())) continue;
+            int sGamesPlayed = strat.getValue().first + strat.getValue().second;
+            double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
+            double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+            double val = sWinRate + ucbVal;
+            if (val > bestUCBStrategyVal) {
+                bestUCBStrategy = strat.getKey();
+                bestUCBStrategyVal = val;
+            }
+        }
+        getGs().bw.sendText("Transitioning from Proxy to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+        strat = nameStrat.get(bestUCBStrategy);
+        if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+    }
+
+    // TODO delete this (useless)?
     void updateStrat() {
         if (strat.trainUnits.contains(UnitType.Terran_Firebat) && getGs().enemyRace == Race.Zerg) getGs().maxBats = 3;
         else getGs().maxBats = 0;
@@ -80,68 +112,73 @@ public class StrategyManager {
                 getGs().maxWraiths = 200; // HELL
                 return new PlasmaWraithHell();
             }
-            if(true) return tPW;
             if (alwaysZealotRushes()) {
                 IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
                 bFE.armyForExpand += 5;
                 bFE.workerGas = 2;
                 return bFE;
             }
-            Consumer<Strategy> addStrat = (Strategy strat) -> {
+            Consumer<Strategy> addStrat = (strat) -> {
                 strategies.put(strat.name, new MutablePair<>(0, 0));
                 nameStrat.put(strat.name, strat);
             };
 
             switch (getGs().enemyRace) {
                 case Zerg:
-                    addStrat.accept(bFE);
-                    addStrat.accept(tPW);
                     addStrat.accept(bGFE);
+                    addStrat.accept(tPW);
                     addStrat.accept(pER);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(bM);
+                    addStrat.accept(bFE);
                     addStrat.accept(fastCC);
+                    addStrat.accept(bMGFE);
                     addStrat.accept(bbs);
+                    addStrat.accept(bM);
                     addStrat.accept(FM);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Terran:
                     addStrat.accept(FM);
                     addStrat.accept(fastCC);
                     addStrat.accept(pER);
+                    addStrat.accept(bMGFE);
+                    addStrat.accept(tPW);
                     addStrat.accept(bM);
                     addStrat.accept(mGFE);
                     addStrat.accept(bbs);
                     addStrat.accept(bFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(bMGFE);
                     addStrat.accept(bGFE);
                     addStrat.accept(b);
                     addStrat.accept(bMFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Protoss:
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(jOR);
                     addStrat.accept(FM);
-                    addStrat.accept(fastCC);
+                    addStrat.accept(jOR);
                     addStrat.accept(pER);
-                    addStrat.accept(bM);
+                    addStrat.accept(fastCC);
                     addStrat.accept(mGFE);
+                    addStrat.accept(bM);
+                    addStrat.accept(bMGFE);
                     addStrat.accept(b);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMFE);
                     addStrat.accept(bFE);
+                    addStrat.accept(vR);
+                    addStrat.accept(tNK);
                     break;
 
                 case Unknown:
                     addStrat.accept(b);
+                    addStrat.accept(FM);
                     addStrat.accept(bM);
                     addStrat.accept(bGFE);
                     addStrat.accept(bMGFE);
-                    addStrat.accept(FM);
                     addStrat.accept(bbs);
                     addStrat.accept(mGFE);
                     addStrat.accept(jOR);
@@ -150,7 +187,7 @@ public class StrategyManager {
                     break;
             }
             if (!forcedStrat.equals("")) {
-                if (forcedStrat.equals("Random")) {
+                if (forcedStrat.toLowerCase().equals("random")) {
                     int index = new Random().nextInt(nameStrat.entrySet().size());
                     Iterator<Map.Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
                     for (int i = 0; i < index; i++) {
@@ -172,24 +209,7 @@ public class StrategyManager {
                     return nameStrat.get(forcedStrat);
                 }
             }
-
             int totalGamesPlayed = EI.wins + EI.losses;
-            if (totalGamesPlayed < 1) {
-                Strategy strat = b;
-                switch (getGs().enemyRace) {
-                    case Zerg:
-                        strat = bGFE;
-                        break;
-                    case Terran:
-                        strat = FM;
-                        break;
-                    case Protoss:
-                        strat = bMFE;
-                        break;
-                }
-                getGs().bw.sendText("I dont know you that well yet, lets pick the standard strategy, " + strat.name);
-                return strat;
-            }
             for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
                 if (strategies.containsKey(r.strategyName)) {
                     strategies.get(r.strategyName).first += r.wins;
@@ -220,15 +240,17 @@ public class StrategyManager {
                 int sGamesPlayed = strat.getValue().first + strat.getValue().second;
                 double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
                 double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
-                if (nameStrat.get(strat.getKey()).proxy && getGs().mapSize == 2) ucbVal += 0.03;
-                if (strat.getKey().equals("14CC") && getGs().mapSize == 4) ucbVal += 0.03;
+                if (totalGamesPlayed > 0 && nameStrat.get(strat.getKey()).proxy && getGs().mapSize == 2) ucbVal += 0.03;
+                if (totalGamesPlayed > 0 && strat.getKey().equals("14CC") && getGs().mapSize == 4) ucbVal += 0.03;
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat.getKey();
                     bestUCBStrategyVal = val;
                 }
             }
-            getGs().bw.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
+            if (totalGamesPlayed < 1)
+                getGs().bw.sendText("I dont know you that well yet, lets pick " + bestUCBStrategy);
+            else getGs().bw.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
             return nameStrat.get(bestUCBStrategy);
         } catch (Exception e) {
             System.err.println("Error initStrat, using default strategy");
