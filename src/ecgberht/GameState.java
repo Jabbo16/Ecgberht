@@ -116,7 +116,7 @@ public class GameState {
     public MutablePair<ComsatStation, Position> checkScan = null;
     public TilePosition chosenPosition = null;
     public TilePosition initDefensePosition = null;
-    public TrainingFacility chosenBuilding = null;
+    public TrainingFacility chosenTrainingFacility = null;
     public Unit chosenScout = null;
     public Unit chosenUnitToHarass = null;
     public UnitType chosenAddon = null;

@@ -22,7 +22,7 @@ public class ChooseVulture extends Action {
                     for (Factory b : gameState.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Vulture)) {
                             gameState.chosenUnit = UnitType.Terran_Vulture;
-                            gameState.chosenBuilding = b;
+                            gameState.chosenTrainingFacility = b;
                             return State.SUCCESS;
                         }
                     }

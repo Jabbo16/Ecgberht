@@ -41,14 +41,14 @@ public class ChooseSCV extends Action {
                 for (Map.Entry<Base, CommandCenter> b : gameState.islandCCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         gameState.chosenUnit = UnitType.Terran_SCV;
-                        gameState.chosenBuilding = b.getValue();
+                        gameState.chosenTrainingFacility = b.getValue();
                         return State.SUCCESS;
                     }
                 }
                 for (Map.Entry<Base, CommandCenter> b : gameState.CCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         gameState.chosenUnit = UnitType.Terran_SCV;
-                        gameState.chosenBuilding = b.getValue();
+                        gameState.chosenTrainingFacility = b.getValue();
                         return State.SUCCESS;
                     }
                 }

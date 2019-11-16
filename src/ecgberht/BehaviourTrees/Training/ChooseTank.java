@@ -34,7 +34,7 @@ public class ChooseTank extends Action {
                     for (Factory b : gameState.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                             gameState.chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
-                            gameState.chosenBuilding = b;
+                            gameState.chosenTrainingFacility = b;
                             return State.SUCCESS;
                         }
                     }

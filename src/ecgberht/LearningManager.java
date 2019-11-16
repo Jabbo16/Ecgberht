@@ -55,7 +55,7 @@ public class LearningManager {
         try (FileWriter writer = new FileWriter(path)) {
             aux.toJson(content, writer);
         } catch (IOException e) {
-            System.err.println("writeOpponentHistory");
+            System.err.println("writeJSON");
             e.printStackTrace();
         }
     }

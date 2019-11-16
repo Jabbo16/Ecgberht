@@ -29,6 +29,7 @@ import ecgberht.BehaviourTrees.Scanner.Scan;
 import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
+import ecgberht.CherryVis.CherryVisDumper;
 import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
@@ -74,6 +75,7 @@ public class Ecgberht implements BWEventListener {
     private BWEM bwem = null;
     private DebugManager debugManager = null;
     private CameraModule skycladObserver = null;
+    private CherryVisDumper cherryVisDumper;
 
     private org.bk.ass.path.Result path;
 
@@ -94,7 +96,7 @@ public class Ecgberht implements BWEventListener {
         initBuildTree();
         initUpgradeTree();
         initAddonBuildTree();
-        gs.scipio.updateStrat();
+        //gs.scipio.updateStrat();
     }
 
     private static void initTrainTree() {
@@ -353,7 +355,7 @@ public class Ecgberht implements BWEventListener {
             gs.alwaysPools();
             if (gs.enemyRace == Race.Zerg && gs.learningManager.isNaughty()) gs.playSound("rushed.mp3");
             gs.scipio = new StrategyManager();
-            gs.scipio.updateStrat();
+            //gs.scipio.updateStrat();
             IntelligenceAgency.setStartStrat(gs.getStrat().name);
             gs.initStartLocations();
             boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
@@ -395,12 +397,12 @@ public class Ecgberht implements BWEventListener {
             initIslandTree();
             gs.silentCartographer = new Cartographer(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
+            cherryVisDumper = new CherryVisDumper(gs);
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void onFrame() {
@@ -521,6 +523,7 @@ public class Ecgberht implements BWEventListener {
             gs.checkMainEnemyBase();
             if (gs.frameCount > 10 && gs.frameCount % 5 == 0) gs.mineralLocking();
             debugManager.onFrame(gs);
+            cherryVisDumper.onFrame();
         } catch (Exception e) {
             System.err.println("onFrame Exception");
             e.printStackTrace();
@@ -536,6 +539,7 @@ public class Ecgberht implements BWEventListener {
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
                 gs.getStrat().name = "PlasmaWraithHell";
             String oldStrat = IntelligenceAgency.getStartStrat();
+            cherryVisDumper.onEnd(arg0, oldStrat);
             if (oldStrat != null && !oldStrat.equals(gs.getStrat().name)) gs.getStrat().name = oldStrat;
             gs.learningManager.onEnd(gs.getStrat().name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom, IntelligenceAgency.getEnemyStrat());
         } catch (Exception e) {
@@ -1011,6 +1015,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitShow(Unit arg0) {
         try {
+            cherryVisDumper.onUnitShow(arg0);
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding ||
                     arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             UnitType type = arg0.getType();

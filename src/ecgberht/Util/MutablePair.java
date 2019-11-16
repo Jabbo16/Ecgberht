@@ -23,7 +23,7 @@ public class MutablePair<K, V> {
 
     @Override
     public String toString() {
-        return "Pair{" + "first=" + first + ", second=" + second + '}';
+        return "{" + first.toString() + ", " + second.toString() + '}';
     }
 
     @Override
