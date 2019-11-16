@@ -33,7 +33,6 @@ public class SupplyMan {
 
     void onComplete(Unit unit) {
         if (unit.getType().supplyProvided() > 0) supplyTotal += unit.getType().supplyProvided();
-
     }
 
     void onDestroy(Unit unit) {

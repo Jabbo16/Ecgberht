@@ -224,7 +224,6 @@ public class Ecgberht extends DefaultBWListener {
         Sequence islandExpansion = new Sequence("island expansion", chI, expanding);
         islandTree = new BehavioralTree("islandTree");
         islandTree.addChild(islandExpansion);
-
     }
 
     private void run() {
@@ -330,8 +329,8 @@ public class Ecgberht extends DefaultBWListener {
             skycladObserver = new CameraModule(self.getStartLocation(), bw);
             debugManager = new DebugManager(bw);
             IntelligenceAgency.onStartIntelligenceAgency(bw.enemy());
-            /*if (!ConfigManager.getConfig().ecgConfig.enableLatCom) bw.enableLatCom(false); // TODO no latcom yet
-            else bw.enableLatCom(true);*/
+            if (!ConfigManager.getConfig().ecgConfig.enableLatCom) bw.setLatCom(false);
+            else bw.setLatCom(true);
             if (ConfigManager.getConfig().bwapiConfig.completeMapInformation) bw.enableFlag(Flag.CompleteMapInformation);
             if (ConfigManager.getConfig().bwapiConfig.frameSkip != 0)
                 bw.setFrameSkip(ConfigManager.getConfig().bwapiConfig.frameSkip);
@@ -728,9 +727,11 @@ public class Ecgberht extends DefaultBWListener {
                     }
                 } else {
                     gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
+                    /*
                     if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
                         UtilMicro.move(arg0, gs.silentCartographer.mapCenter.toPosition());
                     }
+                     */
                 }
             }
         } catch (Exception e) {

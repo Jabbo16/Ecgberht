@@ -92,7 +92,7 @@ public class Squad implements Comparable<Squad> {
             for (UnitInfo u : members) {
                 if (u.unit.isLockedDown() || u.unit.isMaelstrommed() || (u.unit).isStasised() || (u.unit).getTransport() != null)
                     continue;
-                if(u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Firebat && shouldStim(u))
+                if((u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Firebat) && shouldStim(u))
                     u.unit.useTech(TechType.Stim_Packs);
                 if (u.unitType == UnitType.Terran_Medic) microMedic(u.unit, marinesToHeal);
                 else if (u.isTank()) microTank(u);
@@ -146,7 +146,7 @@ public class Squad implements Comparable<Squad> {
                     return;
                 }
                 Position pos = getGs().getNearestCC(u.position, true);
-                if (Util.broodWarDistance(pos, u.position) >= 400) {
+                if (pos != null && Util.broodWarDistance(pos, u.position) >= 400) {
                     UtilMicro.move(u.unit, pos);
                 }
                 break;

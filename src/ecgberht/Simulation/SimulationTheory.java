@@ -131,7 +131,7 @@ public class SimulationTheory {
             if (type.isWorker() && (getGs().getStrat().name.equals("ProxyBBS") || getGs().getStrat().name.equals("ProxyEightRax")))
                 return true;
             if (u.getTransport() != null) return false;
-            return !type.isBuilding() && type.canAttack();
+            return !type.isBuilding() && type.spaceProvided() == 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -22,31 +22,28 @@ public class CheckEnemyBaseVisible extends Action {
     @Override
     public State execute() {
         try {
-            List<Unit> enemies = gameState.bw.enemy().getUnits();
-            if (!enemies.isEmpty()) {
-                for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
-                    if (Util.broodWarDistance(gameState.chosenScout.getPosition(), u.lastPosition) <= 500) {
-                        gameState.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
-                        gameState.scoutSLs = new HashSet<>();
-                        if (!gameState.getStrat().name.equals("PlasmaWraithHell")) {
-                            gameState.chosenHarasser = gameState.chosenScout;
-                        }
-                        gameState.chosenScout = null;
-                        gameState.bw.sendText("!");
-                        gameState.playSound("gearthere.mp3");
-                        if (gameState.enemyStartBase == null) {
-                            gameState.enemyBLs.clear();
-                            gameState.enemyBLs.addAll(gameState.BLs);
-                            gameState.enemyBLs.sort(new BaseLocationComparator(gameState.enemyMainBase));
-                            if (gameState.firstScout) {
-                                gameState.enemyStartBase = gameState.enemyMainBase;
-                                gameState.enemyMainArea = gameState.enemyStartBase.getArea();
-                                gameState.enemyNaturalBase = gameState.enemyBLs.get(1);
-                                gameState.enemyNaturalArea = gameState.enemyNaturalBase.getArea();
-                            }
-                        }
-                        return State.SUCCESS;
+            for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isResourceDepot()).collect(Collectors.toSet())) {
+                if (Util.broodWarDistance(gameState.chosenScout.getPosition(), u.lastPosition) <= 500) {
+                    gameState.enemyMainBase = Util.getClosestBaseLocation(u.lastPosition);
+                    gameState.scoutSLs = new HashSet<>();
+                    if (!gameState.getStrat().name.equals("PlasmaWraithHell")) {
+                        gameState.chosenHarasser = gameState.chosenScout;
                     }
+                    gameState.chosenScout = null;
+                    gameState.bw.sendText("!");
+                    gameState.playSound("gearthere.mp3");
+                    if (gameState.enemyStartBase == null) {
+                        gameState.enemyBLs.clear();
+                        gameState.enemyBLs.addAll(gameState.BLs);
+                        gameState.enemyBLs.sort(new BaseLocationComparator(gameState.enemyMainBase));
+                        if (gameState.firstScout) {
+                            gameState.enemyStartBase = gameState.enemyMainBase;
+                            gameState.enemyMainArea = gameState.enemyStartBase.getArea();
+                            gameState.enemyNaturalBase = gameState.enemyBLs.get(1);
+                            gameState.enemyNaturalArea = gameState.enemyNaturalBase.getArea();
+                        }
+                    }
+                    return State.SUCCESS;
                 }
             }
             return State.FAILURE;

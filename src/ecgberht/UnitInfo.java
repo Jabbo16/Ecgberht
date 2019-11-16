@@ -61,38 +61,37 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
     // TODO completion frames
     void update() {
-        player = unit.getPlayer();
-        unitType = unit.getType();
         visible = unit.isVisible();
-        position = visible ? unit.getPosition() : position;
-        currentOrder = unit.getOrder();
-        completed = !completed && visible ? unit.isCompleted() : completed;
-        tileposition = visible ? unit.getTilePosition() : tileposition;
-        if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
-        else walkposition = tileposition.toWalkPosition();
         if (visible) {
+            player = unit.getPlayer();
+            unitType = unit.getType();
+            position = unit.getPosition();
+            currentOrder = unit.getOrder();
+            completed = !completed && visible ? unit.isCompleted() : completed;
+            tileposition = visible ? unit.getTilePosition() : tileposition;
+            if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
+            else walkposition = tileposition.toWalkPosition();
+            lastVisibleFrame = visible ? getGs().frameCount : lastVisibleFrame;
+            lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : lastVisibleFrame;
+            if (unitType.groundWeapon() != WeaponType.None) // TODO upgrades
+                groundRange = player.weaponMaxRange(unitType.groundWeapon());
+            else if (unitType == UnitType.Terran_Bunker) groundRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon());
+            if (unitType.airWeapon() != WeaponType.None) // TODO upgrades
+                airRange = player.weaponMaxRange(unitType.airWeapon());
+            else if (unitType == UnitType.Terran_Bunker) groundRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon());
+            energy = unit.getEnergy();
+            burrowed = currentOrder == Order.Burrowing || unit.isBurrowed();
+            flying = unit.isFlying();
+            speed = Util.getSpeed(this);
+            target = unit.getTarget() != null ? unit.getTarget() : unit.getOrderTarget();
             lastPosition = position;
             lastTileposition = tileposition;
             lastWalkposition = walkposition;
         }
-        lastVisibleFrame = visible ? getGs().frameCount : lastVisibleFrame;
-        lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : lastVisibleFrame;
-        if (unitType.groundWeapon() != WeaponType.None) // TODO upgrades
-            groundRange = player.weaponMaxRange(unitType.groundWeapon());
-        else if (unitType == UnitType.Terran_Bunker) groundRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon());
-        if (unitType.airWeapon() != WeaponType.None) // TODO upgrades
-            airRange = player.weaponMaxRange(unitType.airWeapon());
-        else if (unitType == UnitType.Terran_Bunker) groundRange = player.weaponMaxRange(UnitType.Terran_Marine.groundWeapon());
         health = visible ? unit.getHitPoints() : expectedHealth();
         shields = visible ? unit.getShields() : expectedShields();
-        energy = unit.getEnergy();
         percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
         percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
-        if (visible) burrowed = currentOrder == Order.Burrowing || unit.isBurrowed();
-
-        if (visible) flying = unit.isFlying();
-        speed = Util.getSpeed(this);
-        target = unit.getTarget() != null ? unit.getTarget() : unit.getOrderTarget();
         attackers.clear();
     }
 
