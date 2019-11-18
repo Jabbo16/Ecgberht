@@ -59,7 +59,7 @@ public class CherryVisDumper {
 
     private String getDumpDirectory(String opponentName) {
         int i = 1;
-        while (i <= 100) {
+        while (i <= 1000) {
             String path = dir + "/" + gameState.getPlayer().getName() + "_" + opponentName + ".cvis." + i + "/";
             File directory = new File(path);
             if (directory.exists()) {
@@ -91,8 +91,8 @@ public class CherryVisDumper {
     }
 
     private void fillGameSummary(boolean win, String startStrat) {
-        gameSummary.opening_bo = startStrat;
-        gameSummary.final_bo = gameState.getStrat().name;
+        gameSummary.cp_opening_bo = startStrat;
+        gameSummary.cp_final_bo = gameState.getStrat().name;
         gameSummary.game_duration_frames = gameState.getIH().getFrameCount();
         gameSummary.draw = gameState.getIH().getFrameCount() == 0;
         gameSummary.map = gameState.getGame().getBWMap().mapFileName();
