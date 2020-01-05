@@ -54,7 +54,8 @@ public class ConfigManager {
             boolean enableLatCom = true;
             boolean enableSkyCladObserver = false;
             String forceStrat = "";
-            boolean cherryVis = false;
+            public boolean enableCherryVisDump = true;
+            boolean debugAttackDisabled = false;
         }
 
         static class BwapiConfig {
@@ -62,7 +63,6 @@ public class ConfigManager {
             int frameSkip = -1;
             boolean userInput = true;
             boolean completeMapInformation = false;
-
         }
     }
 }

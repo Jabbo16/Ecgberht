@@ -25,9 +25,8 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
     private Unit pickingUp;
 
     public DropShipAgent(Unit unit) {
-        super();
+        super(unit);
         this.unit = (Dropship) unit;
-        this.myUnit = unit;
     }
 
     public String statusToString() {

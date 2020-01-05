@@ -43,10 +43,9 @@ public class WorkerScoutAgent extends Agent {
     private TilePosition proxyTile = null;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
+        super(unit);
         this.unit = (SCV) unit;
-        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.enemyBase = enemyBase;
-        this.myUnit = unit;
         canProxyInThisMap();
     }
 

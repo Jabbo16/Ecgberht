@@ -25,11 +25,9 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
     private Set<UnitInfo> airAttackers = new TreeSet<>();
 
     public WraithAgent(Unit unit, String name) {
-        super();
-        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
+        super(unit);
         this.unit = (Wraith) unit;
         this.name = name;
-        this.myUnit = unit;
     }
 
     @Override

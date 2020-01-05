@@ -3,6 +3,7 @@ package ecgberht.CherryVis;
 import com.github.luben.zstd.Zstd;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ecgberht.ConfigManager;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.unit.Unit;
@@ -60,7 +61,7 @@ public class CherryVisDumper {
     private String getDumpDirectory(String opponentName) {
         int i = 1;
         while (i <= 1000) {
-            String path = dir + "/" + gameState.getPlayer().getName() + "_" + opponentName + ".cvis." + i + "/";
+            String path = dir + "/" + gameState.getPlayer().getName() + "_vs_" + opponentName + "_" + i + ".rep.cvis/";
             File directory = new File(path);
             if (directory.exists()) {
                 i++;
@@ -72,6 +73,7 @@ public class CherryVisDumper {
         return null;
     }
     public void onEnd(boolean win, String startStrat) {
+        if (!ConfigManager.getConfig().ecgConfig.enableCherryVisDump) return;
         File directory = new File(dir);
         boolean created = directory.exists();
         if (!created) created = directory.mkdir();

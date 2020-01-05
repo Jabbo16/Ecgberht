@@ -137,7 +137,7 @@ public class SimulationTheory {
                 return true;
             if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
             return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
-                    || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
+                    || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath || u instanceof Dropship;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -57,6 +57,11 @@ public class DebugManager {
                 iH.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
                 ConfigManager.getConfig().ecgConfig.sounds = !setting;
                 break;
+            case "noattack":
+                setting = ConfigManager.getConfig().ecgConfig.debugAttackDisabled;
+                iH.sendText(!setting ? "Debug Attack enabled" : "Debug Attack disabled");
+                ConfigManager.getConfig().ecgConfig.debugAttackDisabled = !setting;
+                break;
         }
     }
 
@@ -89,6 +94,9 @@ public class DebugManager {
             for (Unit u : gameState.enemyInBase) print(u, Color.RED);
             for (Base b : gameState.islandBases)
                 mapDrawer.drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
+            for (Unit u : gameState.islandCCs.values()) {
+                print(u, Color.YELLOW);
+            }
             for (Agent ag : gameState.agents.values()) {
                 if (ag instanceof VultureAgent) {
                     VultureAgent vulture = (VultureAgent) ag;
@@ -110,7 +118,6 @@ public class DebugManager {
                     mapDrawer.drawTextMap(worker.myUnit.getPosition().add(new Position(-16,
                             UnitType.Terran_SCV.dimensionUp())), ColorUtil.formatText(worker.statusToString(), ColorUtil.White));
                 }
-
             }
             if (gameState.enemyStartBase != null)
                 mapDrawer.drawTextMap(gameState.enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));

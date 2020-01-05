@@ -1014,6 +1014,7 @@ public class GameState {
             if (sqManager.squads.isEmpty() || (defense && !getStrat().name.equals("ProxyBBS") && !getStrat().name.equals("ProxyEightRax")))
                 return;
             boolean needToAttack = needToAttack();
+            if (ConfigManager.getConfig().ecgConfig.debugAttackDisabled) needToAttack = false;
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
                 if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && (getStrat().proxy || !checkItWasAttacking(u)))
