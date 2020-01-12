@@ -16,13 +16,11 @@ import java.util.Objects;
 public class CherryVisDumper {
     private GameState gameState;
     private TraceData traceData;
-    private GameSummary gameSummary;
     private final String dir = "bwapi-data/write/cherryvis";
 
     public CherryVisDumper(GameState gameState) {
         this.gameState = gameState;
         traceData = new TraceData();
-        gameSummary = new GameSummary();
     }
 
     public void onFrame() {
@@ -84,26 +82,9 @@ public class CherryVisDumper {
         String opponentName = gameState.getIH().enemy().getName();
         String path = getDumpDirectory(opponentName);
         if (path != null) {
-            fillGameSummary(win, startStrat);
-            Util.getIH().sendText("Writing GameSummary to: " + path);
-            writeJSON(gameSummary, path + "game_summary.json");
             Util.getIH().sendText("Writing traceData to: " + path);
             writeJSONCompressed(traceData, path + "trace.json");
         }
-    }
-
-    private void fillGameSummary(boolean win, String startStrat) {
-        gameSummary.cp_opening_bo = startStrat;
-        gameSummary.cp_final_bo = gameState.getStrat().name;
-        gameSummary.game_duration_frames = gameState.getIH().getFrameCount();
-        gameSummary.draw = gameState.getIH().getFrameCount() == 0;
-        gameSummary.map = gameState.getGame().getBWMap().mapFileName();
-        gameSummary.p0_name = gameState.getPlayer().getName();
-        gameSummary.p0_race = gameState.getPlayer().getRace().toString();
-        gameSummary.p0_win = win;
-        gameSummary.p1_name = gameState.getIH().enemy().getName();
-        gameSummary.p1_race = gameState.enemyRace.toString();
-        gameSummary.p1_win = !win && gameState.getIH().getFrameCount() != 0;
     }
 
     private void fillBoard(String frame) {
@@ -126,7 +107,6 @@ public class CherryVisDumper {
         board.put("APM", getStringObject(gameState.getIH().getFrameCount()));
         board.put("islandBases", getStringObject(gameState.islandBases.size()));
         // TODO more board variables
-
     }
 
     private String getStringObject(Object obj) {

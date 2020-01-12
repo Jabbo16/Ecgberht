@@ -11,7 +11,7 @@ class UnitSeenInfo {
     UnitSeenInfo(Unit u) {
         id = u.getId();
         type = u.getType().getId();
-        x = u.getPosition().toWalkPosition().getX();
-        y = u.getPosition().toWalkPosition().getY();
+        x = u.getTilePosition().toWalkPosition().getX();
+        y = u.getTilePosition().toWalkPosition().getY();
     }
 }
