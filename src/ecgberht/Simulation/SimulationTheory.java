@@ -38,7 +38,7 @@ public class SimulationTheory {
     private int iterations = 10;
 
     public SimulationTheory(BW bw) {
-        simulator = new Simulator();
+        simulator = new Simulator.Builder().build();
         evaluator = new Evaluator();
         factory = new BWAPI4JAgentFactory(bw.getBWMap());
         if (ConfigManager.getConfig().ecgConfig.sscait) {
