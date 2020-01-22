@@ -1,8 +1,8 @@
 package ecgberht.BehaviourTrees.Repair;
 
 
+import bwem.Area;
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;

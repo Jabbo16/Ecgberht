@@ -1,7 +1,7 @@
 package ecgberht;
 
 import bwem.Base;
-import bwem.unit.Mineral;
+import bwem.Mineral;
 import ecgberht.Strategies.*;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.Player;

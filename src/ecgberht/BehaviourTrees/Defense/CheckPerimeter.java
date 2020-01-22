@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Defense;
 
+import bwem.Area;
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.Squad.Status;

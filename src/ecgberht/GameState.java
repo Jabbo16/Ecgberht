@@ -1,13 +1,6 @@
 package ecgberht;
 
-import bwem.BWEM;
-import bwem.Base;
-import bwem.ChokePoint;
-import bwem.area.Area;
-import bwem.unit.Geyser;
-import bwem.unit.Mineral;
-import bwem.unit.Neutral;
-import bwem.unit.NeutralImpl;
+import bwem.*;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.Agents.VesselAgent;
@@ -971,7 +964,7 @@ public class GameState {
 
     void workerTransfer() {
         int numWorkersToTransfer = (workerIdle.size() + workerMining.size()) / 2;
-        List<Unit> minerals = BLs.get(1).getMinerals().stream().map(NeutralImpl::getUnit).collect(Collectors.toList());
+        List<Unit> minerals = BLs.get(1).getMinerals().stream().map(Neutral::getUnit).collect(Collectors.toList());
         boolean hardStuck = false;
         while (numWorkersToTransfer != 0 && !hardStuck) {
             MineralPatch chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();

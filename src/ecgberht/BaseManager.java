@@ -1,8 +1,8 @@
 package ecgberht;
 
+import bwem.Area;
 import bwem.BWEM;
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;

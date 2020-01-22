@@ -70,6 +70,7 @@ public class CherryVisDumper {
         }
         return null;
     }
+
     public void onEnd(boolean win, String startStrat) {
         if (!ConfigManager.getConfig().ecgConfig.enableCherryVisDump) return;
         File directory = new File(dir);

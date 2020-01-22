@@ -2,7 +2,7 @@ package ecgberht;
 
 import bwem.Base;
 import bwem.ChokePoint;
-import bwem.unit.Mineral;
+import bwem.Mineral;
 import cameraModule.CameraModule;
 import ecgberht.Agents.*;
 import ecgberht.Util.ColorUtil;

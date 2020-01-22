@@ -1,7 +1,7 @@
 package ecgberht.Agents;
 
+import bwem.Area;
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
