@@ -18,16 +18,13 @@ import bwem.util.Pair;
 import bwem.util.Pred;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.type.UnitType;
-import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.VespeneGeyser;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static bwem.AreaId.UNINITIALIZED;
-import static java.util.stream.Collectors.toCollection;
 
 public abstract class BWMap {
     final List<Pair<Pair<AreaId, AreaId>, WalkPosition>> rawFrontier =
@@ -48,8 +45,8 @@ public abstract class BWMap {
     BWMap(final BW game, final Asserter asserter) {
         this.game = game;
         this.players = new ArrayList<>(game.getAllPlayers());
-        this.mineralPatches = game.getMineralPatches().stream().map(u -> ((Unit)u)).collect(Collectors.toList());
-        this.vespeneGeysers = game.getVespeneGeysers().stream().map(u -> ((Unit)u)).collect(Collectors.toList());
+        this.mineralPatches = game.getMineralPatches().stream().map(u -> ((Unit) u)).collect(Collectors.toList());
+        this.vespeneGeysers = game.getVespeneGeysers().stream().map(u -> ((Unit) u)).collect(Collectors.toList());
         this.units = new ArrayList<>(game.getAllUnits());
         this.graph = new Graph(this);
         this.neighboringAreaChooser = new NeighboringAreaChooser();
@@ -231,7 +228,7 @@ public abstract class BWMap {
     }
 
     public TilePosition breadthFirstSearch(
-        TilePosition start, Pred<Tile, TilePosition> findCond, Pred<Tile, TilePosition> visitCond, boolean connect8) {
+            TilePosition start, Pred<Tile, TilePosition> findCond, Pred<Tile, TilePosition> visitCond, boolean connect8) {
         if (findCond.test(getData().getTile(start), start)) {
             return start;
         }
@@ -239,7 +236,7 @@ public abstract class BWMap {
         final Set<TilePosition> visited =
                 new TreeSet<>(
                         Comparator.comparing(TilePosition::getX)
-                            .thenComparing(TilePosition::getY));
+                                .thenComparing(TilePosition::getY));
         Queue<TilePosition> toVisit = new ArrayDeque<>();
 
         toVisit.add(start);
@@ -290,15 +287,15 @@ public abstract class BWMap {
     }
 
     public WalkPosition breadthFirstSearch(
-        WalkPosition start, Pred<MiniTile, WalkPosition> findCond, Pred<MiniTile, WalkPosition> visitCond, boolean connect8) {
+            WalkPosition start, Pred<MiniTile, WalkPosition> findCond, Pred<MiniTile, WalkPosition> visitCond, boolean connect8) {
         if (findCond.test(getData().getMiniTile(start), start)) {
             return start;
         }
 
         final Set<WalkPosition> visited =
                 new TreeSet<>(
-                    Comparator.comparing(WalkPosition::getX)
-                        .thenComparing(WalkPosition::getY));
+                        Comparator.comparing(WalkPosition::getX)
+                                .thenComparing(WalkPosition::getY));
         final Queue<WalkPosition> toVisit = new ArrayDeque<>();
 
         toVisit.add(start);
@@ -350,14 +347,14 @@ public abstract class BWMap {
     }
 
     private List<Unit> filterPlayerUnits(final Collection<Unit> units,
-        final Player player) {
+                                         final Player player) {
         //        return this.units.stream().filter(u -> u instanceof PlayerUnit
         //                && ((PlayerUnit)u).getPlayer().equals(player)).map(u ->
         // (PlayerUnit)u).collect(Collectors.toList());
         final List<Unit> ret = new ArrayList<>();
         for (final Unit u : units) {
             if (!(u.getType().isMineralField() || u.getType()
-                .equals(UnitType.Resource_Vespene_Geyser)) && u instanceof PlayerUnit && ((PlayerUnit) u).getPlayer().equals(player)) {
+                    .equals(UnitType.Resource_Vespene_Geyser)) && u instanceof PlayerUnit && ((PlayerUnit) u).getPlayer().equals(player)) {
                 ret.add(u);
             }
         }
@@ -365,7 +362,7 @@ public abstract class BWMap {
     }
 
     List<Unit> filterNeutralPlayerUnits(
-        final Collection<Unit> units, final Collection<Player> players) {
+            final Collection<Unit> units, final Collection<Player> players) {
         final List<Unit> ret = new ArrayList<>();
         for (final Player player : players) {
             if (player.isNeutral()) {
@@ -416,7 +413,7 @@ public abstract class BWMap {
                         result.setLeft(areaId);
                     } else if (!result.getLeft().equals(areaId)) {
                         if (result.getRight() == null ||
-                            areaId.intValue() < result.getRight().intValue()) {
+                                areaId.intValue() < result.getRight().intValue()) {
                             result.setRight(areaId);
                         }
                     }

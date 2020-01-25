@@ -154,7 +154,7 @@ public abstract class Neutral {
         for (int dy = 0; dy < getSize().getY(); ++dy)
             for (int dx = 0; dx < getSize().getX(); ++dx) {
                 final Tile deltaTile = getMap().getData()
-                                .getTile(getTopLeft().add(new TilePosition(dx, dy)));
+                        .getTile(getTopLeft().add(new TilePosition(dx, dy)));
                 if (deltaTile.getNeutral() == null) {
                     deltaTile.addNeutral(this);
                 } else {
@@ -221,7 +221,7 @@ public abstract class Neutral {
                     }
                     if (prevStacked != null) {
                         if (!prevStacked.isSameUnitTypeAs(this) || !(prevStacked
-                            .getTopLeft().equals(getTopLeft()))) {
+                                .getTopLeft().equals(getTopLeft()))) {
                             map.asserter.throwIllegalStateException("");
                         }
                         prevStacked.nextStacked = nextStacked;

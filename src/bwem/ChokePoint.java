@@ -52,12 +52,12 @@ public final class ChokePoint {
     private ChokePoint pathBackTrace = null;
 
     ChokePoint(
-        final Graph graph,
-        final int index,
-        final Area area1,
-        final Area area2,
-        final List<WalkPosition> geometry,
-        final Neutral blockingNeutral) {
+            final Graph graph,
+            final int index,
+            final Area area1,
+            final Area area2,
+            final List<WalkPosition> geometry,
+            final Neutral blockingNeutral) {
         if (geometry.isEmpty()) {
             graph.getMap().asserter.throwIllegalStateException("");
         }
@@ -103,24 +103,24 @@ public final class ChokePoint {
         for (int n = 0; n < Node.NODE_COUNT.ordinal(); ++n) {
             for (final Area area : new Area[]{area1, area2}) {
                 final WalkPosition nodeInArea =
-                    getGraph()
-                        .getMap()
-                        .breadthFirstSearch(
-                            this.nodes[n],
-                            // findCond
-                            (MiniTile miniTile, WalkPosition w) -> (
-                                miniTile.getAreaId().equals(area.getId())
-                                    && map.getData()
-                                    .getTile(w.toTilePosition(), CheckMode.NO_CHECK)
-                                    .getNeutral() == null),
-                            // visitCond
-                            (MiniTile miniTile, WalkPosition w) -> (
-                                miniTile.getAreaId().equals(area.getId())
-                                    || (isBlocked()
-                                    && (miniTile.isBlocked()
-                                    || map.getData()
-                                    .getTile(w.toTilePosition(), CheckMode.NO_CHECK)
-                                    .getNeutral() != null))));
+                        getGraph()
+                                .getMap()
+                                .breadthFirstSearch(
+                                        this.nodes[n],
+                                        // findCond
+                                        (MiniTile miniTile, WalkPosition w) -> (
+                                                miniTile.getAreaId().equals(area.getId())
+                                                        && map.getData()
+                                                        .getTile(w.toTilePosition(), CheckMode.NO_CHECK)
+                                                        .getNeutral() == null),
+                                        // visitCond
+                                        (MiniTile miniTile, WalkPosition w) -> (
+                                                miniTile.getAreaId().equals(area.getId())
+                                                        || (isBlocked()
+                                                        && (miniTile.isBlocked()
+                                                        || map.getData()
+                                                        .getTile(w.toTilePosition(), CheckMode.NO_CHECK)
+                                                        .getNeutral() != null))));
 
                 /*
                  * Note: In the original C++ code, "nodeInArea" is a reference to a "WalkPosition" in
@@ -142,11 +142,11 @@ public final class ChokePoint {
     }
 
     ChokePoint(
-        final Graph graph,
-        final int index,
-        final Area area1,
-        final Area area2,
-        final List<WalkPosition> geometry) {
+            final Graph graph,
+            final int index,
+            final Area area1,
+            final Area area2,
+            final List<WalkPosition> geometry) {
         this(graph, index, area1, area2, geometry, null);
     }
 

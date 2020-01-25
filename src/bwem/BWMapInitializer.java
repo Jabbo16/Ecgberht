@@ -12,13 +12,13 @@
 
 package bwem;
 
-import bwem.util.*;
+import bwem.util.BwemExt;
+import bwem.util.Pair;
+import bwem.util.Utils;
 import org.openbw.bwapi4j.BW;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.WalkPosition;
-import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Unit;
-import org.openbw.bwapi4j.unit.VespeneGeyser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,7 +77,7 @@ class BWMapInitializer extends BWMap {
     }
 
     private void initializeTerrainData(
-        final int mapTileWidth, final int mapTileHeight, final List<TilePosition> startingLocations) {
+            final int mapTileWidth, final int mapTileHeight, final List<TilePosition> startingLocations) {
         final MapData mapData = new MapData(mapTileWidth, mapTileHeight, startingLocations);
         final TileData tileData =
                 new TileData(
@@ -92,9 +92,9 @@ class BWMapInitializer extends BWMap {
     ////////////////////////////////////////////////////////////////////////
 
     private void initializeNeutralData(
-        final List<Unit> mineralPatches,
-        final List<Unit> vespeneGeysers,
-        final List<Unit> neutralUnits) {
+            final List<Unit> mineralPatches,
+            final List<Unit> vespeneGeysers,
+            final List<Unit> neutralUnits) {
         super.neutralData = new NeutralData(this, mineralPatches, vespeneGeysers, neutralUnits);
     }
 
@@ -124,18 +124,18 @@ class BWMapInitializer extends BWMap {
                 getActiveSeaSideList(terrainData);
 
         super.highestAltitude = setAltitudesAndGetUpdatedHighestAltitude(
-                        getHighestAltitude(),
-                        terrainData,
-                        deltasByAscendingAltitude,
-                        activeSeaSides,
-                        altitudeScale);
+                getHighestAltitude(),
+                terrainData,
+                deltasByAscendingAltitude,
+                activeSeaSides,
+                altitudeScale);
     }
 
     /**
      * 1) Fill in and sort DeltasByAscendingAltitude
      */
     private List<Pair<WalkPosition, Altitude>> getSortedDeltasByAscendingAltitude(
-        final int mapWalkTileWidth, final int mapWalkTileHeight, int altitudeScale) {
+            final int mapWalkTileWidth, final int mapWalkTileHeight, int altitudeScale) {
         final int range =
                 Math.max(mapWalkTileWidth, mapWalkTileHeight) / 2
                         + 3; // should suffice for maps with no Sea.
@@ -166,7 +166,7 @@ class BWMapInitializer extends BWMap {
      * seaside miniTiles too.
      */
     private List<Pair<WalkPosition, Altitude>> getActiveSeaSideList(
-        final TerrainData terrainData) {
+            final TerrainData terrainData) {
         final List<Pair<WalkPosition, Altitude>> activeSeaSideList = new ArrayList<>();
 
         for (int y = -1; y <= terrainData.getMapData().getWalkSize().getY(); ++y) {
@@ -187,11 +187,11 @@ class BWMapInitializer extends BWMap {
     // ----------------------------------------------------------------------
 
     private Altitude setAltitudesAndGetUpdatedHighestAltitude(
-        final Altitude currentHighestAltitude,
-        final TerrainData terrainData,
-        final List<Pair<WalkPosition, Altitude>> deltasByAscendingAltitude,
-        final List<Pair<WalkPosition, Altitude>> activeSeaSideList,
-        final int altitudeScale) {
+            final Altitude currentHighestAltitude,
+            final TerrainData terrainData,
+            final List<Pair<WalkPosition, Altitude>> deltasByAscendingAltitude,
+            final List<Pair<WalkPosition, Altitude>> activeSeaSideList,
+            final int altitudeScale) {
         Altitude updatedHighestAltitude = currentHighestAltitude;
 
         for (final Pair<WalkPosition, Altitude> deltaAltitude : deltasByAscendingAltitude) {
@@ -258,7 +258,7 @@ class BWMapInitializer extends BWMap {
     }
 
     private List<Neutral> getCandidates(
-        final List<StaticBuilding> staticBuildings, final List<Mineral> minerals) {
+            final List<StaticBuilding> staticBuildings, final List<Mineral> minerals) {
         final List<Neutral> candidates = new ArrayList<>();
         candidates.addAll(staticBuildings);
         candidates.addAll(minerals);
@@ -340,7 +340,7 @@ class BWMapInitializer extends BWMap {
      * area big enough
      */
     private List<WalkPosition> getTrueDoors(final List<WalkPosition> doors,
-        final Neutral pCandidate) {
+                                            final Neutral pCandidate) {
         final List<WalkPosition> trueDoors = new ArrayList<>();
 
         if (doors.size() >= 2) {
@@ -388,7 +388,7 @@ class BWMapInitializer extends BWMap {
      * 4) If at least 2 true doors, pCandidate is a blocking static building
      */
     private void markBlockingStackedNeutrals(
-        final Neutral pCandidate, final List<WalkPosition> trueDoors) {
+            final Neutral pCandidate, final List<WalkPosition> trueDoors) {
         if (trueDoors.size() >= 2) {
             // Marks pCandidate (and any Neutral stacked with it) as blocking.
             for (Neutral pNeutral = getData().getTile(pCandidate.getTopLeft()).getNeutral();
@@ -454,7 +454,7 @@ class BWMapInitializer extends BWMap {
     }
 
     private List<TempAreaInfo> computeTempAreas(
-        final List<Pair<WalkPosition, MiniTile>> miniTilesByDescendingAltitude) {
+            final List<Pair<WalkPosition, MiniTile>> miniTilesByDescendingAltitude) {
         final List<TempAreaInfo> tempAreaList = new ArrayList<>();
         tempAreaList.add(new TempAreaInfo(asserter)); // tempAreaList[0] left unused, as AreaIds are > 0
 

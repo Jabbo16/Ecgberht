@@ -13,8 +13,7 @@ class Asserter {
         final IllegalStateException exception = new IllegalStateException(message);
         if (failOnError) {
             throw exception;
-        }
-        else {
+        } else {
             try {
                 throw exception;
             } catch (IllegalStateException e) {

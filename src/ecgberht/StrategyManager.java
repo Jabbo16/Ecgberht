@@ -33,7 +33,85 @@ public class StrategyManager {
     private Map<String, Strategy> nameStrat = new LinkedHashMap<>();
 
     StrategyManager() {
+        initBaseStrategies();
         this.strat = initStrat();
+        AddSpecialUnitsIfParticularMap();
+    }
+
+    private void AddSpecialUnitsIfParticularMap() {
+        if (getGs().getGame().getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) { // GoldRush
+            this.strat.trainUnits.add(UnitType.Terran_Wraith);
+        }
+    }
+
+    private void initBaseStrategies() {
+        Consumer<Strategy> addStrat = (strat) -> {
+            strategies.put(strat.name, new MutablePair<>(0, 0));
+            nameStrat.put(strat.name, strat);
+        };
+        switch (getGs().enemyRace) {
+            case Zerg:
+                addStrat.accept(bGFE);
+                addStrat.accept(tPW);
+                addStrat.accept(pER);
+                addStrat.accept(bFE);
+                addStrat.accept(fastCC);
+                addStrat.accept(bMGFE);
+                addStrat.accept(bbs);
+                addStrat.accept(bM);
+                addStrat.accept(FM);
+                addStrat.accept(b);
+                addStrat.accept(bMFE);
+                addStrat.accept(vR);
+                addStrat.accept(tNK);
+                break;
+
+            case Terran:
+                addStrat.accept(FM);
+                addStrat.accept(fastCC);
+                addStrat.accept(pER);
+                addStrat.accept(bMGFE);
+                addStrat.accept(tPW);
+                addStrat.accept(bM);
+                addStrat.accept(mGFE);
+                addStrat.accept(bbs);
+                addStrat.accept(bFE);
+                addStrat.accept(bGFE);
+                addStrat.accept(b);
+                addStrat.accept(bMFE);
+                addStrat.accept(vR);
+                addStrat.accept(tNK);
+                break;
+
+            case Protoss:
+                addStrat.accept(FM);
+                addStrat.accept(jOR);
+                addStrat.accept(pER);
+                addStrat.accept(fastCC);
+                addStrat.accept(mGFE);
+                addStrat.accept(bM);
+                addStrat.accept(bMGFE);
+                addStrat.accept(b);
+                addStrat.accept(bGFE);
+                addStrat.accept(bMFE);
+                addStrat.accept(bFE);
+                addStrat.accept(vR);
+                addStrat.accept(tNK);
+                break;
+
+            case Unknown:
+                addStrat.accept(b);
+                addStrat.accept(FM);
+                addStrat.accept(bM);
+                addStrat.accept(bGFE);
+                addStrat.accept(bMGFE);
+                addStrat.accept(bbs);
+                addStrat.accept(mGFE);
+                addStrat.accept(jOR);
+                addStrat.accept(bMFE);
+                addStrat.accept(bFE);
+                break;
+        }
     }
 
     void choose14CCTransition() {
@@ -105,87 +183,8 @@ public class StrategyManager {
 
     private Strategy initStrat() {
         try {
-            String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             LearningManager.EnemyInfo EI = getGs().learningManager.getEnemyInfo();
-            if (getGs().enemyRace == Race.Zerg && EI.naughty) return b;
-            if (getGs().bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
-                getGs().maxWraiths = 200; // HELL
-                return new PlasmaWraithHell();
-            }
-            if (alwaysZealotRushes()) {
-                IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
-                bFE.armyForExpand += 5;
-                bFE.workerGas = 2;
-                return bFE;
-            }
-            Consumer<Strategy> addStrat = (strat) -> {
-                strategies.put(strat.name, new MutablePair<>(0, 0));
-                nameStrat.put(strat.name, strat);
-            };
-
-            switch (getGs().enemyRace) {
-                case Zerg:
-                    addStrat.accept(bGFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(pER);
-                    addStrat.accept(bFE);
-                    addStrat.accept(fastCC);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(bbs);
-                    addStrat.accept(bM);
-                    addStrat.accept(FM);
-                    addStrat.accept(b);
-                    addStrat.accept(bMFE);
-                    addStrat.accept(vR);
-                    addStrat.accept(tNK);
-                    break;
-
-                case Terran:
-                    addStrat.accept(FM);
-                    addStrat.accept(fastCC);
-                    addStrat.accept(pER);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(tPW);
-                    addStrat.accept(bM);
-                    addStrat.accept(mGFE);
-                    addStrat.accept(bbs);
-                    addStrat.accept(bFE);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(b);
-                    addStrat.accept(bMFE);
-                    addStrat.accept(vR);
-                    addStrat.accept(tNK);
-                    break;
-
-                case Protoss:
-                    addStrat.accept(FM);
-                    addStrat.accept(jOR);
-                    addStrat.accept(pER);
-                    addStrat.accept(fastCC);
-                    addStrat.accept(mGFE);
-                    addStrat.accept(bM);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(b);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(bMFE);
-                    addStrat.accept(bFE);
-                    addStrat.accept(vR);
-                    addStrat.accept(tNK);
-                    break;
-
-                case Unknown:
-                    addStrat.accept(b);
-                    addStrat.accept(FM);
-                    addStrat.accept(bM);
-                    addStrat.accept(bGFE);
-                    addStrat.accept(bMGFE);
-                    addStrat.accept(bbs);
-                    addStrat.accept(mGFE);
-                    addStrat.accept(jOR);
-                    addStrat.accept(bMFE);
-                    addStrat.accept(bFE);
-                    break;
-            }
+            String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (!forcedStrat.equals("")) {
                 if (forcedStrat.toLowerCase().equals("random")) {
                     int index = new Random().nextInt(nameStrat.entrySet().size());
@@ -209,6 +208,18 @@ public class StrategyManager {
                     return nameStrat.get(forcedStrat);
                 }
             }
+            if (getGs().enemyRace == Race.Zerg && EI.naughty) return b;
+            if (getGs().bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
+                getGs().maxWraiths = 200; // HELL
+                return new PlasmaWraithHell();
+            }
+            if (alwaysZealotRushes()) {
+                IntelligenceAgency.setEnemyStrat(IntelligenceAgency.EnemyStrats.ZealotRush);
+                bFE.armyForExpand += 5;
+                bFE.workerGas = 2;
+                return bFE;
+            }
+            removeStrategiesMapSpecific();
             int totalGamesPlayed = EI.wins + EI.losses;
             for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
                 if (strategies.containsKey(r.strategyName)) {
@@ -256,6 +267,19 @@ public class StrategyManager {
             System.err.println("Error initStrat, using default strategy");
             e.printStackTrace();
             return b;
+        }
+    }
+
+    private void removeStrategiesMapSpecific() {
+        Consumer<Strategy> removeStrat = (strat) -> {
+            strategies.remove(strat.name);
+            nameStrat.remove(strat.name);
+        };
+        if (getGs().getGame().getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) { // GoldRush
+            removeStrat.accept(pER);
+            removeStrat.accept(bbs);
+            removeStrat.accept(tNK);
+            removeStrat.accept(jOR);
         }
     }
 }

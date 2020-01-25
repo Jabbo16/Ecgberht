@@ -15,7 +15,6 @@ public class SendScout extends Action {
 
     public SendScout(String name, GameState gh) {
         super(name, gh);
-
     }
 
     @Override

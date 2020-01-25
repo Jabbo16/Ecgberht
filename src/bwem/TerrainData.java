@@ -75,7 +75,7 @@ public final class TerrainData {
         for (final WalkPosition delta : deltas) {
             final WalkPosition walkPositionDelta = walkPosition.add(delta);
             if (getMapData().isValid(walkPositionDelta) && !getMiniTile(walkPositionDelta,
-                CheckMode.NO_CHECK).isSea()) {
+                    CheckMode.NO_CHECK).isSea()) {
                 return true;
             }
         }

@@ -110,13 +110,15 @@ public class GameState {
     public TilePosition chosenPosition = null;
     public TilePosition initDefensePosition = null;
     public TrainingFacility chosenTrainingFacility = null;
-    public Unit chosenScout = null;
+    public MobileUnit chosenScout = null;
     public Unit chosenUnitToHarass = null;
     public UnitType chosenAddon = null;
     public UnitType chosenToBuild = UnitType.None;
+    public Position mapCenter = new Position(0, 0);
     public UnitType chosenUnit = UnitType.None;
     public UpgradeType chosenUpgrade = null;
     public Worker chosenHarasser = null;
+    public Set<MineralPatch> walkingMinerals = new TreeSet<>();
     public Worker chosenWorker = null;
     public Worker chosenWorkerDrop = null;
     public boolean explore = false;
@@ -151,6 +153,7 @@ public class GameState {
         learningManager = new LearningManager(ih.enemy().getName(), ih.enemy().getRace());
         initPlayers();
         mapSize = bw.getBWMap().getStartPositions().size();
+        mapCenter = new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition();
         supplyMan = new SupplyMan(self.getRace());
         sim = new SimulationTheory(bw);
         luckyDraw = Math.random();
@@ -1021,6 +1024,9 @@ public class GameState {
                     if (getGame().getBWMap().isValidPosition(attackPos)) {
                         u.giveAttackOrder(attackPos);
                         u.status = Squad.Status.ATTACK;
+                    } else if (enemyMainBase != null) {
+                        u.giveAttackOrder(enemyMainBase.getLocation().toPosition());
+                        u.status = Squad.Status.ATTACK;
                     }
                 } else if (enemyMainBase != null) {
                     if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
@@ -1169,5 +1175,23 @@ public class GameState {
 
     public boolean isGoingToExpand() {
         return workerBuild.values().stream().anyMatch(u -> u.first == UnitType.Terran_Command_Center);
+    }
+
+    public void initMineralWalkPatches() {
+        List<MineralPatch> mineralPatches = getGame().getMineralPatches();
+        List<Unit> randomEggs = new ArrayList<>();
+        for (Unit u : getGame().getAllUnits()) {
+            if (u.getType() == UnitType.Zerg_Egg) randomEggs.add(u);
+        }
+        for (StaticBuilding u : bwem.getMap().getNeutralData().getStaticBuildings()) {
+            if (u.getUnit() instanceof Assimilator) {
+                mineralPatches.sort(Comparator.comparingInt((MineralPatch o) -> o.getDistance(u.getUnit())));
+                walkingMinerals.add(mineralPatches.get(0));
+                walkingMinerals.add(mineralPatches.get(1));
+                randomEggs.sort(Comparator.comparingInt((Unit o) -> o.getDistance(u.getUnit())));
+                unitStorage.onUnitShow(randomEggs.get(0));
+                unitStorage.onUnitShow(randomEggs.get(1));
+            }
+        }
     }
 }

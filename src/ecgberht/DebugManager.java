@@ -83,6 +83,7 @@ public class DebugManager {
             if(u.getValue().first != null) bw.getMapDrawer().drawLineMap(u.getKey().getLocation().toPosition(), u.getValue().first.getPosition(),Color.RED);
             if(u.getValue().second != null)bw.getMapDrawer().drawLineMap(u.getKey().getLocation().toPosition(), u.getValue().second.getPosition(),Color.ORANGE);
         }*/
+            for (MineralPatch m : gameState.walkingMinerals) print(m, Color.RED);
             for (MineralPatch d : gameState.blockingMinerals.values()) print(d, Color.RED);
             int counter = 0;
             for (Base b : gameState.BLs) {

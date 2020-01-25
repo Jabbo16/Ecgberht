@@ -54,7 +54,7 @@ public final class BwemExt {
     public static Position centerOfBuilding(
             final TilePosition tilePosition, final TilePosition buildingSize) {
         final Position pixelSize = buildingSize.toPosition();
-        final Position pixelOffset = pixelSize.divide(new Position(2,2));
+        final Position pixelOffset = pixelSize.divide(new Position(2, 2));
         return tilePosition.toPosition().add(pixelOffset);
     }
 
@@ -198,7 +198,7 @@ public final class BwemExt {
     }
 
     private static List<TilePosition> innerBorder(
-        final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
+            final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
         final List<TilePosition> border = new ArrayList<>();
         final List<Pair<Integer, Integer>> deltas =
                 innerBorderDeltas(size.getX(), size.getY(), noCorner);
@@ -214,7 +214,7 @@ public final class BwemExt {
     }
 
     private static List<WalkPosition> innerBorder(
-        final WalkPosition topLeft, final WalkPosition size, boolean noCorner) {
+            final WalkPosition topLeft, final WalkPosition size, boolean noCorner) {
         final List<WalkPosition> border = new ArrayList<>();
         final List<Pair<Integer, Integer>> deltas =
                 innerBorderDeltas(size.getX(), size.getY(), noCorner);
@@ -230,7 +230,7 @@ public final class BwemExt {
     }
 
     private static List<TilePosition> outerBorder(
-        final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
+            final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
         return innerBorder(
                 topLeft.subtract(new TilePosition(1, 1)), size.add(new TilePosition(2, 2)), noCorner);
     }
@@ -241,7 +241,7 @@ public final class BwemExt {
     }
 
     private static List<WalkPosition> outerBorder(
-        final WalkPosition topLeft, final WalkPosition size, final boolean noCorner) {
+            final WalkPosition topLeft, final WalkPosition size, final boolean noCorner) {
         return innerBorder(
                 topLeft.subtract(new WalkPosition(1, 1)), size.add(new WalkPosition(2, 2)), noCorner);
     }
@@ -252,7 +252,7 @@ public final class BwemExt {
     }
 
     private static List<WalkPosition> outerMiniTileBorder(
-        final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
+            final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
         return outerBorder(topLeft.toWalkPosition(), size.toWalkPosition(), noCorner);
     }
 
@@ -262,7 +262,7 @@ public final class BwemExt {
     }
 
     private static List<WalkPosition> innerMiniTileBorder(
-        final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
+            final TilePosition topLeft, final TilePosition size, final boolean noCorner) {
         return innerBorder(topLeft.toWalkPosition(), size.toWalkPosition(), noCorner);
     }
 

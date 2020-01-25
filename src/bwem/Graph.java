@@ -12,7 +12,10 @@
 
 package bwem;
 
-import bwem.util.*;
+import bwem.util.BwemExt;
+import bwem.util.Pair;
+import bwem.util.Pred;
+import bwem.util.Utils;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.WalkPosition;
@@ -75,9 +78,9 @@ public final class Graph {
                         .breadthFirstSearch(
                                 walkPosition,
                                 // findCond
-                            (MiniTile miniTile, WalkPosition unused) -> (miniTile.getAreaId().intValue() > 0),
+                                (MiniTile miniTile, WalkPosition unused) -> (miniTile.getAreaId().intValue() > 0),
                                 // visitCond
-                            Pred.accept());
+                                Pred.accept());
 
         return getArea(w);
     }
@@ -89,13 +92,13 @@ public final class Graph {
         }
 
         final TilePosition t =
-            getMap()
-                .breadthFirstSearch(
-                    tilePosition,
-                    // findCond
-                    (Tile tile, TilePosition unused) -> tile.getAreaId().intValue() > 0,
-                    // visitCond
-                    (Tile tile, TilePosition unused) -> true);
+                getMap()
+                        .breadthFirstSearch(
+                                tilePosition,
+                                // findCond
+                                (Tile tile, TilePosition unused) -> tile.getAreaId().intValue() > 0,
+                                // visitCond
+                                (Tile tile, TilePosition unused) -> true);
 
         return getArea(t);
     }
@@ -330,12 +333,12 @@ public final class Graph {
                         }
 
                         final WalkPosition center =
-                            getMap().breadthFirstSearch(
-                                blockingNeutral.getCenter().toWalkPosition(),
-                                // findCond
-                                (MiniTile miniTile, WalkPosition unused) -> miniTile.isWalkable(),
-                                // visitCond
-                                Pred.accept());
+                                getMap().breadthFirstSearch(
+                                        blockingNeutral.getCenter().toWalkPosition(),
+                                        // findCond
+                                        (MiniTile miniTile, WalkPosition unused) -> miniTile.isWalkable(),
+                                        // visitCond
+                                        Pred.accept());
 
                         final List<WalkPosition> list = new ArrayList<>();
                         list.add(center);
@@ -576,7 +579,7 @@ public final class Graph {
             }
 
             for (final Area pArea :
-                new Area[]{current.getAreas().getLeft(), current.getAreas().getRight()}) {
+                    new Area[]{current.getAreas().getLeft(), current.getAreas().getRight()}) {
                 for (final ChokePoint next : pArea.getChokePoints()) {
                     if (!next.equals(current)) {
                         final int newNextDist = currentDist + distance(current, next);
@@ -745,19 +748,19 @@ public final class Graph {
                 final Position cpEnd1 = BwemExt.center(pBestCpA.getNodePosition(ChokePoint.Node.END1));
                 final Position cpEnd2 = BwemExt.center(pBestCpA.getNodePosition(ChokePoint.Node.END2));
                 if (Utils.intersect(
-                    a.getX(),
-                    a.getY(),
-                    b.getX(),
-                    b.getY(),
-                    cpEnd1.getX(),
-                    cpEnd1.getY(),
-                    cpEnd2.getX(),
-                    cpEnd2.getY())) {
+                        a.getX(),
+                        a.getY(),
+                        b.getX(),
+                        b.getY(),
+                        cpEnd1.getX(),
+                        cpEnd1.getY(),
+                        cpEnd2.getX(),
+                        cpEnd2.getY())) {
                     return Optional.of(new PathingResult(path, a.getDistance(b)));
                 } else {
                     int pLength = minDistAB;
                     for (final ChokePoint.Node node :
-                        new ChokePoint.Node[]{ChokePoint.Node.END1, ChokePoint.Node.END2}) {
+                            new ChokePoint.Node[]{ChokePoint.Node.END1, ChokePoint.Node.END2}) {
                         Position c = BwemExt.center(pBestCpA.getNodePosition(node));
                         int distAToB = a.getDistance(c) + b.getDistance(c);
                         pLength = Math.min(pLength, distAToB);

@@ -121,7 +121,8 @@ public class SimulationTheory {
         for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
             if (getGs().getStrat().proxy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking()))
                 continue;
-            if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
+            if (u.unitType == UnitType.Zerg_Larva || (u.unitType == UnitType.Zerg_Egg && !u.player.isNeutral()))
+                continue;
             if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
                     || getGs().frameCount - u.lastVisibleFrame <= 24 * 4)
                 enemyUnits.add(u);

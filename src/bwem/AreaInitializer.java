@@ -13,9 +13,6 @@
 package bwem;
 
 import bwem.util.*;
-import bwem.util.CheckMode;
-import bwem.util.Markable;
-import bwem.util.StaticMarkable;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.WalkPosition;
 import org.openbw.bwapi4j.type.UnitType;
@@ -42,10 +39,10 @@ final class AreaInitializer extends Area {
         final MiniTile topMiniTile = this.map.getData().getMiniTile(top);
         if (!(topMiniTile.getAreaId().equals(areaId))) {
             map.asserter.throwIllegalStateException(
-                "assert failed: topMiniTile.AreaId().equals(areaId): expected: "
-                    + topMiniTile.getAreaId().intValue()
-                    + ", actual: "
-                    + areaId.intValue());
+                    "assert failed: topMiniTile.AreaId().equals(areaId): expected: "
+                            + topMiniTile.getAreaId().intValue()
+                            + ", actual: "
+                            + areaId.intValue());
         }
 
         super.highestAltitude = topMiniTile.getAltitude();
@@ -120,24 +117,24 @@ final class AreaInitializer extends Area {
         }
 
         final TilePosition start =
-            this.map
-                .breadthFirstSearch(
-                    startCP.getNodePositionInArea(ChokePoint.Node.MIDDLE, this).toTilePosition(),
-                    // findCond
-                    (Tile tile, TilePosition unused) -> tile.getAreaId().equals(getId()),
-                    // visitCond
-                    (Tile tile, TilePosition unused) -> true);
+                this.map
+                        .breadthFirstSearch(
+                                startCP.getNodePositionInArea(ChokePoint.Node.MIDDLE, this).toTilePosition(),
+                                // findCond
+                                (Tile tile, TilePosition unused) -> tile.getAreaId().equals(getId()),
+                                // visitCond
+                                (Tile tile, TilePosition unused) -> true);
 
         final List<TilePosition> targets = new ArrayList<>();
         for (final ChokePoint cp : targetCPs) {
             final TilePosition t =
-                this.map
-                    .breadthFirstSearch(
-                        cp.getNodePositionInArea(ChokePoint.Node.MIDDLE, this).toTilePosition(),
-                        // findCond
-                        (Tile tile, TilePosition position) -> (tile.getAreaId().equals(getId())),
-                        // visitCond
-                        (Tile tile, TilePosition unused) -> true);
+                    this.map
+                            .breadthFirstSearch(
+                                    cp.getNodePositionInArea(ChokePoint.Node.MIDDLE, this).toTilePosition(),
+                                    // findCond
+                                    (Tile tile, TilePosition position) -> (tile.getAreaId().equals(getId())),
+                                    // visitCond
+                                    (Tile tile, TilePosition unused) -> true);
             targets.add(t);
         }
 
@@ -150,9 +147,9 @@ final class AreaInitializer extends Area {
         Tile.getStaticMarkable().unmarkAll();
 
         final Queue<Pair<Integer, TilePosition>> toVisit =
-            new PriorityQueue<>(
-                Comparator.comparingInt(
-                    Pair::getLeft)); // a priority queue holding the tiles to visit ordered by their
+                new PriorityQueue<>(
+                        Comparator.comparingInt(
+                                Pair::getLeft)); // a priority queue holding the tiles to visit ordered by their
         // distance to start.
         toVisit.offer(new Pair<>(0, start));
 
@@ -164,13 +161,13 @@ final class AreaInitializer extends Area {
             final Tile currentTile = this.map.getData().getTile(current, CheckMode.NO_CHECK);
             if (!(currentTile.getInternalData() == currentDist)) {
                 map.asserter.throwIllegalStateException(
-                    "currentTile.InternalData().intValue()="
-                        + currentTile.getInternalData()
-                        + ", currentDist="
-                        + currentDist);
+                        "currentTile.InternalData().intValue()="
+                                + currentTile.getInternalData()
+                                + ", currentDist="
+                                + currentDist);
             }
             currentTile
-                .setInternalData(0); // resets Tile::m_internalData for future usage
+                    .setInternalData(0); // resets Tile::m_internalData for future usage
             currentTile.getMarkable().setMarked();
 
             for (int i = 0; i < targets.size(); ++i) {
@@ -184,14 +181,14 @@ final class AreaInitializer extends Area {
             }
 
             final TilePosition[] deltas = {
-                new TilePosition(-1, -1),
-                new TilePosition(0, -1),
-                new TilePosition(+1, -1),
-                new TilePosition(-1, 0),
-                new TilePosition(+1, 0),
-                new TilePosition(-1, +1),
-                new TilePosition(0, +1),
-                new TilePosition(+1, +1)
+                    new TilePosition(-1, -1),
+                    new TilePosition(0, -1),
+                    new TilePosition(+1, -1),
+                    new TilePosition(-1, 0),
+                    new TilePosition(+1, 0),
+                    new TilePosition(-1, +1),
+                    new TilePosition(0, +1),
+                    new TilePosition(+1, +1)
             };
             for (final TilePosition delta : deltas) {
                 final boolean diagonalMove = (delta.getX() != 0) && (delta.getY() != 0);
@@ -202,14 +199,14 @@ final class AreaInitializer extends Area {
                     final Tile nextTile = this.map.getData().getTile(next, CheckMode.NO_CHECK);
                     if (nextTile.getMarkable().isUnmarked()) {
                         if (nextTile.getInternalData()
-                            != 0) { // next already in toVisit
+                                != 0) { // next already in toVisit
                             if (newNextDist
-                                < nextTile
-                                .getInternalData()) { // nextNewDist < nextOldDist
+                                    < nextTile
+                                    .getInternalData()) { // nextNewDist < nextOldDist
                                 // To update next's distance, we need to remove-insert it from toVisit:
                                 final boolean removed =
-                                    toVisit.remove(
-                                        new Pair<>(nextTile.getInternalData(), next));
+                                        toVisit.remove(
+                                                new Pair<>(nextTile.getInternalData(), next));
                                 if (!removed) {
                                     map.asserter.throwIllegalStateException("");
                                 }
@@ -217,7 +214,7 @@ final class AreaInitializer extends Area {
                                 toVisit.offer(new Pair<>(newNextDist, next));
                             }
                         } else if ((nextTile.getAreaId().equals(getId()))
-                            || (nextTile.getAreaId().equals(UNINITIALIZED))) {
+                                || (nextTile.getAreaId().equals(UNINITIALIZED))) {
                             nextTile.setInternalData(newNextDist);
                             toVisit.offer(new Pair<>(newNextDist, next));
                         }
@@ -233,7 +230,7 @@ final class AreaInitializer extends Area {
         for (final Pair<Integer, TilePosition> distanceAndTilePosition : toVisit) {
             final Tile tileToUpdate =
                     this.map.getData()
-                        .getTile(distanceAndTilePosition.getRight(), CheckMode.NO_CHECK);
+                            .getTile(distanceAndTilePosition.getRight(), CheckMode.NO_CHECK);
             tileToUpdate.setInternalData(0);
         }
 
@@ -273,77 +270,77 @@ final class AreaInitializer extends Area {
             // remainingResources):
             TilePosition topLeftResources = new TilePosition(Integer.MAX_VALUE, Integer.MAX_VALUE);
             TilePosition bottomRightResources = new TilePosition(Integer.MIN_VALUE,
-                Integer.MIN_VALUE);
+                    Integer.MIN_VALUE);
             for (final Resource r : remainingResources) {
                 final Pair<TilePosition, TilePosition> pair1 =
-                    BwemExt.makeBoundingBoxIncludePoint(
-                        topLeftResources, bottomRightResources, r.getTopLeft());
+                        BwemExt.makeBoundingBoxIncludePoint(
+                                topLeftResources, bottomRightResources, r.getTopLeft());
                 topLeftResources = pair1.getLeft();
                 bottomRightResources = pair1.getRight();
 
                 final Pair<TilePosition, TilePosition> pair2 =
-                    BwemExt.makeBoundingBoxIncludePoint(
-                        topLeftResources, bottomRightResources, r.getBottomRight());
+                        BwemExt.makeBoundingBoxIncludePoint(
+                                topLeftResources, bottomRightResources, r.getBottomRight());
                 topLeftResources = pair2.getLeft();
                 bottomRightResources = pair2.getRight();
             }
 
             final TilePosition dimensionsBetweenResourceDepotAndResources =
-                new TilePosition(
-                    BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES,
-                    BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES);
+                    new TilePosition(
+                            BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES,
+                            BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES);
             TilePosition topLeftSearchBoundingBox =
-                topLeftResources
-                    .subtract(resourceDepotDimensions)
-                    .subtract(dimensionsBetweenResourceDepotAndResources);
+                    topLeftResources
+                            .subtract(resourceDepotDimensions)
+                            .subtract(dimensionsBetweenResourceDepotAndResources);
             TilePosition bottomRightSearchBoundingBox =
-                bottomRightResources
-                    .add(new TilePosition(1, 1))
-                    .add(dimensionsBetweenResourceDepotAndResources);
+                    bottomRightResources
+                            .add(new TilePosition(1, 1))
+                            .add(dimensionsBetweenResourceDepotAndResources);
             topLeftSearchBoundingBox =
-                BwemExt.makePointFitToBoundingBox(
-                    topLeftSearchBoundingBox,
-                    getTopLeft(),
-                    getBottomRight().subtract(resourceDepotDimensions).add(new TilePosition(1, 1)));
+                    BwemExt.makePointFitToBoundingBox(
+                            topLeftSearchBoundingBox,
+                            getTopLeft(),
+                            getBottomRight().subtract(resourceDepotDimensions).add(new TilePosition(1, 1)));
             bottomRightSearchBoundingBox =
-                BwemExt.makePointFitToBoundingBox(
-                    bottomRightSearchBoundingBox,
-                    getTopLeft(),
-                    getBottomRight().subtract(resourceDepotDimensions).add(new TilePosition(1, 1)));
+                    BwemExt.makePointFitToBoundingBox(
+                            bottomRightSearchBoundingBox,
+                            getTopLeft(),
+                            getBottomRight().subtract(resourceDepotDimensions).add(new TilePosition(1, 1)));
 
             // 2) Mark the Tiles with their distances from each remaining Resource (Potential Fields >= 0)
             for (final Resource r : remainingResources) {
                 for (int dy =
-                    -resourceDepotDimensions.getY()
-                        - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                    dy
-                        < r.getSize().getY()
-                        + resourceDepotDimensions.getY()
-                        + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                    ++dy) {
+                     -resourceDepotDimensions.getY()
+                             - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                     dy
+                             < r.getSize().getY()
+                             + resourceDepotDimensions.getY()
+                             + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                     ++dy) {
                     for (int dx =
-                        -resourceDepotDimensions.getX()
-                            - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                        dx
-                            < r.getSize().getX()
-                            + resourceDepotDimensions.getX()
-                            + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                        ++dx) {
+                         -resourceDepotDimensions.getX()
+                                 - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                         dx
+                                 < r.getSize().getX()
+                                 + resourceDepotDimensions.getX()
+                                 + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                         ++dx) {
                         final TilePosition deltaTilePosition = r.getTopLeft()
-                            .add(new TilePosition(dx, dy));
+                                .add(new TilePosition(dx, dy));
                         if (terrainData.getMapData().isValid(deltaTilePosition)) {
                             final Tile tile = terrainData
-                                .getTile(deltaTilePosition, CheckMode.NO_CHECK);
+                                    .getTile(deltaTilePosition, CheckMode.NO_CHECK);
                             int dist =
-                                (BwemExt.distToRectangle(
-                                    BwemExt.center(deltaTilePosition),
-                                    r.getTopLeft().toPosition(),
-                                    r.getSize().toPosition())
-                                    + (TilePosition.SIZE_IN_PIXELS / 2))
-                                    / TilePosition.SIZE_IN_PIXELS;
+                                    (BwemExt.distToRectangle(
+                                            BwemExt.center(deltaTilePosition),
+                                            r.getTopLeft().toPosition(),
+                                            r.getSize().toPosition())
+                                            + (TilePosition.SIZE_IN_PIXELS / 2))
+                                            / TilePosition.SIZE_IN_PIXELS;
                             int score =
-                                Math.max(BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES + 3
-                                    - dist, 0);
+                                    Math.max(BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES + 3
+                                            - dist, 0);
                             if (r instanceof Geyser) {
                                 // somewhat compensates for Geyser alone vs the several minerals
                                 score *= 3;
@@ -351,7 +348,7 @@ final class AreaInitializer extends Area {
                             if (tile.getAreaId().equals(getId())) {
                                 // note the additive effect (assume tile.InternalData() is 0 at the beginning)
                                 tile
-                                    .setInternalData(tile.getInternalData() + score);
+                                        .setInternalData(tile.getInternalData() + score);
                             }
                         }
                     }
@@ -363,10 +360,10 @@ final class AreaInitializer extends Area {
                 for (int dy = -3; dy < r.getSize().getY() + 3; ++dy) {
                     for (int dx = -3; dx < r.getSize().getX() + 3; ++dx) {
                         final TilePosition deltaTilePosition = r.getTopLeft()
-                            .add(new TilePosition(dx, dy));
+                                .add(new TilePosition(dx, dy));
                         if (terrainData.getMapData().isValid(deltaTilePosition)) {
                             final Tile tileToUpdate = terrainData
-                                .getTile(deltaTilePosition, CheckMode.NO_CHECK);
+                                    .getTile(deltaTilePosition, CheckMode.NO_CHECK);
                             tileToUpdate.setInternalData(-1);
                         }
                     }
@@ -379,14 +376,14 @@ final class AreaInitializer extends Area {
             final List<Mineral> blockingMinerals = new ArrayList<>();
 
             for (int y = topLeftSearchBoundingBox.getY(); y <= bottomRightSearchBoundingBox.getY();
-                ++y) {
+                 ++y) {
                 for (int x = topLeftSearchBoundingBox.getX();
-                    x <= bottomRightSearchBoundingBox.getX();
-                    ++x) {
+                     x <= bottomRightSearchBoundingBox.getX();
+                     ++x) {
                     final int score = computeBaseLocationScore(terrainData, new TilePosition(x, y));
                     if (score > bestScore && validateBaseLocation(terrainData,
-                        new TilePosition(x, y),
-                        blockingMinerals)) {
+                            new TilePosition(x, y),
+                            blockingMinerals)) {
                         bestScore = score;
                         bestLocation = new TilePosition(x, y);
                     }
@@ -397,26 +394,26 @@ final class AreaInitializer extends Area {
             // 2))
             for (Resource r : remainingResources) {
                 for (int dy =
-                    -resourceDepotDimensions.getY()
-                        - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                    dy
-                        < r.getSize().getY()
-                        + resourceDepotDimensions.getY()
-                        + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                    ++dy) {
+                     -resourceDepotDimensions.getY()
+                             - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                     dy
+                             < r.getSize().getY()
+                             + resourceDepotDimensions.getY()
+                             + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                     ++dy) {
                     for (int dx =
-                        -resourceDepotDimensions.getX()
-                            - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                        dx
-                            < r.getSize().getX()
-                            + resourceDepotDimensions.getX()
-                            + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
-                        ++dx) {
+                         -resourceDepotDimensions.getX()
+                                 - BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                         dx
+                                 < r.getSize().getX()
+                                 + resourceDepotDimensions.getX()
+                                 + BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES;
+                         ++dx) {
                         final TilePosition deltaTilePosition = r.getTopLeft()
-                            .add(new TilePosition(dx, dy));
+                                .add(new TilePosition(dx, dy));
                         if (terrainData.getMapData().isValid(deltaTilePosition)) {
                             final Tile tileToUpdate = terrainData
-                                .getTile(deltaTilePosition, CheckMode.NO_CHECK);
+                                    .getTile(deltaTilePosition, CheckMode.NO_CHECK);
                             tileToUpdate.setInternalData(0);
                         }
                     }
@@ -432,10 +429,10 @@ final class AreaInitializer extends Area {
             final List<Resource> assignedResources = new ArrayList<>();
             for (final Resource r : remainingResources) {
                 if (BwemExt.distToRectangle(
-                    r.getCenter(), bestLocation.toPosition(), resourceDepotDimensions.toPosition())
-                    + 2
-                    <= BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES
-                    * TilePosition.SIZE_IN_PIXELS) {
+                        r.getCenter(), bestLocation.toPosition(), resourceDepotDimensions.toPosition())
+                        + 2
+                        <= BwemExt.MAX_TILES_BETWEEN_COMMAND_CENTER_AND_RESOURCES
+                        * TilePosition.SIZE_IN_PIXELS) {
                     assignedResources.add(r);
                 }
             }
@@ -451,14 +448,14 @@ final class AreaInitializer extends Area {
     }
 
     private int computeBaseLocationScore(final TerrainData terrainData,
-        final TilePosition location) {
+                                         final TilePosition location) {
         final TilePosition dimCC = UnitType.Terran_Command_Center.tileSize();
 
         int sumScore = 0;
         for (int dy = 0; dy < dimCC.getY(); ++dy) {
             for (int dx = 0; dx < dimCC.getX(); ++dx) {
                 final Tile tile =
-                    terrainData.getTile(location.add(new TilePosition(dx, dy)), CheckMode.NO_CHECK);
+                        terrainData.getTile(location.add(new TilePosition(dx, dy)), CheckMode.NO_CHECK);
                 if (!tile.isBuildable()) {
                     return -1;
                 }
@@ -484,9 +481,9 @@ final class AreaInitializer extends Area {
     }
 
     private boolean validateBaseLocation(
-        final TerrainData terrainData,
-        final TilePosition location,
-        final List<Mineral> blockingMinerals) {
+            final TerrainData terrainData,
+            final TilePosition location,
+            final List<Mineral> blockingMinerals) {
         final TilePosition dimCC = UnitType.Terran_Command_Center.tileSize();
 
         blockingMinerals.clear();
@@ -516,7 +513,7 @@ final class AreaInitializer extends Area {
         // checks the distance to the bases already created:
         for (final Base base : getBases()) {
             if (BwemExt.roundedDist(base.getLocation(), location)
-                < BwemExt.MIN_TILES_BETWEEN_BASES) {
+                    < BwemExt.MIN_TILES_BETWEEN_BASES) {
                 return false;
             }
         }

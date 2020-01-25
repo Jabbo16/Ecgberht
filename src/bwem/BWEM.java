@@ -19,7 +19,7 @@ import java.io.OutputStream;
 /**
  * BWEM Broodwar Map analysis library by Igor Dimitrijevic.
  * Ported to Java by the OpenBW Team
- *
+ * <p>
  * By default BWEM throws when an invalid state is encountered.
  * But if you know what you are doing, you can skip these throws by setting
  * {@link #setFailOnError} to `false`.

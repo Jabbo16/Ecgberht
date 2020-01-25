@@ -17,7 +17,8 @@ import org.openbw.bwapi4j.unit.Unit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.openbw.bwapi4j.type.UnitType.*;
+import static org.openbw.bwapi4j.type.UnitType.Special_Pit_Door;
+import static org.openbw.bwapi4j.type.UnitType.Special_Right_Pit_Door;
 
 public final class NeutralData {
     private final List<Mineral> minerals;
@@ -25,10 +26,10 @@ public final class NeutralData {
     private final List<StaticBuilding> staticBuildings;
 
     NeutralData(
-        final BWMap map,
-        final List<Unit> mineralPatches,
-        final List<Unit> vespeneGeysers,
-        final List<Unit> neutralUnits) {
+            final BWMap map,
+            final List<Unit> mineralPatches,
+            final List<Unit> vespeneGeysers,
+            final List<Unit> neutralUnits) {
         ////////////////////////////////////////////////////////////////////////
         // BWMap::InitializeNeutrals
         ////////////////////////////////////////////////////////////////////////
@@ -48,7 +49,7 @@ public final class NeutralData {
             if (neutralUnit.getType().isBuilding()) {
                 this.staticBuildings.add(new StaticBuilding(neutralUnit, map));
             }
-            if ( neutralUnit.getType() == Special_Pit_Door || neutralUnit.getType() == Special_Right_Pit_Door) {
+            if (neutralUnit.getType() == Special_Pit_Door || neutralUnit.getType() == Special_Right_Pit_Door) {
                 this.staticBuildings.add(new StaticBuilding(neutralUnit, map));
             }
         }

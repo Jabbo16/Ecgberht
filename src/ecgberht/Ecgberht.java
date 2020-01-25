@@ -129,6 +129,7 @@ public class Ecgberht implements BWEventListener {
     private static void initBuildTree() {
         Build b = new Build("Build", gs);
         WorkerWalkBuild wwB = new WorkerWalkBuild("worker walk build", gs);
+        CheckMineralWalkGoldRush cMWGR = new CheckMineralWalkGoldRush("Mineral Walk Gold Rush", gs);
         ChooseNothingBuilding cNB = new ChooseNothingBuilding("Choose Nothing", gs);
         ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
@@ -159,7 +160,10 @@ public class Ecgberht implements BWEventListener {
         Sequence buildMove;
         if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"))
             buildMove = new Sequence("BuildMove", wwB, b, chooseBuildingBuild, cp, cw, crb, m);
-        else buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
+        else if (bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) // GoldRush
+            buildMove = new Sequence("BuildMove", cMWGR, b, chooseBuildingBuild, cp, cw, crb, m);
+        else
+            buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
         buildTree = new BehavioralTree("Building Tree");
         buildTree.addChild(buildMove);
     }
@@ -227,7 +231,6 @@ public class Ecgberht implements BWEventListener {
         Sequence islandExpansion = new Sequence("island expansion", chI, expanding);
         islandTree = new BehavioralTree("islandTree");
         islandTree.addChild(islandExpansion);
-
     }
 
     private void run() {
@@ -239,11 +242,12 @@ public class Ecgberht implements BWEventListener {
         CheckScout cSc = new CheckScout("Check Scout", gs);
         ChooseScout chSc = new ChooseScout("Choose Scouter", gs);
         SendScout sSc = new SendScout("Send Scout", gs);
+        CheckMineralWalk cMW = new CheckMineralWalk("Check Mineral Walk", gs);
         CheckVisibleBase cVB = new CheckVisibleBase("Check visible Base", gs);
         CheckEnemyBaseVisible cEBV = new CheckEnemyBaseVisible("Check Enemy Base Visible", gs);
         Sequence scoutFalse = new Sequence("Scout ", cSc, chSc, sSc);
         Selector EnemyFound = new Selector("Enemy found in base location", cEBV, sSc);
-        Sequence scoutTrue = new Sequence("Scout True", cVB, EnemyFound);
+        Sequence scoutTrue = new Sequence("Scout True", cMW, cVB, EnemyFound);
         Selector Scouting = new Selector("Select Scouting Plan", scoutFalse, scoutTrue);
         scoutingTree = new BehavioralTree("Movement Tree");
         scoutingTree.addChild(Scouting);
@@ -369,6 +373,9 @@ public class Ecgberht implements BWEventListener {
                 } else if (b.getArea().getAccessibleNeighbors().isEmpty())
                     gs.islandBases.add(b); // Island expansions re-enabled
                 else gs.BLs.add(b);
+            }
+            if (bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) { // GoldRush
+                gs.initMineralWalkPatches();
             }
             gs.initBlockingMinerals();
             gs.initBaseLocations();
@@ -707,7 +714,7 @@ public class Ecgberht implements BWEventListener {
                         }
                     }
                 } else if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
-                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat"))
+                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat") && !bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a"))
                     gs.agents.put(arg0, new VultureAgent(arg0));
                 else if (type == UnitType.Terran_Dropship) {
                     DropShipAgent d = new DropShipAgent(arg0);

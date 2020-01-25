@@ -12,9 +12,9 @@
 
 package bwem;
 
-import org.openbw.bwapi4j.TilePosition;
 import bwem.util.Markable;
 import bwem.util.StaticMarkable;
+import org.openbw.bwapi4j.TilePosition;
 
 /**
  * Corresponds to BWAPI/Starcraft's concept of tile (32x32 pixels).<br>
