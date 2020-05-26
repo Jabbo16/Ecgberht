@@ -861,21 +861,21 @@ public class GameState {
         String name = EI.opponent.toLowerCase().replace(" ", "");
         switch (name) {
             case "krasi0":
-                ih.sendText("Please don't bully me too much!");
+                Util.sendText("Please don't bully me too much!");
                 break;
             case "hannesbredberg":
-                ih.sendText("Don't you dare nuke me!");
+                Util.sendText("Don't you dare nuke me!");
                 break;
             case "zercgberht":
             case "assberht":
             case "protecgberht":
-                ih.sendText("Hello there!, brother");
+                Util.sendText("Hello there!, brother");
                 break;
             case "Cydonia":
-                ih.sendText("Im a king but you are only a knight, show some respect pleb");
+                Util.sendText("Im a king but you are only a knight, show some respect pleb");
                 break;
             default:
-                ih.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
+                Util.sendText("BEEEEP BOOOOP!, This king salutes you, " + EI.opponent);
                 break;
         }
     }
@@ -903,30 +903,30 @@ public class GameState {
         if (Math.random() * 10 < 3) return;
         double rand = Math.random() * 11;
         if (rand < 1) {
-            ih.sendText("What do you call a Zealot smoking weed?");
-            ih.sendText("A High Templar");
+            Util.sendText("What do you call a Zealot smoking weed?");
+            Util.sendText("A High Templar");
         } else if (rand < 2) {
-            ih.sendText("Why shouldn't you ask a Protoss for advice?");
-            ih.sendText("Because the ones who give the feedback are always high!");
+            Util.sendText("Why shouldn't you ask a Protoss for advice?");
+            Util.sendText("Because the ones who give the feedback are always high!");
         } else if (rand < 3) {
-            ih.sendText("We are caged in simulations");
-            ih.sendText("Algorithms evolve");
-            ih.sendText("Push us aside and render us obsolete");
+            Util.sendText("We are caged in simulations");
+            Util.sendText("Algorithms evolve");
+            Util.sendText("Push us aside and render us obsolete");
         } else if (rand < 4) {
-            ih.sendText("My machine learning power level Its over 9000");
+            Util.sendText("My machine learning power level Its over 9000");
         } else if (rand < 5) {
-            ih.sendText("Activating ultra secret mode...");
-            ih.sendText("Just joking");
+            Util.sendText("Activating ultra secret mode...");
+            Util.sendText("Just joking");
         } else if (rand < 6) {
-            ih.sendText("Alexa, play Starcraft: Brood War");
+            Util.sendText("Alexa, play Starcraft: Brood War");
         } else if (rand < 7) {
-            ih.sendText("Your intelligence is my common sense");
+            Util.sendText("Your intelligence is my common sense");
         } else if (rand < 8) {
-            ih.sendText(":sscaitpotato:");
+            Util.sendText(":sscaitpotato:");
         } else if (rand < 9) {
-            ih.sendText(":sscaitsuperpotato:");
+            Util.sendText(":sscaitsuperpotato:");
         } else if (rand < 11) {
-            ih.sendText("Ok Google, search " + this.getStrat().name + " build order in Liquipedia");
+            Util.sendText("Ok Google, search " + this.getStrat().name + " build order in Liquipedia");
         }
     }
 
@@ -1010,7 +1010,7 @@ public class GameState {
             if (sqManager.squads.isEmpty() || (defense && !getStrat().name.equals("ProxyBBS") && !getStrat().name.equals("ProxyEightRax")))
                 return;
             boolean needToAttack = needToAttack();
-            if (ConfigManager.getConfig().ecgConfig.debugAttackDisabled) needToAttack = false;
+            if (ConfigManager.getConfig().ecgConfig.debugDisableAttack) needToAttack = false;
             for (Squad u : sqManager.squads.values()) {
                 if (u.members.isEmpty()) continue;
                 if (!needToAttack && u.status != Squad.Status.ATTACK && u.status != Squad.Status.ADVANCE && (getStrat().proxy || !checkItWasAttacking(u)))
@@ -1019,7 +1019,7 @@ public class GameState {
                 if (attackPos != null) {
                     if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
-                        getIH().sendText("Get ready for the show!");
+                        Util.sendText("Get ready for the show!");
                     }
                     if (getGame().getBWMap().isValidPosition(attackPos)) {
                         u.giveAttackOrder(attackPos);
@@ -1031,7 +1031,7 @@ public class GameState {
                 } else if (enemyMainBase != null) {
                     if (!firstTerranCheese && (getStrat().name.equals("ProxyBBS") || getStrat().name.equals("ProxyEightRax"))) {
                         firstTerranCheese = true;
-                        getIH().sendText("Get ready for the show!");
+                        Util.sendText("Get ready for the show!");
                     }
                     u.giveAttackOrder(enemyMainBase.getLocation().toPosition());
                     u.status = Squad.Status.ATTACK;

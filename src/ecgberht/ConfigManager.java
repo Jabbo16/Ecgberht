@@ -54,8 +54,9 @@ public class ConfigManager {
             boolean enableLatCom = true;
             boolean enableSkyCladObserver = false;
             String forceStrat = "";
-            public boolean enableCherryVisDump = true;
-            boolean debugAttackDisabled = false;
+            public boolean enableCherryVisDump = false;
+            boolean debugDisableAttack = false;
+            public boolean humanMode = false;
         }
 
         static class BwapiConfig {

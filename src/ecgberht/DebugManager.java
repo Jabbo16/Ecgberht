@@ -22,45 +22,47 @@ public class DebugManager {
 
     private MapDrawer mapDrawer;
     private InteractionHandler iH;
+    private CameraModule skycladObserver;
 
-    DebugManager(MapDrawer mapDrawer, InteractionHandler iH) {
+    DebugManager(MapDrawer mapDrawer, InteractionHandler iH, CameraModule skycladObserver) {
         this.mapDrawer = mapDrawer;
         this.iH = iH;
+        this.skycladObserver = skycladObserver;
     }
 
-    void keyboardInteraction(String text, CameraModule skycladObserver) {
+    void keyboardInteraction(String text) {
         boolean setting;
         switch (text) {
             case "dt":
                 setting = ConfigManager.getConfig().ecgConfig.debugText;
-                iH.sendText(!setting ? "debugText enabled" : "debugText disabled");
+                Util.sendText(!setting ? "debugText enabled" : "debugText disabled");
                 ConfigManager.getConfig().ecgConfig.debugText = !setting;
                 break;
             case "dc":
                 setting = ConfigManager.getConfig().ecgConfig.debugConsole;
-                iH.sendText(!setting ? "debugConsole enabled" : "debugConsole disabled");
+                Util.sendText(!setting ? "debugConsole enabled" : "debugConsole disabled");
                 ConfigManager.getConfig().ecgConfig.debugConsole = !setting;
                 break;
             case "ds":
                 setting = ConfigManager.getConfig().ecgConfig.debugScreen;
-                iH.sendText(!setting ? "debugScreen enabled" : "debugScreen disabled");
+                Util.sendText(!setting ? "debugScreen enabled" : "debugScreen disabled");
                 ConfigManager.getConfig().ecgConfig.debugScreen = !setting;
                 break;
             case "obs":
                 setting = ConfigManager.getConfig().ecgConfig.enableSkyCladObserver;
-                iH.sendText(!setting ? "Observer enabled" : "Observer disabled");
+                Util.sendText(!setting ? "Observer enabled" : "Observer disabled");
                 ConfigManager.getConfig().ecgConfig.enableSkyCladObserver = !setting;
                 skycladObserver.toggle();
                 break;
             case "sounds":
                 setting = ConfigManager.getConfig().ecgConfig.sounds;
-                iH.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
+                Util.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
                 ConfigManager.getConfig().ecgConfig.sounds = !setting;
                 break;
             case "noattack":
-                setting = ConfigManager.getConfig().ecgConfig.debugAttackDisabled;
-                iH.sendText(!setting ? "Debug Attack enabled" : "Debug Attack disabled");
-                ConfigManager.getConfig().ecgConfig.debugAttackDisabled = !setting;
+                setting = ConfigManager.getConfig().ecgConfig.debugDisableAttack;
+                Util.sendText(!setting ? "Debug Attack enabled" : "Debug Attack disabled");
+                ConfigManager.getConfig().ecgConfig.debugDisableAttack = !setting;
                 break;
         }
     }

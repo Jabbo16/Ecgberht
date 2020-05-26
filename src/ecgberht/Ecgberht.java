@@ -332,10 +332,20 @@ public class Ecgberht implements BWEventListener {
                 System.setErr(nullOut);
                 System.setOut(nullOut);
             }
+            if (ConfigManager.getConfig().ecgConfig.humanMode) {
+                ConfigManager.getConfig().ecgConfig.sounds = false;
+                ConfigManager.getConfig().ecgConfig.debugConsole = false;
+                ConfigManager.getConfig().ecgConfig.debugScreen = false;
+                ConfigManager.getConfig().ecgConfig.debugText = false;
+                ConfigManager.getConfig().ecgConfig.enableCherryVisDump = false;
+                ConfigManager.getConfig().ecgConfig.enableLatCom = true;
+                ConfigManager.getConfig().ecgConfig.forceStrat = "";
+                ConfigManager.getConfig().ecgConfig.sscait = true;
+            }
             self = bw.getInteractionHandler().self();
             skycladObserver = new CameraModule(self.getStartLocation(), bw);
             ih = bw.getInteractionHandler();
-            debugManager = new DebugManager(bw.getMapDrawer(), bw.getInteractionHandler());
+            debugManager = new DebugManager(bw.getMapDrawer(), bw.getInteractionHandler(), skycladObserver);
             IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
             if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
             else ih.enableLatCom(true);
@@ -347,7 +357,7 @@ public class Ecgberht implements BWEventListener {
             if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
             bwem = new BWEM(bw);
             if (bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) { // Hitchhiker
-                ih.sendText("Hitchhiker :(");
+                Util.sendText("Hitchhiker :(");
             }
             bwem.initialize();
             if (!bw.getBWMap().mapHash().equals("e6d0144e14315118d916905ff5e7045f68db541e")) // Aztec KSL crash fix
@@ -422,7 +432,7 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         path = gs.silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
                     }
-                } else {
+                } else if(ConfigManager.getConfig().ecgConfig.debugScreen) {
                     for (org.bk.ass.path.Position p : path.path) {
                         Position pos = new WalkPosition(p.x, p.y).toPosition();
                         bw.getMapDrawer().drawCircleMap(pos, 4, Color.RED, true);
@@ -437,7 +447,7 @@ public class Ecgberht implements BWEventListener {
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
-                gs.getIH().sendText("RIP"); // Hitchhiker
+                Util.sendText("RIP"); // Hitchhiker
                 gs.getIH().leaveGame();
             }
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
@@ -541,8 +551,8 @@ public class Ecgberht implements BWEventListener {
     public void onEnd(boolean arg0) {
         try {
             String name = ih.enemy().getName();
-            if (arg0) ih.sendText("gg wp " + name);
-            else ih.sendText("gg wp! " + name + ", next game I will not lose!");
+            if (arg0) Util.sendText("gg wp " + name);
+            else Util.sendText("gg wp! " + name + ", next game I will not lose!");
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
                 gs.getStrat().name = "PlasmaWraithHell";
             String oldStrat = IntelligenceAgency.getStartStrat();
@@ -577,7 +587,7 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onSendText(String arg0) {
-        debugManager.keyboardInteraction(arg0, skycladObserver);
+        debugManager.keyboardInteraction(arg0);
     }
 
     @Override

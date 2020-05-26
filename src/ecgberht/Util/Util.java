@@ -4,6 +4,7 @@ import bwem.Area;
 import bwem.Base;
 import bwem.ChokePoint;
 import ecgberht.BaseManager;
+import ecgberht.ConfigManager;
 import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.*;
 import org.openbw.bwapi4j.type.*;
@@ -205,6 +206,10 @@ public class Util {
                 return "Random";
         }
         return "Unknown";
+    }
+
+    public static void sendText(String text) {
+        if (!ConfigManager.getConfig().ecgConfig.humanMode) getIH().sendText(text);
     }
 
     public static int getGroundDistance(Position start, Position end) {

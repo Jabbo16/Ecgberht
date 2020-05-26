@@ -83,7 +83,7 @@ public class CherryVisDumper {
         String opponentName = gameState.getIH().enemy().getName();
         String path = getDumpDirectory(opponentName);
         if (path != null) {
-            Util.getIH().sendText("Writing traceData to: " + path);
+            Util.sendText("Writing traceData to: " + path);
             writeJSONCompressed(traceData, path + "trace.json");
         }
     }

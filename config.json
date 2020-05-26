@@ -14,7 +14,8 @@
         "sscait": false,
         "enableSkyCladObserver": false,
         "forceStrat": "",
-        "enableCherryVisDump": true,
-        "debugAttackDisabled": false
+        "enableCherryVisDump": false,
+        "debugDisableAttack": false,
+        "humanMode": false
     }
 }
