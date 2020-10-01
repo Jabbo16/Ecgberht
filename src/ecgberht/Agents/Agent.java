@@ -4,6 +4,8 @@ import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Unit;
 
+import static ecgberht.Ecgberht.getGs;
+
 public abstract class Agent {
 
     public Unit myUnit;
@@ -13,6 +15,11 @@ public abstract class Agent {
     UnitInfo attackUnit = null;
     int frameLastOrder = 0;
     int actualFrame = 0;
+
+    Agent(Unit unit) {
+        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
+        this.myUnit = unit;
+    }
 
     public String statusToString() {
         if (status == Status.ATTACK) return "Attack";

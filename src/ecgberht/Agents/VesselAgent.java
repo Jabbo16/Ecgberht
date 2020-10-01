@@ -27,10 +27,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     private Unit oldTarget;
 
     public VesselAgent(Unit unit) {
-        super();
-        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
+        super(unit);
         this.unit = (ScienceVessel) unit;
-        this.myUnit = unit;
     }
 
     public String statusToString() {
@@ -303,7 +301,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
                 for (UnitInfo u : matrixTargets) {
                     if (!(u.unit instanceof MobileUnit)) continue;
-                    if (getGs().wizard.isDefenseMatrixed(u.unit)) continue;
+                    if (getGs().wizard.isDefenseMatrixed((MobileUnit) u.unit)) continue;
                     double score = 1;
                     if (!u.unit.isUnderAttack() || ((MobileUnit) u.unit).isDefenseMatrixed()) continue;
                     if (u.unitType.isMechanical()) score = 8;

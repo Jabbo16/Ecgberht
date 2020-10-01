@@ -225,7 +225,9 @@ public class Squad implements Comparable<Squad> {
                 if (dist >= 260) {
                     UtilMicro.move((MobileUnit) u.unit, center);
                     return;
-                } else if (attack != null) UtilMicro.move((MobileUnit) u.unit, attack);
+                } else if (attack != null) {
+                    UtilMicro.move((MobileUnit) u.unit, attack);
+                }
                 break;
         }
     }
@@ -326,7 +328,9 @@ public class Squad implements Comparable<Squad> {
                     if (dist >= 300) {
                         UtilMicro.attack(st, center);
                         return;
-                    } else if (attack != null) UtilMicro.move(st, attack);
+                    } else if (attack != null) {
+                        UtilMicro.move(st, attack);
+                    }
                 }
                 break;
         }

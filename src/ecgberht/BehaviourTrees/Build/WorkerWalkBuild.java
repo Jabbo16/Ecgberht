@@ -1,7 +1,7 @@
 package ecgberht.BehaviourTrees.Build;
 
+import bwem.Area;
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;

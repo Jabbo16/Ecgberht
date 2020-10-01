@@ -3,7 +3,6 @@ package ecgberht;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.ScienceVessel;
-import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,16 +36,16 @@ public class SpellsManager {
         EMPedUnits.entrySet().removeIf(u -> u.getValue().getShields() <= 1 || !u.getValue().exists() || !u.getKey().exists());
     }
 
-    public boolean isUnitIrradiated(Unit u) {
-        return irradiatedUnits.values().contains(u);
+    public boolean isUnitIrradiated(PlayerUnit u) {
+        return irradiatedUnits.containsValue(u);
     }
 
-    public boolean isDefenseMatrixed(Unit u) {
-        return defenseMatrixedUnits.values().contains(u);
+    public boolean isDefenseMatrixed(MobileUnit u) {
+        return defenseMatrixedUnits.containsValue(u);
     }
 
-    public boolean isUnitEMPed(Unit u) {
-        return EMPedUnits.values().contains(u);
+    public boolean isUnitEMPed(PlayerUnit u) {
+        return EMPedUnits.containsValue(u);
     }
 
     public void addIrradiated(ScienceVessel vessel, PlayerUnit unit) {

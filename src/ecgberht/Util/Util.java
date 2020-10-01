@@ -1,12 +1,12 @@
 package ecgberht.Util;
 
+import bwem.Area;
 import bwem.Base;
 import bwem.ChokePoint;
-import bwem.area.Area;
 import ecgberht.BaseManager;
+import ecgberht.ConfigManager;
 import ecgberht.UnitInfo;
 import org.openbw.bwapi4j.*;
-import org.openbw.bwapi4j.org.apache.commons.lang3.mutable.MutableInt;
 import org.openbw.bwapi4j.type.*;
 import org.openbw.bwapi4j.unit.*;
 
@@ -208,11 +208,13 @@ public class Util {
         return "Unknown";
     }
 
+    public static void sendText(String text) {
+        if (!ConfigManager.getConfig().ecgConfig.humanMode) getIH().sendText(text);
+    }
+
     public static int getGroundDistance(Position start, Position end) {
         try {
-            MutableInt dist = new MutableInt();
-            getGs().bwem.getMap().getPath(start, end, dist);
-            return dist.intValue();
+            return getGs().bwem.getMap().getPathLength(start, end);
         } catch (Exception e) {
             return start != null && end != null ? start.getDistance(end) : Integer.MAX_VALUE;
         }

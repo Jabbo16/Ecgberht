@@ -33,7 +33,7 @@ public class ChooseMedic extends Action {
                             for (Barracks b : gameState.MBs) {
                                 if (!b.isTraining()) {
                                     gameState.chosenUnit = UnitType.Terran_Medic;
-                                    gameState.chosenBuilding = b;
+                                    gameState.chosenTrainingFacility = b;
                                     return State.SUCCESS;
                                 }
                             }

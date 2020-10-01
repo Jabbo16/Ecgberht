@@ -40,7 +40,7 @@ public class ChooseSituationalUnit extends Action {
                 for (Starport s : gameState.Ps) {
                     if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                         gameState.chosenUnit = UnitType.Terran_Dropship;
-                        gameState.chosenBuilding = s;
+                        gameState.chosenTrainingFacility = s;
                         return State.SUCCESS;
                     }
                 }
@@ -86,13 +86,13 @@ public class ChooseSituationalUnit extends Action {
                         for (Barracks b : gameState.MBs) {
                             if (!b.isTraining()) {
                                 gameState.chosenUnit = UnitType.Terran_Marine;
-                                gameState.chosenBuilding = b;
+                                gameState.chosenTrainingFacility = b;
                                 return State.SUCCESS;
                             }
                         }
                     }
                     gameState.chosenUnit = UnitType.Terran_Science_Vessel;
-                    gameState.chosenBuilding = s;
+                    gameState.chosenTrainingFacility = s;
                     return State.SUCCESS;
                 }
             }

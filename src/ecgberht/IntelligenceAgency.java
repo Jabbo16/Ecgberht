@@ -1,8 +1,9 @@
 package ecgberht;
 
 import bwem.Base;
-import bwem.unit.Mineral;
+import bwem.Mineral;
 import ecgberht.Strategies.*;
+import ecgberht.Util.Util;
 import org.openbw.bwapi4j.Bullet;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.type.Race;
@@ -184,7 +185,7 @@ public class IntelligenceAgency {
             if (foundPool && drones <= 6) {
                 enemyStrat = EnemyStrats.EarlyPool;
                 getGs().learningManager.setNaughty(true);
-                getGs().ih.sendText("Bad zerg!, bad!");
+                Util.sendText("Bad zerg!, bad!");
                 getGs().playSound("rushed.mp3");
                 String strat = getGs().getStrat().name;
                 if (strat.contains("GreedyFE") || strat.equals("14CC")) { // TODO cancel 14CC??
@@ -208,7 +209,7 @@ public class IntelligenceAgency {
             boolean foundGas = enemyHasType(UnitType.Protoss_Assimilator);
             if (countGates >= 2 && probes <= 13 && !foundGas) {
                 enemyStrat = EnemyStrats.ZealotRush;
-                getGs().ih.sendText("Nice gates you got there");
+                Util.sendText("Nice gates you got there");
                 getGs().playSound("rushed.mp3");
                 String strat = getGs().getStrat().name;
                 if (strat.contains("GreedyFE") || strat.equals("FullMech") || strat.equals("14CC")) {
@@ -243,7 +244,7 @@ public class IntelligenceAgency {
             }
             if (countFactories >= 1 && foundGas && countRax == 1) {
                 enemyStrat = EnemyStrats.MechRush;
-                getGs().ih.sendText("Nice Mech getStrat() you got there");
+                Util.sendText("Nice Mech getStrat() you got there");
                 getGs().playSound("rushed.mp3");
                 if (getGs().getStrat().name.equals("BioGreedyFE")) {
                     getGs().setStrat(new MechGreedyFE());
@@ -290,7 +291,7 @@ public class IntelligenceAgency {
             if (countFactories < 1 && countRax > 1) {
                 enemyStrat = EnemyStrats.BioPush;
                 getGs().getStrat().bunker = true;
-                getGs().ih.sendText("Nice Bio strat");
+                Util.sendText("Nice Bio strat");
                 return true;
             }
         }
@@ -302,7 +303,7 @@ public class IntelligenceAgency {
             int drones = IntelligenceAgency.getNumEnemyWorkers();
             if (getNumEnemyBases(mainEnemy) == 2 && drones >= 10 && drones <= 12) {
                 enemyStrat = EnemyStrats.FastHatch;
-                getGs().ih.sendText("Nice 12 Hatch");
+                Util.sendText("Nice 12 Hatch");
                 if (!getGs().getStrat().name.contains("GreedyFE") && !getGs().getStrat().proxy && !getGs().getStrat().trainUnits.contains(UnitType.Terran_Wraith)) {
                     getGs().iReallyWantToExpand = true;
                     getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
@@ -321,7 +322,7 @@ public class IntelligenceAgency {
             boolean foundExtractor = enemyHasType(UnitType.Zerg_Extractor);
             if (foundPool && getNumEnemyBases(mainEnemy) < 2 && drones >= 7 && drones <= 10) {
                 enemyStrat = EnemyStrats.NinePool;
-                getGs().ih.sendText(drones == 10 || foundExtractor ? "Nice Overpool" : "Nice 9 pool");
+                Util.sendText(drones == 10 || foundExtractor ? "Nice Overpool" : "Nice 9 pool");
                 getGs().getStrat().bunker = true;
                 String strat = getGs().getStrat().name;
                 if (strat.equals("14CC")) { // TODO cancel 14CC??
@@ -345,7 +346,7 @@ public class IntelligenceAgency {
             int probes = IntelligenceAgency.getNumEnemyWorkers();
             if (getNumEnemyBases(mainEnemy) > 1 && probes <= 16) {
                 enemyStrat = EnemyStrats.ProtossFE;
-                getGs().ih.sendText("Nice FE");
+                Util.sendText("Nice FE");
                 String strat = getGs().getStrat().name;
                 if (strat.equals("FullBio") || strat.equals("FullBioFE")) getGs().setStrat(new BioGreedyFE());
                 if (strat.equals("BioMech") || strat.equals("BioMechFE")) getGs().setStrat(new BioMechGreedyFE());
@@ -418,7 +419,6 @@ public class IntelligenceAgency {
         return (int) Math.min(Math.max(3, Math.exp(((double) getNumberEnemyType(UnitType.Zerg_Zergling) - 3) / 20.0)), 15);
     }
 
-
     private static boolean canTrainVessels() {
         boolean tower = false;
         boolean science = false;
@@ -462,7 +462,7 @@ public class IntelligenceAgency {
             }
             if ((foundForge && !foundGas) || somethingInMyBase) {
                 enemyStrat = EnemyStrats.CannonRush;
-                getGs().ih.sendText("Cannon rusher T_T");
+                Util.sendText("Cannon rusher T_T");
                 getGs().playSound("rushed.mp3");
                 getGs().setStrat(new FullMech());
                 getGs().getStrat().armyForExpand += 10; // TODO add preconditions for expanding

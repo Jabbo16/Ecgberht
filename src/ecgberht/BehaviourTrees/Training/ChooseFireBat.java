@@ -30,7 +30,7 @@ public class ChooseFireBat extends Action {
                         for (Barracks b : gameState.MBs) {
                             if (!b.isTraining()) {
                                 gameState.chosenUnit = UnitType.Terran_Firebat;
-                                gameState.chosenBuilding = b;
+                                gameState.chosenTrainingFacility = b;
                                 return State.SUCCESS;
                             }
                         }

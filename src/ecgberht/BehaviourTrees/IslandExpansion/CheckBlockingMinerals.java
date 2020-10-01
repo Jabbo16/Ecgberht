@@ -1,6 +1,6 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
 
-import bwem.unit.Mineral;
+import bwem.Mineral;
 import ecgberht.GameState;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Conditional;

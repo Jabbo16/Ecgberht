@@ -19,7 +19,7 @@ public class CheckResourcesUnit extends Conditional {
             if (cash.first >= (gameState.chosenUnit.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenUnit.gasPrice()) + gameState.deltaCash.second) {
                 return State.SUCCESS;
             }
-            gameState.chosenBuilding = null;
+            gameState.chosenTrainingFacility = null;
             gameState.chosenToBuild = UnitType.None;
             return State.FAILURE;
         } catch (Exception e) {

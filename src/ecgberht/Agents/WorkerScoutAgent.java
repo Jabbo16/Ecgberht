@@ -1,7 +1,7 @@
 package ecgberht.Agents;
 
+import bwem.Area;
 import bwem.Base;
-import bwem.area.Area;
 import ecgberht.BuildingMap;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Simulation.SimInfo;
@@ -43,10 +43,9 @@ public class WorkerScoutAgent extends Agent {
     private TilePosition proxyTile = null;
 
     public WorkerScoutAgent(Unit unit, Base enemyBase) {
+        super(unit);
         this.unit = (SCV) unit;
-        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
         this.enemyBase = enemyBase;
-        this.myUnit = unit;
         canProxyInThisMap();
     }
 

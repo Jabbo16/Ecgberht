@@ -1,35 +1,50 @@
-apply plugin: 'java'
-sourceCompatibility = 1.8
+plugins {
+    id("java")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 sourceSets {
     main {
-         java {
-              srcDir 'src'
-              }
-         }
-}
-repositories {
-    flatDir {
-        dirs 'lib'
+        java {
+            srcDir 'src'
+        }
     }
 }
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     compile fileTree(dir: 'lib', include: ['*.jar'], exclude: ['*-javadoc.jar'])
+    implementation('com.google.code.gson:gson:2.8.6')
+    implementation('com.github.luben:zstd-jni:1.4.4-4:win_x86')
+    implementation('javazoom:jlayer:1.0.1')
+    implementation('com.github.Bytekeeper:ass:1.1')
 }
 
-task copyConfig(type: Copy) {
-    from file("config.json")
-    into file("build/libs/")
-}
+tasks {
+    task copyConfig(type: Copy) {
+        from file("config.json")
+        into file("build/libs/")
+    }
 
-task fatJar(type: Jar) {
-    baseName = 'Ecgberht'
-    from('src/') {
-      include  '*.mp3'
+    task fatJar(type: Jar) {
+        archiveBaseName = 'Ecgberht'
+        from('src/') {
+            include  '*.mp3'
+        }
+        manifest {
+            attributes 'Main-Class': 'ecgberht.Ecgberht'
+        }
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar
     }
-    manifest {
-        attributes 'Main-Class': 'ecgberht.Ecgberht'
-    }
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+    fatJar.dependsOn copyConfig
 }
-fatJar.dependsOn copyConfig

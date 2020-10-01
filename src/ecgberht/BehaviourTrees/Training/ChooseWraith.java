@@ -22,7 +22,7 @@ public class ChooseWraith extends Action {
                     for (Starport b : gameState.Ps) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Wraith)) {
                             gameState.chosenUnit = UnitType.Terran_Wraith;
-                            gameState.chosenBuilding = b;
+                            gameState.chosenTrainingFacility = b;
                             return State.SUCCESS;
                         }
                     }
