@@ -32,7 +32,7 @@ public class CheckEnemyBaseVisible extends Action {
                             gameState.chosenHarasser = (Worker) gameState.chosenScout;
                         }
                         gameState.chosenScout = null;
-                        gameState.getIH().sendText("!");
+                        Util.sendText("!");
                         gameState.playSound("gearthere.mp3");
                         if (gameState.enemyStartBase == null) {
                             gameState.enemyBLs.clear();

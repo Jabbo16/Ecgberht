@@ -28,7 +28,7 @@ public class ChooseGoliath extends Action {
                 for (Factory b : gameState.Fs) {
                     if (!b.isTraining() && b.canTrain(UnitType.Terran_Goliath)) {
                         gameState.chosenUnit = UnitType.Terran_Goliath;
-                        gameState.chosenBuilding = b;
+                        gameState.chosenTrainingFacility = b;
                         return State.SUCCESS;
                     }
                 }

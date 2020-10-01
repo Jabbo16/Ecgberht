@@ -41,7 +41,7 @@ public class ChooseMarine extends Action {
                 for (Barracks b : gameState.MBs) {
                     if (!b.isTraining()) {
                         gameState.chosenUnit = UnitType.Terran_Marine;
-                        gameState.chosenBuilding = b;
+                        gameState.chosenTrainingFacility = b;
                         return State.SUCCESS;
                     }
                 }

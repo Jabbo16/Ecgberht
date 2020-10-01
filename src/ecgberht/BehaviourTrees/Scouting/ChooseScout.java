@@ -6,6 +6,7 @@ import ecgberht.UnitInfo;
 import org.iaie.btree.BehavioralTree.State;
 import org.iaie.btree.task.leaf.Action;
 import org.openbw.bwapi4j.unit.MineralPatch;
+import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.Worker;
 import org.openbw.bwapi4j.unit.Wraith;
 
@@ -22,7 +23,7 @@ public class ChooseScout extends Action {
                 for (Squad s : gameState.sqManager.squads.values()) {
                     for (UnitInfo u : s.members) {
                         if (u.unit instanceof Wraith) {
-                            gameState.chosenScout = u.unit;
+                            gameState.chosenScout = (MobileUnit) u.unit;
                             s.members.remove(u);
                             return State.SUCCESS;
                         }

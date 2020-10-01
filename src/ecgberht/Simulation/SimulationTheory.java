@@ -38,7 +38,7 @@ public class SimulationTheory {
     private int iterations = 10;
 
     public SimulationTheory(BW bw) {
-        simulator = new Simulator();
+        simulator = new Simulator.Builder().build();
         evaluator = new Evaluator();
         factory = new BWAPI4JAgentFactory(bw.getBWMap());
         if (ConfigManager.getConfig().ecgConfig.sscait) {
@@ -121,7 +121,8 @@ public class SimulationTheory {
         for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
             if (getGs().getStrat().proxy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking()))
                 continue;
-            if (u.unitType == UnitType.Zerg_Larva || u.unitType == UnitType.Zerg_Egg) continue;
+            if (u.unitType == UnitType.Zerg_Larva || (u.unitType == UnitType.Zerg_Egg && !u.player.isNeutral()))
+                continue;
             if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
                     || getGs().frameCount - u.lastVisibleFrame <= 24 * 4)
                 enemyUnits.add(u);
@@ -137,7 +138,7 @@ public class SimulationTheory {
                 return true;
             if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
             return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
-                    || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
+                    || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath || u instanceof Dropship;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

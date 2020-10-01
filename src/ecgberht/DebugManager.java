@@ -2,7 +2,7 @@ package ecgberht;
 
 import bwem.Base;
 import bwem.ChokePoint;
-import bwem.unit.Mineral;
+import bwem.Mineral;
 import cameraModule.CameraModule;
 import ecgberht.Agents.*;
 import ecgberht.Util.ColorUtil;
@@ -22,40 +22,47 @@ public class DebugManager {
 
     private MapDrawer mapDrawer;
     private InteractionHandler iH;
+    private CameraModule skycladObserver;
 
-    DebugManager(MapDrawer mapDrawer, InteractionHandler iH) {
+    DebugManager(MapDrawer mapDrawer, InteractionHandler iH, CameraModule skycladObserver) {
         this.mapDrawer = mapDrawer;
         this.iH = iH;
+        this.skycladObserver = skycladObserver;
     }
 
-    void keyboardInteraction(String text, CameraModule skycladObserver) {
+    void keyboardInteraction(String text) {
         boolean setting;
         switch (text) {
             case "dt":
                 setting = ConfigManager.getConfig().ecgConfig.debugText;
-                iH.sendText(!setting ? "debugText enabled" : "debugText disabled");
+                Util.sendText(!setting ? "debugText enabled" : "debugText disabled");
                 ConfigManager.getConfig().ecgConfig.debugText = !setting;
                 break;
             case "dc":
                 setting = ConfigManager.getConfig().ecgConfig.debugConsole;
-                iH.sendText(!setting ? "debugConsole enabled" : "debugConsole disabled");
+                Util.sendText(!setting ? "debugConsole enabled" : "debugConsole disabled");
                 ConfigManager.getConfig().ecgConfig.debugConsole = !setting;
                 break;
             case "ds":
                 setting = ConfigManager.getConfig().ecgConfig.debugScreen;
-                iH.sendText(!setting ? "debugScreen enabled" : "debugScreen disabled");
+                Util.sendText(!setting ? "debugScreen enabled" : "debugScreen disabled");
                 ConfigManager.getConfig().ecgConfig.debugScreen = !setting;
                 break;
             case "obs":
                 setting = ConfigManager.getConfig().ecgConfig.enableSkyCladObserver;
-                iH.sendText(!setting ? "Observer enabled" : "Observer disabled");
+                Util.sendText(!setting ? "Observer enabled" : "Observer disabled");
                 ConfigManager.getConfig().ecgConfig.enableSkyCladObserver = !setting;
                 skycladObserver.toggle();
                 break;
             case "sounds":
                 setting = ConfigManager.getConfig().ecgConfig.sounds;
-                iH.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
+                Util.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
                 ConfigManager.getConfig().ecgConfig.sounds = !setting;
+                break;
+            case "noattack":
+                setting = ConfigManager.getConfig().ecgConfig.debugDisableAttack;
+                Util.sendText(!setting ? "Debug Attack enabled" : "Debug Attack disabled");
+                ConfigManager.getConfig().ecgConfig.debugDisableAttack = !setting;
                 break;
         }
     }
@@ -78,6 +85,7 @@ public class DebugManager {
             if(u.getValue().first != null) bw.getMapDrawer().drawLineMap(u.getKey().getLocation().toPosition(), u.getValue().first.getPosition(),Color.RED);
             if(u.getValue().second != null)bw.getMapDrawer().drawLineMap(u.getKey().getLocation().toPosition(), u.getValue().second.getPosition(),Color.ORANGE);
         }*/
+            for (MineralPatch m : gameState.walkingMinerals) print(m, Color.RED);
             for (MineralPatch d : gameState.blockingMinerals.values()) print(d, Color.RED);
             int counter = 0;
             for (Base b : gameState.BLs) {
@@ -89,6 +97,9 @@ public class DebugManager {
             for (Unit u : gameState.enemyInBase) print(u, Color.RED);
             for (Base b : gameState.islandBases)
                 mapDrawer.drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
+            for (Unit u : gameState.islandCCs.values()) {
+                print(u, Color.YELLOW);
+            }
             for (Agent ag : gameState.agents.values()) {
                 if (ag instanceof VultureAgent) {
                     VultureAgent vulture = (VultureAgent) ag;
@@ -110,7 +121,6 @@ public class DebugManager {
                     mapDrawer.drawTextMap(worker.myUnit.getPosition().add(new Position(-16,
                             UnitType.Terran_SCV.dimensionUp())), ColorUtil.formatText(worker.statusToString(), ColorUtil.White));
                 }
-
             }
             if (gameState.enemyStartBase != null)
                 mapDrawer.drawTextMap(gameState.enemyStartBase.getLocation().toPosition(), ColorUtil.formatText("EnemyStartBase", ColorUtil.White));

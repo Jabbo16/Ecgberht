@@ -27,10 +27,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     private Unit oldTarget;
 
     public VesselAgent(Unit unit) {
-        super();
-        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
+        super(unit);
         this.unit = (ScienceVessel) unit;
-        this.myUnit = unit;
     }
 
     public String statusToString() {

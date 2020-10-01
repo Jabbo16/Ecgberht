@@ -55,7 +55,7 @@ public class LearningManager {
         try (FileWriter writer = new FileWriter(path)) {
             aux.toJson(content, writer);
         } catch (IOException e) {
-            System.err.println("writeOpponentHistory");
+            System.err.println("writeJSON");
             e.printStackTrace();
         }
     }
@@ -63,13 +63,13 @@ public class LearningManager {
     private void writeOpponentInfo(String name, boolean enemyIsRandom) {
         if (enemyIsRandom && enemyInfo.naughty) enemyInfo.naughty = false;
         String path = dir + name + "_" + enemyInfo.race + ".json";
-        Util.getIH().sendText("Writing result to: " + path);
+        Util.sendText("Writing result to: " + path);
         writeJSON(enemyInfo, path);
     }
 
     private void writeOpponentHistory(String name) {
         String path = dir + name + "_" + enemyInfo.race + "-History.json";
-        Util.getIH().sendText("Writing history to: " + path);
+        Util.sendText("Writing history to: " + path);
         writeJSON(enemyHistory, path);
     }
 

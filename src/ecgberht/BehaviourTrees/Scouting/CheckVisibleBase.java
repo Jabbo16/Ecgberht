@@ -10,7 +10,6 @@ public class CheckVisibleBase extends Conditional {
 
     public CheckVisibleBase(String name, GameState gh) {
         super(name, gh);
-
     }
 
     @Override

@@ -29,6 +29,7 @@ import ecgberht.BehaviourTrees.Scanner.Scan;
 import ecgberht.BehaviourTrees.Scouting.*;
 import ecgberht.BehaviourTrees.Training.*;
 import ecgberht.BehaviourTrees.Upgrade.*;
+import ecgberht.CherryVis.CherryVisDumper;
 import ecgberht.Strategies.BioMechFE;
 import ecgberht.Strategies.FullBio;
 import ecgberht.Strategies.FullBioFE;
@@ -74,6 +75,7 @@ public class Ecgberht implements BWEventListener {
     private BWEM bwem = null;
     private DebugManager debugManager = null;
     private CameraModule skycladObserver = null;
+    private CherryVisDumper cherryVisDumper;
 
     private org.bk.ass.path.Result path;
 
@@ -94,7 +96,7 @@ public class Ecgberht implements BWEventListener {
         initBuildTree();
         initUpgradeTree();
         initAddonBuildTree();
-        gs.scipio.updateStrat();
+        //gs.scipio.updateStrat();
     }
 
     private static void initTrainTree() {
@@ -127,6 +129,7 @@ public class Ecgberht implements BWEventListener {
     private static void initBuildTree() {
         Build b = new Build("Build", gs);
         WorkerWalkBuild wwB = new WorkerWalkBuild("worker walk build", gs);
+        CheckMineralWalkGoldRush cMWGR = new CheckMineralWalkGoldRush("Mineral Walk Gold Rush", gs);
         ChooseNothingBuilding cNB = new ChooseNothingBuilding("Choose Nothing", gs);
         ChooseExpand cE = new ChooseExpand("Choose Expansion", gs);
         ChooseSupply cSup = new ChooseSupply("Choose Supply Depot", gs);
@@ -157,7 +160,10 @@ public class Ecgberht implements BWEventListener {
         Sequence buildMove;
         if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"))
             buildMove = new Sequence("BuildMove", wwB, b, chooseBuildingBuild, cp, cw, crb, m);
-        else buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
+        else if (bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) // GoldRush
+            buildMove = new Sequence("BuildMove", cMWGR, b, chooseBuildingBuild, cp, cw, crb, m);
+        else
+            buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
         buildTree = new BehavioralTree("Building Tree");
         buildTree.addChild(buildMove);
     }
@@ -225,7 +231,6 @@ public class Ecgberht implements BWEventListener {
         Sequence islandExpansion = new Sequence("island expansion", chI, expanding);
         islandTree = new BehavioralTree("islandTree");
         islandTree.addChild(islandExpansion);
-
     }
 
     private void run() {
@@ -237,11 +242,12 @@ public class Ecgberht implements BWEventListener {
         CheckScout cSc = new CheckScout("Check Scout", gs);
         ChooseScout chSc = new ChooseScout("Choose Scouter", gs);
         SendScout sSc = new SendScout("Send Scout", gs);
+        CheckMineralWalk cMW = new CheckMineralWalk("Check Mineral Walk", gs);
         CheckVisibleBase cVB = new CheckVisibleBase("Check visible Base", gs);
         CheckEnemyBaseVisible cEBV = new CheckEnemyBaseVisible("Check Enemy Base Visible", gs);
         Sequence scoutFalse = new Sequence("Scout ", cSc, chSc, sSc);
         Selector EnemyFound = new Selector("Enemy found in base location", cEBV, sSc);
-        Sequence scoutTrue = new Sequence("Scout True", cVB, EnemyFound);
+        Sequence scoutTrue = new Sequence("Scout True", cMW, cVB, EnemyFound);
         Selector Scouting = new Selector("Select Scouting Plan", scoutFalse, scoutTrue);
         scoutingTree = new BehavioralTree("Movement Tree");
         scoutingTree.addChild(Scouting);
@@ -326,10 +332,20 @@ public class Ecgberht implements BWEventListener {
                 System.setErr(nullOut);
                 System.setOut(nullOut);
             }
+            if (ConfigManager.getConfig().ecgConfig.humanMode) {
+                ConfigManager.getConfig().ecgConfig.sounds = false;
+                ConfigManager.getConfig().ecgConfig.debugConsole = false;
+                ConfigManager.getConfig().ecgConfig.debugScreen = false;
+                ConfigManager.getConfig().ecgConfig.debugText = false;
+                ConfigManager.getConfig().ecgConfig.enableCherryVisDump = false;
+                ConfigManager.getConfig().ecgConfig.enableLatCom = true;
+                ConfigManager.getConfig().ecgConfig.forceStrat = "";
+                ConfigManager.getConfig().ecgConfig.sscait = true;
+            }
             self = bw.getInteractionHandler().self();
             skycladObserver = new CameraModule(self.getStartLocation(), bw);
             ih = bw.getInteractionHandler();
-            debugManager = new DebugManager(bw.getMapDrawer(), bw.getInteractionHandler());
+            debugManager = new DebugManager(bw.getMapDrawer(), bw.getInteractionHandler(), skycladObserver);
             IntelligenceAgency.onStartIntelligenceAgency(ih.enemy());
             if (!ConfigManager.getConfig().ecgConfig.enableLatCom) ih.enableLatCom(false);
             else ih.enableLatCom(true);
@@ -341,7 +357,7 @@ public class Ecgberht implements BWEventListener {
             if (ConfigManager.getConfig().bwapiConfig.userInput) ih.enableUserInput();
             bwem = new BWEM(bw);
             if (bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) { // Hitchhiker
-                ih.sendText("Hitchhiker :(");
+                Util.sendText("Hitchhiker :(");
             }
             bwem.initialize();
             if (!bw.getBWMap().mapHash().equals("e6d0144e14315118d916905ff5e7045f68db541e")) // Aztec KSL crash fix
@@ -353,7 +369,7 @@ public class Ecgberht implements BWEventListener {
             gs.alwaysPools();
             if (gs.enemyRace == Race.Zerg && gs.learningManager.isNaughty()) gs.playSound("rushed.mp3");
             gs.scipio = new StrategyManager();
-            gs.scipio.updateStrat();
+            //gs.scipio.updateStrat();
             IntelligenceAgency.setStartStrat(gs.getStrat().name);
             gs.initStartLocations();
             boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
@@ -367,6 +383,9 @@ public class Ecgberht implements BWEventListener {
                 } else if (b.getArea().getAccessibleNeighbors().isEmpty())
                     gs.islandBases.add(b); // Island expansions re-enabled
                 else gs.BLs.add(b);
+            }
+            if (bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) { // GoldRush
+                gs.initMineralWalkPatches();
             }
             gs.initBlockingMinerals();
             gs.initBaseLocations();
@@ -395,12 +414,12 @@ public class Ecgberht implements BWEventListener {
             initIslandTree();
             gs.silentCartographer = new Cartographer(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
+            cherryVisDumper = new CherryVisDumper(gs);
         } catch (Exception e) {
             System.err.println("onStart Exception");
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void onFrame() {
@@ -413,7 +432,7 @@ public class Ecgberht implements BWEventListener {
                     } else {
                         path = gs.silentCartographer.getWalkablePath(self.getStartLocation().toWalkPosition(), gs.enemyMainBase.getLocation().toWalkPosition());
                     }
-                } else {
+                } else if(ConfigManager.getConfig().ecgConfig.debugScreen) {
                     for (org.bk.ass.path.Position p : path.path) {
                         Position pos = new WalkPosition(p.x, p.y).toPosition();
                         bw.getMapDrawer().drawCircleMap(pos, 4, Color.RED, true);
@@ -428,7 +447,7 @@ public class Ecgberht implements BWEventListener {
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
-                gs.getIH().sendText("RIP"); // Hitchhiker
+                Util.sendText("RIP"); // Hitchhiker
                 gs.getIH().leaveGame();
             }
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
@@ -521,6 +540,7 @@ public class Ecgberht implements BWEventListener {
             gs.checkMainEnemyBase();
             if (gs.frameCount > 10 && gs.frameCount % 5 == 0) gs.mineralLocking();
             debugManager.onFrame(gs);
+            cherryVisDumper.onFrame();
         } catch (Exception e) {
             System.err.println("onFrame Exception");
             e.printStackTrace();
@@ -531,11 +551,12 @@ public class Ecgberht implements BWEventListener {
     public void onEnd(boolean arg0) {
         try {
             String name = ih.enemy().getName();
-            if (arg0) ih.sendText("gg wp " + name);
-            else ih.sendText("gg wp! " + name + ", next game I will not lose!");
+            if (arg0) Util.sendText("gg wp " + name);
+            else Util.sendText("gg wp! " + name + ", next game I will not lose!");
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
                 gs.getStrat().name = "PlasmaWraithHell";
             String oldStrat = IntelligenceAgency.getStartStrat();
+            cherryVisDumper.onEnd(arg0, oldStrat);
             if (oldStrat != null && !oldStrat.equals(gs.getStrat().name)) gs.getStrat().name = oldStrat;
             gs.learningManager.onEnd(gs.getStrat().name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom, IntelligenceAgency.getEnemyStrat());
         } catch (Exception e) {
@@ -566,7 +587,7 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onSendText(String arg0) {
-        debugManager.keyboardInteraction(arg0, skycladObserver);
+        debugManager.keyboardInteraction(arg0);
     }
 
     @Override
@@ -703,7 +724,7 @@ public class Ecgberht implements BWEventListener {
                         }
                     }
                 } else if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
-                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat"))
+                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat") && !bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a"))
                     gs.agents.put(arg0, new VultureAgent(arg0));
                 else if (type == UnitType.Terran_Dropship) {
                     DropShipAgent d = new DropShipAgent(arg0);
@@ -1011,6 +1032,7 @@ public class Ecgberht implements BWEventListener {
     @Override
     public void onUnitShow(Unit arg0) {
         try {
+            cherryVisDumper.onUnitShow(arg0);
             if (arg0 instanceof MineralPatch || arg0 instanceof VespeneGeyser || arg0 instanceof SpecialBuilding ||
                     arg0 instanceof Critter || arg0 instanceof ScannerSweep) return;
             UnitType type = arg0.getType();

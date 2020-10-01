@@ -50,6 +50,11 @@ public class UnitInfo implements Comparable<UnitInfo> {
 
     public UnitInfo(PlayerUnit u) {
         unit = u;
+        position = u.getPosition();
+        lastPosition = position;
+        tileposition = u.getTilePosition();
+        lastTileposition = tileposition;
+        unitType = u.getType();
     }
 
     // Credits to N00byEdge

@@ -29,10 +29,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private SimInfo mySim;
 
     public VultureAgent(Unit unit) {
-        super();
-        this.unitInfo = getGs().unitStorage.getAllyUnits().get(unit);
+        super(unit);
         this.unit = (Vulture) unit;
-        this.myUnit = unit;
     }
 
     public void placeMine(Position pos) {
