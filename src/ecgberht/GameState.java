@@ -857,7 +857,7 @@ public class GameState {
     }
 
     void sendCustomMessage() {
-        LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
+        EnemyInfo EI = learningManager.getEnemyInfo();
         String name = EI.opponent.toLowerCase().replace(" ", "");
         switch (name) {
             case "krasi0":
@@ -936,8 +936,8 @@ public class GameState {
             List<String> poolers = new ArrayList<>(Arrays.asList("newbiezerg", "neoedmundzerg", "peregrinebot",
                     "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish",
                     "jumpydoggobot", "upstarcraftai2016"));
-            LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-            LinkedList<LearningManager.EnemyHistory.EnemyGame> history = (LinkedList<LearningManager.EnemyHistory.EnemyGame>) learningManager.getEnemyHistory().clone();
+            EnemyInfo EI = learningManager.getEnemyInfo();
+            LinkedList<EnemyHistory.EnemyGame> history = (LinkedList<EnemyHistory.EnemyGame>) learningManager.getEnemyHistory().clone();
             Collections.reverse(history);
             int count = 0;
             boolean reallyNaughty = false;

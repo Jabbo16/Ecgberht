@@ -41,11 +41,13 @@ public class SimulationTheory {
         simulator = new Simulator.Builder().build();
         evaluator = new Evaluator();
         factory = new BWAPI4JAgentFactory(bw.getBWMap());
-        if (ConfigManager.getConfig().ecgConfig.sscait) {
+        boolean is_student_starcraft_AI_tournament = ConfigManager.getConfig().ecgConfig.sscait;
+        if (is_student_starcraft_AI_tournament) {
             simFrames = 300;
             iterations = 0;
         }
-        switch (bw.getInteractionHandler().enemy().getRace()) {
+        Race enemy_race = bw.getInteractionHandler().enemy().getRace();
+        switch (enemy_race) {
             case Zerg:
                 radius = UnitType.Zerg_Sunken_Colony.groundWeapon().maxRange();
                 break;
@@ -62,31 +64,40 @@ public class SimulationTheory {
     }
 
     private void updateRadius() {
-        if (radius == UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange()) return;
-        if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) > 0) {
-            if (getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
+        boolean is_equal_attack_range_with_TerranSiegeTank = radius == UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+        if (is_equal_attack_range_with_TerranSiegeTank) return;
+        int TankMode_nums = Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode);
+        if (TankMode_nums > 0) {
+            boolean is_learn_SiegeMode = getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode);
+            if (is_learn_SiegeMode) {
                 radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
                 return;
             }
         }
         switch (getGs().enemyRace) {
             case Zerg:
-                if (getGs().getPlayer().hasResearched(TechType.Irradiate)) {
+                boolean is_learn_irradiate = getGs().getPlayer().hasResearched(TechType.Irradiate);
+                if (is_learn_irradiate) {
                     radius = WeaponType.Irradiate.maxRange();
                     return;
                 }
                 break;
             case Terran:
-                if (getGs().getStrat() != null && getGs().getStrat().proxy && radius == UnitType.Terran_Missile_Turret.airWeapon().maxRange()) {
+                boolean is_exist_strategy = getGs().getStrat() != null;
+                boolean is_proxy_strategy = getGs().getStrat().proxy;
+                boolean is_equal_TurretMissile_AttackRange = radius == UnitType.Terran_Missile_Turret.airWeapon().maxRange();
+                if (is_exist_strategy && is_proxy_strategy && is_equal_TurretMissile_AttackRange) {
                     radius -= 32;
                 }
-                if (IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+                boolean is_enemy_has_siegeTank = IntelligenceAgency.enemyHasType(UnitType.Terran_Siege_Tank_Tank_Mode);
+                if (is_enemy_has_siegeTank) {
                     radius = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
                     return;
                 }
                 break;
             case Protoss:
-                if (getGs().getPlayer().hasResearched(TechType.EMP_Shockwave)) {
+                boolean is_learn_EMP = getGs().getPlayer().hasResearched(TechType.EMP_Shockwave);
+                if (is_learn_EMP) {
                     radius = WeaponType.EMP_Shockwave.maxRange();
                     return;
                 }
@@ -94,47 +105,54 @@ public class SimulationTheory {
         }
     }
 
-    /**
-     * Clears all the info, clusters, SimInfos and the simulator
-     */
     private void reset() {
         friendly.clear();
         enemies.clear();
         simulations.clear();
     }
 
-    /**
-     * Using allied and enemy units create the clusters with them
-     */
     private void createClusters() {
-        // Friendly Clusters
+        MeanShift clustering;
+        createFriendlyClusters();
+        createEnemyClusters();
+    }
+
+    private void createEnemyClusters() {
+        MeanShift clustering;
+        List<UnitInfo> enemyUnits = new ArrayList<>();
+
+        for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
+            boolean is_proxy_strategy = getGs().getStrat().proxy;
+            boolean is_less_than_four_seconds = getGs().frameCount - u.lastVisibleFrame <= 24 * 4;
+            if (is_proxy_strategy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking()))
+                continue;
+            if (u.unitType == UnitType.Zerg_Larva || (u.unitType == UnitType.Zerg_Egg && !u.player.isNeutral()))
+                continue;
+            if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
+                    || is_less_than_four_seconds)
+                enemyUnits.add(u);
+        }
+        clustering = MeanShift.getInstance(enemyUnits, radius);
+        enemies = clustering.run(iterations);
+    }
+
+    private void createFriendlyClusters() {
         List<UnitInfo> myUnits = new ArrayList<>();
         for (UnitInfo u : getGs().myArmy) {
             if (isArmyUnit(u.unit)) myUnits.add(u);
         }
         getGs().DBs.keySet().stream().map(b -> getGs().unitStorage.getAllyUnits().get(b)).forEach(myUnits::add); // Bunkers
         getGs().agents.values().stream().map(g -> g.unitInfo).forEach(myUnits::add); // Agents
-        MeanShift clustering = new MeanShift(myUnits, radius);
+        MeanShift clustering = MeanShift.getInstance(myUnits, radius);
         friendly = clustering.run(iterations);
-        // Enemy Clusters
-        List<UnitInfo> enemyUnits = new ArrayList<>();
-        for (UnitInfo u : getGs().unitStorage.getEnemyUnits().values()) {
-            if (getGs().getStrat().proxy && u.unitType.isWorker() && (Util.isInOurBases(u) && !u.unit.isAttacking()))
-                continue;
-            if (u.unitType == UnitType.Zerg_Larva || (u.unitType == UnitType.Zerg_Egg && !u.player.isNeutral()))
-                continue;
-            if (Util.isStaticDefense(u.unitType) || u.burrowed || u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode
-                    || getGs().frameCount - u.lastVisibleFrame <= 24 * 4)
-                enemyUnits.add(u);
-        }
-        clustering = new MeanShift(enemyUnits, radius);
-        enemies = clustering.run(iterations);
     }
 
     private boolean isArmyUnit(Unit u) {
+        boolean is_equal_proxyBBS_strategy = getGs().getStrat().name.equals("ProxyBBS");
+        boolean is_equal_proxyEightRax_strategy = getGs().getStrat().name.equals("ProxyEightRax");
         try {
             if (u == null || !u.exists()) return false;
-            if (u instanceof SCV && (getGs().getStrat().name.equals("ProxyBBS") || getGs().getStrat().name.equals("ProxyEightRax")))
+            if (u instanceof SCV && (is_equal_proxyBBS_strategy || is_equal_proxyEightRax_strategy))
                 return true;
             if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
             return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
@@ -145,11 +163,7 @@ public class SimulationTheory {
         }
     }
 
-    /**
-     * Main method that runs every frame
-     * If needed creates the clusters and SimInfos and run the simulations on them
-     */
-    public void onFrameSim() {
+    public void runSimulationOnFrame() {
         time = System.currentTimeMillis();
         updateRadius();
         reset();
@@ -169,7 +183,7 @@ public class SimulationTheory {
     /**
      * Checks if there is no need to do extra work simulating, useful to save cpu power
      *
-     * @return True if there is no need for running {@link #onFrameSim()}, else returns false
+     * @return True if there is no need for running {@link #runSimulationOnFrame()}, else returns false
      */
     private boolean noNeedForSim() {
         int workerThreats = 0;
@@ -249,35 +263,29 @@ public class SimulationTheory {
             try {
                 simulator.reset();
                 if (s.enemies.isEmpty()) continue;
-                for (UnitInfo u : s.allies) {
-                    Agent jU = factory.of(u.unit);
-                    simulator.addAgentA(jU);
-                    s.stateBefore.first.add(jU);
-                }
-                for (UnitInfo u : s.enemies) {
-                    if (u.unitType.isWorker() && u.visible && !u.unit.isAttacking()) continue;
-                    if (u.unitType.isBuilding() && !u.completed) continue;
-                    if (u.unitType == UnitType.Zerg_Creep_Colony || (!Util.isStaticDefense(u) && !u.unitType.canAttack()))
-                        continue;
-                    if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
-                        if (energy >= 1) energy -= 1;
-                        else {
-                            s.lose = true;
-                            break;
-                        }
-                    }
-                    Agent jU = factory.of(u.unit);
-                    simulator.addAgentB(jU);
-                    s.stateBefore.second.add(jU);
-                }
+                addAgentsToSimulator(s);
+                energy = addEnemiesToSimulator(energy, s);
                 if (s.lose) continue;
-                s.preSimScore = scores();
+                if(evaluateSimulator(s));
+                else s.lose = !scoreCalcASS(s, 2);
+            } catch (Exception e) {
+                System.err.println("Simulator ASS exception");
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private boolean evaluateSimulator(SimInfo s){
+        s.preSimScore = scores();
                 double estimate = evaluator.evaluate(s.stateBefore.first, s.stateBefore.second);
                 if (estimate < 0.1) {
                     s.lose = true;
-                    continue;
+                    return false;
                 }
-                if (estimate > 0.6) continue;
+                if (estimate > 0.6){
+                    return true;
+                }
                 simulator.simulate(simFrames);
                 s.postSimScore = scores();
                 s.stateAfter = new MutablePair<>(simulator.getAgentsA(), simulator.getAgentsB());
@@ -285,22 +293,47 @@ public class SimulationTheory {
                 int enemyLosses = s.preSimScore.second - s.postSimScore.second;
                 if (s.stateAfter.first.isEmpty()) {
                     s.lose = true;
-                    continue;
+                    return false;
                 }
-                if (enemyLosses > ourLosses * 1.35) continue;
+                if (enemyLosses > ourLosses * 1.35){
+                    return true;
+                }
                 simulator.simulate(simFrames);
                 s.postSimScore = scores();
                 s.stateAfter = new MutablePair<>(simulator.getAgentsA(), simulator.getAgentsB());
-                //Bad lose sim logic, testing
+
                 if (s.stateAfter.first.isEmpty()) s.lose = true;
                 else if (getGs().getStrat().name.equals("ProxyBBS")) s.lose = !scoreCalcASS(s, 1.2);
                 else if (getGs().getStrat().name.equals("ProxyEightRax")) s.lose = !scoreCalcASS(s, 1.35);
-                else s.lose = !scoreCalcASS(s, 2);
-            } catch (Exception e) {
-                System.err.println("Simulator ASS exception");
-                e.printStackTrace();
-            }
 
+                return false;
+    }
+
+    private int addEnemiesToSimulator(int energy, SimInfo s) {
+        for (UnitInfo u : s.enemies) {
+            if (u.unitType.isWorker() && u.visible && !u.unit.isAttacking()) continue;
+            if (u.unitType.isBuilding() && !u.completed) continue;
+            if (u.unitType == UnitType.Zerg_Creep_Colony || (!Util.isStaticDefense(u) && !u.unitType.canAttack()))
+                continue;
+            if (!u.unit.isDetected() && (u.unit instanceof DarkTemplar || u.burrowed)) {
+                if (energy >= 1) energy -= 1;
+                else {
+                    s.lose = true;
+                    break;
+                }
+            }
+            Agent jU = factory.of(u.unit);
+            simulator.addAgentB(jU);
+            s.stateBefore.second.add(jU);
+        }
+        return energy;
+    }
+
+    private void addAgentsToSimulator(SimInfo s) {
+        for (UnitInfo u : s.allies) {
+            Agent jU = factory.of(u.unit);
+            simulator.addAgentA(jU);
+            s.stateBefore.first.add(jU);
         }
     }
 

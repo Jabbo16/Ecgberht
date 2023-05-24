@@ -192,8 +192,8 @@ public class Util {
         return !(weapon == null);
     }
 
-    public static String raceToString(Race race) {
-        switch (race) {
+    public static String raceToString(Race enemyRace) {
+        switch (enemyRace) {
             case Zerg:
                 return "Zerg";
             case Terran:

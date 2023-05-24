@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ecgberht.Util.Util;
 import org.openbw.bwapi4j.type.Race;
+import ecgberht.EnemyHistory;
+import ecgberht.EnemyInfo;
 
 import java.io.File;
 import java.io.FileReader;
@@ -139,68 +141,5 @@ public class LearningManager {
         setRace(raceToString);
         readOpponentInfo(name);
         readOpponentHistory(name);
-    }
-
-    public static class EnemyHistory {
-        public LinkedList<EnemyGame> history = new LinkedList<>();
-
-        static class EnemyGame {
-            private String opponent;
-            private String race;
-            private String outcome;
-            private String strategy;
-            private String mapName;
-            public String opponentStrategy;
-
-            EnemyGame(String opponent, Race race, boolean outcome, String strategy, String mapName, IntelligenceAgency.EnemyStrats enemyStrat) {
-                this.opponent = opponent;
-                this.race = Util.raceToString(race);
-                this.outcome = outcome ? "Win" : "Lose";
-                this.strategy = strategy;
-                this.mapName = mapName;
-                this.opponentStrategy = enemyStrat.toString();
-            }
-        }
-    }
-
-    public static class EnemyInfo {
-        public String opponent;
-        public String race;
-        public int wins = 0;
-        public int losses = 0;
-        public boolean naughty = false;
-        public boolean defendHarass = false;
-        public List<StrategyOpponentHistory> history = new ArrayList<>();
-
-        EnemyInfo(String opponent, Race race) {
-            this.opponent = opponent;
-            this.race = Util.raceToString(race);
-        }
-
-        void updateStrategyOpponentHistory(String strategyName, int mapSize, boolean win) {
-            for (StrategyOpponentHistory data : history) {
-                if (data.mapSize == mapSize && data.strategyName.equals(strategyName)) {
-                    if (win) data.wins++;
-                    else data.losses++;
-                    return;
-                }
-            }
-            StrategyOpponentHistory newData = new StrategyOpponentHistory(strategyName, mapSize, win);
-            history.add(newData);
-        }
-
-        static class StrategyOpponentHistory {
-            int losses = 0;
-            int mapSize;
-            int wins = 0;
-            String strategyName;
-
-            StrategyOpponentHistory(String strategyName, int mapSize, boolean win) {
-                this.strategyName = strategyName;
-                this.mapSize = mapSize;
-                if (win) this.wins++;
-                else this.losses++;
-            }
-        }
     }
 }

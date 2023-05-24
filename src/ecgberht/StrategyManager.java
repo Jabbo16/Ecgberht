@@ -193,7 +193,7 @@ public class StrategyManager {
 
     private Strategy initStrat() {
         try {
-            LearningManager.EnemyInfo EI = getGs().learningManager.getEnemyInfo();
+            EnemyInfo EI = getGs().learningManager.getEnemyInfo();
             String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
             if (!forcedStrat.equals("")) {
                 if (forcedStrat.toLowerCase().equals("random")) {
@@ -203,7 +203,7 @@ public class StrategyManager {
                 } else if (nameStrat.containsKey(forcedStrat)) {
                     Util.sendText("Picked forced strategy " + forcedStrat);
                     if (forcedStrat.equals("14CC")) {
-                        for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
+                        for (EnemyInfo.StrategyOpponentHistory r : EI.history) {
                             if (strategies.containsKey(r.strategyName)) {
                                 strategies.get(r.strategyName).first += r.wins;
                                 strategies.get(r.strategyName).second += r.losses;
@@ -229,7 +229,7 @@ public class StrategyManager {
             }
             removeStrategiesMapSpecific();
             int totalGamesPlayed = EI.wins + EI.losses;
-            for (LearningManager.EnemyInfo.StrategyOpponentHistory r : EI.history) {
+            for (EnemyInfo.StrategyOpponentHistory r : EI.history) {
                 if (strategies.containsKey(r.strategyName)) {
                     strategies.get(r.strategyName).first += r.wins;
                     strategies.get(r.strategyName).second += r.losses;

@@ -10,22 +10,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/*
-Thanks to @Yegers for improving performance
-*/
 public class MeanShift {
 
-    public long time = 0;
+    private static MeanShift instance;
+
+    private long time = 0;
     private double radius;
     private List<UnitPos> points = new ArrayList<>();
 
-    public MeanShift(Collection<UnitInfo> units, double radius) {
+    private MeanShift(Collection<UnitInfo> units, double radius) {
         this.radius = Math.pow(radius, 2);
         for (UnitInfo u : units) {
-            if (u.unit instanceof Building && !Util.isStaticDefense(u) && !u.visible) continue;
+            boolean isValidUnit = u.unit instanceof Building && !Util.isStaticDefense(u) && !u.visible;
+            if (isValidUnit) continue;
             Position p = u.lastPosition;
             this.points.add(new UnitPos(u, p.getX(), p.getY()));
         }
+    }
+
+    public static MeanShift getInstance(Collection<UnitInfo> units, double radius) {
+        if (instance == null) {
+            instance = new MeanShift(units, radius);
+        }
+        return instance;
+    }
+
+    public long getTime(){
+        return time;
     }
 
     public List<Cluster> run(int iterations) {
@@ -33,12 +44,11 @@ public class MeanShift {
             time = System.currentTimeMillis();
             int bandwidth = 2;
             for (int iter = 0; iter < iterations; iter++) {
-                //System.out.println("-----Iter " + iter + "------");
                 for (int i = 0; i < points.size(); i++) {
-                    UnitPos aux = points.get(i);
-                    double initialX = aux.x;
-                    double initialY = aux.y;
-                    List<double[]> neighbours = getNeighbours(aux.unit, initialX, initialY);
+                    UnitPos point = points.get(i);
+                    double initialX = point.x;
+                    double initialY = point.y;
+                    List<double[]> neighbours = getNeighbours(point.unit, initialX, initialY);
                     double numeratorX = 0;
                     double numeratorY = 0;
                     double denominator = 0;
@@ -55,10 +65,9 @@ public class MeanShift {
                         newPointX = initialX;
                         newPointY = initialY;
                     }
-                    if (Double.isInfinite(newPointX) || Double.isNaN(newPointX)) newPointX = initialX;  // HACK
-                    if (Double.isInfinite(newPointY) || Double.isNaN(newPointY)) newPointY = initialY; // HACK
-                    //System.out.println("Original Point : " + initial + " , shifted point: " + newPoint);
-                    points.set(i, new UnitPos(aux.unit, newPointX, newPointY));
+                    if (Double.isInfinite(newPointX) || Double.isNaN(newPointX)) newPointX = initialX;
+                    if (Double.isInfinite(newPointY) || Double.isNaN(newPointY)) newPointY = initialY;
+                    points.set(i, new UnitPos(point.unit, newPointX, newPointY));
                 }
             }
             List<Cluster> clusters = new ArrayList<>();

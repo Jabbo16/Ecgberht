@@ -516,7 +516,7 @@ public class Ecgberht implements BWEventListener {
             //IntelligenceAgency.updateBullets(); //Disabled because its not actually used yet and its slow
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
-            gs.sim.onFrameSim();
+            gs.sim.runSimulationOnFrame();
             gs.vespeneManager(); //Disabled until it works
             gs.sqManager.updateBunkers();
             gs.checkDisrupter();
