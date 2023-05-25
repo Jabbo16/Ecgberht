@@ -37,7 +37,7 @@ public class UtilMicro {
             if (target.visible) {
                 WeaponType w = Util.getWeapon(attacker, target);
                 double range = attacker.player.getUnitStatCalculator().weaponMaxRange(w);
-                if (attacker.getDistance(target) <= range) {
+                if (attacker.toUnitInfoDistance().getDistance(target) <= range) {
                     attackerUnit.attack(target.unit);
                     return;
                 }

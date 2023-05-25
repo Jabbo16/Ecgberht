@@ -155,7 +155,7 @@ public class WorkerScoutAgent extends Agent {
             stoppedDisrupting = true;
             removedIndex = true;
         } else if (!stoppedDisrupting) {
-            if (mySim.enemies.stream().anyMatch(u -> unitInfo.getDistance(u) <= 4 * 32)) {
+            if (mySim.enemies.stream().anyMatch(u -> unitInfo.toUnitInfoDistance().getDistance(u) <= 4 * 32)) {
                 if (mySim.enemies.stream().anyMatch(u -> u.unit instanceof Zergling)) {
                     unit.haltConstruction();
                     stoppedDisrupting = true;

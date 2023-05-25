@@ -19,8 +19,6 @@ import static ecgberht.Ecgberht.getGs;
 
 public class UnitInfo implements Comparable<UnitInfo> {
 
-    private static final int PROTOSSSHIELDREGEN = 7;
-    private static final int ZERGREGEN = 4;
     public double groundRange = 0.0;
     public double airRange = 0.0;
     public double speed = 0.0;
@@ -57,85 +55,32 @@ public class UnitInfo implements Comparable<UnitInfo> {
         unitType = u.getType();
     }
 
-    // Credits to N00byEdge
-    private int expectedHealth() {
-        if (unitType.getRace() == Race.Zerg && unitType.regeneratesHP())
-            return Math.min(((getGs().frameCount - lastVisibleFrame) * ZERGREGEN >> 8) + health, unitType.maxHitPoints());
-        return health;
+    public UnitInfoDistance toUnitInfoDistance(){
+        return new UnitInfoDistance(this);
     }
 
-    // Credits to N00byEdge
-    private int expectedShields() {
-        if (unitType.getRace() == Race.Protoss)
-            return Math.min(((getGs().frameCount - lastVisibleFrame) * PROTOSSSHIELDREGEN >> 8) + shields, unitType.maxShields());
-        return shields;
-    }
-
-    // TODO completion frames
     void update() {
-        player = unit.getPlayer();
-        unitType = unit.getType();
-        visible = unit.isVisible();
-        position = visible ? unit.getPosition() : position;
-        currentOrder = unit.getOrder();
-        completed = !completed && visible ? unit.isCompleted() : completed;
-        tileposition = visible ? unit.getTilePosition() : tileposition;
-        if (!unitType.isBuilding()) walkposition = new Position(unit.getLeft(), unit.getTop()).toWalkPosition();
-        else walkposition = tileposition.toWalkPosition();
-        if (visible) {
-            lastPosition = position;
-            lastTileposition = tileposition;
-            lastWalkposition = walkposition;
-        }
-        lastVisibleFrame = visible ? getGs().frameCount : lastVisibleFrame;
-        lastAttackFrame = unit.isStartingAttack() ? getGs().frameCount : lastVisibleFrame;
-        if (unit instanceof GroundAttacker)
-            groundRange = player.getUnitStatCalculator().weaponMaxRange(unitType.groundWeapon());
-        if (unit instanceof AirAttacker)
-            airRange = player.getUnitStatCalculator().weaponMaxRange(unitType.airWeapon());
-        if (unit instanceof Bunker) {
-            airRange = 5 * 32;
-            groundRange = 5 * 32;
-        }
-        health = visible ? unit.getHitPoints() : expectedHealth();
-        shields = visible ? unit.getShields() : expectedShields();
-        if (unit instanceof SpellCaster) energy = ((SpellCaster) unit).getEnergy();
-        percentHealth = unitType.maxHitPoints() > 0 ? (double) health / (double) unitType.maxHitPoints() : 1.0;
-        percentShield = unitType.maxShields() > 0 ? (double) shields / (double) unitType.maxShields() : 1.0;
-        if (unit instanceof Burrowable && visible) burrowed = ((Burrowable) unit).isBurrowed();
-        if (visible) flying = unit.isFlying();
-        speed = Util.getSpeed(this);
-        target = unit instanceof Attacker ? ((Attacker) unit).getTargetUnit() : unit.getOrderTarget();
-        attackers.clear();
+        UnitInfoUpdate.updatePlayer(this);
+        UnitInfoUpdate.updateUnitType(this);
+        UnitInfoUpdate.updateVisibility(this);
+        UnitInfoUpdate.updatePosition(this);
+        UnitInfoUpdate.updateOrder(this);
+        UnitInfoUpdate.updateCompletion(this);
+        UnitInfoUpdate.updateTilePosition(this);
+        UnitInfoUpdate.updateWalkPosition(this);
+        UnitInfoUpdate.updateLastPositions(this);
+        UnitInfoUpdate.updateFrames(this);
+        UnitInfoUpdate.updateRanges(this);
+        UnitInfoUpdate.updateHealth(this);
+        UnitInfoUpdate.updateShields(this);
+        UnitInfoUpdate.updateEnergy(this);
+        UnitInfoUpdate.updateBurrowed(this);
+        UnitInfoUpdate.updateFlying(this);
+        UnitInfoUpdate.updateSpeed(this);
+        UnitInfoUpdate.updateTarget(this);
+        UnitInfoUpdate.clearAttackers(this);
     }
 
-    public int getDistance(Position pos) {
-        if (this.visible) return Util.getDistance(this.unit, pos);
-        return this.lastPosition.getDistance(pos);
-    }
-
-    public int getDistance(Unit u) {
-        if (this.visible) return this.unit.getDistance(u);
-        return this.lastPosition.getDistance(u.getPosition());
-    }
-
-    public int getDistance(UnitInfo target) {
-        if (this.visible)
-            return target.visible ? this.unit.getDistance(target.unit) : this.getDistance(target.lastPosition);
-        return target.visible ? target.getDistance(this.lastPosition) : target.lastPosition.getDistance(this.lastPosition);
-    }
-
-    public double getPredictedDistance(UnitInfo target) {
-        Position nextPosition = UtilMicro.predictUnitPosition(target, 1);
-        if (nextPosition == null) return this.getDistance(target);
-        return this.getDistance(nextPosition);
-    }
-
-    public double getPredictedDistance(UnitInfo target, int frames) {
-        Position nextPosition = UtilMicro.predictUnitPosition(target, frames);
-        if (nextPosition == null) return this.getDistance(target);
-        return this.getDistance(nextPosition);
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -156,4 +101,6 @@ public class UnitInfo implements Comparable<UnitInfo> {
     public int compareTo(UnitInfo o) {
         return this.unit.getId() - o.unit.getId();
     }
+
+
 }

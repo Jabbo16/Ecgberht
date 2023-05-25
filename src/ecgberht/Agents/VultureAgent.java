@@ -131,7 +131,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         double distB = Double.MAX_VALUE;
         for (UnitInfo u : enemies) {
             if (u.flying || u.unit.isCloaked()) continue;
-            double distA = unitInfo.getDistance(u);
+            double distA = unitInfo.toUnitInfoDistance().getDistance(u);
             if (chosen == null || distA < distB) {
                 chosen = u;
                 distB = distA;
@@ -163,7 +163,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             }
             int cd = unit.getGroundWeapon().cooldown();
             UnitInfo closestAttacker = Util.getClosestUnit(unitInfo, mySim.enemies, true);
-            if (closestAttacker != null && (cd != 0 || unitInfo.getDistance(closestAttacker) < unitInfo.groundRange * 0.6)) {
+            if (closestAttacker != null && (cd != 0 || unitInfo.toUnitInfoDistance().getDistance(closestAttacker) < unitInfo.groundRange * 0.6)) {
                 status = Status.KITE;
                 return;
             }
@@ -177,7 +177,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                         Position predictedPosition = UtilMicro.predictUnitPosition(attackUnit, 2);
                         if (predictedPosition != null && getGs().getGame().getBWMap().isValidPosition(predictedPosition)) {
                             double distPredicted = unit.getDistance(predictedPosition);
-                            double distCurrent = unitInfo.getDistance(attackUnit);
+                            double distCurrent = unitInfo.toUnitInfoDistance().getDistance(attackUnit);
                             if (distPredicted > distCurrent) {
                                 status = Status.COMBAT;
                                 return;
@@ -200,7 +200,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (status == Status.KITE) {
                 UnitInfo closest = getUnitToAttack(mySim.enemies);
                 if (closest != null) {
-                    double dist = unitInfo.getDistance(closest);
+                    double dist = unitInfo.toUnitInfoDistance().getDistance(closest);
                     double speed = type.topSpeed();
                     double timeToEnter = 0.0;
                     if (speed > .00001) timeToEnter = Math.max(0.0, dist - type.groundWeapon().maxRange()) / speed;
@@ -230,7 +230,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private void kite() {
         //Position kite = UtilMicro.kiteAway(unit, closeEnemies);
-        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> unitInfo.getDistance(u)));
+        Optional<UnitInfo> closestUnit = mySim.enemies.stream().min(Comparator.comparing(u -> unitInfo.toUnitInfoDistance().getDistance(u)));
         Position kite = closestUnit.map(unit1 -> UtilMicro.kiteAwayAlt(unit.getPosition(), unit1.position)).orElse(null);
         if (kite == null || !getGs().getGame().getBWMap().isValidPosition(kite)) {
             kite = UtilMicro.kiteAway(unit, mySim.enemies);
