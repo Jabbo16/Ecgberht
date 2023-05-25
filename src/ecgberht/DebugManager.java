@@ -241,7 +241,7 @@ public class DebugManager {
         try {
             if (!ConfigManager.getConfig().ecgConfig.debugText) return;
             mapDrawer.drawTextScreen(320, 5, ColorUtil.formatText(gameState.supplyMan.getSupplyUsed() + "/" + gameState.supplyMan.getSupplyTotal(), ColorUtil.White));
-            mapDrawer.drawTextScreen(320, 20, ColorUtil.formatText(gameState.getArmySize() + "/" + gameState.getStrat().armyForAttack, ColorUtil.White));
+            mapDrawer.drawTextScreen(320, 20, ColorUtil.formatText(gameState.getArmySize() + "/" + gameState.getStrategyFromManager().armyForAttack, ColorUtil.White));
             String defending = gameState.defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
             mapDrawer.drawTextScreen(320, 35, defending);
             mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText("I want to train: " + gameState.chosenUnit.toString(), ColorUtil.White));
@@ -269,7 +269,7 @@ public class DebugManager {
             mapDrawer.drawTextScreen(10, 50, ColorUtil.formatText("Framecount: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(gameState.frameCount), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 65, ColorUtil.formatText("FPS: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(gameState.ih.getFPS()), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(65, 65, ColorUtil.formatText("APM: ", ColorUtil.White) + ColorUtil.formatText(Integer.toString(gameState.ih.getAPM()), ColorUtil.Yellow));
-            mapDrawer.drawTextScreen(10, 80, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(gameState.getStrat().name, ColorUtil.Yellow));
+            mapDrawer.drawTextScreen(10, 80, ColorUtil.formatText("Strategy: ", ColorUtil.White) + ColorUtil.formatText(gameState.getStrategyFromManager().name, ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 95, ColorUtil.formatText("EnemyStrategy: ", ColorUtil.White) + ColorUtil.formatText(IntelligenceAgency.getEnemyStrat().toString(), ColorUtil.Yellow));
             mapDrawer.drawTextScreen(10, 110, ColorUtil.formatText("SimTime(ms): ", ColorUtil.White) + ColorUtil.formatText(String.valueOf(gameState.sim.time), ColorUtil.Teal));
             if (gameState.enemyRace == Race.Zerg && gameState.learningManager.isNaughty()) {

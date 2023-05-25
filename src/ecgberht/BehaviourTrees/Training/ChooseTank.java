@@ -19,12 +19,12 @@ public class ChooseTank extends Action {
     public State execute() {
         try {
             if (!gameState.Fs.isEmpty()) {
-                if (gameState.getStrat().trainUnits.contains(UnitType.Terran_Wraith) &&
+                if (gameState.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Wraith) &&
                         gameState.maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 <= 1) {
                     return State.FAILURE;
                 }
                 int multiplier = 2;
-                String strat = gameState.getStrat().name;
+                String strat = gameState.getStrategyFromManager().name;
                 if (strat.equals("JoyORush") && gameState.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3)
                     return State.FAILURE;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;

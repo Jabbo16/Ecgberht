@@ -21,7 +21,7 @@ public class ChooseSCV extends Action {
     @Override
     public State execute() {
         try {
-            String strat = gameState.getStrat().name;
+            String strat = gameState.getStrategyFromManager().name;
             if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax")) {
                 boolean notTraining = false;
                 for (Barracks b : gameState.MBs) {
@@ -37,7 +37,7 @@ public class ChooseSCV extends Action {
                     && Util.countBuildingAll(UnitType.Terran_Bunker) < 1 && gameState.getCash().first < 150) {
                 return State.FAILURE;
             }
-            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) <= gameState.mineralsAssigned.size() * 2 + gameState.refineriesAssigned.size() * 3 + gameState.getStrat().extraSCVs && !gameState.CCs.isEmpty()) {
+            if (Util.countUnitTypeSelf(UnitType.Terran_SCV) <= 65 && Util.countUnitTypeSelf(UnitType.Terran_SCV) <= gameState.mineralsAssigned.size() * 2 + gameState.refineriesAssigned.size() * 3 + gameState.getStrategyFromManager().extraSCVs && !gameState.CCs.isEmpty()) {
                 for (Map.Entry<Base, CommandCenter> b : gameState.islandCCs.entrySet()) {
                     if (!b.getValue().isTraining() && !b.getValue().isBuildingAddon() && Util.hasFreePatches(b.getKey())) {
                         gameState.chosenUnit = UnitType.Terran_SCV;

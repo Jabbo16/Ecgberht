@@ -192,8 +192,8 @@ public class Util {
         return !(weapon == null);
     }
 
-    public static String raceToString(Race enemyRace) {
-        switch (enemyRace) {
+    public static String raceToString(Race race) {
+        switch (race) {
             case Zerg:
                 return "Zerg";
             case Terran:
@@ -643,7 +643,7 @@ public class Util {
             if (target.unit instanceof SCV) {
                 if (((SCV) target.unit).isRepairing()) return 11;
                 if (((SCV) target.unit).isConstructing()) {
-                    if (getGs().getStrat().proxy) {
+                    if (getGs().getStrategyFromManager().proxy) {
                         Unit build = target.unit.getBuildUnit();
                         if ((build instanceof Bunker || build instanceof Factory)) return 15;
                         return 13;
@@ -663,7 +663,7 @@ public class Util {
         if (targetType == UnitType.Protoss_Templar_Archives) return 7;
         if (targetType == UnitType.Zerg_Spawning_Pool) return 7;
         if (targetType.isResourceDepot()) {
-            if (getGs().getStrat().proxy) return 3;
+            if (getGs().getStrategyFromManager().proxy) return 3;
             else return 6;
         }
         if (targetType == UnitType.Protoss_Pylon) return 5;

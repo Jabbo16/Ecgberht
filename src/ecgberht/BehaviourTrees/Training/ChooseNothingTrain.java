@@ -18,7 +18,7 @@ public class ChooseNothingTrain extends Action {
     public State execute() {
         try {
             // Bio Builds and no Stim
-            boolean stim = gameState.getStrat().techToResearch.contains(TechType.Stim_Packs);
+            boolean stim = gameState.getStrategyFromManager().techToResearch.contains(TechType.Stim_Packs);
             if (stim && !gameState.getPlayer().hasResearched(TechType.Stim_Packs) &&
                     !gameState.getPlayer().isResearching(TechType.Stim_Packs)
                     && (int) gameState.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
@@ -26,7 +26,7 @@ public class ChooseNothingTrain extends Action {
                 return State.SUCCESS;
             }
             // Mech builds and no siege
-            boolean siege = gameState.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode);
+            boolean siege = gameState.getStrategyFromManager().techToResearch.contains(TechType.Tank_Siege_Mode);
             if (siege && Util.getNumberCCs() >= 2 &&
                     !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode) &&
                     !gameState.getPlayer().isResearching(TechType.Tank_Siege_Mode) &&

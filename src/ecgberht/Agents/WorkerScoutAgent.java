@@ -84,7 +84,7 @@ public class WorkerScoutAgent extends Agent {
                 getGs().proxyBuilding.cancelConstruction();
             return true;
         }
-        if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
+        if (status == Status.EXPLORE && getGs().getStrategyFromManager().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
             getGs().myArmy.add(unitInfo);
             getGs().firstScout = false;
             if (getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted())
@@ -222,7 +222,7 @@ public class WorkerScoutAgent extends Agent {
             }
         }
         if (finishedDisrupting) return Status.EXPLORE;
-        String strat = getGs().getStrat().name;
+        String strat = getGs().getStrategyFromManager().name;
         if (getGs().luckyDraw >= 0.7 && ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
             return Status.PROXYING;
         }

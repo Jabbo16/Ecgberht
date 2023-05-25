@@ -1,13 +1,10 @@
 package ecgberht;
-
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.type.UpgradeType;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
 public abstract class Strategy implements Comparable<Strategy> {
 
     public boolean bunker = false;

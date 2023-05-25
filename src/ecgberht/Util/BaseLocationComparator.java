@@ -29,8 +29,8 @@ public class BaseLocationComparator implements Comparator<Base> {
             double distB = Util.getGroundDistance(b.getLocation().toPosition(), start);
             if (Double.compare(distA, 0.0) == 0 && Double.compare(distB, 0.0) > 0) return 1;
             if (Double.compare(distB, 0.0) == 0 && Double.compare(distA, 0.0) > 0) return -1;
-            if (!getGs().getStrat().name.equals("FullBio") && !getGs().getStrat().name.equals("FullBioFE") &&
-                    !getGs().getStrat().name.equals("BioGreedyFE")) {
+            if (!getGs().getStrategyFromManager().name.equals("FullBio") && !getGs().getStrategyFromManager().name.equals("FullBioFE") &&
+                    !getGs().getStrategyFromManager().name.equals("BioGreedyFE")) {
                 if ((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) &&
                         (!b.getGeysers().isEmpty() && !b.getMinerals().isEmpty())) {
                     return 1;

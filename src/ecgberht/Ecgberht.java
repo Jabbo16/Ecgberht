@@ -76,7 +76,6 @@ public class Ecgberht implements BWEventListener {
     private DebugManager debugManager = null;
     private CameraModule skycladObserver = null;
     private CherryVisDumper cherryVisDumper;
-
     private org.bk.ass.path.Result path;
 
     public static void main(String[] args) {
@@ -113,14 +112,14 @@ public class Ecgberht implements BWEventListener {
         CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
         TrainUnit tr = new TrainUnit("Train Unit", gs);
         Selector chooseUnit = new Selector("Choose Recruit", cNT, cSU, cSCV);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Goliath)) chooseUnit.addChild(cGol);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Firebat) && gs.enemyRace == Race.Zerg)
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Goliath)) chooseUnit.addChild(cGol);
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Firebat) && gs.enemyRace == Race.Zerg)
             chooseUnit.addChild(cFir);
-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
+        if (gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
         Sequence train = new Sequence("Train", chooseUnit, cr, tr);
         trainTree = new BehavioralTree("Training Tree");
         trainTree.addChild(train);
@@ -150,12 +149,12 @@ public class Ecgberht implements BWEventListener {
         Selector chooseBuildingBuild = new Selector("Choose Building to build", cNB, cE, cBun, cSup);
         chooseBuildingBuild.addChild(cTur);
         chooseBuildingBuild.addChild(cRef);
-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Engineering_Bay)) chooseBuildingBuild.addChild(cBay);
-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Armory)) chooseBuildingBuild.addChild(cArm);
-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Factory)) chooseBuildingBuild.addChild(cFar);
-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addChild(cPor);
-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addChild(cSci);
+        if (gs.getStrategyFromManager().buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
+        if (gs.getStrategyFromManager().buildUnits.contains(UnitType.Terran_Engineering_Bay)) chooseBuildingBuild.addChild(cBay);
+        if (gs.getStrategyFromManager().buildUnits.contains(UnitType.Terran_Armory)) chooseBuildingBuild.addChild(cArm);
+        if (gs.getStrategyFromManager().buildUnits.contains(UnitType.Terran_Factory)) chooseBuildingBuild.addChild(cFar);
+        if (gs.getStrategyFromManager().buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addChild(cPor);
+        if (gs.getStrategyFromManager().buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addChild(cSci);
         chooseBuildingBuild.addChild(cBar);
         Sequence buildMove;
         if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"))
@@ -185,15 +184,15 @@ public class Ecgberht implements BWEventListener {
         Selector ChooseUP = new Selector("Choose Upgrade");
         ChooseUP.addChild(cI);
         ChooseUP.addChild(cEMP);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
-        if (gs.getStrat().techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.U_238_Shells)) ChooseUP.addChild(cMR);
-        if (gs.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) ChooseUP.addChild(cSM);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Ion_Thrusters)) ChooseUP.addChild(cVS);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Charon_Boosters)) ChooseUP.addChild(cCB);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Weapons)) ChooseUP.addChild(cWMU);
-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Plating)) ChooseUP.addChild(cAMU);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
+        if (gs.getStrategyFromManager().techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.U_238_Shells)) ChooseUP.addChild(cMR);
+        if (gs.getStrategyFromManager().techToResearch.contains(TechType.Tank_Siege_Mode)) ChooseUP.addChild(cSM);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.Ion_Thrusters)) ChooseUP.addChild(cVS);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.Charon_Boosters)) ChooseUP.addChild(cCB);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Weapons)) ChooseUP.addChild(cWMU);
+        if (gs.getStrategyFromManager().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Plating)) ChooseUP.addChild(cAMU);
         Sequence Upgrader = new Sequence("Upgrader", ChooseUP, cRU, rU);
         upgradeTree = new BehavioralTree("Technology");
         upgradeTree.addChild(Upgrader);
@@ -206,9 +205,9 @@ public class Ecgberht implements BWEventListener {
         ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop", gs);
         ChooseTower cT = new ChooseTower("Choose Control Tower", gs);
         Selector ChooseAddon = new Selector("Choose Addon");
-        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addChild(cMS);
-        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addChild(cCS);
-        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Control_Tower)) ChooseAddon.addChild(cT);
+        if (gs.getStrategyFromManager().buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addChild(cMS);
+        if (gs.getStrategyFromManager().buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addChild(cCS);
+        if (gs.getStrategyFromManager().buildAddons.contains(UnitType.Terran_Control_Tower)) ChooseAddon.addChild(cT);
         Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
         addonBuildTree = new BehavioralTree("Addon Build Tree");
         addonBuildTree.addChild(Addon);
@@ -368,9 +367,9 @@ public class Ecgberht implements BWEventListener {
             gs.learningManager.onStart(ih.enemy().getName(), Util.raceToString(bw.getInteractionHandler().enemy().getRace()));
             gs.alwaysPools();
             if (gs.enemyRace == Race.Zerg && gs.learningManager.isNaughty()) gs.playSound("rushed.mp3");
-            gs.scipio = new StrategyManager();
+            gs.singletonManager = StrategyManager.getInstance();
             //gs.scipio.updateStrat();
-            IntelligenceAgency.setStartStrat(gs.getStrat().name);
+            IntelligenceAgency.setStartStrat(gs.getStrategyFromManager().name);
             gs.initStartLocations();
             boolean fortress = bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"); // Fortress
             for (Base b : bwem.getMap().getBases()) {
@@ -443,7 +442,8 @@ public class Ecgberht implements BWEventListener {
             gs.baseManager.updateGarrisons();
             skycladObserver.onFrame();
             gs.fix();
-            gs.unitStorage.onFrame();
+            OnFrame frame= new OnFrame(gs.unitStorage);
+        	frame.action();
             if (gs.frameCount == 1500) gs.sendCustomMessage();
             if (gs.frameCount == 2300) gs.sendRandomMessage();
             if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
@@ -451,13 +451,13 @@ public class Ecgberht implements BWEventListener {
                 gs.getIH().leaveGame();
             }
             // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
-            if (gs.frameCount == 24 * 60 * 14 && gs.enemyRace == Race.Terran && gs.getStrat().techToResearch.contains(TechType.Stim_Packs) && !gs.getStrat().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
-                gs.setStrat(new FullMech());
+            if (gs.frameCount == 24 * 60 * 14 && gs.enemyRace == Race.Terran && gs.getStrategyFromManager().techToResearch.contains(TechType.Stim_Packs) && !gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+                gs.setStrategyToManager(new FullMech());
                 transition();
             }
             // If rushing and enough time has passed -> transition to best strat
-            if (gs.frameCount == 24 * 60 * 8 && gs.getStrat().proxy) {
-                gs.scipio.chooseProxyTransition();
+            if (gs.frameCount == 24 * 60 * 8 && gs.getStrategyFromManager().proxy) {
+                gs.singletonManager.chooseProxyTransition();
                 List<UnitInfo> workersToDelete = new ArrayList<>();
                 for (UnitInfo u : gs.myArmy) {
                     if (!(u.unit instanceof Worker)) continue;
@@ -468,21 +468,21 @@ public class Ecgberht implements BWEventListener {
                 transition();
             }
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma transition
-                    gs.getStrat().name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
+                    gs.getStrategyFromManager().name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
                 FullBio b = new FullBio();
                 b.buildUnits.remove(UnitType.Terran_Bunker);
-                gs.setStrat(b);
+                gs.setStrategyToManager(b);
                 gs.maxWraiths = 5;
                 transition();
             }
             if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && // Fortress wraiths
-                    !gs.getStrat().trainUnits.contains(UnitType.Terran_Wraith) && gs.frameCount == 24 * 900) {
-                gs.getStrat().trainUnits.add(UnitType.Terran_Wraith);
+                    !gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Wraith) && gs.frameCount == 24 * 900) {
+                gs.getStrategyFromManager().trainUnits.add(UnitType.Terran_Wraith);
                 gs.maxWraiths = 999;
                 transition();
             }
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma special eggs
-                    !gs.getStrat().name.equals("PlasmaWraithHell")) {
+                    !gs.getStrategyFromManager().name.equals("PlasmaWraithHell")) {
                 for (Unit u : bw.getAllUnits()) {
                     if (u.getType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
                         continue;
@@ -493,22 +493,22 @@ public class Ecgberht implements BWEventListener {
                     }
                 }
             }
-            if (gs.getStrat().name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
+            if (gs.getStrategyFromManager().name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
                 if (gs.enemyRace == Race.Zerg) {
-                    if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) gs.setStrat(new BioMechFE());
-                    else gs.setStrat(new FullBioFE());
-                    if (gs.proxyBuilding != null) gs.getStrat().trainUnits.add(UnitType.Terran_Vulture);
-                } else if (gs.enemyRace == Race.Terran) gs.setStrat(new FullMech());
-                gs.getStrat().armyForAttack += 5;
+                    if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) gs.setStrategyToManager(new BioMechFE());
+                    else gs.setStrategyToManager(new FullBioFE());
+                    if (gs.proxyBuilding != null) gs.getStrategyFromManager().trainUnits.add(UnitType.Terran_Vulture);
+                } else if (gs.enemyRace == Race.Terran) gs.setStrategyToManager(new FullMech());
+                gs.getStrategyFromManager().armyForAttack += 5;
                 transition();
             }
-            if (gs.getStrat().name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
-                gs.setStrat(new FullMech());
+            if (gs.getStrategyFromManager().name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
+                gs.setStrategyToManager(new FullMech());
                 if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                 transition();
             }
-            if (gs.getStrat().name.equals("TheNitekat") || gs.getStrat().name.equals("JoyORush") && gs.CCs.size() > 1) {
-                gs.setStrat(new FullMech());
+            if (gs.getStrategyFromManager().name.equals("TheNitekat") || gs.getStrategyFromManager().name.equals("JoyORush") && gs.CCs.size() > 1) {
+                gs.setStrategyToManager(new FullMech());
                 if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
                 transition();
             }
@@ -516,7 +516,7 @@ public class Ecgberht implements BWEventListener {
             //IntelligenceAgency.updateBullets(); //Disabled because its not actually used yet and its slow
             gs.wizard.onFrameSpellManager();
             IntelligenceAgency.onFrame();
-            gs.sim.runSimulationOnFrame();
+            gs.sim.onFrameSim();
             gs.vespeneManager(); //Disabled until it works
             gs.sqManager.updateBunkers();
             gs.checkDisrupter();
@@ -531,8 +531,8 @@ public class Ecgberht implements BWEventListener {
             scoutingTree.run();
             botherTree.run();
             scannerTree.run();
-            if (gs.getStrat().name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
-            else if (gs.getStrat().name.equals("ProxyEightRax")) gs.checkWorkerMilitia(1);
+            if (gs.getStrategyFromManager().name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
+            else if (gs.getStrategyFromManager().name.equals("ProxyEightRax")) gs.checkWorkerMilitia(1);
             defenseTree.run();
             gs.updateAttack();
             gs.runAgents();
@@ -554,11 +554,11 @@ public class Ecgberht implements BWEventListener {
             if (arg0) Util.sendText("gg wp " + name);
             else Util.sendText("gg wp! " + name + ", next game I will not lose!");
             if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67"))
-                gs.getStrat().name = "PlasmaWraithHell";
+                gs.getStrategyFromManager().name = "PlasmaWraithHell";
             String oldStrat = IntelligenceAgency.getStartStrat();
             cherryVisDumper.onEnd(arg0, oldStrat);
-            if (oldStrat != null && !oldStrat.equals(gs.getStrat().name)) gs.getStrat().name = oldStrat;
-            gs.learningManager.onEnd(gs.getStrat().name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom, IntelligenceAgency.getEnemyStrat());
+            if (oldStrat != null && !oldStrat.equals(gs.getStrategyFromManager().name)) gs.getStrategyFromManager().name = oldStrat;
+            gs.learningManager.onEnd(gs.getStrategyFromManager().name, gs.mapSize, arg0, name, gs.enemyRace, bw.getBWMap().mapFileName().replace(".scx", ""), gs.enemyIsRandom, IntelligenceAgency.getEnemyStrat());
         } catch (Exception e) {
             System.err.println("onEnd Exception");
             e.printStackTrace();
@@ -602,7 +602,8 @@ public class Ecgberht implements BWEventListener {
             if (!type.isNeutral() && !type.isSpecialBuilding()) {
                 if (arg0 instanceof Building) {
                     if (pU.getPlayer().getId() == self.getId()) {
-                        gs.unitStorage.onUnitCreate(arg0);
+                    	OnUnitAction createAction= new OnUnitCreate(arg0,gs.unitStorage);
+                    	createAction.action();
                         if (!(arg0 instanceof CommandCenter)) {
                             gs.map.updateMap(arg0.getTilePosition(), type, false);
                             gs.testMap = gs.map.clone();
@@ -628,9 +629,9 @@ public class Ecgberht implements BWEventListener {
                     if (arg0 instanceof Wraith) gs.wraithsTrained++;
                     if (arg0 instanceof SiegeTank) {
                         gs.tanksTrained++;
-                        if (gs.tanksTrained == 3 && gs.getStrat().name.equals("JoyORush")) {
-                            gs.getStrat().trainUnits.add(UnitType.Terran_Vulture);
-                            gs.getStrat().upgradesToResearch.add(UpgradeType.Ion_Thrusters);
+                        if (gs.tanksTrained == 3 && gs.getStrategyFromManager().name.equals("JoyORush")) {
+                            gs.getStrategyFromManager().trainUnits.add(UnitType.Terran_Vulture);
+                            gs.getStrategyFromManager().upgradesToResearch.add(UpgradeType.Ion_Thrusters);
                             //gs.getStrat().techToResearch.add(TechType.Spider_Mines);
                             transition();
                         }
@@ -654,7 +655,8 @@ public class Ecgberht implements BWEventListener {
             PlayerUnit pU = (PlayerUnit) arg0;
             UnitType type = arg0.getType();
             if (!type.isNeutral() && pU.getPlayer().getId() == self.getId()) {
-                gs.unitStorage.onUnitComplete(arg0);
+            	OnUnitAction completeAction= new OnUnitComplete(arg0,gs.unitStorage);
+            	completeAction.action();
                 if (gs.ih.getFrameCount() > 0) gs.supplyMan.onComplete(arg0);
                 if (type.isBuilding()) {
                     gs.builtBuildings++;
@@ -680,17 +682,17 @@ public class Ecgberht implements BWEventListener {
                             if (!gs.islandBases.isEmpty() && gs.islandBases.contains(ccBase))
                                 gs.islandCCs.put(ccBase, (CommandCenter) arg0);
                             else gs.CCs.put(ccBase, (CommandCenter) arg0);
-                            if (gs.getStrat().name.equals("BioMechGreedyFE") && Util.getNumberCCs() > 2)
-                                gs.getStrat().raxPerCC = 3;
-                            else if (gs.getStrat().name.equals("BioMechGreedyFE") && Util.getNumberCCs() < 3)
-                                gs.getStrat().raxPerCC = 2;
+                            if (gs.getStrategyFromManager().name.equals("BioMechGreedyFE") && Util.getNumberCCs() > 2)
+                                gs.getStrategyFromManager().raxPerCC = 3;
+                            else if (gs.getStrategyFromManager().name.equals("BioMechGreedyFE") && Util.getNumberCCs() < 3)
+                                gs.getStrategyFromManager().raxPerCC = 2;
                             gs.addNewResources(ccBase);
                             if (gs.frameCount != 0 && gs.firstExpand && ccBase.getArea().equals(gs.naturalArea) && !gs.defense)
                                 gs.workerTransfer();
                             if (gs.frameCount != 0 && gs.firstExpand) {
                                 gs.firstExpand = false;
-                                if (gs.getStrat().name.equals("14CC")) {
-                                    gs.scipio.choose14CCTransition();
+                                if (gs.getStrategyFromManager().name.equals("14CC")) {
+                                    gs.singletonManager.chooseTransitionForEnemy();
                                     transition();
                                 }
                                 if (gs.naturalChoke != null)
@@ -724,7 +726,7 @@ public class Ecgberht implements BWEventListener {
                         }
                     }
                 } else if (type.isWorker()) gs.workerIdle.add((Worker) arg0);
-                else if (type == UnitType.Terran_Vulture && !gs.getStrat().name.equals("TheNitekat") && !bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a"))
+                else if (type == UnitType.Terran_Vulture && !gs.getStrategyFromManager().name.equals("TheNitekat") && !bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a"))
                     gs.agents.put(arg0, new VultureAgent(arg0));
                 else if (type == UnitType.Terran_Dropship) {
                     DropShipAgent d = new DropShipAgent(arg0);
@@ -733,7 +735,7 @@ public class Ecgberht implements BWEventListener {
                     VesselAgent v = new VesselAgent(arg0);
                     gs.agents.put(arg0, v);
                 } else if (type == UnitType.Terran_Wraith) {
-                    if (!gs.getStrat().name.equals("PlasmaWraithHell")) {
+                    if (!gs.getStrategyFromManager().name.equals("PlasmaWraithHell")) {
                         String name = gs.pickShipName();
                         gs.agents.put(arg0, new WraithAgent(arg0, name));
                     }
@@ -786,7 +788,7 @@ public class Ecgberht implements BWEventListener {
                 } else if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().getId() == self.getId()) {
                     if (gs.ih.getFrameCount() > 0) gs.supplyMan.onDestroy(arg0);
                     if (arg0 instanceof Worker) {
-                        if (gs.getStrat().name.equals("ProxyBBS") || gs.getStrat().name.equals("ProxyEightRax")) {
+                        if (gs.getStrategyFromManager().name.equals("ProxyBBS") || gs.getStrategyFromManager().name.equals("ProxyEightRax")) {
                             UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
                             if (ally != null) gs.myArmy.remove(ally);
                         }
@@ -930,7 +932,7 @@ public class Ecgberht implements BWEventListener {
                         gs.MBs.remove(arg0);
                         if (arg0.equals(gs.proxyBuilding)) {
                             gs.proxyBuilding = null;
-                            gs.getStrat().trainUnits.remove(UnitType.Terran_Vulture);
+                            gs.getStrategyFromManager().trainUnits.remove(UnitType.Terran_Vulture);
                         }
                         if (arg0 instanceof ResearchingFacility) gs.UBs.remove(arg0);
                         gs.SBs.remove(arg0);
@@ -958,7 +960,7 @@ public class Ecgberht implements BWEventListener {
                     } else if (type == UnitType.Terran_Vulture) gs.agents.remove(arg0);
                     else if (type == UnitType.Terran_Dropship) gs.agents.remove(arg0);
                     else if (type == UnitType.Terran_Science_Vessel) gs.agents.remove(arg0);
-                    else if (type == UnitType.Terran_Wraith && !gs.getStrat().name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
+                    else if (type == UnitType.Terran_Wraith && !gs.getStrategyFromManager().name.equals("PlasmaWraithHell") && gs.agents.containsKey(arg0)) {
                         String wraith = ((WraithAgent) gs.agents.get(arg0)).name;
                         gs.shipNames.add(wraith);
                         gs.agents.remove(arg0);
@@ -966,7 +968,8 @@ public class Ecgberht implements BWEventListener {
                     UnitInfo ally = gs.unitStorage.getAllyUnits().get(arg0);
                     if (ally != null) gs.myArmy.remove(ally);
                 }
-                gs.unitStorage.onUnitDestroy(arg0);
+                OnUnitAction destroyAction= new OnUnitDestroy(arg0,gs.unitStorage);
+            	destroyAction.action();
             }
         } catch (Exception e) {
             System.err.println("OnUnitDestroy Exception");
@@ -979,7 +982,8 @@ public class Ecgberht implements BWEventListener {
         try {
             UnitType type = arg0.getType();
             if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().isEnemy()) {
-                gs.unitStorage.onUnitMorph(arg0);
+            	OnUnitAction morphAction= new OnUnitMorph(arg0,gs.unitStorage);
+            	morphAction.action();
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {
                     gs.enemyCombatUnitMemory.add(arg0);
                 }
@@ -1025,8 +1029,10 @@ public class Ecgberht implements BWEventListener {
 
     @Override
     public void onUnitRenegade(Unit arg0) {
-        if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().equals(self))
-            gs.unitStorage.onUnitComplete(arg0);
+        if (arg0 instanceof PlayerUnit && ((PlayerUnit) arg0).getPlayer().equals(self)) {
+        	OnUnitAction completeAction = new OnUnitComplete(arg0,gs.unitStorage);
+        	completeAction.action();
+        }
     }
 
     @Override
@@ -1038,11 +1044,12 @@ public class Ecgberht implements BWEventListener {
             UnitType type = arg0.getType();
             Player p = ((PlayerUnit) arg0).getPlayer();
             if (p != null && p.isEnemy()) {
-                gs.unitStorage.onUnitShow(arg0);
+            	OnUnitAction showAction= new OnUnitShow(arg0,gs.unitStorage);
+            	showAction.action();
                 IntelligenceAgency.onShow(arg0, type);
                 if (gs.enemyRace == Race.Unknown && getGs().getIH().enemies().size() == 1) {
                     gs.enemyRace = type.getRace();
-                    if (gs.enemyRace == Race.Zerg && gs.getStrat().trainUnits.contains(UnitType.Terran_Firebat))
+                    if (gs.enemyRace == Race.Zerg && gs.getStrategyFromManager().trainUnits.contains(UnitType.Terran_Firebat))
                         gs.maxBats = 3;
                 }
                 if (!type.isBuilding() && (type.canAttack() || type.isSpellcaster() || type.spaceProvided() > 0)) {

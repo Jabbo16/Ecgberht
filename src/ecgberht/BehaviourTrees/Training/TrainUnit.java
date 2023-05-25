@@ -10,63 +10,50 @@ import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.TrainingFacility;
 
 public class TrainUnit extends Action {
-
-    public TrainUnit(String name, GameState gh) {
-        super(name, gh);
+    public TrainUnit(String name, GameState gamestate) {
+        super(name, gamestate);
     }
-
     @Override
     public State execute() {
         try {
             if (gameState.chosenUnit == UnitType.None) return State.FAILURE;
-            TrainingFacility chosen = gameState.chosenTrainingFacility;
-            if (gameState.getStrat().name.equals("ProxyBBS")) {
-                if (Util.countBuildingAll(UnitType.Terran_Barracks) == 2 &&
-                        Util.countBuildingAll(UnitType.Terran_Supply_Depot) == 0) {
-                    gameState.chosenTrainingFacility = null;
-                    gameState.chosenToBuild = UnitType.None;
-                    return State.FAILURE;
-                }
-                if (gameState.getSupply() > 0) {
-                    chosen.train(gameState.chosenUnit);
-                    return State.SUCCESS;
-                }
-            }
-            if (gameState.getStrat().name.equals("ProxyEightRax")) {
-                if (Util.countBuildingAll(UnitType.Terran_Barracks) == 0 &&
-                        gameState.supplyMan.getSupplyUsed() >= 16) {
-                    gameState.chosenTrainingFacility = null;
-                    gameState.chosenToBuild = UnitType.None;
-                    return State.FAILURE;
-                }
-                if (gameState.getSupply() > 0) {
-                    chosen.train(gameState.chosenUnit);
-                    return State.SUCCESS;
-                }
-            }
-            if (gameState.getSupply() > 4 || gameState.checkSupply() || gameState.getPlayer().supplyTotal() >= 400) {
-                if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
-                    boolean found = false;
-                    for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
-                        if (w.first == UnitType.Terran_Command_Center) {
-                            found = true;
-                            break;
-                        }
-                    }
+            TrainingFacility currentFacility = gameState.chosenTrainingFacility;
+            StateProxy proxy = StateProxyFactory.getStateProxy(currentFacility, gameState);	
+            proxy.checkProxyStrategy(gameState);	   
+            final int conditionForTrain_supply = 4;	
+            final int conditionForTrain_totalSupply = 400;	
+			boolean gtFourSupplies = gameState.getSupply() > conditionForTrain_supply;	
+			boolean gtTotalFourHundredSupplies = gameState.getPlayer().supplyTotal() >= conditionForTrain_totalSupply;	
+			if (gtFourSupplies || gameState.checkSupply() || gtTotalFourHundredSupplies) {
+                final boolean gameStateNotDefense = !gameState.defense;	
+				final boolean chooseToBuildCommandCenter = gameState.chosenToBuild == UnitType.Terran_Command_Center;	
+				if (gameStateNotDefense && chooseToBuildCommandCenter) {
+                    boolean found = checkCommandCenter(); 
                     if (!found) {
-                        gameState.chosenTrainingFacility = null;
-                        gameState.chosenUnit = UnitType.None;
-                        return State.FAILURE;
+                    	gameState.chosenTrainingFacility = null;
+                		gameState.chosenToBuild = UnitType.None;
+                		return State.FAILURE;
                     }
                 }
-                chosen.train(gameState.chosenUnit);
+                currentFacility.train(gameState.chosenUnit);	
                 return State.SUCCESS;
             }
             return State.FAILURE;
+            
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
             return State.ERROR;
         }
     }
+	public boolean checkCommandCenter() {
+		boolean found = false;
+		for (MutablePair<UnitType, TilePosition> pairOfUnitTile : gameState.workerBuild.values()) {	
+		    if (pairOfUnitTile.first == UnitType.Terran_Command_Center) {
+		        found = true;
+		        break;
+		    }
+		}
+		return found;
+	}
 }

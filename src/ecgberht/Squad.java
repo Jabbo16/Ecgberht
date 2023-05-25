@@ -48,7 +48,7 @@ public class Squad implements Comparable<Squad> {
     private boolean isArmyUnit(Unit u) {
         if (!u.exists()) return false;
         if (u instanceof Building) return false;
-        if (u instanceof SCV && (getGs().getStrat().name.equals("ProxyBBS") || getGs().getStrat().name.equals("ProxyEightRax")))
+        if (u instanceof SCV && (getGs().getStrategyFromManager().name.equals("ProxyBBS") || getGs().getStrategyFromManager().name.equals("ProxyEightRax")))
             return true;
         if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
         return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
@@ -116,14 +116,14 @@ public class Squad implements Comparable<Squad> {
                 executeRangedAttackLogic(u);
                 break;
             case IDLE:
-                if (getGs().getStrat().proxy) return;
+                if (getGs().getStrategyFromManager().proxy) return;
                 Position move = null;
                 if (getGs().defendPosition != null) {
                     if (u.currentOrder != Order.Stop) move = getGs().defendPosition;
                 } else if (!getGs().DBs.isEmpty()) {
                     Unit bunker = getGs().DBs.keySet().iterator().next();
                     if (u.currentOrder != Order.Stop) move = bunker.getPosition();
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrategyFromManager().name.equals("ProxyBBS") && !getGs().getStrategyFromManager().name.equals("ProxyEightRax")) {
                     if (u.currentOrder != Order.Stop) move = getGs().mainChoke.getCenter().toPosition();
 
                 } else if (Util.broodWarDistance(u.position, center) >= 190 && u.currentOrder != Order.Move) {
@@ -187,14 +187,14 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case IDLE:
-                if (getGs().getStrat().proxy) return;
+                if (getGs().getStrategyFromManager().proxy) return;
                 Position move = null;
                 if (getGs().defendPosition != null) {
                     if (u.currentOrder != Order.Stop) move = getGs().defendPosition;
                 } else if (!getGs().DBs.isEmpty()) {
                     Unit bunker = getGs().DBs.keySet().iterator().next();
                     if (u.currentOrder != Order.Stop) move = bunker.getPosition();
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrategyFromManager().name.equals("ProxyBBS") && !getGs().getStrategyFromManager().name.equals("ProxyEightRax")) {
                     if (u.currentOrder != Order.Stop) move = getGs().mainChoke.getCenter().toPosition();
 
                 } else if (Util.broodWarDistance(u.position, center) >= 190 && u.currentOrder != Order.Move) {
@@ -287,12 +287,12 @@ public class Squad implements Comparable<Squad> {
                 } else if (!getGs().DBs.isEmpty()) {
                     Unit bunker = getGs().DBs.keySet().iterator().next();
                     if (Util.broodWarDistance(bunker.getPosition(), center) >= 180 &&
-                            getGs().getArmySize() < getGs().getStrat().armyForAttack && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                            getGs().getArmySize() < getGs().getStrategyFromManager().armyForAttack && !getGs().getStrategyFromManager().name.equals("ProxyBBS") && !getGs().getStrategyFromManager().name.equals("ProxyEightRax")) {
                         if (u.currentOrder != Order.Move) move = bunker.getPosition();
                     }
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrategyFromManager().name.equals("ProxyBBS") && !getGs().getStrategyFromManager().name.equals("ProxyEightRax")) {
                     if (Util.broodWarDistance(getGs().mainChoke.getCenter().toPosition(), center) >= 200 &&
-                            getGs().getArmySize() < getGs().getStrat().armyForAttack) {
+                            getGs().getArmySize() < getGs().getStrategyFromManager().armyForAttack) {
                         if (u.currentOrder != Order.Move) move = getGs().mainChoke.getCenter().toPosition();
                     }
                 } else if (Util.broodWarDistance(u.position, center) >= 180 && u.currentOrder != Order.Move) {

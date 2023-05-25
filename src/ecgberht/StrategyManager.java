@@ -3,6 +3,8 @@ package ecgberht;
 import ecgberht.Strategies.*;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
+
+import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.UnitType;
 
@@ -12,129 +14,165 @@ import java.util.function.Consumer;
 import static ecgberht.Ecgberht.getGs;
 
 public class StrategyManager {
-    private FullBio b = new FullBio();
-    private ProxyBBS bbs = new ProxyBBS();
-    private BioMech bM = new BioMech();
-    private FullBioFE bFE = new FullBioFE();
-    private BioMechFE bMFE = new BioMechFE();
-    private FullMech FM = new FullMech();
-    private BioGreedyFE bGFE = new BioGreedyFE();
-    private MechGreedyFE mGFE = new MechGreedyFE();
-    private BioMechGreedyFE bMGFE = new BioMechGreedyFE();
-    private TwoPortWraith tPW = new TwoPortWraith();
-    private ProxyEightRax pER = new ProxyEightRax();
-    private VultureRush vR = new VultureRush();
-    private TheNitekat tNK = new TheNitekat();
-    private JoyORush jOR = new JoyORush();
-    private FastCC fastCC = new FastCC();
-
-    public Strategy strat;
-
+	private static StrategyManager managerInstance;
+	  private StrategyManager() {
+	        initBaseStrategies();
+	        this.setStrategy(initStrat());
+	        AddSpecialUnitsIfParticularMap();
+	    }
+	  public static StrategyManager getInstance() {
+		  if(!managerUsed) {
+			  managerInstance = new StrategyManager();
+			  managerUsed = true;
+		  }
+			return managerInstance;
+		}
+	
+	private static boolean managerUsed = false;
+    private Strategy strategy;
     private Map<String, MutablePair<Integer, Integer>> strategies = new LinkedHashMap<>();
-    private Map<String, Strategy> nameStrat = new LinkedHashMap<>();
+    private Map<String, Strategy> nameOfStrategies = new LinkedHashMap<>();
 
-    StrategyManager() {
-        initBaseStrategies();
-        this.strat = initStrat();
-        AddSpecialUnitsIfParticularMap();
-    }
-
+    private Strategy b = new FullBio();
+    private Strategy bbs = new ProxyBBS();
+    private Strategy bM = new BioMech();
+    private Strategy bFE = new FullBioFE();
+    private Strategy bMFE = new BioMechFE();
+    private Strategy FM = new FullMech();
+    private Strategy bGFE = new BioGreedyFE();
+    private Strategy mGFE = new MechGreedyFE();
+    private Strategy bMGFE = new BioMechGreedyFE();
+    private Strategy tPW = new TwoPortWraith();
+    private Strategy pER = new ProxyEightRax();
+    private Strategy vR = new VultureRush();
+    private Strategy tNK = new TheNitekat();
+    private Strategy jOR = new JoyORush();
+    private Strategy fastCC = new FastCC();
+    
     private void AddSpecialUnitsIfParticularMap() {
-        if (getGs().getGame().getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) { // GoldRush
-            this.strat.trainUnits.add(UnitType.Terran_Wraith);
+        if (checkMapHash()) { // GoldRush
+            this.getStrategy().trainUnits.add(UnitType.Terran_Wraith);
         }
     }
 
+	public boolean checkMapHash() {
+		return getGs().getGame().getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a");
+	}
+
     private void initBaseStrategies() {
-        Consumer<Strategy> addStrat = (strat) -> {
-            strategies.put(strat.name, new MutablePair<>(0, 0));
-            nameStrat.put(strat.name, strat);
+        Consumer<Strategy> addStrategy = (strategy) -> {
+            strategies.put(strategy.name, new MutablePair<>(0, 0));
+            nameOfStrategies.put(strategy.name, strategy);
         };
         switch (getGs().enemyRace) {
             case Zerg:
-                addStrat.accept(bGFE);
-                addStrat.accept(tPW);
-                addStrat.accept(pER);
-                addStrat.accept(bFE);
-                addStrat.accept(fastCC);
-                addStrat.accept(bMGFE);
-                addStrat.accept(bbs);
-                addStrat.accept(bM);
-                addStrat.accept(FM);
-                addStrat.accept(b);
-                addStrat.accept(bMFE);
-                addStrat.accept(vR);
-                addStrat.accept(tNK);
+			addZergStrategy(addStrategy);
                 break;
 
             case Terran:
-                addStrat.accept(FM);
-                addStrat.accept(fastCC);
-                addStrat.accept(pER);
-                addStrat.accept(bMGFE);
-                addStrat.accept(tPW);
-                addStrat.accept(bM);
-                addStrat.accept(mGFE);
-                addStrat.accept(bbs);
-                addStrat.accept(bFE);
-                addStrat.accept(bGFE);
-                addStrat.accept(b);
-                addStrat.accept(bMFE);
-                addStrat.accept(vR);
-                addStrat.accept(tNK);
+			addTerranStrategy(addStrategy);
                 break;
 
             case Protoss:
-                addStrat.accept(FM);
-                addStrat.accept(jOR);
-                addStrat.accept(pER);
-                addStrat.accept(fastCC);
-                addStrat.accept(mGFE);
-                addStrat.accept(bM);
-                addStrat.accept(bMGFE);
-                addStrat.accept(b);
-                addStrat.accept(bGFE);
-                addStrat.accept(bMFE);
-                addStrat.accept(bFE);
-                addStrat.accept(vR);
-                addStrat.accept(tNK);
+			addProtossStrategy(addStrategy);
                 break;
 
             case Unknown:
-                addStrat.accept(b);
-                addStrat.accept(FM);
-                addStrat.accept(bM);
-                addStrat.accept(bGFE);
-                addStrat.accept(bMGFE);
-                addStrat.accept(bbs);
-                addStrat.accept(mGFE);
-                addStrat.accept(jOR);
-                addStrat.accept(bMFE);
-                addStrat.accept(bFE);
+			addUnknownStrategy(addStrategy);
                 break;
         }
     }
 
-    void choose14CCTransition() {
+	public void addUnknownStrategy(Consumer<Strategy> addStrat) {
+		addStrat.accept(b);
+		addStrat.accept(FM);
+		addStrat.accept(bM);
+		addStrat.accept(bGFE);
+		addStrat.accept(bMGFE);
+		addStrat.accept(bbs);
+		addStrat.accept(mGFE);
+		addStrat.accept(jOR);
+		addStrat.accept(bMFE);
+		addStrat.accept(bFE);
+	}
+
+	public void addProtossStrategy(Consumer<Strategy> addStrat) {
+		addStrat.accept(FM);
+		addStrat.accept(jOR);
+		addStrat.accept(pER);
+		addStrat.accept(fastCC);
+		addStrat.accept(mGFE);
+		addStrat.accept(bM);
+		addStrat.accept(bMGFE);
+		addStrat.accept(b);
+		addStrat.accept(bGFE);
+		addStrat.accept(bMFE);
+		addStrat.accept(bFE);
+		addStrat.accept(vR);
+		addStrat.accept(tNK);
+	}
+
+	public void addTerranStrategy(Consumer<Strategy> addStrat) {
+		addStrat.accept(FM);
+		addStrat.accept(fastCC);
+		addStrat.accept(pER);
+		addStrat.accept(bMGFE);
+		addStrat.accept(tPW);
+		addStrat.accept(bM);
+		addStrat.accept(mGFE);
+		addStrat.accept(bbs);
+		addStrat.accept(bFE);
+		addStrat.accept(bGFE);
+		addStrat.accept(b);
+		addStrat.accept(bMFE);
+		addStrat.accept(vR);
+		addStrat.accept(tNK);
+	}
+
+	public void addZergStrategy(Consumer<Strategy> addStrat) {
+		addStrat.accept(bGFE);
+		addStrat.accept(tPW);
+		addStrat.accept(pER);
+		addStrat.accept(bFE);
+		addStrat.accept(fastCC);
+		addStrat.accept(bMGFE);
+		addStrat.accept(bbs);
+		addStrat.accept(bM);
+		addStrat.accept(FM);
+		addStrat.accept(b);
+		addStrat.accept(bMFE);
+		addStrat.accept(vR);
+		addStrat.accept(tNK);
+	}
+	public boolean forTerranAndProtossTransition(List<String> validTransitions) {
+		return validTransitions.addAll(Arrays.asList(FM.name, bMGFE.name, bGFE.name));
+	}
+	public boolean forZergTransition(List<String> validTransitions) {
+		return validTransitions.addAll(Arrays.asList(bGFE.name, bMGFE.name, tPW.name));
+	}
+    void chooseTransitionForEnemy() {
         double C = 0.75;
         int totalGamesPlayed = getGs().learningManager.getEnemyInfo().wins + getGs().learningManager.getEnemyInfo().losses;
         List<String> validTransitions = new ArrayList<>();
         switch (getGs().enemyRace) {
             case Zerg:
-                validTransitions.addAll(Arrays.asList(bGFE.name, bMGFE.name, tPW.name));
+                forZergTransition(validTransitions);
                 break;
+                
             case Terran:
             case Protoss:
-                validTransitions.addAll(Arrays.asList(FM.name, bMGFE.name, bGFE.name));
+                forTerranAndProtossTransition(validTransitions);
                 break;
         }
         String bestUCBStrategy = null;
         double bestUCBStrategyVal = Double.MIN_VALUE;
         for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
-            if (!validTransitions.contains(strat.getKey())) continue;
+            final boolean transitionHasNoKey = !validTransitions.contains(strat.getKey());
+			if (transitionHasNoKey) continue;
             int sGamesPlayed = strat.getValue().first + strat.getValue().second;
-            double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-            double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+            
+            double sWinRate = getWinRate(sGamesPlayed, strat);
+            double ucbVal = getUcbVal(C, totalGamesPlayed, sGamesPlayed);
             double val = sWinRate + ucbVal;
             if (val > bestUCBStrategyVal) {
                 bestUCBStrategy = strat.getKey();
@@ -142,8 +180,28 @@ public class StrategyManager {
             }
         }
         Util.sendText("Transitioning from 14CC to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-        strat = nameStrat.get(bestUCBStrategy);
-        if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+        setStrategy(nameOfStrategies.get(bestUCBStrategy));
+        final boolean naturalChokeAllocated = getGs().naturalChoke != null;
+		if (naturalChokeAllocated) {
+			final Position naturalChokeToCenter = getGs().naturalChoke.getCenter().toPosition();
+			getGs().defendPosition = naturalChokeToCenter;
+		}
+    }
+	public double getUcbVal(double C, int totalGamesPlayed, int sGamesPlayed) {
+		if(sGamesPlayed == 0) {
+			return 0.85;
+		}
+		else {
+			return C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+		}
+	}
+    public double getWinRate(int sGamesPlayed,Map.Entry<String, MutablePair<Integer, Integer>> strat) {
+  	  if (sGamesPlayed > 0) {
+        	return (strat.getValue().first / (double) (sGamesPlayed));
+        }
+        else {
+        	return 0;
+        }
     }
 
     void chooseProxyTransition() {
@@ -153,11 +211,13 @@ public class StrategyManager {
         if (getGs().enemyRace == Race.Zerg) validTransitions.add(tPW.name);
         String bestUCBStrategy = null;
         double bestUCBStrategyVal = Double.MIN_VALUE;
+       
         for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
-            if (!validTransitions.contains(strat.getKey())) continue;
+        	final boolean transitionHasNoKey = !validTransitions.contains(strat.getKey());
+            if (transitionHasNoKey) continue;
             int sGamesPlayed = strat.getValue().first + strat.getValue().second;
-            double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-            double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
+            double sWinRate = getWinRate(sGamesPlayed, strat);
+            double ucbVal = getUcbVal(C, totalGamesPlayed, sGamesPlayed);
             double val = sWinRate + ucbVal;
             if (val > bestUCBStrategyVal) {
                 bestUCBStrategy = strat.getKey();
@@ -165,60 +225,73 @@ public class StrategyManager {
             }
         }
         Util.sendText("Transitioning from Proxy to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-        strat = nameStrat.get(bestUCBStrategy);
+        setStrategy(nameOfStrategies.get(bestUCBStrategy));
         if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
-    // TODO delete this (useless)?
     void updateStrat() {
-        if (strat.trainUnits.contains(UnitType.Terran_Firebat) && getGs().enemyRace == Race.Zerg) getGs().maxBats = 3;
-        else getGs().maxBats = 0;
-        if (strat.trainUnits.contains(UnitType.Terran_Goliath)) getGs().maxGoliaths = 0;
+        final boolean canTrainFirebat = getStrategy().trainUnits.contains(UnitType.Terran_Firebat);
+		final boolean enemyZerg = getGs().enemyRace == Race.Zerg;
+		 final boolean canTrainGoliath = getStrategy().trainUnits.contains(UnitType.Terran_Goliath);
+		if (canTrainFirebat && enemyZerg) getGs().maxBats = 3;
+		else getGs().maxBats = 0;
+       if (canTrainGoliath) getGs().maxGoliaths = 0;
     }
 
     private boolean alwaysZealotRushes() {
-        if (getGs().enemyRace != Race.Protoss) return false;
+        final boolean enemyNotProtoss = getGs().enemyRace != Race.Protoss;
+		if (enemyNotProtoss) return false;
         List<String> zealots = new ArrayList<>(Arrays.asList("purplewavelet", "wulibot", "flash", "carstennielsen"));
-        return zealots.contains(getGs().learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", ""));
+        final String enemyInfo = getGs().learningManager.getEnemyInfo().opponent.toLowerCase().replace(" ", "");
+		return zealots.contains(enemyInfo);
     }
 
     private Strategy getRandomStrategy() {
-        int index = new Random().nextInt(nameStrat.entrySet().size());
-        Iterator<Map.Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
+        int index = new Random().nextInt(nameOfStrategies.entrySet().size());
+        Iterator<Map.Entry<String, Strategy>> iterator = nameOfStrategies.entrySet().iterator();
         for (int i = 0; i < index; i++) {
-            iter.next();
+            iterator.next();
         }
-       return iter.next().getValue();
+       return iterator.next().getValue();
     }
 
     private Strategy initStrat() {
         try {
-            EnemyInfo EI = getGs().learningManager.getEnemyInfo();
-            String forcedStrat = ConfigManager.getConfig().ecgConfig.forceStrat;
-            if (!forcedStrat.equals("")) {
-                if (forcedStrat.toLowerCase().equals("random")) {
+            LearningManager.EnemyInfo enemyInfo = getGs().learningManager.getEnemyInfo();
+            String forcedStrategy = ConfigManager.getConfig().ecgConfig.forceStrat;
+            final boolean strategyNull = !forcedStrategy.equals("");
+			if (strategyNull) {
+                final boolean isStrategyRandom = forcedStrategy.toLowerCase().equals("random");
+				if (isStrategyRandom) {
                     Strategy randomStrategy = this.getRandomStrategy();
                     Util.sendText("Picked random strategy " + randomStrategy.name);
                     return randomStrategy;
-                } else if (nameStrat.containsKey(forcedStrat)) {
-                    Util.sendText("Picked forced strategy " + forcedStrat);
-                    if (forcedStrat.equals("14CC")) {
-                        for (EnemyInfo.StrategyOpponentHistory r : EI.history) {
-                            if (strategies.containsKey(r.strategyName)) {
-                                strategies.get(r.strategyName).first += r.wins;
-                                strategies.get(r.strategyName).second += r.losses;
-                            }
-                        }
-                    }
-                    return nameStrat.get(forcedStrat);
-                }
+                } else {
+					final boolean forcedStrategyInStrategies = nameOfStrategies.containsKey(forcedStrategy);
+					if (forcedStrategyInStrategies) {
+					    Util.sendText("Picked forced strategy " + forcedStrategy);
+					    final boolean isForcedStrategy14CC = forcedStrategy.equals("14CC");
+						if (isForcedStrategy14CC) {
+					        for (LearningManager.EnemyInfo.StrategyOpponentHistory learningManager : enemyInfo.history) {
+					            if (strategies.containsKey(learningManager.strategyName)) {
+					                strategies.get(learningManager.strategyName).first += learningManager.wins;
+					                strategies.get(learningManager.strategyName).second += learningManager.losses;
+					            }
+					        }
+					    }
+					    return nameOfStrategies.get(forcedStrategy);
+					}
+				}
             }
-            if (ConfigManager.getConfig().ecgConfig.humanMode && Math.round(Math.random() * 10) < 5) {
+            final boolean isHumanMode = ConfigManager.getConfig().ecgConfig.humanMode;
+			final boolean isRandomLtFive = Math.round(Math.random() * 10) < 5;
+			if (isHumanMode && isRandomLtFive) {
                 return this.getRandomStrategy();
             }
-            if (getGs().enemyRace == Race.Zerg && EI.naughty) return b;
-            if (getGs().bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67")) { // Plasma!!!
-                getGs().maxWraiths = 200; // HELL
+            if (getGs().enemyRace == Race.Zerg && enemyInfo.naughty) return b;
+            final boolean checkTempMapHash = getGs().bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67");
+			if (checkTempMapHash) {
+                getGs().maxWraiths = 200;
                 return new PlasmaWraithHell();
             }
             if (alwaysZealotRushes()) {
@@ -228,49 +301,60 @@ public class StrategyManager {
                 return bFE;
             }
             removeStrategiesMapSpecific();
-            int totalGamesPlayed = EI.wins + EI.losses;
-            for (EnemyInfo.StrategyOpponentHistory r : EI.history) {
-                if (strategies.containsKey(r.strategyName)) {
-                    strategies.get(r.strategyName).first += r.wins;
-                    strategies.get(r.strategyName).second += r.losses;
+            int totalGamesPlayed = enemyInfo.wins + enemyInfo.losses;
+            for (LearningManager.EnemyInfo.StrategyOpponentHistory learningManager : enemyInfo.history) {
+                if (strategies.containsKey(learningManager.strategyName)) {
+                    strategies.get(learningManager.strategyName).first += learningManager.wins;
+                    strategies.get(learningManager.strategyName).second += learningManager.losses;
                 }
             }
             double maxWinRate = 0.0;
-            String bestStrat = null;
+            String bestStrategy = null;
             int totalGamesBestS = 0;
             for (Map.Entry<String, MutablePair<Integer, Integer>> s : strategies.entrySet()) {
                 int totalGames = s.getValue().first + s.getValue().second;
-                if (totalGames < 2) continue;
+                final boolean gameLtTwo = totalGames < 2;
+				if (gameLtTwo) continue;
                 double winRate = (double) s.getValue().first / totalGames;
                 if (winRate >= 0.75 && winRate > maxWinRate) {
                     maxWinRate = winRate;
-                    bestStrat = s.getKey();
+                    bestStrategy = s.getKey();
                     totalGamesBestS = totalGames;
                 }
             }
-            if (maxWinRate != 0.0 && bestStrat != null) {
-                Util.sendText("Using best Strategy: " + bestStrat + " with winrate " + maxWinRate * 100 + "% and " + totalGamesBestS + " games played");
-                return nameStrat.get(bestStrat);
+            final boolean maxWinRateNotZero = maxWinRate != 0.0;
+			final boolean bestStrategyNotNull = bestStrategy != null;
+			if (maxWinRateNotZero && bestStrategyNotNull) {
+                Util.sendText("Using best Strategy: " + bestStrategy + " with winrate " + maxWinRate * 100 + "% and " + totalGamesBestS + " games played");
+                return nameOfStrategies.get(bestStrategy);
             }
             double C = 0.7;
             String bestUCBStrategy = null;
             double bestUCBStrategyVal = Double.MIN_VALUE;
             for (Map.Entry<String, MutablePair<Integer, Integer>> strat : strategies.entrySet()) {
                 int sGamesPlayed = strat.getValue().first + strat.getValue().second;
-                double sWinRate = sGamesPlayed > 0 ? (strat.getValue().first / (double) (sGamesPlayed)) : 0;
-                double ucbVal = sGamesPlayed == 0 ? 0.85 : C * Math.sqrt(Math.log(((double) totalGamesPlayed / (double) sGamesPlayed)));
-                if (totalGamesPlayed > 0 && nameStrat.get(strat.getKey()).proxy && getGs().mapSize == 2) ucbVal += 0.03;
-                if (totalGamesPlayed > 0 && strat.getKey().equals("14CC") && getGs().mapSize == 4) ucbVal += 0.03;
+                double sWinRate = getWinRate(sGamesPlayed, strat);
+                double ucbVal = getUcbVal(C, totalGamesPlayed, sGamesPlayed);
+                final boolean moreThanOneGamePlayed = totalGamesPlayed > 0;
+				final boolean isMapSizeTwo = getGs().mapSize == 2;
+				final boolean isStrategyKey14CC = strat.getKey().equals("14CC");
+				final boolean isMapSizeFour = getGs().mapSize == 4;
+				final boolean isStrategyKeyProxy = nameOfStrategies.get(strat.getKey()).proxy;
+				if (moreThanOneGamePlayed && isStrategyKeyProxy && isMapSizeTwo) 
+					ucbVal += 0.03;
+				if (moreThanOneGamePlayed && isStrategyKey14CC && isMapSizeFour) 
+					ucbVal += 0.03;
                 double val = sWinRate + ucbVal;
                 if (val > bestUCBStrategyVal) {
                     bestUCBStrategy = strat.getKey();
                     bestUCBStrategyVal = val;
                 }
             }
-            if (totalGamesPlayed < 1)
+            final boolean gameNotPlayed = totalGamesPlayed < 1;
+			if (gameNotPlayed)
                 Util.sendText("I dont know you that well yet, lets pick " + bestUCBStrategy);
             else Util.sendText("Chose: " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
-            return nameStrat.get(bestUCBStrategy);
+            return nameOfStrategies.get(bestUCBStrategy);
         } catch (Exception e) {
             System.err.println("Error initStrat, using default strategy");
             e.printStackTrace();
@@ -279,15 +363,21 @@ public class StrategyManager {
     }
 
     private void removeStrategiesMapSpecific() {
-        Consumer<Strategy> removeStrat = (strat) -> {
-            strategies.remove(strat.name);
-            nameStrat.remove(strat.name);
+        Consumer<Strategy> removeStrategy = (strategy) -> {
+            strategies.remove(strategy.name);
+            nameOfStrategies.remove(strategy.name);
         };
-        if (getGs().getGame().getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) { // GoldRush
-            removeStrat.accept(pER);
-            removeStrat.accept(bbs);
-            removeStrat.accept(tNK);
-            removeStrat.accept(jOR);
+        if (checkMapHash()) { // GoldRush
+            removeStrategy.accept(pER);
+            removeStrategy.accept(bbs);
+            removeStrategy.accept(tNK);
+            removeStrategy.accept(jOR);
         }
     }
+	public Strategy getStrategy() {
+		return strategy;
+	}
+	public void setStrategy(Strategy strategy) {
+		this.strategy = strategy;
+	}
 }
