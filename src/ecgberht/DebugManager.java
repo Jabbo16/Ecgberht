@@ -23,50 +23,28 @@ public class DebugManager {
     private MapDrawer mapDrawer;
     private InteractionHandler iH;
     private CameraModule skycladObserver;
-
+    TextSetting _textsetting;
     DebugManager(MapDrawer mapDrawer, InteractionHandler iH, CameraModule skycladObserver) {
         this.mapDrawer = mapDrawer;
         this.iH = iH;
         this.skycladObserver = skycladObserver;
     }
 
-    void keyboardInteraction(String text) {
-        boolean setting;
-        switch (text) {
-            case "dt":
-                setting = ConfigManager.getConfig().ecgConfig.debugText;
-                Util.sendText(!setting ? "debugText enabled" : "debugText disabled");
-                ConfigManager.getConfig().ecgConfig.debugText = !setting;
-                break;
-            case "dc":
-                setting = ConfigManager.getConfig().ecgConfig.debugConsole;
-                Util.sendText(!setting ? "debugConsole enabled" : "debugConsole disabled");
-                ConfigManager.getConfig().ecgConfig.debugConsole = !setting;
-                break;
-            case "ds":
-                setting = ConfigManager.getConfig().ecgConfig.debugScreen;
-                Util.sendText(!setting ? "debugScreen enabled" : "debugScreen disabled");
-                ConfigManager.getConfig().ecgConfig.debugScreen = !setting;
-                break;
-            case "obs":
-                setting = ConfigManager.getConfig().ecgConfig.enableSkyCladObserver;
-                Util.sendText(!setting ? "Observer enabled" : "Observer disabled");
-                ConfigManager.getConfig().ecgConfig.enableSkyCladObserver = !setting;
-                skycladObserver.toggle();
-                break;
-            case "sounds":
-                setting = ConfigManager.getConfig().ecgConfig.sounds;
-                Util.sendText(!setting ? "Sounds Effects enabled" : "Sounds Effects disabled");
-                ConfigManager.getConfig().ecgConfig.sounds = !setting;
-                break;
-            case "noattack":
-                setting = ConfigManager.getConfig().ecgConfig.debugDisableAttack;
-                Util.sendText(!setting ? "Debug Attack enabled" : "Debug Attack disabled");
-                ConfigManager.getConfig().ecgConfig.debugDisableAttack = !setting;
-                break;
+    public void keyboardInteraction(String text) {
+        setInteractionText(text);
+        _textsetting.doInteraction(CameraModule skycladObserver);
+    }
+    
+    public void setInteractionText(String text){
+        switch(text){
+            case "dt": _textsetting = new TextSetting_dt(); break;
+            case "dc": _textsetting = new TextSetting_dc(); break;
+            case "ds": _textsetting = new TextSetting_ds(); break;
+            case "obs": _textsetting = new TextSetting_obs(); break;
+            case "sounds": _textsetting = new TextSetting_sounds(); break;
+            case "noattack": _textsetting = new TextSetting_noattack(); break;
         }
     }
-
     private void debugScreen(GameState gameState) {
         try {
             if (!ConfigManager.getConfig().ecgConfig.debugScreen) return;
@@ -100,6 +78,7 @@ public class DebugManager {
             for (Unit u : gameState.islandCCs.values()) {
                 print(u, Color.YELLOW);
             }
+            
             for (Agent ag : gameState.agents.values()) {
                 if (ag instanceof VultureAgent) {
                     VultureAgent vulture = (VultureAgent) ag;
@@ -302,3 +281,58 @@ public class DebugManager {
         debugText(gs);
     }
 }
+
+public abstract class TextSetting{
+    private boolean setting;
+    private abstract String setting_name;
+    private abstract String sending_name;
+
+    //setting config manager
+    private String setting_default =  'setting = ConfigManager.getConfig().ecgConfig.';
+    private String setting_ConfigManager = setting_default + setting_name+";"
+
+    //sending Text
+    private String sending_Text_enabled = sending_name +" enabled"
+    private String sending_Text_disabled = sending_name +" disabled"
+
+    //setting_debugText
+    private String setting_debugText = "ConfigManager.getConfig().ecgConfig." + setting_name+"= !setting;"
+
+    public void doInteraction(CameraModule skycladObserver){
+        exec(setting_ConfigManager);
+        Util.sendText(!setting ? sending_Text_enabled : sending_Text_disabled );
+        exec(setting_debugText);
+    }
+}
+
+public class TextSetting_dt extends TextSetting{
+    setting_name = "debugText";
+    sending_name = "debugText";
+}
+public class TextSetting_dc extends TextSetting{
+    setting_name = "debugConsole";
+    sending_name = "debugConsole";
+}
+public class TextSetting_ds extends TextSetting{
+    setting_name = "debugScreen";
+    sending_name = "debugScreen";
+}
+public class TextSetting_obs extends TextSetting{
+    setting_name = 'enableSkyCladObserver';
+    sending_name = "Observer";
+
+    @Override
+    public void doInteraction(CameraModule skycladObserver){
+        super.doInteraction()
+        skycladObserver.toggle();
+    }
+}
+public class TextSetting_sounds extends TextSetting{
+    setting_name = "sounds";
+    sending_name = "Sounds";
+}
+public class TextSetting_noattack extends TextSetting{
+    setting_name = "debugDisableAttack";
+    sending_name = "Debug Attack";
+}
+       
