@@ -284,6 +284,10 @@ class BWMapInitializer extends BWMap {
 
     // ----------------------------------------------------------------------
 
+    private boolean isTraversablePosition(List<WalkPosition> visited, WalkPosition next) {
+        return getData().getMapData().isValid(next) && !visited.contains(next)
+                && getData().getMiniTile(next, bwem.util.CheckMode.NO_CHECK).isWalkable();
+    }
     /**
      * 2) Find the doors in border: one door for each connected set of walkable, neighboring
      * miniTiles. The searched connected miniTiles all have to be next to some lake or some static
@@ -313,18 +317,13 @@ class BWMapInitializer extends BWMap {
                 };
                 for (final WalkPosition delta : deltas) {
                     final WalkPosition next = current.add(delta);
-                    if (getData().getMapData().isValid(next) && !visited.contains(next)) {
-                        if (getData().getMiniTile(next, bwem.util.CheckMode.NO_CHECK).isWalkable()) {
-                            if (getData()
-                                    .getTile((next.toPosition()).toTilePosition(), bwem.util.CheckMode.NO_CHECK)
-                                    .getNeutral()
-                                    == null) {
-                                if (BwemExt.adjoins8SomeLakeOrNeutral(next, this)) {
-                                    toVisit.add(next);
-                                    visited.add(next);
-                                }
-                            }
-                        }
+                    if (isTraversablePosition(visited, next)
+                        && getData()
+                            .getTile((next.toPosition()).toTilePosition(), bwem.util.CheckMode.NO_CHECK)
+                            .getNeutral() == null
+                        && BwemExt.adjoins8SomeLakeOrNeutral(next, this)) {
+                            toVisit.add(next);
+                            visited.add(next);
                     }
                 }
             }
@@ -364,14 +363,11 @@ class BWMapInitializer extends BWMap {
                     };
                     for (final WalkPosition delta : deltas) {
                         final WalkPosition next = current.add(delta);
-                        if (getData().getMapData().isValid(next) && !visited.contains(next)) {
-                            if (getData().getMiniTile(next, bwem.util.CheckMode.NO_CHECK).isWalkable()) {
-                                if (getData().getTile(next.toTilePosition(), bwem.util.CheckMode.NO_CHECK).getNeutral()
-                                        == null) {
-                                    toVisit.add(next);
-                                    visited.add(next);
-                                }
-                            }
+                        if (isTraversablePosition(visited, next)
+                            && getData().getTile(next.toTilePosition(), bwem.util.CheckMode.NO_CHECK).getNeutral()
+                                    == null) {
+                                toVisit.add(next);
+                                visited.add(next);
                         }
                     }
                 }
