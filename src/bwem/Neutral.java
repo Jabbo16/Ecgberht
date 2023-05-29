@@ -147,7 +147,7 @@ public abstract class Neutral {
     }
 
     private void putOnTiles() {
-        if (!(getNextStacked() == null)) {
+        if (getNextStacked() != null) {
             map.asserter.throwIllegalStateException("");
         }
 
@@ -160,37 +160,42 @@ public abstract class Neutral {
                 } else {
                     final Neutral topNeutral = deltaTile.getNeutral().getLastStacked();
                     // https://github.com/N00byEdge/BWEM-community/issues/30#issuecomment-400840140
-                    if (!topNeutral.getTopLeft().equals(getTopLeft()) || !topNeutral.getBottomRight().equals(getBottomRight())) {
-                        continue;
-                    }
-                    if (this.equals(deltaTile.getNeutral())) {
-                        map.asserter.throwIllegalStateException("");
-                    } else if (this.equals(topNeutral)) {
-                        map.asserter.throwIllegalStateException("");
-                    } else if (topNeutral.getClass().getName().equals(Geyser.class.getName())) {
-                        map.asserter.throwIllegalStateException("");
-                    } else if (!topNeutral.isSameUnitTypeAs(this)) {
-                        //                    bwem_assert_plus(pTop->Type() == Type(), "stacked neutrals have
-                        map.asserter.throwIllegalStateException(
-                                "Stacked Neutral objects have different types: top="
-                                        + topNeutral.getClass().getName()
-                                        + ", this="
-                                        + this.getClass().getName());
-                    } else if (!(topNeutral.getTopLeft().equals(getTopLeft()))) {
-                        //                    bwem_assert_plus(pTop->topLeft() == topLeft(), "stacked neutrals
-                        map.asserter.throwIllegalStateException(
-                                "Stacked Neutral objects not aligned: top="
-                                        + topNeutral.getTopLeft().toString()
-                                        + ", this="
-                                        + getTopLeft().toString());
-                    } else if (!(dx == 0 && dy == 0)) {
-                        map.asserter.throwIllegalStateException("");
-                    } else {
-                        topNeutral.nextStacked = this;
-                        return;
-                    }
+                    if (!isTopNeutralValid(topNeutral)) continue;
+                    if (handleStackedNeutral(dy, dx, deltaTile, topNeutral)) return;
                 }
             }
+    }
+
+    private boolean handleStackedNeutral(int dy, int dx, Tile deltaTile, Neutral topNeutral) {
+        if (this.equals(deltaTile.getNeutral())
+                || this.equals(topNeutral)
+                || topNeutral.getClass().getName().equals(Geyser.class.getName())) {
+            map.asserter.throwIllegalStateException("");
+        } else if (!topNeutral.isSameUnitTypeAs(this)) {
+            //                    bwem_assert_plus(pTop->Type() == Type(), "stacked neutrals have
+            map.asserter.throwIllegalStateException(
+                    "Stacked Neutral objects have different types: top="
+                            + topNeutral.getClass().getName()
+                            + ", this="
+                            + this.getClass().getName());
+        } else if (!(topNeutral.getTopLeft().equals(getTopLeft()))) {
+            //                    bwem_assert_plus(pTop->topLeft() == topLeft(), "stacked neutrals
+            map.asserter.throwIllegalStateException(
+                    "Stacked Neutral objects not aligned: top="
+                            + topNeutral.getTopLeft().toString()
+                            + ", this="
+                            + getTopLeft().toString());
+        } else if (!(dx == 0 && dy == 0)) {
+            map.asserter.throwIllegalStateException("");
+        } else {
+            topNeutral.nextStacked = this;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTopNeutralValid(Neutral topNeutral) {
+        return topNeutral.getTopLeft().equals(getTopLeft()) && topNeutral.getBottomRight().equals(getBottomRight());
     }
 
     /**
