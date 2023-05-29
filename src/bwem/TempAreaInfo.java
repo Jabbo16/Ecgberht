@@ -113,11 +113,8 @@ class TempAreaInfo {
 
     // Left to caller : m.SetAreaId(this->id()) for each MiniTile m in absorbed
     void merge(final TempAreaInfo absorbed) {
-        if (!(isValid() && absorbed.isValid())) {
-            //            bwem_assert(valid() && absorbed.isValid());
-            asserter.throwIllegalStateException("");
-        } else if (!(this.size >= absorbed.size)) {
-            //            bwem_assert (size >= absorbed.size);
+        if (!(isValid() && absorbed.isValid() && size >= absorbed.size)) {
+            // bwem_assert(valid() && absorbed.isValid() && size >= absorbed.size);
             asserter.throwIllegalStateException("");
         }
         this.size += absorbed.size;
