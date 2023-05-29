@@ -272,11 +272,12 @@ class BWMapInitializer extends BWMap {
     }
 
     private List<WalkPosition> trimOuterMiniTileBorder(final List<WalkPosition> border) {
-        border.removeIf(
-                w ->
-                        (!getData().getMapData().isValid(w)
-                                || !getData().getMiniTile(w, bwem.util.CheckMode.NO_CHECK).isWalkable()
-                                || getData().getTile(w.toTilePosition(), bwem.util.CheckMode.NO_CHECK).getNeutral() != null));
+        border.removeIf(w -> {
+            MapData mapData = getData().getMapData();
+            MiniTile miniTile = getData().getMiniTile(w, bwem.util.CheckMode.NO_CHECK);
+            Tile tile = getData().getTile(w.toTilePosition(), bwem.util.CheckMode.NO_CHECK);
+            return !mapData.isValid(w) || !miniTile.isWalkable() || tile.getNeutral() != null;
+        });
         return border;
     }
 
