@@ -216,10 +216,8 @@ class BWMapInitializer extends BWMap {
                         if (terrainData.getMapData().isValid(w)) {
                             final MiniTile miniTile = terrainData.getMiniTile(w, bwem.util.CheckMode.NO_CHECK);
                             if (miniTile.isAltitudeMissing()) {
-                                if (updatedHighestAltitude != null
-                                        && updatedHighestAltitude.intValue() > altitude.intValue()) {
-                                    asserter.throwIllegalStateException("");
-                                }
+                                assertIf(updatedHighestAltitude != null
+                                        && updatedHighestAltitude.intValue() > altitude.intValue());
                                 updatedHighestAltitude = altitude;
                                 current.setRight(altitude);
                                 miniTile.setAltitude(altitude);
@@ -570,16 +568,16 @@ class BWMapInitializer extends BWMap {
 
         for (final TempAreaInfo tempArea : tempAreaList) {
             if (tempArea.isValid()) {
-                if (tempArea.getSize() >= areaMinMiniTiles) {
-                    if (!(newAreaId <= tempArea.getId().intValue())) {
-                        asserter.throwIllegalStateException("");
-                    }
-                    if (newAreaId != tempArea.getId().intValue()) {
+                int tempAreaSize = tempArea.getSize();
+                if (tempAreaSize >= areaMinMiniTiles) {
+                    AreaId tempAreaId = tempArea.getId();
+                    assertIf((newAreaId > tempAreaId.intValue()));
+                    if (newAreaId != tempAreaId.intValue()) {
                         replaceAreaIds(tempArea.getWalkPositionWithHighestAltitude(), new AreaId(newAreaId));
                     }
 
                     areasList.add(
-                            new Pair<>(tempArea.getWalkPositionWithHighestAltitude(), tempArea.getSize()));
+                            new Pair<>(tempArea.getWalkPositionWithHighestAltitude(), tempAreaSize));
                     ++newAreaId;
                 } else {
                     replaceAreaIds(tempArea.getWalkPositionWithHighestAltitude(), new AreaId(newTinyAreaId));
@@ -589,6 +587,12 @@ class BWMapInitializer extends BWMap {
         }
 
         getGraph().createAreas(areasList);
+    }
+
+    private void assertIf(boolean condition) {
+        if (condition) {
+            asserter.throwIllegalStateException("");
+        }
     }
 
     // Renamed from "BWMap::SetAltitudeInTile"
@@ -626,9 +630,7 @@ class BWMapInitializer extends BWMap {
         if (pBlocking == null) {
             throw new IllegalStateException();
         }
-        if (!pBlocking.isBlocking()) {
-            asserter.throwIllegalStateException("");
-        }
+        assertIf(!pBlocking.isBlocking());
 
         for (Area pArea : pBlocking.getBlockedAreas()) {
             for (ChokePoint cp : pArea.getChokePoints()) {
