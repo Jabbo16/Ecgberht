@@ -586,20 +586,14 @@ public final class Graph {
                         final Tile nextTile =
                                 getMap().getData().getTile(next.getCenter().toTilePosition(), bwem.util.CheckMode.NO_CHECK);
                         if (nextTile.getMarkable().isUnmarked()) {
-                            if (nextTile.getInternalData() != 0) { // next already in toVisit
-                                if (newNextDist
-                                        < nextTile.getInternalData()) { // nextNewDist < nextOldDist
-                                    // To update next's distance, we need to remove-insert it from toVisit:
-                                    final boolean removed =
-                                            toVisit.remove(new Pair<>(nextTile.getInternalData(), next));
+                            if (nextTile.getInternalData() == 0 || newNextDist < nextTile.getInternalData()) {
+                                if (nextTile.getInternalData() != 0) {
+                                    final boolean removed = toVisit.remove(new Pair<>(nextTile.getInternalData(), next));
                                     if (!removed) {
                                         map.asserter.throwIllegalStateException("");
                                     }
-                                    nextTile.setInternalData(newNextDist);
-                                    next.setPathBackTrace(current);
-                                    toVisit.offer(new Pair<>(newNextDist, next));
                                 }
-                            } else {
+
                                 nextTile.setInternalData(newNextDist);
                                 next.setPathBackTrace(current);
                                 toVisit.offer(new Pair<>(newNextDist, next));
