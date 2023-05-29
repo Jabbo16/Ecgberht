@@ -487,32 +487,41 @@ final class AreaInitializer extends Area {
                 final TilePosition deltaLocation = location.add(new TilePosition(dx, dy));
                 if (terrainData.getMapData().isValid(deltaLocation)) {
                     final Tile deltaTile = terrainData.getTile(deltaLocation, CheckMode.NO_CHECK);
-                    final Neutral deltaTileNeutral = deltaTile.getNeutral();
-                    if (deltaTileNeutral != null) {
-                        if (deltaTileNeutral instanceof Geyser) {
-                            return false;
-                        } else if (deltaTileNeutral instanceof Mineral) {
-                            final Mineral deltaTileMineral = (Mineral) deltaTileNeutral;
-                            if (deltaTileMineral.getInitialAmount() <= 8) {
-                                blockingMinerals.add(deltaTileMineral);
-                            } else {
-                                return false;
-                            }
-                        }
-                    }
+                    if (isTileInvalidForBase(blockingMinerals, deltaTile)) return false;
                 }
             }
         }
 
-        // checks the distance to the bases already created:
+        if (isBaseTooClose(location)) return false;
+
+        return true;
+    }
+
+    private boolean isBaseTooClose(TilePosition location) {
         for (final Base base : getBases()) {
             if (BwemExt.roundedDist(base.getLocation(), location)
                     < BwemExt.MIN_TILES_BETWEEN_BASES) {
-                return false;
+                return true;
             }
         }
+        return false;
+    }
 
-        return true;
+    private static boolean isTileInvalidForBase(List<Mineral> blockingMinerals, Tile deltaTile) {
+        final Neutral deltaTileNeutral = deltaTile.getNeutral();
+        if (deltaTileNeutral != null) {
+            if (deltaTileNeutral instanceof Geyser) {
+                return true;
+            } else if (deltaTileNeutral instanceof Mineral) {
+                final Mineral deltaTileMineral = (Mineral) deltaTileNeutral;
+                if (deltaTileMineral.getInitialAmount() <= 8) {
+                    blockingMinerals.add(deltaTileMineral);
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void onMineralDestroyed(final Mineral mineral) {
