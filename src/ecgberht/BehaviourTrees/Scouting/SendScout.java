@@ -1,24 +1,25 @@
 package ecgberht.BehaviourTrees.Scouting;
+import ecgberht.brain.*;
 
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SendScout extends Action {
+public class SendScout extends BrainAction {
 
     public SendScout(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (gameState.enemyMainBase == null) {
                 if (!gameState.scoutSLs.isEmpty()) {
@@ -27,11 +28,11 @@ public class SendScout extends Action {
                         if (gameState.fortressSpecialBLs.containsKey(b)) continue;
                         if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
                             if (((MobileUnit) gameState.chosenScout).move(b.getLocation().toPosition())) {
-                                return State.SUCCESS;
+                                return BrainStatus.SUCCESS;
                             }
                         } else if (Util.isConnected(b.getLocation(), gameState.chosenScout.getTilePosition())) {
                             if (((MobileUnit) gameState.chosenScout).move(b.getLocation().toPosition())) {
-                                return State.SUCCESS;
+                                return BrainStatus.SUCCESS;
                             }
                         } else aux.add(b);
                     }
@@ -41,16 +42,17 @@ public class SendScout extends Action {
             if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
                 ((MobileUnit) gameState.chosenScout).stop(false);
                 gameState.chosenScout = null;
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             }
             gameState.workerIdle.add((Worker) gameState.chosenScout);
             ((MobileUnit) gameState.chosenScout).stop(false);
             gameState.chosenScout = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

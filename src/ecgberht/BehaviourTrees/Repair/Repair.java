@@ -1,22 +1,23 @@
 package ecgberht.BehaviourTrees.Repair;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.MobileUnit;
 
-public class Repair extends Action {
+public class Repair extends BrainAction {
 
     public Repair(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && gameState.frameCount >= 24 * 60 * 2.2;
             boolean fastExpanding = gameState.getStrat().name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && gameState.CCs.size() < 2 && gameState.firstExpand;
@@ -37,7 +38,7 @@ public class Repair extends Action {
                     gameState.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
                     gameState.chosenUnitRepair = null;
                     gameState.chosenRepairer = null;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             } else if (gameState.chosenRepairer.repair(gameState.chosenUnitRepair)) {
                 if (gameState.workerIdle.contains(gameState.chosenRepairer)) {
@@ -58,15 +59,16 @@ public class Repair extends Action {
                 }
                 gameState.chosenUnitRepair = null;
                 gameState.chosenRepairer = null;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
             gameState.chosenUnitRepair = null;
             gameState.chosenRepairer = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

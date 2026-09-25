@@ -216,7 +216,7 @@ public class DebugManager {
             }
             gameState.sim.drawClusters();
             for (Squad s : gameState.sqManager.squads.values()) {
-                if (s.status == Squad.Status.ATTACK && s.attack != null)
+                if (s.status == Squad.Status.ATTACK && s.attack != null && !s.members.isEmpty())
                     mapDrawer.drawLineMap(s.getSquadCenter(), s.attack, Color.ORANGE);
             }
             for (Squad s : gameState.sqManager.squads.values()) {

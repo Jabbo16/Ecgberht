@@ -2,12 +2,12 @@ package ecgberht.BehaviourTrees.Defense;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.*;
 
-public class ChooseDefensePosition extends Conditional {
+public class ChooseDefensePosition extends BrainAction {
 
     public ChooseDefensePosition(String name, GameState gh) {
         super(name, gh);
@@ -27,8 +27,9 @@ public class ChooseDefensePosition extends Conditional {
         double maxScore = 0;
         for (Unit b : gameState.enemyInBase) {
             double influence = getScore(b);
-            //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * Util.getGroundDistance(getDefensePosition(), b.getPosition()));
+            double dist = Util.getGroundDistance(getDefensePosition(), b.getPosition());
+            if (dist == Integer.MAX_VALUE) continue;
+            double score = influence / (2.5 * dist);
             if (score > maxScore) {
                 chosen = b.getPosition();
                 maxScore = score;
@@ -48,20 +49,21 @@ public class ChooseDefensePosition extends Conditional {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (gameState.defense) {
                 Position chosenDefensePosition = chooseDefensePosition();
                 if (chosenDefensePosition != null) {
                     gameState.attackPosition = chosenDefensePosition;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

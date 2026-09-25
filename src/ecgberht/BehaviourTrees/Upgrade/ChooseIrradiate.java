@@ -1,23 +1,24 @@
 package ecgberht.BehaviourTrees.Upgrade;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.Race;
 import org.openbw.bwapi4j.type.TechType;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 import org.openbw.bwapi4j.unit.ScienceFacility;
 
-public class ChooseIrradiate extends Action {
+public class ChooseIrradiate extends BrainAction {
 
     public ChooseIrradiate(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.enemyRace != Race.Zerg) return State.FAILURE;
+            if (gameState.enemyRace != Race.Zerg) return BrainStatus.FAILURE;
             boolean found = false;
             ScienceFacility chosen = null;
             for (ResearchingFacility r : gameState.UBs) {
@@ -27,18 +28,19 @@ public class ChooseIrradiate extends Action {
                     break;
                 }
             }
-            if (!found) return State.FAILURE;
+            if (!found) return BrainStatus.FAILURE;
             if (!gameState.getPlayer().isResearching(TechType.Irradiate) &&
                     !gameState.getPlayer().hasResearched(TechType.Irradiate)) {
                 gameState.chosenUnitUpgrader = chosen;
                 gameState.chosenResearch = TechType.Irradiate;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

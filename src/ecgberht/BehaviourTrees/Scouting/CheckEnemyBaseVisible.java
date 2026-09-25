@@ -1,11 +1,12 @@
 package ecgberht.BehaviourTrees.Scouting;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.UnitInfo;
 import ecgberht.Util.BaseLocationComparator;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.PlayerUnit;
 import org.openbw.bwapi4j.unit.Worker;
 
@@ -13,14 +14,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CheckEnemyBaseVisible extends Action {
+public class CheckEnemyBaseVisible extends BrainAction {
 
     public CheckEnemyBaseVisible(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             List<PlayerUnit> enemies = gameState.getGame().getUnits(gameState.getIH().enemy());
             if (!enemies.isEmpty()) {
@@ -45,15 +46,15 @@ public class CheckEnemyBaseVisible extends Action {
                                 gameState.enemyNaturalArea = gameState.enemyNaturalBase.getArea();
                             }
                         }
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

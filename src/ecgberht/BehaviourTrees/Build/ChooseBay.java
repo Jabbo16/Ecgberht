@@ -1,44 +1,46 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Building;
 import org.openbw.bwapi4j.unit.EngineeringBay;
 
-public class ChooseBay extends Action {
+public class ChooseBay extends BrainAction {
 
     public ChooseBay(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (!IntelligenceAgency.enemyHasAirOrCloakedThreats()) {
-                if (gameState.getArmySize() < gameState.getStrat().armyForBay) return State.FAILURE;
-                if (gameState.getStrat().name.contains("BioMech") && gameState.CCs.size() < 2) return State.FAILURE;
+                if (gameState.getArmySize() < gameState.getStrat().armyForBay) return BrainStatus.FAILURE;
+                if (gameState.getStrat().name.contains("BioMech") && gameState.CCs.size() < 2) return BrainStatus.FAILURE;
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < gameState.getStrat().numBays) {
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Engineering_Bay) return State.FAILURE;
+                    if (w.first == UnitType.Terran_Engineering_Bay) return BrainStatus.FAILURE;
                 }
                 for (Building w : gameState.workerTask.values()) {
-                    if (w instanceof EngineeringBay) return State.FAILURE;
+                    if (w instanceof EngineeringBay) return BrainStatus.FAILURE;
                 }
                 gameState.chosenToBuild = UnitType.Terran_Engineering_Bay;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

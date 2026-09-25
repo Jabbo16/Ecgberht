@@ -2,31 +2,32 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 
 import bwem.Base;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 
 
-public class CheckIslands extends Conditional {
+public class CheckIslands extends BrainAction {
 
     public CheckIslands(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.islandBases.isEmpty() || !gameState.islandExpand) return State.FAILURE;
+            if (gameState.islandBases.isEmpty() || !gameState.islandExpand) return BrainStatus.FAILURE;
             for (Base b : gameState.islandBases) {
-                if (!gameState.islandCCs.containsKey(b)) return State.SUCCESS;
+                if (!gameState.islandCCs.containsKey(b)) return BrainStatus.SUCCESS;
             }
             gameState.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

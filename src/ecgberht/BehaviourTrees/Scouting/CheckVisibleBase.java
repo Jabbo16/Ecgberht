@@ -3,19 +3,19 @@ package ecgberht.BehaviourTrees.Scouting;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.BaseLocationComparator;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 
-public class CheckVisibleBase extends Conditional {
+public class CheckVisibleBase extends BrainAction {
 
     public CheckVisibleBase(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.chosenScout == null) return State.FAILURE;
+            if (gameState.chosenScout == null) return BrainStatus.FAILURE;
             if (gameState.scoutSLs.size() == 1 && gameState.enemyMainBase == null) {
                 gameState.enemyMainBase = gameState.scoutSLs.iterator().next();
                 gameState.enemyBLs.clear();
@@ -32,15 +32,16 @@ public class CheckVisibleBase extends Conditional {
                 for (Base b : gameState.scoutSLs) {
                     if ((gameState.getGame().getBWMap().isVisible(b.getLocation()))) {
                         gameState.scoutSLs.remove(b);
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

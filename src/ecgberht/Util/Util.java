@@ -127,7 +127,7 @@ public class Util {
         double dist = Double.MAX_VALUE;
         for (ChokePoint choke : getGs().bwem.getMap().getChokePoints()) {
             double cDist = getGroundDistance(pos, choke.getCenter().toPosition());
-            if (cDist == 0.0) continue;
+            if (cDist == Integer.MAX_VALUE) continue;
             if (closestChoke == null || cDist < dist) {
                 closestChoke = choke;
                 dist = cDist;
@@ -154,7 +154,7 @@ public class Util {
         double dist = Double.MAX_VALUE;
         for (Base base : getGs().bwem.getMap().getBases()) {
             double cDist = getGroundDistance(pos, base.getLocation().toPosition());
-            if (cDist == 0.0) continue;
+            if (cDist == Integer.MAX_VALUE) continue;
             if (closestBase == null || cDist < dist) {
                 closestBase = base;
                 dist = cDist;
@@ -214,9 +214,11 @@ public class Util {
 
     public static int getGroundDistance(Position start, Position end) {
         try {
-            return getGs().bwem.getMap().getPathLength(start, end);
+            int length = getGs().bwem.getMap().getPathLength(start, end);
+            if (length < 0) return Integer.MAX_VALUE;
+            return length;
         } catch (Exception e) {
-            return start != null && end != null ? start.getDistance(end) : Integer.MAX_VALUE;
+            return Integer.MAX_VALUE;
         }
     }
 
@@ -259,15 +261,16 @@ public class Util {
         Position chosen = null;
         double maxScore = 0;
         for (UnitInfo b : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+            double dist = flying ? b.lastPosition.getDistance(p) : Util.getGroundDistance(p, b.lastPosition);
+            if (!flying && dist == Integer.MAX_VALUE) continue;
             double influence = getScoreAttackPosition((Building) b.unit);
-            //double score = influence / (2 * getEuclideanDist(p, b.pos.toPosition()));
-            double score = influence / (2.5 * (flying ? b.lastPosition.getDistance(p) : Util.getGroundDistance(p, b.lastPosition)));
+            double score = influence / (2.5 * dist);
             if (score > maxScore) {
                 chosen = b.lastPosition;
                 maxScore = score;
             }
         }
-        if (chosen == null && getGs().enemyMainBase == null) {
+        if (chosen == null) {
             for (BaseManager.Garrison g : getGs().baseManager.getScoutingBasesSorted()) {
                 if (!flying && g.island) continue;
                 return g.tile.toPosition();

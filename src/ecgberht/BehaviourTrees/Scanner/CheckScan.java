@@ -5,8 +5,8 @@ import ecgberht.GameState;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 import org.openbw.bwapi4j.unit.Attacker;
 import org.openbw.bwapi4j.unit.ComsatStation;
 
@@ -14,16 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class CheckScan extends Conditional {
+public class CheckScan extends BrainAction {
 
     public CheckScan(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.CSs.isEmpty()) return State.FAILURE;
+            if (gameState.CSs.isEmpty()) return BrainStatus.FAILURE;
             if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
                 for (ComsatStation u : gameState.CSs) {
                     if (u.getEnergy() < 50) continue;
@@ -32,7 +32,7 @@ public class CheckScan extends Conditional {
                             if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(a -> a.unitType.canAttack()))
                                 continue;
                             gameState.checkScan = new MutablePair<>(u, e.lastPosition);
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                 }
@@ -48,20 +48,20 @@ public class CheckScan extends Conditional {
                 }
                 valid.add(b);
             }
-            if (valid.isEmpty()) return State.FAILURE;
+            if (valid.isEmpty()) return BrainStatus.FAILURE;
             for (ComsatStation u : gameState.CSs) {
                 if (u.getEnergy() == 200) {
-                    Random random = new Random();
                     gameState.checkScan = new MutablePair<>(u,
-                            Util.getUnitCenterPosition(valid.get(random.nextInt(valid.size())).getLocation().toPosition(), gameState.enemyRace.getCenter()));
-                    return State.SUCCESS;
+                            Util.getUnitCenterPosition(valid.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(valid.size())).getLocation().toPosition(), gameState.enemyRace.getCenter()));
+                    return BrainStatus.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

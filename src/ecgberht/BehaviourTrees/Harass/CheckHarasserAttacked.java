@@ -4,8 +4,8 @@ import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
 import ecgberht.UnitInfo;
 import ecgberht.Util.UtilMicro;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Attacker;
 import org.openbw.bwapi4j.unit.Building;
@@ -16,18 +16,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class CheckHarasserAttacked extends Conditional {
+public class CheckHarasserAttacked extends BrainAction {
     public CheckHarasserAttacked(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (gameState.enemyMainBase == null) {
                 gameState.chosenUnitToHarass = null;
                 gameState.chosenHarasser = null;
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             }
             if (gameState.chosenUnitToHarass != null) {
                 if (!gameState.bw.getBWMap().isValidPosition(gameState.chosenUnitToHarass.getPosition())) {
@@ -50,28 +50,28 @@ public class CheckHarasserAttacked extends Conditional {
             if (workers > 1) {
                 gameState.learningManager.setHarass(true);
                 gameState.chosenUnitToHarass = null;
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             }
             if (attackers.isEmpty()) {
                 if (!gameState.getGame().getBWMap().isVisible(gameState.enemyMainBase.getLocation()) &&
                         gameState.chosenUnitToHarass == null) {
                     gameState.chosenHarasser.move(gameState.enemyMainBase.getLocation().toPosition());
                 }
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             } else {
                 boolean winHarass = gameState.sim.simulateHarass(gameState.chosenHarasser, attackers, 70);
                 if (winHarass) {
                     if (workers == 1 && !attacker.unit.equals(gameState.chosenUnitToHarass)) {
                         UtilMicro.attack(gameState.chosenHarasser, attacker);
                         gameState.chosenUnitToHarass = attacker.unit;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 } else {
                     if (IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.Unknown) {
                         gameState.explore = true;
                         gameState.chosenUnitToHarass = null;
                         gameState.chosenHarasser.stop(false);
-                        return State.FAILURE;
+                        return BrainStatus.FAILURE;
                     } else if (gameState.chosenHarasser.getHitPoints() <= 15) {
                         gameState.workerIdle.add(gameState.chosenHarasser);
                         gameState.chosenHarasser.stop(false);
@@ -92,15 +92,16 @@ public class CheckHarasserAttacked extends Conditional {
                             }
                         }
                     }
-                    return State.FAILURE;
+                    return BrainStatus.FAILURE;
                 }
             }
-            return State.SUCCESS;
+            return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 
 }
+

@@ -1,12 +1,13 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Worker;
 
-public class ChooseWorkerDrop extends Action {
+public class ChooseWorkerDrop extends BrainAction {
 
     public ChooseWorkerDrop(String name, GameState gh) {
         super(name, gh);
@@ -14,7 +15,7 @@ public class ChooseWorkerDrop extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             Worker closestWorker = null;
             int frame = gameState.frameCount;
@@ -39,16 +40,16 @@ public class ChooseWorkerDrop extends Action {
             }
             if (closestWorker != null) {
                 gameState.chosenWorker = closestWorker;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
             gameState.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

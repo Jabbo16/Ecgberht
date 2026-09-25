@@ -1,21 +1,22 @@
 package ecgberht.BehaviourTrees.Recollection;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Map.Entry;
 
-public class CollectMineral extends Action {
+public class CollectMineral extends BrainAction {
 
     public CollectMineral(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             Worker chosen = gameState.chosenWorker;
             if (!gameState.mineralsAssigned.isEmpty()) {
@@ -28,20 +29,28 @@ public class CollectMineral extends Action {
                         closestMineral = m.getKey();
                     }
                 }
+                if (closestMineral == null) {
+                    for (Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+                        if (closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral)) {
+                            closestMineral = m.getKey();
+                        }
+                    }
+                }
                 if (closestMineral != null && chosen.gather(closestMineral, false)) {
                     gameState.mineralsAssigned.put(closestMineral, gameState.mineralsAssigned.get(closestMineral) + 1);
                     gameState.workerMining.put(chosen, closestMineral);
                     gameState.workerIdle.remove(chosen);
                     gameState.chosenWorker = null;
                     gameState.mining++;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

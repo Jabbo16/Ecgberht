@@ -1,4 +1,5 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import bwem.Base;
 import ecgberht.Agents.Agent;
@@ -7,8 +8,8 @@ import ecgberht.GameState;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Player;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Race;
@@ -20,16 +21,16 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-public class ChoosePosition extends Action {
+public class ChoosePosition extends BrainAction {
 
     public ChoosePosition(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.chosenToBuild == UnitType.None) return State.FAILURE;
+            if (gameState.chosenToBuild == UnitType.None) return BrainStatus.FAILURE;
             Player self = gameState.getPlayer();
             TilePosition origin;
             if (gameState.chosenToBuild.isRefinery()) {
@@ -37,17 +38,17 @@ public class ChoosePosition extends Action {
                     for (Entry<VespeneGeyser, Boolean> g : gameState.vespeneGeysers.entrySet()) {
                         if (!g.getValue()) {
                             gameState.chosenPosition = g.getKey().getTilePosition();
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                 }
             } else if (gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 if (!gameState.islandBases.isEmpty() && gameState.islandCCs.size() < gameState.islandBases.size()) {
-                    if (gameState.islandExpand) return State.FAILURE;
+                    if (gameState.islandExpand) return BrainStatus.FAILURE;
                     for (Agent u : gameState.agents.values()) {
                         if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
                             gameState.islandExpand = true;
-                            return State.FAILURE;
+                            return BrainStatus.FAILURE;
                         }
                     }
                 }
@@ -59,7 +60,7 @@ public class ChoosePosition extends Action {
                     for (Base b : gameState.specialBLs) {
                         if (!gameState.CCs.containsKey(b)) {
                             gameState.chosenPosition = b.getLocation();
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                 }
@@ -94,9 +95,9 @@ public class ChoosePosition extends Action {
                     }
                 }
                 valid.removeAll(remove);
-                if (valid.isEmpty()) return State.FAILURE;
+                if (valid.isEmpty()) return BrainStatus.FAILURE;
                 gameState.chosenPosition = valid.get(0).getLocation();
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             } else {
                 if (!gameState.workerBuild.isEmpty()) {
                     for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
@@ -121,13 +122,13 @@ public class ChoosePosition extends Action {
                     if (origin != null) {
                         gameState.testMap = gameState.map.clone();
                         gameState.chosenPosition = origin;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     } else {
                         origin = gameState.testMap.findBunkerPositionAntiPool();
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();
                             gameState.chosenPosition = origin;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         } else if (gameState.mainCC != null) origin = gameState.mainCC.second.getTilePosition();
                         else origin = gameState.getPlayer().getStartLocation();
                     }
@@ -138,7 +139,7 @@ public class ChoosePosition extends Action {
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();
                             gameState.chosenPosition = origin;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                     if (gameState.mainChoke != null &&
@@ -150,21 +151,21 @@ public class ChoosePosition extends Action {
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();
                             gameState.chosenPosition = origin;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         } else origin = gameState.mainChoke.getCenter().toTilePosition();
                     } else if (gameState.naturalChoke != null) {
                         origin = gameState.testMap.findBunkerPosition(gameState.naturalChoke);
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();
                             gameState.chosenPosition = origin;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         } else origin = gameState.mainChoke.getCenter().toTilePosition();
                     } else {
                         origin = gameState.testMap.findBunkerPosition(gameState.mainChoke);
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();
                             gameState.chosenPosition = origin;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         } else origin = gameState.mainChoke.getCenter().toTilePosition();
                     }
                 } else origin = gameState.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
@@ -172,14 +173,15 @@ public class ChoosePosition extends Action {
                 gameState.testMap = gameState.map.clone();
                 if (position != null) {
                     gameState.chosenPosition = position;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

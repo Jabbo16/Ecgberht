@@ -140,6 +140,11 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
                 }
             }
             if (pickingUp != null) {
+                if (unit.getSpaceRemaining() < pickingUp.getType().spaceRequired()) {
+                    cargoWanted.remove(pickingUp);
+                    pickingUp = null;
+                    return;
+                }
                 unit.load((MobileUnit) pickingUp);
             }
         } else {
@@ -160,11 +165,11 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     private Status getNewStatus() {
         if (status == Status.IDLE) {
-            if (!cargoWanted.isEmpty()) return Status.PICKING;
+            if (!cargoWanted.isEmpty() && unit.getSpaceRemaining() > 0) return Status.PICKING;
             if (!cargoLoaded.isEmpty() && target != null) return Status.MOVING;
         }
         if (status == Status.PICKING) {
-            if (!cargoWanted.isEmpty()) return Status.PICKING;
+            if (!cargoWanted.isEmpty() && unit.getSpaceRemaining() > 0) return Status.PICKING;
             else if (!cargoLoaded.isEmpty() && target != null) return Status.MOVING;
         }
         if (status == Status.MOVING) {

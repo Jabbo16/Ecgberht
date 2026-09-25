@@ -1,20 +1,21 @@
 package ecgberht.BehaviourTrees.AddonBuild;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class BuildAddon extends Action {
+public class BuildAddon extends BrainAction {
 
     public BuildAddon(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 boolean found = false;
@@ -24,20 +25,21 @@ public class BuildAddon extends Action {
                         break;
                     }
                 }
-                if (!found) return State.FAILURE;
+                if (!found) return BrainStatus.FAILURE;
             }
             if (gameState.chosenBuildingAddon.getAddon() == null && gameState.chosenBuildingAddon.build(gameState.chosenAddon)) {
                 gameState.chosenBuildingAddon = null;
                 gameState.chosenAddon = null;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
             gameState.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

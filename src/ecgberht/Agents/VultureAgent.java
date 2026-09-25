@@ -33,6 +33,34 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         this.unit = (Vulture) unit;
     }
 
+    private boolean placeMineAtChoke() {
+        if (unit.getSpiderMineCount() > 0 && ecgberht.Ecgberht.getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Spider_Mines)) {
+            Position target = null;
+            if (ecgberht.Ecgberht.getGs().naturalChoke != null) {
+                target = ecgberht.Ecgberht.getGs().naturalChoke.getCenter().toPosition();
+            } else if (ecgberht.Ecgberht.getGs().mainChoke != null) {
+                target = ecgberht.Ecgberht.getGs().mainChoke.getCenter().toPosition();
+            }
+            if (target != null) {
+                target = new Position(target.getX() + (int)(Math.random()*128 - 64), target.getY() + (int)(Math.random()*128 - 64));
+                if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target)) {
+                    boolean mineNearby = false;
+                    for (ecgberht.UnitInfo ally : ecgberht.Ecgberht.getGs().unitStorage.getAllyUnits().values()) {
+                        if (ally.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(target) < 64) {
+                            mineNearby = true;
+                            break;
+                        }
+                    }
+                    if (!mineNearby) {
+                        unit.spiderMine(target);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public void placeMine(Position pos) {
         if (mines > 0) unit.spiderMine(pos);
     }
@@ -41,7 +69,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     public boolean runAgent() {
         try {
             if (!unit.exists() || unitInfo == null) return true;
-            if (unit.getHitPoints() <= 20) {
+            if (unit.getHitPoints() <= 30) {
                 MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
                     Position ccPos = cc.second.getPosition();
@@ -64,6 +92,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
             if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
+                if (placeMineAtChoke()) return false;
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
                 if (pos == null || !getGs().getGame().getBWMap().isValidPosition(pos)) return false;
                 UtilMicro.move(unit, pos);

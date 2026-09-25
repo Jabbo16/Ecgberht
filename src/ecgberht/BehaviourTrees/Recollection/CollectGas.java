@@ -1,23 +1,24 @@
 package ecgberht.BehaviourTrees.Recollection;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.GasMiningFacility;
 import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Map.Entry;
 
-public class CollectGas extends Action {
+public class CollectGas extends BrainAction {
 
     public CollectGas(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.getPlayer().gas() >= 400) return State.FAILURE;
+            if (gameState.getPlayer().gas() >= 400 * Math.max(1, gameState.CCs.size())) return BrainStatus.FAILURE;
             Worker chosen = gameState.chosenWorker;
             if (!gameState.refineriesAssigned.isEmpty()) {
                 GasMiningFacility closestGeyser = null;
@@ -35,15 +36,16 @@ public class CollectGas extends Action {
                         gameState.workerIdle.remove(chosen);
                         gameState.workerGas.put(chosen, closestGeyser);
                         gameState.chosenWorker = null;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

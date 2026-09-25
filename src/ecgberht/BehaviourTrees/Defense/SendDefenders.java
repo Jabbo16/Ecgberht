@@ -1,4 +1,5 @@
 package ecgberht.BehaviourTrees.Defense;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.IntelligenceAgency;
@@ -6,8 +7,8 @@ import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -16,14 +17,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class SendDefenders extends Action {
+public class SendDefenders extends BrainAction {
 
     public SendDefenders(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             boolean air_only = true;
             boolean cannon_rush = false;
@@ -139,11 +140,11 @@ public class SendDefenders extends Action {
                 }
             }
             gameState.attackPosition = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

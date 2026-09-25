@@ -229,7 +229,8 @@ public class SimulationTheory {
     private MutablePair<Integer, Integer> scores() {
         ToIntFunction<Agent> score = a -> {
             PlayerUnit unit = (PlayerUnit) a.getUserObject();
-            if (unit == null) return 0;
+            if (unit == null || a.getHealth() <= 0) return 0;
+            if (unit.getType().maxHitPoints() == 0) return 0;
             UnitType unitType = unit.getType();
             int result = (unitType.destroyScore() * (a.getHealth() * 3 + a.getShields() + 1)) / (
                     (unitType.maxHitPoints() * 3) + unitType.maxShields());
@@ -312,7 +313,7 @@ public class SimulationTheory {
      * @return True if the battle simulated is advantageous for the bot
      */
     private boolean scoreCalcASS(SimInfo s, double rate) {
-        return ((s.preSimScore.second - s.postSimScore.second) * rate <= (s.preSimScore.first - s.postSimScore.first));
+        return ((s.preSimScore.second - s.postSimScore.second) >= (s.preSimScore.first - s.postSimScore.first) * rate);
     }
 
     /**

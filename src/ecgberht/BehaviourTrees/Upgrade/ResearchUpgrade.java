@@ -1,20 +1,21 @@
 package ecgberht.BehaviourTrees.Upgrade;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class ResearchUpgrade extends Action {
+public class ResearchUpgrade extends BrainAction {
 
     public ResearchUpgrade(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 boolean found = false;
@@ -24,27 +25,28 @@ public class ResearchUpgrade extends Action {
                         break;
                     }
                 }
-                if (!found) return State.FAILURE;
+                if (!found) return BrainStatus.FAILURE;
             }
             if (gameState.chosenUpgrade != null) {
                 if (gameState.chosenUnitUpgrader.upgrade(gameState.chosenUpgrade)) {
                     gameState.chosenUpgrade = null;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             } else if (gameState.chosenResearch != null) {
                 if (gameState.chosenUnitUpgrader.research(gameState.chosenResearch)) {
                     gameState.chosenResearch = null;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
             gameState.chosenUnitUpgrader = null;
             gameState.chosenUpgrade = null;
             gameState.chosenResearch = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

@@ -1,25 +1,26 @@
 package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 
-public class HarassWorker extends Conditional {
+public class HarassWorker extends BrainAction {
 
     public HarassWorker(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.chosenUnitToHarass == null || gameState.chosenHarasser == null) return State.FAILURE;
-            if (gameState.chosenHarasser.attack(gameState.chosenUnitToHarass)) return State.SUCCESS;
-            return State.FAILURE;
+            if (gameState.chosenUnitToHarass == null || gameState.chosenHarasser == null) return BrainStatus.FAILURE;
+            if (gameState.chosenHarasser.attack(gameState.chosenUnitToHarass)) return BrainStatus.SUCCESS;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

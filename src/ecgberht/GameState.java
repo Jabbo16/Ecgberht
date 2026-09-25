@@ -486,7 +486,7 @@ public class GameState {
             double distBest = Double.MAX_VALUE;
             for (ChokePoint choke : naturalArea.getChokePoints()) {
                 double dist = Util.getGroundDistance(choke.getCenter().toPosition(), getPlayer().getStartLocation().toPosition());
-                if (dist < distBest && dist > 0.0) {
+                if (dist < distBest && dist != Integer.MAX_VALUE) {
                     mainChoke = choke;
                     distBest = dist;
                 }
@@ -883,7 +883,7 @@ public class GameState {
     String pickShipName() {
         if (shipNames.isEmpty()) return "Pepe";
         String name;
-        int index = new Random().nextInt(shipNames.size());
+        int index = java.util.concurrent.ThreadLocalRandom.current().nextInt(shipNames.size());
         Iterator<String> iter = shipNames.iterator();
         do {
             name = iter.next();
@@ -937,7 +937,7 @@ public class GameState {
                     "dawidloranc", "chriscoxe", "zzzkbot", "middleschoolstrats", "zercgberht", "killalll", "ohfish",
                     "jumpydoggobot", "upstarcraftai2016"));
             LearningManager.EnemyInfo EI = learningManager.getEnemyInfo();
-            LinkedList<LearningManager.EnemyHistory.EnemyGame> history = (LinkedList<LearningManager.EnemyHistory.EnemyGame>) learningManager.getEnemyHistory().clone();
+            LinkedList<LearningManager.EnemyHistory.EnemyGame> history = new LinkedList<>(learningManager.getEnemyHistory());
             Collections.reverse(history);
             int count = 0;
             boolean reallyNaughty = false;
@@ -1045,6 +1045,7 @@ public class GameState {
 
     private boolean checkItWasAttacking(Squad u) { // TODO check, not sure if its good enough
         try {
+            if (u.getSquadCenter() == null) return false;
             Area uArea = bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
             for (Base b : CCs.keySet()) {
                 if (b.getArea() == null) continue;

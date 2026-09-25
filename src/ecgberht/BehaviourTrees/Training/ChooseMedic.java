@@ -1,9 +1,10 @@
 package ecgberht.BehaviourTrees.Training;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.Barracks;
@@ -12,16 +13,16 @@ import org.openbw.bwapi4j.unit.ResearchingFacility;
 import java.util.Set;
 
 
-public class ChooseMedic extends Action {
+public class ChooseMedic extends BrainAction {
 
     public ChooseMedic(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return State.FAILURE;
+            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
             else {
                 for (ResearchingFacility u : gameState.UBs) {
                     if (u instanceof Academy) {
@@ -34,7 +35,7 @@ public class ChooseMedic extends Action {
                                 if (!b.isTraining()) {
                                     gameState.chosenUnit = UnitType.Terran_Medic;
                                     gameState.chosenTrainingFacility = b;
-                                    return State.SUCCESS;
+                                    return BrainStatus.SUCCESS;
                                 }
                             }
                         }
@@ -42,11 +43,12 @@ public class ChooseMedic extends Action {
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

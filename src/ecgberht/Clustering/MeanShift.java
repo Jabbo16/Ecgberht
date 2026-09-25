@@ -31,7 +31,8 @@ public class MeanShift {
     public List<Cluster> run(int iterations) {
         try {
             time = System.currentTimeMillis();
-            int bandwidth = 2;
+            double bandwidth = Math.sqrt(radius) / 2.0;
+            if (bandwidth < 10) bandwidth = 10;
             for (int iter = 0; iter < iterations; iter++) {
                 //System.out.println("-----Iter " + iter + "------");
                 for (int i = 0; i < points.size(); i++) {

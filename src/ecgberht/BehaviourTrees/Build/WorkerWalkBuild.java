@@ -1,12 +1,13 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import bwem.Area;
 import bwem.Base;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MineralPatch;
@@ -14,14 +15,14 @@ import org.openbw.bwapi4j.unit.SCV;
 
 import java.util.Map.Entry;
 
-public class WorkerWalkBuild extends Action {
+public class WorkerWalkBuild extends BrainAction {
 
     public WorkerWalkBuild(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
                 SCV chosen = u.getKey();
@@ -63,11 +64,12 @@ public class WorkerWalkBuild extends Action {
                     chosen.gather(minerals.first);
                 }
             }
-            return State.SUCCESS;
+            return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

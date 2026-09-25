@@ -1,11 +1,12 @@
 package ecgberht.BehaviourTrees.Recollection;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.Worker;
 
-public class FreeWorker extends Action {
+public class FreeWorker extends BrainAction {
 
     public FreeWorker(String name, GameState gh) {
         super(name, gh);
@@ -13,7 +14,7 @@ public class FreeWorker extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             gameState.chosenWorker = null;
             if (!gameState.workerIdle.isEmpty()) {
@@ -21,15 +22,15 @@ public class FreeWorker extends Action {
                 for (Worker w : gameState.workerIdle) {
                     if (w.getLastCommandFrame() != frame) {
                         gameState.chosenWorker = w;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

@@ -1,4 +1,5 @@
 package ecgberht.BehaviourTrees.Repair;
+import ecgberht.brain.*;
 
 
 import bwem.Area;
@@ -8,8 +9,8 @@ import ecgberht.IntelligenceAgency;
 import ecgberht.Squad;
 import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -18,14 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class CheckBuildingFlames extends Action {
+public class CheckBuildingFlames extends BrainAction {
 
     public CheckBuildingFlames(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, Mechanical> u : gameState.repairerTask.entrySet()) {
@@ -57,11 +58,11 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (count < 2 && (gameState.defense || cheesed || fastExpanding)) {
                         gameState.chosenUnitRepair = w;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                     if (count == 0) {
                         gameState.chosenUnitRepair = w;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -75,7 +76,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -94,7 +95,7 @@ public class CheckBuildingFlames extends Action {
                                 }
                                 if (!isBeingRepaired) {
                                     gameState.chosenUnitRepair = (Mechanical) u.unit;
-                                    return State.SUCCESS;
+                                    return BrainStatus.SUCCESS;
                                 }
                             }
                         }
@@ -112,7 +113,7 @@ public class CheckBuildingFlames extends Action {
                         }
                         if (!isBeingRepaired) {
                             gameState.chosenUnitRepair = b;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                 }
@@ -128,7 +129,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -142,7 +143,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = (Mechanical) b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -156,7 +157,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -170,7 +171,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -184,7 +185,7 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
@@ -198,15 +199,16 @@ public class CheckBuildingFlames extends Action {
                     }
                     if (!isBeingRepaired) {
                         gameState.chosenUnitRepair = b;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

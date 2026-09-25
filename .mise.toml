@@ -1,0 +1,5 @@
+[env]
+MISE_ARCH = "i686"
+
+[tools]
+java = "temurin-8.0.422+5"

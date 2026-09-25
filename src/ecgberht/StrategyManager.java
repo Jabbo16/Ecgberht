@@ -174,6 +174,17 @@ public class StrategyManager {
         if (strat.trainUnits.contains(UnitType.Terran_Firebat) && getGs().enemyRace == Race.Zerg) getGs().maxBats = 3;
         else getGs().maxBats = 0;
         if (strat.trainUnits.contains(UnitType.Terran_Goliath)) getGs().maxGoliaths = 0;
+
+        boolean hasVultures = strat.trainUnits.contains(UnitType.Terran_Vulture) || getGs().unitStorage.getAllyUnits().values().stream().anyMatch(u -> u.unitType == UnitType.Terran_Vulture);
+        if (hasVultures) {
+            strat.techToResearch.add(org.openbw.bwapi4j.type.TechType.Spider_Mines);
+            strat.upgradesToResearch.add(org.openbw.bwapi4j.type.UpgradeType.Ion_Thrusters);
+        }
+
+        boolean hasWraiths = strat.trainUnits.contains(UnitType.Terran_Wraith) || getGs().unitStorage.getAllyUnits().values().stream().anyMatch(u -> u.unitType == UnitType.Terran_Wraith);
+        if (hasWraiths) {
+            strat.techToResearch.add(org.openbw.bwapi4j.type.TechType.Cloaking_Field);
+        }
     }
 
     private boolean alwaysZealotRushes() {
@@ -183,7 +194,7 @@ public class StrategyManager {
     }
 
     private Strategy getRandomStrategy() {
-        int index = new Random().nextInt(nameStrat.entrySet().size());
+        int index = java.util.concurrent.ThreadLocalRandom.current().nextInt(nameStrat.entrySet().size());
         Iterator<Map.Entry<String, Strategy>> iter = nameStrat.entrySet().iterator();
         for (int i = 0; i < index; i++) {
             iter.next();

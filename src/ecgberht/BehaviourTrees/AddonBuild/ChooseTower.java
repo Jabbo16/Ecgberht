@@ -1,34 +1,36 @@
 package ecgberht.BehaviourTrees.AddonBuild;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Starport;
 
-public class ChooseTower extends Action {
+public class ChooseTower extends BrainAction {
 
     public ChooseTower(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             for (Starport c : gameState.Ps) {
                 if (!c.isTraining() && c.getAddon() == null) {
                     gameState.chosenBuildingAddon = c;
                     gameState.chosenAddon = UnitType.Terran_Control_Tower;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
             gameState.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

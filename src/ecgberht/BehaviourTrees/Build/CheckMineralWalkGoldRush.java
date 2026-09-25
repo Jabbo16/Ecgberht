@@ -1,10 +1,11 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import bwem.Area;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Order;
@@ -15,7 +16,7 @@ import org.openbw.bwapi4j.unit.Unit;
 
 import java.util.Map;
 
-public class CheckMineralWalkGoldRush extends Action {
+public class CheckMineralWalkGoldRush extends BrainAction {
 
     public CheckMineralWalkGoldRush(String name, GameState gh) {
         super(name, gh);
@@ -43,9 +44,9 @@ public class CheckMineralWalkGoldRush extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.walkingMinerals.isEmpty()) return State.SUCCESS;
+            if (gameState.walkingMinerals.isEmpty()) return BrainStatus.SUCCESS;
             for (Map.Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
                 if (u.getValue().first != UnitType.Terran_Command_Center) continue;
                 SCV scv = u.getKey();
@@ -64,11 +65,12 @@ public class CheckMineralWalkGoldRush extends Action {
                     scv.move(u.getValue().second.toPosition());
                 }
             }
-            return State.SUCCESS;
+            return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

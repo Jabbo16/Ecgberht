@@ -3,21 +3,21 @@ package ecgberht.BehaviourTrees.IslandExpansion;
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Worker;
 
-public class CheckResourcesIsland extends Conditional {
+public class CheckResourcesIsland extends BrainAction {
 
     public CheckResourcesIsland(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             MutablePair<Integer, Integer> cash = gameState.getCash();
             Worker chosen = gameState.chosenWorkerDrop;
@@ -26,13 +26,14 @@ public class CheckResourcesIsland extends Conditional {
             TilePosition end = gameState.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), chosenType);
             if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + gameState.deltaCash.first) {
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

@@ -2,10 +2,10 @@ package ecgberht.BehaviourTrees.Harass;
 
 import ecgberht.Agents.WorkerScoutAgent;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 
-public class Explore extends Conditional {
+public class Explore extends BrainAction {
 
     public Explore(String name, GameState gh) {
         super(name, gh);
@@ -13,19 +13,20 @@ public class Explore extends Conditional {
 
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (gameState.chosenHarasser != null) {
                 gameState.agents.put(gameState.chosenHarasser, new WorkerScoutAgent(gameState.chosenHarasser, gameState.enemyMainBase));
                 gameState.naughtySCV = gameState.chosenHarasser;
                 gameState.chosenHarasser = null;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

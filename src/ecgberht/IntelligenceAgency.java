@@ -408,8 +408,8 @@ public class IntelligenceAgency {
         if (getGs().enemyRace == Race.Zerg) {
             if (stratName.contains("bio")) {
                 int mm = (int) getGs().myArmy.stream().filter(u -> u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Medic).count();
-                if (stratName.contains("full") || stratName.contains("greedy")) return Math.max(3, mm % 14);
-                return Math.max(3, mm % 18);
+                if (stratName.contains("full") || stratName.contains("greedy")) return Math.max(3, mm / 14);
+                return Math.max(3, mm / 18);
             }
         }
         return getGs().enemyRace == Race.Protoss && enemyHasType(UnitType.Protoss_Arbiter) ? 4 : 2;

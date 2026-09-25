@@ -27,8 +27,8 @@ public class BaseLocationComparator implements Comparator<Base> {
             if (b.equals(base)) return 1;
             double distA = Util.getGroundDistance(a.getLocation().toPosition(), start);
             double distB = Util.getGroundDistance(b.getLocation().toPosition(), start);
-            if (Double.compare(distA, 0.0) == 0 && Double.compare(distB, 0.0) > 0) return 1;
-            if (Double.compare(distB, 0.0) == 0 && Double.compare(distA, 0.0) > 0) return -1;
+            if (distA == Integer.MAX_VALUE && distB != Integer.MAX_VALUE) return 1;
+            if (distB == Integer.MAX_VALUE && distA != Integer.MAX_VALUE) return -1;
             if (!getGs().getStrat().name.equals("FullBio") && !getGs().getStrat().name.equals("FullBioFE") &&
                     !getGs().getStrat().name.equals("BioGreedyFE")) {
                 if ((a.getGeysers().isEmpty() && !a.getMinerals().isEmpty()) &&
@@ -40,8 +40,8 @@ public class BaseLocationComparator implements Comparator<Base> {
                     return -1;
                 }
             }
-            if (Double.compare(distA, distB) < 0 && Double.compare(distA, 0.0) > 0) return -1;
-            else if (Double.compare(distA, distB) > 0 && Double.compare(distB, 0.0) > 0) return 1;
+            if (Double.compare(distA, distB) < 0 && distA != Integer.MAX_VALUE) return -1;
+            else if (Double.compare(distA, distB) > 0 && distB != Integer.MAX_VALUE) return 1;
             return 1;
         } catch (Exception e) {
             System.err.println("Sorter");

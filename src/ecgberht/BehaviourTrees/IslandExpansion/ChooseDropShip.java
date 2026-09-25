@@ -1,12 +1,13 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
+import ecgberht.brain.*;
 
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 
-public class ChooseDropShip extends Action {
+public class ChooseDropShip extends BrainAction {
 
     public ChooseDropShip(String name, GameState gh) {
         super(name, gh);
@@ -14,22 +15,22 @@ public class ChooseDropShip extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             for (Agent u : gameState.agents.values()) {
                 if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
                     gameState.chosenDropShip = (DropShipAgent) u;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
             gameState.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

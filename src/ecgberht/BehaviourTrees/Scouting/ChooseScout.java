@@ -1,23 +1,24 @@
 package ecgberht.BehaviourTrees.Scouting;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Squad;
 import ecgberht.UnitInfo;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.MobileUnit;
 import org.openbw.bwapi4j.unit.Worker;
 import org.openbw.bwapi4j.unit.Wraith;
 
-public class ChooseScout extends Action {
+public class ChooseScout extends BrainAction {
 
     public ChooseScout(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (gameState.getStrat().name.equals("PlasmaWraithHell")) {
                 for (Squad s : gameState.sqManager.squads.values()) {
@@ -25,7 +26,7 @@ public class ChooseScout extends Action {
                         if (u.unit instanceof Wraith) {
                             gameState.chosenScout = (MobileUnit) u.unit;
                             s.members.remove(u);
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                 }
@@ -49,12 +50,13 @@ public class ChooseScout extends Action {
                     }
                 }
             }
-            if (gameState.chosenScout != null) return State.SUCCESS;
-            return State.FAILURE;
+            if (gameState.chosenScout != null) return BrainStatus.SUCCESS;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

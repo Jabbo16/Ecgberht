@@ -1,21 +1,22 @@
 package ecgberht.BehaviourTrees.AddonBuild;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Academy;
 import org.openbw.bwapi4j.unit.CommandCenter;
 import org.openbw.bwapi4j.unit.ResearchingFacility;
 
-public class ChooseComsatStation extends Action {
+public class ChooseComsatStation extends BrainAction {
 
     public ChooseComsatStation(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (!gameState.CCs.isEmpty()) {
                 for (CommandCenter c : gameState.CCs.values()) {
@@ -24,7 +25,7 @@ public class ChooseComsatStation extends Action {
                             if (u instanceof Academy) {
                                 gameState.chosenBuildingAddon = c;
                                 gameState.chosenAddon = UnitType.Terran_Comsat_Station;
-                                return State.SUCCESS;
+                                return BrainStatus.SUCCESS;
                             }
                         }
 
@@ -33,11 +34,12 @@ public class ChooseComsatStation extends Action {
             }
             gameState.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

@@ -1,21 +1,22 @@
 package ecgberht.BehaviourTrees.Training;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
 
 
-public class ChooseSituationalUnit extends Action {
+public class ChooseSituationalUnit extends BrainAction {
 
     public ChooseSituationalUnit(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             // Testing dropships islands
             boolean dropship = true;
@@ -36,17 +37,17 @@ public class ChooseSituationalUnit extends Action {
                         break;
                     }
                 }
-                if (!tower) return State.FAILURE;
+                if (!tower) return BrainStatus.FAILURE;
                 for (Starport s : gameState.Ps) {
                     if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                         gameState.chosenUnit = UnitType.Terran_Dropship;
                         gameState.chosenTrainingFacility = s;
-                        return State.SUCCESS;
+                        return BrainStatus.SUCCESS;
                     }
                 }
             }
             // Testing dropships offensive drops
-            /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return State.FAILURE;
+            /*if (Util.countUnitTypeSelf(UnitType.Terran_Dropship) > 0) return BrainStatus.FAILURE;
 
             for (ResearchingFacility u : ((GameState) gameState).UBs) {
                 if (u instanceof ControlTower) {
@@ -54,23 +55,23 @@ public class ChooseSituationalUnit extends Action {
                     break;
                 }
             }
-            if (!tower) return State.FAILURE;
+            if (!tower) return BrainStatus.FAILURE;
             for (Starport s : ((GameState) gameState).Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                     ((GameState) gameState).chosenUnit = UnitType.Terran_Dropship;
                     ((GameState) gameState).chosenBuilding = s;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }*/
 
             // Testing vessels
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > gameState.maxVessels || gameState.workerMining.isEmpty())
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > 0 && !gameState.needToAttack())
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             String strat = gameState.getStrat().name;
             if (strat.equals("FullMech") || strat.equals("MechGreedyFE") && Util.getNumberCCs() + (int) gameState.workerTask.values().stream().filter(u -> u instanceof CommandCenter).count() < 3)
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             tower = false;
             boolean science = false;
             for (ResearchingFacility u : gameState.UBs) {
@@ -78,7 +79,7 @@ public class ChooseSituationalUnit extends Action {
                 else if (u instanceof ScienceFacility) science = true;
                 if (science && tower) break;
             }
-            if (!tower || !science) return State.FAILURE;
+            if (!tower || !science) return BrainStatus.FAILURE;
             for (Starport s : gameState.Ps) {
                 if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
                     if (strat.contains("Bio") && gameState.getCash().second < UnitType.Terran_Science_Vessel.gasPrice()
@@ -87,20 +88,21 @@ public class ChooseSituationalUnit extends Action {
                             if (!b.isTraining()) {
                                 gameState.chosenUnit = UnitType.Terran_Marine;
                                 gameState.chosenTrainingFacility = b;
-                                return State.SUCCESS;
+                                return BrainStatus.SUCCESS;
                             }
                         }
                     }
                     gameState.chosenUnit = UnitType.Terran_Science_Vessel;
                     gameState.chosenTrainingFacility = s;
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

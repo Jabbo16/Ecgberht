@@ -1,20 +1,21 @@
 package ecgberht.BehaviourTrees.BuildingLot;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Worker;
 
-public class FinishBuilding extends Action {
+public class FinishBuilding extends BrainAction {
 
     public FinishBuilding(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             Worker chosen = gameState.chosenWorker;
             if (chosen.rightClick(gameState.chosenBuildingLot, false)) {
@@ -31,13 +32,14 @@ public class FinishBuilding extends Action {
                 gameState.chosenWorker = null;
                 gameState.buildingLot.remove(gameState.chosenBuildingLot);
                 gameState.chosenBuildingLot = null;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

@@ -1,15 +1,16 @@
 package ecgberht.BehaviourTrees.IslandExpansion;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.Worker;
 
 import java.util.Collections;
 import java.util.TreeSet;
 
-public class SendToDrop extends Action {
+public class SendToDrop extends BrainAction {
 
     public SendToDrop(String name, GameState gh) {
         super(name, gh);
@@ -17,7 +18,7 @@ public class SendToDrop extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (gameState.chosenDropShip != null && gameState.chosenWorker != null) {
                 Worker chosen = gameState.chosenWorker;
@@ -35,16 +36,16 @@ public class SendToDrop extends Action {
                 gameState.chosenDropShip.setTarget(gameState.chosenIsland.getLocation().toPosition());
                 gameState.chosenWorkerDrop = gameState.chosenWorker;
                 gameState.chosenWorker = null;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
             gameState.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

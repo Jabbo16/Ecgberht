@@ -84,6 +84,11 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
                     break;
             }
             center = follow.getSquadCenter();
+            if (center == null) {
+                status = Status.RETREAT;
+                retreat();
+                return false;
+            }
             getNewStatus();
             switch (status) {
                 case IRRADIATE:

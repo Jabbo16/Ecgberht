@@ -364,6 +364,7 @@ public class WorkerScoutAgent extends Agent {
                 double distMax = Double.MAX_VALUE;
                 for (int ii = 0; ii < enemyBaseBorders.size(); ii++) {
                     double dist = Util.getGroundDistance(enemyBaseBorders.get(ii), enemyNaturalPos);
+                    if (dist == Integer.MAX_VALUE) continue;
                     if (index == -1 || dist < distMax) {
                         index = ii;
                         distMax = dist;

@@ -1,24 +1,25 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.MineralPatch;
 import org.openbw.bwapi4j.unit.SCV;
 import org.openbw.bwapi4j.unit.Worker;
 
-public class Move extends Action {
+public class Move extends BrainAction {
 
     public Move(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             Worker chosen = gameState.chosenWorker;
             Position realEnd = Util.getUnitCenterPosition(gameState.chosenPosition.toPosition(), gameState.chosenToBuild);
@@ -42,13 +43,14 @@ public class Move extends Action {
                 gameState.deltaCash.second += gameState.chosenToBuild.gasPrice();
                 gameState.chosenWorker = null;
                 gameState.chosenToBuild = UnitType.None;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

@@ -14,3 +14,4 @@ bwapi-data/
 build/
 out/
 .markdownlint.json
+.vscode/

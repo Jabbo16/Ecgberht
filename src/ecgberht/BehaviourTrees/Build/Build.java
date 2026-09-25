@@ -1,9 +1,10 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.MutablePair;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.TilePosition;
 import org.openbw.bwapi4j.type.Order;
@@ -14,14 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class Build extends Action {
+public class Build extends BrainAction {
 
     public Build(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
@@ -42,11 +43,12 @@ public class Build extends Action {
                 }
             }
             for (SCV s : toRemove) gameState.workerBuild.remove(s);
-            return State.SUCCESS;
+            return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

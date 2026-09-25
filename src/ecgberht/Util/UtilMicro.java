@@ -35,15 +35,8 @@ public class UtilMicro {
             Unit targetUnit = attackerUnit.getTargetUnit();
             if (target.unit.equals(targetUnit)) return;
             if (target.visible) {
-                WeaponType w = Util.getWeapon(attacker, target);
-                double range = attacker.player.getUnitStatCalculator().weaponMaxRange(w);
-                if (attacker.getDistance(target) <= range) {
-                    attackerUnit.attack(target.unit);
-                    return;
-                }
-                Position predicted = predictUnitPosition(target, 3);
-                if (predicted != null) move((MobileUnit) attackerUnit, predicted);
-            } else move((MobileUnit) attackerUnit, target.lastPosition);
+                attackerUnit.attack(target.unit);
+            } else attack((MobileUnit) attackerUnit, target.lastPosition);
         } catch (Exception e) {
             System.err.println("UtilMicro Attack Exception");
             e.printStackTrace();
@@ -58,7 +51,7 @@ public class UtilMicro {
             Unit targetUnit = attacker.getTargetUnit();
             if (target.unit.equals(targetUnit)) return;
             if (target.visible) attacker.attack(target.unit);
-            else move((MobileUnit) attacker, target.lastPosition);
+            else attack((MobileUnit) attacker, target.lastPosition);
         } catch (Exception e) {
             System.err.println("UtilMicro Attack Exception");
             e.printStackTrace();
@@ -130,7 +123,11 @@ public class UtilMicro {
             }*/
             //return GenericMath.add(ownPosition, GenericMath.multiply(1. / vectors.size(), GenericMath.sumAll(vectors)));
             MutablePair<Double, Double> sumAll = Util.sumPosition(vectors);
-            return Util.cropPosition(Util.sumPosition(ownPosition, new Position((int) (sumAll.first / vectors.size()), (int) (sumAll.second / vectors.size()))));
+            double avgX = sumAll.first / vectors.size();
+            double avgY = sumAll.second / vectors.size();
+            double length = Math.sqrt(avgX * avgX + avgY * avgY);
+            if (length == 0.0) length = 1.0;
+            return Util.cropPosition(Util.sumPosition(ownPosition, new Position((int) (avgX / length * 64.0), (int) (avgY / length * 64.0))));
         } catch (Exception e) {
             System.err.println("KiteAway Exception");
             e.printStackTrace();

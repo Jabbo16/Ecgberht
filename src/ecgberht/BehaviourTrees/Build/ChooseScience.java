@@ -1,33 +1,35 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 
-public class ChooseScience extends Action {
+public class ChooseScience extends BrainAction {
 
     public ChooseScience(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
 
             if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.Ps.isEmpty() || gameState.getStrat().numCCForScience > Util.getNumberCCs()) {
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Science_Facility) == 0) {
                 gameState.chosenToBuild = UnitType.Terran_Science_Facility;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

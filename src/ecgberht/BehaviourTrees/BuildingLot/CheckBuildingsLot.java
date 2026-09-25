@@ -1,24 +1,25 @@
 package ecgberht.BehaviourTrees.BuildingLot;
 
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 
-public class CheckBuildingsLot extends Conditional {
+public class CheckBuildingsLot extends BrainAction {
 
     public CheckBuildingsLot(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.buildingLot.isEmpty()) return State.FAILURE;
-            return State.SUCCESS;
+            if (gameState.buildingLot.isEmpty()) return BrainStatus.FAILURE;
+            return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

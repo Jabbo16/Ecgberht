@@ -7,8 +7,8 @@ import ecgberht.Squad;
 import ecgberht.Squad.Status;
 import ecgberht.UnitInfo;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Conditional;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.*;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.*;
@@ -16,14 +16,14 @@ import org.openbw.bwapi4j.unit.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CheckPerimeter extends Conditional {
+public class CheckPerimeter extends BrainAction {
 
     public CheckPerimeter(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
 
         try {
             gameState.enemyInBase.clear();
@@ -94,10 +94,10 @@ public class CheckPerimeter extends Conditional {
             }
             if (!gameState.enemyInBase.isEmpty()) {
                 /*if ((((GameState) gameState).getArmySize() >= 50 && ((GameState) gameState).getArmySize() / ((GameState) gameState).enemyInBase.size() > 10)) {
-                    return State.FAILURE;
+                    return BrainStatus.FAILURE;
                 }*/
                 gameState.defense = true;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
             int cFrame = gameState.frameCount;
             List<Worker> toDelete = new ArrayList<>();
@@ -125,6 +125,7 @@ public class CheckPerimeter extends Conditional {
             }
             for (Squad u : gameState.sqManager.squads.values()) {
                 if (u.status == Status.DEFENSE) {
+                    if (u.getSquadCenter() == null) continue;
                     Position closestCC = gameState.getNearestCC(u.getSquadCenter(), false);
                     if (closestCC != null) {
                         Area squad = gameState.bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
@@ -150,11 +151,11 @@ public class CheckPerimeter extends Conditional {
                 }
             }
             gameState.defense = false;
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

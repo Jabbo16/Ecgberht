@@ -1,12 +1,13 @@
 package ecgberht.BehaviourTrees.Scouting;
+import ecgberht.brain.*;
 
 import bwem.Area;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.unit.MineralPatch;
 
-public class CheckMineralWalk extends Action {
+public class CheckMineralWalk extends BrainAction {
 
     public CheckMineralWalk(String name, GameState gh) {
         super(name, gh);
@@ -34,29 +35,30 @@ public class CheckMineralWalk extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
-            if (gameState.chosenScout == null) return State.FAILURE;
-            if (gameState.walkingMinerals.isEmpty() || gameState.scoutSLs.isEmpty()) return State.SUCCESS;
+            if (gameState.chosenScout == null) return BrainStatus.FAILURE;
+            if (gameState.walkingMinerals.isEmpty() || gameState.scoutSLs.isEmpty()) return BrainStatus.SUCCESS;
             if (movingMineral == null) {
                 MineralPatch target = getCloserMineral();
                 if (target == null) {
                     if (gameState.chosenScout.getOrderTarget() != null)
                         gameState.chosenScout.move(gameState.scoutSLs.iterator().next().getLocation().toPosition());
-                    return State.SUCCESS;
+                    return BrainStatus.SUCCESS;
                 }
                 movingMineral = target;
                 gameState.chosenScout.rightClick(target, false);
-                return State.FAILURE;
+                return BrainStatus.FAILURE;
             } else if (gameState.chosenScout.getDistance(movingMineral) < 32) {
                 gameState.chosenScout.move(gameState.scoutSLs.iterator().next().getLocation().toPosition());
                 movingMineral = null;
             }
-            return State.SUCCESS;
+            return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

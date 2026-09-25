@@ -1,13 +1,14 @@
 package ecgberht.BehaviourTrees.Build;
+import ecgberht.brain.*;
 
 import bwem.Area;
 import ecgberht.GameState;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.Position;
 import org.openbw.bwapi4j.unit.Worker;
 
-public class ChooseWorker extends Action {
+public class ChooseWorker extends BrainAction {
 
     public ChooseWorker(String name, GameState gh) {
         super(name, gh);
@@ -15,7 +16,7 @@ public class ChooseWorker extends Action {
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             Worker closestWorker = null;
             int frame = gameState.frameCount;
@@ -48,13 +49,13 @@ public class ChooseWorker extends Action {
             }
             if (closestWorker != null) {
                 gameState.chosenWorker = closestWorker;
-                return State.SUCCESS;
+                return BrainStatus.SUCCESS;
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }

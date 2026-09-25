@@ -1,21 +1,22 @@
 package ecgberht.BehaviourTrees.Training;
+import ecgberht.brain.*;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
-import org.iaie.btree.BehavioralTree.State;
-import org.iaie.btree.task.leaf.Action;
+import ecgberht.brain.BrainStatus;
+import ecgberht.brain.BrainAction;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Factory;
 
 
-public class ChooseVulture extends Action {
+public class ChooseVulture extends BrainAction {
 
     public ChooseVulture(String name, GameState gh) {
         super(name, gh);
     }
 
     @Override
-    public State execute() {
+    public BrainStatus execute() {
         try {
             if (!gameState.Fs.isEmpty()) {
                 if (gameState.getStrat().name.equals("VultureRush") || Util.countUnitTypeSelf(UnitType.Terran_Vulture) * 2 <= Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) + 2) {
@@ -23,16 +24,17 @@ public class ChooseVulture extends Action {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Vulture)) {
                             gameState.chosenUnit = UnitType.Terran_Vulture;
                             gameState.chosenTrainingFacility = b;
-                            return State.SUCCESS;
+                            return BrainStatus.SUCCESS;
                         }
                     }
                 }
             }
-            return State.FAILURE;
+            return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
             e.printStackTrace();
-            return State.ERROR;
+            return BrainStatus.ERROR;
         }
     }
 }
+

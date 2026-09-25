@@ -1,0 +1,622 @@
++
+warning: in the working copy of 'src/ecgberht/Ecgberht.java', LF will be replaced by CRLF the next time Git touches it
+diff --git a/src/ecgberht/Ecgberht.java b/src/ecgberht/Ecgberht.java
+index 16c6343..7d6bde1 100644
+--- a/src/ecgberht/Ecgberht.java
++++ b/src/ecgberht/Ecgberht.java
+@@ -1,4 +1,5 @@
+ package ecgberht;
++import ecgberht.brain.*;
+ 
+ import bwem.BWEM;
+ import bwem.Base;
+@@ -36,9 +37,9 @@ import ecgberht.Strategies.FullBioFE;
+ import ecgberht.Strategies.FullMech;
+ import ecgberht.Util.MutablePair;
+ import ecgberht.Util.Util;
+-import org.iaie.btree.BehavioralTree;
+-import org.iaie.btree.task.composite.Selector;
+-import org.iaie.btree.task.composite.Sequence;
++import ecgberht.brain.BrainTree;
++import ecgberht.brain.BrainSelector;
++import ecgberht.brain.BrainSequence;
+ import org.openbw.bwapi4j.*;
+ import org.openbw.bwapi4j.type.*;
+ import org.openbw.bwapi4j.unit.*;
+@@ -58,18 +59,19 @@ public class Ecgberht implements BWEventListener {
+     private static BW bw;
+     private static InteractionHandler ih;
+     private static GameState gs;
+-    private static BehavioralTree addonBuildTree;
+-    private static BehavioralTree buildTree;
+-    private static BehavioralTree trainTree;
+-    private static BehavioralTree upgradeTree;
+-    private BehavioralTree botherTree;
+-    private BehavioralTree buildingLotTree;
+-    private BehavioralTree collectTree;
+-    private BehavioralTree defenseTree;
+-    private BehavioralTree repairTree;
+-    private BehavioralTree scannerTree;
+-    private BehavioralTree scoutingTree;
+-    private BehavioralTree islandTree;
++    private static BrainTree addonBuildTree;
++    private static BrainTree buildTree;
++    private static BrainTree trainTree;
++    private static BrainTree upgradeTree;
++    private static BrainTree botherTree;
++    private static BrainTree buildingLotTree;
++    private static BrainTree collectTree;
++    private static BrainTree defenseTree;
++    private static BrainTree repairTree;
++    private static BrainTree scannerTree;
++    private static BrainTree scoutingTree;
++    private static BrainTree islandTree;
++    private static BrainTree mainTree;
+     private boolean first = false;
+     private Player self;
+     private BWEM bwem = null;
+@@ -96,9 +98,125 @@ public class Ecgberht implements BWEventListener {
+         initBuildTree();
+         initUpgradeTree();
+         initAddonBuildTree();
++        initMainTree();
+         //gs.scipio.updateStrat();
+     }
+ 
++    private static void initMainTree() {
++        BrainActionLambda strategyTransitions = new BrainActionLambda("Strategy Transitions", () -> {
++            if (gs.frameCount == 1500) gs.sendCustomMessage();
++            if (gs.frameCount == 2300) gs.sendRandomMessage();
++            if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
++                Util.sendText("RIP"); // Hitchhiker
++                gs.getIH().leaveGame();
++            }
++            if (gs.frameCount == 24 * 60 * 14 && gs.enemyRace == Race.Terran && gs.getStrat().techToResearch.contains(TechType.Stim_Packs) && !gs.getStrat().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
++                gs.setStrat(new FullMech());
++                transition();
++            }
++            if (gs.frameCount == 24 * 60 * 8 && gs.getStrat().proxy) {
++                gs.scipio.chooseProxyTransition();
++                List<UnitInfo> workersToDelete = new ArrayList<>();
++                for (UnitInfo u : gs.myArmy) {
++                    if (!(u.unit instanceof Worker)) continue;
++                    workersToDelete.add(u);
++                }
++                gs.myArmy.removeAll(workersToDelete);
++                workersToDelete.forEach(u -> gs.workerIdle.add((Worker) u.unit));
++                transition();
++            }
++            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && 
++                    gs.getStrat().name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
++                FullBio b = new FullBio();
++                b.buildUnits.remove(UnitType.Terran_Bunker);
++                gs.setStrat(b);
++                gs.maxWraiths = 5;
++                transition();
++            }
++            if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && 
++                    !gs.getStrat().trainUnits.contains(UnitType.Terran_Wraith) && gs.frameCount == 24 * 900) {
++                gs.getStrat().trainUnits.add(UnitType.Terran_Wraith);
++                gs.maxWraiths = 999;
++                transition();
++            }
++            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && 
++                    !gs.getStrat().name.equals("PlasmaWraithHell")) {
++                for (Unit u : bw.getAllUnits()) {
++                    if (u.getType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
++                        continue;
++                    if (!u.isVisible() && gs.enemyCombatUnitMemory.contains(u)) gs.enemyCombatUnitMemory.remove(u);
++                    else if (u.getType() == UnitType.Zerg_Egg && u instanceof PlayerUnit &&
++                            !Util.isEnemy(((PlayerUnit) u).getPlayer())) {
++                        gs.enemyCombatUnitMemory.add(u);
++                    }
++                }
++            }
++            if (gs.getStrat().name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
++                if (gs.enemyRace == Race.Zerg) {
++                    if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) gs.setStrat(new BioMechFE());
++                    else gs.setStrat(new FullBioFE());
++                    if (gs.proxyBuilding != null) gs.getStrat().trainUnits.add(UnitType.Terran_Vulture);
++                } else if (gs.enemyRace == Race.Terran) gs.setStrat(new FullMech());
++                gs.getStrat().armyForAttack += 5;
++                transition();
++            }
++            if (gs.getStrat().name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
++                gs.setStrat(new FullMech());
++                if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
++                transition();
++            }
++            if (gs.getStrat().name.equals("TheNitekat") || gs.getStrat().name.equals("JoyORush") && gs.CCs.size() > 1) {
++                gs.setStrat(new FullMech());
++                if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
++                transition();
++            }
++            return BrainStatus.SUCCESS;
++        });
++
++        BrainActionLambda preFrameUpdates = new BrainActionLambda("Pre-Frame Updates", () -> {
++            gs.cancelDyingThings();
++            gs.wizard.onFrameSpellManager();
++            IntelligenceAgency.onFrame();
++            gs.sim.onFrameSim();
++            gs.vespeneManager(); 
++            gs.sqManager.updateBunkers();
++            gs.checkDisrupter();
++            return BrainStatus.SUCCESS;
++        });
++
++        BrainActionLambda postFrameUpdates = new BrainActionLambda("Post-Frame Updates", () -> {
++            if (gs.getStrat().name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
++            else if (gs.getStrat().name.equals("ProxyEightRax")) gs.checkWorkerMilitia(1);
++            defenseTree.getRootNode().evaluate();
++            gs.updateAttack();
++            gs.runAgents();
++            gs.sqManager.updateSquadOrderAndMicro();
++            gs.checkMainEnemyBase();
++            if (gs.frameCount > 10 && gs.frameCount % 5 == 0) gs.mineralLocking();
++            gs.scipio.updateStrat();
++            return BrainStatus.SUCCESS;
++        });
++
++        BrainParallel rootParallel = new BrainParallel("Main AI Loop", 0,
++            strategyTransitions,
++            preFrameUpdates,
++            buildingLotTree.getRootNode(),
++            repairTree.getRootNode(),
++            collectTree.getRootNode(),
++            upgradeTree.getRootNode(),
++            islandTree.getRootNode(),
++            buildTree.getRootNode(),
++            addonBuildTree.getRootNode(),
++            trainTree.getRootNode(),
++            scoutingTree.getRootNode(),
++            botherTree.getRootNode(),
++            scannerTree.getRootNode(),
++            postFrameUpdates
++        );
++        mainTree = new BrainTree("Main AI Tree");
++        mainTree.addSubNode(rootParallel);
++    }
++
+     private static void initTrainTree() {
+         ChooseSituationalUnit cSU = new ChooseSituationalUnit("Choose situational unit", gs);
+         ChooseNothingTrain cNT = new ChooseNothingTrain("Choose Nothing To Train", gs);
+@@ -112,18 +230,18 @@ public class Ecgberht implements BWEventListener {
+         ChooseWraith cWra = new ChooseWraith("Choose Wraith", gs);
+         CheckResourcesUnit cr = new CheckResourcesUnit("Check Cash", gs);
+         TrainUnit tr = new TrainUnit("Train Unit", gs);
+-        Selector chooseUnit = new Selector("Choose Recruit", cNT, cSU, cSCV);
+-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Goliath)) chooseUnit.addChild(cGol);
+-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addChild(cTan);
+-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addChild(cVul);
+-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addChild(cWra);
+-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addChild(cMed);
++        BrainSelector chooseUnit = new BrainSelector("Choose Recruit", cNT, cSU, cSCV);
++        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Goliath)) chooseUnit.addSubNode(cGol);
++        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) chooseUnit.addSubNode(cTan);
++        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Vulture)) chooseUnit.addSubNode(cVul);
++        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Wraith)) chooseUnit.addSubNode(cWra);
++        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Medic)) chooseUnit.addSubNode(cMed);
+         if (gs.getStrat().trainUnits.contains(UnitType.Terran_Firebat) && gs.enemyRace == Race.Zerg)
+-            chooseUnit.addChild(cFir);
+-        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addChild(cMar);
+-        Sequence train = new Sequence("Train", chooseUnit, cr, tr);
+-        trainTree = new BehavioralTree("Training Tree");
+-        trainTree.addChild(train);
++            chooseUnit.addSubNode(cFir);
++        if (gs.getStrat().trainUnits.contains(UnitType.Terran_Marine)) chooseUnit.addSubNode(cMar);
++        BrainSequence train = new BrainSequence("Train", chooseUnit, cr, tr);
++        trainTree = new BrainTree("Training Tree");
++        trainTree.addSubNode(train);
+     }
+ 
+     private static void initBuildTree() {
+@@ -147,29 +265,31 @@ public class Ecgberht implements BWEventListener {
+         ChoosePosition cp = new ChoosePosition("Choose Position", gs);
+         ChooseWorker cw = new ChooseWorker("Choose Worker", gs);
+         Move m = new Move("Move to chosen building position", gs);
+-        Selector chooseBuildingBuild = new Selector("Choose Building to build", cNB, cE, cBun, cSup);
+-        chooseBuildingBuild.addChild(cTur);
+-        chooseBuildingBuild.addChild(cRef);
+-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addChild(cAca);
+-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Engineering_Bay)) chooseBuildingBuild.addChild(cBay);
+-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Armory)) chooseBuildingBuild.addChild(cArm);
+-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Factory)) chooseBuildingBuild.addChild(cFar);
+-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addChild(cPor);
+-        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addChild(cSci);
+-        chooseBuildingBuild.addChild(cBar);
+-        Sequence buildMove;
++        BrainSelector chooseBuildingBuild = new BrainSelector("Choose Building to build", cNB, cE, cBun, cSup);
++        chooseBuildingBuild.addSubNode(cTur);
++        chooseBuildingBuild.addSubNode(cRef);
++        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Academy)) chooseBuildingBuild.addSubNode(cAca);
++        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Engineering_Bay)) chooseBuildingBuild.addSubNode(cBay);
++        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Armory)) chooseBuildingBuild.addSubNode(cArm);
++        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Factory)) chooseBuildingBuild.addSubNode(cFar);
++        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Starport)) chooseBuildingBuild.addSubNode(cPor);
++        if (gs.getStrat().buildUnits.contains(UnitType.Terran_Science_Facility)) chooseBuildingBuild.addSubNode(cSci);
++        chooseBuildingBuild.addSubNode(cBar);
++        BrainSequence buildMove;
+         if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1"))
+-            buildMove = new Sequence("BuildMove", wwB, b, chooseBuildingBuild, cp, cw, crb, m);
++            buildMove = new BrainSequence("BuildMove", wwB, b, chooseBuildingBuild, cp, cw, crb, m);
+         else if (bw.getBWMap().mapHash().equals("666dd28cd3c85223ebc749a481fc281e58221e4a")) // GoldRush
+-            buildMove = new Sequence("BuildMove", cMWGR, b, chooseBuildingBuild, cp, cw, crb, m);
++            buildMove = new BrainSequence("BuildMove", cMWGR, b, chooseBuildingBuild, cp, cw, crb, m);
+         else
+-            buildMove = new Sequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
+-        buildTree = new BehavioralTree("Building Tree");
+-        buildTree.addChild(buildMove);
++            buildMove = new BrainSequence("BuildMove", b, chooseBuildingBuild, cp, cw, crb, m);
++        buildTree = new BrainTree("Building Tree");
++        buildTree.addSubNode(buildMove);
+     }
+ 
+     private static void initUpgradeTree() {
+         CheckResourcesUpgrade cRU = new CheckResourcesUpgrade("Check Resources Upgrade", gs);
++        ChooseVultureMines cVM = new ChooseVultureMines("Choose Vulture Mines", gs);
++        ChooseWraithCloak cWC = new ChooseWraithCloak("Choose Wraith Cloak", gs);
+         ChooseIrradiate cI = new ChooseIrradiate("Choose Irradiate", gs);
+         ChooseEMP cEMP = new ChooseEMP("Choose EMP", gs);
+         ChooseArmorMechUp cAMU = new ChooseArmorMechUp("Choose Armor mech upgrade", gs);
+@@ -182,21 +302,23 @@ public class Ecgberht implements BWEventListener {
+         ChooseCharonBoosters cCB = new ChooseCharonBoosters("Choose Charon Boosters", gs);
+         ChooseVultureSpeed cVS = new ChooseVultureSpeed("Choose Vulture Speed", gs);
+         ResearchUpgrade rU = new ResearchUpgrade("Research Upgrade", gs);
+-        Selector ChooseUP = new Selector("Choose Upgrade");
+-        ChooseUP.addChild(cI);
+-        ChooseUP.addChild(cEMP);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Weapons)) ChooseUP.addChild(cWIU);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)) ChooseUP.addChild(cAIU);
+-        if (gs.getStrat().techToResearch.contains(TechType.Stim_Packs)) ChooseUP.addChild(cSU);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.U_238_Shells)) ChooseUP.addChild(cMR);
+-        if (gs.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)) ChooseUP.addChild(cSM);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Ion_Thrusters)) ChooseUP.addChild(cVS);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Charon_Boosters)) ChooseUP.addChild(cCB);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Weapons)) ChooseUP.addChild(cWMU);
+-        if (gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Plating)) ChooseUP.addChild(cAMU);
+-        Sequence Upgrader = new Sequence("Upgrader", ChooseUP, cRU, rU);
+-        upgradeTree = new BehavioralTree("Technology");
+-        upgradeTree.addChild(Upgrader);
++        BrainSelector ChooseUP = new BrainSelector("Choose Upgrade");
++        ChooseUP.addSubNode(cI);
++        ChooseUP.addSubNode(cEMP);
++        ChooseUP.addSubNode(new BrainSequence("Check WIU", new BrainCondition("Want WIU", () -> gs.getStrat().upgradesToResearch.contains(org.openbw.bwapi4j.type.UpgradeType.Terran_Infantry_Weapons)), cWIU));
++        ChooseUP.addSubNode(new BrainSequence("Check AIU", new BrainCondition("Want AIU", () -> gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Infantry_Armor)), cAIU));
++        ChooseUP.addSubNode(new BrainSequence("Check SU", new BrainCondition("Want SU", () -> gs.getStrat().techToResearch.contains(TechType.Stim_Packs)), cSU));
++        ChooseUP.addSubNode(new BrainSequence("Check VM", new BrainCondition("Want VM", () -> gs.getStrat().techToResearch.contains(TechType.Spider_Mines)), cVM));
++        ChooseUP.addSubNode(new BrainSequence("Check WC", new BrainCondition("Want WC", () -> gs.getStrat().techToResearch.contains(TechType.Cloaking_Field)), cWC));
++        ChooseUP.addSubNode(new BrainSequence("Check MR", new BrainCondition("Want MR", () -> gs.getStrat().upgradesToResearch.contains(UpgradeType.U_238_Shells)), cMR));
++        ChooseUP.addSubNode(new BrainSequence("Check SM", new BrainCondition("Want SM", () -> gs.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode)), cSM));
++        ChooseUP.addSubNode(new BrainSequence("Check VS", new BrainCondition("Want VS", () -> gs.getStrat().upgradesToResearch.contains(UpgradeType.Ion_Thrusters)), cVS));
++        ChooseUP.addSubNode(new BrainSequence("Check CB", new BrainCondition("Want CB", () -> gs.getStrat().upgradesToResearch.contains(UpgradeType.Charon_Boosters)), cCB));
++        ChooseUP.addSubNode(new BrainSequence("Check WMU", new BrainCondition("Want WMU", () -> gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Weapons)), cWMU));
++        ChooseUP.addSubNode(new BrainSequence("Check AMU", new BrainCondition("Want AMU", () -> gs.getStrat().upgradesToResearch.contains(UpgradeType.Terran_Vehicle_Plating)), cAMU));
++        BrainSequence Upgrader = new BrainSequence("Upgrader", ChooseUP, cRU, rU);
++        upgradeTree = new BrainTree("Technology");
++        upgradeTree.addSubNode(Upgrader);
+     }
+ 
+     private static void initAddonBuildTree() {
+@@ -205,16 +327,16 @@ public class Ecgberht implements BWEventListener {
+         ChooseComsatStation cCS = new ChooseComsatStation("Choose Comsat Station", gs);
+         ChooseMachineShop cMS = new ChooseMachineShop("Choose Machine Shop", gs);
+         ChooseTower cT = new ChooseTower("Choose Control Tower", gs);
+-        Selector ChooseAddon = new Selector("Choose Addon");
+-        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addChild(cMS);
+-        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addChild(cCS);
+-        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Control_Tower)) ChooseAddon.addChild(cT);
+-        Sequence Addon = new Sequence("Addon", ChooseAddon, cRA, bA);
+-        addonBuildTree = new BehavioralTree("Addon Build Tree");
+-        addonBuildTree.addChild(Addon);
++        BrainSelector ChooseAddon = new BrainSelector("Choose Addon");
++        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Machine_Shop)) ChooseAddon.addSubNode(cMS);
++        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Comsat_Station)) ChooseAddon.addSubNode(cCS);
++        if (gs.getStrat().buildAddons.contains(UnitType.Terran_Control_Tower)) ChooseAddon.addSubNode(cT);
++        BrainSequence Addon = new BrainSequence("Addon", ChooseAddon, cRA, bA);
++        addonBuildTree = new BrainTree("Addon Build Tree");
++        addonBuildTree.addSubNode(Addon);
+     }
+ 
+-    private void initIslandTree() {
++    private static void initIslandTree() {
+         CheckIslands chI = new CheckIslands("Check islands", gs);
+         CheckExpandingIsland cEI = new CheckExpandingIsland("Check Expanding To Island", gs);
+         CheckDropped chD = new CheckDropped("Check Dropped", gs);
+@@ -225,12 +347,12 @@ public class Ecgberht implements BWEventListener {
+         ChooseIsland cI = new ChooseIsland("Choose Island", gs);
+         ChooseWorkerDrop cWD = new ChooseWorkerDrop("Choose Worker Drop", gs);
+         SendToDrop sD = new SendToDrop("Send To Drop", gs);
+-        Sequence chooseThings = new Sequence("Choose things", cD, cI, cWD, sD);
+-        Sequence expand = new Sequence("Island expand", cEI, chD, cBM, cRI, mI);
+-        Selector expanding = new Selector("Check if already expanding", expand, cEI, chooseThings);
+-        Sequence islandExpansion = new Sequence("island expansion", chI, expanding);
+-        islandTree = new BehavioralTree("islandTree");
+-        islandTree.addChild(islandExpansion);
++        BrainSequence chooseThings = new BrainSequence("Choose things", cD, cI, cWD, sD);
++        BrainSequence expand = new BrainSequence("Island expand", cEI, chD, cBM, cRI, mI);
++        BrainSelector expanding = new BrainSelector("Check if already expanding", expand, cEI, chooseThings);
++        BrainSequence islandExpansion = new BrainSequence("island expansion", chI, expanding);
++        islandTree = new BrainTree("islandTree");
++        islandTree.addSubNode(islandExpansion);
+     }
+ 
+     private void run() {
+@@ -238,58 +360,58 @@ public class Ecgberht implements BWEventListener {
+         Ecgberht.bw.startGame();
+     }
+ 
+-    private void initScoutingTree() {
++    private static void initScoutingTree() {
+         CheckScout cSc = new CheckScout("Check Scout", gs);
+         ChooseScout chSc = new ChooseScout("Choose Scouter", gs);
+         SendScout sSc = new SendScout("Send Scout", gs);
+         CheckMineralWalk cMW = new CheckMineralWalk("Check Mineral Walk", gs);
+         CheckVisibleBase cVB = new CheckVisibleBase("Check visible Base", gs);
+         CheckEnemyBaseVisible cEBV = new CheckEnemyBaseVisible("Check Enemy Base Visible", gs);
+-        Sequence scoutFalse = new Sequence("Scout ", cSc, chSc, sSc);
+-        Selector EnemyFound = new Selector("Enemy found in base location", cEBV, sSc);
+-        Sequence scoutTrue = new Sequence("Scout True", cMW, cVB, EnemyFound);
+-        Selector Scouting = new Selector("Select Scouting Plan", scoutFalse, scoutTrue);
+-        scoutingTree = new BehavioralTree("Movement Tree");
+-        scoutingTree.addChild(Scouting);
++        BrainSequence scoutFalse = new BrainSequence("Scout ", cSc, chSc, sSc);
++        BrainSelector EnemyFound = new BrainSelector("Enemy found in base location", cEBV, sSc);
++        BrainSequence scoutTrue = new BrainSequence("Scout True", cMW, cVB, EnemyFound);
++        BrainSelector Scouting = new BrainSelector("Select Scouting Plan", scoutFalse, scoutTrue);
++        scoutingTree = new BrainTree("Movement Tree");
++        scoutingTree.addSubNode(Scouting);
+     }
+ 
+-    private void initDefenseTree() {
++    private static void initDefenseTree() {
+         CheckPerimeter cP = new CheckPerimeter("Check Perimeter", gs);
+         ChooseDefensePosition cDP = new ChooseDefensePosition("Choose Defence Position", gs);
+         SendDefenders sD = new SendDefenders("Send Defenders", gs);
+-        Sequence Defense = new Sequence("Defence", cP, cDP, sD);
+-        defenseTree = new BehavioralTree("Defence Tree");
+-        defenseTree.addChild(Defense);
++        BrainSequence Defense = new BrainSequence("Defence", cP, cDP, sD);
++        defenseTree = new BrainTree("Defence Tree");
++        defenseTree.addSubNode(Defense);
+     }
+ 
+-    private void initRepairTree() {
++    private static void initRepairTree() {
+         CheckBuildingFlames cBF = new CheckBuildingFlames("Check building in flames", gs);
+         ChooseRepairer cR = new ChooseRepairer("Choose Repairer", gs);
+         Repair R = new Repair("Repair Building", gs);
+-        Sequence Repair = new Sequence("Repair", cBF, cR, R);
+-        repairTree = new BehavioralTree("RepairTree");
+-        repairTree.addChild(Repair);
++        BrainSequence Repair = new BrainSequence("Repair", cBF, cR, R);
++        repairTree = new BrainTree("RepairTree");
++        repairTree.addSubNode(Repair);
+     }
+ 
+-    private void initBuildingLotTree() {
++    private static void initBuildingLotTree() {
+         CheckBuildingsLot chBL = new CheckBuildingsLot("Check Buildings Lot", gs);
+         ChooseBlotWorker cBW = new ChooseBlotWorker("Choose Building Lot worker", gs);
+         ChooseBuildingLot cBLot = new ChooseBuildingLot("Choose Building Lot building", gs);
+         FinishBuilding fB = new FinishBuilding("Finish Building", gs);
+-        Sequence BLot = new Sequence("Building Lot", chBL, cBLot, cBW, fB);
+-        buildingLotTree = new BehavioralTree("Building Lot Tree");
+-        buildingLotTree.addChild(BLot);
++        BrainSequence BLot = new BrainSequence("Building Lot", chBL, cBLot, cBW, fB);
++        buildingLotTree = new BrainTree("Building Lot Tree");
++        buildingLotTree.addSubNode(BLot);
+     }
+ 
+-    private void initScanTree() {
++    private static void initScanTree() {
+         CheckScan cScan = new CheckScan("Check scan", gs);
+         Scan s = new Scan("Scan", gs);
+-        Sequence Scanning = new Sequence("Scanning", cScan, s);
+-        scannerTree = new BehavioralTree("Scanner Tree");
+-        scannerTree.addChild(Scanning);
++        BrainSequence Scanning = new BrainSequence("Scanning", cScan, s);
++        scannerTree = new BrainTree("Scanner Tree");
++        scannerTree.addSubNode(Scanning);
+     }
+ 
+-    private void initHarassTree() {
++    private static void initHarassTree() {
+         CheckHarasser cH = new CheckHarasser("Check Harasser", gs);
+         CheckExplorer cE = new CheckExplorer("Check Explorer", gs);
+         ChooseWorkerToHarass cWTH = new ChooseWorkerToHarass("Check Worker to Harass", gs);
+@@ -298,23 +420,23 @@ public class Ecgberht implements BWEventListener {
+         ChooseBuildingToHarass cBTH = new ChooseBuildingToHarass("Check Building to Harass", gs);
+         Explore E = new Explore("Explore", gs);
+         HarassWorker hW = new HarassWorker("Bother SCV", gs);
+-        Selector bOw = new Selector("Choose Builder or Worker or Building", cWTH, cWTB, cBTH);
+-        Sequence harassAttack = new Sequence("Harass", cHA, bOw, hW);
+-        Sequence explorer = new Sequence("Explorer", cE, E);
+-        Selector eOh = new Selector("Explorer or harasser", explorer, harassAttack);
+-        Sequence harass = new Sequence("Harass", cH, eOh);
+-        botherTree = new BehavioralTree("Harass Tree");
+-        botherTree.addChild(harass);
++        BrainSelector bOw = new BrainSelector("Choose Builder or Worker or Building", cWTH, cWTB, cBTH);
++        BrainSequence harassAttack = new BrainSequence("Harass", cHA, bOw, hW);
++        BrainSequence explorer = new BrainSequence("Explorer", cE, E);
++        BrainSelector eOh = new BrainSelector("Explorer or harasser", explorer, harassAttack);
++        BrainSequence harass = new BrainSequence("Harass", cH, eOh);
++        botherTree = new BrainTree("Harass Tree");
++        botherTree.addSubNode(harass);
+     }
+ 
+-    private void initCollectTree() {
++    private static void initCollectTree() {
+         CollectGas cg = new CollectGas("Collect Gas", gs);
+         CollectMineral cm = new CollectMineral("Collect Mineral", gs);
+         FreeWorker fw = new FreeWorker("No Union", gs);
+-        Selector collectResources = new Selector("Collect Melted Cash", cg, cm);
+-        Sequence collect = new Sequence("Collect", fw, collectResources);
+-        collectTree = new BehavioralTree("Recollection Tree");
+-        collectTree.addChild(collect);
++        BrainSelector collectResources = new BrainSelector("Collect Melted Cash", cg, cm);
++        BrainSequence collect = new BrainSequence("Collect", fw, collectResources);
++        collectTree = new BrainTree("Recollection Tree");
++        collectTree.addSubNode(collect);
+     }
+ 
+     @Override
+@@ -398,20 +520,19 @@ public class Ecgberht implements BWEventListener {
+             }
+             gs.map = new BuildingMap(bw, ih.self(), bwem);
+             gs.map.initMap();
+-            gs.testMap = gs.map.clone();
+-            // Trees Initializations
++            gs.testMap = gs.map.clone();            // Trees Initializations
+             initCollectTree();
+             initTrainTree();
+             initBuildTree();
+             initScoutingTree();
+             initDefenseTree();
+             initUpgradeTree();
++            initIslandTree();
++            initHarassTree();
++            initScanTree();
+             initRepairTree();
+-            initAddonBuildTree();
+             initBuildingLotTree();
+-            initScanTree();
+-            initHarassTree();
+-            initIslandTree();
++            initTrees();
+             gs.silentCartographer = new Cartographer(bw.getBWMap().mapWidth(), bw.getBWMap().mapHeight());
+             if (ConfigManager.getConfig().ecgConfig.enableSkyCladObserver) skycladObserver.toggle();
+             cherryVisDumper = new CherryVisDumper(gs);
+@@ -444,101 +565,7 @@ public class Ecgberht implements BWEventListener {
+             skycladObserver.onFrame();
+             gs.fix();
+             gs.unitStorage.onFrame();
+-            if (gs.frameCount == 1500) gs.sendCustomMessage();
+-            if (gs.frameCount == 2300) gs.sendRandomMessage();
+-            if (gs.frameCount == 1000 && bw.getBWMap().mapHash().equals("69a3b6a5a3d4120e47408defd3ca44c954997948")) {
+-                Util.sendText("RIP"); // Hitchhiker
+-                gs.getIH().leaveGame();
+-            }
+-            // If lategame vs Terran and we are Bio (Stim) -> transition to Mech
+-            if (gs.frameCount == 24 * 60 * 14 && gs.enemyRace == Race.Terran && gs.getStrat().techToResearch.contains(TechType.Stim_Packs) && !gs.getStrat().trainUnits.contains(UnitType.Terran_Siege_Tank_Tank_Mode)) {
+-                gs.setStrat(new FullMech());
+-                transition();
+-            }
+-            // If rushing and enough time has passed -> transition to best strat
+-            if (gs.frameCount == 24 * 60 * 8 && gs.getStrat().proxy) {
+-                gs.scipio.chooseProxyTransition();
+-                List<UnitInfo> workersToDelete = new ArrayList<>();
+-                for (UnitInfo u : gs.myArmy) {
+-                    if (!(u.unit instanceof Worker)) continue;
+-                    workersToDelete.add(u);
+-                }
+-                gs.myArmy.removeAll(workersToDelete);
+-                workersToDelete.forEach(u -> gs.workerIdle.add((Worker) u.unit));
+-                transition();
+-            }
+-            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma transition
+-                    gs.getStrat().name.equals("PlasmaWraithHell") && gs.frameCount == 24 * 700) {
+-                FullBio b = new FullBio();
+-                b.buildUnits.remove(UnitType.Terran_Bunker);
+-                gs.setStrat(b);
+-                gs.maxWraiths = 5;
+-                transition();
+-            }
+-            if (bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && // Fortress wraiths
+-                    !gs.getStrat().trainUnits.contains(UnitType.Terran_Wraith) && gs.frameCount == 24 * 900) {
+-                gs.getStrat().trainUnits.add(UnitType.Terran_Wraith);
+-                gs.maxWraiths = 999;
+-                transition();
+-            }
+-            if (bw.getBWMap().mapHash().equals("6f5295624a7e3887470f3f2e14727b1411321a67") && // Plasma special eggs
+-                    !gs.getStrat().name.equals("PlasmaWraithHell")) {
+-                for (Unit u : bw.getAllUnits()) {
+-                    if (u.getType() != UnitType.Zerg_Egg && u instanceof PlayerUnit && !Util.isEnemy(((PlayerUnit) u).getPlayer()))
+-                        continue;
+-                    if (!u.isVisible() && gs.enemyCombatUnitMemory.contains(u)) gs.enemyCombatUnitMemory.remove(u);
+-                    else if (u.getType() == UnitType.Zerg_Egg && u instanceof PlayerUnit &&
+-                            !Util.isEnemy(((PlayerUnit) u).getPlayer())) {
+-                        gs.enemyCombatUnitMemory.add(u);
+-                    }
+-                }
+-            }
+-            if (gs.getStrat().name.equals("TwoPortWraith") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1 && gs.wraithsTrained >= 4) {
+-                if (gs.enemyRace == Race.Zerg) {
+-                    if (IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) gs.setStrat(new BioMechFE());
+-                    else gs.setStrat(new FullBioFE());
+-                    if (gs.proxyBuilding != null) gs.getStrat().trainUnits.add(UnitType.Terran_Vulture);
+-                } else if (gs.enemyRace == Race.Terran) gs.setStrat(new FullMech());
+-                gs.getStrat().armyForAttack += 5;
+-                transition();
+-            }
+-            if (gs.getStrat().name.equals("VultureRush") && Util.countBuildingAll(UnitType.Terran_Command_Center) > 1) {
+-                gs.setStrat(new FullMech());
+-                if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
+-                transition();
+-            }
+-            if (gs.getStrat().name.equals("TheNitekat") || gs.getStrat().name.equals("JoyORush") && gs.CCs.size() > 1) {
+-                gs.setStrat(new FullMech());
+-                if (gs.naturalChoke != null) gs.defendPosition = gs.naturalChoke.getCenter().toPosition();
+-                transition();
+-            }
+-            gs.cancelDyingThings();
+-            //IntelligenceAgency.updateBullets(); //Disabled because its not actually used yet and its slow
+-            gs.wizard.onFrameSpellManager();
+-            IntelligenceAgency.onFrame();
+-            gs.sim.onFrameSim();
+-            gs.vespeneManager(); //Disabled until it works
+-            gs.sqManager.updateBunkers();
+-            gs.checkDisrupter();
+-            buildingLotTree.run();
+-            repairTree.run();
+-            collectTree.run();
+-            upgradeTree.run();
+-            islandTree.run();
+-            buildTree.run();
+-            addonBuildTree.run();
+-            trainTree.run();
+-            scoutingTree.run();
+-            botherTree.run();
+-            scannerTree.run();
+-            if (gs.getStrat().name.equals("ProxyBBS")) gs.checkWorkerMilitia(2);
+-            else if (gs.getStrat().name.equals("ProxyEightRax")) gs.checkWorkerMilitia(1);
+-            defenseTree.run();
+-            gs.updateAttack();
+-            gs.runAgents();
+-            gs.sqManager.updateSquadOrderAndMicro();
+-            gs.checkMainEnemyBase();
+-            if (gs.frameCount > 10 && gs.frameCount % 5 == 0) gs.mineralLocking();
++            mainTree.executeTree();
+             debugManager.onFrame(gs);
+             cherryVisDumper.onFrame();
+         } catch (Exception e) {
+@@ -631,7 +658,7 @@ public class Ecgberht implements BWEventListener {
+                         if (gs.tanksTrained == 3 && gs.getStrat().name.equals("JoyORush")) {
+                             gs.getStrat().trainUnits.add(UnitType.Terran_Vulture);
+                             gs.getStrat().upgradesToResearch.add(UpgradeType.Ion_Thrusters);
+-                            //gs.getStrat().techToResearch.add(TechType.Spider_Mines);
++                            gs.getStrat().techToResearch.add(TechType.Spider_Mines);
+                             transition();
+                         }
+                     }
+@@ -846,10 +873,10 @@ public class Ecgberht implements BWEventListener {
+                                     Base ccBase = Util.getClosestBaseLocation(arg0.getPosition());
+                                     if (gs.islandBases.contains(ccBase)) gs.islandExpand = false;
+                                 }
+-                                gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
+-                                gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
+-                                gs.workerBuild.remove(arg0);
+                             }
++                            gs.deltaCash.first -= gs.workerBuild.get(arg0).first.mineralPrice();
++                            gs.deltaCash.second -= gs.workerBuild.get(arg0).first.gasPrice();
++                            gs.workerBuild.remove(arg0);
+                         }
+                     } else if (type.isBuilding()) {
+                         if (type != UnitType.Terran_Command_Center) {
+@@ -1059,3 +1086,6 @@ public class Ecgberht implements BWEventListener {
+ 
+     }
+ }
++
++
++

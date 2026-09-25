@@ -56,6 +56,11 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 Weapon myWeapon = closestThreat.flying ? unit.getAirWeapon() : unit.getGroundWeapon();
                 double hisAirWeaponRange = closestThreat.airRange;
                 Position kitePos = UtilMicro.kiteAway(unit, new TreeSet<>(Collections.singleton(closestThreat)));
+                if (!unit.isCloaked() && unit.getEnergy() >= org.openbw.bwapi4j.type.TechType.Cloaking_Field.energyCost() && getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Cloaking_Field)) {
+                    if (bestDist <= hisAirWeaponRange + 64 || (closestThreat.flying && bestDist < 100)) {
+                        unit.cloak();
+                    }
+                }
                 if (myWeapon.maxRange() > hisAirWeaponRange && bestDist > hisAirWeaponRange) {
                     if (myWeapon.cooldown() != 0) {
                         if (kitePos != null) {
