@@ -35,25 +35,27 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     private boolean placeMineAtChoke() {
         if (unit.getSpiderMineCount() > 0 && ecgberht.Ecgberht.getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Spider_Mines)) {
-            Position target = null;
+            org.openbw.bwapi4j.Position chokeCenter = null;
             if (ecgberht.Ecgberht.getGs().naturalChoke != null) {
-                target = ecgberht.Ecgberht.getGs().naturalChoke.getCenter().toPosition();
+                chokeCenter = ecgberht.Ecgberht.getGs().naturalChoke.getCenter().toPosition();
             } else if (ecgberht.Ecgberht.getGs().mainChoke != null) {
-                target = ecgberht.Ecgberht.getGs().mainChoke.getCenter().toPosition();
+                chokeCenter = ecgberht.Ecgberht.getGs().mainChoke.getCenter().toPosition();
             }
-            if (target != null) {
-                target = new Position(target.getX() + (int)(Math.random()*128 - 64), target.getY() + (int)(Math.random()*128 - 64));
-                if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target)) {
-                    boolean mineNearby = false;
-                    for (ecgberht.UnitInfo ally : ecgberht.Ecgberht.getGs().unitStorage.getAllyUnits().values()) {
-                        if (ally.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(target) < 64) {
-                            mineNearby = true;
-                            break;
+            if (chokeCenter != null) {
+                for (int i = 0; i < 5; i++) {
+                    org.openbw.bwapi4j.Position target = new org.openbw.bwapi4j.Position(chokeCenter.getX() + (int)(Math.random()*256 - 128), chokeCenter.getY() + (int)(Math.random()*256 - 128));
+                    if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target)) {
+                        boolean mineNearby = false;
+                        for (ecgberht.UnitInfo ally : ecgberht.Ecgberht.getGs().unitStorage.getAllyUnits().values()) {
+                            if (ally.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(target) < 96) {
+                                mineNearby = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!mineNearby) {
-                        unit.spiderMine(target);
-                        return true;
+                        if (!mineNearby) {
+                            unit.spiderMine(target);
+                            return true;
+                        }
                     }
                 }
             }
@@ -87,12 +89,15 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             if (frameLastOrder == actualFrame) return false;
+            if (unit.getOrder() == Order.PlaceMine) return false;
             //Status old = status;
             getNewStatus();
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
-            if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
+            if (status == Status.ATTACK || status == Status.IDLE) {
                 if (placeMineAtChoke()) return false;
+            }
+            if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
                 if (pos == null || !getGs().getGame().getBWMap().isValidPosition(pos)) return false;
                 UtilMicro.move(unit, pos);
@@ -301,3 +306,4 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 }
+
