@@ -776,8 +776,10 @@ public class Ecgberht implements BWEventListener {
                     }
                 } else {
                     gs.myArmy.add(gs.unitStorage.getAllyUnits().get(arg0));
-                    if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
-                        ((MobileUnit) arg0).move(gs.silentCartographer.mapCenter.toPosition());
+                    if (arg0 instanceof org.openbw.bwapi4j.unit.MobileUnit) {
+                        if (gs.enemyMainBase != null && gs.silentCartographer.mapCenter.getDistance(gs.enemyMainBase.getLocation()) < arg0.getTilePosition().getDistance(gs.enemyMainBase.getLocation())) {
+                            ((org.openbw.bwapi4j.unit.MobileUnit) arg0).move(gs.silentCartographer.mapCenter.toPosition());
+                        }
                     }
                 }
             }
