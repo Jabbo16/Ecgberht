@@ -300,6 +300,24 @@ public class Squad implements Comparable<Squad> {
                     if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 && (e.health + e.shields >= 60 || threats > 2)) {
                         found = true;
                     }
+                    
+                    int minR = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange();
+                    if (!st.isSieged()) {
+                        if (e.groundRange <= 32 && distance < minR + 128) close = true;
+                        else if (distance < minR + 64) close = true;
+                    } else {
+                        if (distance < minR) close = true;
+                    }
+                }
+                if (found && !close && !dangerousMelee) {
+                    if (!st.isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
+                        st.siege();
+                        return;
+                    }
+                }
+                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 && (e.health + e.shields >= 60 || threats > 2)) {
+                        found = true;
+                    }
                     if (!close && distance < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange())
                         close = true;
                 }
@@ -502,6 +520,10 @@ public class Squad implements Comparable<Squad> {
             return;
         }
         if ((kite || enemyTooClose) && target.unitType.topSpeed() > 0) {
+            if (u.unitType == UnitType.Terran_Siege_Tank_Tank_Mode && u.getDistance(center) < 160) {
+                UtilMicro.attack(u, target); // Tanks shouldn't kite too aggressively, it ruins their positioning
+                return;
+            }
             Position kitePos = UtilMicro.kiteAwayAlt(u.position, target.lastPosition);
             if (kitePos != null) UtilMicro.move((MobileUnit) u.unit, kitePos);
             else {
@@ -546,6 +568,8 @@ public class Squad implements Comparable<Squad> {
         ATTACK, IDLE, REGROUP, ADVANCE, defense
     }
 }
+
+
 
 
 
