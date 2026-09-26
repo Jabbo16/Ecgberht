@@ -203,7 +203,7 @@ public class Squad implements Comparable<Squad> {
                 if (u.unit instanceof Firebat && shouldStim(u))
                     ((Firebat) u.unit).stimPack();
                 if (u.unit instanceof Medic)
-                    microMedic((Medic) u.unit, marinesToHeal);
+                    microMedic(u, marinesToHeal);
                 else if (u.unit instanceof SiegeTank)
                     microTank(u);
                 else if (u.unitType.groundWeapon().maxRange() > 32)
@@ -520,7 +520,8 @@ public class Squad implements Comparable<Squad> {
         }
     }
 
-    private void microMedic(Medic u, Set<Unit> marinesToHeal) {
+    private void microMedic(UnitInfo uInfo, Set<Unit> marinesToHeal) {
+        Medic u = (Medic) uInfo.unit;
         PlayerUnit healTarget = getHealTarget(u, marinesToHeal);
         if (healTarget != null) {
             UtilMicro.heal(u, healTarget);
@@ -547,7 +548,7 @@ public class Squad implements Comparable<Squad> {
             if (Util.broodWarDistance(pos, u.getPosition()) >= 400)
                 UtilMicro.heal(u, pos);
         } else if (status == Status.ADVANCE && attack != null) {
-            UtilMicro.move(u, center);
+            UtilMicro.move(u, getFormationPosition(uInfo, attack));
         } else if (center.getDistance(u.getPosition()) > 32 * 6)
             UtilMicro.move(u, center);
     }
