@@ -59,14 +59,43 @@ public class Squad implements Comparable<Squad> {
         return center;
     }
 
-    private Position getFormationPosition(Position unitPos, Position target) {
+    private Position getFormationPosition(UnitInfo u, Position target) {
         if (center == null || target == null) return target;
-        int offsetX = unitPos.getX() - center.getX();
-        int offsetY = unitPos.getY() - center.getY();
-        if (offsetX > 200) offsetX = 200;
-        if (offsetX < -200) offsetX = -200;
-        if (offsetY > 200) offsetY = 200;
-        if (offsetY < -200) offsetY = -200;
+        
+        double dx = target.getX() - center.getX();
+        double dy = target.getY() - center.getY();
+        double dist = Math.sqrt(dx*dx + dy*dy);
+        
+        int offsetX = u.position.getX() - center.getX();
+        int offsetY = u.position.getY() - center.getY();
+        
+        if (dist > 1.0) {
+            double dirX = dx / dist;
+            double dirY = dy / dist;
+            double rightX = -dirY;
+            double rightY = dirX;
+            
+            double lateralOffset = offsetX * rightX + offsetY * rightY;
+            
+            double bias = 0;
+            if (u.unit instanceof Firebat) bias = 80;
+            else if (u.unit instanceof Marine) bias = 0;
+            else if (u.unit instanceof Medic) bias = -60;
+            else if (u.unit instanceof SiegeTank) bias = -120;
+            else if (u.unit instanceof Goliath) bias = 30;
+            
+            if (lateralOffset > 200) lateralOffset = 200;
+            if (lateralOffset < -200) lateralOffset = -200;
+            
+            offsetX = (int)(rightX * lateralOffset + dirX * bias);
+            offsetY = (int)(rightY * lateralOffset + dirY * bias);
+        } else {
+            if (offsetX > 200) offsetX = 200;
+            if (offsetX < -200) offsetX = -200;
+            if (offsetY > 200) offsetY = 200;
+            if (offsetY < -200) offsetY = -200;
+        }
+        
         Position targetFormation = new Position(target.getX() + offsetX, target.getY() + offsetY);
         if (getGs().getGame().getBWMap().isValidPosition(targetFormation)) {
             return targetFormation;
@@ -174,7 +203,7 @@ public class Squad implements Comparable<Squad> {
                     UtilMicro.move((MobileUnit) u.unit, center);
                     return;
                 } else if (attack != null) {
-                    UtilMicro.move((MobileUnit) u.unit, getFormationPosition(u.position, attack));
+                    UtilMicro.move((MobileUnit) u.unit, getFormationPosition(u, attack));
                 }
                 break;
         }
@@ -186,7 +215,7 @@ public class Squad implements Comparable<Squad> {
             case DEFENSE:
                 if (u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
                 if (squadSim.enemies.isEmpty() && attack != null) {
-                    UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u.position, attack));
+                    UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
                     return;
                 }
                 //Experimental storm dodging?
@@ -200,7 +229,7 @@ public class Squad implements Comparable<Squad> {
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
                     UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
                     if (target != null) UtilMicro.attack(u, target);
-                    else if (attack != null) UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u.position, attack));
+                    else if (attack != null) UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
                 }
                 break;
             case IDLE:
@@ -243,7 +272,7 @@ public class Squad implements Comparable<Squad> {
                     UtilMicro.move((MobileUnit) u.unit, center);
                     return;
                 } else if (attack != null) {
-                    UtilMicro.move((MobileUnit) u.unit, getFormationPosition(u.position, attack));
+                    UtilMicro.move((MobileUnit) u.unit, getFormationPosition(u, attack));
                 }
                 break;
         }
@@ -350,7 +379,7 @@ public class Squad implements Comparable<Squad> {
                         UtilMicro.attack(st, center);
                         return;
                     } else if (attack != null) {
-                        UtilMicro.move(st, getFormationPosition(u.position, attack));
+                        UtilMicro.move(st, getFormationPosition(u, attack));
                     }
                 }
                 break;
@@ -425,7 +454,7 @@ public class Squad implements Comparable<Squad> {
         if (u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
         UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
-            if (attack != null) UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u.position, attack));
+            if (attack != null) UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
             return;
         }
         double distToTarget = u.getDistance(target);
