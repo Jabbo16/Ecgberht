@@ -44,6 +44,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
             SimInfo airSim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.AIR);
             airAttackers = airSim.enemies;
             for (UnitInfo u : airAttackers) {
+                if (!u.visible || ((u.unit.isCloaked() || u.burrowed) && !u.unit.isDetected())) continue;
                 double predictedDist = unitInfo.getPredictedDistance(u);
                 if (predictedDist < bestDist) {
                     closestThreat = u;
@@ -59,6 +60,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
                 if (!unit.isCloaked() && unit.getEnergy() >= org.openbw.bwapi4j.type.TechType.Cloaking_Field.energyCost() && getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Cloaking_Field)) {
                     if (bestDist <= hisAirWeaponRange + 64 || (closestThreat.flying && bestDist < 100)) {
                         unit.cloak();
+                        return false;
                     }
                 }
                 if (myWeapon.maxRange() > hisAirWeaponRange && bestDist > hisAirWeaponRange) {
@@ -109,6 +111,7 @@ public class WraithAgent extends Agent implements Comparable<Unit> {
         double maxScore = Double.MIN_VALUE;
         for (UnitInfo u : mainTargets) {
             //if (!u.unit.exists()) continue;
+            if (!u.visible || (u.unit.isCloaked() && !u.unit.isDetected()) || (u.burrowed && !u.unit.isDetected())) continue;
             double dist = unitInfo.getDistance(u);
             double score = u.unitType.isWorker() ? 5 : (u.unitType == UnitType.Zerg_Overlord ? 8 : 1);
             WeaponType weapon = Util.getWeapon(unitInfo, u);

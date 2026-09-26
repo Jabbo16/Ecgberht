@@ -28,7 +28,7 @@ public class CheckScan extends BrainAction {
                 for (ComsatStation u : gameState.CSs) {
                     if (u.getEnergy() < 50) continue;
                     for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
-                        if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected() && e.unit instanceof Attacker) {
+                        if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected()) {
                             if (gameState.sim.getSimulation(e, true).allies.stream().noneMatch(a -> a.unitType.canAttack()))
                                 continue;
                             gameState.checkScan = new MutablePair<>(u, e.lastPosition);
