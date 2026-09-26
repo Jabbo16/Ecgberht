@@ -11,6 +11,7 @@ import org.openbw.bwapi4j.type.Order;
 import org.openbw.bwapi4j.type.UnitType;
 import org.openbw.bwapi4j.unit.Bunker;
 import org.openbw.bwapi4j.unit.Unit;
+import java.util.stream.Collectors;
 import org.openbw.bwapi4j.unit.Vulture;
 
 import java.util.Comparator;
@@ -198,7 +199,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void scoutBases() {
-        java.util.List<ecgberht.BaseManager.Garrison> bases = getGs().baseManager.getScoutingBasesSorted();
+        java.util.List<ecgberht.BaseManager.Garrison> bases = getGs().baseManager.getScoutingBasesSorted()
+            .stream().filter(g -> !g.island).collect(Collectors.toList());
         if (bases.isEmpty()) {
             status = Status.ATTACK;
             attack();
