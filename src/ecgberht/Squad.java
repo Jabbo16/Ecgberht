@@ -85,15 +85,8 @@ public class Squad implements Comparable<Squad> {
         int offsetX = u.position.getX() - center.getX();
         int offsetY = u.position.getY() - center.getY();
 
-        // Limit the advance of the formation rally point so the squad doesn't stretch too much
-        double maxDist = 200.0;
         double targetX = target.getX();
         double targetY = target.getY();
-        
-        if (dist > maxDist) {
-             targetX = center.getX() + (dx / dist) * maxDist;
-             targetY = center.getY() + (dy / dist) * maxDist;
-        }
 
         if (dist > 1.0) {
             double dirX = dx / dist;
@@ -136,16 +129,7 @@ public class Squad implements Comparable<Squad> {
         Position targetFormation = new Position((int)targetX + offsetX, (int)targetY + offsetY);
         
         if (getGs().getGame().getBWMap().isValidPosition(targetFormation)) {
-            // Avoid getting bottlenecked in chokepoints by making sure the offset position is walkable
-            if (getGs().getGame().getBWMap().isWalkable(targetFormation.toWalkPosition())) {
-                return targetFormation;
-            }
-        }
-        
-        // If not walkable (e.g. walls/chokes), just head towards the central rally point
-        Position fallback = new Position((int)targetX, (int)targetY);
-        if (getGs().getGame().getBWMap().isValidPosition(fallback)) {
-            return fallback;
+            return targetFormation;
         }
         
         return target;
