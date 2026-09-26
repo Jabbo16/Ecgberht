@@ -9,7 +9,6 @@ import org.openbw.bwapi4j.unit.Unit;
 import static ecgberht.Ecgberht.getGs;
 
 public class BaseScoutAgent extends Agent {
-    private static int currentBaseScoutIndex = 0;
     private SimInfo mySim;
     
     public BaseScoutAgent(Unit unit) {
@@ -36,23 +35,22 @@ public class BaseScoutAgent extends Agent {
                 else UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, getGs().getPlayer().getStartLocation().toPosition());
                 return false;
             } else if (status == Status.SCOUT) {
-                if (getGs().BLs.isEmpty()) return false;
-                
-                bwem.Base targetBase = getGs().BLs.get(currentBaseScoutIndex);
-                int checks = 0;
-                
-                while (checks < getGs().BLs.size() && (myUnit.getDistance(targetBase.getLocation().toPosition()) < 300 || getGs().bw.getBWMap().isVisible(targetBase.getLocation()))) {
-                    currentBaseScoutIndex = (currentBaseScoutIndex + 1) % getGs().BLs.size();
-                    targetBase = getGs().BLs.get(currentBaseScoutIndex);
-                    checks++;
-                }
-                
-                if (checks < getGs().BLs.size()) {
-                    UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, targetBase.getLocation().toPosition());
-                } else {
-                    // All bases visible, just move to center
+                java.util.List<ecgberht.BaseManager.Garrison> bases = getGs().baseManager.getScoutingBasesSorted();
+                if (bases.isEmpty()) {
                     UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, getGs().mapCenter);
+                    return false;
                 }
+                
+                ecgberht.BaseManager.Garrison targetGarrison = bases.get(0);
+                if (getGs().getGame().getBWMap().isVisible(targetGarrison.tile) || myUnit.getDistance(targetGarrison.tile.toPosition()) < 300) {
+                    if (bases.size() > 1) {
+                        targetGarrison = bases.get(1);
+                    } else {
+                        UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, getGs().mapCenter);
+                        return false;
+                    }
+                }
+                UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, targetGarrison.tile.toPosition());
             }
         } catch (Exception e) {
             e.printStackTrace();

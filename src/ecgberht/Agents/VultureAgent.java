@@ -24,7 +24,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
 
     public Vulture unit;
     public static VultureAgent designatedScout = null;
-    private static int currentBaseScoutIndex = 0;
+
     private int mines = 3;
     private UnitType type = UnitType.Terran_Vulture;
     private int lastPatrolFrame = 0;
@@ -205,23 +205,24 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     }
 
     private void scoutBases() {
-        if (getGs().BLs.isEmpty()) return;
-        
-        bwem.Base targetBase = getGs().BLs.get(currentBaseScoutIndex);
-        int checks = 0;
-        
-        while (checks < getGs().BLs.size() && (unit.getDistance(targetBase.getLocation().toPosition()) < 300 || getGs().bw.getBWMap().isVisible(targetBase.getLocation()))) {
-            currentBaseScoutIndex = (currentBaseScoutIndex + 1) % getGs().BLs.size();
-            targetBase = getGs().BLs.get(currentBaseScoutIndex);
-            checks++;
-        }
-        
-        if (checks < getGs().BLs.size()) {
-            UtilMicro.move(unit, targetBase.getLocation().toPosition());
-        } else {
+        java.util.List<ecgberht.BaseManager.Garrison> bases = getGs().baseManager.getScoutingBasesSorted();
+        if (bases.isEmpty()) {
             status = Status.ATTACK;
             attack();
+            return;
         }
+        
+        ecgberht.BaseManager.Garrison targetGarrison = bases.get(0);
+        if (getGs().getGame().getBWMap().isVisible(targetGarrison.tile) || unit.getDistance(targetGarrison.tile.toPosition()) < 300) {
+            if (bases.size() > 1) {
+                targetGarrison = bases.get(1);
+            } else {
+                status = Status.ATTACK;
+                attack();
+                return;
+            }
+        }
+        UtilMicro.move(unit, targetGarrison.tile.toPosition());
     }
 
     private void combat() {
