@@ -28,10 +28,11 @@ public abstract class Agent {
         if (status == Status.RETREAT) return "Retreat";
         if (status == Status.IDLE) return "Idle";
         if (status == Status.PATROL) return "Patrol";
+        if (status == Status.SCOUT) return "Scout";
         return "None";
     }
 
     public abstract boolean runAgent();
 
-    enum Status {ATTACK, KITE, COMBAT, IDLE, RETREAT, PATROL}
+    enum Status {ATTACK, KITE, COMBAT, IDLE, RETREAT, PATROL, SCOUT}
 }

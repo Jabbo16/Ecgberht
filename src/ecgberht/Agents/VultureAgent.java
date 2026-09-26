@@ -23,6 +23,8 @@ import static ecgberht.Ecgberht.getGs;
 public class VultureAgent extends Agent implements Comparable<Unit> {
 
     public Vulture unit;
+    public static VultureAgent designatedScout = null;
+    private static int currentBaseScoutIndex = 0;
     private int mines = 3;
     private UnitType type = UnitType.Terran_Vulture;
     private int lastPatrolFrame = 0;
@@ -117,6 +119,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     public boolean runAgent() {
         try {
             if (!unit.exists() || unitInfo == null) return true;
+            if (getGs().getArmySize() > 5 && (designatedScout == null || !designatedScout.unit.exists())) {
+                designatedScout = this;
+            }
             if (unit.getHitPoints() <= 30) {
                 MutablePair<Base, Unit> cc = getGs().mainCC;
                 if (cc != null && cc.second != null) {
@@ -138,9 +143,14 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (unit.getOrder() == Order.PlaceMine) return false;
             //Status old = status;
             getNewStatus();
+            
+            if (this == designatedScout && mySim.enemies.isEmpty()) {
+                status = Status.SCOUT;
+            }
+            
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
-            if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
-            if (status == Status.ATTACK || status == Status.IDLE || status == Status.COMBAT || status == Status.KITE || status == Status.PATROL) {
+            if (status != Status.COMBAT && status != Status.PATROL && status != Status.SCOUT) attackUnit = null;
+            if (status == Status.ATTACK || status == Status.IDLE || status == Status.COMBAT || status == Status.KITE || status == Status.PATROL || status == Status.SCOUT) {
                 if (placeMineAtChoke()) return false;
                 if (placeMineCombat()) return false;
             }
@@ -168,6 +178,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                 case PATROL:
                     patrol();
                     break;
+                case SCOUT:
+                    scoutBases();
+                    break;
             }
             return false;
         } catch (Exception e) {
@@ -189,6 +202,26 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             }
         }
         attackUnit = null;
+    }
+
+    private void scoutBases() {
+        if (getGs().BLs.isEmpty()) return;
+        
+        bwem.Base targetBase = getGs().BLs.get(currentBaseScoutIndex);
+        int checks = 0;
+        
+        while (checks < getGs().BLs.size() && (unit.getDistance(targetBase.getLocation().toPosition()) < 300 || getGs().bw.getBWMap().isVisible(targetBase.getLocation()))) {
+            currentBaseScoutIndex = (currentBaseScoutIndex + 1) % getGs().BLs.size();
+            targetBase = getGs().BLs.get(currentBaseScoutIndex);
+            checks++;
+        }
+        
+        if (checks < getGs().BLs.size()) {
+            UtilMicro.move(unit, targetBase.getLocation().toPosition());
+        } else {
+            status = Status.ATTACK;
+            attack();
+        }
     }
 
     private void combat() {
