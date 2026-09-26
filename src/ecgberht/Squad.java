@@ -89,7 +89,7 @@ public class Squad implements Comparable<Squad> {
 
             double bias = 0;
             if (u.unit instanceof Firebat)
-                bias = 80;
+                bias = 150;
             else if (u.unit instanceof Marine)
                 bias = 0;
             else if (u.unit instanceof Medic)

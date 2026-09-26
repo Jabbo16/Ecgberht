@@ -75,7 +75,7 @@ public class GameState {
                                 public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
-    public Set<Worker> workerIdle = new TreeSet<>();
+    public Set<Worker> workerIdle = new LinkedHashSet<>();
     public SimulationTheory sim;
     public SquadManager sqManager = new SquadManager();
     public SpellsManager wizard = new SpellsManager();

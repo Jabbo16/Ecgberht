@@ -50,7 +50,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             if (chokeCenter != null) {
                 for (int i = 0; i < 5; i++) {
                     org.openbw.bwapi4j.Position target = new org.openbw.bwapi4j.Position(chokeCenter.getX() + (int)(Math.random()*256 - 128), chokeCenter.getY() + (int)(Math.random()*256 - 128));
-                    if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target) && ecgberht.Ecgberht.getGs().getGame().getBWMap().isWalkable(target.toWalkPosition())) {
+                    if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target) 
+                        && ecgberht.Ecgberht.getGs().getGame().getBWMap().isWalkable(target.toWalkPosition())
+                        && ecgberht.Ecgberht.getGs().getGame().getBWMap().isBuildable(target.toTilePosition(), false)) {
                         boolean mineNearby = false;
                         for (ecgberht.UnitInfo ally : ecgberht.Ecgberht.getGs().unitStorage.getAllyUnits().values()) {
                             if (ally.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(target) < 160) {
@@ -86,7 +88,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                             break;
                         }
                     }
-                    if (!mineNearby) {
+                    if (!mineNearby && getGs().getGame().getBWMap().isBuildable(unit.getPosition().toTilePosition(), false)) {
                         unit.spiderMine(unit.getPosition());
                         return true;
                     }

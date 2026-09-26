@@ -49,6 +49,11 @@ public class CollectMineral extends BrainAction {
                     return BrainStatus.SUCCESS;
                 }
             }
+            if (chosen != null) {
+                gameState.workerIdle.remove(chosen);
+                gameState.workerIdle.add(chosen);
+                gameState.chosenWorker = null;
+            }
             return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
