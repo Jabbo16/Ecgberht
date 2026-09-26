@@ -125,7 +125,13 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             actualFrame = getGs().frameCount;
             frameLastOrder = unit.getLastCommandFrame();
             if (frameLastOrder == actualFrame) return false;
-            if (unit.getOrder() == Order.PlaceMine) return false;
+            if (unit.getOrder() == Order.PlaceMine) {
+                if (!mySim.enemies.isEmpty() && unit.getOrderTargetPosition() != null && unit.getDistance(unit.getOrderTargetPosition()) > 64) {
+                    unit.stop(false);
+                } else {
+                    return false;
+                }
+            }
             //Status old = status;
             getNewStatus();
             
@@ -136,8 +142,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT && status != Status.PATROL && status != Status.SCOUT) attackUnit = null;
             if (status == Status.ATTACK || status == Status.IDLE || status == Status.COMBAT || status == Status.KITE || status == Status.PATROL || status == Status.SCOUT) {
-                if (placeMineAtChoke()) return false;
                 if (placeMineCombat()) return false;
+                if (mySim.enemies.isEmpty() && placeMineAtChoke()) return false;
             }
             if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
@@ -385,6 +391,8 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 }
+
+
 
 
 
