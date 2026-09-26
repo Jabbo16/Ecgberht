@@ -14,8 +14,8 @@ public class CheckExpandingIsland extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.chosenWorkerDrop != null && (gameState.chosenDropShip == null
-                    || !gameState.chosenDropShip.statusToString().equals("IDLE"))) {
+            if (gameState.chosenWorkerDrop != null && (gameState.mil.chosenDropShip == null
+                    || !gameState.mil.chosenDropShip.statusToString().equals("IDLE"))) {
                 return BrainStatus.SUCCESS;
             }
             return BrainStatus.FAILURE;
@@ -26,4 +26,9 @@ public class CheckExpandingIsland extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

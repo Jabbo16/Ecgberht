@@ -73,3 +73,8 @@ public class BioGreedyFE extends Strategy {
         upgradesToResearch.add(UpgradeType.U_238_Shells);
     }
 }
+
+
+
+
+

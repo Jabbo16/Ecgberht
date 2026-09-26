@@ -152,3 +152,9 @@ public abstract class Area {
         return getId().hashCode();
     }
 }
+
+
+
+
+
+

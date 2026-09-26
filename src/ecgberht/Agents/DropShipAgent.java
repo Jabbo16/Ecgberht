@@ -208,3 +208,7 @@ public class DropShipAgent extends Agent implements Comparable<Unit> {
 
     enum Status {PICKING, MOVING, DROP, RETREAT, IDLE}
 }
+
+
+
+

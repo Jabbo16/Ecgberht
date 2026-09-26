@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.Defense;
+package ecgberht.BehaviourTrees.mil.defense;
 
 import bwem.Area;
 import bwem.Base;
@@ -27,7 +27,7 @@ public class CheckPerimeter extends BrainAction {
 
         try {
             gameState.enemyInBase.clear();
-            gameState.defense = false;
+            gameState.mil.defense = false;
             Set<Unit> enemyInvaders = new TreeSet<>(gameState.enemyCombatUnitMemory);
             for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
                 if (u.unitType.canAttack() || u.unitType == UnitType.Protoss_Pylon || u.unitType.canProduce() || u.unitType.isRefinery()) {
@@ -51,7 +51,7 @@ public class CheckPerimeter extends BrainAction {
                             break;
                         }
                     }
-                    for (Map.Entry<SCV, Building> c : gameState.workerTask.entrySet()) {
+                    for (Map.Entry<SCV, Building> c : gameState.eco.workerTask.entrySet()) {
                         int dist = c.getValue() instanceof CommandCenter ? 500 : 200;
                         if (Util.broodWarDistance(u.getPosition(), c.getValue().getPosition()) <= dist) {
                             gameState.enemyInBase.add(u);
@@ -64,7 +64,7 @@ public class CheckPerimeter extends BrainAction {
                             break;
                         }
                     }
-                    for (Unit c : gameState.DBs.keySet()) {
+                    for (Unit c : gameState.tech.DBs.keySet()) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             gameState.enemyInBase.add(u);
                             break;
@@ -76,14 +76,14 @@ public class CheckPerimeter extends BrainAction {
                             break;
                         }
                     }
-                    for (ResearchingFacility c : gameState.UBs) {
+                    for (ResearchingFacility c : gameState.tech.UBs) {
                         if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                             gameState.enemyInBase.add(u);
                             break;
                         }
                     }
                     if (!gameState.getStrat().name.equals("ProxyBBS") && !gameState.getStrat().name.equals("ProxyEightRax")) {
-                        for (Unit c : gameState.MBs) {
+                        for (Unit c : gameState.tech.MBs) {
                             if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 gameState.enemyInBase.add(u);
                                 break;
@@ -96,17 +96,17 @@ public class CheckPerimeter extends BrainAction {
                 /*if ((((GameState) gameState).getArmySize() >= 50 && ((GameState) gameState).getArmySize() / ((GameState) gameState).enemyInBase.size() > 10)) {
                     return BrainStatus.FAILURE;
                 }*/
-                gameState.defense = true;
+                gameState.mil.defense = true;
                 return BrainStatus.SUCCESS;
             }
             int cFrame = gameState.frameCount;
             List<Worker> toDelete = new ArrayList<>();
-            for (Worker u : gameState.workerDefenders.keySet()) {
+            for (Worker u : gameState.eco.workerDefenders.keySet()) {
                 if (u.getLastCommandFrame() == cFrame) continue;
                 Position closestDefense;
                 if (gameState.learningManager.isNaughty()) {
-                    if (!gameState.DBs.isEmpty()) {
-                        closestDefense = gameState.DBs.keySet().iterator().next().getPosition();
+                    if (!gameState.tech.DBs.isEmpty()) {
+                        closestDefense = gameState.tech.DBs.keySet().iterator().next().getPosition();
                         u.move(closestDefense);
                         toDelete.add(u);
                         continue;
@@ -120,11 +120,11 @@ public class CheckPerimeter extends BrainAction {
             }
             for (Worker u : toDelete) {
                 u.stop(false);
-                gameState.workerDefenders.remove(u);
+                gameState.eco.workerDefenders.remove(u);
                 gameState.workerIdle.add(u);
             }
             for (Squad u : gameState.sqManager.squads.values()) {
-                if (u.status == Status.DEFENSE) {
+                if (u.status == Status.defense) {
                     if (u.getSquadCenter() == null) continue;
                     Position closestCC = gameState.getNearestCC(u.getSquadCenter(), false);
                     if (closestCC != null) {
@@ -132,8 +132,8 @@ public class CheckPerimeter extends BrainAction {
                         Area regCC = gameState.bwem.getMap().getArea(closestCC.toTilePosition());
                         if (squad != null && regCC != null) {
                             if (!squad.equals(regCC)) {
-                                if (!gameState.DBs.isEmpty() && gameState.CCs.size() == 1) {
-                                    u.giveMoveOrder(gameState.DBs.keySet().iterator().next().getPosition());
+                                if (!gameState.tech.DBs.isEmpty() && gameState.CCs.size() == 1) {
+                                    u.giveMoveOrder(gameState.tech.DBs.keySet().iterator().next().getPosition());
                                 } else {
                                     u.giveMoveOrder(Util.getClosestChokepoint(u.getSquadCenter()).getCenter().toPosition());
                                 }
@@ -150,7 +150,7 @@ public class CheckPerimeter extends BrainAction {
                     u.attack = null;
                 }
             }
-            gameState.defense = false;
+            gameState.mil.defense = false;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
@@ -159,3 +159,8 @@ public class CheckPerimeter extends BrainAction {
         }
     }
 }
+
+
+
+
+

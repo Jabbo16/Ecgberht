@@ -22,7 +22,7 @@ public class ChooseBunker extends BrainAction {
                 return BrainStatus.FAILURE;
             }
             if ((needBunker() || gameState.getStrat().bunker || IntelligenceAgency.enemyIsRushing() || gameState.learningManager.isNaughty())
-                    && gameState.MBs.size() >= 1 && Util.countBuildingAll(UnitType.Terran_Bunker) == 0) {
+                    && gameState.tech.MBs.size() >= 1 && Util.countBuildingAll(UnitType.Terran_Bunker) == 0) {
                 gameState.chosenToBuild = UnitType.Terran_Bunker;
                 return BrainStatus.SUCCESS;
             }
@@ -39,4 +39,9 @@ public class ChooseBunker extends BrainAction {
                 && !gameState.getStrat().name.equals("ProxyEightRax") && !gameState.getStrat().name.equals("TwoPortWraith");
     }
 }
+
+
+
+
+
 

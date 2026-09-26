@@ -34,8 +34,8 @@ public class ChooseWorker extends BrainAction {
                         closestWorker = u;
                 }
             }
-            if (!gameState.workerMining.isEmpty()) {
-                for (Worker u : gameState.workerMining.keySet()) {
+            if (!gameState.eco.workerMining.isEmpty()) {
+                for (Worker u : gameState.eco.workerMining.keySet()) {
                     if (u.getLastCommandFrame() == frame) continue;
                     Area workerArea = gameState.bwem.getMap().getArea(u.getTilePosition());
                     if (workerArea == null) continue;
@@ -59,3 +59,8 @@ public class ChooseWorker extends BrainAction {
         }
     }
 }
+
+
+
+
+

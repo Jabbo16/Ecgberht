@@ -46,9 +46,9 @@ public class TrainUnit extends BrainAction {
                 }
             }
             if (gameState.getSupply() > 4 || gameState.checkSupply() || gameState.getPlayer().supplyTotal() >= 400) {
-                if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
+                if (!gameState.mil.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                     boolean found = false;
-                    for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                    for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                         if (w.first == UnitType.Terran_Command_Center) {
                             found = true;
                             break;
@@ -71,4 +71,9 @@ public class TrainUnit extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

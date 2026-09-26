@@ -17,11 +17,11 @@ public class ChooseVultureMines extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
-            for (ResearchingFacility u : gameState.UBs) {
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof MachineShop)) continue;
                 if (!gameState.getPlayer().hasResearched(TechType.Spider_Mines) && u.canResearch(TechType.Spider_Mines) && !u.isResearching() && !u.isUpgrading()) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenResearch = TechType.Spider_Mines;
                     return BrainStatus.SUCCESS;
                 }
@@ -34,4 +34,9 @@ public class ChooseVultureMines extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

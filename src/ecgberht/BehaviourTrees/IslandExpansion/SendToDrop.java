@@ -20,25 +20,25 @@ public class SendToDrop extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.chosenDropShip != null && gameState.chosenWorker != null) {
+            if (gameState.mil.chosenDropShip != null && gameState.chosenWorker != null) {
                 Worker chosen = gameState.chosenWorker;
                 if (gameState.workerIdle.contains(chosen)) {
                     gameState.workerIdle.remove(chosen);
-                } else if (gameState.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = gameState.workerMining.get(chosen);
-                    gameState.workerMining.remove(chosen);
-                    if (gameState.mineralsAssigned.containsKey(mineral)) {
-                        gameState.mining--;
-                        gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                } else if (gameState.eco.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = gameState.eco.workerMining.get(chosen);
+                    gameState.eco.workerMining.remove(chosen);
+                    if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                        gameState.eco.mining--;
+                        gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                     }
                 }
-                gameState.chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(gameState.chosenWorker)));
-                gameState.chosenDropShip.setTarget(gameState.chosenIsland.getLocation().toPosition());
+                gameState.mil.chosenDropShip.setCargo(new TreeSet<>(Collections.singletonList(gameState.chosenWorker)));
+                gameState.mil.chosenDropShip.setTarget(gameState.chosenIsland.getLocation().toPosition());
                 gameState.chosenWorkerDrop = gameState.chosenWorker;
                 gameState.chosenWorker = null;
                 return BrainStatus.SUCCESS;
             }
-            gameState.chosenDropShip = null;
+            gameState.mil.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
             return BrainStatus.FAILURE;
@@ -49,3 +49,8 @@ public class SendToDrop extends BrainAction {
         }
     }
 }
+
+
+
+
+

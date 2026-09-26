@@ -20,23 +20,23 @@ public class CollectGas extends BrainAction {
         try {
             if (gameState.getPlayer().gas() >= 400 * Math.max(1, gameState.CCs.size())) return BrainStatus.FAILURE;
             Worker chosen = gameState.chosenWorker;
-            if (!gameState.refineriesAssigned.isEmpty()) {
+            if (!gameState.eco.refineriesAssigned.isEmpty()) {
                 GasMiningFacility closestGeyser = null;
                 int workerGas = gameState.getStrat().workerGas == 0 ? 3 : gameState.getStrat().workerGas;
-                for (Entry<GasMiningFacility, Integer> g : gameState.refineriesAssigned.entrySet()) {
+                for (Entry<GasMiningFacility, Integer> g : gameState.eco.refineriesAssigned.entrySet()) {
                     if (gameState.bwem.getMap().getArea(chosen.getTilePosition()) != null && gameState.bwem.getMap().getArea(g.getKey().getTilePosition()) != null && !gameState.bwem.getMap().getArea(chosen.getTilePosition()).isAccessibleFrom(gameState.bwem.getMap().getArea(g.getKey().getTilePosition())))
                         continue;
-                    if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && gameState.mining > 3) {
+                    if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && gameState.eco.mining > 3) {
                         closestGeyser = g.getKey();
                     }
                 }
                 if (closestGeyser != null) {
                     if (chosen.gather(closestGeyser, false)) {
-                        Integer aux = gameState.refineriesAssigned.get(closestGeyser);
+                        Integer aux = gameState.eco.refineriesAssigned.get(closestGeyser);
                         aux++;
-                        gameState.refineriesAssigned.put(closestGeyser, aux);
+                        gameState.eco.refineriesAssigned.put(closestGeyser, aux);
                         gameState.workerIdle.remove(chosen);
-                        gameState.workerGas.put(chosen, closestGeyser);
+                        gameState.eco.workerGas.put(chosen, closestGeyser);
                         gameState.chosenWorker = null;
                         return BrainStatus.SUCCESS;
                     }
@@ -50,4 +50,9 @@ public class CollectGas extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

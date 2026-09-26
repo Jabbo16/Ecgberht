@@ -17,11 +17,11 @@ public class ChooseSiegeMode extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
-            for (ResearchingFacility u : gameState.UBs) {
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof MachineShop)) continue;
                 if (!gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode) && u.canResearch(TechType.Tank_Siege_Mode) && !u.isResearching() && !u.isUpgrading()) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenResearch = TechType.Tank_Siege_Mode;
                     return BrainStatus.SUCCESS;
                 }
@@ -34,4 +34,9 @@ public class ChooseSiegeMode extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

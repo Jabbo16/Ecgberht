@@ -16,7 +16,7 @@ public class CheckResourcesUnit extends BrainAction {
     public BrainStatus execute() {
         try {
             MutablePair<Integer, Integer> cash = gameState.getCash();
-            if (cash.first >= (gameState.chosenUnit.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenUnit.gasPrice()) + gameState.deltaCash.second) {
+            if (cash.first >= (gameState.chosenUnit.mineralPrice() + gameState.eco.deltaCash.first) && cash.second >= (gameState.chosenUnit.gasPrice()) + gameState.eco.deltaCash.second) {
                 return BrainStatus.SUCCESS;
             }
             gameState.chosenTrainingFacility = null;
@@ -29,4 +29,9 @@ public class CheckResourcesUnit extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

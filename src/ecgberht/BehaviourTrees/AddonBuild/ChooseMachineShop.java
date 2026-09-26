@@ -17,20 +17,20 @@ public class ChooseMachineShop extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.getStrat().name.equals("VultureRush") && (gameState.Fs.size() < 2 || gameState.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
+            if (gameState.getStrat().name.equals("VultureRush") && (gameState.tech.Fs.size() < 2 || gameState.tech.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
                 return BrainStatus.FAILURE;
-            if (gameState.getStrat().name.equals("TheNitekat") && (gameState.Fs.size() > 1 || gameState.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
+            if (gameState.getStrat().name.equals("TheNitekat") && (gameState.tech.Fs.size() > 1 || gameState.tech.UBs.stream().anyMatch(u -> u instanceof MachineShop)))
                 return BrainStatus.FAILURE;
-            if (!gameState.Fs.isEmpty()) {
-                for (Factory c : gameState.Fs) {
+            if (!gameState.tech.Fs.isEmpty()) {
+                for (Factory c : gameState.tech.Fs) {
                     if (!c.isTraining() && c.getAddon() == null) {
-                        gameState.chosenBuildingAddon = c;
+                        gameState.tech.chosenBuildingAddon = c;
                         gameState.chosenAddon = UnitType.Terran_Machine_Shop;
                         return BrainStatus.SUCCESS;
                     }
                 }
             }
-            gameState.chosenBuildingAddon = null;
+            gameState.tech.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
@@ -40,4 +40,9 @@ public class ChooseMachineShop extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

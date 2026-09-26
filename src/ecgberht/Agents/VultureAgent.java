@@ -113,12 +113,12 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                     Position ccPos = cc.second.getPosition();
                     if (getGs().getGame().getBWMap().isValidPosition(ccPos)) {
                         unit.move(ccPos);
-                        getGs().myArmy.add(unitInfo);
+                        getGs().mil.myArmy.add(unitInfo);
                         return true;
                     }
                 }
                 unit.move(getGs().getPlayer().getStartLocation().toPosition());
-                getGs().myArmy.add(unitInfo);
+                getGs().mil.myArmy.add(unitInfo);
                 return true;
             }
             mySim = getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND);
@@ -385,4 +385,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 }
+
+
+
+
+
 

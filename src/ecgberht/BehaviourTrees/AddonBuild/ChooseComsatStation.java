@@ -21,9 +21,9 @@ public class ChooseComsatStation extends BrainAction {
             if (!gameState.CCs.isEmpty()) {
                 for (CommandCenter c : gameState.CCs.values()) {
                     if (!c.isTraining() && c.getAddon() == null) {
-                        for (ResearchingFacility u : gameState.UBs) {
+                        for (ResearchingFacility u : gameState.tech.UBs) {
                             if (u instanceof Academy) {
-                                gameState.chosenBuildingAddon = c;
+                                gameState.tech.chosenBuildingAddon = c;
                                 gameState.chosenAddon = UnitType.Terran_Comsat_Station;
                                 return BrainStatus.SUCCESS;
                             }
@@ -32,7 +32,7 @@ public class ChooseComsatStation extends BrainAction {
                     }
                 }
             }
-            gameState.chosenBuildingAddon = null;
+            gameState.tech.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
@@ -42,4 +42,9 @@ public class ChooseComsatStation extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

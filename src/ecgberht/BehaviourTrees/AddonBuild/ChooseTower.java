@@ -16,14 +16,14 @@ public class ChooseTower extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            for (Starport c : gameState.Ps) {
+            for (Starport c : gameState.tech.Ps) {
                 if (!c.isTraining() && c.getAddon() == null) {
-                    gameState.chosenBuildingAddon = c;
+                    gameState.tech.chosenBuildingAddon = c;
                     gameState.chosenAddon = UnitType.Terran_Control_Tower;
                     return BrainStatus.SUCCESS;
                 }
             }
-            gameState.chosenBuildingAddon = null;
+            gameState.tech.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
@@ -33,4 +33,9 @@ public class ChooseTower extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -21,14 +21,14 @@ public class ChooseArmory extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.Fs.isEmpty() || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode))
+            if (gameState.tech.Fs.isEmpty() || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode))
                 return BrainStatus.FAILURE;
-            if (gameState.Fs.size() < gameState.getStrat().facForArmory) return BrainStatus.FAILURE;
+            if (gameState.tech.Fs.size() < gameState.getStrat().facForArmory) return BrainStatus.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Armory) < gameState.getStrat().numArmories) {
-                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Armory) return BrainStatus.FAILURE;
                 }
-                for (Building w : gameState.workerTask.values()) {
+                for (Building w : gameState.eco.workerTask.values()) {
                     if (w instanceof Armory) return BrainStatus.FAILURE;
                 }
                 gameState.chosenToBuild = UnitType.Terran_Armory;
@@ -42,4 +42,9 @@ public class ChooseArmory extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

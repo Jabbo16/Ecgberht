@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.BuildingLot;
+package ecgberht.BehaviourTrees.tech.buildingLot;
 import ecgberht.brain.*;
 
 import ecgberht.GameState;
@@ -18,21 +18,21 @@ public class ChooseBuildingLot extends BrainAction {
     public BrainStatus execute() {
         try {
             Building savedTurret = null;
-            for (Building b : gameState.buildingLot) {
+            for (Building b : gameState.tech.buildingLot) {
                 if (!b.isUnderAttack()) {
                     if (b instanceof Bunker) {
-                        gameState.chosenBuildingLot = b;
+                        gameState.tech.chosenBuildingLot = b;
                         return BrainStatus.SUCCESS;
                     }
                     if (b instanceof MissileTurret) savedTurret = b;
-                    gameState.chosenBuildingLot = b;
+                    gameState.tech.chosenBuildingLot = b;
                 }
             }
             if (savedTurret != null) {
-                gameState.chosenBuildingLot = savedTurret;
+                gameState.tech.chosenBuildingLot = savedTurret;
                 return BrainStatus.SUCCESS;
             }
-            if (gameState.chosenBuildingLot != null) return BrainStatus.SUCCESS;
+            if (gameState.tech.chosenBuildingLot != null) return BrainStatus.SUCCESS;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
@@ -41,4 +41,9 @@ public class ChooseBuildingLot extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

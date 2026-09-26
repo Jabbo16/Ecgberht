@@ -34,9 +34,9 @@ public class ChooseSupply extends BrainAction {
                 return BrainStatus.FAILURE;
             }
             if (gameState.getSupply() > 4 * gameState.getCombatUnitsBuildings()) return BrainStatus.FAILURE;
-            int countSupplyDepots = (int) (gameState.workerBuild.values().stream()
+            int countSupplyDepots = (int) (gameState.eco.workerBuild.values().stream()
                     .filter(u -> u.first == UnitType.Terran_Supply_Depot).count()
-                    + gameState.workerTask.values().stream().filter(u -> u instanceof SupplyDepot).count());
+                    + gameState.eco.workerTask.values().stream().filter(u -> u instanceof SupplyDepot).count());
             int maxSupplyDepots = 1;
             if (gameState.getCash().first >= 800) maxSupplyDepots = 4;
             else if (gameState.getCash().first >= 400 && !gameState.isGoingToExpand()) maxSupplyDepots = 2;
@@ -52,4 +52,9 @@ public class ChooseSupply extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

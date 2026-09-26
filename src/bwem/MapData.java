@@ -76,3 +76,9 @@ public final class MapData {
         return (x >= 0 && x < maxX && y >= 0 && y < maxY);
     }
 }
+
+
+
+
+
+

@@ -19,7 +19,7 @@ public class CheckIslands extends BrainAction {
             for (Base b : gameState.islandBases) {
                 if (!gameState.islandCCs.containsKey(b)) return BrainStatus.SUCCESS;
             }
-            gameState.chosenDropShip = null;
+            gameState.mil.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
             return BrainStatus.FAILURE;
@@ -30,4 +30,9 @@ public class CheckIslands extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -20,3 +20,8 @@ public class BrainInverter extends BrainNode {
         return status;
     }
 }
+
+
+
+
+

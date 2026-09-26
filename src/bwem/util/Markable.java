@@ -32,3 +32,9 @@ public final class Markable {
         this.lastMark = staticMarkable.getCurrentMark();
     }
 }
+
+
+
+
+
+

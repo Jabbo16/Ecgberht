@@ -458,7 +458,7 @@ public class BuildingMap implements Cloneable {
     }
 
     public TilePosition findBunkerPositionAntiPool() {
-        TilePosition starting = getGs().MBs.iterator().next().getTilePosition();
+        TilePosition starting = getGs().tech.MBs.iterator().next().getTilePosition();
         TilePosition buildingSize = UnitType.Terran_Bunker.tileSize();
         int size = Math.max(buildingSize.getY(), buildingSize.getX());
         int x = starting.getY();
@@ -534,3 +534,8 @@ public class BuildingMap implements Cloneable {
         }
     }
 }
+
+
+
+
+

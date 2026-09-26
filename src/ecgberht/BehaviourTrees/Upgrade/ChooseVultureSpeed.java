@@ -17,11 +17,11 @@ public class ChooseVultureSpeed extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
-            for (ResearchingFacility u : gameState.UBs) {
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof MachineShop)) continue;
                 if (u.canUpgrade(UpgradeType.Ion_Thrusters) && !u.isResearching() && !u.isUpgrading() && gameState.getPlayer().getUpgradeLevel(UpgradeType.Ion_Thrusters) < 1) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenUpgrade = UpgradeType.Ion_Thrusters;
                     return BrainStatus.SUCCESS;
                 }
@@ -34,4 +34,9 @@ public class ChooseVultureSpeed extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

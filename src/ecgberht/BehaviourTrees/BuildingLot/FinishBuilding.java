@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.BuildingLot;
+package ecgberht.BehaviourTrees.tech.buildingLot;
 import ecgberht.brain.*;
 
 import ecgberht.GameState;
@@ -18,20 +18,20 @@ public class FinishBuilding extends BrainAction {
     public BrainStatus execute() {
         try {
             Worker chosen = gameState.chosenWorker;
-            if (chosen.rightClick(gameState.chosenBuildingLot, false)) {
+            if (chosen.rightClick(gameState.tech.chosenBuildingLot, false)) {
                 if (gameState.workerIdle.contains(chosen)) gameState.workerIdle.remove(chosen);
-                else if (gameState.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = gameState.workerMining.get(chosen);
-                    gameState.workerMining.remove(chosen);
-                    if (gameState.mineralsAssigned.containsKey(mineral)) {
-                        gameState.mining--;
-                        gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                else if (gameState.eco.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = gameState.eco.workerMining.get(chosen);
+                    gameState.eco.workerMining.remove(chosen);
+                    if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                        gameState.eco.mining--;
+                        gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                     }
                 }
-                gameState.workerTask.put((SCV) chosen, gameState.chosenBuildingLot);
+                gameState.eco.workerTask.put((SCV) chosen, gameState.tech.chosenBuildingLot);
                 gameState.chosenWorker = null;
-                gameState.buildingLot.remove(gameState.chosenBuildingLot);
-                gameState.chosenBuildingLot = null;
+                gameState.tech.buildingLot.remove(gameState.tech.chosenBuildingLot);
+                gameState.tech.chosenBuildingLot = null;
                 return BrainStatus.SUCCESS;
             }
             return BrainStatus.FAILURE;
@@ -42,4 +42,9 @@ public class FinishBuilding extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

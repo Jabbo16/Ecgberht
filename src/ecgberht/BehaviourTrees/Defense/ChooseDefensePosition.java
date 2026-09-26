@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.Defense;
+package ecgberht.BehaviourTrees.mil.defense;
 
 import ecgberht.GameState;
 import ecgberht.Util.Util;
@@ -14,7 +14,7 @@ public class ChooseDefensePosition extends BrainAction {
     }
 
     private Position getDefensePosition() {
-        if (gameState.defendPosition != null) return gameState.defendPosition;
+        if (gameState.mil.defendPosition != null) return gameState.mil.defendPosition;
         if (gameState.initDefensePosition != null)
             return gameState.initDefensePosition.toPosition();
         if (gameState.mainChoke != null)
@@ -51,10 +51,10 @@ public class ChooseDefensePosition extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.defense) {
+            if (gameState.mil.defense) {
                 Position chosenDefensePosition = chooseDefensePosition();
                 if (chosenDefensePosition != null) {
-                    gameState.attackPosition = chosenDefensePosition;
+                    gameState.mil.attackPosition = chosenDefensePosition;
                     return BrainStatus.SUCCESS;
                 }
             }
@@ -66,4 +66,9 @@ public class ChooseDefensePosition extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

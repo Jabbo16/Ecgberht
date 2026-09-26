@@ -171,3 +171,9 @@ public final class Base {
         return Objects.hash(this.area, this.location, this.center);
     }
 }
+
+
+
+
+
+

@@ -16,7 +16,7 @@ public class Explore extends BrainAction {
     public BrainStatus execute() {
         try {
             if (gameState.chosenHarasser != null) {
-                gameState.agents.put(gameState.chosenHarasser, new WorkerScoutAgent(gameState.chosenHarasser, gameState.enemyMainBase));
+                gameState.mil.agents.put(gameState.chosenHarasser, new WorkerScoutAgent(gameState.chosenHarasser, gameState.enemyMainBase));
                 gameState.naughtySCV = gameState.chosenHarasser;
                 gameState.chosenHarasser = null;
                 return BrainStatus.SUCCESS;
@@ -29,4 +29,9 @@ public class Explore extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

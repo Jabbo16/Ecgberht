@@ -51,3 +51,9 @@ public final class AreaId implements Comparable<AreaId> {
         return this.val;
     }
 }
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.BuildingLot;
+package ecgberht.BehaviourTrees.tech.buildingLot;
 import ecgberht.brain.*;
 
 import ecgberht.GameState;
@@ -20,7 +20,7 @@ public class ChooseBlotWorker extends BrainAction {
     public BrainStatus execute() {
         try {
             Worker closestWorker = null;
-            Position chosen = gameState.chosenBuildingLot.getPosition();
+            Position chosen = gameState.tech.chosenBuildingLot.getPosition();
             if (!gameState.workerIdle.isEmpty()) {
                 for (Worker u : gameState.workerIdle) {
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
@@ -28,8 +28,8 @@ public class ChooseBlotWorker extends BrainAction {
                     }
                 }
             }
-            if (!gameState.workerMining.isEmpty()) {
-                for (Entry<Worker, MineralPatch> u : gameState.workerMining.entrySet()) {
+            if (!gameState.eco.workerMining.isEmpty()) {
+                for (Entry<Worker, MineralPatch> u : gameState.eco.workerMining.entrySet()) {
                     if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.getKey().isCarryingMinerals()) {
                         closestWorker = u.getKey();
                     }
@@ -47,4 +47,9 @@ public class ChooseBlotWorker extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

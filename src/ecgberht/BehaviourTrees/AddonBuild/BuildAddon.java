@@ -17,9 +17,9 @@ public class BuildAddon extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (!gameState.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
+            if (!gameState.mil.defense && gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 boolean found = false;
-                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Command_Center) {
                         found = true;
                         break;
@@ -27,12 +27,12 @@ public class BuildAddon extends BrainAction {
                 }
                 if (!found) return BrainStatus.FAILURE;
             }
-            if (gameState.chosenBuildingAddon.getAddon() == null && gameState.chosenBuildingAddon.build(gameState.chosenAddon)) {
-                gameState.chosenBuildingAddon = null;
+            if (gameState.tech.chosenBuildingAddon.getAddon() == null && gameState.tech.chosenBuildingAddon.build(gameState.chosenAddon)) {
+                gameState.tech.chosenBuildingAddon = null;
                 gameState.chosenAddon = null;
                 return BrainStatus.SUCCESS;
             }
-            gameState.chosenBuildingAddon = null;
+            gameState.tech.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
@@ -42,4 +42,9 @@ public class BuildAddon extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

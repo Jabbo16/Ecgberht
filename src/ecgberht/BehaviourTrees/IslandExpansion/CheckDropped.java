@@ -18,12 +18,12 @@ public class CheckDropped extends BrainAction {
     public BrainStatus execute() {
         try {
             Worker scv = gameState.chosenWorkerDrop;
-            DropShipAgent ship = gameState.chosenDropShip;
+            DropShipAgent ship = gameState.mil.chosenDropShip;
             if (ship == null) return BrainStatus.SUCCESS;
             if (scv != null && ship.statusToString().equals("RETREAT")) {
                 Unit transport = scv.getTransport();
                 if (transport == null) {
-                    gameState.chosenDropShip = null;
+                    gameState.mil.chosenDropShip = null;
                     return BrainStatus.SUCCESS;
                 }
             }
@@ -35,4 +35,9 @@ public class CheckDropped extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -27,7 +27,7 @@ public class ChooseFactory extends BrainAction {
                     return BrainStatus.FAILURE;
                 }
             }
-            if (gameState.MBs.isEmpty() || gameState.getStrat().numRaxForFac > Util.countBuildingAll(UnitType.Terran_Barracks) ||
+            if (gameState.tech.MBs.isEmpty() || gameState.getStrat().numRaxForFac > Util.countBuildingAll(UnitType.Terran_Barracks) ||
                     (Util.countBuildingAll(UnitType.Terran_Factory) > 0 && gameState.getStrat().facPerCC == 0)) {
                 return BrainStatus.FAILURE;
             }
@@ -35,8 +35,8 @@ public class ChooseFactory extends BrainAction {
                 gameState.chosenToBuild = UnitType.Terran_Factory;
                 return BrainStatus.SUCCESS;
             } else if (Util.countBuildingAll(UnitType.Terran_Factory) < gameState.getStrat().facPerCC * Util.getNumberCCs()) {
-                if (strat.equals("TwoPortWraith") && gameState.naughtySCV != null && gameState.Fs.isEmpty() && gameState.proxyBuilding == null) {
-                    WorkerScoutAgent w = (WorkerScoutAgent) gameState.agents.get(gameState.naughtySCV);
+                if (strat.equals("TwoPortWraith") && gameState.naughtySCV != null && gameState.tech.Fs.isEmpty() && gameState.proxyBuilding == null) {
+                    WorkerScoutAgent w = (WorkerScoutAgent) gameState.mil.agents.get(gameState.naughtySCV);
                     if (w != null && w.statusToString().equals("Proxying")) {
                         gameState.chosenToBuild = UnitType.None;
                         return BrainStatus.SUCCESS;
@@ -53,4 +53,9 @@ public class ChooseFactory extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

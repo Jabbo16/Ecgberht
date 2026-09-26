@@ -27,3 +27,9 @@ public final class StaticMarkable {
         ++this.currentMark;
     }
 }
+
+
+
+
+
+

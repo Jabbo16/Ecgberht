@@ -190,7 +190,7 @@ public class IntelligenceAgency {
                 String strat = getGs().getStrat().name;
                 if (strat.contains("GreedyFE") || strat.equals("14CC")) { // TODO cancel 14CC??
                     getGs().setStrat(new FullBio());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    getGs().mil.defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
                 return true;
@@ -214,12 +214,12 @@ public class IntelligenceAgency {
                 String strat = getGs().getStrat().name;
                 if (strat.contains("GreedyFE") || strat.equals("FullMech") || strat.equals("14CC")) {
                     getGs().setStrat(new FullBio());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    getGs().mil.defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
 
                 } else if (getGs().getStrat().name.equals("BioMech") || getGs().getStrat().name.equals("BioMechFE")) {
                     getGs().setStrat(new FullBioFE());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    getGs().mil.defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
                 getGs().getStrat().armyForExpand += 13;
@@ -306,7 +306,7 @@ public class IntelligenceAgency {
                 Util.sendText("Nice 12 Hatch");
                 if (!getGs().getStrat().name.contains("GreedyFE") && !getGs().getStrat().proxy && !getGs().getStrat().trainUnits.contains(UnitType.Terran_Wraith)) {
                     getGs().iReallyWantToExpand = true;
-                    getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+                    getGs().mil.defendPosition = getGs().naturalChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
                 return true;
@@ -327,12 +327,12 @@ public class IntelligenceAgency {
                 String strat = getGs().getStrat().name;
                 if (strat.equals("14CC")) { // TODO cancel 14CC??
                     getGs().setStrat(new FullBio());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    getGs().mil.defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
                 if (strat.contains("GreedyFE")) { // TODO cancel FE??
                     getGs().setStrat(new FullBio());
-                    getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                    getGs().mil.defendPosition = getGs().mainChoke.getCenter().toPosition();
                     Ecgberht.transition();
                 }
                 return true;
@@ -352,7 +352,7 @@ public class IntelligenceAgency {
                 if (strat.equals("BioMech") || strat.equals("BioMechFE")) getGs().setStrat(new BioMechGreedyFE());
                 if (strat.equals("FullMech")) getGs().setStrat(new MechGreedyFE());
                 if (strat.contains("GreedyFE")) getGs().getStrat().armyForAttack += 10;
-                getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+                getGs().mil.defendPosition = getGs().naturalChoke.getCenter().toPosition();
                 Ecgberht.transition();
                 return true;
             }
@@ -428,7 +428,7 @@ public class IntelligenceAgency {
         if (getGs().getArmySize() <= 12) return 0;
         if (getGs().enemyRace == Race.Zerg) {
             if (stratName.contains("bio")) {
-                int mm = (int) getGs().myArmy.stream().filter(u -> u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Medic).count();
+                int mm = (int) getGs().mil.myArmy.stream().filter(u -> u.unitType == UnitType.Terran_Marine || u.unitType == UnitType.Terran_Medic).count();
                 if (stratName.contains("full") || stratName.contains("greedy")) return Math.max(3, mm / 14);
                 return Math.max(3, mm / 18);
             }
@@ -443,7 +443,7 @@ public class IntelligenceAgency {
     private static boolean canTrainVessels() {
         boolean tower = false;
         boolean science = false;
-        for (ResearchingFacility u : getGs().UBs) {
+        for (ResearchingFacility u : getGs().tech.UBs) {
             if (u instanceof ControlTower) tower = true;
             else if (u instanceof ScienceFacility) science = true;
             if (science && tower) break;
@@ -487,7 +487,7 @@ public class IntelligenceAgency {
                 getGs().playSound("rushed.mp3");
                 getGs().setStrat(new FullMech());
                 getGs().getStrat().armyForExpand += 10; // TODO add preconditions for expanding
-                getGs().defendPosition = getGs().mainChoke.getCenter().toPosition();
+                getGs().mil.defendPosition = getGs().mainChoke.getCenter().toPosition();
                 Ecgberht.transition();
                 return true;
             }
@@ -510,19 +510,19 @@ public class IntelligenceAgency {
         if (timeCheck && rushStratDetected) return true;
         switch (getGs().enemyRace) {
             case Zerg:
-                if (getGs().enemyInBase.stream().filter(u -> u instanceof Zergling).count() >= 4 && getGs().myArmy.size() < 4)
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof Zergling).count() >= 4 && getGs().mil.myArmy.size() < 4)
                     raceCheck = true;
                 break;
             case Terran:
-                if (getGs().enemyInBase.stream().filter(u -> u instanceof SCV).count() >= 3 && getGs().myArmy.size() < 3)
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof SCV).count() >= 3 && getGs().mil.myArmy.size() < 3)
                     raceCheck = true;
-                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Marine).count() > getGs().myArmy.size())
+                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Marine).count() > getGs().mil.myArmy.size())
                     raceCheck = true;
                 break;
             case Protoss:
-                if (getGs().enemyInBase.stream().filter(u -> u instanceof Probe).count() >= 3 && getGs().myArmy.size() < 3)
+                if (getGs().enemyInBase.stream().filter(u -> u instanceof Probe).count() >= 3 && getGs().mil.myArmy.size() < 3)
                     raceCheck = true;
-                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Zealot).count() >= 3 && getGs().myArmy.size() < 6)
+                else if (getGs().enemyInBase.stream().filter(u -> u instanceof Zealot).count() >= 3 && getGs().mil.myArmy.size() < 6)
                     raceCheck = true;
                 break;
         }
@@ -548,3 +548,8 @@ public class IntelligenceAgency {
 
     public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, NinePool, FastHatch, BioPush, MechRush, MutaliskRush}
 }
+
+
+
+
+

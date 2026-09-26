@@ -26,9 +26,9 @@ public class MoveIsland extends BrainAction {
             TilePosition chosenTile = gameState.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(chosenTile.toPosition(), chosenType);
             if (chosen.move(realEnd)) {
-                gameState.workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
-                gameState.deltaCash.first += chosenType.mineralPrice();
-                gameState.deltaCash.second += chosenType.gasPrice();
+                gameState.eco.workerBuild.put((SCV) chosen, new MutablePair<>(chosenType, chosenTile));
+                gameState.eco.deltaCash.first += chosenType.mineralPrice();
+                gameState.eco.deltaCash.second += chosenType.gasPrice();
                 gameState.chosenWorkerDrop = null;
                 gameState.chosenIsland = null;
                 gameState.islandExpand = false;
@@ -42,4 +42,9 @@ public class MoveIsland extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

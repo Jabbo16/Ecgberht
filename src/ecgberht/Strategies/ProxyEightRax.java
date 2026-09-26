@@ -63,3 +63,8 @@ public class ProxyEightRax extends Strategy {
         return Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 3;
     }
 }
+
+
+
+
+

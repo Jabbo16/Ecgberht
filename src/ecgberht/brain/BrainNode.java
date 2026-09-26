@@ -27,3 +27,8 @@ public abstract class BrainNode {
 
     public abstract BrainStatus evaluate();
 }
+
+
+
+
+

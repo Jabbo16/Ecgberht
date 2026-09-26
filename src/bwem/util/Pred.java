@@ -20,3 +20,9 @@ public interface Pred<T, P> {
         return (tile, position) -> true;
     }
 }
+
+
+
+
+
+

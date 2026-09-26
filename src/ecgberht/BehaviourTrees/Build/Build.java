@@ -25,13 +25,13 @@ public class Build extends BrainAction {
     public BrainStatus execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
-            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
+            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.eco.workerBuild.entrySet()) {
                 if (u.getKey().getOrder() != Order.PlaceBuilding && gameState.getGame().getBWMap().isVisible(u.getValue().second) && gameState.canAfford(u.getValue().first)) {
                     SCV chosen = u.getKey();
                     if (u.getValue().first == UnitType.Terran_Bunker) {
                         if (!chosen.build(u.getValue().second, u.getValue().first)) {
-                            gameState.deltaCash.first -= u.getValue().first.mineralPrice();
-                            gameState.deltaCash.second -= u.getValue().first.gasPrice();
+                            gameState.eco.deltaCash.first -= u.getValue().first.mineralPrice();
+                            gameState.eco.deltaCash.second -= u.getValue().first.gasPrice();
                             toRemove.add(chosen);
                             chosen.stop(false);
                             gameState.workerIdle.add(chosen);
@@ -42,7 +42,7 @@ public class Build extends BrainAction {
                     } else chosen.build(u.getValue().second, u.getValue().first);
                 }
             }
-            for (SCV s : toRemove) gameState.workerBuild.remove(s);
+            for (SCV s : toRemove) gameState.eco.workerBuild.remove(s);
             return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
@@ -51,4 +51,9 @@ public class Build extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

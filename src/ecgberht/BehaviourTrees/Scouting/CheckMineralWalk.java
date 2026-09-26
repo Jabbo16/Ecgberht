@@ -62,3 +62,8 @@ public class CheckMineralWalk extends BrainAction {
     }
 }
 
+
+
+
+
+

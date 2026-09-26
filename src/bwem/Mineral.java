@@ -45,3 +45,9 @@ public final class Mineral extends Resource {
         return getUnit().hashCode();
     }
 }
+
+
+
+
+
+

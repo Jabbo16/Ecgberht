@@ -19,7 +19,7 @@ public class ChooseWorkerDrop extends BrainAction {
         try {
             Worker closestWorker = null;
             int frame = gameState.frameCount;
-            Position chosen = gameState.chosenDropShip.unit.getPosition();
+            Position chosen = gameState.mil.chosenDropShip.unit.getPosition();
             if (!gameState.workerIdle.isEmpty()) {
                 for (Worker u : gameState.workerIdle) {
                     if (u.isCarryingMinerals()) continue;
@@ -29,8 +29,8 @@ public class ChooseWorkerDrop extends BrainAction {
                     }
                 }
             }
-            if (!gameState.workerMining.isEmpty()) {
-                for (Worker u : gameState.workerMining.keySet()) {
+            if (!gameState.eco.workerMining.isEmpty()) {
+                for (Worker u : gameState.eco.workerMining.keySet()) {
                     if (u.isCarryingMinerals()) continue;
                     if (u.getLastCommandFrame() == frame) continue;
                     if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
@@ -42,7 +42,7 @@ public class ChooseWorkerDrop extends BrainAction {
                 gameState.chosenWorker = closestWorker;
                 return BrainStatus.SUCCESS;
             }
-            gameState.chosenDropShip = null;
+            gameState.mil.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
             return BrainStatus.FAILURE;
@@ -53,3 +53,8 @@ public class ChooseWorkerDrop extends BrainAction {
         }
     }
 }
+
+
+
+
+

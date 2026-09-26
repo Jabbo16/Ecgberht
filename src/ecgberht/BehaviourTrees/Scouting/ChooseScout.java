@@ -37,15 +37,15 @@ public class ChooseScout extends BrainAction {
                 gameState.workerIdle.remove(chosen);
             }
             if (gameState.chosenScout == null) {
-                for (Worker u : gameState.workerMining.keySet()) {
+                for (Worker u : gameState.eco.workerMining.keySet()) {
                     if (!u.isCarryingMinerals()) {
                         gameState.chosenScout = u;
-                        MineralPatch mineral = gameState.workerMining.get(u);
-                        if (gameState.mineralsAssigned.containsKey(mineral)) {
-                            gameState.mining--;
-                            gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                        MineralPatch mineral = gameState.eco.workerMining.get(u);
+                        if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                            gameState.eco.mining--;
+                            gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                         }
-                        gameState.workerMining.remove(u);
+                        gameState.eco.workerMining.remove(u);
                         break;
                     }
                 }
@@ -59,4 +59,9 @@ public class ChooseScout extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

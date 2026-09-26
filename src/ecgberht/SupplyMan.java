@@ -47,3 +47,8 @@ public class SupplyMan {
         if (type.supplyRequired() > 0) supplyUsed -= type.supplyRequired();
     }
 }
+
+
+
+
+

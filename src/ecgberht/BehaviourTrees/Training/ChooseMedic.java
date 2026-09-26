@@ -22,16 +22,16 @@ public class ChooseMedic extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
             else {
-                for (ResearchingFacility u : gameState.UBs) {
+                for (ResearchingFacility u : gameState.tech.UBs) {
                     if (u instanceof Academy) {
                         int marine_count = 0;
-                        if (!gameState.DBs.isEmpty()) {
-                            marine_count = gameState.DBs.values().stream().mapToInt(Set::size).sum();
+                        if (!gameState.tech.DBs.isEmpty()) {
+                            marine_count = gameState.tech.DBs.values().stream().mapToInt(Set::size).sum();
                         }
-                        if (!gameState.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
-                            for (Barracks b : gameState.MBs) {
+                        if (!gameState.tech.MBs.isEmpty() && Util.countUnitTypeSelf(UnitType.Terran_Medic) * 4 < Util.countUnitTypeSelf(UnitType.Terran_Marine) - marine_count) {
+                            for (Barracks b : gameState.tech.MBs) {
                                 if (!b.isTraining()) {
                                     gameState.chosenUnit = UnitType.Terran_Medic;
                                     gameState.chosenTrainingFacility = b;
@@ -51,4 +51,9 @@ public class ChooseMedic extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

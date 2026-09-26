@@ -27,7 +27,7 @@ public class ChooseAcademy extends BrainAction {
             }
             Strategy strat = gameState.getStrat();
             if (strat.name.equals("FullMech") || strat.name.equals("MechGreedyFE")) {
-                if (gameState.Fs.size() >= strat.facPerCC
+                if (gameState.tech.Fs.size() >= strat.facPerCC
                         || IntelligenceAgency.enemyHasType(UnitType.Protoss_Dark_Templar)
                         || IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker)) {
                     gameState.chosenToBuild = UnitType.Terran_Academy;
@@ -35,10 +35,10 @@ public class ChooseAcademy extends BrainAction {
                 } else return BrainStatus.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Barracks) >= gameState.getStrat().numRaxForAca) {
-                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Academy) return BrainStatus.FAILURE;
                 }
-                for (Building w : gameState.workerTask.values()) {
+                for (Building w : gameState.eco.workerTask.values()) {
                     if (w instanceof Academy) return BrainStatus.FAILURE;
                 }
                 gameState.chosenToBuild = UnitType.Terran_Academy;
@@ -52,4 +52,9 @@ public class ChooseAcademy extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

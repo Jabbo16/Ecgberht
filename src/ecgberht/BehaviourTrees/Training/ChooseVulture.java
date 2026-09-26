@@ -18,9 +18,9 @@ public class ChooseVulture extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (!gameState.Fs.isEmpty()) {
+            if (!gameState.tech.Fs.isEmpty()) {
                 if (gameState.getStrat().name.equals("VultureRush") || Util.countUnitTypeSelf(UnitType.Terran_Vulture) * 2 <= Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) + 2) {
-                    for (Factory b : gameState.Fs) {
+                    for (Factory b : gameState.tech.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Vulture)) {
                             gameState.chosenUnit = UnitType.Terran_Vulture;
                             gameState.chosenTrainingFacility = b;
@@ -37,4 +37,9 @@ public class ChooseVulture extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

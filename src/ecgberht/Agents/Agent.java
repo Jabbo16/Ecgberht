@@ -36,3 +36,8 @@ public abstract class Agent {
 
     enum Status {ATTACK, KITE, COMBAT, IDLE, RETREAT, PATROL, SCOUT}
 }
+
+
+
+
+

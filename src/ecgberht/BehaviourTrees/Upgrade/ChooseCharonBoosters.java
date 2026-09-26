@@ -18,13 +18,13 @@ public class ChooseCharonBoosters extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty() || !gameState.getStrat().trainUnits.contains(UnitType.Terran_Goliath) || gameState.maxGoliaths == 0) {
+            if (gameState.tech.UBs.isEmpty() || !gameState.getStrat().trainUnits.contains(UnitType.Terran_Goliath) || gameState.maxGoliaths == 0) {
                 return BrainStatus.FAILURE;
             }
-            for (ResearchingFacility u : gameState.UBs) {
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof MachineShop)) continue;
                 if (gameState.getPlayer().getUpgradeLevel(UpgradeType.Charon_Boosters) < 1 && u.canUpgrade(UpgradeType.Charon_Boosters) && !u.isResearching() && !u.isUpgrading()) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenUpgrade = UpgradeType.Charon_Boosters;
                     return BrainStatus.SUCCESS;
                 }
@@ -37,4 +37,9 @@ public class ChooseCharonBoosters extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

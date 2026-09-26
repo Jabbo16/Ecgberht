@@ -17,13 +17,13 @@ public class ChooseDropShip extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            for (Agent u : gameState.agents.values()) {
+            for (Agent u : gameState.mil.agents.values()) {
                 if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
-                    gameState.chosenDropShip = (DropShipAgent) u;
+                    gameState.mil.chosenDropShip = (DropShipAgent) u;
                     return BrainStatus.SUCCESS;
                 }
             }
-            gameState.chosenDropShip = null;
+            gameState.mil.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
             return BrainStatus.FAILURE;
@@ -34,3 +34,8 @@ public class ChooseDropShip extends BrainAction {
         }
     }
 }
+
+
+
+
+

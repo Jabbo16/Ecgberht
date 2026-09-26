@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.Defense;
+package ecgberht.BehaviourTrees.mil.defense;
 import ecgberht.brain.*;
 
 import ecgberht.GameState;
@@ -36,8 +36,8 @@ public class SendDefenders extends BrainAction {
             Set<UnitInfo> friends = new TreeSet<>();
             for (Squad s : gameState.sqManager.squads.values()) friends.addAll(s.members);
             boolean bunker = false;
-            if (!gameState.DBs.isEmpty()) {
-                for (Bunker b : gameState.DBs.keySet()) {
+            if (!gameState.tech.DBs.isEmpty()) {
+                for (Bunker b : gameState.tech.DBs.keySet()) {
                     friends.add(gameState.unitStorage.getAllyUnits().get(b));
                 }
                 bunker = true;
@@ -57,9 +57,9 @@ public class SendDefenders extends BrainAction {
             int frame = gameState.frameCount;
             int notFound = 0;
             if (!air_only && ((!battleWin.first || battleWin.second) || defenders == 1)) {
-                while (gameState.workerDefenders.size() + notFound < defenders && !gameState.workerIdle.isEmpty()) {
+                while (gameState.eco.workerDefenders.size() + notFound < defenders && !gameState.workerIdle.isEmpty()) {
                     Worker closestWorker = null;
-                    Position chosen = gameState.attackPosition;
+                    Position chosen = gameState.mil.attackPosition;
                     for (Worker u : gameState.workerIdle) {
                         if (u.getLastCommandFrame() == frame) continue;
                         if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen))) {
@@ -67,36 +67,36 @@ public class SendDefenders extends BrainAction {
                         }
                     }
                     if (closestWorker != null) {
-                        gameState.workerDefenders.put(closestWorker, null);
+                        gameState.eco.workerDefenders.put(closestWorker, null);
                         gameState.workerIdle.remove(closestWorker);
                     } else notFound++;
                 }
                 notFound = 0;
-                while (gameState.workerDefenders.size() + notFound < defenders && !gameState.workerMining.isEmpty()) {
+                while (gameState.eco.workerDefenders.size() + notFound < defenders && !gameState.eco.workerMining.isEmpty()) {
                     Worker closestWorker = null;
-                    Position chosen = gameState.attackPosition;
-                    for (Entry<Worker, MineralPatch> u : gameState.workerMining.entrySet()) {
+                    Position chosen = gameState.mil.attackPosition;
+                    for (Entry<Worker, MineralPatch> u : gameState.eco.workerMining.entrySet()) {
                         if (u.getKey().getLastCommandFrame() == frame) continue;
                         if ((closestWorker == null || u.getKey().getDistance(chosen) < closestWorker.getDistance(chosen))) {
                             closestWorker = u.getKey();
                         }
                     }
                     if (closestWorker != null) {
-                        if (gameState.workerMining.containsKey(closestWorker)) {
-                            MineralPatch mineral = gameState.workerMining.get(closestWorker);
-                            gameState.workerDefenders.put(closestWorker, null);
-                            if (gameState.mineralsAssigned.containsKey(mineral)) {
-                                gameState.mining--;
-                                gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                        if (gameState.eco.workerMining.containsKey(closestWorker)) {
+                            MineralPatch mineral = gameState.eco.workerMining.get(closestWorker);
+                            gameState.eco.workerDefenders.put(closestWorker, null);
+                            if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                                gameState.eco.mining--;
+                                gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                             }
-                            gameState.workerMining.remove(closestWorker);
+                            gameState.eco.workerMining.remove(closestWorker);
                         }
                     } else notFound++;
                 }
-                for (Entry<Worker, Position> u : gameState.workerDefenders.entrySet()) {
+                for (Entry<Worker, Position> u : gameState.eco.workerDefenders.entrySet()) {
                     if (frame == u.getKey().getLastCommandFrame()) continue;
-                    if (gameState.attackPosition != null) {
-                        gameState.workerDefenders.put(u.getKey(), gameState.attackPosition);
+                    if (gameState.mil.attackPosition != null) {
+                        gameState.eco.workerDefenders.put(u.getKey(), gameState.mil.attackPosition);
                         if (gameState.enemyInBase.size() == 1 && gameState.enemyInBase.iterator().next() instanceof Worker) {
                             Unit scouter = gameState.enemyInBase.iterator().next();
                             Unit lastTarget = u.getKey().getOrderTarget();
@@ -105,8 +105,8 @@ public class SendDefenders extends BrainAction {
                         } else {
                             Position closestDefense = null;
                             if (gameState.learningManager.isNaughty()) {
-                                if (!gameState.DBs.isEmpty())
-                                    closestDefense = gameState.DBs.keySet().iterator().next().getPosition();
+                                if (!gameState.tech.DBs.isEmpty())
+                                    closestDefense = gameState.tech.DBs.keySet().iterator().next().getPosition();
                                 if (closestDefense == null)
                                     closestDefense = gameState.getNearestCC(u.getKey().getPosition(), false);
                                 if (closestDefense != null && u.getKey().getDistance(closestDefense) > UnitType.Terran_Marine.groundWeapon().maxRange() * 0.95) {
@@ -121,25 +121,25 @@ public class SendDefenders extends BrainAction {
                                 u.getKey().attack(toAttack);
                             } else {
                                 Position lastTargetPosition = u.getKey().getOrderTargetPosition();
-                                if (lastTargetPosition != null && lastTargetPosition.equals(gameState.attackPosition))
+                                if (lastTargetPosition != null && lastTargetPosition.equals(gameState.mil.attackPosition))
                                     continue;
-                                u.getKey().attack(gameState.attackPosition);
+                                u.getKey().attack(gameState.mil.attackPosition);
                             }
                         }
                     }
                 }
             } else if (!gameState.getStrat().name.equals("ProxyBBS") && !gameState.getStrat().name.equals("ProxyEightRax")) {
                 for (Entry<Integer, Squad> u : gameState.sqManager.squads.entrySet()) {
-                    if (gameState.attackPosition != null) {
-                        u.getValue().giveAttackOrder(gameState.attackPosition);
-                        u.getValue().status = Status.DEFENSE;
+                    if (gameState.mil.attackPosition != null) {
+                        u.getValue().giveAttackOrder(gameState.mil.attackPosition);
+                        u.getValue().status = Status.defense;
                     } else {
                         u.getValue().status = Status.IDLE;
                         u.getValue().attack = null;
                     }
                 }
             }
-            gameState.attackPosition = null;
+            gameState.mil.attackPosition = null;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
@@ -148,3 +148,8 @@ public class SendDefenders extends BrainAction {
         }
     }
 }
+
+
+
+
+

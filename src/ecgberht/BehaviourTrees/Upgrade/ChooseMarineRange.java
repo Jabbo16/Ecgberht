@@ -19,7 +19,7 @@ public class ChooseMarineRange extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
             String strat = gameState.getStrat().name;
             if (strat.equals("BioMech") || strat.equals("BioMechGreedyFE") || strat.equals("BioMechFE")) {
                 Player self = gameState.getPlayer();
@@ -27,10 +27,10 @@ public class ChooseMarineRange extends BrainAction {
                     return BrainStatus.FAILURE;
                 }
             }
-            for (ResearchingFacility u : gameState.UBs) {
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof Academy)) continue;
                 if (gameState.getPlayer().hasResearched(TechType.Stim_Packs) && gameState.getPlayer().getUpgradeLevel(UpgradeType.U_238_Shells) < 1 && u.canUpgrade(UpgradeType.U_238_Shells) && !u.isResearching() && !u.isUpgrading()) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenUpgrade = UpgradeType.U_238_Shells;
                     return BrainStatus.SUCCESS;
                 }
@@ -43,4 +43,9 @@ public class ChooseMarineRange extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

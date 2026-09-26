@@ -20,7 +20,14 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ecgberht.Modules.EconomyManager;
+import ecgberht.Modules.MilitaryManager;
+import ecgberht.Modules.TechManager;
+
 public class GameState {
+    public EconomyManager eco = new EconomyManager();
+    public MilitaryManager mil = new MilitaryManager();
+    public TechManager tech = new TechManager();
 
     public Area enemyMainArea = null;
     public Area enemyNaturalArea = null;
@@ -30,35 +37,24 @@ public class GameState {
     public Base enemyNaturalBase = null;
     public Base enemyStartBase = null;
     public BaseManager baseManager = null;
-    public boolean defense = false;
-    public boolean enemyIsRandom = true;
+        public boolean enemyIsRandom = true;
     public boolean firstTerranCheese = false;
     public boolean firstScout = true;
     public boolean iReallyWantToExpand = false;
     public boolean islandExpand;
-    public Building chosenBuildingLot = null;
-    public Mechanical chosenUnitRepair = null;
+        public Mechanical chosenUnitRepair = null;
     public BuildingMap map;
     public BuildingMap testMap;
     public ChokePoint mainChoke = null;
     public ChokePoint naturalChoke = null;
     public List<ChokePoint> enemyChokes = new ArrayList<>();
-    public DropShipAgent chosenDropShip;
-    public LearningManager learningManager;
-    public ExtendibleByAddon chosenBuildingAddon = null;
-    public int builtBuildings;
-    public int builtRefinery;
-    public int frameCount;
+        public LearningManager learningManager;
+                public int frameCount;
     public int mapSize = 2;
     public int maxWraiths = 6;
     public int maxBats = 0;
-    public int mining;
-    public int startCount;
-    public int vulturesTrained = 0;
-    public int wraithsTrained = 0;
-    public int tanksTrained = 0;
-    public int workerCountToSustain = 0;
-    public List<Base> blockedBLs = new ArrayList<>();
+        public int startCount;
+                    public List<Base> blockedBLs = new ArrayList<>();
     public List<Base> BLs = new ArrayList<>();
     public List<Base> enemyBLs = new ArrayList<>();
     public List<Base> specialBLs = new ArrayList<>();
@@ -66,39 +62,16 @@ public class GameState {
     public Map<Base, CommandCenter> CCs = new LinkedHashMap<>();
     public Map<Base, CommandCenter> islandCCs = new HashMap<>();
     public Map<Base, Neutral> blockedBases = new HashMap<>();
-    public Map<Bunker, Set<UnitInfo>> DBs = new TreeMap<>();
-    public Map<GasMiningFacility, Integer> refineriesAssigned = new TreeMap<>();
-    public Map<MineralPatch, Integer> mineralsAssigned = new TreeMap<>();
-    public Map<Player, Integer> players = new HashMap<>();
-    public Map<Position, MineralPatch> blockingMinerals = new LinkedHashMap<>();
-    public Map<SCV, Mechanical> repairerTask = new TreeMap<>();
-    public Map<SCV, Building> workerTask = new TreeMap<>();
-    public Map<SCV, MutablePair<UnitType, TilePosition>> workerBuild = new HashMap<>();
-    public Map<Unit, Agent> agents = new TreeMap<>();
-    public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
-    public Map<Worker, GasMiningFacility> workerGas = new TreeMap<>();
-    public Map<Worker, MineralPatch> workerMining = new TreeMap<>();
-    public Map<Worker, Position> workerDefenders = new TreeMap<>();
-    public MutablePair<Base, Unit> mainCC = null;
-    public MutablePair<Integer, Integer> deltaCash = new MutablePair<>(0, 0);
-    public Player neutral = null;
-    public Position attackPosition;
-    public Position defendPosition = null;
-    public Race enemyRace = Race.Unknown;
-    public ResearchingFacility chosenUnitUpgrader = null;
-    public SCV chosenRepairer = null;
-    public Set<Barracks> MBs = new TreeSet<>();
-    public Set<Base> islandBases = new HashSet<>();
+                public Map<Player, Integer> players = new HashMap<>();
+                        public Map<VespeneGeyser, Boolean> vespeneGeysers = new TreeMap<>();
+                public MutablePair<Base, Unit> mainCC = null;
+        public Player neutral = null;
+            public Race enemyRace = Race.Unknown;
+        public SCV chosenRepairer = null;
+        public Set<Base> islandBases = new HashSet<>();
     public Set<Base> scoutSLs = new HashSet<>();
     public Set<Base> SLs = new HashSet<>();
-    public Set<Building> buildingLot = new TreeSet<>();
-    public Set<ComsatStation> CSs = new TreeSet<>();
-    public Set<Factory> Fs = new TreeSet<>();
-    public Set<MissileTurret> Ts = new TreeSet<>();
-    public Set<ResearchingFacility> UBs = new TreeSet<>();
-    public Set<Starport> Ps = new TreeSet<>();
-    public Set<UnitInfo> myArmy = new TreeSet<>();
-    public Set<SupplyDepot> SBs = new TreeSet<>();
+                                public Set<SupplyDepot> SBs = new TreeSet<>();
     public Set<Unit> enemyCombatUnitMemory = new TreeSet<>();
     public Set<Unit> enemyInBase = new TreeSet<>();
     public Set<Worker> workerIdle = new TreeSet<>();
@@ -187,7 +160,7 @@ public class GameState {
         int amount = 0;
         if (bw.getBWMap().mapHash().equals("cd5d907c30d58333ce47c88719b6ddb2cba6612f")) amount = 16; // Valkyries
         for (MineralPatch u : bw.getMineralPatches()) {
-            if (u.getResources() <= amount) blockingMinerals.put(u.getPosition(), u);
+            if (u.getResources() <= amount) eco.blockingMinerals.put(u.getPosition(), u);
         }
         for (Base b : BLs) {
             if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b))
@@ -220,12 +193,12 @@ public class GameState {
     }
 
     void checkBasesWithBLockingMinerals() {
-        if (blockingMinerals.isEmpty()) return;
+        if (eco.blockingMinerals.isEmpty()) return;
         for (bwem.Base b : BLs) {
             if (b.isStartingLocation() || bw.getBWMap().getStartPositions().contains(b.getLocation()) || skipWeirdBlocking(b))
                 continue;
             for (ChokePoint c : b.getArea().getChokePoints()) {
-                for (Position m : blockingMinerals.keySet()) {
+                for (Position m : eco.blockingMinerals.keySet()) {
                     if (Util.broodWarDistance(m, c.getCenter().toPosition()) < 40) {
                         blockedBLs.add(b);
                         break;
@@ -282,12 +255,12 @@ public class GameState {
     void addNewResources(Base base) {
         List<Mineral> minerals = base.getMinerals();
         List<Geyser> gas = base.getGeysers();
-        minerals.forEach(m -> mineralsAssigned.put((MineralPatch) m.getUnit(), 0));
+        minerals.forEach(m -> eco.mineralsAssigned.put((MineralPatch) m.getUnit(), 0));
         gas.forEach(g -> vespeneGeysers.put((VespeneGeyser) g.getUnit(), false));
         if (getStrat().name.equals("ProxyBBS")) {
-            workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
+            eco.workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
         } else if (getStrat().name.equals("ProxyEightRax")) {
-            workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
+            eco.workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
 
@@ -295,16 +268,16 @@ public class GameState {
         List<Mineral> minerals = Util.getClosestBaseLocation(unit.getPosition()).getMinerals();
         List<Geyser> gas = Util.getClosestBaseLocation(unit.getPosition()).getGeysers();
         for (Mineral m : minerals) {
-            if (mineralsAssigned.containsKey(m.getUnit())) {
+            if (eco.mineralsAssigned.containsKey(m.getUnit())) {
                 List<Unit> aux = new ArrayList<>();
-                for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
+                for (Entry<Worker, MineralPatch> w : eco.workerMining.entrySet()) {
                     if (m.getUnit().equals(w.getValue())) {
                         aux.add(w.getKey());
                         workerIdle.add(w.getKey());
                     }
                 }
-                for (Unit u : aux) workerMining.remove(u);
-                mineralsAssigned.remove(m.getUnit());
+                for (Unit u : aux) eco.workerMining.remove(u);
+                eco.mineralsAssigned.remove(m.getUnit());
             }
 
         }
@@ -313,26 +286,26 @@ public class GameState {
             vespeneGeysers.remove(geyser);
         }
         List<Unit> auxGas = new ArrayList<>();
-        for (Entry<GasMiningFacility, Integer> pm : refineriesAssigned.entrySet()) {
+        for (Entry<GasMiningFacility, Integer> pm : eco.refineriesAssigned.entrySet()) {
             for (Geyser g : gas) {
                 if (pm.getKey().equals(g.getUnit())) {
                     List<Worker> aux = new ArrayList<>();
-                    for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
+                    for (Entry<Worker, GasMiningFacility> w : eco.workerGas.entrySet()) {
                         if (pm.getKey().equals(w.getValue())) {
                             aux.add(w.getKey());
                             workerIdle.add(w.getKey());
                         }
                     }
-                    for (Worker u : aux) workerGas.remove(u);
+                    for (Worker u : aux) eco.workerGas.remove(u);
                     auxGas.add(pm.getKey());
                 }
             }
         }
-        for (Unit u : auxGas) refineriesAssigned.remove(u);
+        for (Unit u : auxGas) eco.refineriesAssigned.remove(u);
         if (getStrat().name.equals("ProxyBBS")) {
-            workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
+            eco.workerCountToSustain = (int) mineralGatherRateNeeded(Arrays.asList(UnitType.Terran_Marine, UnitType.Terran_Marine));
         } else if (getStrat().name.equals("ProxyEightRax")) {
-            workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
+            eco.workerCountToSustain = (int) mineralGatherRateNeeded(Collections.singletonList(UnitType.Terran_Marine));
         }
     }
 
@@ -388,49 +361,49 @@ public class GameState {
     }
 
     void fix() {
-        if (defense && enemyInBase.isEmpty()) defense = false;
+        if (mil.defense && enemyInBase.isEmpty()) mil.defense = false;
         Iterator<Entry<Unit, UnitInfo>> allyIT = unitStorage.getAllyUnits().entrySet().iterator();
         while (allyIT.hasNext()) {
             Entry<Unit, UnitInfo> u = allyIT.next();
             if (!u.getKey().exists()) {
-                myArmy.remove(u.getValue());
+                mil.myArmy.remove(u.getValue());
                 allyIT.remove();
             }
         }
-        DBs.values().forEach(s -> s.removeIf(u -> !u.unit.exists()));
+        tech.DBs.values().forEach(s -> s.removeIf(u -> !u.unit.exists()));
         List<Worker> removeGas = new ArrayList<>();
-        for (Entry<Worker, GasMiningFacility> w : workerGas.entrySet()) {
+        for (Entry<Worker, GasMiningFacility> w : eco.workerGas.entrySet()) {
             if (!w.getKey().isGatheringGas()) {
                 removeGas.add(w.getKey());
-                refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
+                eco.refineriesAssigned.put(w.getValue(), eco.refineriesAssigned.get(w.getValue()) - 1);
                 w.getKey().stop(false);
                 workerIdle.add(w.getKey());
             }
         }
-        for (Worker u : removeGas) workerGas.remove(u);
+        for (Worker u : removeGas) eco.workerGas.remove(u);
 
         if (frameCount % 350 == 0) {
-            Map<MineralPatch, Long> mineralCount = workerMining.values().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            Map<MineralPatch, Long> mineralCount = eco.workerMining.values().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
             for (Entry<MineralPatch, Long> p : mineralCount.entrySet())
-                mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
+                eco.mineralsAssigned.put(p.getKey(), Math.toIntExact(p.getValue()));
         }
 
         for (PlayerUnit u : bw.getUnits(self)) {
             if (!u.exists() || !(u instanceof Building) || u instanceof Addon || u.equals(proxyBuilding)) continue;
             if (u.getBuildUnit() != null || enemyNaturalBase == null || u.getTilePosition().equals(enemyNaturalBase.getLocation()))
                 continue;
-            if (!u.isCompleted() && !workerTask.values().contains(u) && !buildingLot.contains(u)) {
-                buildingLot.add((Building) u);
+            if (!u.isCompleted() && !eco.workerTask.values().contains(u) && !tech.buildingLot.contains(u)) {
+                tech.buildingLot.add((Building) u);
             }
         }
 
         List<Worker> removeTask = new ArrayList<>();
-        for (Entry<SCV, Building> w : workerTask.entrySet()) {
+        for (Entry<SCV, Building> w : eco.workerTask.entrySet()) {
             if (!w.getKey().exists() || !w.getKey().isConstructing() || w.getValue().isCompleted() || !w.getValue().exists())
                 removeTask.add(w.getKey());
         }
         for (Worker u : removeTask) {
-            workerTask.remove(u);
+            eco.workerTask.remove(u);
             u.stop(false);
             workerIdle.add(u);
         }
@@ -443,26 +416,26 @@ public class GameState {
         }
 
         List<Unit> aux3 = new ArrayList<>();
-        for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : workerBuild.entrySet()) {
+        for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : eco.workerBuild.entrySet()) {
             if (!(bw.getBWMap().mapHash().equals("83320e505f35c65324e93510ce2eafbaa71c9aa1") && u.getKey().isGatheringMinerals()) && (u.getKey().isIdle() || u.getKey().isGatheringGas() || u.getKey().isGatheringMinerals()) &&
                     Util.broodWarDistance(u.getKey().getPosition(), u.getValue().second.toPosition()) > 100) {
                 aux3.add(u.getKey());
-                deltaCash.first -= u.getValue().first.mineralPrice();
-                deltaCash.second -= u.getValue().first.gasPrice();
+                eco.deltaCash.first -= u.getValue().first.mineralPrice();
+                eco.deltaCash.second -= u.getValue().first.gasPrice();
                 workerIdle.add(u.getKey());
             }
         }
-        for (Unit u : aux3) workerBuild.remove(u);
+        for (Unit u : aux3) eco.workerBuild.remove(u);
 
         List<Unit> aux5 = new ArrayList<>();
-        for (Worker r : workerDefenders.keySet()) {
+        for (Worker r : eco.workerDefenders.keySet()) {
             if (!r.exists()) aux5.add(r);
             else if (r.isIdle() || r.isGatheringMinerals()) {
                 workerIdle.add(r);
                 aux5.add(r);
             }
         }
-        for (Unit u : aux5) workerDefenders.remove(u);
+        for (Unit u : aux5) eco.workerDefenders.remove(u);
     }
 
     void checkMainEnemyBase() {
@@ -574,7 +547,7 @@ public class GameState {
         int count = 0;
         if (sqManager.squads.isEmpty()) return count;
         else for (Squad s : sqManager.squads.values()) count += s.getSquadMembersCount();
-        return count + agents.size() * 2;
+        return count + mil.agents.size() * 2;
     }
 
     public int getArmySize(Set<UnitInfo> units) {
@@ -591,17 +564,17 @@ public class GameState {
     }
 
     public boolean checkSupply() {
-        for (MutablePair<UnitType, TilePosition> w : workerBuild.values()) {
+        for (MutablePair<UnitType, TilePosition> w : eco.workerBuild.values()) {
             if (w.first == UnitType.Terran_Supply_Depot) return true;
         }
-        for (Building w : workerTask.values()) {
+        for (Building w : eco.workerTask.values()) {
             if (w instanceof SupplyDepot) return true;
         }
         return false;
     }
 
     public int getCombatUnitsBuildings() {
-        int count = MBs.size() + Fs.size();
+        int count = tech.MBs.size() + tech.Fs.size();
         return count == 0 ? 1 : count;
     }
 
@@ -620,7 +593,7 @@ public class GameState {
     }
 
     void mineralLocking() {
-        for (Entry<Worker, MineralPatch> u : workerMining.entrySet()) {
+        for (Entry<Worker, MineralPatch> u : eco.workerMining.entrySet()) {
             if (u.getKey().getLastCommandFrame() == frameCount || u.getKey().isCarryingMinerals()) continue;
             if (u.getKey().getTargetUnit() == null && !Order.MoveToMinerals.equals(u.getKey().getOrder())
                     || u.getKey().getTargetUnit() != null && !u.getKey().getTargetUnit().equals(u.getValue())
@@ -640,7 +613,7 @@ public class GameState {
             }
         }
         if (tasked) {
-            for (Unit u : workerTask.values()) {
+            for (Unit u : eco.workerTask.values()) {
                 if (!(u instanceof CommandCenter)) continue;
                 double distance_aux = Util.broodWarDistance(u.getPosition(), position);
                 if (distance_aux > 0.0 && (chosen == null || distance_aux < distance)) {
@@ -655,8 +628,8 @@ public class GameState {
 
     public TilePosition getBunkerPositionAntiPool() {
         try {
-            if (MBs.isEmpty() || CCs.isEmpty()) return null;
-            TilePosition startTile = MBs.iterator().next().getTilePosition();
+            if (tech.MBs.isEmpty() || CCs.isEmpty()) return null;
+            TilePosition startTile = tech.MBs.iterator().next().getTilePosition();
             TilePosition searchTile = CCs.values().iterator().next().getTilePosition();
             UnitType type = UnitType.Terran_Barracks;
             UnitType bType = UnitType.Terran_Bunker;
@@ -764,7 +737,7 @@ public class GameState {
         double SaturationX2_B = m2f * 77.5;
         for (UnitType unit : units) mineralsRequired += (((double) unit.mineralPrice()) / unit.buildTime()) / 1.0;
         double workersRequired = mineralsRequired / SaturationX1;
-        if (workersRequired > mineralsAssigned.size())
+        if (workersRequired > eco.mineralsAssigned.size())
             return Math.ceil((mineralsRequired - SaturationX2_B / 1.0) / SaturationX2_Slope);
         return Math.ceil(workersRequired);
     }
@@ -773,40 +746,40 @@ public class GameState {
         if (getStrat().name.equals("ProxyBBS")) {
             if (Util.countBuildingAll(UnitType.Terran_Barracks) == rax) {
                 List<Unit> aux = new ArrayList<>();
-                int count = workerMining.size();
-                for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
-                    if (count <= workerCountToSustain) break;
+                int count = eco.workerMining.size();
+                for (Entry<Worker, MineralPatch> scv : eco.workerMining.entrySet()) {
+                    if (count <= eco.workerCountToSustain) break;
                     if (!scv.getKey().isCarryingMinerals()) {
                         scv.getKey().move(new TilePosition(bw.getBWMap().mapWidth() / 2, bw.getBWMap().mapHeight() / 2).toPosition());
-                        myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
-                        if (mineralsAssigned.containsKey(scv.getValue())) {
-                            mining--;
-                            mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
+                        mil.myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
+                        if (eco.mineralsAssigned.containsKey(scv.getValue())) {
+                            eco.mining--;
+                            eco.mineralsAssigned.put(scv.getValue(), eco.mineralsAssigned.get(scv.getValue()) - 1);
                         }
                         aux.add(scv.getKey());
                         count--;
                     }
                 }
-                for (Unit u : aux) workerMining.remove(u);
+                for (Unit u : aux) eco.workerMining.remove(u);
             }
-        } else if (MBs.size() == rax) {
+        } else if (tech.MBs.size() == rax) {
             List<Unit> aux = new ArrayList<>();
-            int count = workerMining.size();
-            for (Entry<Worker, MineralPatch> scv : workerMining.entrySet()) {
-                if (count <= workerCountToSustain) break;
+            int count = eco.workerMining.size();
+            for (Entry<Worker, MineralPatch> scv : eco.workerMining.entrySet()) {
+                if (count <= eco.workerCountToSustain) break;
                 if (!scv.getKey().isCarryingMinerals()) {
                     //addToSquad(scv.getKey());
                     scv.getKey().stop(false);
-                    myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
-                    if (mineralsAssigned.containsKey(scv.getValue())) {
-                        mining--;
-                        mineralsAssigned.put(scv.getValue(), mineralsAssigned.get(scv.getValue()) - 1);
+                    mil.myArmy.add(unitStorage.getAllyUnits().get(scv.getKey()));
+                    if (eco.mineralsAssigned.containsKey(scv.getValue())) {
+                        eco.mining--;
+                        eco.mineralsAssigned.put(scv.getValue(), eco.mineralsAssigned.get(scv.getValue()) - 1);
                     }
                     aux.add(scv.getKey());
                     count--;
                 }
             }
-            for (Unit u : aux) workerMining.remove(u);
+            for (Unit u : aux) eco.workerMining.remove(u);
         }
     }
 
@@ -846,7 +819,7 @@ public class GameState {
 
     void runAgents() {
         List<Agent> rem = new ArrayList<>();
-        for (Agent ag : agents.values()) {
+        for (Agent ag : mil.agents.values()) {
             if (ag.runAgent()) rem.add(ag);
         }
         for (Agent ag : rem) {
@@ -854,7 +827,7 @@ public class GameState {
                 String wraith = ((WraithAgent) ag).name;
                 shipNames.add(wraith);
             } else if (ag instanceof VesselAgent) ((VesselAgent) ag).follow = null;
-            agents.remove(ag.myUnit);
+            mil.agents.remove(ag.myUnit);
         }
     }
 
@@ -968,32 +941,32 @@ public class GameState {
     }
 
     void workerTransfer() {
-        int numWorkersToTransfer = (workerIdle.size() + workerMining.size()) / 2;
+        int numWorkersToTransfer = (workerIdle.size() + eco.workerMining.size()) / 2;
         List<Unit> minerals = BLs.get(1).getMinerals().stream().map(Neutral::getUnit).collect(Collectors.toList());
         boolean hardStuck = false;
         while (numWorkersToTransfer != 0 && !hardStuck) {
-            MineralPatch chosenMineral = Collections.min(mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
+            MineralPatch chosenMineral = Collections.min(eco.mineralsAssigned.entrySet().stream().filter(m -> minerals.contains(m.getKey())).collect(Collectors.toSet()), Entry.comparingByValue()).getKey();
             if (chosenMineral == null) break;
             Worker chosen = null;
             if (!workerIdle.isEmpty()) {
                 chosen = workerIdle.iterator().next();
-                mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
-                workerMining.put(chosen, chosenMineral);
+                eco.mineralsAssigned.put(chosenMineral, eco.mineralsAssigned.get(chosenMineral) + 1);
+                eco.workerMining.put(chosen, chosenMineral);
                 workerIdle.remove(chosen);
                 numWorkersToTransfer--;
                 continue;
             }
             MineralPatch oldPatch = null;
-            for (Entry<Worker, MineralPatch> w : workerMining.entrySet()) {
+            for (Entry<Worker, MineralPatch> w : eco.workerMining.entrySet()) {
                 if (minerals.contains(w.getValue())) continue;
                 chosen = w.getKey();
                 oldPatch = w.getValue();
                 break;
             }
             if (chosen != null && oldPatch != null) {
-                mineralsAssigned.put(oldPatch, mineralsAssigned.get(oldPatch) - 1);
-                mineralsAssigned.put(chosenMineral, mineralsAssigned.get(chosenMineral) + 1);
-                workerMining.put(chosen, chosenMineral);
+                eco.mineralsAssigned.put(oldPatch, eco.mineralsAssigned.get(oldPatch) - 1);
+                eco.mineralsAssigned.put(chosenMineral, eco.mineralsAssigned.get(chosenMineral) + 1);
+                eco.workerMining.put(chosen, chosenMineral);
                 numWorkersToTransfer--;
                 continue;
             }
@@ -1009,7 +982,7 @@ public class GameState {
 
     void updateAttack() {
         try {
-            if (sqManager.squads.isEmpty() || (defense && !getStrat().name.equals("ProxyBBS") && !getStrat().name.equals("ProxyEightRax")))
+            if (sqManager.squads.isEmpty() || (mil.defense && !getStrat().name.equals("ProxyBBS") && !getStrat().name.equals("ProxyEightRax")))
                 return;
             boolean needToAttack = needToAttack();
             if (ConfigManager.getConfig().ecgConfig.debugDisableAttack) needToAttack = false;
@@ -1096,19 +1069,19 @@ public class GameState {
 
     void cancelDyingThings() { // TODO test
         List<SCV> toRemove = new ArrayList<>();
-        for (Entry<SCV, Building> b : workerTask.entrySet()) {
+        for (Entry<SCV, Building> b : eco.workerTask.entrySet()) {
             if (b.getValue().isCompleted()) continue; // Is this even needed??
             if (b.getValue().isUnderAttack() && b.getValue().getHitPoints() <= 30) {
                 b.getKey().haltConstruction();
-                buildingLot.add(b.getValue());
+                tech.buildingLot.add(b.getValue());
                 toRemove.add(b.getKey());
             }
         }
         for (SCV s : toRemove) {
             workerIdle.add(s);
-            workerBuild.remove(s);
+            eco.workerBuild.remove(s);
         }
-        for (Building b : buildingLot) {
+        for (Building b : tech.buildingLot) {
             if (b.isCompleted()) continue; // Is this even needed??
             if (b.isUnderAttack() && b.getHitPoints() <= 30) b.cancelConstruction();
         }
@@ -1140,8 +1113,8 @@ public class GameState {
 
     void vespeneManager() {
         try {
-            int workersAtGas = workerGas.keySet().size();
-            int refineries = refineriesAssigned.size();
+            int workersAtGas = eco.workerGas.keySet().size();
+            int refineries = eco.refineriesAssigned.size();
             if (refineries == 0) return;
             if (getCash().second >= 200) {
                 int workersNeeded;
@@ -1153,7 +1126,7 @@ public class GameState {
                     getStrat().workerGas = 2;
                 }
                 if (workersAtGas > workersNeeded) {
-                    Iterator<Entry<Worker, GasMiningFacility>> iterGas = workerGas.entrySet().iterator();
+                    Iterator<Entry<Worker, GasMiningFacility>> iterGas = eco.workerGas.entrySet().iterator();
                     while (iterGas.hasNext()) {
                         Entry<Worker, GasMiningFacility> w = iterGas.next();
                         if (w.getKey().getOrder() == Order.HarvestGas) continue;
@@ -1162,7 +1135,7 @@ public class GameState {
                             w.getKey().returnCargo();
                             w.getKey().stop(true);
                         } else w.getKey().stop(false);
-                        refineriesAssigned.put(w.getValue(), refineriesAssigned.get(w.getValue()) - 1);
+                        eco.refineriesAssigned.put(w.getValue(), eco.refineriesAssigned.get(w.getValue()) - 1);
                         iterGas.remove();
                         workersAtGas--;
                         if (workersNeeded == workersAtGas) break;
@@ -1177,7 +1150,7 @@ public class GameState {
     }
 
     public boolean isGoingToExpand() {
-        return workerBuild.values().stream().anyMatch(u -> u.first == UnitType.Terran_Command_Center);
+        return eco.workerBuild.values().stream().anyMatch(u -> u.first == UnitType.Terran_Command_Center);
     }
 
     public void initMineralWalkPatches() {
@@ -1198,3 +1171,8 @@ public class GameState {
         }
     }
 }
+
+
+
+
+

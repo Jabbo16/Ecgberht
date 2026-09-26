@@ -45,7 +45,7 @@ public class SquadManager {
                     }
                 }
                 if (scoutInfo == null) {
-                    for (Map.Entry<org.openbw.bwapi4j.unit.Unit, ecgberht.Agents.Agent> entry : getGs().agents.entrySet()) {
+                    for (Map.Entry<org.openbw.bwapi4j.unit.Unit, ecgberht.Agents.Agent> entry : getGs().mil.agents.entrySet()) {
                         org.openbw.bwapi4j.unit.Unit u = entry.getKey();
                         if (u.getType() == org.openbw.bwapi4j.type.UnitType.Terran_Wraith) {
                             scoutInfo = getGs().unitStorage.getAllyUnits().get(u);
@@ -56,8 +56,8 @@ public class SquadManager {
                 
                 if (scoutInfo != null) {
                     getGs().designatedBaseScout = new ecgberht.Agents.BaseScoutAgent(scoutInfo.unit);
-                    getGs().agents.put(scoutInfo.unit, getGs().designatedBaseScout);
-                    getGs().myArmy.remove(scoutInfo);
+                    getGs().mil.agents.put(scoutInfo.unit, getGs().designatedBaseScout);
+                    getGs().mil.myArmy.remove(scoutInfo);
                 }
             }
         }
@@ -67,7 +67,7 @@ public class SquadManager {
     }
 
     void updateBunkers() { // TODO improve
-        for (Map.Entry<Bunker, Set<UnitInfo>> bunker : getGs().DBs.entrySet()) {
+        for (Map.Entry<Bunker, Set<UnitInfo>> bunker : getGs().tech.DBs.entrySet()) {
             SimInfo bunkerSim = getGs().sim.getSimulation(getGs().unitStorage.getAllyUnits().get(bunker.getKey()), SimInfo.SimType.MIX);
             if (!bunkerSim.enemies.isEmpty()) {
                 if (bunker.getValue().size() < 4) {
@@ -96,3 +96,7 @@ public class SquadManager {
         }
     }
 }
+
+
+
+

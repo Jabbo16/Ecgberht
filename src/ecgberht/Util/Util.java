@@ -444,7 +444,7 @@ public class Util {
 
     public static int countBuildingAll(UnitType type) {
         int count = 0;
-        for (MutablePair<UnitType, TilePosition> w : getGs().workerBuild.values()) {
+        for (MutablePair<UnitType, TilePosition> w : getGs().eco.workerBuild.values()) {
             if (w.first == type) count++;
         }
         count += countUnitTypeSelf(type);
@@ -455,7 +455,7 @@ public class Util {
         List<MineralPatch> minerals = base.getMinerals().stream().map(u -> (MineralPatch) u.getUnit()).collect(Collectors.toList());
         int count = 0;
         for (MineralPatch m : minerals) {
-            if (getGs().mineralsAssigned.containsKey(m)) count += getGs().mineralsAssigned.get(m);
+            if (getGs().eco.mineralsAssigned.containsKey(m)) count += getGs().eco.mineralsAssigned.get(m);
         }
         return count < 2 * minerals.size();
     }
@@ -466,10 +466,10 @@ public class Util {
 
     public static boolean checkSiege() {
         boolean machineShop = false;
-        if (getGs().Fs.isEmpty()) return false;
-        int mS = (int) getGs().UBs.stream().filter(u -> u instanceof MachineShop).count();
+        if (getGs().tech.Fs.isEmpty()) return false;
+        int mS = (int) getGs().tech.UBs.stream().filter(u -> u instanceof MachineShop).count();
         if (mS == 0) {
-            for (Factory f : getGs().Fs) {
+            for (Factory f : getGs().tech.Fs) {
                 if (f.getMachineShop() != null) {
                     machineShop = true;
                     break;
@@ -724,3 +724,8 @@ public class Util {
         return new Position(0, 0).getDistance(new Position(xDist, yDist));
     }
 }
+
+
+
+
+

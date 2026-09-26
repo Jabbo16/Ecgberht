@@ -16,3 +16,8 @@ public class BrainActionLambda extends BrainNode {
         return action.get();
     }
 }
+
+
+
+
+

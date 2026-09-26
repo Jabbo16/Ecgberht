@@ -19,20 +19,20 @@ public class ChooseTank extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (!gameState.Fs.isEmpty()) {
+            if (!gameState.tech.Fs.isEmpty()) {
                 if (gameState.getStrat().trainUnits.contains(UnitType.Terran_Wraith) &&
                         gameState.maxWraiths - Util.countUnitTypeSelf(UnitType.Terran_Wraith) > 0 && Math.random() * 10 <= 1) {
                     return BrainStatus.FAILURE;
                 }
                 int multiplier = 2;
                 String strat = gameState.getStrat().name;
-                if (strat.equals("JoyORush") && gameState.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3)
+                if (strat.equals("JoyORush") && gameState.mil.tanksTrained == 3 && Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) == 3)
                     return BrainStatus.FAILURE;
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE")) multiplier = 15;
                 if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                     MutablePair<Integer, Integer> cash = gameState.getCash();
                     if (cash.second < (UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice())) return BrainStatus.FAILURE;
-                    for (Factory b : gameState.Fs) {
+                    for (Factory b : gameState.tech.Fs) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Siege_Tank_Tank_Mode)) {
                             gameState.chosenUnit = UnitType.Terran_Siege_Tank_Tank_Mode;
                             gameState.chosenTrainingFacility = b;
@@ -49,4 +49,9 @@ public class ChooseTank extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

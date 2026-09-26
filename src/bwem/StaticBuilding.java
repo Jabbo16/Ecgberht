@@ -50,3 +50,9 @@ public class StaticBuilding extends Neutral {
         return getUnit().hashCode();
     }
 }
+
+
+
+
+
+

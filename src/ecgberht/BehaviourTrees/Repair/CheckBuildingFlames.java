@@ -29,7 +29,7 @@ public class CheckBuildingFlames extends BrainAction {
     public BrainStatus execute() {
         try {
             List<SCV> toRemove = new ArrayList<>();
-            for (Entry<SCV, Mechanical> u : gameState.repairerTask.entrySet()) {
+            for (Entry<SCV, Mechanical> u : gameState.eco.repairerTask.entrySet()) {
                 if (u.getValue().maxHitPoints() != u.getValue().getHitPoints()) {
                     if (u.getKey().getOrder() != Order.Follow && u.getKey().getOrder() != Order.Repair) {
                         u.getKey().rightClick(u.getValue(), false);
@@ -45,18 +45,18 @@ public class CheckBuildingFlames extends BrainAction {
                     toRemove.add(u.getKey());
                 }
             }
-            for (SCV s : toRemove) gameState.repairerTask.remove(s);
+            for (SCV s : toRemove) gameState.eco.repairerTask.remove(s);
             boolean isBeingRepaired;
             boolean cheesed = IntelligenceAgency.getEnemyStrat() == IntelligenceAgency.EnemyStrats.ZealotRush && gameState.frameCount >= 24 * 60 * 2.2;
             boolean fastExpanding = gameState.getStrat().name.contains("GreedyFE") && Util.countBuildingAll(UnitType.Terran_Command_Center) == 2 && gameState.CCs.size() < 2 && gameState.firstExpand;
-            for (Bunker w : gameState.DBs.keySet()) {
+            for (Bunker w : gameState.tech.DBs.keySet()) {
                 int count = 0;
                 if (UnitType.Terran_Bunker.maxHitPoints() != w.getHitPoints() ||
                         (cheesed && Util.countBuildingAll(UnitType.Terran_Command_Center) < 2) || fastExpanding) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (w.equals(r)) count++;
                     }
-                    if (count < 2 && (gameState.defense || cheesed || fastExpanding)) {
+                    if (count < 2 && (gameState.mil.defense || cheesed || fastExpanding)) {
                         gameState.chosenUnitRepair = w;
                         return BrainStatus.SUCCESS;
                     }
@@ -67,9 +67,9 @@ public class CheckBuildingFlames extends BrainAction {
                 }
             }
             isBeingRepaired = false;
-            for (MissileTurret b : gameState.Ts) {
+            for (MissileTurret b : gameState.tech.Ts) {
                 if (UnitType.Terran_Missile_Turret.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true; // TODO check to add break?
                         }
@@ -88,7 +88,7 @@ public class CheckBuildingFlames extends BrainAction {
                         Area unitArea = gameState.bwem.getMap().getArea(u.tileposition);
                         for (Base b : gameState.CCs.keySet()) {
                             if (unitArea != null && b.getArea().equals(unitArea)) {
-                                for (Mechanical r : gameState.repairerTask.values()) {
+                                for (Mechanical r : gameState.eco.repairerTask.values()) {
                                     if (u.unit.equals(r)) {
                                         isBeingRepaired = true;
                                     }
@@ -104,9 +104,9 @@ public class CheckBuildingFlames extends BrainAction {
             }
             if (!gameState.getStrat().proxy) {
                 isBeingRepaired = false;
-                for (Barracks b : gameState.MBs) {
+                for (Barracks b : gameState.tech.MBs) {
                     if (UnitType.Terran_Barracks.maxHitPoints() != b.getHitPoints()) {
-                        for (Mechanical r : gameState.repairerTask.values()) {
+                        for (Mechanical r : gameState.eco.repairerTask.values()) {
                             if (b.equals(r)) {
                                 isBeingRepaired = true;
                             }
@@ -119,10 +119,10 @@ public class CheckBuildingFlames extends BrainAction {
                 }
             }
             isBeingRepaired = false;
-            for (Factory b : gameState.Fs) {
+            for (Factory b : gameState.tech.Fs) {
                 if (b.equals(gameState.proxyBuilding)) continue;
                 if (UnitType.Terran_Factory.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
@@ -134,9 +134,9 @@ public class CheckBuildingFlames extends BrainAction {
                 }
             }
             isBeingRepaired = false;
-            for (ResearchingFacility b : gameState.UBs) {
+            for (ResearchingFacility b : gameState.tech.UBs) {
                 if (b.getType().maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
@@ -150,7 +150,7 @@ public class CheckBuildingFlames extends BrainAction {
             isBeingRepaired = false;
             for (SupplyDepot b : gameState.SBs) {
                 if (UnitType.Terran_Supply_Depot.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
@@ -164,7 +164,7 @@ public class CheckBuildingFlames extends BrainAction {
             isBeingRepaired = false;
             for (CommandCenter b : gameState.CCs.values()) {
                 if (UnitType.Terran_Command_Center.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
@@ -176,9 +176,9 @@ public class CheckBuildingFlames extends BrainAction {
                 }
             }
             isBeingRepaired = false;
-            for (ComsatStation b : gameState.CSs) {
+            for (ComsatStation b : gameState.tech.CSs) {
                 if (UnitType.Terran_Comsat_Station.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
@@ -190,9 +190,9 @@ public class CheckBuildingFlames extends BrainAction {
                 }
             }
             isBeingRepaired = false;
-            for (Starport b : gameState.Ps) {
+            for (Starport b : gameState.tech.Ps) {
                 if (UnitType.Terran_Starport.maxHitPoints() != b.getHitPoints()) {
-                    for (Mechanical r : gameState.repairerTask.values()) {
+                    for (Mechanical r : gameState.eco.repairerTask.values()) {
                         if (b.equals(r)) {
                             isBeingRepaired = true;
                         }
@@ -211,4 +211,9 @@ public class CheckBuildingFlames extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

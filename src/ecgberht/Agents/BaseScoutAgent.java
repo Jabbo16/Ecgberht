@@ -88,3 +88,8 @@ public class BaseScoutAgent extends Agent {
         return false;
     }
 }
+
+
+
+
+

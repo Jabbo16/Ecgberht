@@ -15,10 +15,10 @@ public class CheckResourcesAddon extends BrainAction {
     public BrainStatus execute() {
         try {
             MutablePair<Integer, Integer> cash = gameState.getCash();
-            if (cash.first >= (gameState.chosenAddon.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenAddon.gasPrice()) + gameState.deltaCash.second) {
+            if (cash.first >= (gameState.chosenAddon.mineralPrice() + gameState.eco.deltaCash.first) && cash.second >= (gameState.chosenAddon.gasPrice()) + gameState.eco.deltaCash.second) {
                 return BrainStatus.SUCCESS;
             }
-            gameState.chosenBuildingAddon = null;
+            gameState.tech.chosenBuildingAddon = null;
             gameState.chosenAddon = null;
             return BrainStatus.FAILURE;
         } catch (Exception e) {
@@ -28,4 +28,9 @@ public class CheckResourcesAddon extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -18,15 +18,15 @@ public class ChooseGoliath extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.stream().filter(unit -> unit instanceof Armory).count() < 1) return BrainStatus.FAILURE;
+            if (gameState.tech.UBs.stream().filter(unit -> unit instanceof Armory).count() < 1) return BrainStatus.FAILURE;
             int count = 0;
             for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
                 if (!u.exists()) continue;
                 if (u.getType() == UnitType.Terran_Goliath) count++;
                 if (count >= gameState.maxGoliaths) return BrainStatus.FAILURE;
             }
-            if (!gameState.Fs.isEmpty()) {
-                for (Factory b : gameState.Fs) {
+            if (!gameState.tech.Fs.isEmpty()) {
+                for (Factory b : gameState.tech.Fs) {
                     if (!b.isTraining() && b.canTrain(UnitType.Terran_Goliath)) {
                         gameState.chosenUnit = UnitType.Terran_Goliath;
                         gameState.chosenTrainingFacility = b;
@@ -42,4 +42,9 @@ public class ChooseGoliath extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

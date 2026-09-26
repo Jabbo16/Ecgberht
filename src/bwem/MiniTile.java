@@ -206,3 +206,9 @@ public final class MiniTile {
         this.areaId = areaId;
     }
 }
+
+
+
+
+
+

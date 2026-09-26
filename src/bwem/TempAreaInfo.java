@@ -124,3 +124,9 @@ class TempAreaInfo {
         absorbed.isValid = false;
     }
 }
+
+
+
+
+
+

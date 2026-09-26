@@ -26,10 +26,10 @@ public class ChooseBay extends BrainAction {
                 if (gameState.getStrat().name.contains("BioMech") && gameState.CCs.size() < 2) return BrainStatus.FAILURE;
             }
             if (Util.countUnitTypeSelf(UnitType.Terran_Engineering_Bay) < gameState.getStrat().numBays) {
-                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Engineering_Bay) return BrainStatus.FAILURE;
                 }
-                for (Building w : gameState.workerTask.values()) {
+                for (Building w : gameState.eco.workerTask.values()) {
                     if (w instanceof EngineeringBay) return BrainStatus.FAILURE;
                 }
                 gameState.chosenToBuild = UnitType.Terran_Engineering_Bay;
@@ -43,4 +43,9 @@ public class ChooseBay extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

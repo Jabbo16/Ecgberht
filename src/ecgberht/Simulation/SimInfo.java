@@ -31,3 +31,8 @@ public class SimInfo {
 
     public enum SimType {GROUND, AIR, MIX}
 }
+
+
+
+
+

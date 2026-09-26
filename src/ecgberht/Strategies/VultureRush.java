@@ -71,3 +71,8 @@ public class VultureRush extends Strategy {
         return Util.countUnitTypeSelf(UnitType.Terran_Vulture) >= 2;
     }
 }
+
+
+
+
+

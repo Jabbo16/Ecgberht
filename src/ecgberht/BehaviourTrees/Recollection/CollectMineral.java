@@ -19,11 +19,11 @@ public class CollectMineral extends BrainAction {
     public BrainStatus execute() {
         try {
             Worker chosen = gameState.chosenWorker;
-            if (!gameState.mineralsAssigned.isEmpty()) {
+            if (!gameState.eco.mineralsAssigned.isEmpty()) {
                 MineralPatch closestMineral = null;
                 int workerPerPatch = 2;
-                if (gameState.workerMining.size() < 7) workerPerPatch = 1;
-                for (Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+                if (gameState.eco.workerMining.size() < 7) workerPerPatch = 1;
+                for (Entry<MineralPatch, Integer> m : gameState.eco.mineralsAssigned.entrySet()) {
                     if (gameState.bwem.getMap().getArea(chosen.getTilePosition()) != null && gameState.bwem.getMap().getArea(m.getKey().getTilePosition()) != null && !gameState.bwem.getMap().getArea(chosen.getTilePosition()).isAccessibleFrom(gameState.bwem.getMap().getArea(m.getKey().getTilePosition())))
                         continue;
                     if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral))
@@ -32,7 +32,7 @@ public class CollectMineral extends BrainAction {
                     }
                 }
                 if (closestMineral == null) {
-                    for (Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+                    for (Entry<MineralPatch, Integer> m : gameState.eco.mineralsAssigned.entrySet()) {
                         if (gameState.bwem.getMap().getArea(chosen.getTilePosition()) != null && gameState.bwem.getMap().getArea(m.getKey().getTilePosition()) != null && !gameState.bwem.getMap().getArea(chosen.getTilePosition()).isAccessibleFrom(gameState.bwem.getMap().getArea(m.getKey().getTilePosition())))
                             continue;
                         if (closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral)) {
@@ -41,11 +41,11 @@ public class CollectMineral extends BrainAction {
                     }
                 }
                 if (closestMineral != null && chosen.gather(closestMineral, false)) {
-                    gameState.mineralsAssigned.put(closestMineral, gameState.mineralsAssigned.get(closestMineral) + 1);
-                    gameState.workerMining.put(chosen, closestMineral);
+                    gameState.eco.mineralsAssigned.put(closestMineral, gameState.eco.mineralsAssigned.get(closestMineral) + 1);
+                    gameState.eco.workerMining.put(chosen, closestMineral);
                     gameState.workerIdle.remove(chosen);
                     gameState.chosenWorker = null;
-                    gameState.mining++;
+                    gameState.eco.mining++;
                     return BrainStatus.SUCCESS;
                 }
             }
@@ -57,4 +57,9 @@ public class CollectMineral extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

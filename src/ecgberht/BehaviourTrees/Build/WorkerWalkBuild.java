@@ -24,7 +24,7 @@ public class WorkerWalkBuild extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
+            for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.eco.workerBuild.entrySet()) {
                 SCV chosen = u.getKey();
                 if (u.getValue().first != UnitType.Terran_Command_Center
                         || gameState.getGame().getBWMap().isVisible(u.getValue().second)
@@ -72,4 +72,9 @@ public class WorkerWalkBuild extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -27,7 +27,7 @@ public class ChoosePort extends BrainAction {
                     return BrainStatus.FAILURE;
                 }
             }
-            if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.getStrat().numCCForPort > Util.getNumberCCs() ||
+            if (gameState.tech.MBs.isEmpty() || gameState.tech.Fs.isEmpty() || gameState.getStrat().numCCForPort > Util.getNumberCCs() ||
                     (Util.countBuildingAll(UnitType.Terran_Starport) > 0 && gameState.getStrat().portPerCC == 0)) {
                 return BrainStatus.FAILURE;
             }
@@ -46,4 +46,9 @@ public class ChoosePort extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

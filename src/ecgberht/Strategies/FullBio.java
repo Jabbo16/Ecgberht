@@ -79,3 +79,8 @@ public class FullBio extends Strategy {
         return Util.isResearched(TechType.Stim_Packs) && Util.countUnitTypeSelf(UnitType.Terran_Medic) >= 3;
     }
 }
+
+
+
+
+

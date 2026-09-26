@@ -38,23 +38,23 @@ public class ChooseTurret extends BrainAction {
             }
             
             boolean tech = false;
-            for (ResearchingFacility ub : gameState.UBs) {
+            for (ResearchingFacility ub : gameState.tech.UBs) {
                 if (ub instanceof EngineeringBay) {
                     tech = true;
                     break;
                 }
             }
             
-            if (tech && gameState.Ts.size() < requiredTurrets) {
+            if (tech && gameState.tech.Ts.size() < requiredTurrets) {
                 int building = 0;
-                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Missile_Turret) building++;
                 }
-                for (Building w : gameState.workerTask.values()) {
+                for (Building w : gameState.eco.workerTask.values()) {
                     if (w instanceof MissileTurret) building++;
                 }
                 
-                if (gameState.Ts.size() + building < requiredTurrets) {
+                if (gameState.tech.Ts.size() + building < requiredTurrets) {
                     gameState.chosenToBuild = UnitType.Terran_Missile_Turret;
                     return BrainStatus.SUCCESS;
                 }
@@ -67,4 +67,9 @@ public class ChooseTurret extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

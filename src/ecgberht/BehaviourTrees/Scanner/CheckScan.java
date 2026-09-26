@@ -23,9 +23,9 @@ public class CheckScan extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.CSs.isEmpty()) return BrainStatus.FAILURE;
+            if (gameState.tech.CSs.isEmpty()) return BrainStatus.FAILURE;
             if (gameState.frameCount - gameState.startCount > 40 + gameState.getIH().getLatency()) {
-                for (ComsatStation u : gameState.CSs) {
+                for (ComsatStation u : gameState.tech.CSs) {
                     if (u.getEnergy() < 50) continue;
                     for (UnitInfo e : gameState.unitStorage.getEnemyUnits().values()) {
                         if ((e.unit.isCloaked() || e.burrowed) && !e.unit.isDetected()) {
@@ -49,7 +49,7 @@ public class CheckScan extends BrainAction {
                 valid.add(b);
             }
             if (valid.isEmpty()) return BrainStatus.FAILURE;
-            for (ComsatStation u : gameState.CSs) {
+            for (ComsatStation u : gameState.tech.CSs) {
                 if (u.getEnergy() == 200) {
                     gameState.checkScan = new MutablePair<>(u,
                             Util.getUnitCenterPosition(valid.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(valid.size())).getLocation().toPosition(), gameState.enemyRace.getCenter()));
@@ -64,4 +64,9 @@ public class CheckScan extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

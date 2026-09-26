@@ -25,12 +25,12 @@ public class ChooseExpand extends BrainAction {
             String strat = gameState.getStrat().name;
             if (strat.equals("ProxyBBS") || strat.equals("ProxyEightRax") || ((strat.equals("JoyORush") || strat.equals("TheNitekat")) && gameState.getCash().first <= 550))
                 return BrainStatus.FAILURE;
-            if (strat.equals("FullMech") && (gameState.myArmy.stream().noneMatch(u -> u.unit instanceof SiegeTank) || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && gameState.firstExpand)
+            if (strat.equals("FullMech") && (gameState.mil.myArmy.stream().noneMatch(u -> u.unit instanceof SiegeTank) || !gameState.getPlayer().hasResearched(TechType.Tank_Siege_Mode)) && gameState.firstExpand)
                 return BrainStatus.FAILURE;
-            for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+            for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                 if (w.first == UnitType.Terran_Command_Center) return BrainStatus.FAILURE;
             }
-            for (Building w : gameState.workerTask.values()) {
+            for (Building w : gameState.eco.workerTask.values()) {
                 if (w instanceof CommandCenter) return BrainStatus.FAILURE;
             }
             if (strat.equals("PlasmaWraithHell") && Util.countUnitTypeSelf(UnitType.Terran_Command_Center) > 2) {
@@ -41,13 +41,13 @@ public class ChooseExpand extends BrainAction {
                 return BrainStatus.SUCCESS;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE") ||
-                    strat.equals("PlasmaWraithHell")) && !gameState.MBs.isEmpty() && gameState.CCs.size() == 1) {
+                    strat.equals("PlasmaWraithHell")) && !gameState.tech.MBs.isEmpty() && gameState.CCs.size() == 1) {
                 gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return BrainStatus.SUCCESS;
             }
             int workers = gameState.workerIdle.size();
-            for (Integer wt : gameState.mineralsAssigned.values()) workers += wt;
-            if (gameState.mineralsAssigned.size() * 2 <= workers - 1 &&
+            for (Integer wt : gameState.eco.mineralsAssigned.values()) workers += wt;
+            if (gameState.eco.mineralsAssigned.size() * 2 <= workers - 1 &&
                     gameState.getArmySize() >= gameState.getStrat().armyForExpand) {
                 gameState.chosenToBuild = UnitType.Terran_Command_Center;
                 return BrainStatus.SUCCESS;
@@ -60,4 +60,9 @@ public class ChooseExpand extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

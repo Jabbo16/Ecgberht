@@ -21,7 +21,7 @@ public class ChooseIrradiate extends BrainAction {
             if (gameState.enemyRace != Race.Zerg) return BrainStatus.FAILURE;
             boolean found = false;
             ScienceFacility chosen = null;
-            for (ResearchingFacility r : gameState.UBs) {
+            for (ResearchingFacility r : gameState.tech.UBs) {
                 if (r instanceof ScienceFacility && !r.isResearching()) {
                     found = true;
                     chosen = (ScienceFacility) r;
@@ -31,7 +31,7 @@ public class ChooseIrradiate extends BrainAction {
             if (!found) return BrainStatus.FAILURE;
             if (!gameState.getPlayer().isResearching(TechType.Irradiate) &&
                     !gameState.getPlayer().hasResearched(TechType.Irradiate)) {
-                gameState.chosenUnitUpgrader = chosen;
+                gameState.tech.chosenUnitUpgrader = chosen;
                 gameState.chosenResearch = TechType.Irradiate;
                 return BrainStatus.SUCCESS;
             }
@@ -43,4 +43,9 @@ public class ChooseIrradiate extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

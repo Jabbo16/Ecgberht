@@ -86,21 +86,21 @@ public class DebugManager {
             if(u.getValue().second != null)bw.getMapDrawer().drawLineMap(u.getKey().getLocation().toPosition(), u.getValue().second.getPosition(),Color.ORANGE);
         }*/
             for (MineralPatch m : gameState.walkingMinerals) print(m, Color.RED);
-            for (MineralPatch d : gameState.blockingMinerals.values()) print(d, Color.RED);
+            for (MineralPatch d : gameState.eco.blockingMinerals.values()) print(d, Color.RED);
             int counter = 0;
             for (Base b : gameState.BLs) {
                 mapDrawer.drawTextMap(Util.getUnitCenterPosition(b.getLocation().toPosition(), UnitType.Terran_Command_Center), ColorUtil.formatText(Integer.toString(counter), ColorUtil.White));
                 for (Mineral m : b.getBlockingMinerals()) print(m.getUnit(), Color.RED);
                 counter++;
             }
-            for (Building b : gameState.buildingLot) print(b, Color.PURPLE);
+            for (Building b : gameState.tech.buildingLot) print(b, Color.PURPLE);
             for (Unit u : gameState.enemyInBase) print(u, Color.RED);
             for (Base b : gameState.islandBases)
                 mapDrawer.drawTextMap(b.getLocation().toPosition(), ColorUtil.formatText("Island", ColorUtil.White));
             for (Unit u : gameState.islandCCs.values()) {
                 print(u, Color.YELLOW);
             }
-            for (Agent ag : gameState.agents.values()) {
+            for (Agent ag : gameState.mil.agents.values()) {
                 if (ag instanceof VultureAgent) {
                     VultureAgent vulture = (VultureAgent) ag;
                     mapDrawer.drawTextMap(vulture.myUnit.getPosition(), ColorUtil.formatText(ag.statusToString(), ColorUtil.White));
@@ -138,7 +138,7 @@ public class DebugManager {
                 mapDrawer.drawTextMap(gameState.chosenHarasser.getPosition(), ColorUtil.formatText("Harasser", ColorUtil.White));
                 print(gameState.chosenHarasser, Color.BLUE);
             }
-            for (Map.Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
+            for (Map.Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.eco.workerBuild.entrySet()) {
                 print(u.getKey(), Color.TEAL);
                 mapDrawer.drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Building " + u.getValue().first.toString(), ColorUtil.White));
                 print(u.getValue().second, u.getValue().first, Color.TEAL);
@@ -149,7 +149,7 @@ public class DebugManager {
                 mapDrawer.drawTextMap(gameState.chosenUnitToHarass.getPosition(), ColorUtil.formatText("UnitToHarass", ColorUtil.White));
             }
 
-            for (Map.Entry<SCV, Mechanical> r : gameState.repairerTask.entrySet()) {
+            for (Map.Entry<SCV, Mechanical> r : gameState.eco.repairerTask.entrySet()) {
                 print(r.getKey(), Color.YELLOW);
                 mapDrawer.drawTextMap(r.getKey().getPosition(), ColorUtil.formatText("Repairer", ColorUtil.White));
                 if (r.getValue() == null || !r.getValue().exists()) continue;
@@ -164,7 +164,7 @@ public class DebugManager {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.BLUE);
             }*/
-            /*for (UnitInfo ui : gameState.myArmy) {
+            /*for (UnitInfo ui : gameState.mil.myArmy) {
                 mapDrawer.drawTextMap(ui.position.add(new Position(0, 16)), ColorUtil.formatText(ui.unitType.toString(), ColorUtil.White));
                 print(ui.unit, Color.BLUE);
             }*/
@@ -184,33 +184,33 @@ public class DebugManager {
                 print(u, Color.YELLOW);
                 mapDrawer.drawCircleMap(u.getPosition(), 500, Color.ORANGE);
             }
-            for (Unit u : gameState.DBs.keySet()) {
+            for (Unit u : gameState.tech.DBs.keySet()) {
                 mapDrawer.drawCircleMap(u.getPosition(), 300, Color.ORANGE);
             }
             for (Unit u : gameState.workerIdle) print(u, Color.ORANGE);
-            for (Map.Entry<SCV, Building> u : gameState.workerTask.entrySet()) {
+            for (Map.Entry<SCV, Building> u : gameState.eco.workerTask.entrySet()) {
                 print(u.getKey(), Color.TEAL);
                 mapDrawer.drawTextMap(u.getKey().getPosition(), ColorUtil.formatText("Tasked: " + u.getValue().getType().toString(), ColorUtil.White));
                 print(u.getValue(), Color.TEAL);
                 mapDrawer.drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.RED);
             }
-            for (Worker u : gameState.workerDefenders.keySet()) {
+            for (Worker u : gameState.eco.workerDefenders.keySet()) {
                 print(u, Color.PURPLE);
                 mapDrawer.drawTextMap(u.getPosition(), ColorUtil.formatText("SpartanSCV", ColorUtil.White));
             }
-            for (Map.Entry<Worker, MineralPatch> u : gameState.workerMining.entrySet()) {
+            for (Map.Entry<Worker, MineralPatch> u : gameState.eco.workerMining.entrySet()) {
                 print(u.getKey(), Color.CYAN);
                 mapDrawer.drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.CYAN);
             }
-            for (Map.Entry<Worker, GasMiningFacility> u : gameState.workerGas.entrySet()) {
+            for (Map.Entry<Worker, GasMiningFacility> u : gameState.eco.workerGas.entrySet()) {
                 if (u.getKey().getOrder() == Order.HarvestGas) continue;
                 print(u.getKey(), Color.GREEN);
                 mapDrawer.drawLineMap(u.getKey().getPosition(), u.getValue().getPosition(), Color.GREEN);
             }
             for (Map.Entry<VespeneGeyser, Boolean> u : gameState.vespeneGeysers.entrySet()) {
                 print(u.getKey(), Color.GREEN);
-                if (gameState.refineriesAssigned.containsKey(u.getKey())) {
-                    int gas = gameState.refineriesAssigned.get(u.getKey());
+                if (gameState.eco.refineriesAssigned.containsKey(u.getKey())) {
+                    int gas = gameState.eco.refineriesAssigned.get(u.getKey());
                     mapDrawer.drawTextMap(u.getKey().getPosition(), ColorUtil.formatText(Integer.toString(gas), ColorUtil.White));
                 }
             }
@@ -226,7 +226,7 @@ public class DebugManager {
                 mapDrawer.drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp())), ColorUtil.formatText(s.status.toString(), ColorUtil.White));
                 mapDrawer.drawTextMap(center.add(new Position(0, UnitType.Terran_Marine.dimensionUp() * 2)), ColorUtil.formatText(s.lose ? "Lose" : "Win", ColorUtil.White));
             }
-            for (Map.Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+            for (Map.Entry<MineralPatch, Integer> m : gameState.eco.mineralsAssigned.entrySet()) {
                 print(m.getKey(), Color.CYAN);
                 if (m.getValue() == 0) continue;
                 mapDrawer.drawTextMap(m.getKey().getPosition(), ColorUtil.formatText(m.getValue().toString(), ColorUtil.White));
@@ -242,7 +242,7 @@ public class DebugManager {
             if (!ConfigManager.getConfig().ecgConfig.debugText) return;
             mapDrawer.drawTextScreen(320, 5, ColorUtil.formatText(gameState.supplyMan.getSupplyUsed() + "/" + gameState.supplyMan.getSupplyTotal(), ColorUtil.White));
             mapDrawer.drawTextScreen(320, 20, ColorUtil.formatText(gameState.getArmySize() + "/" + gameState.getStrat().armyForAttack, ColorUtil.White));
-            String defending = gameState.defense ? ColorUtil.formatText("Defense", ColorUtil.Green) : ColorUtil.formatText("Defense", ColorUtil.Red);
+            String defending = gameState.mil.defense ? ColorUtil.formatText("mil.defense", ColorUtil.Green) : ColorUtil.formatText("mil.defense", ColorUtil.Red);
             mapDrawer.drawTextScreen(320, 35, defending);
             mapDrawer.drawTextScreen(320, 50, ColorUtil.formatText("I want to train: " + gameState.chosenUnit.toString(), ColorUtil.White));
             mapDrawer.drawTextScreen(320, 65, ColorUtil.formatText("I want to build: " + gameState.chosenToBuild.toString(), ColorUtil.White));
@@ -302,3 +302,7 @@ public class DebugManager {
         debugText(gs);
     }
 }
+
+
+
+

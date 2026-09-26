@@ -62,3 +62,9 @@ public final class BWEM {
         asserter.setFailOutputStream(outputStream);
     }
 }
+
+
+
+
+
+

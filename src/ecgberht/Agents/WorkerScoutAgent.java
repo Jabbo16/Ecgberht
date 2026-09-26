@@ -86,7 +86,7 @@ public class WorkerScoutAgent extends Agent {
             return true;
         }
         if (status == Status.EXPLORE && getGs().getStrat().proxy && mySim.allies.stream().anyMatch(u -> u.unit instanceof Marine)) {
-            getGs().myArmy.add(unitInfo);
+            getGs().mil.myArmy.add(unitInfo);
             getGs().firstScout = false;
             if (getGs().proxyBuilding != null && !getGs().proxyBuilding.isCompleted())
                 getGs().proxyBuilding.cancelConstruction();
@@ -224,7 +224,7 @@ public class WorkerScoutAgent extends Agent {
         }
         if (finishedDisrupting) return Status.EXPLORE;
         String strat = getGs().getStrat().name;
-        if (getGs().luckyDraw >= 0.7 && ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().MBs.isEmpty() && !getGs().refineriesAssigned.isEmpty()) {
+        if (getGs().luckyDraw >= 0.7 && ableToProxy && strat.equals("TwoPortWraith") && !getGs().learningManager.isNaughty() && !getGs().tech.MBs.isEmpty() && !getGs().eco.refineriesAssigned.isEmpty()) {
             return Status.PROXYING;
         }
         if (getGs().luckyDraw >= 0.35 || strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE")
@@ -412,3 +412,8 @@ public class WorkerScoutAgent extends Agent {
         return "None";
     }
 }
+
+
+
+
+

@@ -301,7 +301,7 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
             maxScore = 0;
         }
         if (!mySimMix.allies.isEmpty()) {
-            // Defense Matrix
+            // mil.defense Matrix
             Set<UnitInfo> matrixTargets = new TreeSet<>(mySimMix.allies);
             if (follow != null && !matrixTargets.isEmpty() && unit.getEnergy() >= TechType.Defensive_Matrix.energyCost() && follow.status != Squad.Status.IDLE) {
                 for (UnitInfo u : matrixTargets) {
@@ -364,3 +364,8 @@ public class VesselAgent extends Agent implements Comparable<Unit> {
     enum Status {DMATRIX, KITE, FOLLOW, IDLE, RETREAT, IRRADIATE, HOVER, EMP}
 
 }
+
+
+
+
+

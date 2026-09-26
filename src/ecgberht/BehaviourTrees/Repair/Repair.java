@@ -26,16 +26,16 @@ public class Repair extends BrainAction {
                     if (gameState.workerIdle.contains(gameState.chosenRepairer)) {
                         gameState.workerIdle.remove(gameState.chosenRepairer);
                     } else {
-                        if (gameState.workerMining.containsKey(gameState.chosenRepairer)) {
-                            MineralPatch mineral = gameState.workerMining.get(gameState.chosenRepairer);
-                            gameState.workerMining.remove(gameState.chosenRepairer);
-                            if (gameState.mineralsAssigned.containsKey(mineral)) {
-                                gameState.mining--;
-                                gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                        if (gameState.eco.workerMining.containsKey(gameState.chosenRepairer)) {
+                            MineralPatch mineral = gameState.eco.workerMining.get(gameState.chosenRepairer);
+                            gameState.eco.workerMining.remove(gameState.chosenRepairer);
+                            if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                                gameState.eco.mining--;
+                                gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                             }
                         }
                     }
-                    gameState.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
+                    gameState.eco.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
                     gameState.chosenUnitRepair = null;
                     gameState.chosenRepairer = null;
                     return BrainStatus.SUCCESS;
@@ -44,16 +44,16 @@ public class Repair extends BrainAction {
                 if (gameState.workerIdle.contains(gameState.chosenRepairer)) {
                     gameState.workerIdle.remove(gameState.chosenRepairer);
                 } else {
-                    if (gameState.workerMining.containsKey(gameState.chosenRepairer)) {
-                        MineralPatch mineral = gameState.workerMining.get(gameState.chosenRepairer);
-                        gameState.workerMining.remove(gameState.chosenRepairer);
-                        if (gameState.mineralsAssigned.containsKey(mineral)) {
-                            gameState.mining--;
-                            gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                    if (gameState.eco.workerMining.containsKey(gameState.chosenRepairer)) {
+                        MineralPatch mineral = gameState.eco.workerMining.get(gameState.chosenRepairer);
+                        gameState.eco.workerMining.remove(gameState.chosenRepairer);
+                        if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                            gameState.eco.mining--;
+                            gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                         }
                     }
                 }
-                gameState.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
+                gameState.eco.repairerTask.put(gameState.chosenRepairer, gameState.chosenUnitRepair);
                 if (gameState.chosenUnitRepair instanceof MobileUnit) {
                     ((MobileUnit) gameState.chosenUnitRepair).move(gameState.chosenRepairer.getPosition());
                 }
@@ -71,4 +71,9 @@ public class Repair extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

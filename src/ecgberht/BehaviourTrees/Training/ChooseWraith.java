@@ -18,9 +18,9 @@ public class ChooseWraith extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (!gameState.Ps.isEmpty()) {
+            if (!gameState.tech.Ps.isEmpty()) {
                 if (Util.countUnitTypeSelf(UnitType.Terran_Wraith) <= gameState.maxWraiths) {
-                    for (Starport b : gameState.Ps) {
+                    for (Starport b : gameState.tech.Ps) {
                         if (!b.isTraining() && b.canTrain(UnitType.Terran_Wraith)) {
                             gameState.chosenUnit = UnitType.Terran_Wraith;
                             gameState.chosenTrainingFacility = b;
@@ -37,4 +37,9 @@ public class ChooseWraith extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

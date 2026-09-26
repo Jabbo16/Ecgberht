@@ -102,7 +102,7 @@ public class CherryVisDumper {
         board.put("iReallyWantToExpand", getStringObject(gameState.iReallyWantToExpand));
         board.put("firstScout", getStringObject(gameState.firstScout));
         board.put("chosenToBuild", getStringObject(gameState.chosenToBuild));
-        board.put("deltaCash", getStringObject(gameState.deltaCash));
+        board.put("eco.deltaCash", getStringObject(gameState.eco.deltaCash));
         board.put("proxyBuilding", getStringUnitTypeUnit(gameState.proxyBuilding));
         board.put("islandExpand", getStringObject(gameState.islandExpand));
         board.put("APM", getStringObject(gameState.getIH().getFrameCount()));
@@ -119,3 +119,8 @@ public class CherryVisDumper {
     }
 
 }
+
+
+
+
+

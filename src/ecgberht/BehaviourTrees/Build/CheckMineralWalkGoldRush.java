@@ -47,7 +47,7 @@ public class CheckMineralWalkGoldRush extends BrainAction {
     public BrainStatus execute() {
         try {
             if (gameState.walkingMinerals.isEmpty()) return BrainStatus.SUCCESS;
-            for (Map.Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.workerBuild.entrySet()) {
+            for (Map.Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.eco.workerBuild.entrySet()) {
                 if (u.getValue().first != UnitType.Terran_Command_Center) continue;
                 SCV scv = u.getKey();
                 Unit movingMineral = u.getKey().getTargetUnit();
@@ -73,4 +73,9 @@ public class CheckMineralWalkGoldRush extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

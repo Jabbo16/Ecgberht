@@ -36,21 +36,21 @@ public class ChooseRefinery extends BrainAction {
             if (gameState.getStrat().techToResearch.contains(TechType.Tank_Siege_Mode) && gameState.getCash().second >= 250 * Math.max(1, gameState.CCs.size())) {
                 return BrainStatus.FAILURE;
             }
-            if (gameState.refineriesAssigned.size() == 1) {
+            if (gameState.eco.refineriesAssigned.size() == 1) {
                 boolean found = false;
-                for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                     if (w.first == UnitType.Terran_Barracks) {
                         found = true;
                         break;
                     }
                 }
-                for (Building w : gameState.workerTask.values()) {
+                for (Building w : gameState.eco.workerTask.values()) {
                     if (w instanceof Barracks) {
                         found = true;
                         break;
                     }
                 }
-                if (gameState.MBs.isEmpty() && !found) return BrainStatus.FAILURE;
+                if (gameState.tech.MBs.isEmpty() && !found) return BrainStatus.FAILURE;
             }
             int count = 0;
             VespeneGeyser geyser = null;
@@ -60,15 +60,15 @@ public class ChooseRefinery extends BrainAction {
                 } else geyser = r.getKey();
             }
             if (count == gameState.vespeneGeysers.size()) return BrainStatus.FAILURE;
-            for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+            for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                 if (w.first == UnitType.Terran_Refinery) return BrainStatus.FAILURE;
             }
-            for (Building w : gameState.workerTask.values()) {
+            for (Building w : gameState.eco.workerTask.values()) {
                 if (w instanceof Refinery && geyser != null && w.getTilePosition().equals(geyser.getTilePosition()))
                     return BrainStatus.FAILURE;
             }
             if ((strat.equals("BioGreedyFE") || strat.equals("MechGreedyFE") || strat.equals("BioMechGreedyFE")) &&
-                    !gameState.refineriesAssigned.isEmpty()
+                    !gameState.eco.refineriesAssigned.isEmpty()
                     && Util.getNumberCCs() <= 2 && Util.countUnitTypeSelf(UnitType.Terran_SCV) < 30) {
                 return BrainStatus.FAILURE;
             }
@@ -81,4 +81,9 @@ public class ChooseRefinery extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

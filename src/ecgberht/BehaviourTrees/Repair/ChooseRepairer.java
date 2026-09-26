@@ -27,7 +27,7 @@ public class ChooseRepairer extends BrainAction {
                     closestWorker = (SCV) u;
                 }
             }
-            for (Worker u : gameState.workerMining.keySet()) {
+            for (Worker u : gameState.eco.workerMining.keySet()) {
                 if (u.getLastCommandFrame() == frame) continue;
                 if ((closestWorker == null || u.getDistance(chosen) < closestWorker.getDistance(chosen)) && !u.isCarryingMinerals()) {
                     closestWorker = (SCV) u;
@@ -45,3 +45,8 @@ public class ChooseRepairer extends BrainAction {
         }
     }
 }
+
+
+
+
+

@@ -15,3 +15,8 @@ class UnitSeenInfo {
         y = u.getTilePosition().toWalkPosition().getY();
     }
 }
+
+
+
+
+

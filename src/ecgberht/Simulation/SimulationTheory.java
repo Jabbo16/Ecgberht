@@ -109,11 +109,11 @@ public class SimulationTheory {
     private void createClusters() {
         // Friendly Clusters
         List<UnitInfo> myUnits = new ArrayList<>();
-        for (UnitInfo u : getGs().myArmy) {
+        for (UnitInfo u : getGs().mil.myArmy) {
             if (isArmyUnit(u.unit)) myUnits.add(u);
         }
-        getGs().DBs.keySet().stream().map(b -> getGs().unitStorage.getAllyUnits().get(b)).forEach(myUnits::add); // Bunkers
-        getGs().agents.values().stream().map(g -> g.unitInfo).forEach(myUnits::add); // Agents
+        getGs().tech.DBs.keySet().stream().map(b -> getGs().unitStorage.getAllyUnits().get(b)).forEach(myUnits::add); // Bunkers
+        getGs().mil.agents.values().stream().map(g -> g.unitInfo).forEach(myUnits::add); // mil.agents
         MeanShift clustering = new MeanShift(myUnits, radius);
         friendly = clustering.run(iterations);
         // Enemy Clusters
@@ -173,7 +173,7 @@ public class SimulationTheory {
      */
     private boolean noNeedForSim() {
         int workerThreats = 0;
-        if ((friendly.isEmpty() || enemies.isEmpty()) && getGs().agents.isEmpty()) return true;
+        if ((friendly.isEmpty() || enemies.isEmpty()) && getGs().mil.agents.isEmpty()) return true;
         for (Unit u : getGs().enemyCombatUnitMemory) {
             if (u instanceof Attacker && !(u instanceof Worker) || workerThreats > 1) return false;
             if (u instanceof Worker && ((Worker) u).isAttacking()) workerThreats++;
@@ -245,7 +245,7 @@ public class SimulationTheory {
      * Updates the SimInfos created with the results of the ASS simulations
      */
     private void doSimASS() {
-        int energy = getGs().CSs.stream().filter(s -> s.getOrder() != Order.CastScannerSweep).mapToInt(s -> s.getEnergy() / 50).sum();
+        int energy = getGs().tech.CSs.stream().filter(s -> s.getOrder() != Order.CastScannerSweep).mapToInt(s -> s.getEnergy() / 50).sum();
         for (SimInfo s : simulations) {
             try {
                 simulator.reset();
@@ -441,3 +441,8 @@ public class SimulationTheory {
         return new SimInfo();
     }
 }
+
+
+
+
+

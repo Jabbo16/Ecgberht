@@ -31,13 +31,13 @@ public class CheckResourcesBuilding extends BrainAction {
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), gameState.chosenToBuild);
             if (gameState.getStrat().name.equals("ProxyBBS") && gameState.chosenToBuild == UnitType.Terran_Barracks) {
                 if (Util.countBuildingAll(UnitType.Terran_Barracks) < 1) {
-                    if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() * 2 + 40 + gameState.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice() * 2) + gameState.deltaCash.second) {
+                    if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() * 2 + 40 + gameState.eco.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice() * 2) + gameState.eco.deltaCash.second) {
                         return BrainStatus.SUCCESS;
                     }
                 } else if (Util.countBuildingAll(UnitType.Terran_Barracks) == 1)
                     return BrainStatus.SUCCESS;
                 return BrainStatus.FAILURE;
-            } else if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice()) + gameState.deltaCash.second) {
+            } else if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= (gameState.chosenToBuild.mineralPrice() + gameState.eco.deltaCash.first) && cash.second >= (gameState.chosenToBuild.gasPrice()) + gameState.eco.deltaCash.second) {
                 return BrainStatus.SUCCESS;
             }
             gameState.chosenWorker = null;
@@ -51,4 +51,9 @@ public class CheckResourcesBuilding extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

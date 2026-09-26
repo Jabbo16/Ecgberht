@@ -21,25 +21,25 @@ public class ChooseMarine extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (!gameState.MBs.isEmpty()) {
+            if (!gameState.tech.MBs.isEmpty()) {
                 int multiplier = 2;
                 String strat = gameState.getStrat().name;
                 Player self = gameState.getPlayer();
                 if (strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("VultureRush"))
                     multiplier = 15;
-                if (!gameState.Fs.isEmpty() && (self.isResearching(TechType.Tank_Siege_Mode) || self.hasResearched(TechType.Tank_Siege_Mode)) && self.gas() >= UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice() && self.minerals() <= 200) {
+                if (!gameState.tech.Fs.isEmpty() && (self.isResearching(TechType.Tank_Siege_Mode) || self.hasResearched(TechType.Tank_Siege_Mode)) && self.gas() >= UnitType.Terran_Siege_Tank_Tank_Mode.gasPrice() && self.minerals() <= 200) {
                     if (Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Siege_Mode) + Util.countUnitTypeSelf(UnitType.Terran_Siege_Tank_Tank_Mode) < Util.countUnitTypeSelf(UnitType.Terran_Marine) * multiplier) {
                         return BrainStatus.FAILURE;
                     }
                 }
                 if ((strat.equals("FullMech") || strat.equals("MechGreedyFE") || strat.equals("2PortWraith"))
-                        && Util.countUnitTypeSelf(UnitType.Terran_Marine) > (gameState.enemyRace == Race.Zerg ? 4 : 2) && !gameState.defense)
+                        && Util.countUnitTypeSelf(UnitType.Terran_Marine) > (gameState.enemyRace == Race.Zerg ? 4 : 2) && !gameState.mil.defense)
                     return BrainStatus.FAILURE;
-                if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !gameState.defense)
+                if (strat.equals("VultureRush") && Util.countUnitTypeSelf(UnitType.Terran_Marine) > 2 && !gameState.mil.defense)
                     return BrainStatus.FAILURE;
                 if (strat.equals("JoyORush") && Util.countBuildingAll(UnitType.Terran_Factory) < 2)
                     return BrainStatus.FAILURE;
-                for (Barracks b : gameState.MBs) {
+                for (Barracks b : gameState.tech.MBs) {
                     if (!b.isTraining()) {
                         gameState.chosenUnit = UnitType.Terran_Marine;
                         gameState.chosenTrainingFacility = b;
@@ -55,4 +55,9 @@ public class ChooseMarine extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

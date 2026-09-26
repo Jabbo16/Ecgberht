@@ -17,12 +17,12 @@ public class CheckResourcesUpgrade extends BrainAction {
             MutablePair<Integer, Integer> cash = gameState.getCash();
             if (gameState.chosenUpgrade != null) {
                 if (cash.first >= (gameState.chosenUpgrade.mineralPrice(gameState.getPlayer().getUpgradeLevel(gameState.chosenUpgrade)) +
-                        gameState.deltaCash.first) && cash.second >= (gameState.chosenUpgrade.gasPrice(gameState.getPlayer().getUpgradeLevel(gameState.chosenUpgrade)))
-                        + gameState.deltaCash.second) {
+                        gameState.eco.deltaCash.first) && cash.second >= (gameState.chosenUpgrade.gasPrice(gameState.getPlayer().getUpgradeLevel(gameState.chosenUpgrade)))
+                        + gameState.eco.deltaCash.second) {
                     return BrainStatus.SUCCESS;
                 }
             } else if (gameState.chosenResearch != null) {
-                if (cash.first >= (gameState.chosenResearch.mineralPrice() + gameState.deltaCash.first) && cash.second >= (gameState.chosenResearch.gasPrice()) + gameState.deltaCash.second) {
+                if (cash.first >= (gameState.chosenResearch.mineralPrice() + gameState.eco.deltaCash.first) && cash.second >= (gameState.chosenResearch.gasPrice()) + gameState.eco.deltaCash.second) {
                     return BrainStatus.SUCCESS;
                 }
             }
@@ -34,4 +34,9 @@ public class CheckResourcesUpgrade extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

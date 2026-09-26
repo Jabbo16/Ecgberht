@@ -25,22 +25,22 @@ public class Move extends BrainAction {
             Position realEnd = Util.getUnitCenterPosition(gameState.chosenPosition.toPosition(), gameState.chosenToBuild);
             if (chosen.move(realEnd)) {
                 if (gameState.workerIdle.contains(chosen)) gameState.workerIdle.remove(chosen);
-                else if (gameState.workerMining.containsKey(chosen)) {
-                    MineralPatch mineral = gameState.workerMining.get(chosen);
-                    gameState.workerMining.remove(chosen);
-                    if (gameState.mineralsAssigned.containsKey(mineral)) {
-                        gameState.mining--;
-                        gameState.mineralsAssigned.put(mineral, gameState.mineralsAssigned.get(mineral) - 1);
+                else if (gameState.eco.workerMining.containsKey(chosen)) {
+                    MineralPatch mineral = gameState.eco.workerMining.get(chosen);
+                    gameState.eco.workerMining.remove(chosen);
+                    if (gameState.eco.mineralsAssigned.containsKey(mineral)) {
+                        gameState.eco.mining--;
+                        gameState.eco.mineralsAssigned.put(mineral, gameState.eco.mineralsAssigned.get(mineral) - 1);
                     }
                 }
                 if (gameState.chosenToBuild == UnitType.Terran_Command_Center
                         && gameState.bwem.getMap().getArea(gameState.chosenPosition).equals(gameState.naturalArea)
                         && gameState.naturalChoke != null) {
-                    gameState.defendPosition = gameState.naturalChoke.getCenter().toPosition();
+                    gameState.mil.defendPosition = gameState.naturalChoke.getCenter().toPosition();
                 }
-                gameState.workerBuild.put((SCV) chosen, new MutablePair<>(gameState.chosenToBuild, gameState.chosenPosition));
-                gameState.deltaCash.first += gameState.chosenToBuild.mineralPrice();
-                gameState.deltaCash.second += gameState.chosenToBuild.gasPrice();
+                gameState.eco.workerBuild.put((SCV) chosen, new MutablePair<>(gameState.chosenToBuild, gameState.chosenPosition));
+                gameState.eco.deltaCash.first += gameState.chosenToBuild.mineralPrice();
+                gameState.eco.deltaCash.second += gameState.chosenToBuild.gasPrice();
                 gameState.chosenWorker = null;
                 gameState.chosenToBuild = UnitType.None;
                 return BrainStatus.SUCCESS;
@@ -53,4 +53,9 @@ public class Move extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-package ecgberht.BehaviourTrees.BuildingLot;
+package ecgberht.BehaviourTrees.tech.buildingLot;
 
 import ecgberht.GameState;
 import ecgberht.brain.BrainStatus;
@@ -13,7 +13,7 @@ public class CheckBuildingsLot extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.buildingLot.isEmpty()) return BrainStatus.FAILURE;
+            if (gameState.tech.buildingLot.isEmpty()) return BrainStatus.FAILURE;
             return BrainStatus.SUCCESS;
         } catch (Exception e) {
             System.err.println(this.getClass().getSimpleName());
@@ -22,4 +22,9 @@ public class CheckBuildingsLot extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

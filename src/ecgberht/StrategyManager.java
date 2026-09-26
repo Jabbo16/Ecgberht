@@ -143,7 +143,7 @@ public class StrategyManager {
         }
         Util.sendText("Transitioning from 14CC to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
         strat = nameStrat.get(bestUCBStrategy);
-        if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+        if (getGs().naturalChoke != null) getGs().mil.defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
     void chooseProxyTransition() {
@@ -166,7 +166,7 @@ public class StrategyManager {
         }
         Util.sendText("Transitioning from Proxy to " + bestUCBStrategy + " with UCB: " + bestUCBStrategyVal);
         strat = nameStrat.get(bestUCBStrategy);
-        if (getGs().naturalChoke != null) getGs().defendPosition = getGs().naturalChoke.getCenter().toPosition();
+        if (getGs().naturalChoke != null) getGs().mil.defendPosition = getGs().naturalChoke.getCenter().toPosition();
     }
 
     // TODO delete this (useless)?
@@ -302,3 +302,8 @@ public class StrategyManager {
         }
     }
 }
+
+
+
+
+

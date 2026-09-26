@@ -45,7 +45,7 @@ public class ChoosePosition extends BrainAction {
             } else if (gameState.chosenToBuild == UnitType.Terran_Command_Center) {
                 if (!gameState.islandBases.isEmpty() && gameState.islandCCs.size() < gameState.islandBases.size()) {
                     if (gameState.islandExpand) return BrainStatus.FAILURE;
-                    for (Agent u : gameState.agents.values()) {
+                    for (Agent u : gameState.mil.agents.values()) {
                         if (u instanceof DropShipAgent && u.statusToString().equals("IDLE")) {
                             gameState.islandExpand = true;
                             return BrainStatus.FAILURE;
@@ -99,8 +99,8 @@ public class ChoosePosition extends BrainAction {
                 gameState.chosenPosition = valid.get(0).getLocation();
                 return BrainStatus.SUCCESS;
             } else {
-                if (!gameState.workerBuild.isEmpty()) {
-                    for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
+                if (!gameState.eco.workerBuild.isEmpty()) {
+                    for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
                         gameState.testMap.updateMap(w.second, w.first, false);
                     }
                 }
@@ -111,11 +111,11 @@ public class ChoosePosition extends BrainAction {
                         origin = gameState.mainCC.first.getLocation();
                     } else origin = self.getStartLocation();
                 } else if (gameState.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (gameState.defendPosition != null) origin = gameState.defendPosition.toTilePosition();
-                    else if (gameState.DBs.isEmpty()) {
+                    if (gameState.mil.defendPosition != null) origin = gameState.mil.defendPosition.toTilePosition();
+                    else if (gameState.tech.DBs.isEmpty()) {
                         origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
-                        origin = gameState.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                        origin = gameState.tech.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                     }
                 } else if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg) {
                     origin = gameState.getBunkerPositionAntiPool();
@@ -132,9 +132,9 @@ public class ChoosePosition extends BrainAction {
                         } else if (gameState.mainCC != null) origin = gameState.mainCC.second.getTilePosition();
                         else origin = gameState.getPlayer().getStartLocation();
                     }
-                } else if (gameState.Ts.isEmpty()) {
-                    if (gameState.defendPosition != null && gameState.naturalChoke != null
-                            && gameState.defendPosition.equals(gameState.naturalChoke.getCenter().toPosition())) {
+                } else if (gameState.tech.Ts.isEmpty()) {
+                    if (gameState.mil.defendPosition != null && gameState.naturalChoke != null
+                            && gameState.mil.defendPosition.equals(gameState.naturalChoke.getCenter().toPosition())) {
                         origin = gameState.testMap.findBunkerPosition(gameState.naturalChoke);
                         if (origin != null) {
                             gameState.testMap = gameState.map.clone();
@@ -168,7 +168,7 @@ public class ChoosePosition extends BrainAction {
                             return BrainStatus.SUCCESS;
                         } else origin = gameState.mainChoke.getCenter().toTilePosition();
                     }
-                } else origin = gameState.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                } else origin = gameState.tech.Ts.stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
                 TilePosition position = gameState.testMap.findPositionNew(gameState.chosenToBuild, origin);
                 gameState.testMap = gameState.map.clone();
                 if (position != null) {
@@ -184,4 +184,9 @@ public class ChoosePosition extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -17,7 +17,7 @@ public class ChooseScience extends BrainAction {
     public BrainStatus execute() {
         try {
 
-            if (gameState.MBs.isEmpty() || gameState.Fs.isEmpty() || gameState.Ps.isEmpty() || gameState.getStrat().numCCForScience > Util.getNumberCCs()) {
+            if (gameState.tech.MBs.isEmpty() || gameState.tech.Fs.isEmpty() || gameState.tech.Ps.isEmpty() || gameState.getStrat().numCCForScience > Util.getNumberCCs()) {
                 return BrainStatus.FAILURE;
             }
             if (Util.countBuildingAll(UnitType.Terran_Science_Facility) == 0) {
@@ -32,4 +32,9 @@ public class ChooseScience extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

@@ -25,7 +25,7 @@ public class CheckResourcesIsland extends BrainAction {
             TilePosition start = chosen.getTilePosition();
             TilePosition end = gameState.chosenIsland.getLocation();
             Position realEnd = Util.getUnitCenterPosition(end.toPosition(), chosenType);
-            if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + gameState.deltaCash.first) {
+            if (cash.first + gameState.getMineralsWhenReaching(start, realEnd.toTilePosition()) >= chosenType.mineralPrice() + gameState.eco.deltaCash.first) {
                 return BrainStatus.SUCCESS;
             }
             return BrainStatus.FAILURE;
@@ -36,4 +36,9 @@ public class CheckResourcesIsland extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

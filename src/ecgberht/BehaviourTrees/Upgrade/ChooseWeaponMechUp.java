@@ -17,11 +17,11 @@ public class ChooseWeaponMechUp extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
-            for (ResearchingFacility u : gameState.UBs) {
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof Armory)) continue;
                 if (u.canUpgrade(UpgradeType.Terran_Vehicle_Weapons) && !u.isResearching() && !u.isUpgrading() && gameState.getPlayer().getUpgradeLevel(UpgradeType.Terran_Vehicle_Weapons) < 3) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenUpgrade = UpgradeType.Terran_Vehicle_Weapons;
                     return BrainStatus.SUCCESS;
                 }
@@ -34,4 +34,9 @@ public class ChooseWeaponMechUp extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

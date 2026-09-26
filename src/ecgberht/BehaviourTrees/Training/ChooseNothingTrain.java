@@ -22,7 +22,7 @@ public class ChooseNothingTrain extends BrainAction {
             boolean stim = gameState.getStrat().techToResearch.contains(TechType.Stim_Packs);
             if (stim && !gameState.getPlayer().hasResearched(TechType.Stim_Packs) &&
                     !gameState.getPlayer().isResearching(TechType.Stim_Packs)
-                    && (int) gameState.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
+                    && (int) gameState.tech.UBs.stream().filter(u -> u instanceof Academy).count() >= 1) {
                 gameState.chosenUnit = UnitType.None;
                 return BrainStatus.SUCCESS;
             }
@@ -44,4 +44,9 @@ public class ChooseNothingTrain extends BrainAction {
     }
 
 }
+
+
+
+
+
 

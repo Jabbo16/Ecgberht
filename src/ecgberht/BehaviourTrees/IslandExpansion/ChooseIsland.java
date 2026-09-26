@@ -20,7 +20,7 @@ public class ChooseIsland extends BrainAction {
         try {
             Base chosen = null;
             double distMax = Double.MAX_VALUE;
-            Position drop = gameState.chosenDropShip.unit.getPosition();
+            Position drop = gameState.mil.chosenDropShip.unit.getPosition();
             for (Base b : gameState.islandBases) {
                 if (gameState.islandCCs.containsKey(b)) continue;
                 double dist = Util.broodWarDistance(b.getLocation().toPosition(), drop);
@@ -33,7 +33,7 @@ public class ChooseIsland extends BrainAction {
                 gameState.chosenIsland = chosen;
                 return BrainStatus.SUCCESS;
             }
-            gameState.chosenDropShip = null;
+            gameState.mil.chosenDropShip = null;
             gameState.chosenWorker = null;
             gameState.chosenIsland = null;
             return BrainStatus.FAILURE;
@@ -44,3 +44,8 @@ public class ChooseIsland extends BrainAction {
         }
     }
 }
+
+
+
+
+

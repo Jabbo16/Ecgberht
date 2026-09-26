@@ -18,9 +18,9 @@ public class ChooseFireBat extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.enemyRace != Race.Zerg || gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
+            if (gameState.enemyRace != Race.Zerg || gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
             if (Util.countUnitTypeSelf(UnitType.Terran_Marine) >= 4) {
-                for (ResearchingFacility r : gameState.UBs) {
+                for (ResearchingFacility r : gameState.tech.UBs) {
                     if (r instanceof Academy) {
                         int count = 0;
                         for (Unit u : gameState.getGame().getUnits(gameState.getPlayer())) {
@@ -28,7 +28,7 @@ public class ChooseFireBat extends BrainAction {
                             if (u instanceof Firebat) count++;
                             if (count >= gameState.maxBats) return BrainStatus.FAILURE;
                         }
-                        for (Barracks b : gameState.MBs) {
+                        for (Barracks b : gameState.tech.MBs) {
                             if (!b.isTraining()) {
                                 gameState.chosenUnit = UnitType.Terran_Firebat;
                                 gameState.chosenTrainingFacility = b;
@@ -46,4 +46,9 @@ public class ChooseFireBat extends BrainAction {
         }
     }
 }
+
+
+
+
+
 

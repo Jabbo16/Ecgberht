@@ -17,11 +17,11 @@ public class ChooseStimUpgrade extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.UBs.isEmpty()) return BrainStatus.FAILURE;
-            for (ResearchingFacility u : gameState.UBs) {
+            if (gameState.tech.UBs.isEmpty()) return BrainStatus.FAILURE;
+            for (ResearchingFacility u : gameState.tech.UBs) {
                 if (!(u instanceof Academy)) continue;
                 if (!gameState.getPlayer().hasResearched(TechType.Stim_Packs) && u.canResearch(TechType.Stim_Packs) && !u.isResearching() && !u.isUpgrading()) {
-                    gameState.chosenUnitUpgrader = u;
+                    gameState.tech.chosenUnitUpgrader = u;
                     gameState.chosenResearch = TechType.Stim_Packs;
                     return BrainStatus.SUCCESS;
                 }
@@ -34,4 +34,9 @@ public class ChooseStimUpgrade extends BrainAction {
         }
     }
 }
+
+
+
+
+
 
