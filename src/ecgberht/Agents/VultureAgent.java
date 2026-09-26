@@ -36,18 +36,21 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private boolean placeMineAtChoke() {
         if (unit.getSpiderMineCount() > 0 && ecgberht.Ecgberht.getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Spider_Mines)) {
             org.openbw.bwapi4j.Position chokeCenter = null;
-            if (ecgberht.Ecgberht.getGs().naturalChoke != null) {
-                chokeCenter = ecgberht.Ecgberht.getGs().naturalChoke.getCenter().toPosition();
-            } else if (ecgberht.Ecgberht.getGs().mainChoke != null) {
-                chokeCenter = ecgberht.Ecgberht.getGs().mainChoke.getCenter().toPosition();
+            double minDist = 600.0;
+            for (bwem.ChokePoint choke : ecgberht.Ecgberht.getGs().bwem.getMap().getChokePoints()) {
+                double dist = unit.getDistance(choke.getCenter().toPosition());
+                if (dist < minDist) {
+                    minDist = dist;
+                    chokeCenter = choke.getCenter().toPosition();
+                }
             }
             if (chokeCenter != null) {
                 for (int i = 0; i < 5; i++) {
                     org.openbw.bwapi4j.Position target = new org.openbw.bwapi4j.Position(chokeCenter.getX() + (int)(Math.random()*256 - 128), chokeCenter.getY() + (int)(Math.random()*256 - 128));
-                    if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target)) {
+                    if (ecgberht.Ecgberht.getGs().getGame().getBWMap().isValidPosition(target) && ecgberht.Ecgberht.getGs().getGame().getBWMap().isWalkable(target.toWalkPosition())) {
                         boolean mineNearby = false;
                         for (ecgberht.UnitInfo ally : ecgberht.Ecgberht.getGs().unitStorage.getAllyUnits().values()) {
-                            if (ally.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(target) < 96) {
+                            if (ally.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(target) < 160) {
                                 mineNearby = true;
                                 break;
                             }
@@ -56,6 +59,33 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
                             unit.spiderMine(target);
                             return true;
                         }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean placeMineCombat() {
+        if (unit.getSpiderMineCount() > 0 && getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Spider_Mines)) {
+            if (mySim != null && !mySim.enemies.isEmpty()) {
+                int closeEnemies = 0;
+                for (UnitInfo e : mySim.enemies) {
+                    if (!e.flying && unitInfo.getDistance(e) < 320) {
+                        closeEnemies++;
+                    }
+                }
+                if (closeEnemies >= 2 || (closeEnemies == 1 && mySim.lose)) {
+                    boolean mineNearby = false;
+                    for (UnitInfo ally : getGs().unitStorage.getAllyUnits().values()) {
+                        if (ally.unitType == UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(unitInfo) < 192) {
+                            mineNearby = true;
+                            break;
+                        }
+                    }
+                    if (!mineNearby) {
+                        unit.spiderMine(unit.getPosition());
+                        return true;
                     }
                 }
             }
@@ -94,8 +124,9 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
             getNewStatus();
             //if (old == status && status != Status.COMBAT && status != Status.ATTACK) return false;
             if (status != Status.COMBAT && status != Status.PATROL) attackUnit = null;
-            if (status == Status.ATTACK || status == Status.IDLE) {
+            if (status == Status.ATTACK || status == Status.IDLE || status == Status.COMBAT || status == Status.KITE || status == Status.PATROL) {
                 if (placeMineAtChoke()) return false;
+                if (placeMineCombat()) return false;
             }
             if ((status == Status.ATTACK || status == Status.IDLE) && (unit.isIdle() || unit.getOrder() == Order.PlayerGuard)) {
                 Position pos = Util.chooseAttackPosition(unit.getPosition(), false);
