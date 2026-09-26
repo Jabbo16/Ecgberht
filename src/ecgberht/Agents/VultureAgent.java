@@ -36,12 +36,28 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
     private boolean placeMineAtChoke() {
         if (unit.getSpiderMineCount() > 0 && ecgberht.Ecgberht.getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Spider_Mines)) {
             org.openbw.bwapi4j.Position chokeCenter = null;
-            double minDist = 600.0;
-            for (bwem.ChokePoint choke : ecgberht.Ecgberht.getGs().bwem.getMap().getChokePoints()) {
+            
+            java.util.List<bwem.ChokePoint> enemyChokes = new java.util.ArrayList<>();
+            if (getGs().enemyMainBase != null) enemyChokes.addAll(getGs().enemyMainBase.getArea().getChokePoints());
+            if (getGs().enemyNaturalBase != null) enemyChokes.addAll(getGs().enemyNaturalBase.getArea().getChokePoints());
+            
+            double enemyMinDist = 1500.0;
+            for (bwem.ChokePoint choke : enemyChokes) {
                 double dist = unit.getDistance(choke.getCenter().toPosition());
-                if (dist < minDist) {
-                    minDist = dist;
+                if (dist < enemyMinDist) {
+                    enemyMinDist = dist;
                     chokeCenter = choke.getCenter().toPosition();
+                }
+            }
+            
+            if (chokeCenter == null) {
+                double minDist = 600.0;
+                for (bwem.ChokePoint choke : ecgberht.Ecgberht.getGs().bwem.getMap().getChokePoints()) {
+                    double dist = unit.getDistance(choke.getCenter().toPosition());
+                    if (dist < minDist) {
+                        minDist = dist;
+                        chokeCenter = choke.getCenter().toPosition();
+                    }
                 }
             }
             if (chokeCenter != null) {
