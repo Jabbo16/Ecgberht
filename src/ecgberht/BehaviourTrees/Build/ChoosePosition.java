@@ -4,6 +4,7 @@ import ecgberht.brain.*;
 import bwem.Base;
 import ecgberht.Agents.Agent;
 import ecgberht.Agents.DropShipAgent;
+import ecgberht.BaseManager;
 import ecgberht.GameState;
 import ecgberht.UnitInfo;
 import ecgberht.Util.MutablePair;
@@ -111,11 +112,23 @@ public class ChoosePosition extends BrainAction {
                         origin = gameState.mainCC.first.getLocation();
                     } else origin = self.getStartLocation();
                 } else if (gameState.chosenToBuild.equals(UnitType.Terran_Missile_Turret)) {
-                    if (gameState.mil.defendPosition != null) origin = gameState.mil.defendPosition.toTilePosition();
+                    TilePosition chokeOrigin;
+                    if (gameState.mil.defendPosition != null) chokeOrigin = gameState.mil.defendPosition.toTilePosition();
                     else if (gameState.tech.DBs.isEmpty()) {
-                        origin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
+                        chokeOrigin = Util.getClosestChokepoint(self.getStartLocation().toPosition()).getCenter().toTilePosition();
                     } else {
-                        origin = gameState.tech.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(null);
+                        chokeOrigin = gameState.tech.DBs.keySet().stream().findFirst().map(UnitImpl::getTilePosition).orElse(self.getStartLocation());
+                    }
+                    
+                    origin = chokeOrigin; // fallback/default
+                    if (getTurretsNear(chokeOrigin) >= 2) {
+                        for (BaseManager.Garrison b : gameState.baseManager.getMyBases()) {
+                            TilePosition basePos = b.tile;
+                            if (getTurretsNear(basePos) < 2) {
+                                origin = basePos;
+                                break;
+                            }
+                        }
                     }
                 } else if (gameState.learningManager.isNaughty() && gameState.enemyRace == Race.Zerg) {
                     origin = gameState.getBunkerPositionAntiPool();
@@ -182,6 +195,21 @@ public class ChoosePosition extends BrainAction {
             e.printStackTrace();
             return BrainStatus.ERROR;
         }
+    }
+
+    private int getTurretsNear(TilePosition pos) {
+        int count = 0;
+        if (pos == null) return 999;
+        for (Unit turret : gameState.tech.Ts) {
+            if (turret.getTilePosition().getDistance(pos) < 18) count++;
+        }
+        for (Building w : gameState.eco.workerTask.values()) {
+            if (w instanceof MissileTurret && w.getTilePosition().getDistance(pos) < 18) count++;
+        }
+        for (MutablePair<UnitType, TilePosition> w : gameState.eco.workerBuild.values()) {
+            if (w.first == UnitType.Terran_Missile_Turret && w.second != null && w.second.getDistance(pos) < 18) count++;
+        }
+        return count;
     }
 }
 
