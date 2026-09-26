@@ -22,10 +22,21 @@ public class ChooseTurret extends BrainAction {
     @Override
     public BrainStatus execute() {
         try {
-            if (gameState.getArmySize() < gameState.getStrat().armyForTurret &&
-                    !IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar)) {
+            int requiredTurrets = 0;
+            boolean hasThreat = IntelligenceAgency.enemyHasAirOrCloakedThreats() || 
+                                IntelligenceAgency.enemyHasType(UnitType.Zerg_Lurker, UnitType.Hero_Dark_Templar);
+                                
+            if (hasThreat) {
+                requiredTurrets = gameState.baseManager.getMyBases().size() * 2;
+                if (requiredTurrets == 0) requiredTurrets = 2;
+            } else if (gameState.getArmySize() >= gameState.getStrat().armyForTurret) {
+                requiredTurrets = 1;
+            }
+            
+            if (requiredTurrets == 0) {
                 return BrainStatus.FAILURE;
             }
+            
             boolean tech = false;
             for (ResearchingFacility ub : gameState.UBs) {
                 if (ub instanceof EngineeringBay) {
@@ -33,15 +44,20 @@ public class ChooseTurret extends BrainAction {
                     break;
                 }
             }
-            if (tech && gameState.Ts.isEmpty()) {
+            
+            if (tech && gameState.Ts.size() < requiredTurrets) {
+                int building = 0;
                 for (MutablePair<UnitType, TilePosition> w : gameState.workerBuild.values()) {
-                    if (w.first == UnitType.Terran_Missile_Turret) return BrainStatus.FAILURE;
+                    if (w.first == UnitType.Terran_Missile_Turret) building++;
                 }
                 for (Building w : gameState.workerTask.values()) {
-                    if (w instanceof MissileTurret) return BrainStatus.FAILURE;
+                    if (w instanceof MissileTurret) building++;
                 }
-                gameState.chosenToBuild = UnitType.Terran_Missile_Turret;
-                return BrainStatus.SUCCESS;
+                
+                if (gameState.Ts.size() + building < requiredTurrets) {
+                    gameState.chosenToBuild = UnitType.Terran_Missile_Turret;
+                    return BrainStatus.SUCCESS;
+                }
             }
             return BrainStatus.FAILURE;
         } catch (Exception e) {

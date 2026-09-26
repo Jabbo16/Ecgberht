@@ -363,7 +363,28 @@ public class IntelligenceAgency {
     static void onFrame() {
         if (getGs().enemyStartBase == null) return;
         detectEnemyStrategy();
+        detectMidGameTransitions();
         updateMaxAmountTypes();
+    }
+    
+    private static void detectMidGameTransitions() {
+        if (getGs().enemyRace == Race.Zerg) {
+            if (getGs().frameCount > 24 * 60 * 4) {
+                boolean spire = mainEnemyHasType(UnitType.Zerg_Spire, UnitType.Zerg_Greater_Spire);
+                int mutas = mainEnemyUnitTypeAmount.getOrDefault(UnitType.Zerg_Mutalisk, 0);
+                if ((spire || mutas >= 3) && enemyStrat != EnemyStrats.MutaliskRush) {
+                    enemyStrat = EnemyStrats.MutaliskRush;
+                    Util.sendText("Spire detected, adapting");
+                    getGs().playSound("rushed.mp3");
+                    
+                    String strat = getGs().getStrat().name;
+                    if (strat.equals("FullBio") || strat.equals("FullBioFE")) {
+                        // Adding science vessels or goliaths is good, but just setting the strat helps
+                        // We keep the strategy if it's already strong against Mutas (like BioMech)
+                    }
+                }
+            }
+        }
     }
 
     private static int updateGoliaths() {
@@ -525,5 +546,5 @@ public class IntelligenceAgency {
         return cloakedThreats;
     }
 
-    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, NinePool, FastHatch, BioPush, MechRush}
+    public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, NinePool, FastHatch, BioPush, MechRush, MutaliskRush}
 }
