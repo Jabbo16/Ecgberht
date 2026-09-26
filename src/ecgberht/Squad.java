@@ -242,20 +242,23 @@ public class Squad implements Comparable<Squad> {
             case DEFENSE:
                 boolean found = false;
                 boolean close = false;
+                boolean dangerousMelee = false;
                 int threats = (int) squadSim.enemies.stream().filter(e -> e.unitType.canAttack() || e.unitType.isSpellcaster() || Util.isStaticDefense(e.unitType)).count();
                 for (UnitInfo e : squadSim.enemies) {
                     if (e.flying || e.unit instanceof Worker || e.unit instanceof Medic || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()))
                         continue;
                     int distance = u.getDistance(e);
+                    if (distance < 128 && !e.unitType.isBuilding() && (e.unitType == UnitType.Protoss_Zealot || e.unitType == UnitType.Zerg_Zergling || e.unitType == UnitType.Protoss_Dark_Templar || e.groundRange <= 32)) {
+                        dangerousMelee = true;
+                    }
                     if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 && (e.health + e.shields >= 60 || threats > 2)) {
                         found = true;
                     }
                     if (!close && distance < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange())
                         close = true;
-                    if (found && close) break;
                 }
-                if (found && !close) {
-                    if (!st.isSieged()) {
+                if (found && !close && !dangerousMelee) {
+                    if (!st.isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
                         st.siege();
                         return;
                     }
@@ -265,19 +268,20 @@ public class Squad implements Comparable<Squad> {
                     if (u.getDistance(getGs().defendPosition) > range) st.unsiege();
                     return;
                 }
-                Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
                 if (st.isSieged()) {
-                    tankTargets.removeIf(e -> u.getDistance(e) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()));
-                    if (tankTargets.isEmpty() && Math.random() * 10 <= 3) {
+                    Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
+                    tankTargets.removeIf(e -> u.getDistance(e) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 || u.getDistance(e) < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange() || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()));
+                    if (tankTargets.isEmpty()) {
                         st.unsiege();
                         return;
                     }
-                }
-                UnitInfo target = Util.getTankTarget(u, tankTargets);
-                if (target != null) UtilMicro.attack(u, target);
-                else if (attack != null) {
-                    if (st.isSieged()) { if (Math.random() * 10 <= 2.5) st.unsiege(); }
-                    else UtilMicro.move(st, attack);
+                    UnitInfo target = Util.getTankTarget(u, tankTargets);
+                    if (target != null) UtilMicro.attack(u, target);
+                    else if (attack != null) {
+                        if (Math.random() * 10 <= 2.5) st.unsiege();
+                    }
+                } else {
+                    executeRangedAttackLogic(u);
                 }
                 break;
             case IDLE:
