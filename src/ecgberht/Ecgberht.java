@@ -574,6 +574,11 @@ public class Ecgberht implements BWEventListener {
             gs.baseManager.updateGarrisons();
             skycladObserver.onFrame();
             gs.fix();
+            if (gs.frameCount % 24 == 0) {
+                gs.enemyChokes.clear();
+                if (gs.enemyMainBase != null) gs.enemyChokes.addAll(gs.enemyMainBase.getArea().getChokePoints());
+                if (gs.enemyNaturalBase != null) gs.enemyChokes.addAll(gs.enemyNaturalBase.getArea().getChokePoints());
+            }
             gs.unitStorage.onFrame();
             mainTree.executeTree();
             debugManager.onFrame(gs);

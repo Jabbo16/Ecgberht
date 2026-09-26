@@ -42,6 +42,7 @@ public class GameState {
     public BuildingMap testMap;
     public ChokePoint mainChoke = null;
     public ChokePoint naturalChoke = null;
+    public List<ChokePoint> enemyChokes = new ArrayList<>();
     public DropShipAgent chosenDropShip;
     public LearningManager learningManager;
     public ExtendibleByAddon chosenBuildingAddon = null;
