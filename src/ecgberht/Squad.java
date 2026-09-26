@@ -72,12 +72,28 @@ public class Squad implements Comparable<Squad> {
         if (center == null || target == null)
             return target;
 
+        // If unit is too far from the squad center, fall back to center to regroup
+        double distToCenter = Util.broodWarDistance(u.position, center);
+        if (distToCenter > 300) {
+            return center;
+        }
+
         double dx = target.getX() - center.getX();
         double dy = target.getY() - center.getY();
         double dist = Math.sqrt(dx * dx + dy * dy);
 
         int offsetX = u.position.getX() - center.getX();
         int offsetY = u.position.getY() - center.getY();
+
+        // Limit the advance of the formation rally point so the squad doesn't stretch too much
+        double maxDist = 200.0;
+        double targetX = target.getX();
+        double targetY = target.getY();
+        
+        if (dist > maxDist) {
+             targetX = center.getX() + (dx / dist) * maxDist;
+             targetY = center.getY() + (dy / dist) * maxDist;
+        }
 
         if (dist > 1.0) {
             double dirX = dx / dist;
@@ -99,28 +115,39 @@ public class Squad implements Comparable<Squad> {
             else if (u.unit instanceof Goliath)
                 bias = 30;
 
-            if (lateralOffset > 200)
-                lateralOffset = 200;
-            if (lateralOffset < -200)
-                lateralOffset = -200;
+            if (lateralOffset > 150)
+                lateralOffset = 150;
+            if (lateralOffset < -150)
+                lateralOffset = -150;
 
             offsetX = (int) (rightX * lateralOffset + dirX * bias);
             offsetY = (int) (rightY * lateralOffset + dirY * bias);
         } else {
-            if (offsetX > 200)
-                offsetX = 200;
-            if (offsetX < -200)
-                offsetX = -200;
-            if (offsetY > 200)
-                offsetY = 200;
-            if (offsetY < -200)
-                offsetY = -200;
+            if (offsetX > 150)
+                offsetX = 150;
+            if (offsetX < -150)
+                offsetX = -150;
+            if (offsetY > 150)
+                offsetY = 150;
+            if (offsetY < -150)
+                offsetY = -150;
         }
 
-        Position targetFormation = new Position(target.getX() + offsetX, target.getY() + offsetY);
+        Position targetFormation = new Position((int)targetX + offsetX, (int)targetY + offsetY);
+        
         if (getGs().getGame().getBWMap().isValidPosition(targetFormation)) {
-            return targetFormation;
+            // Avoid getting bottlenecked in chokepoints by making sure the offset position is walkable
+            if (getGs().getGame().getBWMap().isWalkable(targetFormation.toWalkPosition())) {
+                return targetFormation;
+            }
         }
+        
+        // If not walkable (e.g. walls/chokes), just head towards the central rally point
+        Position fallback = new Position((int)targetX, (int)targetY);
+        if (getGs().getGame().getBWMap().isValidPosition(fallback)) {
+            return fallback;
+        }
+        
         return target;
     }
 
