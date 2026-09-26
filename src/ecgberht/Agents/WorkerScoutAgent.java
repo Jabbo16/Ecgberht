@@ -28,6 +28,7 @@ import static ecgberht.Ecgberht.getGs;
 public class WorkerScoutAgent extends Agent {
     private SCV unit;
     private int currentVertex;
+    private int explorationDirection = 1;
     private List<Position> enemyBaseBorders = new ArrayList<>();
     private Base enemyBase;
     private Status status = Status.IDLE;
@@ -244,12 +245,32 @@ public class WorkerScoutAgent extends Agent {
             return enemyBaseBorders.get(closestPolygonIndex);
         }
         if (currentVertex == enemyNaturalIndex && getGs().getGame().getBWMap().isVisible(getGs().enemyNaturalBase.getLocation())) {
-            currentVertex = (currentVertex + 1) % enemyBaseBorders.size();
+            currentVertex = (currentVertex + explorationDirection + enemyBaseBorders.size()) % enemyBaseBorders.size();
             return enemyBaseBorders.get(currentVertex);
         }
+        
+        UnitInfo closestEnemy = null;
+        double minEnemyDist = Double.MAX_VALUE;
+        for (UnitInfo e : mySim.enemies) {
+            double d = unit.getDistance(e.unit);
+            if (d < minEnemyDist) {
+                minEnemyDist = d;
+                closestEnemy = e;
+            }
+        }
+        
+        if (closestEnemy != null && minEnemyDist < 160) {
+            double enemyToVertex = closestEnemy.getDistance(enemyBaseBorders.get(currentVertex));
+            double myToVertex = unit.getDistance(enemyBaseBorders.get(currentVertex));
+            if (enemyToVertex < myToVertex) {
+                explorationDirection *= -1;
+                currentVertex = (currentVertex + explorationDirection + enemyBaseBorders.size()) % enemyBaseBorders.size();
+            }
+        }
+
         double distanceFromCurrentVertex = enemyBaseBorders.get(currentVertex).getDistance(unit.getPosition());
         while (distanceFromCurrentVertex < 128) {
-            currentVertex = (currentVertex + 1) % enemyBaseBorders.size();
+            currentVertex = (currentVertex + explorationDirection + enemyBaseBorders.size()) % enemyBaseBorders.size();
             distanceFromCurrentVertex = enemyBaseBorders.get(currentVertex).getDistance(unit.getPosition());
         }
         return enemyBaseBorders.get(currentVertex);
