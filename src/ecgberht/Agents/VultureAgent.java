@@ -269,6 +269,19 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         } else {
             boolean meleeOnly = checkOnlyMelees();
             if (!meleeOnly && getGs().sim.getSimulation(unitInfo, SimInfo.SimType.GROUND).lose) {
+                if (this == designatedScout) {
+                    boolean speedAdvantage = true;
+                    for (UnitInfo e : mySim.enemies) {
+                        if (e.unit.getType().topSpeed() >= unitInfo.unit.getType().topSpeed() || (e.flying && !unitInfo.flying) || e.groundRange > unitInfo.groundRange) {
+                            speedAdvantage = false;
+                            break;
+                        }
+                    }
+                    if (speedAdvantage) {
+                        status = Status.KITE;
+                        return;
+                    }
+                }
                 status = Util.isInOurBases(unitInfo) ? Status.KITE : Status.RETREAT;
                 return;
             }
