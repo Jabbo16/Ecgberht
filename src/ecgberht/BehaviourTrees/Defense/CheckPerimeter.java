@@ -29,8 +29,10 @@ public class CheckPerimeter extends BrainAction {
             gameState.enemyInBase.clear();
             gameState.mil.defense = false;
             Set<Unit> enemyInvaders = new TreeSet<>(gameState.enemyCombatUnitMemory);
-            for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
-                if (u.unitType.canAttack() || u.unitType == UnitType.Protoss_Pylon || u.unitType.canProduce() || u.unitType.isRefinery()) {
+            for (UnitInfo u : gameState.unitStorage.getEnemyUnits().values().stream()
+                    .filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
+                if (u.unitType.canAttack() || u.unitType == UnitType.Protoss_Pylon || u.unitType.canProduce()
+                        || u.unitType.isRefinery()) {
                     enemyInvaders.add(u.unit);
                 }
             }
@@ -44,9 +46,11 @@ public class CheckPerimeter extends BrainAction {
                         Area myMainArea = gameState.mainCC != null ? gameState.mainCC.first.getArea() : null;
                         Area myNatArea = gameState.naturalArea;
                         for (Base b : gameState.CCs.keySet()) {
-                            if (!b.getArea().equals(enemyArea)) continue;
+                            if (!b.getArea().equals(enemyArea))
+                                continue;
                             if ((myMainArea != null && !b.getArea().equals(myMainArea)
-                                    && (myNatArea != null && !b.getArea().equals(myNatArea)))) continue;
+                                    && (myNatArea != null && !b.getArea().equals(myNatArea))))
+                                continue;
                             gameState.enemyInBase.add(u);
                             break;
                         }
@@ -82,7 +86,8 @@ public class CheckPerimeter extends BrainAction {
                             break;
                         }
                     }
-                    if (!gameState.getStrat().name.equals("ProxyBBS") && !gameState.getStrat().name.equals("ProxyEightRax")) {
+                    if (!gameState.getStrat().name.equals("ProxyBBS")
+                            && !gameState.getStrat().name.equals("ProxyEightRax")) {
                         for (Unit c : gameState.tech.MBs) {
                             if (Util.broodWarDistance(u.getPosition(), c.getPosition()) <= 200) {
                                 gameState.enemyInBase.add(u);
@@ -93,16 +98,21 @@ public class CheckPerimeter extends BrainAction {
                 }
             }
             if (!gameState.enemyInBase.isEmpty()) {
-                /*if ((((GameState) gameState).getArmySize() >= 50 && ((GameState) gameState).getArmySize() / ((GameState) gameState).enemyInBase.size() > 10)) {
-                    return BrainStatus.FAILURE;
-                }*/
+                /*
+                 * if ((((GameState) gameState).getArmySize() >= 50 && ((GameState)
+                 * gameState).getArmySize() / ((GameState) gameState).enemyInBase.size() > 10))
+                 * {
+                 * return BrainStatus.FAILURE;
+                 * }
+                 */
                 gameState.mil.defense = true;
                 return BrainStatus.SUCCESS;
             }
             int cFrame = gameState.frameCount;
             List<Worker> toDelete = new ArrayList<>();
             for (Worker u : gameState.eco.workerDefenders.keySet()) {
-                if (u.getLastCommandFrame() == cFrame) continue;
+                if (u.getLastCommandFrame() == cFrame)
+                    continue;
                 Position closestDefense;
                 if (gameState.learningManager.isNaughty()) {
                     if (!gameState.tech.DBs.isEmpty()) {
@@ -124,8 +134,9 @@ public class CheckPerimeter extends BrainAction {
                 gameState.workerIdle.add(u);
             }
             for (Squad u : gameState.sqManager.squads.values()) {
-                if (u.status == Status.defense) {
-                    if (u.getSquadCenter() == null) continue;
+                if (u.status == Status.DEFENSE) {
+                    if (u.getSquadCenter() == null)
+                        continue;
                     Position closestCC = gameState.getNearestCC(u.getSquadCenter(), false);
                     if (closestCC != null) {
                         Area squad = gameState.bwem.getMap().getArea(u.getSquadCenter().toTilePosition());
@@ -135,7 +146,8 @@ public class CheckPerimeter extends BrainAction {
                                 if (!gameState.tech.DBs.isEmpty() && gameState.CCs.size() == 1) {
                                     u.giveMoveOrder(gameState.tech.DBs.keySet().iterator().next().getPosition());
                                 } else {
-                                    u.giveMoveOrder(Util.getClosestChokepoint(u.getSquadCenter()).getCenter().toPosition());
+                                    u.giveMoveOrder(
+                                            Util.getClosestChokepoint(u.getSquadCenter()).getCenter().toPosition());
                                 }
                                 u.status = Status.IDLE;
                                 u.attack = null;
@@ -159,8 +171,3 @@ public class CheckPerimeter extends BrainAction {
         }
     }
 }
-
-
-
-
-

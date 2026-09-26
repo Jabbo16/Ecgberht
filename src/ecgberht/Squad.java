@@ -32,25 +32,34 @@ public class Squad implements Comparable<Squad> {
         this.lose = squadSim.lose;
         this.squadSim = squadSim;
         for (UnitInfo m : squadSim.allies) {
-            if (isArmyUnit(m.unit) && !getGs().mil.agents.containsKey(m.unit)) this.members.add(m);
+            if (isArmyUnit(m.unit) && !getGs().mil.agents.containsKey(m.unit))
+                this.members.add(m);
         }
-        status = getGs().mil.defense ? Status.defense : Status.IDLE;
-        if (getGs().mil.defendPosition != null) attack = getGs().mil.defendPosition;
-        else if (!getGs().tech.DBs.isEmpty()) attack = getGs().tech.DBs.keySet().iterator().next().getPosition();
+        status = getGs().mil.defense ? Status.DEFENSE : Status.IDLE;
+        if (getGs().mil.defendPosition != null)
+            attack = getGs().mil.defendPosition;
+        else if (!getGs().tech.DBs.isEmpty())
+            attack = getGs().tech.DBs.keySet().iterator().next().getPosition();
         else {
             Position closestCC = getGs().getNearestCC(center, false);
-            if (closestCC != null) attack = closestCC;
-            else attack = center;
+            if (closestCC != null)
+                attack = closestCC;
+            else
+                attack = center;
         }
         this.center = center;
     }
 
     private boolean isArmyUnit(Unit u) {
-        if (!u.exists()) return false;
-        if (u instanceof Building) return false;
-        if (u instanceof SCV && (getGs().getStrat().name.equals("ProxyBBS") || getGs().getStrat().name.equals("ProxyEightRax")))
+        if (!u.exists())
+            return false;
+        if (u instanceof Building)
+            return false;
+        if (u instanceof SCV
+                && (getGs().getStrat().name.equals("ProxyBBS") || getGs().getStrat().name.equals("ProxyEightRax")))
             return true;
-        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null) return false;
+        if (u instanceof MobileUnit && ((MobileUnit) u).getTransport() != null)
+            return false;
         return u instanceof Marine || u instanceof Medic || u instanceof SiegeTank || u instanceof Firebat
                 || u instanceof Vulture || u instanceof Wraith || u instanceof Goliath;
     }
@@ -60,42 +69,54 @@ public class Squad implements Comparable<Squad> {
     }
 
     private Position getFormationPosition(UnitInfo u, Position target) {
-        if (center == null || target == null) return target;
-        
+        if (center == null || target == null)
+            return target;
+
         double dx = target.getX() - center.getX();
         double dy = target.getY() - center.getY();
-        double dist = Math.sqrt(dx*dx + dy*dy);
-        
+        double dist = Math.sqrt(dx * dx + dy * dy);
+
         int offsetX = u.position.getX() - center.getX();
         int offsetY = u.position.getY() - center.getY();
-        
+
         if (dist > 1.0) {
             double dirX = dx / dist;
             double dirY = dy / dist;
             double rightX = -dirY;
             double rightY = dirX;
-            
+
             double lateralOffset = offsetX * rightX + offsetY * rightY;
-            
+
             double bias = 0;
-            if (u.unit instanceof Firebat) bias = 80;
-            else if (u.unit instanceof Marine) bias = 0;
-            else if (u.unit instanceof Medic) bias = -60;
-            else if (u.unit instanceof SiegeTank) bias = -120;
-            else if (u.unit instanceof Goliath) bias = 30;
-            
-            if (lateralOffset > 200) lateralOffset = 200;
-            if (lateralOffset < -200) lateralOffset = -200;
-            
-            offsetX = (int)(rightX * lateralOffset + dirX * bias);
-            offsetY = (int)(rightY * lateralOffset + dirY * bias);
+            if (u.unit instanceof Firebat)
+                bias = 80;
+            else if (u.unit instanceof Marine)
+                bias = 0;
+            else if (u.unit instanceof Medic)
+                bias = -60;
+            else if (u.unit instanceof SiegeTank)
+                bias = -120;
+            else if (u.unit instanceof Goliath)
+                bias = 30;
+
+            if (lateralOffset > 200)
+                lateralOffset = 200;
+            if (lateralOffset < -200)
+                lateralOffset = -200;
+
+            offsetX = (int) (rightX * lateralOffset + dirX * bias);
+            offsetY = (int) (rightY * lateralOffset + dirY * bias);
         } else {
-            if (offsetX > 200) offsetX = 200;
-            if (offsetX < -200) offsetX = -200;
-            if (offsetY > 200) offsetY = 200;
-            if (offsetY < -200) offsetY = -200;
+            if (offsetX > 200)
+                offsetX = 200;
+            if (offsetX < -200)
+                offsetX = -200;
+            if (offsetY > 200)
+                offsetY = 200;
+            if (offsetY < -200)
+                offsetY = -200;
         }
-        
+
         Position targetFormation = new Position(target.getX() + offsetX, target.getY() + offsetY);
         if (getGs().getGame().getBWMap().isValidPosition(targetFormation)) {
             return targetFormation;
@@ -104,14 +125,16 @@ public class Squad implements Comparable<Squad> {
     }
 
     public void giveAttackOrder(Position pos) {
-        if (!pos.equals(attack)) attack = pos;
+        if (!pos.equals(attack))
+            attack = pos;
     }
 
     int getSquadMembersCount() {
         int count = 0;
         for (UnitInfo u : members) {
             count++;
-            if (u.unit instanceof Goliath || u.unit instanceof SiegeTank || u.unit instanceof Vulture || u.unit instanceof Wraith)
+            if (u.unit instanceof Goliath || u.unit instanceof SiegeTank || u.unit instanceof Vulture
+                    || u.unit instanceof Wraith)
                 count++;
         }
         return count;
@@ -119,17 +142,25 @@ public class Squad implements Comparable<Squad> {
 
     private void setSquadStatus() {
         medicOnly = members.stream().noneMatch(u -> u.unitType != UnitType.Terran_Medic);
-        if (status == Status.defense) return;
-        if (status != Status.IDLE && (squadSim.lose || medicOnly)) status = Status.REGROUP;
-        else if (status == Status.ATTACK && squadSim.enemies.isEmpty()) status = Status.ADVANCE;
-        else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing() && (getGs().mil.defendPosition == null || getGs().mil.defendPosition.getDistance(center) <= 350))
-            if (!squadSim.lose) status = Status.ATTACK;
-            else status = Status.REGROUP;
+        if (status == Status.DEFENSE)
+            return;
+        if (status != Status.IDLE && (squadSim.lose || medicOnly))
+            status = Status.REGROUP;
+        else if (status == Status.ATTACK && squadSim.enemies.isEmpty())
+            status = Status.ADVANCE;
+        else if (status == Status.IDLE && !squadSim.enemies.isEmpty() && !IntelligenceAgency.enemyIsRushing()
+                && (getGs().mil.defendPosition == null || getGs().mil.defendPosition.getDistance(center) <= 350))
+            if (!squadSim.lose)
+                status = Status.ATTACK;
+            else
+                status = Status.REGROUP;
     }
 
     void updateSquad() {
-        if (members.isEmpty()) return;
-        if (!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs)) stimResearched = true;
+        if (members.isEmpty())
+            return;
+        if (!stimResearched && getGs().getPlayer().hasResearched(TechType.Stim_Packs))
+            stimResearched = true;
         setSquadStatus();
     }
 
@@ -137,14 +168,21 @@ public class Squad implements Comparable<Squad> {
         Set<Unit> marinesToHeal = new HashSet<>();
         for (UnitInfo u : members) {
             try {
-                if (u.unit.isLockedDown() || u.unit.isMaelstrommed() || ((MobileUnit) u.unit).isStasised() || ((MobileUnit) u.unit).getTransport() != null)
+                if (u.unit.isLockedDown() || u.unit.isMaelstrommed() || ((MobileUnit) u.unit).isStasised()
+                        || ((MobileUnit) u.unit).getTransport() != null)
                     continue;
-                if (u.unit instanceof Marine && shouldStim(u)) ((Marine) u.unit).stimPack();
-                if (u.unit instanceof Firebat && shouldStim(u)) ((Firebat) u.unit).stimPack();
-                if (u.unit instanceof Medic) microMedic((Medic) u.unit, marinesToHeal);
-                else if (u.unit instanceof SiegeTank) microTank(u);
-                else if (u.unitType.groundWeapon().maxRange() > 32) microRanged(u);
-                else microMelee(u);
+                if (u.unit instanceof Marine && shouldStim(u))
+                    ((Marine) u.unit).stimPack();
+                if (u.unit instanceof Firebat && shouldStim(u))
+                    ((Firebat) u.unit).stimPack();
+                if (u.unit instanceof Medic)
+                    microMedic((Medic) u.unit, marinesToHeal);
+                else if (u.unit instanceof SiegeTank)
+                    microTank(u);
+                else if (u.unitType.groundWeapon().maxRange() > 32)
+                    microRanged(u);
+                else
+                    microMelee(u);
             } catch (Exception e) {
                 System.err.println("runSquad Error on unit " + u.unit);
                 e.printStackTrace();
@@ -156,28 +194,38 @@ public class Squad implements Comparable<Squad> {
     private void microRanged(UnitInfo u) {
         switch (status) {
             case ATTACK:
-            case defense:
+            case DEFENSE:
                 executeRangedAttackLogic(u);
                 break;
             case IDLE:
-                if (getGs().getStrat().proxy) return;
+                if (getGs().getStrat().proxy)
+                    return;
                 Position move = null;
                 if (getGs().mil.defendPosition != null) {
-                    if (u.currentOrder != Order.Stop) move = getGs().mil.defendPosition;
+                    if (u.currentOrder != Order.Stop)
+                        move = getGs().mil.defendPosition;
                 } else if (!getGs().tech.DBs.isEmpty()) {
                     Unit bunker = getGs().tech.DBs.keySet().iterator().next();
-                    if (u.currentOrder != Order.Stop) move = bunker.getPosition();
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
-                    if (u.currentOrder != Order.Stop) move = getGs().mainChoke.getCenter().toPosition();
+                    if (u.currentOrder != Order.Stop)
+                        move = bunker.getPosition();
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty()
+                        && !getGs().getStrat().name.equals("ProxyBBS")
+                        && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                    if (u.currentOrder != Order.Stop)
+                        move = getGs().mainChoke.getCenter().toPosition();
 
                 } else if (Util.broodWarDistance(u.position, center) >= 190 && u.currentOrder != Order.Move) {
-                    if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition())) move = center;
+                    if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition()))
+                        move = center;
                 }
                 if (move != null) {
                     WeaponType weapon = Util.getWeapon(u.unitType);
-                    int range2 = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange() : weapon.maxRange();
+                    int range2 = weapon == WeaponType.None ? UnitType.Terran_Marine.groundWeapon().maxRange()
+                            : weapon.maxRange();
                     if (u.currentOrder == Order.AttackMove) {
-                        if (u.getDistance(move) <= range2 * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0 && Util.shouldIStop(u.position)) {
+                        if (u.getDistance(move) <= range2
+                                * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0
+                                && Util.shouldIStop(u.position)) {
                             UtilMicro.stop((MobileUnit) u.unit);
                             return;
                         }
@@ -188,7 +236,8 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, false) || squadSim.enemies.stream().noneMatch(e -> Util.getWeapon(e, u).maxRange() > 32)) {
+                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, false)
+                        || squadSim.enemies.stream().noneMatch(e -> Util.getWeapon(e, u).maxRange() > 32)) {
                     executeRangedAttackLogic(u);
                     return;
                 }
@@ -212,13 +261,14 @@ public class Squad implements Comparable<Squad> {
     private void microMelee(UnitInfo u) {
         switch (status) {
             case ATTACK:
-            case defense:
-                if (u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
+            case DEFENSE:
+                if (u.unit.isAttackFrame() || u.unit.isStartingAttack())
+                    return;
                 if (squadSim.enemies.isEmpty() && attack != null) {
                     UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
                     return;
                 }
-                //Experimental storm dodging?
+                // Experimental storm dodging?
                 if (((MobileUnit) u.unit).isUnderStorm()) {
                     Position closestCC = getGs().getNearestCC(u.position, true);
                     if (closestCC != null) {
@@ -228,28 +278,40 @@ public class Squad implements Comparable<Squad> {
                 }
                 if (attack != null && !u.unit.isStartingAttack() && !u.unit.isAttacking()) {
                     UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
-                    if (target != null) UtilMicro.attack(u, target);
-                    else if (attack != null) UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
+                    if (target != null)
+                        UtilMicro.attack(u, target);
+                    else if (attack != null)
+                        UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
                 }
                 break;
             case IDLE:
-                if (getGs().getStrat().proxy) return;
+                if (getGs().getStrat().proxy)
+                    return;
                 Position move = null;
                 if (getGs().mil.defendPosition != null) {
-                    if (u.currentOrder != Order.Stop) move = getGs().mil.defendPosition;
+                    if (u.currentOrder != Order.Stop)
+                        move = getGs().mil.defendPosition;
                 } else if (!getGs().tech.DBs.isEmpty()) {
                     Unit bunker = getGs().tech.DBs.keySet().iterator().next();
-                    if (u.currentOrder != Order.Stop) move = bunker.getPosition();
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
-                    if (u.currentOrder != Order.Stop) move = getGs().mainChoke.getCenter().toPosition();
+                    if (u.currentOrder != Order.Stop)
+                        move = bunker.getPosition();
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty()
+                        && !getGs().getStrat().name.equals("ProxyBBS")
+                        && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                    if (u.currentOrder != Order.Stop)
+                        move = getGs().mainChoke.getCenter().toPosition();
 
                 } else if (Util.broodWarDistance(u.position, center) >= 190 && u.currentOrder != Order.Move) {
-                    if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition())) move = center;
+                    if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition()))
+                        move = center;
                 }
                 if (move != null) {
                     int range2 = UnitType.Terran_Marine.groundWeapon().maxRange();
-                    if (u.currentOrder == Order.AttackMove || u.currentOrder == Order.Move || u.currentOrder == Order.PlayerGuard) {
-                        if (u.getDistance(move) <= range2 * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0 && Util.shouldIStop(u.position)) {
+                    if (u.currentOrder == Order.AttackMove || u.currentOrder == Order.Move
+                            || u.currentOrder == Order.PlayerGuard) {
+                        if (u.getDistance(move) <= range2
+                                * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0
+                                && Util.shouldIStop(u.position)) {
                             UtilMicro.stop((MobileUnit) u.unit);
                             return;
                         }
@@ -260,7 +322,8 @@ public class Squad implements Comparable<Squad> {
                 }
                 break;
             case REGROUP:
-                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, true)) return;
+                if (((MobileUnit) u.unit).isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, true))
+                    return;
                 Position pos = getGs().getNearestCC(u.position, true);
                 if (Util.broodWarDistance(pos, u.position) >= 400) {
                     UtilMicro.move((MobileUnit) u.unit, pos);
@@ -280,33 +343,46 @@ public class Squad implements Comparable<Squad> {
 
     private void microTank(UnitInfo u) {
         SiegeTank st = (SiegeTank) u.unit;
-        if (st.isAttackFrame() || st.isStartingAttack() || st.isSieged() && u.currentOrder == Order.Unsieging) return;
-        if (!st.isSieged() && u.currentOrder == Order.Sieging) return;
-        if (u.currentOrder == Order.Unsieging || u.currentOrder == Order.Sieging) return;
+        if (st.isAttackFrame() || st.isStartingAttack() || st.isSieged() && u.currentOrder == Order.Unsieging)
+            return;
+        if (!st.isSieged() && u.currentOrder == Order.Sieging)
+            return;
+        if (u.currentOrder == Order.Unsieging || u.currentOrder == Order.Sieging)
+            return;
         switch (status) {
             case ATTACK:
-            case defense:
+            case DEFENSE:
                 boolean found = false;
                 boolean close = false;
                 boolean dangerousMelee = false;
-                int threats = (int) squadSim.enemies.stream().filter(e -> e.unitType.canAttack() || e.unitType.isSpellcaster() || Util.isStaticDefense(e.unitType)).count();
+                int threats = (int) squadSim.enemies.stream().filter(
+                        e -> e.unitType.canAttack() || e.unitType.isSpellcaster() || Util.isStaticDefense(e.unitType))
+                        .count();
                 for (UnitInfo e : squadSim.enemies) {
-                    if (e.flying || e.unit instanceof Worker || e.unit instanceof Medic || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()))
+                    if (e.flying || e.unit instanceof Worker || e.unit instanceof Medic
+                            || (e.unitType.isBuilding() && !Util.isStaticDefense(e))
+                            || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()))
                         continue;
                     int distance = u.getDistance(e);
-                    if (distance < 128 && !e.unitType.isBuilding() && (e.unitType == UnitType.Protoss_Zealot || e.unitType == UnitType.Zerg_Zergling || e.unitType == UnitType.Protoss_Dark_Templar || e.groundRange <= 32)) {
+                    if (distance < 128 && !e.unitType.isBuilding()
+                            && (e.unitType == UnitType.Protoss_Zealot || e.unitType == UnitType.Zerg_Zergling
+                                    || e.unitType == UnitType.Protoss_Dark_Templar || e.groundRange <= 32)) {
                         dangerousMelee = true;
                     }
-                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 && (e.health + e.shields >= 60 || threats > 2)) {
+                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8
+                            && (e.health + e.shields >= 60 || threats > 2)) {
                         found = true;
                     }
-                    
+
                     int minR = UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange();
                     if (!st.isSieged()) {
-                        if (e.groundRange <= 32 && distance < minR + 128) close = true;
-                        else if (distance < minR + 64) close = true;
+                        if (e.groundRange <= 32 && distance < minR + 128)
+                            close = true;
+                        else if (distance < minR + 64)
+                            close = true;
                     } else {
-                        if (distance < minR) close = true;
+                        if (distance < minR)
+                            close = true;
                     }
                 }
                 if (found && !close && !dangerousMelee) {
@@ -315,34 +391,32 @@ public class Squad implements Comparable<Squad> {
                         return;
                     }
                 }
-                    if (!found && distance <= UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 && (e.health + e.shields >= 60 || threats > 2)) {
-                        found = true;
-                    }
-                    if (!close && distance < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange())
-                        close = true;
-                }
-                if (found && !close && !dangerousMelee) {
-                    if (!st.isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
-                        st.siege();
-                        return;
-                    }
-                }
-                if (status == Status.defense && st.isSieged() && getGs().mil.defendPosition != null) {
+                if (status == Status.DEFENSE && st.isSieged() && getGs().mil.defendPosition != null) {
                     double range = u.groundRange - 8;
-                    if (u.getDistance(getGs().mil.defendPosition) > range) st.unsiege();
+                    if (u.getDistance(getGs().mil.defendPosition) > range)
+                        st.unsiege();
                     return;
                 }
                 if (st.isSieged()) {
-                    Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying).collect(Collectors.toSet());
-                    tankTargets.removeIf(e -> u.getDistance(e) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8 || u.getDistance(e) < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange() || (e.unitType.isBuilding() && !Util.isStaticDefense(e)) || (!e.unitType.isBuilding() && !e.unitType.canAttack() && !e.unitType.isSpellcaster()));
+                    Set<UnitInfo> tankTargets = squadSim.enemies.stream().filter(e -> !e.flying)
+                            .collect(Collectors.toSet());
+                    tankTargets.removeIf(
+                            e -> u.getDistance(e) > UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() - 8
+                                    || u.getDistance(e) < UnitType.Terran_Siege_Tank_Siege_Mode.groundWeapon()
+                                            .minRange()
+                                    || (e.unitType.isBuilding() && !Util.isStaticDefense(e))
+                                    || (!e.unitType.isBuilding() && !e.unitType.canAttack()
+                                            && !e.unitType.isSpellcaster()));
                     if (tankTargets.isEmpty()) {
                         st.unsiege();
                         return;
                     }
                     UnitInfo target = Util.getTankTarget(u, tankTargets);
-                    if (target != null) UtilMicro.attack(u, target);
+                    if (target != null)
+                        UtilMicro.attack(u, target);
                     else if (attack != null) {
-                        if (Math.random() * 10 <= 2.5) st.unsiege();
+                        if (Math.random() * 10 <= 2.5)
+                            st.unsiege();
                     }
                 } else {
                     executeRangedAttackLogic(u);
@@ -355,42 +429,57 @@ public class Squad implements Comparable<Squad> {
                 } else if (!getGs().tech.DBs.isEmpty()) {
                     Unit bunker = getGs().tech.DBs.keySet().iterator().next();
                     if (Util.broodWarDistance(bunker.getPosition(), center) >= 180 &&
-                            getGs().getArmySize() < getGs().getStrat().armyForAttack && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
-                        if (u.currentOrder != Order.Move) move = bunker.getPosition();
+                            getGs().getArmySize() < getGs().getStrat().armyForAttack
+                            && !getGs().getStrat().name.equals("ProxyBBS")
+                            && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                        if (u.currentOrder != Order.Move)
+                            move = bunker.getPosition();
                     }
-                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty() && !getGs().getStrat().name.equals("ProxyBBS") && !getGs().getStrat().name.equals("ProxyEightRax")) {
+                } else if (getGs().mainChoke != null && !getGs().learningManager.isNaughty()
+                        && !getGs().getStrat().name.equals("ProxyBBS")
+                        && !getGs().getStrat().name.equals("ProxyEightRax")) {
                     if (Util.broodWarDistance(getGs().mainChoke.getCenter().toPosition(), center) >= 200 &&
                             getGs().getArmySize() < getGs().getStrat().armyForAttack) {
-                        if (u.currentOrder != Order.Move) move = getGs().mainChoke.getCenter().toPosition();
+                        if (u.currentOrder != Order.Move)
+                            move = getGs().mainChoke.getCenter().toPosition();
                     }
                 } else if (Util.broodWarDistance(u.position, center) >= 180 && u.currentOrder != Order.Move) {
-                    if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition())) move = center;
+                    if (getGs().getGame().getBWMap().isWalkable(center.toWalkPosition()))
+                        move = center;
                 }
                 if (move != null) {
                     WeaponType weapon = Util.getWeapon(u.unitType);
                     int range = weapon.maxRange();
-                    if (u.currentOrder == Order.AttackMove || u.currentOrder == Order.PlayerGuard || u.currentOrder == Order.Move) {
-                        if (u.getDistance(move) <= range * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0 && Util.shouldIStop(u.position)) {
+                    if (u.currentOrder == Order.AttackMove || u.currentOrder == Order.PlayerGuard
+                            || u.currentOrder == Order.Move) {
+                        if (u.getDistance(move) <= range
+                                * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0
+                                && Util.shouldIStop(u.position)) {
                             if (!st.isSieged() && getGs().getPlayer().hasResearched(TechType.Tank_Siege_Mode)) {
                                 st.siege();
-                            } else UtilMicro.stop(st);
+                            } else
+                                UtilMicro.stop(st);
                             return;
                         }
                     } else if (u.getDistance(move) > range) {
                         if (st.isSieged() && !getGs().mil.defense) {
                             st.unsiege();
-                        } else UtilMicro.attack(st, move);
+                        } else
+                            UtilMicro.attack(st, move);
                         return;
                     }
                 }
                 break;
             case REGROUP:
-                if (st.isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, false)) return;
+                if (st.isDefenseMatrixed() || getGs().sim.farFromFight(u, squadSim, false))
+                    return;
                 Position pos = getGs().getNearestCC(u.position, true);
-                if (Util.broodWarDistance(pos, u.position) >= 400) UtilMicro.move(st, pos);
+                if (Util.broodWarDistance(pos, u.position) >= 400)
+                    UtilMicro.move(st, pos);
                 break;
             case ADVANCE:
-                if (st.isSieged() && Math.random() * 10 <= 6) st.unsiege();
+                if (st.isSieged() && Math.random() * 10 <= 6)
+                    st.unsiege();
                 else {
                     double dist = Util.broodWarDistance(u.position, center);
                     if (dist >= 300) {
@@ -412,37 +501,49 @@ public class Squad implements Comparable<Squad> {
         } else if (status == Status.IDLE) {
             if (getGs().mil.defendPosition != null) {
                 int range = UnitType.Terran_Marine.groundWeapon().maxRange();
-                if (getGs().mil.defendPosition.getDistance(u.getPosition()) <= range * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0 && Util.shouldIStop(u.getPosition())) {
+                if (getGs().mil.defendPosition.getDistance(u.getPosition()) <= range
+                        * ((double) (java.util.concurrent.ThreadLocalRandom.current().nextInt(4, 11))) / 10.0
+                        && Util.shouldIStop(u.getPosition())) {
                     UtilMicro.stop(u);
-                } else if (u.getDistance(getGs().mil.defendPosition) > range) UtilMicro.move(u, getGs().mil.defendPosition);
+                } else if (u.getDistance(getGs().mil.defendPosition) > range)
+                    UtilMicro.move(u, getGs().mil.defendPosition);
             }
         } else if (status == Status.REGROUP) {
             if (medicOnly) {
-                Optional<Squad> closest = getGs().sqManager.squads.values().stream().
-                        filter(s -> !s.medicOnly && s.getSquadCenter() != null).
-                        min(Comparator.comparingDouble(s -> u.getDistance(s.getSquadCenter())));
+                Optional<Squad> closest = getGs().sqManager.squads.values().stream()
+                        .filter(s -> !s.medicOnly && s.getSquadCenter() != null)
+                        .min(Comparator.comparingDouble(s -> u.getDistance(s.getSquadCenter())));
                 closest.ifPresent(squad -> UtilMicro.move(u, squad.getSquadCenter()));
                 return;
             }
             Position pos = getGs().getNearestCC(u.getPosition(), true);
-            if (Util.broodWarDistance(pos, u.getPosition()) >= 400) UtilMicro.heal(u, pos);
+            if (Util.broodWarDistance(pos, u.getPosition()) >= 400)
+                UtilMicro.heal(u, pos);
         } else if (status == Status.ADVANCE && attack != null) {
             UtilMicro.move(u, center);
-        } else if (center.getDistance(u.getPosition()) > 32 * 6) UtilMicro.move(u, center);
+        } else if (center.getDistance(u.getPosition()) > 32 * 6)
+            UtilMicro.move(u, center);
     }
 
     private boolean shouldStim(UnitInfo stimmer) {
-        if (stimmer.health <= 25) return false;
-        if (stimmer.unitType == UnitType.Terran_Marine && ((Marine) stimmer.unit).isStimmed()) return false;
-        if (stimmer.unitType == UnitType.Terran_Firebat && ((Firebat) stimmer.unit).isStimmed()) return false;
+        if (stimmer.health <= 25)
+            return false;
+        if (stimmer.unitType == UnitType.Terran_Marine && ((Marine) stimmer.unit).isStimmed())
+            return false;
+        if (stimmer.unitType == UnitType.Terran_Firebat && ((Firebat) stimmer.unit).isStimmed())
+            return false;
         Unit target = stimmer.target;
-        if (target == null) return false;
+        if (target == null)
+            return false;
         UnitInfo targetUI = getGs().unitStorage.getEnemyUnits().get(target);
         double range = stimmer.groundRange;
         double distToTarget;
-        if (targetUI != null) distToTarget = stimmer.getDistance(targetUI);
-        else distToTarget = stimmer.getDistance(target);
-        return distToTarget > (range - 32) && (target instanceof Attacker || target instanceof SpellCaster || Util.isStaticDefense(target.getType()));
+        if (targetUI != null)
+            distToTarget = stimmer.getDistance(targetUI);
+        else
+            distToTarget = stimmer.getDistance(target);
+        return distToTarget > (range - 32) && (target instanceof Attacker || target instanceof SpellCaster
+                || Util.isStaticDefense(target.getType()));
     }
 
     private PlayerUnit getHealTarget(final Unit u, final Set<Unit> marinesToHeal) {
@@ -450,7 +551,8 @@ public class Squad implements Comparable<Squad> {
         PlayerUnit chosen = null;
         double dist = Double.MAX_VALUE;
         for (PlayerUnit m : healables) {
-            if (m.getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m)) continue;
+            if (m.getHitPoints() == m.getType().maxHitPoints() || marinesToHeal.contains(m))
+                continue;
             double distA = m.getDistance(u);
             if (chosen == null || distA < dist) {
                 chosen = m;
@@ -463,30 +565,38 @@ public class Squad implements Comparable<Squad> {
     private Set<PlayerUnit> getHealable() {
         Set<PlayerUnit> aux = new HashSet<>();
         for (UnitInfo u : this.members) {
-            if (u.unit instanceof Marine || u.unit instanceof Firebat) aux.add(u.unit);
+            if (u.unit instanceof Marine || u.unit instanceof Firebat)
+                aux.add(u.unit);
         }
         return aux;
     }
 
     private void executeRangedAttackLogic(UnitInfo u) {
-        if (u.unit.isAttackFrame() || u.unit.isStartingAttack()) return;
+        if (u.unit.isAttackFrame() || u.unit.isStartingAttack())
+            return;
         UnitInfo target = Util.getRangedTarget(u, squadSim.enemies, attack);
         if (target == null) {
-            if (attack != null) UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
+            if (attack != null)
+                UtilMicro.attack((MobileUnit) u.unit, getFormationPosition(u, attack));
             return;
         }
         double distToTarget = u.getDistance(target);
-        Optional<UnitInfo> bunker = squadSim.allies.stream().filter(ally -> ally.unitType == UnitType.Terran_Bunker).findFirst();
-        if (status == Status.defense && IntelligenceAgency.enemyIsRushing() && bunker.isPresent() && u.getDistance(bunker.get()) > distToTarget) {
+        Optional<UnitInfo> bunker = squadSim.allies.stream().filter(ally -> ally.unitType == UnitType.Terran_Bunker)
+                .findFirst();
+        if (status == Status.DEFENSE && IntelligenceAgency.enemyIsRushing() && bunker.isPresent()
+                && u.getDistance(bunker.get()) > distToTarget) {
             UtilMicro.move((MobileUnit) u.unit, bunker.get().lastPosition);
             return;
         }
         double speed = u.speed;
-        if (getGs().frameCount - u.unit.getLastCommandFrame() <= 10) return;
+        if (getGs().frameCount - u.unit.getLastCommandFrame() <= 10)
+            return;
         WeaponType w = Util.getWeapon(u, target);
         double range = u.player.getUnitStatCalculator().weaponMaxRange(w);
 
-        int cooldown = (target.flying ? ((AirAttacker) u.unit).getAirWeaponCooldown() : ((GroundAttacker) u.unit).getGroundWeaponCooldown()) - getGs().getIH().getRemainingLatencyFrames() - 2;
+        int cooldown = (target.flying ? ((AirAttacker) u.unit).getAirWeaponCooldown()
+                : ((GroundAttacker) u.unit).getGroundWeaponCooldown()) - getGs().getIH().getRemainingLatencyFrames()
+                - 2;
         int framesToFiringRange = (int) Math.ceil(Math.max(0, distToTarget - range) / speed);
         if (cooldown <= framesToFiringRange) {
             UtilMicro.attack(u, target);
@@ -497,7 +607,9 @@ public class Squad implements Comparable<Squad> {
         boolean kite = true;
         boolean enemyTooClose = distToTarget <= 3 * 32 && targetRange <= 32;
         boolean moveCloser = target.unitType == UnitType.Terran_Siege_Tank_Siege_Mode ||
-                (target.unit instanceof SCV && ((SCV) target.unit).isRepairing() && target.unit.getOrderTarget() != null && target.unit.getOrderTarget().getType() == UnitType.Terran_Bunker) ||
+                (target.unit instanceof SCV && ((SCV) target.unit).isRepairing() && target.unit.getOrderTarget() != null
+                        && target.unit.getOrderTarget().getType() == UnitType.Terran_Bunker)
+                ||
                 (target.unitType.isBuilding() && !Util.canAttack(target, u));
         if (!moveCloser) {
             predictedPosition = UtilMicro.predictUnitPosition(target, 2);
@@ -506,7 +618,8 @@ public class Squad implements Comparable<Squad> {
                 double distCurrent = u.getDistance(target);
                 if (distPredicted > distCurrent) {
                     kite = false;
-                    if (distToTarget > (range - 24)) moveCloser = true;
+                    if (distToTarget > (range - 24))
+                        moveCloser = true;
                 } else if (distCurrent == distPredicted && range >= (targetRange + 64) && distToTarget > (range - 48)) {
                     moveCloser = true;
                 }
@@ -514,9 +627,12 @@ public class Squad implements Comparable<Squad> {
         }
         if (moveCloser && !enemyTooClose) {
             if (distToTarget > 32 && !u.unit.isStartingAttack() && !u.unit.isAttackFrame()) {
-                if (predictedPosition != null) UtilMicro.move((MobileUnit) u.unit, predictedPosition);
-                else UtilMicro.move((MobileUnit) u.unit, target.lastPosition);
-            } else UtilMicro.attack(u, target);
+                if (predictedPosition != null)
+                    UtilMicro.move((MobileUnit) u.unit, predictedPosition);
+                else
+                    UtilMicro.move((MobileUnit) u.unit, target.lastPosition);
+            } else
+                UtilMicro.attack(u, target);
             return;
         }
         if ((kite || enemyTooClose) && target.unitType.topSpeed() > 0) {
@@ -525,31 +641,40 @@ public class Squad implements Comparable<Squad> {
                 return;
             }
             Position kitePos = UtilMicro.kiteAwayAlt(u.position, target.lastPosition);
-            if (kitePos != null) UtilMicro.move((MobileUnit) u.unit, kitePos);
+            if (kitePos != null)
+                UtilMicro.move((MobileUnit) u.unit, kitePos);
             else {
                 kitePos = UtilMicro.kiteAway(u.unit, squadSim.enemies);
-                if (kitePos != null) UtilMicro.move((MobileUnit) u.unit, kitePos);
+                if (kitePos != null)
+                    UtilMicro.move((MobileUnit) u.unit, kitePos);
             }
-        } else UtilMicro.attack(u, target);
+        } else
+            UtilMicro.attack(u, target);
     }
 
     public void giveMoveOrder(Position retreat) {
         int frameCount = getGs().frameCount;
         for (UnitInfo u : members) {
             PlayerUnit pU = u.unit;
-            if (u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging) continue;
-            if (u.unitType == UnitType.Terran_Siege_Tank_Tank_Mode && pU.getOrder() == Order.Sieging) continue;
-            Position lastTarget = ((MobileUnit) u.unit).getTargetPosition() == null ? pU.getOrderTargetPosition() :
-                    ((MobileUnit) u.unit).getTargetPosition();
-            if (lastTarget != null && lastTarget.equals(retreat)) continue;
-            if (attack != null && frameCount != pU.getLastCommandFrame()) ((MobileUnit) u.unit).move(retreat);
+            if (u.unitType == UnitType.Terran_Siege_Tank_Siege_Mode && pU.getOrder() == Order.Unsieging)
+                continue;
+            if (u.unitType == UnitType.Terran_Siege_Tank_Tank_Mode && pU.getOrder() == Order.Sieging)
+                continue;
+            Position lastTarget = ((MobileUnit) u.unit).getTargetPosition() == null ? pU.getOrderTargetPosition()
+                    : ((MobileUnit) u.unit).getTargetPosition();
+            if (lastTarget != null && lastTarget.equals(retreat))
+                continue;
+            if (attack != null && frameCount != pU.getLastCommandFrame())
+                ((MobileUnit) u.unit).move(retreat);
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Squad)) return false;
+        if (o == this)
+            return true;
+        if (!(o instanceof Squad))
+            return false;
         Squad s = (Squad) o;
         return id.equals(s.id);
     }
@@ -565,14 +690,6 @@ public class Squad implements Comparable<Squad> {
     }
 
     public enum Status {
-        ATTACK, IDLE, REGROUP, ADVANCE, defense
+        ATTACK, IDLE, REGROUP, ADVANCE, DEFENSE
     }
 }
-
-
-
-
-
-
-
-
