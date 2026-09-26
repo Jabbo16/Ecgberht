@@ -28,6 +28,40 @@ public class SquadManager {
     }
 
     void updateSquadOrderAndMicro() {
+        if (getGs().getArmySize() > 5) {
+            boolean hasVultureScout = ecgberht.Agents.VultureAgent.designatedScout != null && ecgberht.Agents.VultureAgent.designatedScout.unit.exists();
+            if (!hasVultureScout && (getGs().designatedBaseScout == null || !getGs().designatedBaseScout.myUnit.exists())) {
+                UnitInfo scoutInfo = null;
+                for (Squad s : squads.values()) {
+                    for (UnitInfo u : s.members) {
+                        if (u.unit.getType() == org.openbw.bwapi4j.type.UnitType.Terran_Marine) {
+                            scoutInfo = u;
+                            break;
+                        }
+                    }
+                    if (scoutInfo != null) {
+                        s.members.remove(scoutInfo);
+                        break;
+                    }
+                }
+                if (scoutInfo == null) {
+                    for (Map.Entry<org.openbw.bwapi4j.unit.Unit, ecgberht.Agents.Agent> entry : getGs().agents.entrySet()) {
+                        org.openbw.bwapi4j.unit.Unit u = entry.getKey();
+                        if (u.getType() == org.openbw.bwapi4j.type.UnitType.Terran_Wraith) {
+                            scoutInfo = getGs().unitStorage.getAllyUnits().get(u);
+                            break;
+                        }
+                    }
+                }
+                
+                if (scoutInfo != null) {
+                    getGs().designatedBaseScout = new ecgberht.Agents.BaseScoutAgent(scoutInfo.unit);
+                    getGs().agents.put(scoutInfo.unit, getGs().designatedBaseScout);
+                    getGs().myArmy.remove(scoutInfo);
+                }
+            }
+        }
+        
         squads.values().stream().filter(u -> !u.members.isEmpty()).forEach(Squad::updateSquad);
         squads.values().stream().filter(u -> !u.members.isEmpty()).forEach(Squad::runSquad);
     }

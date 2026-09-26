@@ -111,6 +111,7 @@ public class GameState {
     public TilePosition initDefensePosition = null;
     public TrainingFacility chosenTrainingFacility = null;
     public MobileUnit chosenScout = null;
+    public ecgberht.Agents.Agent designatedBaseScout = null;
     public Unit chosenUnitToHarass = null;
     public UnitType chosenAddon = null;
     public UnitType chosenToBuild = UnitType.None;
