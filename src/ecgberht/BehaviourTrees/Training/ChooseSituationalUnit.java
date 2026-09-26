@@ -64,6 +64,26 @@ public class ChooseSituationalUnit extends BrainAction {
                 }
             }*/
 
+            // Testing Valkyries
+            if (gameState.maxValkyries > 0 && Util.countUnitTypeSelf(UnitType.Terran_Valkyrie) < gameState.maxValkyries) {
+                boolean armory = false;
+                for (ResearchingFacility u : gameState.tech.UBs) {
+                    if (u instanceof Armory) {
+                        armory = true;
+                        break;
+                    }
+                }
+                if (armory && gameState.getCash().second >= UnitType.Terran_Valkyrie.gasPrice() && gameState.getCash().first >= UnitType.Terran_Valkyrie.mineralPrice()) {
+                    for (Starport s : gameState.tech.Ps) {
+                        if (s.getAddon() != null && s.getAddon().isCompleted() && !s.isTraining()) {
+                            gameState.chosenUnit = UnitType.Terran_Valkyrie;
+                            gameState.chosenTrainingFacility = s;
+                            return BrainStatus.SUCCESS;
+                        }
+                    }
+                }
+            }
+            
             // Testing vessels
             if (Util.countUnitTypeSelf(UnitType.Terran_Science_Vessel) > gameState.maxVessels || gameState.eco.workerMining.isEmpty())
                 return BrainStatus.FAILURE;
@@ -105,6 +125,7 @@ public class ChooseSituationalUnit extends BrainAction {
         }
     }
 }
+
 
 
 

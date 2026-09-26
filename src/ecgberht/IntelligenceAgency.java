@@ -387,6 +387,16 @@ public class IntelligenceAgency {
         }
     }
 
+    private static int updateValkyries() {
+        if (getGs().enemyRace != Race.Zerg) return 0;
+        int valkyries = 0;
+        boolean spire = mainEnemyHasType(UnitType.Zerg_Spire, UnitType.Zerg_Greater_Spire);
+        if (spire) valkyries += 2;
+        Integer amount = mainEnemyUnitTypeAmount.get(UnitType.Zerg_Mutalisk);
+        if (amount != null && amount > 0) valkyries += Math.ceil(amount / 4.0);
+        return Math.min(6, valkyries);
+    }
+
     private static int updateGoliaths() {
         int goliaths = 0;
         Integer amount;
@@ -455,6 +465,7 @@ public class IntelligenceAgency {
         if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Goliath)) getGs().maxGoliaths = updateGoliaths();
         if (canTrainVessels()) getGs().maxVessels = updateVessels();
         if (getGs().getStrat().trainUnits.contains(UnitType.Terran_Firebat)) getGs().maxBats = updateFirebats();
+        getGs().maxValkyries = updateValkyries();
     }
 
     /**
@@ -548,6 +559,8 @@ public class IntelligenceAgency {
 
     public enum EnemyStrats {Unknown, EarlyPool, ZealotRush, CannonRush, ProtossFE, NinePool, FastHatch, BioPush, MechRush, MutaliskRush}
 }
+
+
 
 
 

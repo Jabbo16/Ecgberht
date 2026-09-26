@@ -51,6 +51,7 @@ public class GameState {
         public LearningManager learningManager;
                 public int frameCount;
     public int mapSize = 2;
+    public int maxValkyries = 0;
     public int maxWraiths = 6;
     public int maxBats = 0;
         public int startCount;
@@ -1171,6 +1172,7 @@ public class GameState {
         }
     }
 }
+
 
 
 
