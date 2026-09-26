@@ -24,6 +24,8 @@ public class CollectMineral extends BrainAction {
                 int workerPerPatch = 2;
                 if (gameState.workerMining.size() < 7) workerPerPatch = 1;
                 for (Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+                    if (gameState.bwem.getMap().getArea(chosen.getTilePosition()) != null && gameState.bwem.getMap().getArea(m.getKey().getTilePosition()) != null && !gameState.bwem.getMap().getArea(chosen.getTilePosition()).isAccessibleFrom(gameState.bwem.getMap().getArea(m.getKey().getTilePosition())))
+                        continue;
                     if ((closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral))
                             && m.getValue() < workerPerPatch) {
                         closestMineral = m.getKey();
@@ -31,6 +33,8 @@ public class CollectMineral extends BrainAction {
                 }
                 if (closestMineral == null) {
                     for (Entry<MineralPatch, Integer> m : gameState.mineralsAssigned.entrySet()) {
+                        if (gameState.bwem.getMap().getArea(chosen.getTilePosition()) != null && gameState.bwem.getMap().getArea(m.getKey().getTilePosition()) != null && !gameState.bwem.getMap().getArea(chosen.getTilePosition()).isAccessibleFrom(gameState.bwem.getMap().getArea(m.getKey().getTilePosition())))
+                            continue;
                         if (closestMineral == null || chosen.getDistance(m.getKey()) < chosen.getDistance(closestMineral)) {
                             closestMineral = m.getKey();
                         }

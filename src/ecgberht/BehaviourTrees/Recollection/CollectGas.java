@@ -24,6 +24,8 @@ public class CollectGas extends BrainAction {
                 GasMiningFacility closestGeyser = null;
                 int workerGas = gameState.getStrat().workerGas == 0 ? 3 : gameState.getStrat().workerGas;
                 for (Entry<GasMiningFacility, Integer> g : gameState.refineriesAssigned.entrySet()) {
+                    if (gameState.bwem.getMap().getArea(chosen.getTilePosition()) != null && gameState.bwem.getMap().getArea(g.getKey().getTilePosition()) != null && !gameState.bwem.getMap().getArea(chosen.getTilePosition()).isAccessibleFrom(gameState.bwem.getMap().getArea(g.getKey().getTilePosition())))
+                        continue;
                     if ((closestGeyser == null || chosen.getDistance(g.getKey()) < chosen.getDistance(closestGeyser)) && g.getValue() < workerGas && gameState.mining > 3) {
                         closestGeyser = g.getKey();
                     }
