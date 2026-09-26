@@ -205,6 +205,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         
         ecgberht.BaseManager.Garrison targetGarrison = bases.get(0);
         if (getGs().getGame().getBWMap().isVisible(targetGarrison.tile) || unit.getDistance(targetGarrison.tile.toPosition()) < 300) {
+            targetGarrison.lastFrameVisible = getGs().frameCount;
             if (bases.size() > 1) {
                 targetGarrison = bases.get(1);
             } else {
@@ -391,6 +392,7 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         return this.unit.getId() - v1.getId();
     }
 }
+
 
 
 

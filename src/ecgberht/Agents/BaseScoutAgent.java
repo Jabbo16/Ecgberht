@@ -87,9 +87,9 @@ public class BaseScoutAgent extends Agent {
                 }
 
                 ecgberht.BaseManager.Garrison targetGarrison = bases.get(0);
-                if (getGs().getGame().getBWMap().isVisible(targetGarrison.tile)
-                        || myUnit.getDistance(targetGarrison.tile.toPosition()) < 300) {
-                    if (bases.size() > 1) {
+                if (getGs().getGame().getBWMap().isVisible(targetGarrison.tile) || myUnit.getDistance(targetGarrison.tile.toPosition()) < 300) {
+            targetGarrison.lastFrameVisible = getGs().frameCount;
+            if (bases.size() > 1) {
                         targetGarrison = bases.get(1);
                     } else {
                         UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit) myUnit, getGs().mapCenter);
