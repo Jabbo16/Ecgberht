@@ -60,11 +60,15 @@ public class BaseScoutAgent extends Agent {
                 Position kite = UtilMicro.kiteAwayAlt(myUnit.getPosition(), mySim.enemies.iterator().next().position);
                 if (kite != null) UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, kite);
                 else {
-                    Position CC = getGs().getNearestCC(myUnit.getPosition(), true);
-                    if (CC != null) UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, CC);
+                    java.util.List<ecgberht.BaseManager.Garrison> bases = getGs().baseManager.getScoutingBasesSorted();
+                    if (!bases.isEmpty()) {
+                        UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, bases.get(0).tile.toPosition());
+                    } else {
+                        Position CC = getGs().getNearestCC(myUnit.getPosition(), true);
+                        if (CC != null) UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, CC);
+                    }
                 }
-                return false;
-            } else if (status == Status.SCOUT) {
+                return false; else if (status == Status.SCOUT) {
                 java.util.List<ecgberht.BaseManager.Garrison> bases = getGs().baseManager.getScoutingBasesSorted();
                 if (bases.isEmpty()) {
                     UtilMicro.move((org.openbw.bwapi4j.unit.MobileUnit)myUnit, getGs().mapCenter);
@@ -88,6 +92,7 @@ public class BaseScoutAgent extends Agent {
         return false;
     }
 }
+
 
 
 

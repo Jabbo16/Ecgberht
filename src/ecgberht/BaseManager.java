@@ -62,7 +62,21 @@ public class BaseManager {
 
     public List<Garrison> getScoutingBasesSorted() {
         return garrisons.values().stream().filter(u -> u.player == null)
-                .sorted(Comparator.comparing(Garrison::frameVisibleDiff).reversed()).collect(Collectors.toList());
+                .sorted((g1, g2) -> {
+                    if (getGs().enemyMainBase == null) {
+                        if (g1.starting && !g2.starting) return -1;
+                        if (!g1.starting && g2.starting) return 1;
+                    }
+                    double score1 = g1.frameVisibleDiff();
+                    double score2 = g2.frameVisibleDiff();
+                    if (getGs().enemyMainBase != null && getGs().enemyMainBase.getLocation() != null) {
+                        double dist1 = g1.tile.toPosition().getDistance(getGs().enemyMainBase.getLocation().toPosition());
+                        double dist2 = g2.tile.toPosition().getDistance(getGs().enemyMainBase.getLocation().toPosition());
+                        score1 -= dist1 * 0.5;
+                        score2 -= dist2 * 0.5;
+                    }
+                    return Double.compare(score2, score1);
+                }).collect(Collectors.toList());
     }
 
     public class Garrison {
@@ -94,6 +108,7 @@ public class BaseManager {
         }
     }
 }
+
 
 
 
