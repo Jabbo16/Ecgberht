@@ -263,7 +263,7 @@ public class Util {
         for (UnitInfo b : getGs().unitStorage.getEnemyUnits().values().stream().filter(u -> u.unitType.isBuilding()).collect(Collectors.toSet())) {
             double dist = flying ? b.lastPosition.getDistance(p) : Util.getGroundDistance(p, b.lastPosition);
             if (!flying && dist == Integer.MAX_VALUE) continue;
-            double influence = getScoreAttackPosition((Building) b.unit);
+            double influence = getScoreAttackPosition(b);
             double score = influence / (2.5 * dist);
             if (score > maxScore) {
                 chosen = b.lastPosition;
@@ -279,11 +279,18 @@ public class Util {
         return chosen;
     }
 
-    private static double getScoreAttackPosition(Building unit) {
-        if (unit instanceof ResourceDepot) return 8;
-        if (unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
-        if (unit.getType().canAttack() || unit instanceof Bunker) return 6;
-        return 3;
+    private static double getScoreAttackPosition(UnitInfo info) {
+        if (info.unit != null && info.unit instanceof Building) {
+            Building unit = (Building) info.unit;
+            if (unit instanceof ResourceDepot) return 8;
+            if (unit instanceof ResearchingFacility || unit instanceof TrainingFacility) return 4;
+            if (unit.getType().canAttack() || unit instanceof Bunker) return 6;
+            return 3;
+        } else {
+            if (info.unitType.isResourceDepot()) return 8;
+            if (info.unitType.canAttack() || info.unitType == org.openbw.bwapi4j.type.UnitType.Terran_Bunker) return 6;
+            return 3;
+        }
     }
 
     public static UnitInfo getClosestUnit(UnitInfo unit, Set<UnitInfo> enemies, boolean ignoreAir) {
