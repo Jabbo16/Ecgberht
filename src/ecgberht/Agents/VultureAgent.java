@@ -208,6 +208,22 @@ public class VultureAgent extends Agent implements Comparable<Unit> {
         }
         
         ecgberht.BaseManager.Garrison targetGarrison = bases.get(0);
+        
+        if (unit.getSpiderMineCount() > 0 && getGs().getPlayer().hasResearched(org.openbw.bwapi4j.type.TechType.Spider_Mines)) {
+            if (unit.getDistance(targetGarrison.tile.toPosition()) < 150) {
+                boolean mineNearby = false;
+                for (UnitInfo ally : getGs().unitStorage.getAllyUnits().values()) {
+                    if (ally.unitType == UnitType.Terran_Vulture_Spider_Mine && ally.getDistance(targetGarrison.tile.toPosition()) < 250) {
+                        mineNearby = true;
+                        break;
+                    }
+                }
+                if (!mineNearby && getGs().getGame().getBWMap().isBuildable(targetGarrison.tile, false)) {
+                    unit.spiderMine(targetGarrison.tile.toPosition());
+                    return;
+                }
+            }
+        }
         if (getGs().getGame().getBWMap().isVisible(targetGarrison.tile) || unit.getDistance(targetGarrison.tile.toPosition()) < 300) {
             targetGarrison.lastFrameVisible = getGs().frameCount;
             if (bases.size() > 1) {

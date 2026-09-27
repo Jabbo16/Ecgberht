@@ -28,6 +28,24 @@ public class Build extends BrainAction {
             for (Entry<SCV, MutablePair<UnitType, TilePosition>> u : gameState.eco.workerBuild.entrySet()) {
                 if (u.getKey().getOrder() != Order.PlaceBuilding && gameState.getGame().getBWMap().isVisible(u.getValue().second) && gameState.canAfford(u.getValue().first)) {
                     SCV chosen = u.getKey();
+                    TilePosition tp = u.getValue().second;
+                    UnitType type = u.getValue().first;
+                    
+                    boolean mineBlocking = false;
+                    for (ecgberht.UnitInfo ally : gameState.unitStorage.getAllyUnits().values()) {
+                        if (ally.unitType == UnitType.Terran_Vulture_Spider_Mine) {
+                            int tx = ally.tileposition.getX();
+                            int ty = ally.tileposition.getY();
+                            if (tx >= tp.getX() && tx < tp.getX() + type.tileWidth() &&
+                                ty >= tp.getY() && ty < tp.getY() + type.tileHeight()) {
+                                chosen.attack(ally.unit);
+                                mineBlocking = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (mineBlocking) continue;
+                    
                     if (u.getValue().first == UnitType.Terran_Bunker) {
                         if (!chosen.build(u.getValue().second, u.getValue().first)) {
                             gameState.eco.deltaCash.first -= u.getValue().first.mineralPrice();
